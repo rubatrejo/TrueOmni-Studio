@@ -1,0 +1,42 @@
+# Node
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+
+# Next.js
+.next/
+out/
+build/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+__MACOSX/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+
+# Claude local state (si aparece)
+.claude/*.local.*
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# Temporales
+*.tmp
+*.bak

@@ -1,0 +1,47 @@
+{
+  "$schema": "./config.schema.json",
+  "client": {
+    "slug": "_template",
+    "nombre": "Nombre del cliente",
+    "locale": "es-ES",
+    "timezone": "Europe/Madrid"
+  },
+  "branding": {
+    "logo": {
+      "default": "assets/logo.svg",
+      "dark": "assets/logo-dark.svg",
+      "alt": "Logo del cliente"
+    },
+    "favicon": "assets/favicon.ico"
+  },
+  "textos": {
+    "titulo_principal": "Bienvenido",
+    "subtitulo": "Toque para empezar",
+    "cta_primaria": "Empezar",
+    "cta_secundaria": "Más información",
+    "pie_legal": "© 2026 Cliente · Todos los derechos reservados"
+  },
+  "navegacion": {
+    "home": "/",
+    "menu": "/menu",
+    "info": "/info"
+  },
+  "assets": {
+    "hero_image": "assets/hero.jpg",
+    "poster_atraccion": "assets/poster.jpg"
+  },
+  "features": {
+    "idioma_secundario": false,
+    "mostrar_reloj": true,
+    "inactividad_reset_seg": 90,
+    "permitir_compartir_qr": false
+  },
+  "integraciones": {
+    "api_base_url": "",
+    "analytics_id": ""
+  },
+  "meta": {
+    "creado_en": "2026-04-19",
+    "version_config": "1.0.0"
+  }
+}

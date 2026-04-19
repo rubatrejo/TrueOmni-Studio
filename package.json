@@ -1,0 +1,15 @@
+{
+  "name": "kiosk-portrait",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Kiosk retrato white-label (Next.js + Tailwind + shadcn/ui).",
+  "type": "module",
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "kiosk:new-client": "node scripts/new-client.mjs",
+    "validate:configs": "node scripts/validate-configs.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

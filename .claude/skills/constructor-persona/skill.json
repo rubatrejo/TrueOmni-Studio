@@ -1,0 +1,6 @@
+{
+  "name": "constructor-persona",
+  "description": "Build complete and detailed customer personas/avatars for TrueOmni's ideal customers in Travel, Hospitality, and Retail industries. Creates fictional profiles with demographics, psychographics, pain points, aspirations, core desires, and online behavior.",
+  "version": "1.0.0",
+  "userInvocable": true
+}

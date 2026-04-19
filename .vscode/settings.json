@@ -1,0 +1,15 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["clients/*/config.json"],
+      "url": "./clients/_template/config.schema.json"
+    }
+  ],
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+  }
+}

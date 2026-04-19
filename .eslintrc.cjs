@@ -70,6 +70,8 @@ module.exports = {
       rules: {
         'react/display-name': 'off',
         'no-restricted-imports': 'off',
+        'import/order': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
       },
     },
     {

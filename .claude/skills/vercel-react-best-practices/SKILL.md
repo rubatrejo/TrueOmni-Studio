@@ -144,11 +144,7 @@ Each file wraps the one below it. This means:
 ```tsx
 // [slug] — Single dynamic segment
 // src/app/blog/[slug]/page.tsx
-export default async function BlogPost({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params; // Next.js 15: params is async
   const post = await getPost(slug);
   if (!post) notFound();
@@ -166,14 +162,10 @@ export async function generateStaticParams() {
 // [...slug] — Catch-all segment
 // src/app/docs/[...slug]/page.tsx
 // Matches: /docs/getting-started, /docs/api/authentication, /docs/a/b/c
-export default async function DocsPage({
-  params,
-}: {
-  params: Promise<{ slug: string[] }>;
-}) {
+export default async function DocsPage({ params }: { params: Promise<{ slug: string[] }> }) {
   const { slug } = await params;
   // slug = ['getting-started'] or ['api', 'authentication'] or ['a', 'b', 'c']
-  const doc = await getDoc(slug.join("/"));
+  const doc = await getDoc(slug.join('/'));
   return <div>{/* ... */}</div>;
 }
 
@@ -181,11 +173,7 @@ export default async function DocsPage({
 // src/app/admin/[[...segments]]/page.tsx
 // Matches: /admin, /admin/collections, /admin/collections/pages
 // The segments param may be undefined (when at /admin)
-export default async function AdminPage({
-  params,
-}: {
-  params: Promise<{ segments?: string[] }>;
-}) {
+export default async function AdminPage({ params }: { params: Promise<{ segments?: string[] }> }) {
   const { segments } = await params;
   // segments = undefined (at /admin) or ['collections'] or ['collections', 'pages']
   return <PayloadAdminPanel />;
@@ -272,11 +260,7 @@ export default function Layout({
 }
 
 // @modal/(.)photos/[id]/page.tsx
-export default async function PhotoModal({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function PhotoModal({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const photo = await getPhoto(id);
   return (
@@ -293,8 +277,8 @@ export default async function PhotoModal({
 
 ```tsx
 // src/app/api/contact/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
 const contactSchema = z.object({
   name: z.string().min(2),
@@ -312,28 +296,22 @@ export async function POST(request: NextRequest) {
     await sendEmail(data);
 
     return NextResponse.json(
-      { success: true, message: "Message sent successfully" },
+      { success: true, message: 'Message sent successfully' },
       { status: 200 },
     );
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, errors: error.errors },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, errors: error.errors }, { status: 400 });
     }
-    return NextResponse.json(
-      { success: false, message: "Internal server error" },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
   }
 }
 
 // GET with search params
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const page = parseInt(searchParams.get("page") || "1");
-  const limit = parseInt(searchParams.get("limit") || "10");
+  const page = parseInt(searchParams.get('page') || '1');
+  const limit = parseInt(searchParams.get('limit') || '10');
 
   const { items, total } = await getItems({ page, limit });
 
@@ -342,21 +320,18 @@ export async function GET(request: NextRequest) {
 
 // Dynamic route handler
 // src/app/api/posts/[slug]/route.ts
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> },
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await getPost(slug);
   if (!post) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
   return NextResponse.json(post);
 }
 
 // Route handler config
-export const runtime = "edge"; // or 'nodejs' (default)
-export const dynamic = "force-dynamic"; // Skip caching
+export const runtime = 'edge'; // or 'nodejs' (default)
+export const dynamic = 'force-dynamic'; // Skip caching
 export const revalidate = 3600; // Cache for 1 hour
 
 // Supported HTTP methods:
@@ -424,16 +399,13 @@ Client Component:
 export default async function ProductPage() {
   // Direct database/CMS query — no API needed
   const features = await payload.find({
-    collection: "features",
-    where: { status: { equals: "published" } },
-    sort: "order",
+    collection: 'features',
+    where: { status: { equals: 'published' } },
+    sort: 'order',
   });
 
   // Multiple parallel data fetches
-  const [testimonials, stats] = await Promise.all([
-    getTestimonials(),
-    getStats(),
-  ]);
+  const [testimonials, stats] = await Promise.all([getTestimonials(), getStats()]);
 
   return (
     <div>
@@ -447,10 +419,10 @@ export default async function ProductPage() {
 // Component that fetches its own data
 async function RecentPosts() {
   const posts = await payload.find({
-    collection: "posts",
+    collection: 'posts',
     limit: 3,
-    sort: "-publishedAt",
-    where: { status: { equals: "published" } },
+    sort: '-publishedAt',
+    where: { status: { equals: 'published' } },
   });
 
   return (
@@ -483,9 +455,9 @@ export default async function PricingPage() {
 }
 
 // PricingToggle.tsx (Client Component)
-("use client");
+('use client');
 
-import { useState } from "react";
+import { useState } from 'react';
 
 interface Plan {
   id: string;
@@ -501,7 +473,7 @@ export function PricingToggle({ plans }: { plans: Plan[] }) {
   return (
     <div>
       <Switch checked={isAnnual} onCheckedChange={setIsAnnual}>
-        {isAnnual ? "Annual" : "Monthly"}
+        {isAnnual ? 'Annual' : 'Monthly'}
       </Switch>
       <div className="grid grid-cols-3 gap-6">
         {plans.map((plan) => (
@@ -509,7 +481,7 @@ export function PricingToggle({ plans }: { plans: Plan[] }) {
             key={plan.id}
             plan={plan}
             price={isAnnual ? plan.annualPrice : plan.monthlyPrice}
-            period={isAnnual ? "/year" : "/month"}
+            period={isAnnual ? '/year' : '/month'}
           />
         ))}
       </div>
@@ -591,12 +563,8 @@ export default async function ServerWrapper() {
 }
 
 // ClientInteractiveWrapper.tsx
-("use client");
-export function ClientInteractiveWrapper({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+('use client');
+export function ClientInteractiveWrapper({ children }: { children: React.ReactNode }) {
   const [isVisible, setIsVisible] = useState(true);
 
   return (
@@ -609,7 +577,7 @@ export function ClientInteractiveWrapper({
 
 // Pattern: Context provider at the boundary
 // providers.tsx
-("use client");
+('use client');
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
@@ -622,16 +590,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
 }
 
 // layout.tsx (Server Component)
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
         <Providers>
-          {" "}
+          {' '}
           {/* Client boundary for context */}
           {children} {/* Can still be Server Components */}
         </Providers>
@@ -650,17 +614,17 @@ export default function RootLayout({
 ```tsx
 // Server Action defined in a separate file
 // src/app/actions.ts
-"use server";
+'use server';
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { z } from "zod";
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { z } from 'zod';
 
 const demoSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
   company: z.string().min(1),
-  companySize: z.enum(["1-10", "11-50", "51-200", "200+"]),
+  companySize: z.enum(['1-10', '11-50', '51-200', '200+']),
   message: z.string().max(500).optional(),
 });
 
@@ -676,7 +640,7 @@ export async function submitDemoRequest(formData: FormData) {
   // Save to Payload CMS
   try {
     await payload.create({
-      collection: "demo-requests",
+      collection: 'demo-requests',
       data: result.data,
     });
 
@@ -684,46 +648,39 @@ export async function submitDemoRequest(formData: FormData) {
     await sendConfirmationEmail(result.data.email, result.data.name);
 
     // Revalidate relevant pages
-    revalidatePath("/demo");
+    revalidatePath('/demo');
 
     return { success: true };
   } catch (error) {
     return {
       success: false,
-      errors: { _form: ["Failed to submit. Please try again."] },
+      errors: { _form: ['Failed to submit. Please try again.'] },
     };
   }
 }
 
 // Usage with useActionState (React 19)
 // DemoForm.tsx
-("use client");
+('use client');
 
-import { useActionState } from "react";
-import { submitDemoRequest } from "@/app/actions";
+import { useActionState } from 'react';
+import { submitDemoRequest } from '@/app/actions';
 
 export function DemoForm() {
-  const [state, formAction, isPending] = useActionState(
-    submitDemoRequest,
-    null,
-  );
+  const [state, formAction, isPending] = useActionState(submitDemoRequest, null);
 
   return (
     <form action={formAction}>
       <div>
         <Label htmlFor="name">Name</Label>
         <Input id="name" name="name" required />
-        {state?.errors?.name && (
-          <p className="text-sm text-red-600">{state.errors.name[0]}</p>
-        )}
+        {state?.errors?.name && <p className="text-sm text-red-600">{state.errors.name[0]}</p>}
       </div>
 
       <div>
         <Label htmlFor="email">Email</Label>
         <Input id="email" name="email" type="email" required />
-        {state?.errors?.email && (
-          <p className="text-sm text-red-600">{state.errors.email[0]}</p>
-        )}
+        {state?.errors?.email && <p className="text-sm text-red-600">{state.errors.email[0]}</p>}
       </div>
 
       <Button type="submit" disabled={isPending}>
@@ -733,7 +690,7 @@ export function DemoForm() {
             Submitting...
           </>
         ) : (
-          "Request Demo"
+          'Request Demo'
         )}
       </Button>
 
@@ -741,9 +698,7 @@ export function DemoForm() {
         <Alert className="mt-4">
           <CheckCircle className="h-4 w-4" />
           <AlertTitle>Demo requested!</AlertTitle>
-          <AlertDescription>
-            We will contact you within 24 hours.
-          </AlertDescription>
+          <AlertDescription>We will contact you within 24 hours.</AlertDescription>
         </Alert>
       )}
     </form>
@@ -759,47 +714,47 @@ export function DemoForm() {
 // You must explicitly opt into caching
 
 // No caching (default in Next.js 15)
-const data = await fetch("https://api.example.com/data");
+const data = await fetch('https://api.example.com/data');
 
 // Cache indefinitely (equivalent to SSG)
-const data = await fetch("https://api.example.com/data", {
-  cache: "force-cache",
+const data = await fetch('https://api.example.com/data', {
+  cache: 'force-cache',
 });
 
 // Revalidate every 60 seconds (ISR)
-const data = await fetch("https://api.example.com/data", {
+const data = await fetch('https://api.example.com/data', {
   next: { revalidate: 60 },
 });
 
 // Revalidate by tag (on-demand revalidation)
-const data = await fetch("https://api.example.com/posts", {
-  next: { tags: ["posts"] },
+const data = await fetch('https://api.example.com/posts', {
+  next: { tags: ['posts'] },
 });
 // Later, to revalidate:
-import { revalidateTag } from "next/cache";
-revalidateTag("posts");
+import { revalidateTag } from 'next/cache';
+revalidateTag('posts');
 
 // No cache, always fresh
-const data = await fetch("https://api.example.com/data", {
-  cache: "no-store",
+const data = await fetch('https://api.example.com/data', {
+  cache: 'no-store',
 });
 
 // For Payload CMS (local API — no fetch needed):
 // Use unstable_cache for caching direct function calls
-import { unstable_cache } from "next/cache";
+import { unstable_cache } from 'next/cache';
 
 const getCachedPosts = unstable_cache(
   async () => {
     return payload.find({
-      collection: "posts",
-      where: { status: { equals: "published" } },
-      sort: "-publishedAt",
+      collection: 'posts',
+      where: { status: { equals: 'published' } },
+      sort: '-publishedAt',
     });
   },
-  ["published-posts"], // Cache key
+  ['published-posts'], // Cache key
   {
     revalidate: 60, // Revalidate every 60 seconds
-    tags: ["posts"], // Tag for on-demand revalidation
+    tags: ['posts'], // Tag for on-demand revalidation
   },
 );
 ```
@@ -810,7 +765,7 @@ const getCachedPosts = unstable_cache(
 // Stream content as it becomes ready using Suspense
 
 // page.tsx
-import { Suspense } from "react";
+import { Suspense } from 'react';
 
 export default function DashboardPage() {
   return (
@@ -911,7 +866,7 @@ function Page() {
 
 // PRELOADING PATTERN:
 // Start fetching data before it's needed
-import { preload } from "react-dom";
+import { preload } from 'react-dom';
 
 // In a Server Component:
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -938,8 +893,8 @@ function preloadPosts() {
 // src/app/blog/[slug]/page.tsx
 export async function generateStaticParams() {
   const posts = await payload.find({
-    collection: "posts",
-    where: { status: { equals: "published" } },
+    collection: 'posts',
+    where: { status: { equals: 'published' } },
     select: { slug: true },
     limit: 0, // Get all
   });
@@ -949,11 +904,7 @@ export async function generateStaticParams() {
   }));
 }
 
-export default async function BlogPost({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await getPost(slug);
   if (!post) notFound();
@@ -961,7 +912,7 @@ export default async function BlogPost({
 }
 
 // Config for fully static pages:
-export const dynamic = "force-static";
+export const dynamic = 'force-static';
 export const revalidate = false; // Never revalidate
 
 // When to use SSG:
@@ -984,13 +935,13 @@ export default async function PricingPage() {
 
 // On-demand revalidation (triggered by CMS webhook)
 // src/app/api/revalidate/route.ts
-import { revalidatePath, revalidateTag } from "next/cache";
-import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath, revalidateTag } from 'next/cache';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
-  const secret = request.headers.get("x-revalidate-secret");
+  const secret = request.headers.get('x-revalidate-secret');
   if (secret !== process.env.REVALIDATION_SECRET) {
-    return NextResponse.json({ error: "Invalid secret" }, { status: 401 });
+    return NextResponse.json({ error: 'Invalid secret' }, { status: 401 });
   }
 
   const body = await request.json();
@@ -1007,18 +958,18 @@ export async function POST(request: NextRequest) {
 
   // Revalidate specific content types
   switch (body.collection) {
-    case "posts":
-      revalidateTag("posts");
-      revalidatePath("/blog");
+    case 'posts':
+      revalidateTag('posts');
+      revalidatePath('/blog');
       if (body.slug) revalidatePath(`/blog/${body.slug}`);
       break;
-    case "pages":
-      revalidateTag("pages");
+    case 'pages':
+      revalidateTag('pages');
       if (body.slug) revalidatePath(`/${body.slug}`);
       break;
-    case "case-studies":
-      revalidateTag("case-studies");
-      revalidatePath("/customers");
+    case 'case-studies':
+      revalidateTag('case-studies');
+      revalidatePath('/customers');
       break;
   }
 
@@ -1046,7 +997,7 @@ export async function POST(request: NextRequest) {
 
 ```tsx
 // Force dynamic rendering (SSR on every request)
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export default async function SearchResults({
   searchParams,
@@ -1057,7 +1008,7 @@ export default async function SearchResults({
 
   if (!q) return <SearchEmptyState />;
 
-  const results = await search(q, parseInt(page || "1"));
+  const results = await search(q, parseInt(page || '1'));
   return <SearchResultsList results={results} query={q} />;
 }
 
@@ -1090,8 +1041,8 @@ const nextConfig = {
 };
 
 // page.tsx
-import { Suspense } from "react";
-import { unstable_noStore } from "next/cache";
+import { Suspense } from 'react';
+import { unstable_noStore } from 'next/cache';
 
 export default function ProductPage() {
   return (
@@ -1123,7 +1074,7 @@ export default function ProductPage() {
 // The dynamic component opts out of static rendering:
 async function DynamicPrice() {
   unstable_noStore(); // Mark as dynamic
-  const geo = headers().get("x-vercel-ip-country") || "US";
+  const geo = headers().get('x-vercel-ip-country') || 'US';
   const price = await getGeoPrice(geo);
   return <PriceDisplay price={price} />;
 }
@@ -1270,23 +1221,23 @@ const nextConfig: NextConfig = {
     // Remote image domains
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "cms.trueomni.com",
-        pathname: "/media/**",
+        protocol: 'https',
+        hostname: 'cms.trueomni.com',
+        pathname: '/media/**',
       },
       {
-        protocol: "https",
-        hostname: "*.supabase.co",
-        pathname: "/storage/**",
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/storage/**',
       },
       {
-        protocol: "https",
-        hostname: "images.unsplash.com",
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
       },
     ],
 
     // Output formats (default: ['image/webp'])
-    formats: ["image/avif", "image/webp"],
+    formats: ['image/avif', 'image/webp'],
 
     // Device sizes for responsive images
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -1339,28 +1290,24 @@ const nextConfig: NextConfig = {
 
 ```tsx
 // src/app/layout.tsx
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Inter, Space_Grotesk } from 'next/font/google';
 
 // Body font
 const inter = Inter({
-  subsets: ["latin"],
-  display: "swap", // Show fallback font immediately, swap when loaded
-  variable: "--font-inter", // CSS variable for Tailwind
+  subsets: ['latin'],
+  display: 'swap', // Show fallback font immediately, swap when loaded
+  variable: '--font-inter', // CSS variable for Tailwind
 });
 
 // Heading font
 const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-heading",
-  weight: ["400", "500", "600", "700"], // Only load needed weights
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-heading',
+  weight: ['400', '500', '600', '700'], // Only load needed weights
 });
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body className={inter.className}>{children}</body>
@@ -1383,42 +1330,42 @@ export default function RootLayout({
 
 ```tsx
 // For custom fonts not on Google Fonts
-import localFont from "next/font/local";
+import localFont from 'next/font/local';
 
 const satoshi = localFont({
   src: [
     {
-      path: "../../public/fonts/Satoshi-Regular.woff2",
-      weight: "400",
-      style: "normal",
+      path: '../../public/fonts/Satoshi-Regular.woff2',
+      weight: '400',
+      style: 'normal',
     },
     {
-      path: "../../public/fonts/Satoshi-Medium.woff2",
-      weight: "500",
-      style: "normal",
+      path: '../../public/fonts/Satoshi-Medium.woff2',
+      weight: '500',
+      style: 'normal',
     },
     {
-      path: "../../public/fonts/Satoshi-Bold.woff2",
-      weight: "700",
-      style: "normal",
+      path: '../../public/fonts/Satoshi-Bold.woff2',
+      weight: '700',
+      style: 'normal',
     },
     {
-      path: "../../public/fonts/Satoshi-Italic.woff2",
-      weight: "400",
-      style: "italic",
+      path: '../../public/fonts/Satoshi-Italic.woff2',
+      weight: '400',
+      style: 'italic',
     },
   ],
-  display: "swap",
-  variable: "--font-satoshi",
+  display: 'swap',
+  variable: '--font-satoshi',
 });
 
 // Variable font (single file, all weights)
 const interVariable = localFont({
-  src: "../../public/fonts/InterVariable.woff2",
-  display: "swap",
-  variable: "--font-inter",
+  src: '../../public/fonts/InterVariable.woff2',
+  display: 'swap',
+  variable: '--font-inter',
   // Weight range for variable fonts
-  weight: "100 900",
+  weight: '100 900',
 });
 ```
 
@@ -1480,83 +1427,77 @@ RECOMMENDATION FOR TRUEOMNI:
 
 ```tsx
 // src/app/layout.tsx — Base metadata for the entire site
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://trueomni.com"),
+  metadataBase: new URL('https://trueomni.com'),
   title: {
-    default: "TrueOmni — The Omnichannel Platform",
-    template: "%s | TrueOmni", // "%s" is replaced by child page titles
+    default: 'TrueOmni — The Omnichannel Platform',
+    template: '%s | TrueOmni', // "%s" is replaced by child page titles
   },
   description:
-    "The complete omnichannel solution for modern businesses. Unify your customer experience across all channels.",
-  keywords: [
-    "omnichannel",
-    "customer experience",
-    "unified commerce",
-    "analytics",
-  ],
-  authors: [{ name: "TrueOmni", url: "https://trueomni.com" }],
-  creator: "TrueOmni",
-  publisher: "TrueOmni",
+    'The complete omnichannel solution for modern businesses. Unify your customer experience across all channels.',
+  keywords: ['omnichannel', 'customer experience', 'unified commerce', 'analytics'],
+  authors: [{ name: 'TrueOmni', url: 'https://trueomni.com' }],
+  creator: 'TrueOmni',
+  publisher: 'TrueOmni',
   robots: {
     index: true,
     follow: true,
     googleBot: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
     },
   },
   openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://trueomni.com",
-    siteName: "TrueOmni",
-    title: "TrueOmni — The Omnichannel Platform",
-    description: "The complete omnichannel solution for modern businesses.",
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://trueomni.com',
+    siteName: 'TrueOmni',
+    title: 'TrueOmni — The Omnichannel Platform',
+    description: 'The complete omnichannel solution for modern businesses.',
     images: [
       {
-        url: "/og/default.png",
+        url: '/og/default.png',
         width: 1200,
         height: 630,
-        alt: "TrueOmni Platform",
+        alt: 'TrueOmni Platform',
       },
     ],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "TrueOmni — The Omnichannel Platform",
-    description: "The complete omnichannel solution for modern businesses.",
-    images: ["/og/default.png"],
-    creator: "@trueomni",
+    card: 'summary_large_image',
+    title: 'TrueOmni — The Omnichannel Platform',
+    description: 'The complete omnichannel solution for modern businesses.',
+    images: ['/og/default.png'],
+    creator: '@trueomni',
   },
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "32x32" },
-      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
     ],
-    apple: "/apple-touch-icon.png",
+    apple: '/apple-touch-icon.png',
   },
-  manifest: "/manifest.webmanifest",
+  manifest: '/manifest.webmanifest',
   alternates: {
-    canonical: "https://trueomni.com",
+    canonical: 'https://trueomni.com',
   },
   verification: {
-    google: "google-verification-code",
+    google: 'google-verification-code',
   },
 };
 
 // Child pages inherit and override parent metadata:
 // src/app/(frontend)/pricing/page.tsx
 export const metadata: Metadata = {
-  title: "Pricing Plans", // Becomes "Pricing Plans | TrueOmni" (template)
-  description:
-    "Compare TrueOmni pricing plans. Start free, upgrade as you grow.",
+  title: 'Pricing Plans', // Becomes "Pricing Plans | TrueOmni" (template)
+  description: 'Compare TrueOmni pricing plans. Start free, upgrade as you grow.',
   alternates: {
-    canonical: "/pricing",
+    canonical: '/pricing',
   },
 };
 ```
@@ -1565,7 +1506,7 @@ export const metadata: Metadata = {
 
 ```tsx
 // src/app/(frontend)/blog/[slug]/page.tsx
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -1577,7 +1518,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!post) {
     return {
-      title: "Post Not Found",
+      title: 'Post Not Found',
     };
   }
 
@@ -1588,7 +1529,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     publishedTime: post.publishedAt,
     modifiedTime: post.updatedAt,
     openGraph: {
-      type: "article",
+      type: 'article',
       title: post.title,
       description: post.excerpt,
       url: `/blog/${slug}`,
@@ -1616,62 +1557,58 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 ```tsx
 // src/app/api/og/route.tsx
-import { ImageResponse } from "next/og";
-import { NextRequest } from "next/server";
+import { ImageResponse } from 'next/og';
+import { NextRequest } from 'next/server';
 
-export const runtime = "edge";
+export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
-  const title = searchParams.get("title") || "TrueOmni";
-  const subtitle = searchParams.get("subtitle") || "The Omnichannel Platform";
-  const type = searchParams.get("type") || "page"; // page, blog, product
+  const title = searchParams.get('title') || 'TrueOmni';
+  const subtitle = searchParams.get('subtitle') || 'The Omnichannel Platform';
+  const type = searchParams.get('type') || 'page'; // page, blog, product
 
   // Load custom font
   const interBold = await fetch(
-    new URL("../../../../public/fonts/Inter-Bold.ttf", import.meta.url),
+    new URL('../../../../public/fonts/Inter-Bold.ttf', import.meta.url),
   ).then((res) => res.arrayBuffer());
 
   return new ImageResponse(
     <div
       style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        padding: "80px",
-        background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-        fontFamily: "Inter",
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: '80px',
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        fontFamily: 'Inter',
       }}
     >
       {/* Logo */}
-      <div
-        style={{ display: "flex", alignItems: "center", marginBottom: "40px" }}
-      >
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '40px' }}>
         <div
           style={{
-            width: "48px",
-            height: "48px",
-            borderRadius: "12px",
-            background: "#3b82f6",
-            marginRight: "16px",
+            width: '48px',
+            height: '48px',
+            borderRadius: '12px',
+            background: '#3b82f6',
+            marginRight: '16px',
           }}
         />
-        <span style={{ color: "#94a3b8", fontSize: "24px", fontWeight: 600 }}>
-          TrueOmni
-        </span>
+        <span style={{ color: '#94a3b8', fontSize: '24px', fontWeight: 600 }}>TrueOmni</span>
       </div>
 
       {/* Title */}
       <h1
         style={{
-          color: "#f8fafc",
-          fontSize: title.length > 50 ? "48px" : "64px",
+          color: '#f8fafc',
+          fontSize: title.length > 50 ? '48px' : '64px',
           fontWeight: 700,
           lineHeight: 1.1,
-          marginBottom: "20px",
-          maxWidth: "900px",
+          marginBottom: '20px',
+          maxWidth: '900px',
         }}
       >
         {title}
@@ -1680,29 +1617,29 @@ export async function GET(request: NextRequest) {
       {/* Subtitle */}
       <p
         style={{
-          color: "#94a3b8",
-          fontSize: "28px",
+          color: '#94a3b8',
+          fontSize: '28px',
           lineHeight: 1.4,
-          maxWidth: "700px",
+          maxWidth: '700px',
         }}
       >
         {subtitle}
       </p>
 
       {/* Type badge */}
-      {type !== "page" && (
+      {type !== 'page' && (
         <div
           style={{
-            position: "absolute",
-            top: "40px",
-            right: "80px",
-            background: "#3b82f6",
-            color: "white",
-            padding: "8px 16px",
-            borderRadius: "20px",
-            fontSize: "16px",
+            position: 'absolute',
+            top: '40px',
+            right: '80px',
+            background: '#3b82f6',
+            color: 'white',
+            padding: '8px 16px',
+            borderRadius: '20px',
+            fontSize: '16px',
             fontWeight: 600,
-            textTransform: "uppercase",
+            textTransform: 'uppercase',
           }}
         >
           {type}
@@ -1714,7 +1651,7 @@ export async function GET(request: NextRequest) {
       height: 630,
       fonts: [
         {
-          name: "Inter",
+          name: 'Inter',
           data: interBold,
           weight: 700,
         },
@@ -1730,76 +1667,71 @@ export async function GET(request: NextRequest) {
 // src/lib/structured-data.ts
 export function generateOrganizationSchema() {
   return {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "TrueOmni",
-    url: "https://trueomni.com",
-    logo: "https://trueomni.com/logo.png",
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'TrueOmni',
+    url: 'https://trueomni.com',
+    logo: 'https://trueomni.com/logo.png',
     sameAs: [
-      "https://twitter.com/trueomni",
-      "https://linkedin.com/company/trueomni",
-      "https://github.com/trueomni",
+      'https://twitter.com/trueomni',
+      'https://linkedin.com/company/trueomni',
+      'https://github.com/trueomni',
     ],
     contactPoint: {
-      "@type": "ContactPoint",
-      email: "designers@trueomni.com",
-      contactType: "sales",
+      '@type': 'ContactPoint',
+      email: 'designers@trueomni.com',
+      contactType: 'sales',
     },
   };
 }
 
 export function generateArticleSchema(post: Post) {
   return {
-    "@context": "https://schema.org",
-    "@type": "Article",
+    '@context': 'https://schema.org',
+    '@type': 'Article',
     headline: post.title,
     description: post.excerpt,
     image:
-      post.ogImage?.url ||
-      `https://trueomni.com/api/og?title=${encodeURIComponent(post.title)}`,
+      post.ogImage?.url || `https://trueomni.com/api/og?title=${encodeURIComponent(post.title)}`,
     datePublished: post.publishedAt,
     dateModified: post.updatedAt,
     author: {
-      "@type": "Person",
+      '@type': 'Person',
       name: post.author.name,
       url: `https://trueomni.com/team/${post.author.slug}`,
     },
     publisher: {
-      "@type": "Organization",
-      name: "TrueOmni",
+      '@type': 'Organization',
+      name: 'TrueOmni',
       logo: {
-        "@type": "ImageObject",
-        url: "https://trueomni.com/logo.png",
+        '@type': 'ImageObject',
+        url: 'https://trueomni.com/logo.png',
       },
     },
   };
 }
 
-export function generateFAQSchema(
-  faqs: { question: string; answer: string }[],
-) {
+export function generateFAQSchema(faqs: { question: string; answer: string }[]) {
   return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
     mainEntity: faqs.map((faq) => ({
-      "@type": "Question",
+      '@type': 'Question',
       name: faq.question,
       acceptedAnswer: {
-        "@type": "Answer",
+        '@type': 'Answer',
         text: faq.answer,
       },
     })),
   };
 }
 
-export function generateBreadcrumbSchema(
-  items: { name: string; url: string }[],
-) {
+export function generateBreadcrumbSchema(items: { name: string; url: string }[]) {
   return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
     itemListElement: items.map((item, i) => ({
-      "@type": "ListItem",
+      '@type': 'ListItem',
       position: i + 1,
       name: item.name,
       item: `https://trueomni.com${item.url}`,
@@ -1814,15 +1746,15 @@ export function generateProductSchema(product: {
   offers?: { price: number; currency: string; planName: string }[];
 }) {
   return {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
     name: product.name,
     description: product.description,
     url: product.url,
-    applicationCategory: "BusinessApplication",
-    operatingSystem: "Web",
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
     offers: product.offers?.map((offer) => ({
-      "@type": "Offer",
+      '@type': 'Offer',
       name: offer.planName,
       price: offer.price,
       priceCurrency: offer.currency,
@@ -1851,61 +1783,61 @@ export default function Page() {
 
 ```tsx
 // src/app/sitemap.ts
-import type { MetadataRoute } from "next";
+import type { MetadataRoute } from 'next';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://trueomni.com";
+  const baseUrl = 'https://trueomni.com';
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: "weekly",
+      changeFrequency: 'weekly',
       priority: 1,
     },
     {
       url: `${baseUrl}/product`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/pricing`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/customers`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${baseUrl}/company/about`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
       url: `${baseUrl}/company/contact`,
       lastModified: new Date(),
-      changeFrequency: "yearly",
+      changeFrequency: 'yearly',
       priority: 0.6,
     },
     {
       url: `${baseUrl}/demo`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: 'monthly',
       priority: 0.9,
     },
   ];
 
   // Dynamic pages from CMS
   const posts = await payload.find({
-    collection: "posts",
-    where: { status: { equals: "published" } },
+    collection: 'posts',
+    where: { status: { equals: 'published' } },
     select: { slug: true, updatedAt: true },
     limit: 0,
   });
@@ -1913,13 +1845,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const blogPages: MetadataRoute.Sitemap = posts.docs.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
     lastModified: new Date(post.updatedAt),
-    changeFrequency: "weekly" as const,
+    changeFrequency: 'weekly' as const,
     priority: 0.6,
   }));
 
   const caseStudies = await payload.find({
-    collection: "case-studies",
-    where: { status: { equals: "published" } },
+    collection: 'case-studies',
+    where: { status: { equals: 'published' } },
     select: { slug: true, updatedAt: true },
     limit: 0,
   });
@@ -1927,7 +1859,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const caseStudyPages: MetadataRoute.Sitemap = caseStudies.docs.map((cs) => ({
     url: `${baseUrl}/customers/${cs.slug}`,
     lastModified: new Date(cs.updatedAt),
-    changeFrequency: "monthly" as const,
+    changeFrequency: 'monthly' as const,
     priority: 0.7,
   }));
 
@@ -1936,18 +1868,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
 // robots.txt
 // src/app/robots.ts
-import type { MetadataRoute } from "next";
+import type { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        userAgent: "*",
-        allow: "/",
-        disallow: ["/admin/", "/api/", "/preview/"],
+        userAgent: '*',
+        allow: '/',
+        disallow: ['/admin/', '/api/', '/preview/'],
       },
     ],
-    sitemap: "https://trueomni.com/sitemap.xml",
+    sitemap: 'https://trueomni.com/sitemap.xml',
   };
 }
 ```
@@ -1960,27 +1892,27 @@ export default function robots(): MetadataRoute.Robots {
 
 ```tsx
 // src/middleware.ts
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Protect admin routes
-  if (pathname.startsWith("/admin")) {
-    const token = request.cookies.get("payload-token");
+  if (pathname.startsWith('/admin')) {
+    const token = request.cookies.get('payload-token');
     if (!token) {
-      const loginUrl = new URL("/admin/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
+      const loginUrl = new URL('/admin/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
   }
 
   // Protect API routes (require API key)
-  if (pathname.startsWith("/api/") && !pathname.startsWith("/api/auth")) {
-    const apiKey = request.headers.get("x-api-key");
+  if (pathname.startsWith('/api/') && !pathname.startsWith('/api/auth')) {
+    const apiKey = request.headers.get('x-api-key');
     if (!apiKey || apiKey !== process.env.API_KEY) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
   }
 
@@ -1990,10 +1922,10 @@ export function middleware(request: NextRequest) {
 // Only run middleware on specific paths
 export const config = {
   matcher: [
-    "/admin/:path*",
-    "/api/:path*",
+    '/admin/:path*',
+    '/api/:path*',
     // Exclude static files and images
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.png$).*)",
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.png$).*)',
   ],
 };
 ```
@@ -2006,29 +1938,23 @@ export function middleware(request: NextRequest) {
 
   // Redirect old URLs to new ones
   const redirects: Record<string, string> = {
-    "/features": "/product",
-    "/about": "/company/about",
-    "/blog/old-slug": "/blog/new-slug",
+    '/features': '/product',
+    '/about': '/company/about',
+    '/blog/old-slug': '/blog/new-slug',
   };
 
   if (redirects[pathname]) {
-    return NextResponse.redirect(
-      new URL(redirects[pathname], request.url),
-      301,
-    );
+    return NextResponse.redirect(new URL(redirects[pathname], request.url), 301);
   }
 
   // Rewrite (proxy) — URL stays the same, content is different
-  if (pathname === "/docs") {
-    return NextResponse.rewrite(new URL("/api/docs-proxy", request.url));
+  if (pathname === '/docs') {
+    return NextResponse.rewrite(new URL('/api/docs-proxy', request.url));
   }
 
   // Add trailing slash redirect
-  if (pathname !== "/" && pathname.endsWith("/")) {
-    return NextResponse.redirect(
-      new URL(pathname.slice(0, -1), request.url),
-      308,
-    );
+  if (pathname !== '/' && pathname.endsWith('/')) {
+    return NextResponse.redirect(new URL(pathname.slice(0, -1), request.url), 308);
   }
 
   return NextResponse.next();
@@ -2040,48 +1966,48 @@ export function middleware(request: NextRequest) {
 ```tsx
 export function middleware(request: NextRequest) {
   // Vercel provides geo data automatically
-  const country = request.geo?.country || "US";
-  const city = request.geo?.city || "Unknown";
-  const region = request.geo?.region || "Unknown";
+  const country = request.geo?.country || 'US';
+  const city = request.geo?.city || 'Unknown';
+  const region = request.geo?.region || 'Unknown';
 
   // Set headers for use in Server Components
   const response = NextResponse.next();
-  response.headers.set("x-user-country", country);
-  response.headers.set("x-user-city", city);
+  response.headers.set('x-user-country', country);
+  response.headers.set('x-user-city', city);
 
   // Redirect EU users to GDPR-compliant version
   const euCountries = [
-    "DE",
-    "FR",
-    "ES",
-    "IT",
-    "NL",
-    "BE",
-    "AT",
-    "SE",
-    "DK",
-    "FI",
-    "IE",
-    "PT",
-    "GR",
-    "PL",
-    "CZ",
-    "RO",
-    "HU",
-    "BG",
-    "HR",
-    "SK",
-    "SI",
-    "LT",
-    "LV",
-    "EE",
-    "LU",
-    "MT",
-    "CY",
+    'DE',
+    'FR',
+    'ES',
+    'IT',
+    'NL',
+    'BE',
+    'AT',
+    'SE',
+    'DK',
+    'FI',
+    'IE',
+    'PT',
+    'GR',
+    'PL',
+    'CZ',
+    'RO',
+    'HU',
+    'BG',
+    'HR',
+    'SK',
+    'SI',
+    'LT',
+    'LV',
+    'EE',
+    'LU',
+    'MT',
+    'CY',
   ];
-  if (euCountries.includes(country) && !request.cookies.get("gdpr-consent")) {
+  if (euCountries.includes(country) && !request.cookies.get('gdpr-consent')) {
     // Show GDPR consent banner
-    response.headers.set("x-show-gdpr-banner", "true");
+    response.headers.set('x-show-gdpr-banner', 'true');
   }
 
   return response;
@@ -2095,26 +2021,26 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Only A/B test specific pages
-  if (pathname === "/" || pathname === "/pricing") {
+  if (pathname === '/' || pathname === '/pricing') {
     // Check if user already has a variant assigned
-    let variant = request.cookies.get("ab-variant")?.value;
+    let variant = request.cookies.get('ab-variant')?.value;
 
     if (!variant) {
       // Assign variant randomly (50/50)
-      variant = Math.random() < 0.5 ? "a" : "b";
+      variant = Math.random() < 0.5 ? 'a' : 'b';
     }
 
     const response = NextResponse.next();
 
     // Set cookie for consistent experience
-    response.cookies.set("ab-variant", variant, {
+    response.cookies.set('ab-variant', variant, {
       maxAge: 60 * 60 * 24 * 30, // 30 days
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: 'lax',
     });
 
     // Set header for use in Server Components
-    response.headers.set("x-ab-variant", variant);
+    response.headers.set('x-ab-variant', variant);
 
     return response;
   }
@@ -2123,13 +2049,13 @@ export function middleware(request: NextRequest) {
 }
 
 // In Server Component:
-import { headers } from "next/headers";
+import { headers } from 'next/headers';
 
 export default async function HomePage() {
   const headerList = await headers();
-  const variant = headerList.get("x-ab-variant") || "a";
+  const variant = headerList.get('x-ab-variant') || 'a';
 
-  return variant === "a" ? <HeroVariantA /> : <HeroVariantB />;
+  return variant === 'a' ? <HeroVariantA /> : <HeroVariantB />;
 }
 ```
 
@@ -2143,14 +2069,10 @@ export default async function HomePage() {
 // Install: npm install @vercel/analytics @vercel/speed-insights
 
 // src/app/layout.tsx
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
@@ -2163,16 +2085,16 @@ export default function RootLayout({
 }
 
 // Custom events tracking
-import { track } from "@vercel/analytics";
+import { track } from '@vercel/analytics';
 
 // Track in Client Components:
 function DemoButton() {
   return (
     <Button
       onClick={() => {
-        track("demo_requested", {
-          source: "hero",
-          plan: "enterprise",
+        track('demo_requested', {
+          source: 'hero',
+          plan: 'enterprise',
         });
       }}
     >
@@ -2182,11 +2104,11 @@ function DemoButton() {
 }
 
 // Track in Server Actions:
-("use server");
-import { track } from "@vercel/analytics/server";
+('use server');
+import { track } from '@vercel/analytics/server';
 
 export async function submitForm(data: FormData) {
-  await track("form_submitted", { type: "contact" });
+  await track('form_submitted', { type: 'contact' });
   // ... process form
 }
 ```
@@ -2210,21 +2132,19 @@ export async function submitForm(data: FormData) {
 // Use for: Feature flags, redirects, A/B test configs
 // Install: npm install @vercel/edge-config
 
-import { get } from "@vercel/edge-config";
+import { get } from '@vercel/edge-config';
 
 // In middleware or Edge functions:
 export async function middleware(request: NextRequest) {
   // Read feature flags (< 1ms read time)
-  const maintenanceMode = await get<boolean>("maintenance_mode");
+  const maintenanceMode = await get<boolean>('maintenance_mode');
 
   if (maintenanceMode) {
-    return NextResponse.rewrite(new URL("/maintenance", request.url));
+    return NextResponse.rewrite(new URL('/maintenance', request.url));
   }
 
   // Read A/B test config
-  const abConfig = await get<{ enabled: boolean; splitPercentage: number }>(
-    "ab_hero_test",
-  );
+  const abConfig = await get<{ enabled: boolean; splitPercentage: number }>('ab_hero_test');
 
   if (abConfig?.enabled) {
     // Apply A/B test logic
@@ -2234,10 +2154,10 @@ export async function middleware(request: NextRequest) {
 }
 
 // In Server Components:
-import { get } from "@vercel/edge-config";
+import { get } from '@vercel/edge-config';
 
 async function FeatureSection() {
-  const features = await get<string[]>("enabled_features");
+  const features = await get<string[]>('enabled_features');
   // Render only enabled features
 }
 ```
@@ -2290,30 +2210,30 @@ export async function GET(request: NextRequest) {
 
 // 1. Draft mode for CMS preview
 // src/app/api/preview/route.ts
-import { draftMode } from "next/headers";
-import { redirect } from "next/navigation";
+import { draftMode } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 export async function GET(request: NextRequest) {
-  const secret = request.nextUrl.searchParams.get("secret");
-  const slug = request.nextUrl.searchParams.get("slug");
+  const secret = request.nextUrl.searchParams.get('secret');
+  const slug = request.nextUrl.searchParams.get('slug');
 
   if (secret !== process.env.PREVIEW_SECRET) {
-    return new Response("Invalid token", { status: 401 });
+    return new Response('Invalid token', { status: 401 });
   }
 
   const draft = await draftMode();
   draft.enable();
-  redirect(slug || "/");
+  redirect(slug || '/');
 }
 
 // 2. Check if running in preview
-const isPreview = process.env.VERCEL_ENV === "preview";
+const isPreview = process.env.VERCEL_ENV === 'preview';
 
 // 3. Preview banner component
 function PreviewBanner() {
   return (
-    <div className="bg-amber-500 text-amber-950 text-center text-sm py-2 px-4 font-medium">
-      Preview Mode —{" "}
+    <div className="bg-amber-500 px-4 py-2 text-center text-sm font-medium text-amber-950">
+      Preview Mode —{' '}
       <a href="/api/exit-preview" className="underline">
         Exit
       </a>
@@ -2323,13 +2243,13 @@ function PreviewBanner() {
 
 // 4. Exit preview mode
 // src/app/api/exit-preview/route.ts
-import { draftMode } from "next/headers";
-import { redirect } from "next/navigation";
+import { draftMode } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 export async function GET() {
   const draft = await draftMode();
   draft.disable();
-  redirect("/");
+  redirect('/');
 }
 ```
 
@@ -2362,24 +2282,24 @@ WHEN IT DOES NOT APPLY:
 // The Data Cache stores fetch results and unstable_cache results
 
 // Cached fetch (opt-in in Next.js 15)
-const data = await fetch("https://api.example.com/data", {
+const data = await fetch('https://api.example.com/data', {
   next: {
     revalidate: 3600, // Cache for 1 hour
-    tags: ["data-tag"], // Tag for on-demand revalidation
+    tags: ['data-tag'], // Tag for on-demand revalidation
   },
 });
 
 // unstable_cache for non-fetch operations (database queries, etc.)
-import { unstable_cache } from "next/cache";
+import { unstable_cache } from 'next/cache';
 
 const getCachedData = unstable_cache(
   async (id: string) => {
     return await db.query(`SELECT * FROM items WHERE id = $1`, [id]);
   },
-  ["item-by-id"], // Cache key parts
+  ['item-by-id'], // Cache key parts
   {
     revalidate: 3600, // 1 hour
-    tags: ["items"], // For on-demand revalidation
+    tags: ['items'], // For on-demand revalidation
   },
 );
 
@@ -2387,17 +2307,17 @@ const getCachedData = unstable_cache(
 const getCachedPosts = unstable_cache(
   async (options?: { limit?: number; page?: number }) => {
     return await payload.find({
-      collection: "posts",
-      where: { status: { equals: "published" } },
-      sort: "-publishedAt",
+      collection: 'posts',
+      where: { status: { equals: 'published' } },
+      sort: '-publishedAt',
       limit: options?.limit || 10,
       page: options?.page || 1,
     });
   },
-  ["published-posts"],
+  ['published-posts'],
   {
     revalidate: 300, // 5 minutes
-    tags: ["posts"],
+    tags: ['posts'],
   },
 );
 ```
@@ -2429,10 +2349,10 @@ async function Footer() {
 // - fetch() calls with the same URL and options
 // - React.cache() wrapped functions
 
-import { cache } from "react";
+import { cache } from 'react';
 
 export const getSiteSettings = cache(async () => {
-  return await payload.findGlobal({ slug: "site-settings" });
+  return await payload.findGlobal({ slug: 'site-settings' });
 });
 
 // Now getSiteSettings() is memoized per request
@@ -2442,45 +2362,42 @@ export const getSiteSettings = cache(async () => {
 ### revalidatePath and revalidateTag
 
 ```tsx
-"use server";
+'use server';
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 // Revalidate a specific page
 export async function updatePost(id: string, data: PostData) {
-  await payload.update({ collection: "posts", id, data });
+  await payload.update({ collection: 'posts', id, data });
 
   // Option 1: Revalidate by path
-  revalidatePath("/blog"); // Blog listing
+  revalidatePath('/blog'); // Blog listing
   revalidatePath(`/blog/${data.slug}`); // Specific post
-  revalidatePath("/", "layout"); // Entire layout tree
+  revalidatePath('/', 'layout'); // Entire layout tree
 
   // Option 2: Revalidate by tag (preferred — more granular)
-  revalidateTag("posts"); // All cached data tagged 'posts'
+  revalidateTag('posts'); // All cached data tagged 'posts'
   revalidateTag(`post-${data.slug}`); // Specific post cache
 }
 
 // In Payload CMS hook (afterChange):
 // This revalidates pages when content is edited in the admin
-export const afterChangeHook: CollectionAfterChangeHook = async ({
-  doc,
-  collection,
-}) => {
+export const afterChangeHook: CollectionAfterChangeHook = async ({ doc, collection }) => {
   revalidateTag(collection.slug); // Revalidate all data for this collection
 
   if (doc.slug) {
     // Revalidate the specific page
     switch (collection.slug) {
-      case "posts":
+      case 'posts':
         revalidatePath(`/blog/${doc.slug}`);
-        revalidatePath("/blog");
+        revalidatePath('/blog');
         break;
-      case "pages":
+      case 'pages':
         revalidatePath(`/${doc.slug}`);
         break;
-      case "case-studies":
+      case 'case-studies':
         revalidatePath(`/customers/${doc.slug}`);
-        revalidatePath("/customers");
+        revalidatePath('/customers');
         break;
     }
   }
@@ -2520,17 +2437,17 @@ ANALYZE=true npm run build
 
 ```tsx
 // CORRECT: Named imports (tree-shakeable)
-import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { format } from "date-fns";
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+import { format } from 'date-fns';
 
 // WRONG: Default imports of large libraries
-import _ from "lodash"; // Imports ALL of lodash (~70KB)
-import * as Icons from "lucide-react"; // Imports ALL icons
+import _ from 'lodash'; // Imports ALL of lodash (~70KB)
+import * as Icons from 'lucide-react'; // Imports ALL icons
 
 // CORRECT: Import only what you need
-import debounce from "lodash/debounce"; // Only debounce (~1KB)
-import { Search, Menu, X } from "lucide-react"; // Only 3 icons
+import debounce from 'lodash/debounce'; // Only debounce (~1KB)
+import { Search, Menu, X } from 'lucide-react'; // Only 3 icons
 
 // Check if a library is tree-shakeable:
 // 1. Look for "sideEffects: false" in its package.json
@@ -2547,16 +2464,16 @@ import { Search, Menu, X } from "lucide-react"; // Only 3 icons
 // - Each route group is a separate chunk
 
 // Manual code splitting with dynamic imports:
-import dynamic from "next/dynamic";
+import dynamic from 'next/dynamic';
 
 // Heavy component loaded only when needed
-const HeavyChart = dynamic(() => import("@/components/HeavyChart"), {
+const HeavyChart = dynamic(() => import('@/components/HeavyChart'), {
   loading: () => <ChartSkeleton />,
   ssr: false, // Client-only component (e.g., uses canvas/WebGL)
 });
 
 // Conditionally loaded component
-const AdminPanel = dynamic(() => import("@/components/AdminPanel"), {
+const AdminPanel = dynamic(() => import('@/components/AdminPanel'), {
   loading: () => <Spinner />,
 });
 
@@ -2571,7 +2488,7 @@ function Dashboard({ isAdmin }: { isAdmin: boolean }) {
 
 // Dynamic import for utilities
 async function handleExport() {
-  const { exportToPDF } = await import("@/lib/pdf-export");
+  const { exportToPDF } = await import('@/lib/pdf-export');
   await exportToPDF(data);
 }
 
@@ -2583,22 +2500,20 @@ async function handleExport() {
 
 ```tsx
 // For Client Components that are heavy and not needed immediately
-"use client";
+'use client';
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense } from 'react';
 
 // Lazy load a heavy client component
-const MapComponent = lazy(() => import("@/components/Map"));
-const VideoPlayer = lazy(() => import("@/components/VideoPlayer"));
-const RichTextEditor = lazy(() => import("@/components/RichTextEditor"));
+const MapComponent = lazy(() => import('@/components/Map'));
+const VideoPlayer = lazy(() => import('@/components/VideoPlayer'));
+const RichTextEditor = lazy(() => import('@/components/RichTextEditor'));
 
 function ContactPage() {
   return (
     <div>
       <ContactForm />
-      <Suspense
-        fallback={<div className="h-96 bg-gray-100 rounded-lg animate-pulse" />}
-      >
+      <Suspense fallback={<div className="h-96 animate-pulse rounded-lg bg-gray-100" />}>
         <MapComponent location={{ lat: 40.7128, lng: -74.006 }} />
       </Suspense>
     </div>
@@ -2698,9 +2613,9 @@ BUNDLE SIZE:
 // Replaces useFormState (deprecated in React 19)
 // Manages form state including pending, errors, and response
 
-"use client";
+'use client';
 
-import { useActionState } from "react";
+import { useActionState } from 'react';
 
 interface FormState {
   success: boolean;
@@ -2708,31 +2623,28 @@ interface FormState {
   message?: string;
 }
 
-async function submitAction(
-  prevState: FormState | null,
-  formData: FormData,
-): Promise<FormState> {
-  "use server";
+async function submitAction(prevState: FormState | null, formData: FormData): Promise<FormState> {
+  'use server';
 
-  const name = formData.get("name") as string;
-  const email = formData.get("email") as string;
+  const name = formData.get('name') as string;
+  const email = formData.get('email') as string;
 
   if (!name || name.length < 2) {
     return {
       success: false,
-      errors: { name: ["Name must be at least 2 characters"] },
+      errors: { name: ['Name must be at least 2 characters'] },
     };
   }
 
-  if (!email || !email.includes("@")) {
+  if (!email || !email.includes('@')) {
     return {
       success: false,
-      errors: { email: ["Please enter a valid email"] },
+      errors: { email: ['Please enter a valid email'] },
     };
   }
 
   await saveToDatabase({ name, email });
-  return { success: true, message: "Submitted successfully!" };
+  return { success: true, message: 'Submitted successfully!' };
 }
 
 export function ContactForm() {
@@ -2743,21 +2655,19 @@ export function ContactForm() {
       <div>
         <Label htmlFor="name">Name</Label>
         <Input id="name" name="name" disabled={isPending} />
-        {state?.errors?.name && (
-          <p className="text-sm text-red-600 mt-1">{state.errors.name[0]}</p>
-        )}
+        {state?.errors?.name && <p className="mt-1 text-sm text-red-600">{state.errors.name[0]}</p>}
       </div>
 
       <div>
         <Label htmlFor="email">Email</Label>
         <Input id="email" name="email" type="email" disabled={isPending} />
         {state?.errors?.email && (
-          <p className="text-sm text-red-600 mt-1">{state.errors.email[0]}</p>
+          <p className="mt-1 text-sm text-red-600">{state.errors.email[0]}</p>
         )}
       </div>
 
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Submitting..." : "Submit"}
+        {isPending ? 'Submitting...' : 'Submit'}
       </Button>
 
       {state?.success && (
@@ -2776,9 +2686,9 @@ export function ContactForm() {
 // useFormStatus reads the status of the parent <form>
 // Must be used inside a component rendered within a <form>
 
-"use client";
+'use client';
 
-import { useFormStatus } from "react-dom";
+import { useFormStatus } from 'react-dom';
 
 function SubmitButton({ children }: { children: React.ReactNode }) {
   const { pending, data, method, action } = useFormStatus();
@@ -2818,9 +2728,9 @@ function MyForm() {
 ```tsx
 // useOptimistic provides immediate UI feedback before server confirmation
 
-"use client";
+'use client';
 
-import { useOptimistic } from "react";
+import { useOptimistic } from 'react';
 
 interface Message {
   id: string;
@@ -2848,7 +2758,7 @@ export function MessageList({
   );
 
   async function handleSubmit(formData: FormData) {
-    const content = formData.get("content") as string;
+    const content = formData.get('content') as string;
     addOptimisticMessage(content); // Update UI immediately
     await sendAction(formData); // Then send to server
     // When server responds, React reconciles with real data
@@ -2860,15 +2770,10 @@ export function MessageList({
         {optimisticMessages.map((msg) => (
           <li
             key={msg.id}
-            className={cn(
-              "p-3 rounded-lg",
-              msg.sending ? "bg-blue-50 opacity-70" : "bg-white",
-            )}
+            className={cn('rounded-lg p-3', msg.sending ? 'bg-blue-50 opacity-70' : 'bg-white')}
           >
             {msg.content}
-            {msg.sending && (
-              <span className="text-xs text-gray-400 ml-2">Sending...</span>
-            )}
+            {msg.sending && <span className="ml-2 text-xs text-gray-400">Sending...</span>}
           </li>
         ))}
       </ul>
@@ -2897,7 +2802,7 @@ export function MessageList({
 
 // 'use server' at the top of a file makes ALL exports server functions
 // src/app/actions.ts
-"use server";
+'use server';
 
 export async function getUser(id: string) {
   return await db.user.findUnique({ where: { id } });
@@ -2909,13 +2814,13 @@ export async function updateUser(id: string, data: Partial<User>) {
 
 export async function deleteUser(id: string) {
   await db.user.delete({ where: { id } });
-  revalidatePath("/admin/users");
+  revalidatePath('/admin/users');
 }
 
 // 'use server' inline makes a single function a server function
 export default function Page() {
   async function handleSubmit(formData: FormData) {
-    "use server";
+    'use server';
     // This runs on the server
     await processFormData(formData);
   }
@@ -2936,21 +2841,21 @@ export default function Page() {
 // - Never trust client-side data — always re-validate on server
 
 // Example with auth check:
-("use server");
+('use server');
 
-import { auth } from "@/lib/auth";
+import { auth } from '@/lib/auth';
 
 export async function createProject(formData: FormData) {
   const session = await auth();
-  if (!session) throw new Error("Unauthorized");
+  if (!session) throw new Error('Unauthorized');
 
   const data = projectSchema.parse({
-    name: formData.get("name"),
-    description: formData.get("description"),
+    name: formData.get('name'),
+    description: formData.get('description'),
   });
 
   return await payload.create({
-    collection: "projects",
+    collection: 'projects',
     data: { ...data, createdBy: session.user.id },
   });
 }
@@ -2964,7 +2869,7 @@ export async function createProject(formData: FormData) {
 
 ```tsx
 // next.config.ts
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   // Rendering
@@ -2975,37 +2880,37 @@ const nextConfig: NextConfig = {
     ppr: true, // Partial Prerendering
     reactCompiler: true, // React Compiler (auto-memoization)
     serverActions: {
-      bodySizeLimit: "2mb", // Server Action body size limit
+      bodySizeLimit: '2mb', // Server Action body size limit
     },
     optimizePackageImports: [
       // Optimize barrel imports
-      "lucide-react",
-      "@radix-ui/react-icons",
-      "date-fns",
-      "lodash",
+      'lucide-react',
+      '@radix-ui/react-icons',
+      'date-fns',
+      'lodash',
     ],
   },
 
   // Images
   images: {
-    remotePatterns: [{ hostname: "cms.trueomni.com" }],
-    formats: ["image/avif", "image/webp"],
+    remotePatterns: [{ hostname: 'cms.trueomni.com' }],
+    formats: ['image/avif', 'image/webp'],
   },
 
   // Redirects
   async redirects() {
-    return [{ source: "/old-path", destination: "/new-path", permanent: true }];
+    return [{ source: '/old-path', destination: '/new-path', permanent: true }];
   },
 
   // Headers
   async headers() {
     return [
       {
-        source: "/(.*)",
+        source: '/(.*)',
         headers: [
-          { key: "X-Frame-Options", value: "DENY" },
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         ],
       },
     ];
@@ -3028,30 +2933,30 @@ export default nextConfig;
 // control the behavior of that route segment
 
 // Force static rendering
-export const dynamic = "force-static";
+export const dynamic = 'force-static';
 
 // Force dynamic rendering (SSR)
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 // Revalidation interval (ISR)
 export const revalidate = 3600; // seconds (0 = always revalidate)
 export const revalidate = false; // never revalidate (static)
 
 // Runtime
-export const runtime = "nodejs"; // default
-export const runtime = "edge"; // Edge Runtime
+export const runtime = 'nodejs'; // default
+export const runtime = 'edge'; // Edge Runtime
 
 // Preferred region (Vercel)
-export const preferredRegion = "iad1"; // US East
-export const preferredRegion = ["iad1", "sfo1"]; // Multiple regions
-export const preferredRegion = "auto"; // Vercel decides
+export const preferredRegion = 'iad1'; // US East
+export const preferredRegion = ['iad1', 'sfo1']; // Multiple regions
+export const preferredRegion = 'auto'; // Vercel decides
 
 // Maximum duration (Vercel)
 export const maxDuration = 30; // seconds (default: 10 on Hobby, 60 on Pro)
 
 // Fetch cache
-export const fetchCache = "default-cache"; // Cache by default
-export const fetchCache = "default-no-store"; // No cache by default
+export const fetchCache = 'default-cache'; // Cache by default
+export const fetchCache = 'default-no-store'; // No cache by default
 ```
 
 ---

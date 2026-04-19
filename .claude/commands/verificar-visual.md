@@ -1,6 +1,6 @@
 ---
 description: Comparar visualmente una ruta del kiosk con su SVG de referencia.
-argument-hint: "<ruta>   (ej. /, /menu, /info/evento)"
+argument-hint: '<ruta>   (ej. /, /menu, /info/evento)'
 ---
 
 # /verificar-visual — Diff visual render vs SVG

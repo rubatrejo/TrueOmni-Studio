@@ -1,6 +1,6 @@
 ---
 description: Arrancar el trabajo de una pantalla del kiosk a partir de su SVG y specs.
-argument-hint: "<nombre-de-pantalla>   (ej. home, menu, info-evento)"
+argument-hint: '<nombre-de-pantalla>   (ej. home, menu, info-evento)'
 ---
 
 # /pantalla — Preparar trabajo de una pantalla

@@ -1,6 +1,6 @@
 ---
 name: shadcn-awesome-libs
-description: "Curated shadcn/ui component libraries and registry references. Use when building UI with shadcn/ui, React, Next.js, Tailwind CSS. Triggers: shadcn component, ui component, form builder, data table, file upload, date picker, phone input, image cropper, drag and drop, spinner, loading, rich text editor, kanban, charts, dashboard, landing page, animation."
+description: 'Curated shadcn/ui component libraries and registry references. Use when building UI with shadcn/ui, React, Next.js, Tailwind CSS. Triggers: shadcn component, ui component, form builder, data table, file upload, date picker, phone input, image cropper, drag and drop, spinner, loading, rich text editor, kanban, charts, dashboard, landing page, animation.'
 ---
 
 # Shadcn/ui Awesome Libraries Reference
@@ -79,13 +79,13 @@ Curated selection of the best shadcn/ui compatible libraries for Next.js + React
 ### Auto-form with Zod (most useful for CMS)
 
 ```tsx
-import AutoForm from "@autoform/react";
-import { ZodProvider } from "@autoform/zod";
+import AutoForm from '@autoform/react';
+import { ZodProvider } from '@autoform/zod';
 
 const schema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
-  role: z.enum(["admin", "user", "viewer"]),
+  role: z.enum(['admin', 'user', 'viewer']),
 });
 
 <AutoForm schema={schema} onSubmit={handleSubmit} />;
@@ -94,7 +94,7 @@ const schema = z.object({
 ### Vaul Drawer
 
 ```tsx
-import { Drawer } from "vaul";
+import { Drawer } from 'vaul';
 
 <Drawer.Root>
   <Drawer.Trigger>Open</Drawer.Trigger>
@@ -108,7 +108,7 @@ import { Drawer } from "vaul";
 ### Novel Editor
 
 ```tsx
-import { Editor } from "novel";
+import { Editor } from 'novel';
 
 <Editor defaultValue={content} onUpdate={handleUpdate} />;
 ```
@@ -116,9 +116,9 @@ import { Editor } from "novel";
 ### Number Flow
 
 ```tsx
-import NumberFlow from "number-flow";
+import NumberFlow from 'number-flow';
 
-<NumberFlow value={1234} format={{ style: "currency", currency: "USD" }} />;
+<NumberFlow value={1234} format={{ style: 'currency', currency: 'USD' }} />;
 ```
 
 ## Full Awesome List Reference
@@ -219,18 +219,13 @@ Payload CMS 3 blocks render as React components on the frontend. shadcn/ui compo
 
 ```tsx
 // src/blocks/CTA/Component.tsx
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button"; // shadcn button
-import { motion } from "framer-motion";
-import type { CTABlock as CTABlockType } from "@/payload-types";
+import { Button } from '@/components/ui/button'; // shadcn button
+import { motion } from 'framer-motion';
+import type { CTABlock as CTABlockType } from '@/payload-types';
 
-export function CTABlock({
-  headline,
-  description,
-  buttonLabel,
-  buttonLink,
-}: CTABlockType) {
+export function CTABlock({ headline, description, buttonLabel, buttonLink }: CTABlockType) {
   return (
     <section className="py-24 text-center">
       <motion.div
@@ -239,9 +234,7 @@ export function CTABlock({
         viewport={{ once: true }}
       >
         <h2 className="text-4xl font-bold">{headline}</h2>
-        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-          {description}
-        </p>
+        <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">{description}</p>
         <Button asChild size="lg" className="mt-8">
           <a href={buttonLink}>{buttonLabel}</a>
         </Button>
@@ -257,15 +250,15 @@ Use auto-form with Zod schemas for CMS-driven forms:
 
 ```tsx
 // src/blocks/ContactForm/Component.tsx
-"use client";
+'use client';
 
-import AutoForm from "@autoform/react";
-import { ZodProvider } from "@autoform/zod";
-import { contactSchema } from "@/lib/schemas";
+import AutoForm from '@autoform/react';
+import { ZodProvider } from '@autoform/zod';
+import { contactSchema } from '@/lib/schemas';
 
 export function ContactFormBlock({ title, description }: ContactFormBlockType) {
   return (
-    <section className="py-24 max-w-2xl mx-auto">
+    <section className="mx-auto max-w-2xl py-24">
       <h2 className="text-3xl font-bold">{title}</h2>
       <p className="mt-2 text-muted-foreground">{description}</p>
       <div className="mt-8">

@@ -627,9 +627,9 @@ npx lighthouse https://example.com \
 ```js
 // lighthouse-config.js
 module.exports = {
-  extends: "lighthouse:default",
+  extends: 'lighthouse:default',
   settings: {
-    formFactor: "desktop",
+    formFactor: 'desktop',
     screenEmulation: {
       mobile: false,
       width: 1350,
@@ -645,29 +645,28 @@ module.exports = {
       downloadThroughputKbps: 0,
       uploadThroughputKbps: 0,
     },
-    emulatedUserAgent:
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+    emulatedUserAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
   },
   // Custom performance budgets
   budgets: [
     {
-      path: "/*",
+      path: '/*',
       resourceSizes: [
-        { resourceType: "script", budget: 150 }, // KB
-        { resourceType: "stylesheet", budget: 30 },
-        { resourceType: "image", budget: 500 },
-        { resourceType: "total", budget: 1000 },
+        { resourceType: 'script', budget: 150 }, // KB
+        { resourceType: 'stylesheet', budget: 30 },
+        { resourceType: 'image', budget: 500 },
+        { resourceType: 'total', budget: 1000 },
       ],
       resourceCounts: [
-        { resourceType: "third-party", budget: 10 },
-        { resourceType: "script", budget: 15 },
+        { resourceType: 'third-party', budget: 10 },
+        { resourceType: 'script', budget: 15 },
       ],
       timings: [
-        { metric: "interactive", budget: 3000 }, // ms
-        { metric: "first-contentful-paint", budget: 1500 },
-        { metric: "largest-contentful-paint", budget: 2500 },
-        { metric: "cumulative-layout-shift", budget: 0.1 },
-        { metric: "total-blocking-time", budget: 200 },
+        { metric: 'interactive', budget: 3000 }, // ms
+        { metric: 'first-contentful-paint', budget: 1500 },
+        { metric: 'largest-contentful-paint', budget: 2500 },
+        { metric: 'cumulative-layout-shift', budget: 0.1 },
+        { metric: 'total-blocking-time', budget: 200 },
       ],
     },
   ],
@@ -695,7 +694,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
 
       - name: Install dependencies
         run: npm ci
@@ -776,17 +775,17 @@ interface LighthouseResult {
   categories: {
     performance: { score: number };
     accessibility: { score: number };
-    "best-practices": { score: number };
+    'best-practices': { score: number };
     seo: { score: number };
   };
   audits: {
-    "largest-contentful-paint": { numericValue: number; displayValue: string };
-    "cumulative-layout-shift": { numericValue: number; displayValue: string };
-    "total-blocking-time": { numericValue: number; displayValue: string };
-    "first-contentful-paint": { numericValue: number; displayValue: string };
-    "speed-index": { numericValue: number; displayValue: string };
+    'largest-contentful-paint': { numericValue: number; displayValue: string };
+    'cumulative-layout-shift': { numericValue: number; displayValue: string };
+    'total-blocking-time': { numericValue: number; displayValue: string };
+    'first-contentful-paint': { numericValue: number; displayValue: string };
+    'speed-index': { numericValue: number; displayValue: string };
     interactive: { numericValue: number; displayValue: string };
-    "server-response-time": { numericValue: number; displayValue: string };
+    'server-response-time': { numericValue: number; displayValue: string };
   };
 }
 
@@ -796,19 +795,17 @@ function extractMetrics(result: LighthouseResult) {
     scores: {
       performance: Math.round(result.categories.performance.score * 100),
       accessibility: Math.round(result.categories.accessibility.score * 100),
-      bestPractices: Math.round(
-        result.categories["best-practices"].score * 100,
-      ),
+      bestPractices: Math.round(result.categories['best-practices'].score * 100),
       seo: Math.round(result.categories.seo.score * 100),
     },
     metrics: {
-      lcp: result.audits["largest-contentful-paint"].displayValue,
-      cls: result.audits["cumulative-layout-shift"].displayValue,
-      tbt: result.audits["total-blocking-time"].displayValue,
-      fcp: result.audits["first-contentful-paint"].displayValue,
-      si: result.audits["speed-index"].displayValue,
-      tti: result.audits["interactive"].displayValue,
-      ttfb: result.audits["server-response-time"].displayValue,
+      lcp: result.audits['largest-contentful-paint'].displayValue,
+      cls: result.audits['cumulative-layout-shift'].displayValue,
+      tbt: result.audits['total-blocking-time'].displayValue,
+      fcp: result.audits['first-contentful-paint'].displayValue,
+      si: result.audits['speed-index'].displayValue,
+      tti: result.audits['interactive'].displayValue,
+      ttfb: result.audits['server-response-time'].displayValue,
     },
   };
 }
@@ -863,31 +860,31 @@ npx playwright screenshot \
 
 ```typescript
 // scripts/capture-screenshots.ts
-import { chromium, type Page } from "@playwright/test";
-import fs from "fs/promises";
-import path from "path";
+import { chromium, type Page } from '@playwright/test';
+import fs from 'fs/promises';
+import path from 'path';
 
 const VIEWPORTS = [
-  { name: "mobile", width: 375, height: 812 },
-  { name: "tablet", width: 768, height: 1024 },
-  { name: "desktop", width: 1280, height: 800 },
-  { name: "desktop-lg", width: 1440, height: 900 },
-  { name: "desktop-xl", width: 1920, height: 1080 },
+  { name: 'mobile', width: 375, height: 812 },
+  { name: 'tablet', width: 768, height: 1024 },
+  { name: 'desktop', width: 1280, height: 800 },
+  { name: 'desktop-lg', width: 1440, height: 900 },
+  { name: 'desktop-xl', width: 1920, height: 1080 },
 ];
 
 const PAGES = [
-  { name: "homepage", path: "/" },
-  { name: "product", path: "/product" },
-  { name: "pricing", path: "/pricing" },
-  { name: "blog", path: "/blog" },
-  { name: "about", path: "/company/about" },
-  { name: "contact", path: "/company/contact" },
-  { name: "demo", path: "/demo" },
+  { name: 'homepage', path: '/' },
+  { name: 'product', path: '/product' },
+  { name: 'pricing', path: '/pricing' },
+  { name: 'blog', path: '/blog' },
+  { name: 'about', path: '/company/about' },
+  { name: 'contact', path: '/company/contact' },
+  { name: 'demo', path: '/demo' },
 ];
 
 async function captureScreenshots(baseUrl: string) {
-  const date = new Date().toISOString().split("T")[0];
-  const outputDir = path.join(process.cwd(), "screenshots", date);
+  const date = new Date().toISOString().split('T')[0];
+  const outputDir = path.join(process.cwd(), 'screenshots', date);
   await fs.mkdir(outputDir, { recursive: true });
 
   const browser = await chromium.launch();
@@ -903,7 +900,7 @@ async function captureScreenshots(baseUrl: string) {
       const url = `${baseUrl}${pageConfig.path}`;
 
       try {
-        await page.goto(url, { waitUntil: "networkidle", timeout: 30000 });
+        await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
 
         // Wait for images and animations to settle
         await page.waitForTimeout(1000);
@@ -911,15 +908,15 @@ async function captureScreenshots(baseUrl: string) {
         // Viewport screenshot
         await page.screenshot({
           path: path.join(outputDir, `${pageConfig.name}-${viewport.name}.png`),
-          type: "png",
+          type: 'png',
         });
 
         // Full page screenshot (desktop only — mobile full pages are very long)
-        if (viewport.name === "desktop") {
+        if (viewport.name === 'desktop') {
           await page.screenshot({
             path: path.join(outputDir, `${pageConfig.name}-full.png`),
             fullPage: true,
-            type: "png",
+            type: 'png',
           });
         }
 
@@ -939,7 +936,7 @@ async function captureScreenshots(baseUrl: string) {
 }
 
 // Run:
-captureScreenshots("https://example.com");
+captureScreenshots('https://example.com');
 ```
 
 ### Before/After Comparison Strategy

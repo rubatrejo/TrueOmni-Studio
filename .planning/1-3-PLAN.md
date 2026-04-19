@@ -31,6 +31,7 @@
        - **Cero hex** en `globals.css` tras la limpieza.
 
     4. NO instalar todavía ningún componente; eso es la siguiente tarea.
+
   </action>
   <verify>
     - Existe `components.json` y referencia `@/components` y `@/lib/utils`.
@@ -60,6 +61,7 @@
     Revisar tras la instalación:
     - Cada componente usa clases como `bg-primary`, `text-primary-foreground`, `bg-destructive`, etc. — todas resuelven contra los tokens mapeados en `tailwind.config.ts` (1-1).
     - **No deben existir hex en estos archivos.** Si los hay, es porque faltó un token en `tokens.css` → añadirlo al template y regenerar el componente.
+
   </action>
   <verify>
     - Existen los 5 archivos en `src/components/ui/`.
@@ -108,6 +110,7 @@
     }]
     ```
     Con override en `src/components/*.ts(x)` (los wrappers) para permitirles el import directo. Y en `src/components/ui/**` para no auto-bloquearse.
+
   </action>
   <verify>
     - Existen los 5 wrappers en `src/components/` y un `index.ts`.

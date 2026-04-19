@@ -46,9 +46,15 @@
           "type": "object",
           "required": ["default", "alt"],
           "properties": {
-            "default": { "type": "string", "description": "Path relativo al logo (ej. assets/logo.svg)." },
-            "dark":    { "type": "string", "description": "Variante para fondos oscuros (opcional)." },
-            "alt":     { "type": "string", "description": "Texto alternativo obligatorio por accesibilidad." }
+            "default": {
+              "type": "string",
+              "description": "Path relativo al logo (ej. assets/logo.svg)."
+            },
+            "dark": { "type": "string", "description": "Variante para fondos oscuros (opcional)." },
+            "alt": {
+              "type": "string",
+              "description": "Texto alternativo obligatorio por accesibilidad."
+            }
           }
         },
         "favicon": { "type": "string" }
@@ -77,7 +83,7 @@
       "additionalProperties": false,
       "properties": {
         "idioma_secundario": { "type": "boolean", "default": false },
-        "mostrar_reloj":     { "type": "boolean", "default": true },
+        "mostrar_reloj": { "type": "boolean", "default": true },
         "inactividad_reset_seg": { "type": "integer", "minimum": 10, "maximum": 600 },
         "permitir_compartir_qr": { "type": "boolean", "default": false }
       }
@@ -95,7 +101,7 @@
       "additionalProperties": false,
       "required": ["version_config"],
       "properties": {
-        "creado_en":      { "type": "string", "format": "date" },
+        "creado_en": { "type": "string", "format": "date" },
         "version_config": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" }
       }
     }

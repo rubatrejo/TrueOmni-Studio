@@ -5,7 +5,7 @@
  * En Fase 2 el import apuntará a clients/{KIOSK_CLIENT}/tokens.css dinámicamente.
  * Hasta entonces, el template provee los valores por defecto.
  */
-@import "../../clients/_template/tokens.css";
+@import '../../clients/_template/tokens.css';
 
 @tailwind base;
 @tailwind components;

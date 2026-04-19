@@ -20,12 +20,14 @@ Clonar un diseño de **kiosk retrato (Adobe XD)** a HTML pixel-perfect y convert
 ## 2. Metodología (GSD + Boris Cherny)
 
 **GSD (Get Shit Done):**
+
 - Fases atómicas ejecutables en contexto fresco ~200k tokens.
 - Orden sagrado: `discutir → planear → ejecutar → verificar → shippear`.
 - Toda memoria vive en `.planning/`, commiteada a git.
 - Toda tarea lleva `<verify>` y `<done>` explícitos (ver sección 5).
 
 **Boris Cherny:**
+
 - **Plan mode primero** (Shift+Tab×2) para cualquier tarea no trivial. Iteramos el plan hasta aprobación; entonces `auto-accept edits`.
 - **Dale a Claude forma de verificar su trabajo**: screenshot, diff visual, typecheck, lighthouse.
 - **Slash commands para el inner-loop**: viven en `.claude/commands/`.

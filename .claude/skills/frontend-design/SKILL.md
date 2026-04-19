@@ -83,37 +83,35 @@ src/blocks/Features/config.ts        ← Payload schema
 // Standard component template
 // File: src/components/ui/example.tsx
 
-import { forwardRef } from "react";
-import { cn } from "@/lib/utils";
-import { type VariantProps, cva } from "class-variance-authority";
+import { forwardRef } from 'react';
+import { cn } from '@/lib/utils';
+import { type VariantProps, cva } from 'class-variance-authority';
 
 const exampleVariants = cva(
   // Base classes (always applied)
-  "inline-flex items-center justify-center rounded-md font-medium transition-colors",
+  'inline-flex items-center justify-center rounded-md font-medium transition-colors',
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        outline: "border border-input bg-background hover:bg-accent",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        outline: 'border border-input bg-background hover:bg-accent',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
       },
       size: {
-        sm: "h-9 px-3 text-sm",
-        md: "h-10 px-4 text-sm",
-        lg: "h-11 px-6 text-base",
+        sm: 'h-9 px-3 text-sm',
+        md: 'h-10 px-4 text-sm',
+        lg: 'h-11 px-6 text-base',
       },
     },
     defaultVariants: {
-      variant: "default",
-      size: "md",
+      variant: 'default',
+      size: 'md',
     },
   },
 );
 
 interface ExampleProps
-  extends
-    React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof exampleVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof exampleVariants> {
   /** Whether the component is in a loading state */
   isLoading?: boolean;
 }
@@ -121,17 +119,13 @@ interface ExampleProps
 const Example = forwardRef<HTMLDivElement, ExampleProps>(
   ({ className, variant, size, isLoading, children, ...props }, ref) => {
     return (
-      <div
-        ref={ref}
-        className={cn(exampleVariants({ variant, size }), className)}
-        {...props}
-      >
+      <div ref={ref} className={cn(exampleVariants({ variant, size }), className)} {...props}>
         {isLoading ? <Skeleton /> : children}
       </div>
     );
   },
 );
-Example.displayName = "Example";
+Example.displayName = 'Example';
 
 export { Example, exampleVariants };
 export type { ExampleProps };
@@ -155,35 +149,35 @@ export const fadeIn = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
   exit: { opacity: 0 },
-  transition: { duration: 0.3, ease: "easeOut" },
+  transition: { duration: 0.3, ease: 'easeOut' },
 };
 
 export const fadeInUp = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: 20 },
-  transition: { duration: 0.5, ease: "easeOut" },
+  transition: { duration: 0.5, ease: 'easeOut' },
 };
 
 export const fadeInDown = {
   initial: { opacity: 0, y: -20 },
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -20 },
-  transition: { duration: 0.5, ease: "easeOut" },
+  transition: { duration: 0.5, ease: 'easeOut' },
 };
 
 export const fadeInLeft = {
   initial: { opacity: 0, x: -20 },
   animate: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: -20 },
-  transition: { duration: 0.5, ease: "easeOut" },
+  transition: { duration: 0.5, ease: 'easeOut' },
 };
 
 export const fadeInRight = {
   initial: { opacity: 0, x: 20 },
   animate: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: 20 },
-  transition: { duration: 0.5, ease: "easeOut" },
+  transition: { duration: 0.5, ease: 'easeOut' },
 };
 
 // ============================================================
@@ -194,20 +188,20 @@ export const scaleIn = {
   initial: { opacity: 0, scale: 0.95 },
   animate: { opacity: 1, scale: 1 },
   exit: { opacity: 0, scale: 0.95 },
-  transition: { duration: 0.3, ease: "easeOut" },
+  transition: { duration: 0.3, ease: 'easeOut' },
 };
 
 export const scaleInBounce = {
   initial: { opacity: 0, scale: 0.8 },
   animate: { opacity: 1, scale: 1 },
   exit: { opacity: 0, scale: 0.8 },
-  transition: { type: "spring", stiffness: 300, damping: 20 },
+  transition: { type: 'spring', stiffness: 300, damping: 20 },
 };
 
 export const popIn = {
   initial: { opacity: 0, scale: 0.5 },
   animate: { opacity: 1, scale: 1 },
-  transition: { type: "spring", stiffness: 400, damping: 15 },
+  transition: { type: 'spring', stiffness: 400, damping: 15 },
 };
 
 // ============================================================
@@ -215,30 +209,30 @@ export const popIn = {
 // ============================================================
 
 export const slideInFromLeft = {
-  initial: { x: "-100%", opacity: 0 },
+  initial: { x: '-100%', opacity: 0 },
   animate: { x: 0, opacity: 1 },
-  exit: { x: "-100%", opacity: 0 },
+  exit: { x: '-100%', opacity: 0 },
   transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
 };
 
 export const slideInFromRight = {
-  initial: { x: "100%", opacity: 0 },
+  initial: { x: '100%', opacity: 0 },
   animate: { x: 0, opacity: 1 },
-  exit: { x: "100%", opacity: 0 },
+  exit: { x: '100%', opacity: 0 },
   transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
 };
 
 export const slideInFromBottom = {
-  initial: { y: "100%", opacity: 0 },
+  initial: { y: '100%', opacity: 0 },
   animate: { y: 0, opacity: 1 },
-  exit: { y: "100%", opacity: 0 },
+  exit: { y: '100%', opacity: 0 },
   transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
 };
 
 export const slideInFromTop = {
-  initial: { y: "-100%", opacity: 0 },
+  initial: { y: '-100%', opacity: 0 },
   animate: { y: 0, opacity: 1 },
-  exit: { y: "-100%", opacity: 0 },
+  exit: { y: '-100%', opacity: 0 },
   transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
 };
 
@@ -271,7 +265,7 @@ export const staggerItem = {
   animate: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: "easeOut" },
+    transition: { duration: 0.5, ease: 'easeOut' },
   },
 };
 
@@ -280,7 +274,7 @@ export const staggerItemFromLeft = {
   animate: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.5, ease: "easeOut" },
+    transition: { duration: 0.5, ease: 'easeOut' },
   },
 };
 
@@ -292,36 +286,36 @@ export const staggerItemFromLeft = {
 export const scrollFadeUp = {
   initial: { opacity: 0, y: 40 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-100px" },
-  transition: { duration: 0.6, ease: "easeOut" },
+  viewport: { once: true, margin: '-100px' },
+  transition: { duration: 0.6, ease: 'easeOut' },
 };
 
 export const scrollFadeIn = {
   initial: { opacity: 0 },
   whileInView: { opacity: 1 },
-  viewport: { once: true, margin: "-50px" },
-  transition: { duration: 0.8, ease: "easeOut" },
+  viewport: { once: true, margin: '-50px' },
+  transition: { duration: 0.8, ease: 'easeOut' },
 };
 
 export const scrollScaleIn = {
   initial: { opacity: 0, scale: 0.9 },
   whileInView: { opacity: 1, scale: 1 },
-  viewport: { once: true, margin: "-100px" },
-  transition: { duration: 0.6, ease: "easeOut" },
+  viewport: { once: true, margin: '-100px' },
+  transition: { duration: 0.6, ease: 'easeOut' },
 };
 
 export const scrollSlideInLeft = {
   initial: { opacity: 0, x: -60 },
   whileInView: { opacity: 1, x: 0 },
-  viewport: { once: true, margin: "-100px" },
-  transition: { duration: 0.7, ease: "easeOut" },
+  viewport: { once: true, margin: '-100px' },
+  transition: { duration: 0.7, ease: 'easeOut' },
 };
 
 export const scrollSlideInRight = {
   initial: { opacity: 0, x: 60 },
   whileInView: { opacity: 1, x: 0 },
-  viewport: { once: true, margin: "-100px" },
-  transition: { duration: 0.7, ease: "easeOut" },
+  viewport: { once: true, margin: '-100px' },
+  transition: { duration: 0.7, ease: 'easeOut' },
 };
 
 // ============================================================
@@ -332,13 +326,12 @@ export const scrollSlideInRight = {
 export const layoutTransition = {
   layout: true,
   transition: {
-    layout: { type: "spring", stiffness: 300, damping: 30 },
+    layout: { type: 'spring', stiffness: 300, damping: 30 },
   },
 };
 
 // Shared layout animation ID generator
-export const createLayoutId = (prefix: string, id: string | number) =>
-  `${prefix}-${id}`;
+export const createLayoutId = (prefix: string, id: string | number) => `${prefix}-${id}`;
 
 // ============================================================
 // GESTURE ANIMATIONS
@@ -346,7 +339,7 @@ export const createLayoutId = (prefix: string, id: string | number) =>
 
 export const buttonTap = {
   whileTap: { scale: 0.98 },
-  transition: { type: "spring", stiffness: 400, damping: 17 },
+  transition: { type: 'spring', stiffness: 400, damping: 17 },
 };
 
 export const cardHover = {
@@ -397,9 +390,9 @@ export const getReducedMotionPreset = (animation: Record<string, unknown>) => {
 
 ```tsx
 // Pattern 1: Scroll-triggered section with staggered children
-"use client";
-import { motion } from "framer-motion";
-import { staggerContainer, staggerItem, scrollFadeUp } from "@/lib/animations";
+'use client';
+import { motion } from 'framer-motion';
+import { staggerContainer, staggerItem, scrollFadeUp } from '@/lib/animations';
 
 function FeatureSection({ features }) {
   return (
@@ -409,8 +402,8 @@ function FeatureSection({ features }) {
         variants={staggerContainer}
         initial="initial"
         whileInView="animate"
-        viewport={{ once: true, margin: "-100px" }}
-        className="grid grid-cols-1 md:grid-cols-3 gap-8"
+        viewport={{ once: true, margin: '-100px' }}
+        className="grid grid-cols-1 gap-8 md:grid-cols-3"
       >
         {features.map((feature) => (
           <motion.div key={feature.id} variants={staggerItem}>
@@ -423,7 +416,7 @@ function FeatureSection({ features }) {
 }
 
 // Pattern 2: AnimatePresence for mount/unmount animations
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence } from 'framer-motion';
 
 function Modal({ isOpen, onClose, children }) {
   return (
@@ -432,7 +425,7 @@ function Modal({ isOpen, onClose, children }) {
         <>
           <motion.div
             key="backdrop"
-            className="fixed inset-0 bg-black/50 z-40"
+            className="fixed inset-0 z-40 bg-black/50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -452,7 +445,7 @@ function Modal({ isOpen, onClose, children }) {
 }
 
 // Pattern 3: Shared layout animation (tabs, toggles)
-import { LayoutGroup } from "framer-motion";
+import { LayoutGroup } from 'framer-motion';
 
 function Tabs({ items, activeId, onChange }) {
   return (
@@ -465,7 +458,7 @@ function Tabs({ items, activeId, onChange }) {
               <motion.div
                 layoutId="activeTab"
                 className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
               />
             )}
           </button>
@@ -476,15 +469,10 @@ function Tabs({ items, activeId, onChange }) {
 }
 
 // Pattern 4: Counter animation (for stats)
-import {
-  useInView,
-  useMotionValue,
-  useTransform,
-  animate,
-} from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useInView, useMotionValue, useTransform, animate } from 'framer-motion';
+import { useEffect, useRef } from 'react';
 
-function AnimatedCounter({ value, suffix = "" }) {
+function AnimatedCounter({ value, suffix = '' }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
   const count = useMotionValue(0);
@@ -492,7 +480,7 @@ function AnimatedCounter({ value, suffix = "" }) {
 
   useEffect(() => {
     if (isInView) {
-      animate(count, value, { duration: 2, ease: "easeOut" });
+      animate(count, value, { duration: 2, ease: 'easeOut' });
     }
   }, [isInView, value, count]);
 
@@ -505,14 +493,12 @@ function AnimatedCounter({ value, suffix = "" }) {
 }
 
 // Pattern 5: Reduced motion support
-import { useReducedMotion } from "framer-motion";
+import { useReducedMotion } from 'framer-motion';
 
 function AnimatedSection({ children }) {
   const prefersReducedMotion = useReducedMotion();
 
-  const animation = prefersReducedMotion
-    ? { initial: {}, animate: {} }
-    : scrollFadeUp;
+  const animation = prefersReducedMotion ? { initial: {}, animate: {} } : scrollFadeUp;
 
   return <motion.div {...animation}>{children}</motion.div>;
 }
@@ -528,7 +514,7 @@ function AnimatedSection({ children }) {
 /* src/app/globals.css */
 
 /* Tailwind v4 uses @theme instead of tailwind.config.ts for theming */
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   /* Colors - Design System */
@@ -553,9 +539,9 @@ function AnimatedSection({ children }) {
   --color-ring: #3b82f6;
 
   /* Typography */
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-heading: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, monospace;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
 
   /* Custom spacing */
   --spacing-section: 6rem;
@@ -571,8 +557,7 @@ function AnimatedSection({ children }) {
 
   /* Shadows */
   --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-card-hover:
-    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-card-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 /* Dark mode overrides */
@@ -641,13 +626,13 @@ function AnimatedSection({ children }) {
 // Child: respond to container width
 function Card() {
   return (
-    <div className="flex flex-col @md:flex-row @lg:gap-8 gap-4">
+    <div className="@md:flex-row @lg:gap-8 flex flex-col gap-4">
       <div className="@md:w-1/3">
         <Image />
       </div>
       <div className="@md:w-2/3">
-        <h3 className="text-lg @lg:text-2xl">Title</h3>
-        <p className="text-sm @md:text-base">Description</p>
+        <h3 className="@lg:text-2xl text-lg">Title</h3>
+        <p className="@md:text-base text-sm">Description</p>
       </div>
     </div>
   );
@@ -680,8 +665,8 @@ function Card() {
 ```tsx
 // cn() utility for merging Tailwind classes (from shadcn/ui)
 // src/lib/utils.ts
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -690,8 +675,8 @@ export function cn(...inputs: ClassValue[]) {
 // Usage in components:
 <div
   className={cn(
-    "rounded-lg border p-4", // base
-    variant === "primary" && "bg-primary text-white", // conditional
+    'rounded-lg border p-4', // base
+    variant === 'primary' && 'bg-primary text-white', // conditional
     className, // override from props
   )}
 />;
@@ -699,28 +684,26 @@ export function cn(...inputs: ClassValue[]) {
 // Common Tailwind patterns for the project:
 
 // Section container
-const sectionClasses = "py-16 md:py-24 lg:py-32";
-const containerClasses = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
+const sectionClasses = 'py-16 md:py-24 lg:py-32';
+const containerClasses = 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8';
 
 // Responsive grid
-const gridClasses =
-  "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8";
+const gridClasses = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8';
 
 // Card
 const cardClasses =
-  "rounded-xl border border-border bg-background p-6 shadow-card transition-shadow hover:shadow-card-hover";
+  'rounded-xl border border-border bg-background p-6 shadow-card transition-shadow hover:shadow-card-hover';
 
 // Prose/Content
 const proseClasses =
-  "prose prose-slate max-w-none prose-headings:font-heading prose-a:text-primary";
+  'prose prose-slate max-w-none prose-headings:font-heading prose-a:text-primary';
 
 // Gradient text
 const gradientTextClasses =
-  "bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent";
+  'bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent';
 
 // Glass effect
-const glassClasses =
-  "backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border border-white/20";
+const glassClasses = 'backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border border-white/20';
 ```
 
 ---
@@ -776,25 +759,22 @@ STEP 5: Verify
 
 ```tsx
 // Dynamic imports for heavy components
-import dynamic from "next/dynamic";
+import dynamic from 'next/dynamic';
 
 // Lazy load below-the-fold sections
-const TestimonialCarousel = dynamic(
-  () => import("@/blocks/Testimonials/Component"),
-  {
-    loading: () => <TestimonialSkeleton />,
-    ssr: true, // SSR by default, set false for client-only
-  },
-);
+const TestimonialCarousel = dynamic(() => import('@/blocks/Testimonials/Component'), {
+  loading: () => <TestimonialSkeleton />,
+  ssr: true, // SSR by default, set false for client-only
+});
 
 // Lazy load heavy libraries
-const ReactPlayer = dynamic(() => import("react-player/lazy"), {
+const ReactPlayer = dynamic(() => import('react-player/lazy'), {
   ssr: false,
   loading: () => <VideoSkeleton />,
 });
 
 // Lazy load modals (not needed until user interaction)
-const DemoModal = dynamic(() => import("@/components/shared/demo-modal"), {
+const DemoModal = dynamic(() => import('@/components/shared/demo-modal'), {
   ssr: false,
 });
 ```
@@ -806,25 +786,22 @@ const DemoModal = dynamic(() => import("@/components/shared/demo-modal"), {
 // Each page in src/app/ is automatically a separate chunk
 
 // Component-based splitting for large blocks
-const PricingCalculator = dynamic(() => import("@/blocks/Pricing/Calculator"), {
+const PricingCalculator = dynamic(() => import('@/blocks/Pricing/Calculator'), {
   ssr: false,
 });
 
 // Library-based splitting
-const Chart = dynamic(
-  () => import("recharts").then((mod) => ({ default: mod.LineChart })),
-  {
-    ssr: false,
-    loading: () => <ChartSkeleton />,
-  },
-);
+const Chart = dynamic(() => import('recharts').then((mod) => ({ default: mod.LineChart })), {
+  ssr: false,
+  loading: () => <ChartSkeleton />,
+});
 ```
 
 ### Suspense Boundaries
 
 ```tsx
 // Wrap async Server Components in Suspense
-import { Suspense } from "react";
+import { Suspense } from 'react';
 
 export default function Page() {
   return (
@@ -848,9 +825,9 @@ export default function Page() {
 // Streaming: heavy data fetches don't block the entire page
 async function LatestBlogPosts() {
   const posts = await payload.find({
-    collection: "posts",
+    collection: 'posts',
     limit: 6,
-    sort: "-publishedAt",
+    sort: '-publishedAt',
   });
   return <BlogGrid posts={posts.docs} />;
 }
@@ -951,86 +928,85 @@ Registration in payload.config.ts:
 
 ```typescript
 // src/blocks/Hero/config.ts
-import type { Block } from "payload";
+import type { Block } from 'payload';
 
 export const HeroBlock: Block = {
-  slug: "hero",
+  slug: 'hero',
   labels: {
-    singular: "Hero Section",
-    plural: "Hero Sections",
+    singular: 'Hero Section',
+    plural: 'Hero Sections',
   },
-  imageURL: "/blocks/hero-preview.png", // Preview image in admin
+  imageURL: '/blocks/hero-preview.png', // Preview image in admin
   fields: [
     {
-      name: "variant",
-      type: "select",
+      name: 'variant',
+      type: 'select',
       required: true,
-      defaultValue: "centered",
+      defaultValue: 'centered',
       options: [
-        { label: "Centered Text", value: "centered" },
-        { label: "Split Content-Image", value: "split" },
-        { label: "Full-Bleed Image", value: "fullBleed" },
+        { label: 'Centered Text', value: 'centered' },
+        { label: 'Split Content-Image', value: 'split' },
+        { label: 'Full-Bleed Image', value: 'fullBleed' },
       ],
       admin: {
-        description: "Choose the visual layout variant for this hero section.",
+        description: 'Choose the visual layout variant for this hero section.',
       },
     },
     {
-      name: "heading",
-      type: "text",
+      name: 'heading',
+      type: 'text',
       required: true,
       admin: {
-        description: "Main headline. Keep under 8 words for maximum impact.",
+        description: 'Main headline. Keep under 8 words for maximum impact.',
       },
     },
     {
-      name: "subheading",
-      type: "textarea",
+      name: 'subheading',
+      type: 'textarea',
       admin: {
-        description: "Supporting text. 15-25 words recommended.",
+        description: 'Supporting text. 15-25 words recommended.',
       },
     },
     {
-      name: "primaryCta",
-      type: "group",
+      name: 'primaryCta',
+      type: 'group',
       fields: [
-        { name: "label", type: "text", required: true },
-        { name: "url", type: "text", required: true },
+        { name: 'label', type: 'text', required: true },
+        { name: 'url', type: 'text', required: true },
         {
-          name: "style",
-          type: "select",
-          options: ["primary", "secondary", "ghost"],
+          name: 'style',
+          type: 'select',
+          options: ['primary', 'secondary', 'ghost'],
         },
       ],
     },
     {
-      name: "secondaryCta",
-      type: "group",
+      name: 'secondaryCta',
+      type: 'group',
       fields: [
-        { name: "label", type: "text" },
-        { name: "url", type: "text" },
+        { name: 'label', type: 'text' },
+        { name: 'url', type: 'text' },
       ],
     },
     {
-      name: "image",
-      type: "upload",
-      relationTo: "media",
+      name: 'image',
+      type: 'upload',
+      relationTo: 'media',
       admin: {
         condition: (data, siblingData) =>
-          siblingData.variant === "split" ||
-          siblingData.variant === "fullBleed",
-        description: "Hero image. Recommended: 1920x1080 or larger.",
+          siblingData.variant === 'split' || siblingData.variant === 'fullBleed',
+        description: 'Hero image. Recommended: 1920x1080 or larger.',
       },
     },
     {
-      name: "backgroundColor",
-      type: "select",
-      defaultValue: "white",
+      name: 'backgroundColor',
+      type: 'select',
+      defaultValue: 'white',
       options: [
-        { label: "White", value: "white" },
-        { label: "Light Gray", value: "gray" },
-        { label: "Primary", value: "primary" },
-        { label: "Dark", value: "dark" },
+        { label: 'White', value: 'white' },
+        { label: 'Light Gray', value: 'gray' },
+        { label: 'Primary', value: 'primary' },
+        { label: 'Dark', value: 'dark' },
       ],
     },
   ],
@@ -1041,39 +1017,26 @@ export const HeroBlock: Block = {
 
 ```tsx
 // src/blocks/Hero/Component.tsx
-import { cn } from "@/lib/utils";
-import { HeroClient } from "./Client";
-import type { HeroBlock as HeroBlockType } from "@/payload-types";
+import { cn } from '@/lib/utils';
+import { HeroClient } from './Client';
+import type { HeroBlock as HeroBlockType } from '@/payload-types';
 
 interface HeroProps {
   block: HeroBlockType;
 }
 
 const bgMap = {
-  white: "bg-white",
-  gray: "bg-muted",
-  primary: "bg-primary text-primary-foreground",
-  dark: "bg-slate-900 text-white",
+  white: 'bg-white',
+  gray: 'bg-muted',
+  primary: 'bg-primary text-primary-foreground',
+  dark: 'bg-slate-900 text-white',
 } as const;
 
 export function HeroBlock({ block }: HeroProps) {
-  const {
-    variant,
-    heading,
-    subheading,
-    primaryCta,
-    secondaryCta,
-    image,
-    backgroundColor,
-  } = block;
+  const { variant, heading, subheading, primaryCta, secondaryCta, image, backgroundColor } = block;
 
   return (
-    <section
-      className={cn(
-        "relative py-20 md:py-32",
-        bgMap[backgroundColor || "white"],
-      )}
-    >
+    <section className={cn('relative py-20 md:py-32', bgMap[backgroundColor || 'white'])}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <HeroClient
           variant={variant}
@@ -1093,12 +1056,12 @@ export function HeroBlock({ block }: HeroProps) {
 
 ```tsx
 // src/blocks/RenderBlocks.tsx
-import { HeroBlock } from "./Hero/Component";
-import { FeaturesBlock } from "./Features/Component";
-import { PricingBlock } from "./Pricing/Component";
-import { TestimonialsBlock } from "./Testimonials/Component";
-import { CTABlock } from "./CTA/Component";
-import { FAQBlock } from "./FAQ/Component";
+import { HeroBlock } from './Hero/Component';
+import { FeaturesBlock } from './Features/Component';
+import { PricingBlock } from './Pricing/Component';
+import { TestimonialsBlock } from './Testimonials/Component';
+import { CTABlock } from './CTA/Component';
+import { FAQBlock } from './FAQ/Component';
 // ... import all blocks
 
 const blockComponents = {
@@ -1121,16 +1084,10 @@ export function RenderBlocks({ blocks }: RenderBlocksProps) {
   return (
     <>
       {blocks.map((block, index) => {
-        const Component =
-          blockComponents[block.blockType as keyof typeof blockComponents];
+        const Component = blockComponents[block.blockType as keyof typeof blockComponents];
         if (!Component) return null;
 
-        return (
-          <Component
-            key={`${block.blockType}-${index}`}
-            block={block as never}
-          />
-        );
+        return <Component key={`${block.blockType}-${index}`} block={block as never} />;
       })}
     </>
   );
@@ -1141,20 +1098,16 @@ export function RenderBlocks({ blocks }: RenderBlocksProps) {
 
 ```tsx
 // src/app/(frontend)/[slug]/page.tsx
-import { notFound } from "next/navigation";
-import { getPayload } from "payload";
-import config from "@payload-config";
-import { RenderBlocks } from "@/blocks/RenderBlocks";
-import { generateMetadata as genMeta } from "@/lib/seo";
+import { notFound } from 'next/navigation';
+import { getPayload } from 'payload';
+import config from '@payload-config';
+import { RenderBlocks } from '@/blocks/RenderBlocks';
+import { generateMetadata as genMeta } from '@/lib/seo';
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export async function generateMetadata({ params }: { params: { slug: string } }) {
   const payload = await getPayload({ config });
   const page = await payload.find({
-    collection: "pages",
+    collection: 'pages',
     where: { slug: { equals: params.slug } },
     limit: 1,
   });
@@ -1162,7 +1115,7 @@ export async function generateMetadata({
   const doc = page.docs[0];
   return genMeta({
     title: doc.metaTitle || doc.title,
-    description: doc.metaDescription || "",
+    description: doc.metaDescription || '',
     path: `/${doc.slug}`,
   });
 }
@@ -1170,7 +1123,7 @@ export async function generateMetadata({
 export default async function Page({ params }: { params: { slug: string } }) {
   const payload = await getPayload({ config });
   const result = await payload.find({
-    collection: "pages",
+    collection: 'pages',
     where: { slug: { equals: params.slug } },
     limit: 1,
   });
@@ -1271,10 +1224,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
 ```tsx
 // Theme toggle component
-"use client";
-import { useTheme } from "next-themes";
-import { Moon, Sun } from "lucide-react";
-import { Button } from "@/components/ui/button";
+'use client';
+import { useTheme } from 'next-themes';
+import { Moon, Sun } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -1282,8 +1235,8 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="sm"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
     >
       <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
       <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
@@ -1293,7 +1246,7 @@ export function ThemeToggle() {
 
 // Layout setup with ThemeProvider
 // src/app/layout.tsx
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider } from 'next-themes';
 
 export default function RootLayout({ children }) {
   return (
@@ -1397,28 +1350,22 @@ Rule: Always provide sizes prop. Without it, Next.js assumes 100vw
 
 ```typescript
 // src/collections/Media.ts
-import type { CollectionConfig } from "payload";
+import type { CollectionConfig } from 'payload';
 
 export const Media: CollectionConfig = {
-  slug: "media",
+  slug: 'media',
   upload: {
-    mimeTypes: [
-      "image/png",
-      "image/jpeg",
-      "image/webp",
-      "image/svg+xml",
-      "image/gif",
-    ],
+    mimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml', 'image/gif'],
     imageSizes: [
-      { name: "thumbnail", width: 400, height: 300, position: "centre" },
-      { name: "card", width: 768, height: 432 },
-      { name: "hero", width: 1920, height: 1080 },
+      { name: 'thumbnail', width: 400, height: 300, position: 'centre' },
+      { name: 'card', width: 768, height: 432 },
+      { name: 'hero', width: 1920, height: 1080 },
     ],
-    adminThumbnail: "thumbnail",
+    adminThumbnail: 'thumbnail',
   },
   fields: [
-    { name: "alt", type: "text", required: true },
-    { name: "caption", type: "text" },
+    { name: 'alt', type: 'text', required: true },
+    { name: 'caption', type: 'text' },
   ],
 };
 ```
@@ -1465,72 +1412,43 @@ RULE: If you can do it with CSS, prefer CSS.
 // Compound component pattern for complex UI elements
 // Example: Card with composable sub-components
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
-function Card({
-  className,
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function Card({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div
-      className={cn("rounded-xl border bg-card shadow-card", className)}
-      {...props}
-    >
+    <div className={cn('bg-card shadow-card rounded-xl border', className)} {...props}>
       {children}
     </div>
   );
 }
 
-function CardHeader({
-  className,
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function CardHeader({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("flex flex-col space-y-1.5 p-6", className)} {...props}>
+    <div className={cn('flex flex-col space-y-1.5 p-6', className)} {...props}>
       {children}
     </div>
   );
 }
 
-function CardTitle({
-  className,
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLHeadingElement>) {
+function CardTitle({ className, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3
-      className={cn(
-        "font-heading text-2xl font-semibold leading-tight",
-        className,
-      )}
-      {...props}
-    >
+    <h3 className={cn('font-heading text-2xl font-semibold leading-tight', className)} {...props}>
       {children}
     </h3>
   );
 }
 
-function CardContent({
-  className,
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function CardContent({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("p-6 pt-0", className)} {...props}>
+    <div className={cn('p-6 pt-0', className)} {...props}>
       {children}
     </div>
   );
 }
 
-function CardFooter({
-  className,
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function CardFooter({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("flex items-center p-6 pt-0", className)} {...props}>
+    <div className={cn('flex items-center p-6 pt-0', className)} {...props}>
       {children}
     </div>
   );
@@ -1554,7 +1472,7 @@ function CardFooter({
 
 ```tsx
 // src/hooks/use-media-query.ts
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 export function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(false);
@@ -1563,8 +1481,8 @@ export function useMediaQuery(query: string): boolean {
     const media = window.matchMedia(query);
     setMatches(media.matches);
     const listener = (e: MediaQueryListEvent) => setMatches(e.matches);
-    media.addEventListener("change", listener);
-    return () => media.removeEventListener("change", listener);
+    media.addEventListener('change', listener);
+    return () => media.removeEventListener('change', listener);
   }, [query]);
 
   return matches;
@@ -1573,20 +1491,20 @@ export function useMediaQuery(query: string): boolean {
 // Usage: const isMobile = useMediaQuery('(max-width: 768px)')
 
 // src/hooks/use-scroll-direction.ts
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 export function useScrollDirection() {
-  const [direction, setDirection] = useState<"up" | "down">("up");
+  const [direction, setDirection] = useState<'up' | 'down'>('up');
   const [prevScroll, setPrevScroll] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScroll = window.scrollY;
-      setDirection(currentScroll > prevScroll ? "down" : "up");
+      setDirection(currentScroll > prevScroll ? 'down' : 'up');
       setPrevScroll(currentScroll);
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [prevScroll]);
 
   return direction;
@@ -1596,7 +1514,7 @@ export function useScrollDirection() {
 // <header className={cn('sticky top-0', scrollDir === 'down' && '-translate-y-full')}>
 
 // src/hooks/use-intersection-observer.ts
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
 export function useIntersectionObserver(options?: IntersectionObserverInit) {
   const ref = useRef<HTMLElement>(null);
@@ -1746,12 +1664,12 @@ function handleKeyDown(e: React.KeyboardEvent) {
 // Focus visible ring (Tailwind)
 // Applied globally via globals.css or per-component:
 const focusClasses =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 
 // Auto-focus on route change (for SPA navigation)
-("use client");
-import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+('use client');
+import { usePathname } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 
 export function RouteAnnouncer() {
   const pathname = usePathname();
@@ -1852,31 +1770,19 @@ interface SectionProps {
   children: React.ReactNode;
   className?: string;
   id?: string;
-  background?: "white" | "muted" | "primary" | "dark";
+  background?: 'white' | 'muted' | 'primary' | 'dark';
 }
 
-export function Section({
-  children,
-  className,
-  id,
-  background = "white",
-}: SectionProps) {
+export function Section({ children, className, id, background = 'white' }: SectionProps) {
   const bgClasses = {
-    white: "bg-background",
-    muted: "bg-muted",
-    primary: "bg-primary text-primary-foreground",
-    dark: "bg-slate-900 text-white",
+    white: 'bg-background',
+    muted: 'bg-muted',
+    primary: 'bg-primary text-primary-foreground',
+    dark: 'bg-slate-900 text-white',
   };
 
   return (
-    <section
-      id={id}
-      className={cn(
-        "py-16 md:py-24 lg:py-32",
-        bgClasses[background],
-        className,
-      )}
-    >
+    <section id={id} className={cn('py-16 md:py-24 lg:py-32', bgClasses[background], className)}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">{children}</div>
     </section>
   );
@@ -1891,17 +1797,17 @@ interface SectionHeaderProps {
   eyebrow?: string;
   heading: string;
   description?: string;
-  align?: "left" | "center";
+  align?: 'left' | 'center';
 }
 
 export function SectionHeader({
   eyebrow,
   heading,
   description,
-  align = "center",
+  align = 'center',
 }: SectionHeaderProps) {
   return (
-    <div className={cn("mb-12 md:mb-16", align === "center" && "text-center")}>
+    <div className={cn('mb-12 md:mb-16', align === 'center' && 'text-center')}>
       {eyebrow && (
         <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-primary">
           {eyebrow}
@@ -1913,8 +1819,8 @@ export function SectionHeader({
       {description && (
         <p
           className={cn(
-            "mt-4 text-lg text-muted-foreground",
-            align === "center" && "mx-auto max-w-2xl",
+            'mt-4 text-lg text-muted-foreground',
+            align === 'center' && 'mx-auto max-w-2xl',
           )}
         >
           {description}

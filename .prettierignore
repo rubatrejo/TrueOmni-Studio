@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+coverage
+pnpm-lock.yaml
+clients/*/assets
+designs
+*.svg
+.planning/verifications

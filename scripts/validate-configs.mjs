@@ -20,15 +20,15 @@
  *  Para validación completa del schema, instalar ajv en Fase 1+.
  */
 
-import { readdir, readFile, stat } from "node:fs/promises";
-import { existsSync } from "node:fs";
-import { join, dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readdir, readFile, stat } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { join, dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = resolve(__dirname, "..");
-const CLIENTS_DIR = join(ROOT, "clients");
-const SCHEMA_PATH = join(CLIENTS_DIR, "_template", "config.schema.json");
+const ROOT = resolve(__dirname, '..');
+const CLIENTS_DIR = join(ROOT, 'clients');
+const SCHEMA_PATH = join(CLIENTS_DIR, '_template', 'config.schema.json');
 
 async function main() {
   if (!existsSync(SCHEMA_PATH)) {
@@ -36,22 +36,22 @@ async function main() {
     process.exit(1);
   }
 
-  const schema = JSON.parse(await readFile(SCHEMA_PATH, "utf8"));
+  const schema = JSON.parse(await readFile(SCHEMA_PATH, 'utf8'));
   const entries = await readdir(CLIENTS_DIR, { withFileTypes: true });
 
   const clients = entries
     .filter((e) => e.isDirectory())
     .map((e) => e.name)
-    .filter((name) => !name.startsWith("."));
+    .filter((name) => !name.startsWith('.'));
 
   if (clients.length === 0) {
-    console.log("ℹ️  No hay clientes todavía en clients/.");
+    console.log('ℹ️  No hay clientes todavía en clients/.');
     process.exit(0);
   }
 
   let failed = 0;
   for (const slug of clients) {
-    const configPath = join(CLIENTS_DIR, slug, "config.json");
+    const configPath = join(CLIENTS_DIR, slug, 'config.json');
     if (!existsSync(configPath)) {
       console.error(`❌ ${slug}: falta config.json`);
       failed++;
@@ -59,7 +59,7 @@ async function main() {
     }
 
     try {
-      const config = JSON.parse(await readFile(configPath, "utf8"));
+      const config = JSON.parse(await readFile(configPath, 'utf8'));
       const errors = lightweightValidate(config, schema);
       if (errors.length === 0) {
         console.log(`✅ ${slug}: OK`);
@@ -120,7 +120,7 @@ function lightweightValidate(config, schema) {
     const versionPattern = schema.properties.meta.properties.version_config.pattern;
     if (!new RegExp(versionPattern).test(config.meta.version_config)) {
       errors.push(
-        `meta.version_config "${config.meta.version_config}" no es semver MAJOR.MINOR.PATCH`
+        `meta.version_config "${config.meta.version_config}" no es semver MAJOR.MINOR.PATCH`,
       );
     }
   }

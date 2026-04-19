@@ -4,7 +4,7 @@ Fases ordenadas. Cada fase es atómica, ejecutable en una ventana de contexto fr
 
 ---
 
-## Fase 0 — Bootstrap del repo  🟡 en progreso
+## Fase 0 — Bootstrap del repo 🟡 en progreso
 
 **Cubre:** infraestructura.
 

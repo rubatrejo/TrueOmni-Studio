@@ -148,8 +148,8 @@ npm install -D typescript @types/node tsx
 
 ```typescript
 // src/index.ts
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -157,13 +157,13 @@ import {
   ReadResourceRequestSchema,
   ListPromptsRequestSchema,
   GetPromptRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+} from '@modelcontextprotocol/sdk/types.js';
 
 // Create server instance
 const server = new Server(
   {
-    name: "my-mcp-server",
-    version: "1.0.0",
+    name: 'my-mcp-server',
+    version: '1.0.0',
   },
   {
     capabilities: {
@@ -183,17 +183,17 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
       {
-        name: "hello_world",
-        description: "Returns a greeting message",
+        name: 'hello_world',
+        description: 'Returns a greeting message',
         inputSchema: {
-          type: "object" as const,
+          type: 'object' as const,
           properties: {
             name: {
-              type: "string",
-              description: "The name to greet",
+              type: 'string',
+              description: 'The name to greet',
             },
           },
-          required: ["name"],
+          required: ['name'],
         },
       },
     ],
@@ -205,12 +205,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   switch (name) {
-    case "hello_world": {
+    case 'hello_world': {
       const userName = args?.name as string;
       return {
         content: [
           {
-            type: "text" as const,
+            type: 'text' as const,
             text: `Hello, ${userName}! Welcome to MCP.`,
           },
         ],
@@ -228,7 +228,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("MCP server running on stdio"); // stderr for logs (stdout is for protocol)
+  console.error('MCP server running on stdio'); // stderr for logs (stdout is for protocol)
 }
 
 main().catch(console.error);
@@ -238,31 +238,31 @@ main().catch(console.error);
 
 ```typescript
 // src/http-server.ts
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
-import express from "express";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
+import express from 'express';
 
 const app = express();
 const server = new Server(
-  { name: "my-mcp-http-server", version: "1.0.0" },
+  { name: 'my-mcp-http-server', version: '1.0.0' },
   { capabilities: { tools: {} } },
 );
 
 // ... register handlers same as stdio ...
 
 // SSE endpoint
-app.get("/sse", async (req, res) => {
-  const transport = new SSEServerTransport("/message", res);
+app.get('/sse', async (req, res) => {
+  const transport = new SSEServerTransport('/message', res);
   await server.connect(transport);
 });
 
 // Message endpoint (client sends requests here)
-app.post("/message", async (req, res) => {
+app.post('/message', async (req, res) => {
   // SSEServerTransport handles this internally
 });
 
 app.listen(3001, () => {
-  console.log("MCP HTTP server on port 3001");
+  console.log('MCP HTTP server on port 3001');
 });
 ```
 
@@ -276,24 +276,23 @@ app.listen(3001, () => {
 // Tools are defined with JSON Schema for input validation
 
 const tool = {
-  name: "create_record",
-  description:
-    "Creates a new record in the database. Returns the created record with its ID.",
+  name: 'create_record',
+  description: 'Creates a new record in the database. Returns the created record with its ID.',
   inputSchema: {
-    type: "object" as const,
+    type: 'object' as const,
     properties: {
       table: {
-        type: "string",
-        description: "The database table name",
-        enum: ["users", "posts", "comments"], // Restrict to valid tables
+        type: 'string',
+        description: 'The database table name',
+        enum: ['users', 'posts', 'comments'], // Restrict to valid tables
       },
       data: {
-        type: "object",
-        description: "The record data as key-value pairs",
+        type: 'object',
+        description: 'The record data as key-value pairs',
         additionalProperties: true,
       },
     },
-    required: ["table", "data"],
+    required: ['table', 'data'],
   },
 };
 ```
@@ -301,28 +300,26 @@ const tool = {
 ### 3.2 Parameter Validation
 
 ```typescript
-import { z } from "zod";
+import { z } from 'zod';
 
 // Define Zod schemas for validation
 const QuerySchema = z.object({
   sql: z.string().min(1).max(10000),
-  params: z
-    .array(z.union([z.string(), z.number(), z.boolean(), z.null()]))
-    .optional(),
+  params: z.array(z.union([z.string(), z.number(), z.boolean(), z.null()])).optional(),
   limit: z.number().int().min(1).max(1000).default(100),
 });
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
-  if (name === "query_database") {
+  if (name === 'query_database') {
     // Validate inputs
     const parsed = QuerySchema.safeParse(args);
     if (!parsed.success) {
       return {
         content: [
           {
-            type: "text" as const,
+            type: 'text' as const,
             text: `Validation error: ${parsed.error.message}`,
           },
         ],
@@ -333,14 +330,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { sql, params, limit } = parsed.data;
 
     // SECURITY: Prevent destructive queries
-    const forbidden = ["DROP", "DELETE", "TRUNCATE", "ALTER", "UPDATE"];
+    const forbidden = ['DROP', 'DELETE', 'TRUNCATE', 'ALTER', 'UPDATE'];
     const upperSql = sql.toUpperCase().trim();
     if (forbidden.some((word) => upperSql.startsWith(word))) {
       return {
         content: [
           {
-            type: "text" as const,
-            text: `Forbidden: ${forbidden.join(", ")} queries are not allowed.`,
+            type: 'text' as const,
+            text: `Forbidden: ${forbidden.join(', ')} queries are not allowed.`,
           },
         ],
         isError: true,
@@ -353,7 +350,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     return {
       content: [
         {
-          type: "text" as const,
+          type: 'text' as const,
           text: JSON.stringify(results.rows.slice(0, limit), null, 2),
         },
       ],
@@ -369,8 +366,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 return {
   content: [
     {
-      type: "text",
-      text: "Operation completed successfully.",
+      type: 'text',
+      text: 'Operation completed successfully.',
     },
   ],
 };
@@ -379,9 +376,9 @@ return {
 return {
   content: [
     {
-      type: "image",
+      type: 'image',
       data: base64EncodedImage, // base64 string
-      mimeType: "image/png",
+      mimeType: 'image/png',
     },
   ],
 };
@@ -389,9 +386,9 @@ return {
 // MULTIPLE content items
 return {
   content: [
-    { type: "text", text: "Here is the chart:" },
-    { type: "image", data: chartBase64, mimeType: "image/png" },
-    { type: "text", text: "Generated from 1000 data points." },
+    { type: 'text', text: 'Here is the chart:' },
+    { type: 'image', data: chartBase64, mimeType: 'image/png' },
+    { type: 'text', text: 'Generated from 1000 data points.' },
   ],
 };
 
@@ -399,10 +396,10 @@ return {
 return {
   content: [
     {
-      type: "resource",
+      type: 'resource',
       resource: {
-        uri: "db://users/123",
-        mimeType: "application/json",
+        uri: 'db://users/123',
+        mimeType: 'application/json',
         text: JSON.stringify(userData),
       },
     },
@@ -413,8 +410,8 @@ return {
 return {
   content: [
     {
-      type: "text",
-      text: "Error: Database connection failed.",
+      type: 'text',
+      text: 'Error: Database connection failed.',
     },
   ],
   isError: true,
@@ -429,9 +426,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   try {
     switch (name) {
-      case "query_database":
+      case 'query_database':
         return await handleQueryDatabase(args);
-      case "send_notification":
+      case 'send_notification':
         return await handleSendNotification(args);
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
@@ -448,8 +445,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     return {
       content: [
         {
-          type: "text" as const,
-          text: `Error executing ${name}: ${error instanceof Error ? error.message : "Unknown error"}`,
+          type: 'text' as const,
+          text: `Error executing ${name}: ${error instanceof Error ? error.message : 'Unknown error'}`,
         },
       ],
       isError: true,
@@ -469,16 +466,16 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
   return {
     resources: [
       {
-        uri: "config://app/settings",
-        name: "Application Settings",
-        description: "Current application configuration",
-        mimeType: "application/json",
+        uri: 'config://app/settings',
+        name: 'Application Settings',
+        description: 'Current application configuration',
+        mimeType: 'application/json',
       },
       {
-        uri: "file://docs/api-reference",
-        name: "API Reference",
-        description: "API documentation for all endpoints",
-        mimeType: "text/markdown",
+        uri: 'file://docs/api-reference',
+        name: 'API Reference',
+        description: 'API documentation for all endpoints',
+        mimeType: 'text/markdown',
       },
     ],
   };
@@ -488,25 +485,25 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   const { uri } = request.params;
 
   switch (uri) {
-    case "config://app/settings": {
+    case 'config://app/settings': {
       const settings = await loadSettings();
       return {
         contents: [
           {
             uri,
-            mimeType: "application/json",
+            mimeType: 'application/json',
             text: JSON.stringify(settings, null, 2),
           },
         ],
       };
     }
-    case "file://docs/api-reference": {
-      const docs = await fs.readFile("./docs/api-reference.md", "utf-8");
+    case 'file://docs/api-reference': {
+      const docs = await fs.readFile('./docs/api-reference.md', 'utf-8');
       return {
         contents: [
           {
             uri,
-            mimeType: "text/markdown",
+            mimeType: 'text/markdown',
             text: docs,
           },
         ],
@@ -525,16 +522,14 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 
 server.setRequestHandler(ListResourcesRequestSchema, async () => {
   // Dynamically list available resources
-  const tables = await db.query(
-    "SELECT table_name FROM information_schema.tables",
-  );
+  const tables = await db.query('SELECT table_name FROM information_schema.tables');
 
   return {
     resources: tables.rows.map((table) => ({
       uri: `db://tables/${table.table_name}/schema`,
       name: `${table.table_name} schema`,
       description: `Database schema for ${table.table_name} table`,
-      mimeType: "application/json",
+      mimeType: 'application/json',
     })),
   };
 });
@@ -556,7 +551,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
       contents: [
         {
           uri,
-          mimeType: "application/json",
+          mimeType: 'application/json',
           text: JSON.stringify(columns.rows, null, 2),
         },
       ],
@@ -575,16 +570,16 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
     resources: [],
     resourceTemplates: [
       {
-        uriTemplate: "db://users/{userId}",
-        name: "User Profile",
-        description: "Get a user profile by ID",
-        mimeType: "application/json",
+        uriTemplate: 'db://users/{userId}',
+        name: 'User Profile',
+        description: 'Get a user profile by ID',
+        mimeType: 'application/json',
       },
       {
-        uriTemplate: "api://endpoints/{path}",
-        name: "API Response",
-        description: "Fetch data from an API endpoint",
-        mimeType: "application/json",
+        uriTemplate: 'api://endpoints/{path}',
+        name: 'API Response',
+        description: 'Fetch data from an API endpoint',
+        mimeType: 'application/json',
       },
     ],
   };
@@ -598,12 +593,12 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   const userMatch = uri.match(/^db:\/\/users\/(\d+)$/);
   if (userMatch) {
     const userId = userMatch[1];
-    const user = await db.query("SELECT * FROM users WHERE id = $1", [userId]);
+    const user = await db.query('SELECT * FROM users WHERE id = $1', [userId]);
     return {
       contents: [
         {
           uri,
-          mimeType: "application/json",
+          mimeType: 'application/json',
           text: JSON.stringify(user.rows[0], null, 2),
         },
       ],
@@ -620,7 +615,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 // Server can notify client when a resource changes
 
 const server = new Server(
-  { name: "my-server", version: "1.0.0" },
+  { name: 'my-server', version: '1.0.0' },
   {
     capabilities: {
       resources: {
@@ -647,7 +642,7 @@ server.setRequestHandler(UnsubscribeRequestSchema, async (request) => {
 async function onDataChange(uri: string) {
   if (subscriptions.has(uri)) {
     await server.notification({
-      method: "notifications/resources/updated",
+      method: 'notifications/resources/updated',
       params: { uri },
     });
   }
@@ -665,28 +660,28 @@ server.setRequestHandler(ListPromptsRequestSchema, async () => {
   return {
     prompts: [
       {
-        name: "analyze_data",
-        description: "Analyze a dataset and provide insights",
+        name: 'analyze_data',
+        description: 'Analyze a dataset and provide insights',
         arguments: [
           {
-            name: "dataset",
-            description: "Name of the dataset to analyze",
+            name: 'dataset',
+            description: 'Name of the dataset to analyze',
             required: true,
           },
           {
-            name: "focus",
-            description: "What aspect to focus on (trends, anomalies, summary)",
+            name: 'focus',
+            description: 'What aspect to focus on (trends, anomalies, summary)',
             required: false,
           },
         ],
       },
       {
-        name: "generate_report",
-        description: "Generate a formatted report from data",
+        name: 'generate_report',
+        description: 'Generate a formatted report from data',
         arguments: [
           {
-            name: "type",
-            description: "Report type: daily, weekly, monthly",
+            name: 'type',
+            description: 'Report type: daily, weekly, monthly',
             required: true,
           },
         ],
@@ -698,9 +693,9 @@ server.setRequestHandler(ListPromptsRequestSchema, async () => {
 server.setRequestHandler(GetPromptRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
-  if (name === "analyze_data") {
+  if (name === 'analyze_data') {
     const dataset = args?.dataset as string;
-    const focus = (args?.focus as string) || "summary";
+    const focus = (args?.focus as string) || 'summary';
 
     // Fetch actual data to include in the prompt
     const data = await fetchDataset(dataset);
@@ -709,14 +704,14 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
       description: `Analyze the ${dataset} dataset`,
       messages: [
         {
-          role: "user",
+          role: 'user',
           content: {
-            type: "text",
+            type: 'text',
             text: `Please analyze the following ${dataset} dataset with a focus on ${focus}.
 
 Dataset (${data.length} records):
 ${JSON.stringify(data.slice(0, 50), null, 2)}
-${data.length > 50 ? `\n... and ${data.length - 50} more records` : ""}
+${data.length > 50 ? `\n... and ${data.length - 50} more records` : ''}
 
 Please provide:
 1. Key findings
@@ -728,15 +723,15 @@ Please provide:
     };
   }
 
-  if (name === "generate_report") {
+  if (name === 'generate_report') {
     const type = args?.type as string;
     return {
       description: `Generate a ${type} report`,
       messages: [
         {
-          role: "user",
+          role: 'user',
           content: {
-            type: "text",
+            type: 'text',
             text: `Generate a ${type} report. Include:
 - Executive summary
 - Key metrics and KPIs
@@ -765,8 +760,8 @@ Format the report in Markdown.`,
 // src/index.ts — Full MCP Server Template
 // This is a complete, production-ready MCP server skeleton.
 
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -776,14 +771,14 @@ import {
   GetPromptRequestSchema,
   ErrorCode,
   McpError,
-} from "@modelcontextprotocol/sdk/types.js";
+} from '@modelcontextprotocol/sdk/types.js';
 
 // ──────────────────────────────────────
 // CONFIGURATION
 // ──────────────────────────────────────
 
-const SERVER_NAME = "trueomni-mcp";
-const SERVER_VERSION = "1.0.0";
+const SERVER_NAME = 'trueomni-mcp';
+const SERVER_VERSION = '1.0.0';
 
 // ──────────────────────────────────────
 // SERVER SETUP
@@ -807,41 +802,41 @@ const server = new Server(
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
     {
-      name: "get_status",
-      description: "Get the current status of the application",
+      name: 'get_status',
+      description: 'Get the current status of the application',
       inputSchema: {
-        type: "object" as const,
+        type: 'object' as const,
         properties: {
           component: {
-            type: "string",
-            description: "Component to check: api, database, cache",
-            enum: ["api", "database", "cache", "all"],
+            type: 'string',
+            description: 'Component to check: api, database, cache',
+            enum: ['api', 'database', 'cache', 'all'],
           },
         },
-        required: ["component"],
+        required: ['component'],
       },
     },
     {
-      name: "search_content",
-      description: "Search content across the CMS",
+      name: 'search_content',
+      description: 'Search content across the CMS',
       inputSchema: {
-        type: "object" as const,
+        type: 'object' as const,
         properties: {
           query: {
-            type: "string",
-            description: "Search query string",
+            type: 'string',
+            description: 'Search query string',
           },
           collection: {
-            type: "string",
-            description: "CMS collection to search in",
-            enum: ["pages", "posts", "case-studies"],
+            type: 'string',
+            description: 'CMS collection to search in',
+            enum: ['pages', 'posts', 'case-studies'],
           },
           limit: {
-            type: "number",
-            description: "Maximum results to return (default: 10)",
+            type: 'number',
+            description: 'Maximum results to return (default: 10)',
           },
         },
-        required: ["query"],
+        required: ['query'],
       },
     },
   ],
@@ -852,22 +847,22 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   try {
     switch (name) {
-      case "get_status": {
-        const component = (args?.component as string) || "all";
+      case 'get_status': {
+        const component = (args?.component as string) || 'all';
         // Implementation here
         const status = {
-          api: "healthy",
-          database: "healthy",
-          cache: "healthy",
-          uptime: "99.9%",
+          api: 'healthy',
+          database: 'healthy',
+          cache: 'healthy',
+          uptime: '99.9%',
           lastChecked: new Date().toISOString(),
         };
         return {
           content: [
             {
-              type: "text" as const,
+              type: 'text' as const,
               text: JSON.stringify(
-                component === "all"
+                component === 'all'
                   ? status
                   : { [component]: status[component as keyof typeof status] },
                 null,
@@ -878,7 +873,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case "search_content": {
+      case 'search_content': {
         const query = args?.query as string;
         const collection = args?.collection as string | undefined;
         const limit = (args?.limit as number) || 10;
@@ -889,7 +884,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return {
           content: [
             {
-              type: "text" as const,
+              type: 'text' as const,
               text: JSON.stringify(results, null, 2),
             },
           ],
@@ -905,8 +900,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     return {
       content: [
         {
-          type: "text" as const,
-          text: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+          type: 'text' as const,
+          text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         },
       ],
       isError: true,
@@ -921,10 +916,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 server.setRequestHandler(ListResourcesRequestSchema, async () => ({
   resources: [
     {
-      uri: "config://trueomni/env",
-      name: "Environment Config",
-      description: "Current environment configuration (sanitized)",
-      mimeType: "application/json",
+      uri: 'config://trueomni/env',
+      name: 'Environment Config',
+      description: 'Current environment configuration (sanitized)',
+      mimeType: 'application/json',
     },
   ],
 }));
@@ -932,17 +927,16 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => ({
 server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   const { uri } = request.params;
 
-  if (uri === "config://trueomni/env") {
+  if (uri === 'config://trueomni/env') {
     return {
       contents: [
         {
           uri,
-          mimeType: "application/json",
+          mimeType: 'application/json',
           text: JSON.stringify(
             {
-              NODE_ENV: process.env.NODE_ENV || "development",
-              SITE_URL:
-                process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+              NODE_ENV: process.env.NODE_ENV || 'development',
+              SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
               CMS_ENABLED: !!process.env.DATABASE_URI,
             },
             null,
@@ -963,13 +957,13 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 server.setRequestHandler(ListPromptsRequestSchema, async () => ({
   prompts: [
     {
-      name: "create_page",
-      description: "Guided workflow to create a new CMS page with blocks",
+      name: 'create_page',
+      description: 'Guided workflow to create a new CMS page with blocks',
       arguments: [
-        { name: "pageName", description: "Name of the page", required: true },
+        { name: 'pageName', description: 'Name of the page', required: true },
         {
-          name: "template",
-          description: "Template: landing, blog, product",
+          name: 'template',
+          description: 'Template: landing, blog, product',
           required: false,
         },
       ],
@@ -980,17 +974,17 @@ server.setRequestHandler(ListPromptsRequestSchema, async () => ({
 server.setRequestHandler(GetPromptRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
-  if (name === "create_page") {
+  if (name === 'create_page') {
     const pageName = args?.pageName as string;
-    const template = (args?.template as string) || "landing";
+    const template = (args?.template as string) || 'landing';
 
     return {
       description: `Create a new ${template} page: ${pageName}`,
       messages: [
         {
-          role: "user",
+          role: 'user',
           content: {
-            type: "text",
+            type: 'text',
             text: `Create a new ${template} page called "${pageName}".
 
 Steps:
@@ -1000,9 +994,9 @@ Steps:
 4. Add to navigation if appropriate
 
 Template "${template}" typically includes these blocks:
-${template === "landing" ? "- Hero, Features, Testimonials, CTA, FAQ" : ""}
-${template === "blog" ? "- RichText (main content), Author, Related Posts" : ""}
-${template === "product" ? "- Hero, Features, Pricing, Comparison, CTA" : ""}`,
+${template === 'landing' ? '- Hero, Features, Testimonials, CTA, FAQ' : ''}
+${template === 'blog' ? '- RichText (main content), Author, Related Posts' : ''}
+${template === 'product' ? '- Hero, Features, Pricing, Comparison, CTA' : ''}`,
           },
         },
       ],
@@ -1022,14 +1016,12 @@ async function searchCMS(
   limit: number = 10,
 ): Promise<unknown[]> {
   // Replace with actual CMS/database search
-  console.error(
-    `Searching CMS: query="${query}", collection="${collection}", limit=${limit}`,
-  );
+  console.error(`Searching CMS: query="${query}", collection="${collection}", limit=${limit}`);
   return [
     {
-      id: "1",
+      id: '1',
       title: `Result for "${query}"`,
-      collection: collection || "pages",
+      collection: collection || 'pages',
     },
   ];
 }
@@ -1038,14 +1030,14 @@ async function searchCMS(
 // GRACEFUL SHUTDOWN
 // ──────────────────────────────────────
 
-process.on("SIGINT", async () => {
-  console.error("Shutting down MCP server...");
+process.on('SIGINT', async () => {
+  console.error('Shutting down MCP server...');
   await server.close();
   process.exit(0);
 });
 
-process.on("SIGTERM", async () => {
-  console.error("Shutting down MCP server...");
+process.on('SIGTERM', async () => {
+  console.error('Shutting down MCP server...');
   await server.close();
   process.exit(0);
 });
@@ -1061,7 +1053,7 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error("Fatal error:", error);
+  console.error('Fatal error:', error);
   process.exit(1);
 });
 ```
@@ -1109,26 +1101,22 @@ echo '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"hello_worl
 
 ```typescript
 // src/__tests__/server.test.ts
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { createServer } from "../server.js"; // Export your server creation
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { createServer } from '../server.js'; // Export your server creation
 
-describe("MCP Server", () => {
+describe('MCP Server', () => {
   let client: Client;
   let cleanup: () => Promise<void>;
 
   beforeAll(async () => {
     const server = createServer();
-    const [clientTransport, serverTransport] =
-      InMemoryTransport.createLinkedPair();
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
 
     await server.connect(serverTransport);
 
-    client = new Client(
-      { name: "test-client", version: "1.0" },
-      { capabilities: {} },
-    );
+    client = new Client({ name: 'test-client', version: '1.0' }, { capabilities: {} });
     await client.connect(clientTransport);
 
     cleanup = async () => {
@@ -1141,39 +1129,37 @@ describe("MCP Server", () => {
     await cleanup();
   });
 
-  it("lists tools", async () => {
+  it('lists tools', async () => {
     const result = await client.listTools();
     expect(result.tools).toHaveLength(2);
-    expect(result.tools[0].name).toBe("get_status");
+    expect(result.tools[0].name).toBe('get_status');
   });
 
-  it("calls get_status tool", async () => {
+  it('calls get_status tool', async () => {
     const result = await client.callTool({
-      name: "get_status",
-      arguments: { component: "all" },
+      name: 'get_status',
+      arguments: { component: 'all' },
     });
     expect(result.isError).toBeFalsy();
     const text = (result.content[0] as { type: string; text: string }).text;
     const status = JSON.parse(text);
-    expect(status.api).toBe("healthy");
+    expect(status.api).toBe('healthy');
   });
 
-  it("returns error for unknown tool", async () => {
-    await expect(
-      client.callTool({ name: "nonexistent", arguments: {} }),
-    ).rejects.toThrow();
+  it('returns error for unknown tool', async () => {
+    await expect(client.callTool({ name: 'nonexistent', arguments: {} })).rejects.toThrow();
   });
 
-  it("lists resources", async () => {
+  it('lists resources', async () => {
     const result = await client.listResources();
     expect(result.resources.length).toBeGreaterThan(0);
   });
 
-  it("reads a resource", async () => {
+  it('reads a resource', async () => {
     const result = await client.readResource({
-      uri: "config://trueomni/env",
+      uri: 'config://trueomni/env',
     });
-    expect(result.contents[0].mimeType).toBe("application/json");
+    expect(result.contents[0].mimeType).toBe('application/json');
   });
 });
 ```
@@ -1183,34 +1169,34 @@ describe("MCP Server", () => {
 ```typescript
 // Test the full flow: initialize → list → call → verify
 
-import { spawn } from "child_process";
+import { spawn } from 'child_process';
 
 async function integrationTest() {
-  const serverProcess = spawn("node", ["dist/index.js"], {
-    stdio: ["pipe", "pipe", "pipe"],
+  const serverProcess = spawn('node', ['dist/index.js'], {
+    stdio: ['pipe', 'pipe', 'pipe'],
   });
 
   // Send initialize
   const initRequest =
     JSON.stringify({
-      jsonrpc: "2.0",
+      jsonrpc: '2.0',
       id: 1,
-      method: "initialize",
+      method: 'initialize',
       params: {
-        protocolVersion: "2024-11-05",
+        protocolVersion: '2024-11-05',
         capabilities: {},
-        clientInfo: { name: "test", version: "1.0" },
+        clientInfo: { name: 'test', version: '1.0' },
       },
-    }) + "\n";
+    }) + '\n';
 
   serverProcess.stdin.write(initRequest);
 
   // Read response
   const response = await new Promise<string>((resolve) => {
-    serverProcess.stdout.once("data", (data) => resolve(data.toString()));
+    serverProcess.stdout.once('data', (data) => resolve(data.toString()));
   });
 
-  console.log("Initialize response:", response);
+  console.log('Initialize response:', response);
 
   // Cleanup
   serverProcess.kill();
@@ -1228,17 +1214,13 @@ async function integrationTest() {
 // stdout is reserved for JSON-RPC protocol messages
 
 // Bad:
-console.log("Debug info"); // ← breaks protocol!
+console.log('Debug info'); // ← breaks protocol!
 
 // Good:
-console.error("Debug info"); // ← goes to stderr, safe
+console.error('Debug info'); // ← goes to stderr, safe
 
 // Structured logging
-function log(
-  level: "debug" | "info" | "warn" | "error",
-  message: string,
-  data?: unknown,
-) {
+function log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data?: unknown) {
   const entry = {
     timestamp: new Date().toISOString(),
     level,
@@ -1249,8 +1231,8 @@ function log(
 }
 
 // Usage:
-log("info", "Tool called", { tool: "query_database", args: sanitizedArgs });
-log("error", "Database connection failed", { error: err.message });
+log('info', 'Tool called', { tool: 'query_database', args: sanitizedArgs });
+log('error', 'Database connection failed', { error: err.message });
 ```
 
 ### 8.2 Common Errors and Fixes
@@ -1463,16 +1445,16 @@ RECOMMENDATION:
 
 ```typescript
 // mcp-servers/database/src/index.ts
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import pg from "pg";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import pg from 'pg';
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URI,
 });
 
 const server = new Server(
-  { name: "database-mcp", version: "1.0.0" },
+  { name: 'database-mcp', version: '1.0.0' },
   { capabilities: { tools: {}, resources: {} } },
 );
 
@@ -1480,31 +1462,31 @@ const server = new Server(
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
     {
-      name: "query",
-      description: "Execute a read-only SQL query against the database",
+      name: 'query',
+      description: 'Execute a read-only SQL query against the database',
       inputSchema: {
-        type: "object" as const,
+        type: 'object' as const,
         properties: {
-          sql: { type: "string", description: "SQL query (SELECT only)" },
-          limit: { type: "number", description: "Max rows (default 100)" },
+          sql: { type: 'string', description: 'SQL query (SELECT only)' },
+          limit: { type: 'number', description: 'Max rows (default 100)' },
         },
-        required: ["sql"],
+        required: ['sql'],
       },
     },
     {
-      name: "list_tables",
-      description: "List all tables in the database",
-      inputSchema: { type: "object" as const, properties: {} },
+      name: 'list_tables',
+      description: 'List all tables in the database',
+      inputSchema: { type: 'object' as const, properties: {} },
     },
     {
-      name: "describe_table",
-      description: "Get column information for a table",
+      name: 'describe_table',
+      description: 'Get column information for a table',
       inputSchema: {
-        type: "object" as const,
+        type: 'object' as const,
         properties: {
-          table: { type: "string", description: "Table name" },
+          table: { type: 'string', description: 'Table name' },
         },
-        required: ["table"],
+        required: ['table'],
       },
     },
   ],
@@ -1514,17 +1496,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   switch (name) {
-    case "query": {
+    case 'query': {
       const sql = (args?.sql as string).trim();
       const limit = (args?.limit as number) || 100;
 
       // SECURITY: Only allow SELECT queries
-      if (!sql.toUpperCase().startsWith("SELECT")) {
+      if (!sql.toUpperCase().startsWith('SELECT')) {
         return {
           content: [
             {
-              type: "text" as const,
-              text: "Error: Only SELECT queries are allowed.",
+              type: 'text' as const,
+              text: 'Error: Only SELECT queries are allowed.',
             },
           ],
           isError: true,
@@ -1535,7 +1517,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       return {
         content: [
           {
-            type: "text" as const,
+            type: 'text' as const,
             text: JSON.stringify(
               {
                 rowCount: result.rowCount,
@@ -1550,7 +1532,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       };
     }
 
-    case "list_tables": {
+    case 'list_tables': {
       const result = await pool.query(`
         SELECT table_name, table_type
         FROM information_schema.tables
@@ -1558,13 +1540,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         ORDER BY table_name
       `);
       return {
-        content: [
-          { type: "text" as const, text: JSON.stringify(result.rows, null, 2) },
-        ],
+        content: [{ type: 'text' as const, text: JSON.stringify(result.rows, null, 2) }],
       };
     }
 
-    case "describe_table": {
+    case 'describe_table': {
       const table = args?.table as string;
       const result = await pool.query(
         `
@@ -1576,9 +1556,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         [table],
       );
       return {
-        content: [
-          { type: "text" as const, text: JSON.stringify(result.rows, null, 2) },
-        ],
+        content: [{ type: 'text' as const, text: JSON.stringify(result.rows, null, 2) }],
       };
     }
 
@@ -1596,13 +1574,13 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
     resources: tables.rows.map((t) => ({
       uri: `db://schema/${t.table_name}`,
       name: `${t.table_name} schema`,
-      mimeType: "application/json",
+      mimeType: 'application/json',
     })),
   };
 });
 
 // Cleanup
-process.on("SIGINT", async () => {
+process.on('SIGINT', async () => {
   await pool.end();
   process.exit(0);
 });
@@ -1617,42 +1595,42 @@ server.connect(transport);
 // mcp-servers/api-wrapper/src/index.ts
 // Wraps any REST API as MCP tools
 
-const API_BASE = process.env.API_BASE_URL || "https://api.example.com";
+const API_BASE = process.env.API_BASE_URL || 'https://api.example.com';
 const API_KEY = process.env.API_KEY;
 
 const server = new Server(
-  { name: "api-wrapper-mcp", version: "1.0.0" },
+  { name: 'api-wrapper-mcp', version: '1.0.0' },
   { capabilities: { tools: {} } },
 );
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
     {
-      name: "api_get",
-      description: "Make a GET request to the API",
+      name: 'api_get',
+      description: 'Make a GET request to the API',
       inputSchema: {
-        type: "object" as const,
+        type: 'object' as const,
         properties: {
-          path: { type: "string", description: "API path (e.g., /users)" },
+          path: { type: 'string', description: 'API path (e.g., /users)' },
           params: {
-            type: "object",
-            description: "Query parameters",
-            additionalProperties: { type: "string" },
+            type: 'object',
+            description: 'Query parameters',
+            additionalProperties: { type: 'string' },
           },
         },
-        required: ["path"],
+        required: ['path'],
       },
     },
     {
-      name: "api_post",
-      description: "Make a POST request to the API",
+      name: 'api_post',
+      description: 'Make a POST request to the API',
       inputSchema: {
-        type: "object" as const,
+        type: 'object' as const,
         properties: {
-          path: { type: "string", description: "API path" },
-          body: { type: "object", description: "Request body" },
+          path: { type: 'string', description: 'API path' },
+          body: { type: 'object', description: 'Request body' },
         },
-        required: ["path", "body"],
+        required: ['path', 'body'],
       },
     },
   ],
@@ -1662,12 +1640,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
     ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
   };
 
   switch (name) {
-    case "api_get": {
+    case 'api_get': {
       const path = args?.path as string;
       const params = args?.params as Record<string, string> | undefined;
       const url = new URL(path, API_BASE);
@@ -1681,7 +1659,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       return {
         content: [
           {
-            type: "text" as const,
+            type: 'text' as const,
             text: JSON.stringify({ status: response.status, data }, null, 2),
           },
         ],
@@ -1689,12 +1667,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       };
     }
 
-    case "api_post": {
+    case 'api_post': {
       const path = args?.path as string;
       const body = args?.body;
 
       const response = await fetch(new URL(path, API_BASE).toString(), {
-        method: "POST",
+        method: 'POST',
         headers,
         body: JSON.stringify(body),
       });
@@ -1703,7 +1681,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       return {
         content: [
           {
-            type: "text" as const,
+            type: 'text' as const,
             text: JSON.stringify({ status: response.status, data }, null, 2),
           },
         ],
@@ -1729,46 +1707,46 @@ const SLACK_WEBHOOK = process.env.SLACK_WEBHOOK_URL;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 const server = new Server(
-  { name: "notifications-mcp", version: "1.0.0" },
+  { name: 'notifications-mcp', version: '1.0.0' },
   { capabilities: { tools: {} } },
 );
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
     {
-      name: "send_slack",
-      description: "Send a message to a Slack channel via webhook",
+      name: 'send_slack',
+      description: 'Send a message to a Slack channel via webhook',
       inputSchema: {
-        type: "object" as const,
+        type: 'object' as const,
         properties: {
           message: {
-            type: "string",
-            description: "Message text (supports Markdown)",
+            type: 'string',
+            description: 'Message text (supports Markdown)',
           },
           channel: {
-            type: "string",
-            description: "Channel override (optional)",
+            type: 'string',
+            description: 'Channel override (optional)',
           },
           urgency: {
-            type: "string",
-            enum: ["low", "normal", "high"],
-            description: "Message urgency level",
+            type: 'string',
+            enum: ['low', 'normal', 'high'],
+            description: 'Message urgency level',
           },
         },
-        required: ["message"],
+        required: ['message'],
       },
     },
     {
-      name: "send_email",
-      description: "Send an email via Resend",
+      name: 'send_email',
+      description: 'Send an email via Resend',
       inputSchema: {
-        type: "object" as const,
+        type: 'object' as const,
         properties: {
-          to: { type: "string", description: "Recipient email" },
-          subject: { type: "string", description: "Email subject" },
-          body: { type: "string", description: "Email body (HTML supported)" },
+          to: { type: 'string', description: 'Recipient email' },
+          subject: { type: 'string', description: 'Email subject' },
+          body: { type: 'string', description: 'Email body (HTML supported)' },
         },
-        required: ["to", "subject", "body"],
+        required: ['to', 'subject', 'body'],
       },
     },
   ],
@@ -1778,13 +1756,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   switch (name) {
-    case "send_slack": {
+    case 'send_slack': {
       if (!SLACK_WEBHOOK) {
         return {
           content: [
             {
-              type: "text" as const,
-              text: "Error: SLACK_WEBHOOK_URL not configured",
+              type: 'text' as const,
+              text: 'Error: SLACK_WEBHOOK_URL not configured',
             },
           ],
           isError: true,
@@ -1792,17 +1770,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       const message = args?.message as string;
-      const urgency = (args?.urgency as string) || "normal";
+      const urgency = (args?.urgency as string) || 'normal';
 
       const emoji = {
-        low: ":information_source:",
-        normal: ":bell:",
-        high: ":rotating_light:",
+        low: ':information_source:',
+        normal: ':bell:',
+        high: ':rotating_light:',
       };
 
       const response = await fetch(SLACK_WEBHOOK, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text: `${emoji[urgency as keyof typeof emoji]} ${message}`,
         }),
@@ -1811,9 +1789,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       return {
         content: [
           {
-            type: "text" as const,
+            type: 'text' as const,
             text: response.ok
-              ? "Slack message sent successfully."
+              ? 'Slack message sent successfully.'
               : `Slack error: ${response.status}`,
           },
         ],
@@ -1821,13 +1799,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       };
     }
 
-    case "send_email": {
+    case 'send_email': {
       if (!RESEND_API_KEY) {
         return {
           content: [
             {
-              type: "text" as const,
-              text: "Error: RESEND_API_KEY not configured",
+              type: 'text' as const,
+              text: 'Error: RESEND_API_KEY not configured',
             },
           ],
           isError: true,
@@ -1838,14 +1816,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const subject = args?.subject as string;
       const body = args?.body as string;
 
-      const response = await fetch("https://api.resend.com/emails", {
-        method: "POST",
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${RESEND_API_KEY}`,
         },
         body: JSON.stringify({
-          from: "TrueOmni <noreply@trueomni.com>",
+          from: 'TrueOmni <noreply@trueomni.com>',
           to: [to],
           subject,
           html: body,
@@ -1857,7 +1835,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       return {
         content: [
           {
-            type: "text" as const,
+            type: 'text' as const,
             text: response.ok
               ? `Email sent to ${to}. ID: ${result.id}`
               : `Email error: ${JSON.stringify(result)}`,
@@ -1880,57 +1858,57 @@ server.connect(transport);
 
 ```typescript
 // mcp-servers/file-processor/src/index.ts
-import * as fs from "fs/promises";
-import * as path from "path";
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
 const ALLOWED_DIR = process.env.ALLOWED_DIR || process.cwd();
 
 const server = new Server(
-  { name: "file-processor-mcp", version: "1.0.0" },
+  { name: 'file-processor-mcp', version: '1.0.0' },
   { capabilities: { tools: {}, resources: {} } },
 );
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
     {
-      name: "read_file",
-      description: "Read the contents of a file",
+      name: 'read_file',
+      description: 'Read the contents of a file',
       inputSchema: {
-        type: "object" as const,
+        type: 'object' as const,
         properties: {
-          path: { type: "string", description: "Relative file path" },
+          path: { type: 'string', description: 'Relative file path' },
           encoding: {
-            type: "string",
-            description: "Encoding (default: utf-8)",
+            type: 'string',
+            description: 'Encoding (default: utf-8)',
           },
         },
-        required: ["path"],
+        required: ['path'],
       },
     },
     {
-      name: "list_directory",
-      description: "List files in a directory",
+      name: 'list_directory',
+      description: 'List files in a directory',
       inputSchema: {
-        type: "object" as const,
+        type: 'object' as const,
         properties: {
-          path: { type: "string", description: "Relative directory path" },
+          path: { type: 'string', description: 'Relative directory path' },
           pattern: {
-            type: "string",
-            description: "Glob pattern filter (e.g., *.ts)",
+            type: 'string',
+            description: 'Glob pattern filter (e.g., *.ts)',
           },
         },
-        required: ["path"],
+        required: ['path'],
       },
     },
     {
-      name: "file_stats",
-      description: "Get file metadata (size, dates, permissions)",
+      name: 'file_stats',
+      description: 'Get file metadata (size, dates, permissions)',
       inputSchema: {
-        type: "object" as const,
+        type: 'object' as const,
         properties: {
-          path: { type: "string", description: "Relative file path" },
+          path: { type: 'string', description: 'Relative file path' },
         },
-        required: ["path"],
+        required: ['path'],
       },
     },
   ],
@@ -1943,42 +1921,40 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   function safePath(relativePath: string): string {
     const resolved = path.resolve(ALLOWED_DIR, relativePath);
     if (!resolved.startsWith(path.resolve(ALLOWED_DIR))) {
-      throw new Error("Path traversal attempt blocked");
+      throw new Error('Path traversal attempt blocked');
     }
     return resolved;
   }
 
   switch (name) {
-    case "read_file": {
+    case 'read_file': {
       const filePath = safePath(args?.path as string);
-      const encoding = (args?.encoding as BufferEncoding) || "utf-8";
+      const encoding = (args?.encoding as BufferEncoding) || 'utf-8';
       const content = await fs.readFile(filePath, encoding);
       return {
-        content: [{ type: "text" as const, text: content }],
+        content: [{ type: 'text' as const, text: content }],
       };
     }
 
-    case "list_directory": {
+    case 'list_directory': {
       const dirPath = safePath(args?.path as string);
       const entries = await fs.readdir(dirPath, { withFileTypes: true });
       const listing = entries.map((e) => ({
         name: e.name,
-        type: e.isDirectory() ? "directory" : "file",
+        type: e.isDirectory() ? 'directory' : 'file',
       }));
       return {
-        content: [
-          { type: "text" as const, text: JSON.stringify(listing, null, 2) },
-        ],
+        content: [{ type: 'text' as const, text: JSON.stringify(listing, null, 2) }],
       };
     }
 
-    case "file_stats": {
+    case 'file_stats': {
       const filePath = safePath(args?.path as string);
       const stats = await fs.stat(filePath);
       return {
         content: [
           {
-            type: "text" as const,
+            type: 'text' as const,
             text: JSON.stringify(
               {
                 size: stats.size,
@@ -2060,9 +2036,7 @@ const limiter = new RateLimiter(100, 60000); // 100 calls per minute
 // In tool handler:
 if (!limiter.check()) {
   return {
-    content: [
-      { type: "text", text: "Rate limit exceeded. Try again in a minute." },
-    ],
+    content: [{ type: 'text', text: 'Rate limit exceeded. Try again in a minute.' }],
     isError: true,
   };
 }
@@ -2086,7 +2060,7 @@ async function withRetry<T>(
       await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
     }
   }
-  throw new Error("Unreachable");
+  throw new Error('Unreachable');
 }
 
 // Usage in tool handler:
@@ -2109,24 +2083,24 @@ async function shutdown(signal: string) {
     try {
       await handler();
     } catch (error) {
-      console.error("Cleanup error:", error);
+      console.error('Cleanup error:', error);
     }
   }
   process.exit(0);
 }
 
-process.on("SIGINT", () => shutdown("SIGINT"));
-process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 // Register cleanup handlers
 onCleanup(async () => {
   await pool.end(); // Close database connections
-  console.error("Database pool closed");
+  console.error('Database pool closed');
 });
 
 onCleanup(async () => {
   await server.close(); // Close MCP server
-  console.error("MCP server closed");
+  console.error('MCP server closed');
 });
 ```
 

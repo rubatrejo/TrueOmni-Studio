@@ -516,8 +516,7 @@ function SessionTimeoutWarning() {
       <DialogContent>
         <DialogTitle>Session Expiring</DialogTitle>
         <DialogDescription>
-          Your session will expire in {timeLeft} seconds. Would you like to
-          continue?
+          Your session will expire in {timeLeft} seconds. Would you like to continue?
         </DialogDescription>
         <DialogFooter>
           <Button onClick={extendSession}>Continue Session</Button>
@@ -543,10 +542,7 @@ function HeroCarousel({ slides }: { slides: Slide[] }) {
   const [isPaused, setIsPaused] = useState(false);
 
   return (
-    <div
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-    >
+    <div onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)}>
       <Carousel autoPlay={!isPaused} interval={5000}>
         {slides.map((slide) => (
           <CarouselSlide key={slide.id} {...slide} />
@@ -554,7 +550,7 @@ function HeroCarousel({ slides }: { slides: Slide[] }) {
       </Carousel>
       <button
         onClick={() => setIsPaused(!isPaused)}
-        aria-label={isPaused ? "Play carousel" : "Pause carousel"}
+        aria-label={isPaused ? 'Play carousel' : 'Pause carousel'}
       >
         {isPaused ? <Play /> : <Pause />}
       </button>
@@ -641,7 +637,7 @@ function SkipToContent() {
   return (
     <a
       href="#main-content"
-      className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-blue-600 focus:rounded-md focus:shadow-lg focus:outline-2 focus:outline-blue-600"
+      className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-blue-600 focus:shadow-lg focus:outline-2 focus:outline-blue-600"
     >
       Skip to main content
     </a>
@@ -665,8 +661,8 @@ function SkipToContent() {
 // Every page must have a unique, descriptive title
 // In Next.js App Router:
 export const metadata: Metadata = {
-  title: "Pricing Plans | TrueOmni", // Specific → General
-  description: "Compare TrueOmni pricing plans...",
+  title: 'Pricing Plans | TrueOmni', // Specific → General
+  description: 'Compare TrueOmni pricing plans...',
 };
 
 // Dynamic titles:
@@ -834,11 +830,7 @@ Users must be able to understand the information and the operation of the interf
 ```tsx
 // Set language on the html element
 // In Next.js App Router layout.tsx:
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>{children}</body>
@@ -852,8 +844,7 @@ export default function RootLayout({
 ```tsx
 // Mark content in a different language
 <p>
-  The French term <span lang="fr">mise en place</span> means everything in its
-  place.
+  The French term <span lang="fr">mise en place</span> means everything in its place.
 </p>
 ```
 
@@ -924,7 +915,7 @@ export default function RootLayout({
 // CORRECT: Error with icon, color, and text message
 <div>
   <label htmlFor="email" className="block text-sm font-medium">
-    Email Address{" "}
+    Email Address{' '}
     <span aria-hidden="true" className="text-red-500">
       *
     </span>
@@ -933,18 +924,14 @@ export default function RootLayout({
     id="email"
     type="email"
     aria-invalid={!!errors.email}
-    aria-describedby={errors.email ? "email-error" : undefined}
+    aria-describedby={errors.email ? 'email-error' : undefined}
     className={cn(
-      "border rounded-md px-3 py-2 w-full",
-      errors.email ? "border-red-500" : "border-gray-300",
+      'w-full rounded-md border px-3 py-2',
+      errors.email ? 'border-red-500' : 'border-gray-300',
     )}
   />
   {errors.email && (
-    <p
-      id="email-error"
-      role="alert"
-      className="mt-1 text-sm text-red-600 flex items-center gap-1"
-    >
+    <p id="email-error" role="alert" className="mt-1 flex items-center gap-1 text-sm text-red-600">
       <AlertCircle className="h-4 w-4" aria-hidden="true" />
       {errors.email.message}
     </p>
@@ -990,15 +977,13 @@ export default function RootLayout({
     <AlertDialogHeader>
       <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
       <AlertDialogDescription>
-        This action cannot be undone. This will permanently delete your account
-        and remove all your data from our servers.
+        This action cannot be undone. This will permanently delete your account and remove all your
+        data from our servers.
       </AlertDialogDescription>
     </AlertDialogHeader>
     <AlertDialogFooter>
       <AlertDialogCancel>Cancel</AlertDialogCancel>
-      <AlertDialogAction onClick={deleteAccount}>
-        Yes, delete my account
-      </AlertDialogAction>
+      <AlertDialogAction onClick={deleteAccount}>Yes, delete my account</AlertDialogAction>
     </AlertDialogFooter>
   </AlertDialogContent>
 </AlertDialog>
@@ -1197,7 +1182,7 @@ function SubmitButton() {
           Submitting...
         </>
       ) : (
-        "Submit"
+        'Submit'
       )}
     </Button>
   );
@@ -1217,12 +1202,8 @@ function StepIndicator({ currentStep, totalSteps }: Props) {
         <div
           key={i}
           className={cn(
-            "h-2 flex-1 rounded-full transition-colors",
-            i < currentStep
-              ? "bg-blue-600"
-              : i === currentStep
-                ? "bg-blue-300"
-                : "bg-gray-200",
+            'h-2 flex-1 rounded-full transition-colors',
+            i < currentStep ? 'bg-blue-600' : i === currentStep ? 'bg-blue-300' : 'bg-gray-200',
           )}
         />
       ))}
@@ -1242,9 +1223,7 @@ function FileUpload() {
         <span>{progress}%</span>
       </div>
       <Progress value={progress} className="h-2" />
-      <p className="text-xs text-gray-500">
-        {progress < 100 ? "Uploading..." : "Upload complete"}
-      </p>
+      <p className="text-xs text-gray-500">{progress < 100 ? 'Uploading...' : 'Upload complete'}</p>
     </div>
   );
 }
@@ -1256,12 +1235,12 @@ function FileUpload() {
       key={link.href}
       href={link.href}
       className={cn(
-        "px-3 py-2 rounded-md text-sm font-medium",
+        'rounded-md px-3 py-2 text-sm font-medium',
         pathname === link.href
-          ? "bg-blue-100 text-blue-700" // Active state
-          : "text-gray-600 hover:bg-gray-100",
+          ? 'bg-blue-100 text-blue-700' // Active state
+          : 'text-gray-600 hover:bg-gray-100',
       )}
-      aria-current={pathname === link.href ? "page" : undefined}
+      aria-current={pathname === link.href ? 'page' : undefined}
     >
       {link.label}
     </Link>
@@ -1834,10 +1813,7 @@ function NotFoundPage() {
         </button>
       </TooltipTrigger>
       <TooltipContent className="max-w-xs">
-        <p>
-          Your API key authenticates requests to our service. Find it in
-          Settings → API.
-        </p>
+        <p>Your API key authenticates requests to our service. Find it in Settings → API.</p>
       </TooltipContent>
     </Tooltip>
   </TooltipProvider>
@@ -1857,27 +1833,19 @@ function OnboardingChecklist({ steps }: { steps: OnboardingStep[] }) {
       </CardHeader>
       <CardContent>
         {steps.map((step) => (
-          <div
-            key={step.id}
-            className="flex items-start gap-3 py-3 border-b last:border-0"
-          >
+          <div key={step.id} className="flex items-start gap-3 border-b py-3 last:border-0">
             {step.completed ? (
-              <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+              <CheckCircle className="mt-0.5 h-5 w-5 text-green-500" />
             ) : (
-              <Circle className="h-5 w-5 text-gray-300 mt-0.5" />
+              <Circle className="mt-0.5 h-5 w-5 text-gray-300" />
             )}
             <div>
-              <p
-                className={cn(
-                  "font-medium",
-                  step.completed && "line-through text-gray-400",
-                )}
-              >
+              <p className={cn('font-medium', step.completed && 'text-gray-400 line-through')}>
                 {step.title}
               </p>
               <p className="text-sm text-gray-500">{step.description}</p>
               {!step.completed && (
-                <Button variant="link" size="sm" className="px-0 mt-1" asChild>
+                <Button variant="link" size="sm" className="mt-1 px-0" asChild>
                   <Link href={step.actionUrl}>{step.actionLabel}</Link>
                 </Button>
               )}
@@ -1892,19 +1860,18 @@ function OnboardingChecklist({ steps }: { steps: OnboardingStep[] }) {
 // Empty state with guidance
 function EmptyProjectList() {
   return (
-    <div className="text-center py-12">
-      <FolderOpen className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-      <h3 className="text-lg font-medium mb-1">No projects yet</h3>
-      <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
-        Create your first project to start tracking analytics and managing your
-        team.
+    <div className="py-12 text-center">
+      <FolderOpen className="mx-auto mb-4 h-12 w-12 text-gray-300" />
+      <h3 className="mb-1 text-lg font-medium">No projects yet</h3>
+      <p className="mx-auto mb-6 max-w-sm text-sm text-gray-500">
+        Create your first project to start tracking analytics and managing your team.
       </p>
       <Button>
         <Plus className="mr-2 h-4 w-4" />
         Create Project
       </Button>
-      <p className="text-xs text-gray-400 mt-4">
-        Need help?{" "}
+      <p className="mt-4 text-xs text-gray-400">
+        Need help?{' '}
         <a href="/docs/getting-started" className="text-blue-600 underline">
           Read our getting started guide
         </a>
@@ -2177,28 +2144,28 @@ function ResponsiveDialog({ children, ...props }: Props) {
 // Email validation
 const emailSchema = z
   .string()
-  .email("Please enter a valid email address")
-  .min(1, "Email is required");
+  .email('Please enter a valid email address')
+  .min(1, 'Email is required');
 
 // Password validation with strength indicator
 const passwordSchema = z
   .string()
-  .min(8, "Must be at least 8 characters")
-  .regex(/[A-Z]/, "Must include an uppercase letter")
-  .regex(/[0-9]/, "Must include a number")
-  .regex(/[^A-Za-z0-9]/, "Must include a special character");
+  .min(8, 'Must be at least 8 characters')
+  .regex(/[A-Z]/, 'Must include an uppercase letter')
+  .regex(/[0-9]/, 'Must include a number')
+  .regex(/[^A-Za-z0-9]/, 'Must include a special character');
 
 // URL validation
 const urlSchema = z
   .string()
-  .url("Please enter a valid URL starting with https://")
-  .startsWith("https://", "URL must use HTTPS");
+  .url('Please enter a valid URL starting with https://')
+  .startsWith('https://', 'URL must use HTTPS');
 
 // Phone validation (flexible international format)
 const phoneSchema = z
   .string()
-  .regex(/^\+?[\d\s\-()]+$/, "Please enter a valid phone number")
-  .min(7, "Phone number is too short");
+  .regex(/^\+?[\d\s\-()]+$/, 'Please enter a valid phone number')
+  .min(7, 'Phone number is too short');
 
 // Credit card (use input masking library like react-input-mask)
 // Pattern: #### #### #### ####
@@ -2206,33 +2173,30 @@ const phoneSchema = z
 // Date validation
 const dateSchema = z.coerce
   .date()
-  .min(new Date("2020-01-01"), "Date must be after January 1, 2020")
-  .max(new Date("2030-12-31"), "Date must be before December 31, 2030");
+  .min(new Date('2020-01-01'), 'Date must be after January 1, 2020')
+  .max(new Date('2030-12-31'), 'Date must be before December 31, 2030');
 
 // Form with React Hook Form + Zod
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email"),
-  company: z.string().min(1, "Company name is required"),
-  role: z.enum(["developer", "designer", "manager", "executive", "other"]),
-  companySize: z.enum(["1-10", "11-50", "51-200", "200+"]),
-  message: z
-    .string()
-    .max(500, "Message must be under 500 characters")
-    .optional(),
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Please enter a valid email'),
+  company: z.string().min(1, 'Company name is required'),
+  role: z.enum(['developer', 'designer', 'manager', 'executive', 'other']),
+  companySize: z.enum(['1-10', '11-50', '51-200', '200+']),
+  message: z.string().max(500, 'Message must be under 500 characters').optional(),
 });
 
 function DemoForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      company: "",
-      message: "",
+      name: '',
+      email: '',
+      company: '',
+      message: '',
     },
   });
 
@@ -2271,12 +2235,10 @@ function DemoForm() {
     <Input
       {...field}
       aria-invalid={!!fieldState.error}
-      aria-describedby={fieldState.error ? "email-error" : "email-hint"}
+      aria-describedby={fieldState.error ? 'email-error' : 'email-hint'}
     />
   </FormControl>
-  <FormDescription id="email-hint">
-    We'll never share your email with anyone.
-  </FormDescription>
+  <FormDescription id="email-hint">We'll never share your email with anyone.</FormDescription>
   <FormMessage id="email-error" /> {/* Shows Zod error message */}
 </FormItem>;
 
@@ -2290,7 +2252,7 @@ function FormErrorSummary({ errors }: { errors: FieldErrors }) {
       <AlertCircle className="h-4 w-4" />
       <AlertTitle>Please fix the following errors:</AlertTitle>
       <AlertDescription>
-        <ul className="list-disc pl-4 mt-2 space-y-1">
+        <ul className="mt-2 list-disc space-y-1 pl-4">
           {errorEntries.map(([field, error]) => (
             <li key={field}>
               <a href={`#${field}`} className="underline">
@@ -2308,17 +2270,14 @@ function FormErrorSummary({ errors }: { errors: FieldErrors }) {
 const onSubmit = async (data: FormData) => {
   try {
     await submitForm(data);
-    toast({ title: "Success", description: "Your demo has been requested." });
+    toast({ title: 'Success', description: 'Your demo has been requested.' });
   } catch (error) {
     toast({
-      variant: "destructive",
-      title: "Submission failed",
-      description: "Please try again or contact support@trueomni.com.",
+      variant: 'destructive',
+      title: 'Submission failed',
+      description: 'Please try again or contact support@trueomni.com.',
       action: (
-        <ToastAction
-          altText="Try again"
-          onClick={() => form.handleSubmit(onSubmit)()}
-        >
+        <ToastAction altText="Try again" onClick={() => form.handleSubmit(onSubmit)()}>
           Try Again
         </ToastAction>
       ),
@@ -2341,14 +2300,14 @@ const onSubmit = async (data: FormData) => {
 function MultiStepForm() {
   const [step, setStep] = useState(0);
   const steps = [
-    { title: "Contact Info", component: ContactInfoStep },
-    { title: "Company Details", component: CompanyStep },
-    { title: "Your Needs", component: NeedsStep },
-    { title: "Review", component: ReviewStep },
+    { title: 'Contact Info', component: ContactInfoStep },
+    { title: 'Company Details', component: CompanyStep },
+    { title: 'Your Needs', component: NeedsStep },
+    { title: 'Review', component: ReviewStep },
   ];
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="mx-auto max-w-2xl">
       {/* Step indicator */}
       <nav aria-label="Form progress" className="mb-8">
         <ol className="flex items-center">
@@ -2356,18 +2315,18 @@ function MultiStepForm() {
             <li key={i} className="flex items-center">
               <div
                 className={cn(
-                  "flex items-center justify-center w-8 h-8 rounded-full border-2 text-sm font-medium",
-                  i < step && "bg-blue-600 border-blue-600 text-white",
-                  i === step && "border-blue-600 text-blue-600",
-                  i > step && "border-gray-300 text-gray-400",
+                  'flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-medium',
+                  i < step && 'border-blue-600 bg-blue-600 text-white',
+                  i === step && 'border-blue-600 text-blue-600',
+                  i > step && 'border-gray-300 text-gray-400',
                 )}
               >
                 {i < step ? <Check className="h-4 w-4" /> : i + 1}
               </div>
               <span
                 className={cn(
-                  "ml-2 text-sm hidden sm:inline",
-                  i <= step ? "text-gray-900" : "text-gray-400",
+                  'ml-2 hidden text-sm sm:inline',
+                  i <= step ? 'text-gray-900' : 'text-gray-400',
                 )}
               >
                 {s.title}
@@ -2375,8 +2334,8 @@ function MultiStepForm() {
               {i < steps.length - 1 && (
                 <div
                   className={cn(
-                    "w-12 sm:w-24 h-0.5 mx-2",
-                    i < step ? "bg-blue-600" : "bg-gray-200",
+                    'mx-2 h-0.5 w-12 sm:w-24',
+                    i < step ? 'bg-blue-600' : 'bg-gray-200',
                   )}
                 />
               )}
@@ -2391,12 +2350,8 @@ function MultiStepForm() {
       </div>
 
       {/* Navigation */}
-      <div className="flex justify-between mt-8">
-        <Button
-          variant="outline"
-          onClick={() => setStep((s) => s - 1)}
-          disabled={step === 0}
-        >
+      <div className="mt-8 flex justify-between">
+        <Button variant="outline" onClick={() => setStep((s) => s - 1)} disabled={step === 0}>
           <ChevronLeft className="mr-1 h-4 w-4" />
           Back
         </Button>
@@ -2511,20 +2466,15 @@ function MegaMenu() {
         <NavigationMenuItem>
           <NavigationMenuTrigger>Product</NavigationMenuTrigger>
           <NavigationMenuContent>
-            <div className="grid gap-3 p-6 w-[600px] lg:w-[800px] lg:grid-cols-[.75fr_1fr]">
+            <div className="grid w-[600px] gap-3 p-6 lg:w-[800px] lg:grid-cols-[.75fr_1fr]">
               {/* Featured item */}
               <div className="row-span-3 rounded-md bg-gradient-to-b from-blue-50 to-blue-100 p-6">
-                <h3 className="text-lg font-semibold mb-2">
-                  TrueOmni Platform
-                </h3>
-                <p className="text-sm text-gray-600 mb-4">
+                <h3 className="mb-2 text-lg font-semibold">TrueOmni Platform</h3>
+                <p className="mb-4 text-sm text-gray-600">
                   The complete omnichannel solution for modern businesses.
                 </p>
                 <NavigationMenuLink asChild>
-                  <Link
-                    href="/product"
-                    className="text-sm font-medium text-blue-600"
-                  >
+                  <Link href="/product" className="text-sm font-medium text-blue-600">
                     Explore platform →
                   </Link>
                 </NavigationMenuLink>
@@ -2532,17 +2482,12 @@ function MegaMenu() {
 
               {/* Feature links */}
               <NavigationMenuLink asChild>
-                <Link
-                  href="/product/analytics"
-                  className="block p-3 rounded-md hover:bg-gray-50"
-                >
+                <Link href="/product/analytics" className="block rounded-md p-3 hover:bg-gray-50">
                   <div className="flex items-center gap-3">
                     <BarChart3 className="h-5 w-5 text-blue-600" />
                     <div>
                       <p className="text-sm font-medium">Analytics</p>
-                      <p className="text-xs text-gray-500">
-                        Real-time insights and reporting
-                      </p>
+                      <p className="text-xs text-gray-500">Real-time insights and reporting</p>
                     </div>
                   </div>
                 </Link>
@@ -2582,12 +2527,7 @@ function MobileNavigation() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="lg:hidden"
-          aria-label="Open menu"
-        >
+        <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open menu">
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
@@ -2604,19 +2544,19 @@ function MobileNavigation() {
           {/* Expandable sections */}
           <Accordion type="single" collapsible>
             <AccordionItem value="product" className="border-0">
-              <AccordionTrigger className="py-3 px-4 hover:bg-gray-50 rounded-md">
+              <AccordionTrigger className="rounded-md px-4 py-3 hover:bg-gray-50">
                 Product
               </AccordionTrigger>
               <AccordionContent className="pl-4">
                 <Link
                   href="/product/analytics"
-                  className="block py-2 px-4 text-sm hover:bg-gray-50 rounded-md"
+                  className="block rounded-md px-4 py-2 text-sm hover:bg-gray-50"
                 >
                   Analytics
                 </Link>
                 <Link
                   href="/product/integrations"
-                  className="block py-2 px-4 text-sm hover:bg-gray-50 rounded-md"
+                  className="block rounded-md px-4 py-2 text-sm hover:bg-gray-50"
                 >
                   Integrations
                 </Link>
@@ -2625,16 +2565,10 @@ function MobileNavigation() {
           </Accordion>
 
           {/* Simple links */}
-          <Link
-            href="/pricing"
-            className="py-3 px-4 hover:bg-gray-50 rounded-md font-medium"
-          >
+          <Link href="/pricing" className="rounded-md px-4 py-3 font-medium hover:bg-gray-50">
             Pricing
           </Link>
-          <Link
-            href="/customers"
-            className="py-3 px-4 hover:bg-gray-50 rounded-md font-medium"
-          >
+          <Link href="/customers" className="rounded-md px-4 py-3 font-medium hover:bg-gray-50">
             Customers
           </Link>
         </nav>
@@ -2672,7 +2606,7 @@ function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
   return (
     <nav aria-label="Breadcrumb" className="mb-6">
       <ol
-        className="flex items-center flex-wrap gap-1 text-sm"
+        className="flex flex-wrap items-center gap-1 text-sm"
         itemScope
         itemType="https://schema.org/BreadcrumbList"
       >
@@ -2684,26 +2618,13 @@ function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
             itemScope
             itemType="https://schema.org/ListItem"
           >
-            {index > 0 && (
-              <ChevronRight
-                className="h-4 w-4 text-gray-400"
-                aria-hidden="true"
-              />
-            )}
+            {index > 0 && <ChevronRight className="h-4 w-4 text-gray-400" aria-hidden="true" />}
             {index === items.length - 1 ? (
-              <span
-                className="text-gray-900 font-medium"
-                aria-current="page"
-                itemProp="name"
-              >
+              <span className="font-medium text-gray-900" aria-current="page" itemProp="name">
                 {item.label}
               </span>
             ) : (
-              <Link
-                href={item.href}
-                className="text-gray-500 hover:text-gray-700"
-                itemProp="item"
-              >
+              <Link href={item.href} className="text-gray-500 hover:text-gray-700" itemProp="item">
                 <span itemProp="name">{item.label}</span>
               </Link>
             )}
@@ -2718,9 +2639,9 @@ function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
 // Usage:
 <Breadcrumbs
   items={[
-    { label: "Home", href: "/" },
-    { label: "Product", href: "/product" },
-    { label: "Analytics", href: "/product/analytics" },
+    { label: 'Home', href: '/' },
+    { label: 'Product', href: '/product' },
+    { label: 'Analytics', href: '/product/analytics' },
   ]}
 />;
 
@@ -2826,17 +2747,17 @@ html {
 function BottomNavigation() {
   const pathname = usePathname();
   const items = [
-    { href: "/", icon: Home, label: "Home" },
-    { href: "/product", icon: Box, label: "Product" },
-    { href: "/pricing", icon: CreditCard, label: "Pricing" },
-    { href: "/company", icon: Building2, label: "Company" },
-    { href: "/demo", icon: CalendarDays, label: "Demo" },
+    { href: '/', icon: Home, label: 'Home' },
+    { href: '/product', icon: Box, label: 'Product' },
+    { href: '/pricing', icon: CreditCard, label: 'Pricing' },
+    { href: '/company', icon: Building2, label: 'Company' },
+    { href: '/demo', icon: CalendarDays, label: 'Demo' },
   ];
 
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white lg:hidden"
-      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       aria-label="Main navigation"
     >
       <div className="flex justify-around py-1">
@@ -2847,10 +2768,10 @@ function BottomNavigation() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center gap-0.5 px-3 py-2 text-xs min-w-[64px]",
-                isActive ? "text-blue-600" : "text-gray-500",
+                'flex min-w-[64px] flex-col items-center gap-0.5 px-3 py-2 text-xs',
+                isActive ? 'text-blue-600' : 'text-gray-500',
               )}
-              aria-current={isActive ? "page" : undefined}
+              aria-current={isActive ? 'page' : undefined}
             >
               <item.icon className="h-5 w-5" />
               <span>{item.label}</span>
@@ -2883,16 +2804,13 @@ function NotFoundPage() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
       <div className="mb-8">
-        <p className="text-6xl font-bold text-gray-200 mb-2">404</p>
-        <h1 className="text-2xl font-bold text-gray-900 mb-3">
-          Page not found
-        </h1>
-        <p className="text-gray-600 max-w-md">
-          The page you are looking for does not exist or may have been moved to
-          a new URL.
+        <p className="mb-2 text-6xl font-bold text-gray-200">404</p>
+        <h1 className="mb-3 text-2xl font-bold text-gray-900">Page not found</h1>
+        <p className="max-w-md text-gray-600">
+          The page you are looking for does not exist or may have been moved to a new URL.
         </p>
       </div>
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row">
         <Button asChild>
           <Link href="/">Return to homepage</Link>
         </Button>
@@ -2909,16 +2827,14 @@ function ServerErrorPage() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
       <div className="mb-8">
-        <ServerCrash className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-        <h1 className="text-2xl font-bold text-gray-900 mb-3">
-          Something went wrong
-        </h1>
-        <p className="text-gray-600 max-w-md">
-          We are experiencing technical difficulties. Our team has been notified
-          and is working on a fix.
+        <ServerCrash className="mx-auto mb-4 h-16 w-16 text-gray-300" />
+        <h1 className="mb-3 text-2xl font-bold text-gray-900">Something went wrong</h1>
+        <p className="max-w-md text-gray-600">
+          We are experiencing technical difficulties. Our team has been notified and is working on a
+          fix.
         </p>
       </div>
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row">
         <Button onClick={() => window.location.reload()}>
           <RefreshCw className="mr-2 h-4 w-4" />
           Try again
@@ -2927,8 +2843,8 @@ function ServerErrorPage() {
           <Link href="/">Return to homepage</Link>
         </Button>
       </div>
-      <p className="text-xs text-gray-400 mt-8">
-        If this problem persists, contact us at{" "}
+      <p className="mt-8 text-xs text-gray-400">
+        If this problem persists, contact us at{' '}
         <a href="mailto:support@trueomni.com" className="underline">
           support@trueomni.com
         </a>
@@ -2958,12 +2874,10 @@ function NetworkError({ onRetry }: { onRetry: () => void }) {
 function ComponentErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   return (
     <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-      <AlertTriangle className="h-8 w-8 text-red-400 mx-auto mb-3" />
-      <h3 className="font-medium text-red-800 mb-1">
-        Unable to load this section
-      </h3>
-      <p className="text-sm text-red-600 mb-4">
-        {error.message || "An unexpected error occurred."}
+      <AlertTriangle className="mx-auto mb-3 h-8 w-8 text-red-400" />
+      <h3 className="mb-1 font-medium text-red-800">Unable to load this section</h3>
+      <p className="mb-4 text-sm text-red-600">
+        {error.message || 'An unexpected error occurred.'}
       </p>
       <Button variant="outline" size="sm" onClick={resetErrorBoundary}>
         Try Again
@@ -2973,11 +2887,7 @@ function ComponentErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 }
 
 // Form validation error summary
-function ValidationErrorSummary({
-  errors,
-}: {
-  errors: Record<string, string>;
-}) {
+function ValidationErrorSummary({ errors }: { errors: Record<string, string> }) {
   const errorList = Object.entries(errors);
   if (errorList.length === 0) return null;
 
@@ -2989,19 +2899,15 @@ function ValidationErrorSummary({
       ref={(el) => el?.focus()} // Focus on error summary when it appears
     >
       <div className="flex gap-3">
-        <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+        <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" />
         <div>
           <h3 className="font-medium text-red-800">
-            Please fix {errorList.length}{" "}
-            {errorList.length === 1 ? "error" : "errors"}:
+            Please fix {errorList.length} {errorList.length === 1 ? 'error' : 'errors'}:
           </h3>
           <ul className="mt-2 space-y-1">
             {errorList.map(([field, message]) => (
               <li key={field}>
-                <a
-                  href={`#${field}`}
-                  className="text-sm text-red-700 underline hover:text-red-900"
-                >
+                <a href={`#${field}`} className="text-sm text-red-700 underline hover:text-red-900">
                   {message}
                 </a>
               </li>
@@ -3022,12 +2928,12 @@ function ValidationErrorSummary({
 
 ```tsx
 // Skeleton component (using shadcn/ui Skeleton)
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Card skeleton
 function CardSkeleton() {
   return (
-    <div className="rounded-xl border p-6 space-y-4">
+    <div className="space-y-4 rounded-xl border p-6">
       <Skeleton className="h-4 w-3/4" /> {/* Title */}
       <Skeleton className="h-3 w-full" /> {/* Description line 1 */}
       <Skeleton className="h-3 w-5/6" /> {/* Description line 2 */}
@@ -3043,7 +2949,7 @@ function CardSkeleton() {
 function BlogPage() {
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Blog</h1>
+      <h1 className="mb-8 text-3xl font-bold">Blog</h1>
       <Suspense fallback={<BlogGridSkeleton />}>
         <BlogGrid />
       </Suspense>
@@ -3053,7 +2959,7 @@ function BlogPage() {
 
 function BlogGridSkeleton() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }).map((_, i) => (
         <CardSkeleton key={i} />
       ))}
@@ -3065,7 +2971,7 @@ function BlogGridSkeleton() {
 function TableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div className="space-y-3">
-      <div className="flex gap-4 pb-3 border-b">
+      <div className="flex gap-4 border-b pb-3">
         <Skeleton className="h-4 w-1/4" />
         <Skeleton className="h-4 w-1/4" />
         <Skeleton className="h-4 w-1/4" />
@@ -3098,12 +3004,7 @@ function TableSkeleton({ rows = 5 }: { rows?: number }) {
 }
 
 .skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    hsl(0 0% 93%) 25%,
-    hsl(0 0% 97%) 50%,
-    hsl(0 0% 93%) 75%
-  );
+  background: linear-gradient(90deg, hsl(0 0% 93%) 25%, hsl(0 0% 97%) 50%, hsl(0 0% 93%) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
 }
@@ -3113,16 +3014,16 @@ function TableSkeleton({ rows = 5 }: { rows?: number }) {
 
 ```tsx
 // Spinner component
-function Spinner({ size = "default", className }: SpinnerProps) {
+function Spinner({ size = 'default', className }: SpinnerProps) {
   const sizeClasses = {
-    sm: "h-4 w-4",
-    default: "h-6 w-6",
-    lg: "h-8 w-8",
+    sm: 'h-4 w-4',
+    default: 'h-6 w-6',
+    lg: 'h-8 w-8',
   };
 
   return (
     <Loader2
-      className={cn("animate-spin text-blue-600", sizeClasses[size], className)}
+      className={cn('animate-spin text-blue-600', sizeClasses[size], className)}
       aria-hidden="true"
     />
   );
@@ -3133,7 +3034,7 @@ function LoadingButton({ isLoading, children, ...props }: LoadingButtonProps) {
   return (
     <Button disabled={isLoading} {...props}>
       {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      {isLoading ? "Loading..." : children}
+      {isLoading ? 'Loading...' : children}
     </Button>
   );
 }
@@ -3159,7 +3060,7 @@ function PageLoading() {
 
 ```tsx
 // Progressive image loading with blur placeholder
-import Image from "next/image";
+import Image from 'next/image';
 
 <Image
   src="/hero-image.jpg"
@@ -3196,34 +3097,29 @@ async function BlogPosts() {
 function LikeButton({ postId, initialLikes, initialLiked }: Props) {
   const [optimisticState, setOptimisticState] = useOptimistic(
     { likes: initialLikes, liked: initialLiked },
-    (state, action: "like" | "unlike") => ({
-      likes: action === "like" ? state.likes + 1 : state.likes - 1,
-      liked: action === "like",
+    (state, action: 'like' | 'unlike') => ({
+      likes: action === 'like' ? state.likes + 1 : state.likes - 1,
+      liked: action === 'like',
     }),
   );
 
   async function handleToggle() {
-    const action = optimisticState.liked ? "unlike" : "like";
+    const action = optimisticState.liked ? 'unlike' : 'like';
     setOptimisticState(action);
     try {
       await toggleLike(postId, action);
     } catch {
       // Revert happens automatically when the state re-renders from server
       toast({
-        variant: "destructive",
-        title: "Failed to update. Please try again.",
+        variant: 'destructive',
+        title: 'Failed to update. Please try again.',
       });
     }
   }
 
   return (
     <button onClick={handleToggle} className="flex items-center gap-1">
-      <Heart
-        className={cn(
-          "h-5 w-5",
-          optimisticState.liked && "fill-red-500 text-red-500",
-        )}
-      />
+      <Heart className={cn('h-5 w-5', optimisticState.liked && 'fill-red-500 text-red-500')} />
       <span>{optimisticState.likes}</span>
     </button>
   );
@@ -3260,21 +3156,21 @@ RULES:
 ```tsx
 function EmptyDashboard() {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-      <div className="rounded-full bg-blue-50 p-4 mb-6">
+    <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
+      <div className="mb-6 rounded-full bg-blue-50 p-4">
         <Sparkles className="h-8 w-8 text-blue-500" />
       </div>
-      <h2 className="text-xl font-semibold mb-2">Welcome to TrueOmni</h2>
-      <p className="text-gray-600 max-w-md mb-8">
-        Start by setting up your first project. We will guide you through
-        connecting your data sources and creating your first dashboard.
+      <h2 className="mb-2 text-xl font-semibold">Welcome to TrueOmni</h2>
+      <p className="mb-8 max-w-md text-gray-600">
+        Start by setting up your first project. We will guide you through connecting your data
+        sources and creating your first dashboard.
       </p>
       <Button size="lg">
         <Plus className="mr-2 h-5 w-5" />
         Create First Project
       </Button>
-      <p className="text-xs text-gray-400 mt-6">
-        Need help?{" "}
+      <p className="mt-6 text-xs text-gray-400">
+        Need help?{' '}
         <Link href="/docs/quickstart" className="text-blue-600 underline">
           Read our quickstart guide
         </Link>
@@ -3290,14 +3186,14 @@ function EmptyDashboard() {
 function NoSearchResults({ query }: { query: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
-      <SearchX className="h-12 w-12 text-gray-300 mb-4" />
-      <h3 className="text-lg font-medium mb-1">No results found</h3>
-      <p className="text-gray-600 max-w-sm mb-6">
+      <SearchX className="mb-4 h-12 w-12 text-gray-300" />
+      <h3 className="mb-1 text-lg font-medium">No results found</h3>
+      <p className="mb-6 max-w-sm text-gray-600">
         No results match "{query}". Try adjusting your search or filters.
       </p>
       <div className="space-y-2 text-sm text-gray-500">
         <p>Suggestions:</p>
-        <ul className="list-disc text-left pl-4 space-y-1">
+        <ul className="list-disc space-y-1 pl-4 text-left">
           <li>Check for typos or try different keywords</li>
           <li>Remove some filters to broaden your search</li>
           <li>Try a more general search term</li>
@@ -3314,9 +3210,9 @@ function NoSearchResults({ query }: { query: string }) {
 function DataLoadError({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
-      <AlertTriangle className="h-12 w-12 text-amber-400 mb-4" />
-      <h3 className="text-lg font-medium mb-1">Unable to load data</h3>
-      <p className="text-gray-600 max-w-sm mb-6">
+      <AlertTriangle className="mb-4 h-12 w-12 text-amber-400" />
+      <h3 className="mb-1 text-lg font-medium">Unable to load data</h3>
+      <p className="mb-6 max-w-sm text-gray-600">
         We could not load your data. This might be a temporary issue.
       </p>
       <Button onClick={onRetry}>
@@ -3356,51 +3252,50 @@ RULES:
 
 ```tsx
 // Using shadcn/ui toast system (Sonner or shadcn toast)
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
 // SUCCESS: Confirm completed action
-toast.success("Changes saved successfully");
+toast.success('Changes saved successfully');
 
 // ERROR: Report failed action
-toast.error("Failed to save changes. Please try again.");
+toast.error('Failed to save changes. Please try again.');
 
 // WARNING: Alert about potential issues
-toast.warning("Your session will expire in 5 minutes");
+toast.warning('Your session will expire in 5 minutes');
 
 // INFO: Neutral information
-toast.info("New feature available: Check out our updated analytics dashboard");
+toast.info('New feature available: Check out our updated analytics dashboard');
 
 // WITH ACTION: Toast with undo or retry
-toast("Item deleted", {
+toast('Item deleted', {
   action: {
-    label: "Undo",
+    label: 'Undo',
     onClick: () => restoreItem(itemId),
   },
   duration: 8000,
 });
 
 // WITH DESCRIPTION: More detail
-toast.error("Upload failed", {
-  description:
-    "The file exceeds the maximum size of 10 MB. Please compress it and try again.",
+toast.error('Upload failed', {
+  description: 'The file exceeds the maximum size of 10 MB. Please compress it and try again.',
 });
 
 // PROMISE: Auto-handle loading/success/error
 toast.promise(saveData(), {
-  loading: "Saving changes...",
-  success: "Changes saved successfully",
-  error: "Failed to save changes",
+  loading: 'Saving changes...',
+  success: 'Changes saved successfully',
+  error: 'Failed to save changes',
 });
 
 // CUSTOM: Rich toast content
 toast.custom((t) => (
-  <div className="flex items-center gap-4 bg-white border rounded-lg p-4 shadow-lg">
+  <div className="flex items-center gap-4 rounded-lg border bg-white p-4 shadow-lg">
     <Avatar>
       <AvatarImage src={user.avatar} />
     </Avatar>
     <div>
       <p className="font-medium">{user.name} invited you to a project</p>
-      <div className="flex gap-2 mt-2">
+      <div className="mt-2 flex gap-2">
         <Button
           size="sm"
           onClick={() => {
@@ -3475,17 +3370,13 @@ CONTENT:
     <AlertDialogHeader>
       <AlertDialogTitle>Delete "Project Alpha"?</AlertDialogTitle>
       <AlertDialogDescription>
-        This will permanently delete the project and all its data, including 12
-        dashboards, 45 reports, and 3 team members' access. This action cannot
-        be undone.
+        This will permanently delete the project and all its data, including 12 dashboards, 45
+        reports, and 3 team members' access. This action cannot be undone.
       </AlertDialogDescription>
     </AlertDialogHeader>
     <AlertDialogFooter>
       <AlertDialogCancel>Cancel</AlertDialogCancel>
-      <AlertDialogAction
-        className="bg-red-600 hover:bg-red-700"
-        onClick={handleDelete}
-      >
+      <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDelete}>
         Delete Project
       </AlertDialogAction>
     </AlertDialogFooter>
@@ -3500,9 +3391,7 @@ CONTENT:
   <DialogContent className="sm:max-w-lg">
     <DialogHeader>
       <DialogTitle>Create New Project</DialogTitle>
-      <DialogDescription>
-        Set up a new project to start tracking your analytics.
-      </DialogDescription>
+      <DialogDescription>Set up a new project to start tracking your analytics.</DialogDescription>
     </DialogHeader>
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
@@ -3612,18 +3501,11 @@ function InfiniteList() {
 ### Pagination
 
 ```tsx
-function Pagination({
-  currentPage,
-  totalPages,
-  onPageChange,
-}: PaginationProps) {
+function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
   const pages = generatePageNumbers(currentPage, totalPages);
 
   return (
-    <nav
-      aria-label="Pagination"
-      className="flex items-center justify-center gap-1"
-    >
+    <nav aria-label="Pagination" className="flex items-center justify-center gap-1">
       <Button
         variant="outline"
         size="icon"
@@ -3635,18 +3517,18 @@ function Pagination({
       </Button>
 
       {pages.map((page, i) =>
-        page === "..." ? (
+        page === '...' ? (
           <span key={`ellipsis-${i}`} className="px-2 text-gray-400">
             ...
           </span>
         ) : (
           <Button
             key={page}
-            variant={page === currentPage ? "default" : "outline"}
+            variant={page === currentPage ? 'default' : 'outline'}
             size="icon"
             onClick={() => onPageChange(page as number)}
             aria-label={`Go to page ${page}`}
-            aria-current={page === currentPage ? "page" : undefined}
+            aria-current={page === currentPage ? 'page' : undefined}
           >
             {page}
           </Button>
@@ -3667,16 +3549,12 @@ function Pagination({
 }
 
 // Page number generation: 1 2 3 ... 8 9 10 (show first, last, and around current)
-function generatePageNumbers(
-  current: number,
-  total: number,
-): (number | "...")[] {
+function generatePageNumbers(current: number, total: number): (number | '...')[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
 
-  if (current <= 3) return [1, 2, 3, 4, "...", total];
-  if (current >= total - 2)
-    return [1, "...", total - 3, total - 2, total - 1, total];
-  return [1, "...", current - 1, current, current + 1, "...", total];
+  if (current <= 3) return [1, 2, 3, 4, '...', total];
+  if (current >= total - 2) return [1, '...', total - 3, total - 2, total - 1, total];
+  return [1, '...', current - 1, current, current + 1, '...', total];
 }
 ```
 
@@ -3693,7 +3571,7 @@ function LoadMoreList() {
       </div>
 
       {hasMore && (
-        <div className="flex flex-col items-center gap-2 mt-8">
+        <div className="mt-8 flex flex-col items-center gap-2">
           <p className="text-sm text-gray-500">
             Showing {items.length} of {totalCount} items
           </p>
@@ -3704,7 +3582,7 @@ function LoadMoreList() {
                 Loading...
               </>
             ) : (
-              "Load More"
+              'Load More'
             )}
           </Button>
         </div>
@@ -3720,7 +3598,7 @@ function LoadMoreList() {
 // For very large lists (1000+ items), use virtualization
 // Libraries: @tanstack/react-virtual, react-window, react-virtuoso
 
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 function VirtualList({ items }: { items: Item[] }) {
   const parentRef = useRef<HTMLDivElement>(null);
@@ -3737,17 +3615,17 @@ function VirtualList({ items }: { items: Item[] }) {
       <div
         style={{
           height: `${virtualizer.getTotalSize()}px`,
-          position: "relative",
+          position: 'relative',
         }}
       >
         {virtualizer.getVirtualItems().map((virtualItem) => (
           <div
             key={virtualItem.key}
             style={{
-              position: "absolute",
+              position: 'absolute',
               top: 0,
               left: 0,
-              width: "100%",
+              width: '100%',
               transform: `translateY(${virtualItem.start}px)`,
             }}
           >
@@ -3788,19 +3666,19 @@ RULES:
 ```tsx
 function SearchCommand() {
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const { results, isLoading } = useSearch(query);
 
   // Open with Cmd+K
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setOpen(true);
       }
     };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, []);
 
   return (
@@ -3808,13 +3686,11 @@ function SearchCommand() {
       {/* Trigger button */}
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-3 py-2 border rounded-lg text-sm text-gray-500 hover:bg-gray-50 w-64"
+        className="flex w-64 items-center gap-2 rounded-lg border px-3 py-2 text-sm text-gray-500 hover:bg-gray-50"
       >
         <Search className="h-4 w-4" />
         <span>Search...</span>
-        <kbd className="ml-auto text-xs bg-gray-100 px-1.5 py-0.5 rounded">
-          ⌘K
-        </kbd>
+        <kbd className="ml-auto rounded bg-gray-100 px-1.5 py-0.5 text-xs">⌘K</kbd>
       </button>
 
       {/* Search dialog */}
@@ -3844,10 +3720,7 @@ function SearchCommand() {
           {results?.pages?.length > 0 && (
             <CommandGroup heading="Pages">
               {results.pages.map((page) => (
-                <CommandItem
-                  key={page.slug}
-                  onSelect={() => navigate(page.url)}
-                >
+                <CommandItem key={page.slug} onSelect={() => navigate(page.url)}>
                   <FileText className="mr-2 h-4 w-4" />
                   <div>
                     <p>{page.title}</p>
@@ -3861,10 +3734,7 @@ function SearchCommand() {
           {results?.posts?.length > 0 && (
             <CommandGroup heading="Blog Posts">
               {results.posts.map((post) => (
-                <CommandItem
-                  key={post.slug}
-                  onSelect={() => navigate(post.url)}
-                >
+                <CommandItem key={post.slug} onSelect={() => navigate(post.url)}>
                   <BookOpen className="mr-2 h-4 w-4" />
                   <div>
                     <p>{post.title}</p>
@@ -3889,14 +3759,14 @@ function FilteredSearch() {
     category: [],
     dateRange: null,
     status: [],
-    sortBy: "relevance",
+    sortBy: 'relevance',
   });
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8">
+    <div className="flex flex-col gap-8 lg:flex-row">
       {/* Filter sidebar */}
-      <aside className="w-full lg:w-64 flex-shrink-0">
-        <div className="flex items-center justify-between mb-4">
+      <aside className="w-full flex-shrink-0 lg:w-64">
+        <div className="mb-4 flex items-center justify-between">
           <h2 className="font-semibold">Filters</h2>
           {hasActiveFilters && (
             <Button variant="ghost" size="sm" onClick={clearAllFilters}>
@@ -3907,13 +3777,9 @@ function FilteredSearch() {
 
         {/* Active filters */}
         {hasActiveFilters && (
-          <div className="flex flex-wrap gap-2 mb-4 pb-4 border-b">
+          <div className="mb-4 flex flex-wrap gap-2 border-b pb-4">
             {activeFilters.map((filter) => (
-              <Badge
-                key={filter.id}
-                variant="secondary"
-                className="flex items-center gap-1"
-              >
+              <Badge key={filter.id} variant="secondary" className="flex items-center gap-1">
                 {filter.label}
                 <button
                   onClick={() => removeFilter(filter.id)}
@@ -3927,25 +3793,18 @@ function FilteredSearch() {
         )}
 
         {/* Filter groups */}
-        <Accordion type="multiple" defaultValue={["category", "status"]}>
+        <Accordion type="multiple" defaultValue={['category', 'status']}>
           <AccordionItem value="category">
             <AccordionTrigger>Category</AccordionTrigger>
             <AccordionContent>
               {categories.map((cat) => (
-                <label
-                  key={cat.value}
-                  className="flex items-center gap-2 py-1.5 cursor-pointer"
-                >
+                <label key={cat.value} className="flex cursor-pointer items-center gap-2 py-1.5">
                   <Checkbox
                     checked={filters.category.includes(cat.value)}
-                    onCheckedChange={(checked) =>
-                      toggleFilter("category", cat.value)
-                    }
+                    onCheckedChange={(checked) => toggleFilter('category', cat.value)}
                   />
                   <span className="text-sm">{cat.label}</span>
-                  <span className="text-xs text-gray-400 ml-auto">
-                    {cat.count}
-                  </span>
+                  <span className="ml-auto text-xs text-gray-400">{cat.count}</span>
                 </label>
               ))}
             </AccordionContent>
@@ -3955,13 +3814,10 @@ function FilteredSearch() {
             <AccordionTrigger>Status</AccordionTrigger>
             <AccordionContent>
               {statuses.map((status) => (
-                <label
-                  key={status.value}
-                  className="flex items-center gap-2 py-1.5 cursor-pointer"
-                >
+                <label key={status.value} className="flex cursor-pointer items-center gap-2 py-1.5">
                   <Checkbox
                     checked={filters.status.includes(status.value)}
-                    onCheckedChange={() => toggleFilter("status", status.value)}
+                    onCheckedChange={() => toggleFilter('status', status.value)}
                   />
                   <span className="text-sm">{status.label}</span>
                 </label>
@@ -3973,7 +3829,7 @@ function FilteredSearch() {
 
       {/* Results */}
       <main className="flex-1">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <p className="text-sm text-gray-600">
             <span role="status">{totalResults} results</span>
           </p>
@@ -4063,20 +3919,12 @@ RULES:
 ### KPI / Metric Cards
 
 ```tsx
-function MetricCard({
-  title,
-  value,
-  change,
-  changeType,
-  description,
-}: MetricCardProps) {
+function MetricCard({ title, value, change, changeType, description }: MetricCardProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-gray-500">
-          {title}
-        </CardTitle>
-        {changeType === "increase" ? (
+        <CardTitle className="text-sm font-medium text-gray-500">{title}</CardTitle>
+        {changeType === 'increase' ? (
           <TrendingUp className="h-4 w-4 text-green-500" />
         ) : (
           <TrendingDown className="h-4 w-4 text-red-500" />
@@ -4084,14 +3932,14 @@ function MetricCard({
       </CardHeader>
       <CardContent>
         <p className="text-2xl font-bold">{value}</p>
-        <div className="flex items-center gap-1 mt-1">
+        <div className="mt-1 flex items-center gap-1">
           <span
             className={cn(
-              "text-xs font-medium",
-              changeType === "increase" ? "text-green-600" : "text-red-600",
+              'text-xs font-medium',
+              changeType === 'increase' ? 'text-green-600' : 'text-red-600',
             )}
           >
-            {changeType === "increase" ? "+" : ""}
+            {changeType === 'increase' ? '+' : ''}
             {change}
           </span>
           <span className="text-xs text-gray-500">{description}</span>
@@ -4102,7 +3950,7 @@ function MetricCard({
 }
 
 // Usage
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
   <MetricCard
     title="Total Revenue"
     value="$45,231"
@@ -4140,7 +3988,7 @@ function MetricCard({
 // Accessible, sortable data table
 function DataTable({ columns, data }: DataTableProps) {
   return (
-    <div className="rounded-md border overflow-x-auto">
+    <div className="overflow-x-auto rounded-md border">
       <table className="w-full">
         <thead>
           <tr className="border-b bg-gray-50">
@@ -4148,7 +3996,7 @@ function DataTable({ columns, data }: DataTableProps) {
               <th
                 key={col.id}
                 scope="col"
-                className="h-10 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="h-10 px-4 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
               >
                 {col.sortable ? (
                   <button
@@ -4168,10 +4016,7 @@ function DataTable({ columns, data }: DataTableProps) {
         </thead>
         <tbody>
           {data.map((row, i) => (
-            <tr
-              key={row.id}
-              className="border-b hover:bg-gray-50 transition-colors"
-            >
+            <tr key={row.id} className="border-b transition-colors hover:bg-gray-50">
               {columns.map((col) => (
                 <td key={col.id} className="px-4 py-3 text-sm">
                   {col.render ? col.render(row) : row[col.id]}

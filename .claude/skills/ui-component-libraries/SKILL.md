@@ -1,6 +1,6 @@
 ---
 name: ui-component-libraries
-description: "UI component libraries reference: Aceternity UI, Magic UI, Origin UI, Animata, Lunar UI, Tremor. Use when building animated components, landing pages, dashboards, charts, bento grids, hero sections, marquees, cards, or any visual UI element. Triggers: aceternity, magic ui, origin ui, animata, lunar ui, tremor, animated component, landing page component, bento grid, marquee, hero section, chart component, dashboard component, 3d card, spotlight, parallax scroll, text reveal, sparkles, meteor, globe."
+description: 'UI component libraries reference: Aceternity UI, Magic UI, Origin UI, Animata, Lunar UI, Tremor. Use when building animated components, landing pages, dashboards, charts, bento grids, hero sections, marquees, cards, or any visual UI element. Triggers: aceternity, magic ui, origin ui, animata, lunar ui, tremor, animated component, landing page component, bento grid, marquee, hero section, chart component, dashboard component, 3d card, spotlight, parallax scroll, text reveal, sparkles, meteor, globe.'
 ---
 
 # UI Component Libraries
@@ -190,15 +190,15 @@ Then copy components from https://tremor.so/
 ### Usage (npm version)
 
 ```tsx
-import { AreaChart, Card, Title } from "@tremor/react";
+import { AreaChart, Card, Title } from '@tremor/react';
 
 <Card>
   <Title>Revenue over time</Title>
   <AreaChart
     data={chartData}
     index="date"
-    categories={["Revenue", "Expenses"]}
-    colors={["blue", "red"]}
+    categories={['Revenue', 'Expenses']}
+    colors={['blue', 'red']}
   />
 </Card>;
 ```

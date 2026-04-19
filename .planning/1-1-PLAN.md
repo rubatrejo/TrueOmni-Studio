@@ -37,6 +37,7 @@
 
     **NO instalar** ESLint, Prettier ni shadcn aquí — eso es 1-2 y 1-3.
     **NO crear** `clients/default/` — eso es Fase 2. Solo el fallback en código.
+
   </action>
   <verify>
     - `pnpm install` completa sin errores.
@@ -81,6 +82,7 @@
        - **Cero colores hardcoded** (CLAUDE.md §7).
 
     Verificar que NO se copia `tokens.css` dentro de `src/` — el template es la fuente única en Fase 1.
+
   </action>
   <verify>
     - `pnpm typecheck` pasa.
@@ -126,6 +128,7 @@
        El archivo entero lleva el comentario `[FASE 1 PLACEHOLDER]` para que el auditor-white-label de Fase 2 sepa que hay que borrarlo. **No se importa desde ningún otro sitio que no sea la página de prueba.**
 
     3. Actualizar `.env.example` SOLO si falta algo — ya contiene `KIOSK_CLIENT=default` y es suficiente. No duplicar.
+
   </action>
   <verify>
     - `pnpm typecheck` pasa.
@@ -162,6 +165,7 @@
     4. `src/app/(kiosk)/page.tsx` — página de prueba. Server Component. Importa `KIOSK_PHASE_1_PLACEHOLDER` y renderiza los 3 textos en un layout básico centrado. Añade un pequeño bloque que lea `getClientSlug()` y lo muestre (útil para verificar que la env llega): "Cliente activo: {slug}". Ese label ("Cliente activo:") **también vive en el placeholder** — no inventar strings en JSX.
 
     5. Añadir scripts al `package.json` si faltan: `"kiosk:dev": "KIOSK_CLIENT=default next dev"` (decisión §1, ROADMAP Fase 1). En Windows hay que usar `cross-env` o documentar limitación en SUMMARY — decisión: usar `cross-env` como devDep para portabilidad (`pnpm add -D cross-env`) y que el script quede `"kiosk:dev": "cross-env KIOSK_CLIENT=default next dev"`.
+
   </action>
   <verify>
     - `pnpm kiosk:dev` levanta sin errores en `http://localhost:3000`.

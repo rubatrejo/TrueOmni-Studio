@@ -196,44 +196,44 @@ Each block in `src/blocks/` follows this structure:
 #### Block Schema (`config.ts`)
 
 ```typescript
-import { Block } from "payload";
+import { Block } from 'payload';
 
 export const HeroBlock: Block = {
-  slug: "hero",
-  labels: { singular: "Hero", plural: "Heroes" },
-  imageURL: "/blocks/hero-preview.png", // Preview in admin
+  slug: 'hero',
+  labels: { singular: 'Hero', plural: 'Heroes' },
+  imageURL: '/blocks/hero-preview.png', // Preview in admin
   fields: [
     {
-      name: "headline",
-      type: "text",
+      name: 'headline',
+      type: 'text',
       required: true,
     },
     {
-      name: "subheadline",
-      type: "textarea",
+      name: 'subheadline',
+      type: 'textarea',
     },
     {
-      name: "variant",
-      type: "select",
+      name: 'variant',
+      type: 'select',
       options: [
-        { label: "With Image", value: "withImage" },
-        { label: "With Video", value: "withVideo" },
-        { label: "Minimal", value: "minimal" },
+        { label: 'With Image', value: 'withImage' },
+        { label: 'With Video', value: 'withVideo' },
+        { label: 'Minimal', value: 'minimal' },
       ],
-      defaultValue: "withImage",
+      defaultValue: 'withImage',
     },
     {
-      name: "cta",
-      type: "group",
+      name: 'cta',
+      type: 'group',
       fields: [
-        { name: "label", type: "text" },
-        { name: "link", type: "text" },
+        { name: 'label', type: 'text' },
+        { name: 'link', type: 'text' },
       ],
     },
     {
-      name: "backgroundImage",
-      type: "upload",
-      relationTo: "media",
+      name: 'backgroundImage',
+      type: 'upload',
+      relationTo: 'media',
     },
   ],
 };
@@ -242,29 +242,21 @@ export const HeroBlock: Block = {
 #### Block Component (`Component.tsx`)
 
 ```tsx
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import type { HeroBlock as HeroBlockType } from "@/payload-types";
+import { motion } from 'framer-motion';
+import type { HeroBlock as HeroBlockType } from '@/payload-types';
 
-export function HeroBlock({
-  headline,
-  subheadline,
-  variant,
-  cta,
-  backgroundImage,
-}: HeroBlockType) {
+export function HeroBlock({ headline, subheadline, variant, cta, backgroundImage }: HeroBlockType) {
   return (
-    <section className="relative min-h-[80vh] flex items-center">
+    <section className="relative flex min-h-[80vh] items-center">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         <h1 className="text-5xl font-bold tracking-tight">{headline}</h1>
-        {subheadline && (
-          <p className="mt-4 text-xl text-muted-foreground">{subheadline}</p>
-        )}
+        {subheadline && <p className="mt-4 text-xl text-muted-foreground">{subheadline}</p>}
       </motion.div>
     </section>
   );
@@ -275,18 +267,18 @@ export function HeroBlock({
 
 ```typescript
 // payload.config.ts
-import { HeroBlock } from "@/blocks/Hero/config";
-import { FeaturesBlock } from "@/blocks/Features/config";
+import { HeroBlock } from '@/blocks/Hero/config';
+import { FeaturesBlock } from '@/blocks/Features/config';
 // ... import all blocks
 
 export default buildConfig({
   collections: [
     {
-      slug: "pages",
+      slug: 'pages',
       fields: [
         {
-          name: "layout",
-          type: "blocks",
+          name: 'layout',
+          type: 'blocks',
           blocks: [HeroBlock, FeaturesBlock /* ... */],
         },
       ],
@@ -299,8 +291,8 @@ export default buildConfig({
 
 ```tsx
 // src/app/(frontend)/[slug]/page.tsx
-import { HeroBlock } from "@/blocks/Hero/Component";
-import { FeaturesBlock } from "@/blocks/Features/Component";
+import { HeroBlock } from '@/blocks/Hero/Component';
+import { FeaturesBlock } from '@/blocks/Features/Component';
 
 const blockComponents = {
   hero: HeroBlock,

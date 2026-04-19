@@ -1,6 +1,6 @@
 ---
 description: Generar y proponer un commit en Conventional Commits español.
-argument-hint: "[nota opcional sobre el commit]"
+argument-hint: '[nota opcional sobre el commit]'
 ---
 
 # /commit — Commit en Conventional Commits español

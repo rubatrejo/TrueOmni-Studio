@@ -41,14 +41,14 @@ npm install @remotion/tailwind     # Tailwind support in compositions
 
 ```typescript
 // remotion.config.ts (project root)
-import { Config } from "@remotion/cli/config";
+import { Config } from '@remotion/cli/config';
 
-Config.setVideoImageFormat("jpeg"); // or 'png' for transparency
+Config.setVideoImageFormat('jpeg'); // or 'png' for transparency
 Config.setOverwriteOutput(true);
 Config.setConcurrency(4); // parallel render threads
-Config.setPixelFormat("yuv420p"); // best compatibility
-Config.setCodec("h264"); // default codec
-Config.setChromiumOpenGlRenderer("angle"); // GPU rendering
+Config.setPixelFormat('yuv420p'); // best compatibility
+Config.setCodec('h264'); // default codec
+Config.setChromiumOpenGlRenderer('angle'); // GPU rendering
 ```
 
 ### 1.3 Folder Structure
@@ -219,20 +219,20 @@ const MyComponent: React.FC = () => {
 ### 2.2 interpolate() — The Core Animation Function
 
 ```typescript
-import { interpolate, Easing } from "remotion";
+import { interpolate, Easing } from 'remotion';
 
 // Basic: map frame 0-30 to opacity 0-1
 const opacity = interpolate(frame, [0, 30], [0, 1]);
 
 // With clamping (default — clamps output to [0, 1]):
 const opacity = interpolate(frame, [0, 30], [0, 1], {
-  extrapolateLeft: "clamp", // default
-  extrapolateRight: "clamp", // default
+  extrapolateLeft: 'clamp', // default
+  extrapolateRight: 'clamp', // default
 });
 
 // Allow values to extend beyond output range:
 const position = interpolate(frame, [0, 30], [0, 100], {
-  extrapolateRight: "extend", // goes past 100 after frame 30
+  extrapolateRight: 'extend', // goes past 100 after frame 30
 });
 
 // With easing:
@@ -245,24 +245,24 @@ const y = interpolate(
   frame,
   [0, 15, 30, 45, 60], // keyframe frames
   [100, 0, -20, 0, 0], // keyframe values
-  { extrapolateRight: "clamp" },
+  { extrapolateRight: 'clamp' },
 );
 
 // COMMON PATTERNS:
 // Fade in during frames 0-20:
 const fadeIn = interpolate(frame, [0, 20], [0, 1], {
-  extrapolateRight: "clamp",
+  extrapolateRight: 'clamp',
 });
 
 // Fade out during frames 80-100:
 const fadeOut = interpolate(frame, [80, 100], [1, 0], {
-  extrapolateLeft: "clamp",
+  extrapolateLeft: 'clamp',
 });
 
 // Slide in from left:
 const slideX = interpolate(frame, [0, 30], [-200, 0], {
   easing: Easing.out(Easing.cubic),
-  extrapolateRight: "clamp",
+  extrapolateRight: 'clamp',
 });
 ```
 
@@ -1190,24 +1190,24 @@ SAFE ZONES (for vertical video 9:16):
 
 export const brand = {
   primary: {
-    50: "#EFF6FF",
-    100: "#DBEAFE",
-    500: "#0066FF",
-    600: "#0052CC",
-    900: "#001A42",
+    50: '#EFF6FF',
+    100: '#DBEAFE',
+    500: '#0066FF',
+    600: '#0052CC',
+    900: '#001A42',
   },
   secondary: {
-    500: "#7C3AED",
+    500: '#7C3AED',
   },
   accent: {
-    500: "#06B6D4",
+    500: '#06B6D4',
   },
   neutral: {
-    50: "#F8FAFC",
-    100: "#F1F5F9",
-    800: "#1E293B",
-    900: "#0F172A",
-    950: "#020617",
+    50: '#F8FAFC',
+    100: '#F1F5F9',
+    800: '#1E293B',
+    900: '#0F172A',
+    950: '#020617',
   },
 } as const;
 
@@ -1223,19 +1223,13 @@ export const gradients = {
 
 ```typescript
 // src/remotion/utils/fonts.ts
-import { staticFile, continueRender, delayRender } from "remotion";
+import { staticFile, continueRender, delayRender } from 'remotion';
 
 export const loadFonts = () => {
   const waitForFont = delayRender();
 
-  const inter = new FontFace(
-    "Inter",
-    `url(${staticFile("fonts/Inter-Variable.woff2")})`,
-  );
-  const geist = new FontFace(
-    "Geist",
-    `url(${staticFile("fonts/Geist-Variable.woff2")})`,
-  );
+  const inter = new FontFace('Inter', `url(${staticFile('fonts/Inter-Variable.woff2')})`);
+  const geist = new FontFace('Geist', `url(${staticFile('fonts/Geist-Variable.woff2')})`);
 
   Promise.all([inter.load(), geist.load()])
     .then(() => {
@@ -1244,14 +1238,14 @@ export const loadFonts = () => {
       continueRender(waitForFont);
     })
     .catch((err) => {
-      console.error("Font loading error:", err);
+      console.error('Font loading error:', err);
       continueRender(waitForFont);
     });
 };
 
 // Alternative: use @remotion/google-fonts
-import { getAvailableFonts } from "@remotion/google-fonts";
-import { loadFont } from "@remotion/google-fonts/Inter";
+import { getAvailableFonts } from '@remotion/google-fonts';
+import { loadFont } from '@remotion/google-fonts/Inter';
 
 const { fontFamily } = loadFont();
 // Use fontFamily in your styles

@@ -1,6 +1,6 @@
 ---
 description: Crear una carpeta de cliente nueva a partir de clients/_template.
-argument-hint: "<slug>   (ej. acme, museo-thyssen — minúsculas y guiones)"
+argument-hint: '<slug>   (ej. acme, museo-thyssen — minúsculas y guiones)'
 ---
 
 # /nuevo-cliente — Crear cliente white-label nuevo
@@ -65,7 +65,7 @@ Preséntame:
 
 - Qué se creó (árbol breve de `clients/$ARGUMENTS/`).
 - Qué placeholders quedan por llenar (slug ya hecho, nombre, logo, textos, colores).
-- Propón: *"¿Abrimos `clients/$ARGUMENTS/config.json` y `tokens.css` para rellenar branding real, o lo dejas para luego?"*.
+- Propón: _"¿Abrimos `clients/$ARGUMENTS/config.json` y `tokens.css` para rellenar branding real, o lo dejas para luego?"_.
 
 NO hagas commit todavía; eso va por `/commit` cuando el cliente esté listo.
 

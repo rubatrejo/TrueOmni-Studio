@@ -245,11 +245,11 @@ function contrastRatio(hex1: string, hex2: string): number {
 function meetsWCAG(
   foreground: string,
   background: string,
-  level: "AA" | "AAA" = "AA",
+  level: 'AA' | 'AAA' = 'AA',
   isLargeText: boolean = false,
 ): boolean {
   const ratio = contrastRatio(foreground, background);
-  if (level === "AA") return isLargeText ? ratio >= 3 : ratio >= 4.5;
+  if (level === 'AA') return isLargeText ? ratio >= 3 : ratio >= 4.5;
   return isLargeText ? ratio >= 4.5 : ratio >= 7;
 }
 ```
@@ -810,9 +810,9 @@ export const transitions = {
   normal: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
   relaxed: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
   slow: { duration: 0.5, ease: [0.25, 0.1, 0, 1] },
-  spring: { type: "spring", stiffness: 400, damping: 30 },
-  springBouncy: { type: "spring", stiffness: 300, damping: 20 },
-  springGentle: { type: "spring", stiffness: 200, damping: 25 },
+  spring: { type: 'spring', stiffness: 400, damping: 30 },
+  springBouncy: { type: 'spring', stiffness: 300, damping: 20 },
+  springGentle: { type: 'spring', stiffness: 200, damping: 25 },
 } as const;
 
 export const variants = {
@@ -841,7 +841,7 @@ export const variants = {
     visible: { opacity: 1, scale: 1, transition: transitions.relaxed },
   },
   slideUp: {
-    hidden: { y: "100%" },
+    hidden: { y: '100%' },
     visible: { y: 0, transition: transitions.slow },
   },
   stagger: {
@@ -864,7 +864,7 @@ Tailwind v4 uses CSS-first configuration with the `@theme` directive:
 ```css
 /* src/app/globals.css */
 
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   /* ========== COLORS ========== */
@@ -944,9 +944,9 @@ Tailwind v4 uses CSS-first configuration with the `@theme` directive:
 
   /* ========== TYPOGRAPHY ========== */
 
-  --font-sans: "Inter", "system-ui", "-apple-system", "Segoe UI", sans-serif;
-  --font-heading: "Geist", "Inter", sans-serif;
-  --font-mono: "Geist Mono", "JetBrains Mono", "Fira Code", monospace;
+  --font-sans: 'Inter', 'system-ui', '-apple-system', 'Segoe UI', sans-serif;
+  --font-heading: 'Geist', 'Inter', sans-serif;
+  --font-mono: 'Geist Mono', 'JetBrains Mono', 'Fira Code', monospace;
 
   /* Type Scale (Minor Third 1.2) */
   --text-xs: 0.694rem;
@@ -970,12 +970,9 @@ Tailwind v4 uses CSS-first configuration with the `@theme` directive:
   --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-  --shadow-md:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --shadow-lg:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --shadow-xl:
-    0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
 
@@ -1364,7 +1361,7 @@ DARK MODE: Class-based with next-themes, system default
 ### CSS Output
 
 ```css
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   --color-primary-50: #eff6ff;
@@ -1403,9 +1400,9 @@ DARK MODE: Class-based with next-themes, system default
   --color-accent-900: #164e63;
   --color-accent-950: #083344;
 
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-heading: "Geist", "Inter", sans-serif;
-  --font-mono: "Geist Mono", "JetBrains Mono", monospace;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Geist', 'Inter', sans-serif;
+  --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
 
   --text-xs: 0.694rem;
   --text-sm: 0.833rem;

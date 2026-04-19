@@ -1,6 +1,6 @@
 ---
 description: Abrir sesión de trabajo. Lee estado, muestra progreso, propone siguiente paso y carga skills de diseño.
-argument-hint: "[nota opcional sobre qué se quiere hacer hoy]"
+argument-hint: '[nota opcional sobre qué se quiere hacer hoy]'
 ---
 
 # /iniciar — Abrir sesión de trabajo
@@ -27,9 +27,11 @@ Este proyecto es de UI. Antes de cualquier tarea visual hay que cargar los skill
 **Orden de verificación:**
 
 1. Ejecuta en bash:
+
    ```bash
    ls .claude/skills/ 2>/dev/null | sort
    ```
+
    Eso te lista los skills instalados localmente en el repo.
 
 2. Compara con lo esperado según `.planning/SKILLS.md`:

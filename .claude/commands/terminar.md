@@ -1,6 +1,6 @@
 ---
 description: Cerrar sesión. Resume lo hecho, actualiza STATE.md, propone y hace commit.
-argument-hint: "[nota opcional sobre qué cerramos]"
+argument-hint: '[nota opcional sobre qué cerramos]'
 ---
 
 # /terminar — Cerrar sesión de trabajo
@@ -39,9 +39,11 @@ Genera un **resumen conciso** (máximo 12-15 líneas) con:
 Antes de editar:
 
 1. Obtén la fecha real de hoy ejecutando:
+
    ```bash
    date +%F
    ```
+
    Usa **exactamente** ese valor como `YYYY-MM-DD`. No inventes la fecha ni uses la que recuerdes del contexto — suele estar desfasada.
 
 2. Lee `.planning/STATE.md` y añade una entrada al final del **historial de sesiones** (antes de la sección de "Plantilla de entrada" si existe) siguiendo este formato:
@@ -50,16 +52,20 @@ Antes de editar:
    ### Sesión YYYY-MM-DD — [título breve]
 
    **Hecho:**
+
    - [punto 1]
    - [punto 2]
 
    **Verificado:**
+
    - [qué se comprobó y cómo]
 
    **Pendiente / siguiente:**
+
    - [qué retomar la próxima vez]
 
    **Decisiones:**
+
    - [decisión + razón, si aplica]
 
    **Fase:** [fase activa del roadmap]

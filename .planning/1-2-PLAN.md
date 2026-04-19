@@ -41,6 +41,7 @@
        - `"lint:fix": "next lint --fix"`.
 
     **NO** añadir aquí regla custom que impida todos los strings en JSX (sería ruido; el auditor-white-label lo valida semánticamente).
+
   </action>
   <verify>
     - `pnpm lint` termina con 0 errores sobre el código de 1-1. Warnings permitidos solo si son explícitamente aceptados (documentar cuáles en SUMMARY).
@@ -86,6 +87,7 @@
        - `"format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,cjs,mjs,json,md,css}\""`.
 
     5. Comprobar compatibilidad con ESLint: el `extends: ["...", "prettier"]` ya apaga reglas conflictivas (hecho en la tarea anterior).
+
   </action>
   <verify>
     - `pnpm format:check` pasa limpio sobre el código de 1-1 tras correr `pnpm format` una vez.
@@ -121,6 +123,7 @@
     Ordenar alfabéticamente los scripts para que el diff sea legible.
 
     No añadir `husky` ni hooks de git en Fase 1 (no está en ROADMAP Fase 1; sería scope creep).
+
   </action>
   <verify>
     - `pnpm check` ejecuta typecheck + lint + format:check y termina con código 0.

@@ -41,15 +41,19 @@ _(sin entradas todavía — el bootstrap aún no está commiteado)_
 ### Sesión YYYY-MM-DD — [título breve]
 
 **Hecho:**
+
 - [punto 1]
 
 **Verificado:**
+
 - [qué se comprobó y cómo]
 
 **Pendiente / siguiente:**
+
 - [qué retomar]
 
 **Decisiones:**
+
 - [decisión + razón, si aplica]
 
 **Fase:** [nº y nombre]

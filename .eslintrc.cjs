@@ -75,6 +75,14 @@ module.exports = {
       },
     },
     {
+      // Billboards consumen assets servidos por la route `/assets/[...path]`
+      // (un file server propio). next/image no puede optimizarlos sin
+      // configuración adicional; el kiosk corre en hardware fijo y la
+      // optimización no es crítica. Permitimos <img> en estas pantallas.
+      files: ['src/components/billboard/**'],
+      rules: { '@next/next/no-img-element': 'off' },
+    },
+    {
       // Archivos de configuración pueden usar default export.
       files: ['*.config.{ts,js,mjs,cjs}'],
       rules: { 'import/no-default-export': 'off' },

@@ -42,3 +42,7 @@ coverage/
 # Temporales
 *.tmp
 *.bak
+
+# Playwright MCP (screenshots ephemeros de /verificar-visual)
+.playwright-mcp/
+*-render.png

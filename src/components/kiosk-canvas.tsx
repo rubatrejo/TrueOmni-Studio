@@ -2,8 +2,11 @@ import type { ReactNode } from 'react';
 
 /**
  * Canvas fijo 1080×1920 (retrato) centrado en el viewport.
- * Dimensiones y safe-areas vienen de tokens CSS (tokens.css del cliente activo).
- * NO usar literales de dimensión (ni en clases arbitrarias) — romperían el white-label.
+ * Dimensiones vienen de los tokens `--kiosk-width`/`--kiosk-height`.
+ *
+ * El canvas NO añade padding. Cada pantalla del kiosk gestiona sus propios
+ * bordes (full-bleed, safe-areas, etc.). Si necesitas safe-area, usa las
+ * clases de Tailwind `p-safe-top`, `p-safe-x` o los tokens directamente.
  */
 export function KioskCanvas({ children }: { children: ReactNode }) {
   return (
@@ -14,10 +17,6 @@ export function KioskCanvas({ children }: { children: ReactNode }) {
         style={{
           width: 'var(--kiosk-width)',
           height: 'var(--kiosk-height)',
-          paddingTop: 'var(--safe-area-top)',
-          paddingBottom: 'var(--safe-area-bottom)',
-          paddingLeft: 'var(--safe-area-x)',
-          paddingRight: 'var(--safe-area-x)',
         }}
       >
         {children}

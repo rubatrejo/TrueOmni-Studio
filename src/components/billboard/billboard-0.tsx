@@ -1,4 +1,4 @@
-import { Accessibility, ChevronUp, Globe } from 'lucide-react';
+import { ChevronUp, Globe } from 'lucide-react';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 
@@ -7,16 +7,17 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
  *
  * Layout replicado 1:1 del SVG original (designs/TNT/Billboard/Billboard 0.svg):
  * - Foto hero full-bleed (1080×1920).
+ * - Logo TrueOmni grande blanco @ (193, 371), tamaño ~704×128.
  * - Botón central "TOUCH HERE" 548×342 @ (281, 776), rx=20, fill #2e2e2e,
- *   con doble borde blanco: un ring de 10px desde el edge (SVG stroke).
+ *   con ring blanco de 10px desde el edge.
  * - Botón ENGLISH (decorativo Fase 3) 244×80 @ (418, 1565), rx=8,
  *   fondo #b4bd01 (olive), globe icon + ENGLISH + chevron.
- * - Footer 1080×218 @ y=1702 en #004f8b con:
- *   · Logo TrueOmni blanco @ (60, 103 relativo al footer).
- *   · Wheelchair accessibility icon @ (540, 114 relativo al footer).
- *   · "Powered by" + mini logo TrueOmni @ (851, 132 relativo al footer).
- *
- * Tipografía CTA: Open Sans Bold 90px (fidelidad 1:1 con el SVG).
+ * - Footer 1080×218 @ y=1702 con split diagonal:
+ *   · Back_Tab #1796d6 trapezoide (1080,0) → (0,83.636) → (0,218) → (1080,218).
+ *   · Front_Tab #004f8b trapezoide (0,0) → (1080,83.636) → (1080,218) → (0,218).
+ *   · Logo TrueOmni @ relativo (60, 103).
+ *   · Wheelchair path exacto del SVG @ relativo (540, 114).
+ *   · Powered by + mini logo @ relativo (851, 132).
  */
 export function Billboard0() {
   return (
@@ -32,8 +33,13 @@ export function Billboard0() {
         className="absolute inset-0 h-full w-full object-cover"
       />
 
-      {/* Botón central TOUCH HERE (548×342 @ x=281 y=776, rx=20).
-          Doble borde: fill oscuro + ring blanco 10px desde el edge. */}
+      {/* Logo grande TrueOmni encima del botón (193, 371), ~704×128px. */}
+      <div className="absolute" style={{ left: '193px', top: '371px' }}>
+        <TrueOmniLogo className="h-[128px] w-auto text-white" />
+      </div>
+
+      {/* Botón central TOUCH HERE (548×342 @ x=281 y=776, rx=20) con ring
+          blanco de 10px desde el edge (equivalente al stroke del SVG). */}
       <div
         className="absolute flex items-center justify-center"
         style={{
@@ -56,8 +62,7 @@ export function Billboard0() {
         </p>
       </div>
 
-      {/* Botón ENGLISH decorativo (244×80 @ x=418 y=1565, rx=8, fill #b4bd01).
-          Globe icon + label + chevron-up. Fase 6 lo hará funcional. */}
+      {/* Botón ENGLISH decorativo (244×80 @ x=418 y=1565, rx=8, fill #b4bd01). */}
       <div
         className="absolute flex items-center"
         style={{
@@ -81,36 +86,61 @@ export function Billboard0() {
         <ChevronUp className="ml-auto h-6 w-6 text-white" strokeWidth={3} />
       </div>
 
-      {/* Footer 1080×218 @ y=1702 en azul marca #004f8b. */}
+      {/* Footer 1080×218 @ y=1702 con split diagonal (Back_Tab + Front_Tab). */}
       <div
-        className="absolute left-0 right-0 flex items-center"
+        className="absolute left-0 right-0"
         style={{
           bottom: '0',
           height: '218px',
-          backgroundColor: '#004f8b',
+          width: '1080px',
         }}
       >
-        {/* Logo TrueOmni @ (60, 103) relativo → centrado verticalmente
-            con margen izquierdo de 60px. */}
-        <TrueOmniLogo className="ml-[60px] h-[65px] w-auto text-white" />
-
-        {/* Wheelchair icon @ (540, 114) relativo → centrado verticalmente
-            con x absoluto 540. */}
-        <Accessibility
-          className="absolute h-[54px] w-[54px] text-white"
-          style={{ left: '540px', top: '111px' }}
-          strokeWidth={2.2}
+        {/* Back_Tab lighter blue (trapezoide con top-left recortado). */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundColor: '#1796d6',
+            clipPath: 'polygon(1080px 0, 0 83.636px, 0 218px, 1080px 218px)',
+          }}
+        />
+        {/* Front_Tab dark blue (trapezoide con top-right recortado). */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundColor: '#004f8b',
+            clipPath: 'polygon(0 0, 1080px 83.636px, 1080px 218px, 0 218px)',
+          }}
         />
 
-        {/* "Powered by" + mini logo TrueOmni a la derecha del footer. */}
-        <div className="absolute flex flex-col items-start" style={{ left: '851px', top: '103px' }}>
+        {/* Logo TrueOmni footer @ relativo (60, 103), ~353.7×65.4. */}
+        <div className="absolute" style={{ left: '60px', top: '103px' }}>
+          <TrueOmniLogo className="h-[65px] w-auto text-white" />
+        </div>
+
+        {/* Wheelchair icon — path exacto del SVG @ relativo (540, 114.357). */}
+        <svg
+          className="absolute"
+          style={{ left: '540px', top: '114.357px' }}
+          xmlns="http://www.w3.org/2000/svg"
+          width="54"
+          height="54"
+          viewBox="0 0 54 54"
+          fill="#fff"
+          role="img"
+          aria-label="Accesibilidad"
+        >
+          <path d="M5.431,48.58A17.893,17.893,0,0,1,0,35.449,18.137,18.137,0,0,1,3.217,24.955a17.685,17.685,0,0,1,8.49-6.7q.421,2.847.949,6.961A12.414,12.414,0,0,0,8.385,29.49,11.7,11.7,0,0,0,10.23,43.781a11.367,11.367,0,0,0,8.332,3.48A11.846,11.846,0,0,0,30.27,37.136H32.8l2.742,5.8a18.576,18.576,0,0,1-6.8,8.016,17.958,17.958,0,0,1-10.178,3.058A17.893,17.893,0,0,1,5.431,48.58Zm38.128,1.054a3.394,3.394,0,0,1-2-1.74L35.015,33.761H20.25a3.229,3.229,0,0,1-2.215-.844,3.459,3.459,0,0,1-1.16-2Q13.5,7.183,13.5,6.761a6.635,6.635,0,0,1,.949-3.48A6.745,6.745,0,0,1,17.033.8,6.457,6.457,0,0,1,20.566.011a6.4,6.4,0,0,1,4.483,2A6.683,6.683,0,0,1,27,6.55a7.3,7.3,0,0,1-.738,3.217A6.383,6.383,0,0,1,21.2,13.406l.528,3.48H35.438a1.626,1.626,0,0,1,1.688,1.688v3.375a1.624,1.624,0,0,1-1.687,1.688H22.676l.527,3.375H37.125a3.2,3.2,0,0,1,1.74.581,3.933,3.933,0,0,1,1.319,1.318L46.2,41.883l3.9-2a1.956,1.956,0,0,1,1.266,0,1.606,1.606,0,0,1,.949.844l1.477,2.954a1.72,1.72,0,0,1,.105,1.319,1.606,1.606,0,0,1-.844,1L46.2,49.476a3.281,3.281,0,0,1-1.481.361A3.523,3.523,0,0,1,43.559,49.634Z" />
+        </svg>
+
+        {/* "Powered by" + mini logo TrueOmni @ relativo (851, 132). */}
+        <div className="absolute" style={{ left: '851px', top: '132px' }}>
           <span
-            className="font-sans italic text-white"
-            style={{ fontSize: '8px', letterSpacing: '0.02em', lineHeight: '1' }}
+            className="block font-display italic text-white"
+            style={{ fontSize: '8px', fontWeight: 500, letterSpacing: '0.01em', lineHeight: '1' }}
           >
             Powered by
           </span>
-          <TrueOmniLogo className="mt-[4px] h-[14px] w-auto text-white" />
+          <TrueOmniLogo className="mt-[2px] h-[10px] w-auto text-white" />
         </div>
       </div>
     </div>

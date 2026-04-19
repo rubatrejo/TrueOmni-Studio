@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://kiosk-portrait.local/schemas/client-config.json",
+  "title": "KioskClientConfig",
+  "description": "Configuración white-label de un cliente del kiosk. Vive en clients/{slug}/config.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["client", "branding", "textos", "features", "meta"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Ruta al schema. Recomendado: './config.schema.json'."
+    },
+    "client": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["slug", "nombre", "locale"],
+      "properties": {
+        "slug": {
+          "type": "string",
+          "pattern": "^(_[a-z][a-z0-9-]*|[a-z0-9][a-z0-9-]*)$",
+          "description": "Slug del cliente. Debe coincidir con el nombre de la carpeta en clients/. Los slugs con guion bajo inicial (ej. _template) se reservan para plantillas y no se despliegan."
+        },
+        "nombre": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Nombre legible del cliente."
+        },
+        "locale": {
+          "type": "string",
+          "pattern": "^[a-z]{2}-[A-Z]{2}$",
+          "description": "Locale BCP-47 (ej. es-ES, en-US)."
+        },
+        "timezone": {
+          "type": "string",
+          "description": "Zona horaria IANA (ej. Europe/Madrid)."
+        }
+      }
+    },
+    "branding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["logo"],
+      "properties": {
+        "logo": {
+          "type": "object",
+          "required": ["default", "alt"],
+          "properties": {
+            "default": {
+              "type": "string",
+              "description": "Path relativo al logo (ej. assets/logo.svg)."
+            },
+            "dark": { "type": "string", "description": "Variante para fondos oscuros (opcional)." },
+            "alt": {
+              "type": "string",
+              "description": "Texto alternativo obligatorio por accesibilidad."
+            }
+          }
+        },
+        "favicon": { "type": "string" }
+      }
+    },
+    "textos": {
+      "type": "object",
+      "description": "Textos de UI. Cualquier cadena que se muestre en pantalla va aquí.",
+      "additionalProperties": { "type": "string" }
+    },
+    "navegacion": {
+      "type": "object",
+      "description": "Rutas internas del kiosk por nombre.",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^/"
+      }
+    },
+    "assets": {
+      "type": "object",
+      "description": "Paths relativos a imágenes/videos usados por las pantallas.",
+      "additionalProperties": { "type": "string" }
+    },
+    "features": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "idioma_secundario": { "type": "boolean", "default": false },
+        "mostrar_reloj": { "type": "boolean", "default": true },
+        "inactividad_reset_seg": { "type": "integer", "minimum": 10, "maximum": 600 },
+        "permitir_compartir_qr": { "type": "boolean", "default": false }
+      }
+    },
+    "integraciones": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "api_base_url": { "type": "string", "format": "uri" },
+        "analytics_id": { "type": "string" }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version_config"],
+      "properties": {
+        "creado_en": { "type": "string", "format": "date" },
+        "version_config": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" }
+      }
+    }
+  }
+}

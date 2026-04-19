@@ -1,11 +1,10 @@
 /*
  * globals.css — estilos base del kiosk.
  *
- * Importa los tokens del template como fuente única de verdad.
- * En Fase 2 el import apuntará a clients/{KIOSK_CLIENT}/tokens.css dinámicamente.
- * Hasta entonces, el template provee los valores por defecto.
+ * Los tokens del cliente activo se inyectan en <head> desde src/app/layout.tsx
+ * (ver getClientTokensCss). Este archivo NO importa tokens.css directamente
+ * para evitar duplicación y permitir el switch de cliente por KIOSK_CLIENT.
  */
-@import '../../clients/_template/tokens.css';
 
 @tailwind base;
 @tailwind components;

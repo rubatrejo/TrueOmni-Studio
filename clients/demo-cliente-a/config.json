@@ -1,8 +1,8 @@
 {
   "$schema": "./config.schema.json",
   "client": {
-    "slug": "_template",
-    "nombre": "Nombre del cliente",
+    "slug": "demo-cliente-a",
+    "nombre": "Demo Cliente A",
     "locale": "es-ES",
     "timezone": "Europe/Madrid"
   },
@@ -10,17 +10,17 @@
     "logo": {
       "default": "assets/logo.svg",
       "dark": "assets/logo-dark.svg",
-      "alt": "Logo del cliente"
+      "alt": "Logo Demo Cliente A"
     },
     "favicon": "assets/favicon.ico"
   },
   "textos": {
-    "titulo_principal": "Bienvenido",
-    "subtitulo": "Toque para empezar",
-    "cta_primaria": "Empezar",
-    "cta_secundaria": "Más información",
-    "pie_legal": "© 2026 Cliente · Todos los derechos reservados",
-    "label_cliente_activo": "Cliente activo:"
+    "titulo_principal": "Bienvenido a Demo A",
+    "subtitulo": "Toque la pantalla para empezar",
+    "cta_primaria": "Comenzar",
+    "cta_secundaria": "Saber más",
+    "pie_legal": "© 2026 Demo Cliente A · Todos los derechos reservados",
+    "label_cliente_activo": "Estás viendo:"
   },
   "navegacion": {
     "home": "/",
@@ -34,8 +34,8 @@
   "features": {
     "idioma_secundario": false,
     "mostrar_reloj": true,
-    "inactividad_reset_seg": 90,
-    "permitir_compartir_qr": false
+    "inactividad_reset_seg": 120,
+    "permitir_compartir_qr": true
   },
   "integraciones": {
     "api_base_url": "",

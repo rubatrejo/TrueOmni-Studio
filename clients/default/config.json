@@ -1,8 +1,8 @@
 {
   "$schema": "./config.schema.json",
   "client": {
-    "slug": "_template",
-    "nombre": "Nombre del cliente",
+    "slug": "default",
+    "nombre": "Kiosk por defecto",
     "locale": "es-ES",
     "timezone": "Europe/Madrid"
   },
@@ -10,7 +10,7 @@
     "logo": {
       "default": "assets/logo.svg",
       "dark": "assets/logo-dark.svg",
-      "alt": "Logo del cliente"
+      "alt": "Logo del kiosk"
     },
     "favicon": "assets/favicon.ico"
   },
@@ -19,7 +19,7 @@
     "subtitulo": "Toque para empezar",
     "cta_primaria": "Empezar",
     "cta_secundaria": "Más información",
-    "pie_legal": "© 2026 Cliente · Todos los derechos reservados",
+    "pie_legal": "© 2026 Kiosk Portrait · Todos los derechos reservados",
     "label_cliente_activo": "Cliente activo:"
   },
   "navegacion": {

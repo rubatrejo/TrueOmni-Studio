@@ -1,22 +1,53 @@
-import type { ReactNode } from 'react';
+'use client';
+
+import type { CSSProperties, ReactNode } from 'react';
+import { useEffect, useRef } from 'react';
+
+const KIOSK_WIDTH_PX = 1080;
+const KIOSK_HEIGHT_PX = 1920;
 
 /**
- * Canvas fijo 1080×1920 (retrato) centrado en el viewport.
- * Dimensiones vienen de los tokens `--kiosk-width`/`--kiosk-height`.
+ * Canvas fijo 1080×1920 (retrato) escalado para caber en el viewport
+ * del navegador sin scroll, preservando el aspecto 9:16.
  *
- * El canvas NO añade padding. Cada pantalla del kiosk gestiona sus propios
- * bordes (full-bleed, safe-areas, etc.). Si necesitas safe-area, usa las
- * clases de Tailwind `p-safe-top`, `p-safe-x` o los tokens directamente.
+ * El escalado se aplica con `transform: scale(var(--kiosk-scale))` y la
+ * variable se calcula en un useEffect (resize-aware). Los hijos siguen
+ * diseñándose en el espacio lógico 1080×1920 (posiciones absolutas
+ * exactas del SVG, sin cálculo manual).
  */
 export function KioskCanvas({ children }: { children: ReactNode }) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+
+    const updateScale = () => {
+      const scale = Math.min(
+        window.innerWidth / KIOSK_WIDTH_PX,
+        window.innerHeight / KIOSK_HEIGHT_PX,
+      );
+      el.style.setProperty('--kiosk-scale', String(scale));
+    };
+
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
+    <div
+      ref={wrapperRef}
+      className="fixed inset-0 flex items-center justify-center overflow-hidden bg-background"
+      style={{ ['--kiosk-scale' as string]: 1 } as CSSProperties}
+    >
       <div
         data-kiosk-canvas
-        className="relative overflow-hidden bg-background text-foreground shadow-xl"
+        className="relative origin-center overflow-hidden bg-background text-foreground shadow-2xl"
         style={{
-          width: 'var(--kiosk-width)',
-          height: 'var(--kiosk-height)',
+          width: `${KIOSK_WIDTH_PX}px`,
+          height: `${KIOSK_HEIGHT_PX}px`,
+          transform: 'scale(var(--kiosk-scale))',
         }}
       >
         {children}

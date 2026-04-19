@@ -1,10 +1,25 @@
 import type { Metadata } from 'next';
+import { Montserrat, Open_Sans } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { getClientTokensCss } from '@/lib/client-tokens';
 import { getConfig } from '@/lib/config';
 
 import '@/styles/globals.css';
+
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['400', '600', '700', '800'],
+  variable: '--font-montserrat',
+  display: 'swap',
+});
+
+const openSans = Open_Sans({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  variable: '--font-open-sans',
+  display: 'swap',
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getConfig();
@@ -18,7 +33,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const [tokensCss, config] = await Promise.all([getClientTokensCss(), getConfig()]);
 
   return (
-    <html lang={config.client.locale}>
+    <html lang={config.client.locale} className={`${montserrat.variable} ${openSans.variable}`}>
       <head>
         {/* Tokens del cliente activo. Se inyectan antes de Tailwind base para
             que las variables estén disponibles al resolver las clases. */}

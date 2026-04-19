@@ -53,7 +53,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: 'var(--font-sans)',
-        serif: 'var(--font-serif)',
+        display: 'var(--font-display)',
         mono: 'var(--font-mono)',
       },
       fontSize: {
@@ -65,6 +65,12 @@ const config: Config = {
         '2xl': 'var(--font-2xl)',
         '3xl': 'var(--font-3xl)',
         '4xl': 'var(--font-4xl)',
+        'billboard-cta': 'var(--font-billboard-cta)',
+        'billboard-cat-lg': 'var(--font-billboard-cat-lg)',
+        'billboard-cat-md': 'var(--font-billboard-cat-md)',
+        'billboard-time': 'var(--font-billboard-time)',
+        'billboard-weather': 'var(--font-billboard-weather)',
+        'billboard-small': 'var(--font-billboard-small)',
       },
       lineHeight: {
         tight: 'var(--leading-tight)',

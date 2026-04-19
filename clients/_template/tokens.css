@@ -11,18 +11,25 @@
 
 :root {
   /* ---------------------------------------------------------------------- */
-  /*  COLORES                                                               */
+  /*  PALETA DE MARCA TRUEOMNI                                              */
+  /* ---------------------------------------------------------------------- */
+  --brand-primary: 201 100% 40%; /* #0088CE Tech Blue (TrueOmni primary) */
+  --brand-neutral: 0 0% 7%; /* #131313 Black Tetramine */
+  --brand-accent: 172 82% 30%; /* #0E8C7E Teal */
+
+  /* ---------------------------------------------------------------------- */
+  /*  TOKENS SEMÁNTICOS (consumidos por Tailwind y componentes)             */
   /* ---------------------------------------------------------------------- */
   --background: 0 0% 100%; /* fondo base del kiosk */
-  --foreground: 222 47% 11%; /* texto principal */
+  --foreground: var(--brand-neutral); /* texto principal */
 
-  --primary: 221 83% 53%; /* color de marca principal */
+  --primary: var(--brand-primary);
   --primary-foreground: 0 0% 100%;
 
   --secondary: 210 40% 96%; /* fondo de chips, tarjetas suaves */
-  --secondary-foreground: 222 47% 11%;
+  --secondary-foreground: var(--brand-neutral);
 
-  --accent: 262 83% 58%; /* CTA destacada, highlights */
+  --accent: var(--brand-accent);
   --accent-foreground: 0 0% 100%;
 
   --muted: 210 40% 96%;
@@ -30,15 +37,15 @@
 
   --border: 214 32% 91%;
   --input: 214 32% 91%;
-  --ring: 221 83% 53%;
+  --ring: var(--brand-primary);
 
   /* Requeridos por shadcn/ui: card (tarjetas) y popover (overlays/menus).
      Por defecto replican background/foreground; cada cliente puede
      diferenciarlos si su branding lo necesita. */
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  --card-foreground: var(--brand-neutral);
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --popover-foreground: var(--brand-neutral);
 
   --success: 142 71% 45%;
   --warning: 38 92% 50%;
@@ -48,8 +55,13 @@
   /* ---------------------------------------------------------------------- */
   /*  TIPOGRAFÍA                                                            */
   /* ---------------------------------------------------------------------- */
-  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-serif: 'Playfair Display', Georgia, serif;
+  /* --font-display: Montserrat (titulares, CTAs, categorías).
+     --font-sans: Open Sans (body, labels, metadatos).
+     Las variables --font-montserrat y --font-open-sans las inyecta
+     next/font en <html> desde src/app/layout.tsx. */
+  --font-display:
+    var(--font-montserrat, 'Montserrat'), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: var(--font-open-sans, 'Open Sans'), system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* Escala de tamaños (kiosk retrato 1080×1920 → escalas grandes para lectura de lejos) */
@@ -61,6 +73,14 @@
   --font-2xl: 48px;
   --font-3xl: 64px;
   --font-4xl: 96px;
+
+  /* Escala específica de los Billboards (derivada de los SVGs del XD). */
+  --font-billboard-cta: 70px; /* "TOUCH HERE" / "TOUCH TO START" */
+  --font-billboard-cat-lg: 70px; /* THINGS TO DO, EVENTS (B1/B4) */
+  --font-billboard-cat-md: 50px; /* HOTELS, EAT, PLAY (B2/B3) */
+  --font-billboard-time: 67px; /* reloj grande B2 */
+  --font-billboard-weather: 48px; /* "50°" B1 */
+  --font-billboard-small: 24px; /* labels idioma, metadatos */
 
   --leading-tight: 1.1;
   --leading-snug: 1.25;

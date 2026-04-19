@@ -48,8 +48,9 @@
   /* ---------------------------------------------------------------------- */
   /*  TIPOGRAFÍA                                                            */
   /* ---------------------------------------------------------------------- */
-  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-serif: 'Fraunces', Georgia, serif;
+  --font-display:
+    var(--font-montserrat, 'Montserrat'), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: var(--font-open-sans, 'Open Sans'), system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* Escala de tamaños (kiosk retrato 1080×1920 → escalas grandes para lectura de lejos) */

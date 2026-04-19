@@ -38,19 +38,20 @@ canvas 1080×1920 visible, placeholder mostrando `Cliente activo: default`.
 
 ---
 
-## Fase 2 — Sistema de tokens + cargador de cliente
+## Fase 2 — Sistema de tokens + cargador de cliente ✅ cerrada (2026-04-19)
 
 **Cubre:** R3, R4, R5, R6.
 
-- [ ] `src/lib/tokens.ts` con el tipo `Tokens`.
-- [ ] `src/lib/config.ts` que lee `clients/${KIOSK_CLIENT}/config.json` tipado.
-- [ ] `clients/_template/tokens.css` aplicado en `globals.css`.
-- [ ] Tailwind config extendido con `hsl(var(--...))`.
-- [ ] Documentar cómo crear un cliente nuevo en `clients/_template/README.md`.
-- [ ] Crear `clients/default/` como clon del template.
-- [ ] Crear `clients/demo-cliente-a/` con tokens alternativos para probar que cambiar token = cambia UI.
+- [x] `src/lib/tokens.ts` con `TokenColor`/`TokenLayout` (`7bc72ef`).
+- [x] `src/lib/config.ts` con `getConfig()` tipado + fallback (`7bc72ef`).
+- [x] `src/lib/client-tokens.ts` inyecta `tokens.css` por cliente en layout (`5b44b63`).
+- [x] Tailwind config extendido con `hsl(var(--...))` (desde Fase 1).
+- [x] `clients/_template/README.md` documenta creación de cliente nuevo.
+- [x] `clients/default/` existe como clon del template.
+- [x] `clients/demo-cliente-a/` con tokens alternos (naranja + verde menta).
 
-**Verificación:** cambiar `KIOSK_CLIENT=demo-cliente-a` rebuild-ea con colores distintos sin tocar `.tsx`.
+**Verificación:** `KIOSK_CLIENT=default` → primary azul, `KIOSK_CLIENT=demo-cliente-a` →
+primary naranja, textos distintos, sin tocar ningún `.tsx`.
 
 ---
 

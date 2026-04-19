@@ -6,13 +6,13 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Fase 2 — Sistema de tokens + cargador de cliente (por iniciar).
+**Fase activa:** Fase 3 — Pantallas del kiosk (esperando SVGs de Adobe XD).
 
-**Última fase cerrada:** Fase 1 — Scaffolding Next.js + Tailwind + shadcn/ui.
+**Última fase cerrada:** Fase 2 — Sistema de tokens + cargador de cliente.
 
-**Siguiente acción concreta:** discutir con el orquestador el alcance de Fase 2 (crear `clients/default/` y `clients/demo-cliente-a/`, extender cargador a `config.json` tipado con `src/lib/config.ts`, mover placeholder de Fase 1 a config real).
+**Siguiente acción concreta:** cuando Rubén entregue los primeros SVGs del XD, depositarlos en `designs/NN-nombre.svg` + spec en `designs/NN-nombre.md` e invocar `/pantalla NN-nombre` para empezar la primera sub-fase de Fase 3.
 
-**Bloqueos:** ninguno. Esperando SVGs del XD para activar Fase 3 más adelante.
+**Bloqueos:** Fase 3 depende de los SVGs. Sin ellos, no se puede planificar pantallas concretas. Fases 4/5 dependen de 3.
 
 **Decisiones globales vigentes:**
 
@@ -97,6 +97,63 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
   generados y NO se editan a mano (CLAUDE.md §9).
 
 **Fase:** 1 — Scaffolding Next.js + Tailwind + shadcn/ui.
+
+### Sesión 2026-04-19 — Fase 2 completa (sistema white-label funcional)
+
+**Hecho:**
+
+- Cargadores tipados: `src/lib/tokens.ts` (catálogo de nombres de token),
+  `src/lib/config.ts` con `getConfig()` cacheado y fallback a `default`,
+  `src/lib/client-tokens.ts` con `getClientTokensCss()` para inyectar
+  tokens.css. Dep `server-only` añadida. Commit `7bc72ef`.
+- Clientes reales: `clients/default/` (clon del template, slug "default",
+  nombre "Kiosk por defecto") y `clients/demo-cliente-a/` (primary
+  naranja 25 95% 55%, accent verde menta 160 72% 45%, radios más
+  redondeados, font-serif Fraunces, textos alternativos). Commit `5b44b63`.
+- Cableado UI: `src/app/layout.tsx` pasa a async, inyecta tokens del
+  cliente activo como `<style data-kiosk-tokens>` en `<head>`, setea
+  `lang` y title desde config. `src/app/(kiosk)/page.tsx` consume
+  `config.textos`. `src/styles/globals.css` deja de hacer `@import`
+  del template (los tokens entran solo por inyección).
+- `src/lib/kiosk-placeholder.ts` borrado. Cero referencias en el repo.
+- `clients/_template/README.md` documenta la creación de cliente nuevo
+  y qué archivo controla qué.
+- Archivo `Untitled` accidental borrado.
+
+**Verificado:**
+
+- `KIOSK_CLIENT=default` → `--primary: 221 83% 53%` (azul), título
+  "Bienvenido", slug `default`, metadata title "Kiosk por defecto".
+- `KIOSK_CLIENT=demo-cliente-a` → `--primary: 25 95% 55%` (naranja),
+  `--accent: 160 72% 45%` (verde), título "Bienvenido a Demo A",
+  label "Estás viendo:", metadata title "Demo Cliente A".
+- Cambio entre clientes sin tocar ni un `.tsx`.
+- `pnpm check` (typecheck + lint + format:check) limpio.
+- `grep -R "KIOSK_PHASE_1_PLACEHOLDER\|kiosk-placeholder" src/` vacío.
+- `grep -n "@import" src/styles/globals.css` vacío (tokens solo por
+  inyección).
+
+**Pendiente / siguiente:**
+
+- Fase 3: esperar los SVGs del XD. Por cada pantalla, depositar
+  `designs/NN-nombre.{svg,md}`, crear plan XML, cargar skills Tier 1
+  y construir pixel-perfect.
+- Evaluar si conviene un fallback más defensivo en `getConfig()` si
+  el JSON del cliente está malformado (ahora propaga el error).
+  Probablemente suficiente hasta Fase 5 (validador zod).
+
+**Decisiones:**
+
+- Inyección de tokens via `<style dangerouslySetInnerHTML>` en layout,
+  no via `@import` estático en `globals.css`. Razón: permite switch
+  por `KIOSK_CLIENT` en cada render, sin rebuild.
+- `React.cache()` para `getConfig` y `getClientTokensCss` — evita
+  doble lectura de fichero cuando layout + page consumen lo mismo.
+- Schema `config.schema.json` se duplica en cada cliente (copia, no
+  symlink). Razón: portabilidad y el `$schema` relativo funciona.
+- Dep `server-only` mantiene los cargadores fuera del bundle cliente.
+
+**Fase:** 2 — Sistema de tokens + cargador de cliente.
 
 ---
 

@@ -141,6 +141,16 @@ El producto es visual. No vale solo con "el typecheck pasa". Herramientas obliga
 
 Si no puedes verificar visualmente, **dilo explícitamente** y **no marques la tarea como completa**: crea un TODO y anótalo en STATE.md antes de cerrar la sesión.
 
+### Protocolo pixel-perfect (obligatorio por pantalla)
+
+Ver `.planning/PIXEL-PERFECT-PROTOCOL.md`. Resumen de los 5 pasos:
+
+1. **Inventario de groups del SVG** → checklist en `.planning/3-NN-COVERAGE.md`.
+2. **Paths verbatim del SVG con sus `transform`** — nunca reescribir coords a mano.
+3. **Cero substituciones de iconos** con librerías si el SVG trae el path.
+4. **Diff visual `revisor-visual`** antes de declarar hecho (tolerancia ±2px).
+5. **Audit del checklist de coverage** antes del commit.
+
 ---
 
 ## 7. Reglas de white-label (CRÍTICAS — nunca se rompen)

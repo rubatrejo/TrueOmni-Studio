@@ -46,3 +46,6 @@ coverage/
 # Playwright MCP (screenshots ephemeros de /verificar-visual)
 .playwright-mcp/
 *-render.png
+# Screenshots dev scratchpad (billboard-*.png, b*-*.png)
+billboard-*.png
+b*-*.png

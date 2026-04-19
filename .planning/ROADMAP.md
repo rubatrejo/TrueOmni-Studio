@@ -4,17 +4,17 @@ Fases ordenadas. Cada fase es atómica, ejecutable en una ventana de contexto fr
 
 ---
 
-## Fase 0 — Bootstrap del repo 🟡 en progreso
+## Fase 0 — Bootstrap del repo ✅ cerrada (2026-04-19)
 
 **Cubre:** infraestructura.
 
-- [ ] CLAUDE.md raíz.
-- [ ] `.claude/commands/iniciar.md`, `.claude/commands/terminar.md`.
-- [ ] `.planning/` con PROJECT, REQUIREMENTS, ROADMAP, STATE.
-- [ ] `clients/_template/` con `config.json` + `tokens.css`.
-- [ ] `designs/_template.md` con plantilla de specs por pantalla.
-- [ ] `git init` + primer commit `chore: bootstrap del repo`.
-- [ ] Aún no hay Next.js — eso va en la fase 1.
+- [x] CLAUDE.md raíz.
+- [x] `.claude/commands/iniciar.md`, `.claude/commands/terminar.md`.
+- [x] `.planning/` con PROJECT, REQUIREMENTS, ROADMAP, STATE.
+- [x] `clients/_template/` con `config.json` + `tokens.css`.
+- [x] `designs/_template.md` con plantilla de specs por pantalla.
+- [x] `git init` + primer commit `chore: bootstrap del repo` (`8e5a3e5`).
+- [x] Aún no hay Next.js — eso va en la fase 1.
 
 > Los checks se marcan solo **después** del commit que los incorpora. Nada está "hecho" hasta que está en git.
 
@@ -22,18 +22,19 @@ Fases ordenadas. Cada fase es atómica, ejecutable en una ventana de contexto fr
 
 ---
 
-## Fase 1 — Scaffolding Next.js + Tailwind + shadcn/ui
+## Fase 1 — Scaffolding Next.js + Tailwind + shadcn/ui ✅ cerrada (2026-04-19)
 
 **Cubre:** R2.
 
-- [ ] `pnpm create next-app` con TypeScript + Tailwind + App Router.
-- [ ] Instalar shadcn/ui y al menos 5 componentes base (button, card, dialog, input, badge).
-- [ ] Configurar alias de paths (`@/components`, `@/lib`, `@/styles`).
-- [ ] Configurar ESLint + Prettier con reglas estrictas.
-- [ ] Variables de entorno: `KIOSK_CLIENT`.
-- [ ] Script `pnpm kiosk:dev` que arranca con `KIOSK_CLIENT=default`.
+- [x] Scaffold Next.js 15 + React 19 + TypeScript estricto + App Router (`04464ce`).
+- [x] shadcn/ui con 5 componentes base (button, card, dialog, input, badge) + wrappers (`172dc42`).
+- [x] Alias de paths (`@/components`, `@/lib`, `@/styles`).
+- [x] ESLint + Prettier estrictos + scripts `check`/`format`/`lint` (`59718e1`).
+- [x] Variable de entorno `KIOSK_CLIENT` con `getClientSlug()` + fallback `default`.
+- [x] Script `pnpm kiosk:dev` con `cross-env KIOSK_CLIENT=default next dev`.
 
-**Verificación:** `pnpm dev` levanta, typecheck pasa, lint limpio, página en blanco con layout del kiosk (1080×1920).
+**Verificación:** `pnpm kiosk:dev` levanta HTTP 200, `pnpm check` limpio,
+canvas 1080×1920 visible, placeholder mostrando `Cliente activo: default`.
 
 ---
 

@@ -5,6 +5,8 @@ import { useEffect, useRef } from 'react';
 
 const KIOSK_WIDTH_PX = 1080;
 const KIOSK_HEIGHT_PX = 1920;
+/** Margen alrededor del canvas dentro del viewport (dev-view). */
+const VIEWPORT_PADDING_PX = 48;
 
 /**
  * Canvas fijo 1080×1920 (retrato) escalado para caber en el viewport
@@ -23,10 +25,11 @@ export function KioskCanvas({ children }: { children: ReactNode }) {
     if (!el) return;
 
     const updateScale = () => {
-      const scale = Math.min(
-        window.innerWidth / KIOSK_WIDTH_PX,
-        window.innerHeight / KIOSK_HEIGHT_PX,
-      );
+      const available = {
+        w: window.innerWidth - VIEWPORT_PADDING_PX * 2,
+        h: window.innerHeight - VIEWPORT_PADDING_PX * 2,
+      };
+      const scale = Math.min(available.w / KIOSK_WIDTH_PX, available.h / KIOSK_HEIGHT_PX);
       el.style.setProperty('--kiosk-scale', String(scale));
     };
 

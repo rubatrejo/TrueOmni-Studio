@@ -1,0 +1,20 @@
+/*
+ * globals.css — estilos base del kiosk.
+ *
+ * Importa los tokens del template como fuente única de verdad.
+ * En Fase 2 el import apuntará a clients/{KIOSK_CLIENT}/tokens.css dinámicamente.
+ * Hasta entonces, el template provee los valores por defecto.
+ */
+@import "../../clients/_template/tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}

@@ -16,15 +16,21 @@ const VARIANTS = {
 
 type BillboardVariant = keyof typeof VARIANTS;
 
+interface BillboardProps {
+  /** Override manual (URL `?variant=N` en dev). Si no llega, lee config. */
+  variant?: number;
+}
+
 /**
  * Switcher de variante Billboard.
- * Lee `config.features.billboard_variant` (0-4) y renderiza la
- * variante correspondiente. Fallback a Billboard0 si el valor no
- * está definido o no coincide con un variante válido.
+ * Prioridad:
+ *   1. Prop `variant` (útil para navegación dev vía URL).
+ *   2. `config.features.billboard_variant` (producción, por cliente).
+ *   3. Fallback a Billboard0.
  */
-export async function Billboard() {
+export async function Billboard({ variant: override }: BillboardProps = {}) {
   const config = await getConfig();
-  const raw = config.features?.billboard_variant;
+  const raw = override ?? config.features?.billboard_variant;
   const variant: BillboardVariant =
     typeof raw === 'number' && raw in VARIANTS ? (raw as BillboardVariant) : 0;
   const Component = VARIANTS[variant];

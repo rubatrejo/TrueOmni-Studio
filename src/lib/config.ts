@@ -36,6 +36,8 @@ export interface KioskConfig {
     mostrar_reloj?: boolean;
     inactividad_reset_seg?: number;
     permitir_compartir_qr?: boolean;
+    /** Variante del Billboard idle (0-4). Default 0 si no se declara. */
+    billboard_variant?: 0 | 1 | 2 | 3 | 4;
   };
   integraciones?: {
     api_base_url?: string;

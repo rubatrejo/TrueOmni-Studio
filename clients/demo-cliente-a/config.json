@@ -35,7 +35,8 @@
     "idioma_secundario": false,
     "mostrar_reloj": true,
     "inactividad_reset_seg": 120,
-    "permitir_compartir_qr": true
+    "permitir_compartir_qr": true,
+    "billboard_variant": 1
   },
   "integraciones": {
     "api_base_url": "",

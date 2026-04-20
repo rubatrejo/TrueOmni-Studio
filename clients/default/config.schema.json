@@ -85,7 +85,14 @@
         "idioma_secundario": { "type": "boolean", "default": false },
         "mostrar_reloj": { "type": "boolean", "default": true },
         "inactividad_reset_seg": { "type": "integer", "minimum": 10, "maximum": 600 },
-        "permitir_compartir_qr": { "type": "boolean", "default": false }
+        "permitir_compartir_qr": { "type": "boolean", "default": false },
+        "billboard_variant": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4,
+          "default": 0,
+          "description": "Variante del Billboard idle (0=dark hero, 1=grid+weather, 2=categories, 3=dark blue grid, 4=bands+sidebars)."
+        }
       }
     },
     "integraciones": {

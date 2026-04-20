@@ -1,5 +1,5 @@
-import { Billboard4 } from '@/components/billboard/billboard-4';
+import { Billboard } from '@/components/billboard/billboard';
 
 export default function KioskHomePage() {
-  return <Billboard4 />;
+  return <Billboard />;
 }

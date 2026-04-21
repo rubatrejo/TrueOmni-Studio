@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <filter id="Rectangle_11" x="168" y="452.5" width="744" height="1016" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feFlood flood-opacity="0.22"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <clipPath id="clip-Weather_Popup">
+      <rect width="1080" height="1920"/>
+    </clipPath>
+  </defs>
+  <g id="Weather_Popup" data-name="Weather Popup" clip-path="url(#clip-Weather_Popup)">
+    <rect id="Opacity_Overlay" data-name="Opacity Overlay" width="1080" height="1920" opacity="0.75"/>
+    <g id="Weather_PopUp-2" data-name="Weather PopUp" transform="translate(198 482)">
+      <g id="Pop-ups_Small_Background" data-name="Pop-ups/Small/Background" transform="translate(0 0.5)">
+        <g transform="matrix(1, 0, 0, 1, -198, -482.5)" filter="url(#Rectangle_11)">
+          <rect id="Rectangle_11-2" data-name="Rectangle 11" width="684" height="956" rx="8" transform="translate(198 482.5)" fill="#fff"/>
+        </g>
+        <g id="Button_Ok" data-name="Button Ok" transform="translate(182 812)">
+          <rect id="Rectangle_13" data-name="Rectangle 13" width="320" height="71" rx="9" fill="#1796d6"/>
+          <text id="Ok" transform="translate(134 49)" fill="#fff" font-size="32" font-family="Helvetica-Bold, Helvetica" font-weight="700"><tspan x="0" y="0">OK</tspan></text>
+        </g>
+      </g>
+      <path id="Background" d="M0,0H576a0,0,0,0,1,0,0V495a15,15,0,0,1-15,15H15A15,15,0,0,1,0,495V0A0,0,0,0,1,0,0Z" transform="translate(55)" fill="#004f8b"/>
+      <g id="Group_4" data-name="Group 4" transform="translate(3 587.5)">
+        <g id="Group_2" data-name="Group 2" transform="translate(52)">
+          <path id="icon" d="M36.5,73a2.811,2.811,0,0,1-2.808-2.808V64.577a2.808,2.808,0,1,1,5.615,0v5.615A2.811,2.811,0,0,1,36.5,73Zm23.824-9.868a2.782,2.782,0,0,1-1.984-.823l-3.972-3.972a2.807,2.807,0,0,1,3.97-3.97L62.31,58.34a2.808,2.808,0,0,1-1.985,4.792Zm-47.649,0A2.808,2.808,0,0,1,10.69,58.34l3.972-3.972a2.807,2.807,0,0,1,3.97,3.97L14.66,62.31A2.782,2.782,0,0,1,12.676,63.132ZM36.5,56.154A19.654,19.654,0,1,1,56.154,36.5,19.676,19.676,0,0,1,36.5,56.154Zm0-33.692A14.039,14.039,0,1,0,50.539,36.5,14.055,14.055,0,0,0,36.5,22.461ZM70.192,39.307H64.577a2.808,2.808,0,1,1,0-5.615h5.615a2.808,2.808,0,1,1,0,5.615Zm-61.769,0H2.808a2.808,2.808,0,1,1,0-5.615H8.423a2.808,2.808,0,1,1,0,5.615Zm47.93-19.853a2.808,2.808,0,0,1-1.985-4.793L58.34,10.69a2.807,2.807,0,0,1,3.97,3.97l-3.972,3.972A2.782,2.782,0,0,1,56.354,19.454Zm-39.707,0a2.782,2.782,0,0,1-1.984-.823L10.69,14.66a2.807,2.807,0,0,1,3.97-3.97l3.972,3.972a2.808,2.808,0,0,1-1.985,4.793ZM36.5,11.231a2.811,2.811,0,0,1-2.808-2.808V2.808a2.808,2.808,0,1,1,5.615,0V8.423A2.811,2.811,0,0,1,36.5,11.231Z" transform="translate(0 41)" fill="#4d4d4d"/>
+          <text id="date_copy" data-name="date copy" transform="translate(5)" fill="#4d4d4d" font-size="20" font-family="Helvetica-Light, Helvetica" font-weight="300"><tspan x="3.72" y="15">Friday </tspan></text>
+          <text id="_50_" data-name="50°" transform="translate(3 138.5)" fill="#4d4d4d" font-size="20" font-family="Helvetica-Bold, Helvetica" font-weight="700"><tspan x="0" y="15" xml:space="preserve">50°  </tspan></text>
+          <text id="_20_" data-name="20°" transform="translate(40 138.5)" fill="#4d4d4d" font-size="20" font-family="Helvetica-Light, Helvetica" font-weight="300"><tspan x="0" y="15" xml:space="preserve">20°  </tspan></text>
+          <rect id="Rectangle_Copy" data-name="Rectangle Copy" width="1" height="68" rx="0.5" transform="translate(70.5 31.5) rotate(90)" fill="#4d4d4d"/>
+          <rect id="Rectangle_Copy_2" data-name="Rectangle Copy 2" width="1" height="68" rx="0.5" transform="translate(70.5 127.5) rotate(90)" fill="#4d4d4d"/>
+        </g>
+        <g id="Group_2_Copy" data-name="Group 2 Copy" transform="translate(171)">
+          <g id="Group_3_Copy" data-name="Group 3 Copy" transform="translate(5 43)">
+            <path id="icon-2" data-name="icon" d="M31.286,63a2.417,2.417,0,0,1-2.407-2.423V55.731a2.407,2.407,0,1,1,4.813,0v4.847A2.417,2.417,0,0,1,31.286,63Zm20.421-8.516a2.378,2.378,0,0,1-1.7-.71l-3.4-3.427a2.438,2.438,0,0,1,0-3.426,2.393,2.393,0,0,1,3.4,0l3.4,3.427a2.437,2.437,0,0,1,0,3.426A2.385,2.385,0,0,1,51.707,54.484Zm-40.842,0a2.382,2.382,0,0,1-1.7-.71,2.437,2.437,0,0,1,0-3.426l3.4-3.427a2.393,2.393,0,0,1,3.4,0,2.438,2.438,0,0,1,0,3.426l-3.4,3.427A2.378,2.378,0,0,1,10.865,54.484Zm20.421-6.023A16.962,16.962,0,1,1,48.132,31.5,16.923,16.923,0,0,1,31.286,48.461Zm0-29.077A12.116,12.116,0,1,0,43.319,31.5,12.088,12.088,0,0,0,31.286,19.384ZM60.165,33.923H55.352a2.423,2.423,0,0,1,0-4.846h4.813a2.423,2.423,0,0,1,0,4.846Zm-52.945,0H2.407a2.423,2.423,0,0,1,0-4.846H7.22a2.423,2.423,0,0,1,0,4.846ZM48.3,16.789a2.382,2.382,0,0,1-1.7-.71,2.438,2.438,0,0,1,0-3.426l3.4-3.427a2.4,2.4,0,0,1,3.4,0,2.437,2.437,0,0,1,0,3.426L50,16.079A2.378,2.378,0,0,1,48.3,16.789Zm-34.034,0a2.378,2.378,0,0,1-1.7-.71l-3.4-3.427a2.437,2.437,0,0,1,0-3.426,2.4,2.4,0,0,1,3.4,0l3.4,3.427a2.438,2.438,0,0,1,0,3.426A2.382,2.382,0,0,1,14.269,16.789Zm17.017-7.1a2.417,2.417,0,0,1-2.407-2.423V2.423a2.407,2.407,0,1,1,4.813,0V7.269A2.417,2.417,0,0,1,31.286,9.692Z" fill="#4d4d4d"/>
+            <path id="ic_weather" d="M52.739,16.68a16.41,16.41,0,0,0-31.2-7.38,8.62,8.62,0,0,0-4.827-1.464,8.834,8.834,0,0,0-8.751,8.281A12.285,12.285,0,0,0,12.1,39.9h39.33A11.3,11.3,0,0,0,52.72,17.392C52.733,17.148,52.739,16.912,52.739,16.68Z" transform="translate(10.429 23.1)" fill="#fff" stroke="#4d4d4d" stroke-miterlimit="10" stroke-width="4.471"/>
+          </g>
+          <text id="date_copy-2" data-name="date copy" fill="#4d4d4d" font-size="20" font-family="Helvetica-Light, Helvetica" font-weight="300"><tspan x="1.67" y="15">Saturday</tspan></text>
+          <text id="_50_2" data-name="50°" transform="translate(8 138.5)" fill="#4d4d4d" font-size="20" font-family="Helvetica-Bold, Helvetica" font-weight="700"><tspan x="0" y="15" xml:space="preserve">50°  </tspan></text>
+          <text id="_20_2" data-name="20°" transform="translate(43 138.5)" fill="#4d4d4d" font-size="20" font-family="Helvetica-Light, Helvetica" font-weight="300"><tspan x="0" y="15" xml:space="preserve">20°  </tspan></text>
+          <rect id="Rectangle_Copy-2" data-name="Rectangle Copy" width="1" height="68" rx="0.5" transform="translate(75.5 31.5) rotate(90)" fill="#4d4d4d"/>
+          <rect id="Rectangle_Copy_2-2" data-name="Rectangle Copy 2" width="1" height="68" rx="0.5" transform="translate(75.5 127.5) rotate(90)" fill="#4d4d4d"/>
+        </g>
+        <g id="Group_2_Copy_2" data-name="Group 2 Copy 2" transform="translate(296)">
+          <path id="ic_weather-2" data-name="ic_weather" d="M59,18.44a18.394,18.394,0,0,0-34.9-8.159,9.726,9.726,0,0,0-5.4-1.618,9.833,9.833,0,0,0-9.79,9.155,13.557,13.557,0,0,0,4.63,26.292h44a12.484,12.484,0,0,0,1.442-24.883C58.993,18.958,59,18.7,59,18.44Z" transform="translate(8 58.521)" fill="#fff" stroke="#4d4d4d" stroke-miterlimit="10" stroke-width="4"/>
+          <text id="date_copy-3" data-name="date copy" fill="#4d4d4d" font-size="20" font-family="Helvetica-Light, Helvetica" font-weight="300"><tspan x="7.6" y="15">Sunday</tspan></text>
+          <text id="_50_3" data-name="50°" transform="translate(8 138.5)" fill="#4d4d4d" font-size="20" font-family="Helvetica-Bold, Helvetica" font-weight="700"><tspan x="0" y="15" xml:space="preserve">50°  </tspan></text>
+          <text id="_20_3" data-name="20°" transform="translate(43 138.5)" fill="#4d4d4d" font-size="20" font-family="Helvetica-Light, Helvetica" font-weight="300"><tspan x="0" y="15" xml:space="preserve">20°  </tspan></text>
+          <rect id="Rectangle_Copy-3" data-name="Rectangle Copy" width="1" height="68" rx="0.5" transform="translate(75.5 31.5) rotate(90)" fill="#4d4d4d"/>
+          <rect id="Rectangle_Copy_2-3" data-name="Rectangle Copy 2" width="1" height="68" rx="0.5" transform="translate(75.5 127.5) rotate(90)" fill="#4d4d4d"/>
+        </g>
+        <g id="Group_2_Copy_3" data-name="Group 2 Copy 3" transform="translate(420)">
+          <g id="Group_3" data-name="Group 3" transform="translate(8 40)">
+            <path id="icon-3" data-name="icon" d="M31.286,0a2.417,2.417,0,0,0-2.407,2.423V7.269a2.407,2.407,0,1,0,4.813,0V2.423A2.417,2.417,0,0,0,31.286,0ZM51.707,8.516a2.378,2.378,0,0,0-1.7.71l-3.4,3.427a2.438,2.438,0,0,0,0,3.426,2.393,2.393,0,0,0,3.4,0l3.4-3.427a2.437,2.437,0,0,0,0-3.426A2.385,2.385,0,0,0,51.707,8.516Zm-40.842,0a2.382,2.382,0,0,0-1.7.71,2.437,2.437,0,0,0,0,3.426l3.4,3.427a2.393,2.393,0,0,0,3.4,0,2.438,2.438,0,0,0,0-3.426l-3.4-3.427A2.378,2.378,0,0,0,10.865,8.516Zm20.421,6.023A16.962,16.962,0,1,0,48.132,31.5,16.923,16.923,0,0,0,31.286,14.539Zm0,29.077A12.116,12.116,0,1,1,43.319,31.5,12.088,12.088,0,0,1,31.286,43.616ZM60.165,29.077H55.352a2.423,2.423,0,0,0,0,4.846h4.813a2.423,2.423,0,0,0,0-4.846Zm-52.945,0H2.407a2.423,2.423,0,0,0,0,4.846H7.22a2.423,2.423,0,0,0,0-4.846ZM48.3,46.211a2.382,2.382,0,0,0-1.7.71,2.438,2.438,0,0,0,0,3.426l3.4,3.427a2.4,2.4,0,0,0,3.4,0,2.437,2.437,0,0,0,0-3.426L50,46.921A2.378,2.378,0,0,0,48.3,46.211Zm-34.034,0a2.378,2.378,0,0,0-1.7.71l-3.4,3.427a2.437,2.437,0,0,0,0,3.426,2.4,2.4,0,0,0,3.4,0l3.4-3.427a2.438,2.438,0,0,0,0-3.426A2.382,2.382,0,0,0,14.269,46.211Zm17.017,7.1a2.417,2.417,0,0,0-2.407,2.423v4.847a2.407,2.407,0,1,0,4.813,0V55.731A2.417,2.417,0,0,0,31.286,53.308Z" transform="translate(73 63) rotate(180)" fill="#4d4d4d"/>
+            <path id="ic_weather-3" data-name="ic_weather" d="M9.833,16.68a16.41,16.41,0,0,1,31.2-7.38,8.62,8.62,0,0,1,4.827-1.464,8.834,8.834,0,0,1,8.751,8.281A12.285,12.285,0,0,1,50.47,39.9H11.14A11.3,11.3,0,0,1,9.851,17.392C9.839,17.148,9.833,16.912,9.833,16.68Z" transform="translate(0 23.1)" fill="#fff" stroke="#4d4d4d" stroke-miterlimit="10" stroke-width="4.471"/>
+          </g>
+          <text id="date_copy-4" data-name="date copy" fill="#4d4d4d" font-size="20" font-family="Helvetica-Light, Helvetica" font-weight="300"><tspan x="5.38" y="15">Monday</tspan></text>
+          <text id="_50_4" data-name="50°" transform="translate(8 138.5)" fill="#4d4d4d" font-size="20" font-family="Helvetica-Bold, Helvetica" font-weight="700"><tspan x="0" y="15" xml:space="preserve">50°  </tspan></text>
+          <text id="_20_4" data-name="20°" transform="translate(43 138.5)" fill="#4d4d4d" font-size="20" font-family="Helvetica-Light, Helvetica" font-weight="300"><tspan x="0" y="15" xml:space="preserve">20°  </tspan></text>
+          <rect id="Rectangle_Copy-4" data-name="Rectangle Copy" width="1" height="68" rx="0.5" transform="translate(75.5 31.5) rotate(90)" fill="#4d4d4d"/>
+          <rect id="Rectangle_Copy_2-4" data-name="Rectangle Copy 2" width="1" height="68" rx="0.5" transform="translate(75.5 127.5) rotate(90)" fill="#4d4d4d"/>
+        </g>
+        <g id="Group_2_Copy_4" data-name="Group 2 Copy 4" transform="translate(545)">
+          <path id="icon-4" data-name="icon" d="M36.5,73a2.811,2.811,0,0,1-2.808-2.808V64.577a2.808,2.808,0,1,1,5.615,0v5.615A2.811,2.811,0,0,1,36.5,73Zm23.824-9.868a2.782,2.782,0,0,1-1.984-.823l-3.972-3.972a2.807,2.807,0,0,1,3.97-3.97L62.31,58.34a2.808,2.808,0,0,1-1.985,4.792Zm-47.649,0A2.808,2.808,0,0,1,10.69,58.34l3.972-3.972a2.807,2.807,0,0,1,3.97,3.97L14.66,62.31A2.782,2.782,0,0,1,12.676,63.132ZM36.5,56.154A19.654,19.654,0,1,1,56.154,36.5,19.676,19.676,0,0,1,36.5,56.154Zm0-33.692A14.039,14.039,0,1,0,50.539,36.5,14.055,14.055,0,0,0,36.5,22.461ZM70.192,39.307H64.577a2.808,2.808,0,1,1,0-5.615h5.615a2.808,2.808,0,1,1,0,5.615Zm-61.769,0H2.808a2.808,2.808,0,1,1,0-5.615H8.423a2.808,2.808,0,1,1,0,5.615Zm47.93-19.853a2.808,2.808,0,0,1-1.985-4.793L58.34,10.69a2.807,2.807,0,0,1,3.97,3.97l-3.972,3.972A2.782,2.782,0,0,1,56.354,19.454Zm-39.707,0a2.782,2.782,0,0,1-1.984-.823L10.69,14.66a2.807,2.807,0,0,1,3.97-3.97l3.972,3.972a2.808,2.808,0,0,1-1.985,4.793ZM36.5,11.231a2.811,2.811,0,0,1-2.808-2.808V2.808a2.808,2.808,0,1,1,5.615,0V8.423A2.811,2.811,0,0,1,36.5,11.231Z" transform="translate(5 41)" fill="#4d4d4d"/>
+          <text id="date_copy-5" data-name="date copy" fill="#4d4d4d" font-size="20" font-family="Helvetica-Light, Helvetica" font-weight="300"><tspan x="4.07" y="15">Tuesday</tspan></text>
+          <text id="_50_5" data-name="50°" transform="translate(8 138.5)" fill="#4d4d4d" font-size="20" font-family="Helvetica-Bold, Helvetica" font-weight="700"><tspan x="0" y="15" xml:space="preserve">50°  </tspan></text>
+          <text id="_20_5" data-name="20°" transform="translate(43 138.5)" fill="#4d4d4d" font-size="20" font-family="Helvetica-Light, Helvetica" font-weight="300"><tspan x="0" y="15" xml:space="preserve">20°  </tspan></text>
+          <rect id="Rectangle_Copy-5" data-name="Rectangle Copy" width="1" height="68" rx="0.5" transform="translate(75.5 31.5) rotate(90)" fill="#4d4d4d"/>
+          <rect id="Rectangle_Copy_2-5" data-name="Rectangle Copy 2" width="1" height="68" rx="0.5" transform="translate(75.5 127.5) rotate(90)" fill="#4d4d4d"/>
+        </g>
+        <rect id="Rectangle" width="3" height="106" rx="1.5" transform="translate(148 27)" fill="#4d4d4d"/>
+        <rect id="Rectangle_Copy_3" data-name="Rectangle Copy 3" width="3" height="106" rx="1.5" transform="translate(273 27)" fill="#4d4d4d"/>
+        <rect id="Rectangle_Copy_4" data-name="Rectangle Copy 4" width="3" height="106" rx="1.5" transform="translate(398 27)" fill="#4d4d4d"/>
+        <rect id="Rectangle_Copy_5" data-name="Rectangle Copy 5" width="3" height="106" rx="1.5" transform="translate(523 27)" fill="#4d4d4d"/>
+      </g>
+      <g id="Group_5" data-name="Group 5" transform="translate(93 81.5)">
+        <text id="date" transform="translate(0 187)" fill="#fff" font-size="38" font-family="OpenSans-Semibold, Open Sans" font-weight="600"><tspan x="17.043" y="41">Friday, December 9, 2025</tspan></text>
+        <g id="Group_6537" data-name="Group 6537" transform="translate(0 -20)">
+          <path id="ic_weather-4" data-name="ic_weather" d="M155.929,48.912A48.583,48.583,0,0,0,63.688,27.27a25.637,25.637,0,0,0-14.271-4.293A26.028,26.028,0,0,0,23.543,47.261,35.979,35.979,0,0,0,35.779,117H152.063a33.122,33.122,0,0,0,3.811-66C155.911,50.285,155.929,49.593,155.929,48.912Z" transform="translate(17)" fill="#fff"/>
+          <text id="_50_6" data-name="50°" transform="translate(238)" fill="#fff" font-size="151.667" font-family="OpenSans-Bold, Open Sans" font-weight="700"><tspan x="0" y="162">50° </tspan></text>
+        </g>
+        <g id="Group" transform="translate(165 319)">
+          <text id="time_and_temperature" data-name="time and temperature" transform="translate(-31 0.5)" fill="#fff" font-size="65" font-family="OpenSans-Bold, Open Sans" font-weight="700"><tspan x="0" y="69">12:00 </tspan></text>
+          <text id="PM" transform="translate(146 57.5)" fill="#fff" font-size="35" font-family="OpenSans-Bold, Open Sans" font-weight="700"><tspan x="0" y="0">PM</tspan></text>
+        </g>
+        <line id="Line_46" data-name="Line 46" x2="536" transform="translate(-17.5 278)" fill="none" stroke="#fff" stroke-width="2"/>
+        <line id="Line_47" data-name="Line 47" x2="536" transform="translate(-17.5 151)" fill="none" stroke="#fff" stroke-width="2"/>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,347 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <linearGradient id="linear-gradient" x1="0.5" y1="0.973" x2="0.5" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.765"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0.278"/>
+    </linearGradient>
+    <pattern id="pattern" preserveAspectRatio="xMidYMid slice" width="100%" height="100%" viewBox="0 0 46 46">
+      <image width="46" height="46" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAAuCAIAAADY27xgAAAAAXNSR0IArs4c6QAAD2xJREFUWAk9mMuuJclVhjMyIiPytnOfa3V1dxmrq7sRpmVLDKymQTLGA0DM8AvwBJ5YPAECWZ7ACzBg5JEZGMkScy42YKRGYGjTRmXJVtfl1Dn71L7lNSL4VuwyqX3y5M6dGbHWv/71rxWhLt7+utZFzie3Rrtc2SzPjS5jVCozKt1X3Mqt4pSbqAtnK6V08Iqzc1WuzH6/X4Jv29aWlbxtrNYuZCqEzJg2hCCv5vkSYsZhihhj8JE7MeeZoNJ9w3ettcrlQg6VZ8owico0v4gN3Ev/eEZuZ5qB+KkoeMBwuHS8vH3hvS8Yq7BYwH+by0WIuMA3HVVWKMU5yxUDZLlcYFhQfIKKmeHNPOcZo/FGF1iQTNEMphRQGe4ozTkZlWtTCCSKhzTARD9PunR1U726z4f+UJeVYGYK0PKLGobeugJz8cGDszilBRgGyDJwF3gALwOAzBARMSWFAKi5xr5cgQfTM4IGJwzFJpzjAeAs+LkoKlvNHlv8siwmH+VRxRPykQkDcylnCkaxucHvPPCETMMv6SzBiqCWZ4DHkeaQRyRGSpAwKgryUeBkbrlO4dM6F5AwXabEuEx4pPLCFaXJdde24zDHxc/j1DZt5WofclfEZZltQXTyGEFSrDxRh0gBiceaFG9OGI01UJIA2VwcLkBL5y4Q4mQH15iIHcLu3BR5mRiTBQ9oiSx5gXcYRMz744gnulE8bTX0zGYcwWCMTxDL9D4SGxyEWwvQSJgwCDvIGg0DZRqsAacISNokLG2yQFAhI1L4cI6pxDJjCmglZvk4zzNhKk2VWcJkjoedn/3Z2VVdNjCcKQGYI9nBF01ExDachrRyCGmATOxIhIVc+EcGneICSFiQIpjsOF1LaJThZRlOZrAkUFGEYThyATXDEqd+0AHnYlXkxpXDMCQHgCHgponkcORlH2GUOMMhphSFY8DI6HLWkiJMLJzFDcmpBAbmkgeohUgC1wAuwhPkMax31oXFgwEs3G93IfrLi27dNVlcCnCvbYJtxPQiz8gZ3ICDHtYYCRywyGViIoMLBkIakHs9vRDWoA5CVYFN7hN2eVXORFMClYNQHn3oVmfBz66w3hUEyxr0cS6si2ECbcBdICzkkhwMyyI5A+9QHXyTCOEp3GQO0ZXXFpxskjlOgRMjBAZBQjRG9I2nBST+cy4tKuLG6RC1QldWdUGwcrWMw84vY1kZi3QpM89RYpqLtHkdpkXUGgYTNe7gVLIgpSumi6syulCYC7Em2SHnpH68zJXwn5/wEN4yflwi+aZCt25tgZaYYWjGYcjjEuZliqjWymJQbkELCmOQqG5KKTEFTMi9/wcDAHA6YU5QXhtxskYyJfE6WYONwhLeThlAqHAW7ZiqqmhqTI6CRIl6Gma1RenDPA09d8FPJoWeEtacPBbaIQMataUkeeFd8v41LU6zcqcwQl6Cd+KEMSWXwpJInBhKshrdckVe17YqC22iNRFxPc4T6GJTmH3Fd20RvWWalA/Wwjw8FplZUMNUBSVMGdj4NBmpgiU8Q8pIpkiACsDQUj5+SU++piQPJBJKA9cCN5q2WHV1Xek8AwNlKZKXZ8Mw3Tx/qSlHBpmXwZCPsuBHSCmlOPhFqocojegtuIAPySxTcjfhgS2v71Anuc8hnYMc4hCvu6wCZpV73mtX1XrdlCWMWcBq3VZFkT24zG5vLKacdatl9shlJIPTAa9wurAWg9BEzrBG2ENmoSKNKL/wVRhLenLLEBhhDA9UjkBMlkbAmjAp5+o5vydlqto2GFX7xg1YSDKDk858XejjPusPe6uHQpeS/XEWTlDGUQ6D6o90BHw1hcDDT6WVWk2CCwYYCqek2gohBAzChi0l9FOqdqW15TRNzaoKYW6bqqnLtimtg8xgm7obo6nRy3CMbgUft/f3OZ1UVY79lJgloDMrc4GBgJrAoCByIQwUNhNGbWEoD9F6MSVhMlJf0pcSDSXGJabVhcvUAC26ukLonZRnD/F1hq+iqGSoN1mcjuNxWDmj2xq5xGofR+EY/RF80D5D1ZO8ktNCfBIBnaNrEcwYCXOssRJEsOBPTCNMeNKt10kMjuuuWp+tXGkaV+MGFRfGUfJ50Ca+UxBz5/q+15X53KOL25vjq9sdUqzMUllNZRMBAUVolppIWgbQ+SWFsCSYCvjTgTSRa3AehORGSpPSzcUqv7i8Utm86pALTxeEEVR10joFF5eFlZBJijNRzst2RQtRw4X9vs8VMuMk7KqQHkW0FRGR4xQpziKS6E1TRmujM/jHcFlh6DwUNgEVxqnCD+P9Tz/9ny9/+TdgBtbGRUYQqaU9pX3CYUlsD9XJCRyh8g0jLWV88LDNX8w+6LoR7DmWZaL6iCvS/TE7L57O8i9vzLE1Y+vmVRk6GzsXV06tXNYUlPjlretVv33+nb/+q2G7bWwdBuVyX2qULXMGjc/A3hahdCTQWFm8WqiGhR5cMbd1dHasS82H50uL6qCBASsLm9lCPtCdj84XuXD5SD9Y0hgXoXYKeaT5MC44RyBDoWdypa2raRiP+0PfjxlFBVUX5OAV8KQCGYMr82kaKTo0pHiLYqBoKg5UOlYdvELIRZgkb2kAfaZTeSQ4qTIDtWmtIiKVk+gYfOXCZcZ6bY6uqkzhL67XX/nq75R1NS6HmM/kFKU2zgTD+jGtMkjRSE0hbpEcRnep/Mywefl0nnYQMLAmIXCTaBre05/5yc/CGipj6rCTffCUlgdTQlX6VRMrN1vbN22oa3T92HZ6c//ie3/7NyEO59etrVXboncBhS2Mz7Es9JknXb0K43R8tSzSHnAdl55OJYMc06uw7LJw4DyP95zjcgjhqLM+j1Tvo5IR9pzNqoxtFWzFxOhjqFes8ODhgRKXqcKV2XpdfPGLj62dnV1WbZ6PAyWevJvnA85WVTUOkFE0l35yt9vMQ951XczGaTiWLt/tbnxFT4A8smySZaKIGtcBN5ATckeCxtmUbsnVkaJaosCwJCdNqBSuae1xWNZdCYfOzso8Z0nhNncvHl1VJMI03vPDvBy5Qkkp88zBiOtVUvF5q/NYVst23MWwn0bm74kORZEUnueUNknWaA9gyYkuBGi/Xvm2XlZd9vDN6vKy6Fb60aMH//avP/rWn/35L548Yfrvf++7Tmf/8g//9Cff+Obf/+PfXV5X3Rlrt0PtYH5v8l7FrVb7LLzKAiG4i+Eeoq/PoOqxXKmg+ynu+MRsCLGf/H4Oh9N59j2fJQyc9R9//Y9c7Ywzm1fbX7x4OsfsOC7//h8//vZf/OXzm5ub+9v77b30dEr94Ic/vN3cfvrk47Oz7s23HpxfrEmOhoKpaVlKihhdC/0rXZGWnp1KIP19Woama3RIlma0s/KAzxaRYPpdUpAKRsr96Te+SdP/4//65Af//KNh8avu4jgMr7b77dy//fCtaVx2uwOxr119fX2JQZuXP391f/e7X/3K733ta11TVxCYtSaFIJATY3exur44H6f+eDyS6wjaMrGclTYWrki/qjRfkTu564U9lE/UVhZ47z/43NBPZKIpGqhDzfKi44EmgIJC/xxIFAkoIQUyQi2lZx77bFnWqxon4YqsnUwcx/78ov2t3/7NL33pA9AYx5H6KtIj5VdT22UtmMGVGVOwkEIxTjP35Sek+uryHX4W6nHIk1ROUSHSHjsoSfhHRUqspDjQj0m94KtkRKojniyQ9j1mnClSuf7DP/j9jz76iH6K0XiSg1TBAumu+UsLDiJwOPYE7DAsmLjbH0zTtdIhpH5C2msqMm+mZWN6Lb756G2KxixOTMfjQBXEXWmVYQEFRcW6stfX121dPri6fv/dxzhA/wa7CMjJ1mWeeSU5KZV5JhhZvtvvRR8FdcSPkuRNd7lumobpk9XSQEv/G0JhNWK/zMusfD8cttv98biHVSbO7C7RjJ5fnNelXTX1r3/h1x5cXtBPoTGruuFdvGRuLGB65IX7iI4nFjN1AK0VONddN4zzwATj5FmT4N5+e5eFCRhgBmcZaJIW8OQQaLG0sGxROIrA6v3H7731xjX7GUShcsVZ1150K6Koot/cPL+T1yOoXFxe8+Jms2G13PeHi4uLDv2WpagQgTYZZjz77Clpk9Pn0jNM42G/pT0rPZK92/W7/US5Ox4RMCIk+MrLsuHx3rvv/Oo779YllZgU8KCFqaxvnLVsq9A9rZC/xKd5nm5vb/thRLWdKwl9W1VQkKeBh8YC41g1kTv00DObMRK7ibYL9dWNtV7uDXAV5yAVeU4nl4qaEIx8AZj9fgc5Rhaf2y12sA+42dzd3d7dbTbjMB56Pv04L2Xd0KMehv5nP/v5Z599JpRiJAQeRU3tPmcSeBzFApZBtD2Ea/Eofq7eOD+HRGQvlD3VAs5kH/wlTAQbz07xgiKJ1JIU3GRq2iXW6+QwbKjr+qzrqsrhWNetQIKI0zNgd9s0rCUwiL798uzc1VBHcO+HCZBwgJ1Llrrq4dUlYIvYpVzmzMHc/E4On6whwlzzGqbwI6X9cDyUFSFwyMPV1RUZ9OTJEzw/74hVhQTzysXZGvxZJJ6dnWE6B+0d90+kpNxKvhasifTusD/se3V9dSFrPdnAZA7pHjAZa9L+VkqohA1GcJye4QJI2KzhgheY48MPP2SOjz/+mCjTMa3bhs6YpTJeOyfqAKIgx6pivV5L3hrZ6mUZ1hPdcbZlycxswyTXiZuomvRUp0MaoWQc9nEksES8mRhsp2VOS1pDxt5t7qnPH3zwQeVKGPDw4Rurbk16suPCztlme8/z28Ph6dPnL25vXt7e39y97IeZ5onOkX0LokNUoIK6Wq9FfERkT2IruMidFCYuxDKWtZKHsqxihUiw2GPCLARbXMyzx48ff/5X3uHX7XYrHTaPsZaray4++eQ/wQbwAOfAHp1sYiNtsripqoadGQBjZCalBy5xlplleQBkWEDLxEqfjXNpaMQuTKamCp/kDk1jwomVNy0tiya2eqz9yU/+G7sfv/eY92X92zTHfths7pu6ZlHadetVtyJTR5SCckUlWjyCC0so7NO8QD7dNrXkiazS2JSUEMikKmNXSCZM8AhlONhUEKbRxlIFZrKdXKXXnsZ++2orgjP7S/qdwn760/+FNyAEYdMivJDBYkCPXVkxHcIDynwE8JiBLvgxmsCOMdjBiaQHBKop3GXDTKSQX2RPUUIm3XvwbGehUPJwKofs47FGY8GzPeyfPb8Bj2fPnlEwMI7REVYKak/SjqOkh/Sdsi7mJheMIHWZ3Rel/g/yjMOFRjZNNQAAAABJRU5ErkJggg=="/>
+    </pattern>
+    <clipPath id="clip-path">
+      <rect id="Rectangle_7" data-name="Rectangle 7" width="930" height="47" transform="translate(0 260)" fill="#fff"/>
+    </clipPath>
+    <clipPath id="clip-path-2">
+      <rect id="gradient_mask_white" data-name="gradient/mask/white" width="988" height="63" fill="url(#linear-gradient)"/>
+    </clipPath>
+    <clipPath id="clip-path-3">
+      <rect id="Mask" width="73" height="75" rx="7" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-5">
+      <rect id="Mask-3" data-name="Mask" width="171" height="75" rx="7" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-6">
+      <rect id="Mask-4" data-name="Mask" width="111" height="75" rx="7" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-9">
+      <rect id="Mask-7" data-name="Mask" width="514" height="75" rx="7" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-16">
+      <rect id="Mask-14" data-name="Mask" width="122" height="75" rx="7" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-27">
+      <rect id="Mask-25" data-name="Mask" width="149" height="75" rx="7" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-38">
+      <rect id="Mask-36" data-name="Mask" width="86" height="75" rx="7" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-Search">
+      <rect width="1080" height="1920"/>
+    </clipPath>
+  </defs>
+  <g id="Search" clip-path="url(#clip-Search)">
+    <rect width="1080" height="1920" fill="#f8f8f8"/>
+    <rect id="Opacity_Overlay" data-name="Opacity Overlay" width="1080" height="1926" opacity="0.75"/>
+    <g id="Search_Result" data-name="Search Result" transform="translate(48 726)">
+      <rect id="Rectangle" width="988" height="307" fill="#fff"/>
+      <text id="Search_for_lorem_" data-name="Search for “lorem”" transform="translate(90 23)" fill="#9a9a9a" font-size="20" font-family="OpenSans-Italic, Open Sans" font-style="italic"><tspan x="0" y="21" fill="#9a9a9a">Search for</tspan><tspan y="21" xml:space="preserve" fill="#9a9a9a" font-family="OpenSans, Open Sans" font-style="normal"> “</tspan><tspan y="21" font-family="OpenSans, Open Sans" font-style="normal" fill="#000">lorem</tspan><tspan y="21" fill="#9a9a9a" font-family="OpenSans, Open Sans" font-style="normal">”</tspan></text>
+      <g id="list_search-result" data-name="list/search-result" transform="translate(92 72)">
+        <rect id="bg" width="750" height="94" fill="#fff"/>
+        <g id="im_search-result" data-name="im/search-result" transform="translate(0 25)">
+          <circle id="Oval" cx="22" cy="22" r="22" transform="translate(2 2)" fill="url(#pattern)"/>
+        </g>
+        <text id="Lorem_Ipsum_Dolor_Copy_2" data-name="Lorem Ipsum Dolor Copy 2" transform="translate(72 33)" font-size="24" font-family="OpenSans, Open Sans"><tspan x="0" y="26">Lorem Ipsum Dolor</tspan></text>
+        <rect id="Rectangle-2" data-name="Rectangle" width="804" height="1" fill="#e0e0e0"/>
+      </g>
+      <g id="list_search-result_copy" data-name="list/search-result copy" transform="translate(92 166)">
+        <rect id="bg-2" data-name="bg" width="750" height="94" fill="#fff"/>
+        <g id="im_search-result-2" data-name="im/search-result" transform="translate(0 25)">
+          <circle id="Oval-2" data-name="Oval" cx="22" cy="22" r="22" transform="translate(2 2)" fill="url(#pattern)"/>
+        </g>
+        <text id="Lorem_Ipsum_Dolor_Copy_2-2" data-name="Lorem Ipsum Dolor Copy 2" transform="translate(72 33)" font-size="24" font-family="OpenSans, Open Sans"><tspan x="0" y="26">Lorem Ipsum Dolor</tspan></text>
+        <rect id="Rectangle-3" data-name="Rectangle" width="804" height="1" fill="#e0e0e0"/>
+      </g>
+      <rect id="Rectangle_7-2" data-name="Rectangle 7" width="930" height="47" transform="translate(0 260)" fill="#fff"/>
+      <g id="Group_Copy_4" data-name="Group Copy 4" clip-path="url(#clip-path)">
+        <g id="list_search-result_copy_2" data-name="list/search-result copy 2" transform="translate(92 260)">
+          <rect id="bg-3" data-name="bg" width="746.269" height="94" fill="#fff"/>
+          <g id="im_search-result-3" data-name="im/search-result" transform="translate(0 25)">
+            <circle id="Oval-3" data-name="Oval" cx="22" cy="22" r="22" transform="translate(2 2)" fill="url(#pattern)"/>
+          </g>
+          <text id="Lorem_Ipsum_Dolor_Copy_2-3" data-name="Lorem Ipsum Dolor Copy 2" transform="translate(72 33)" font-size="24" font-family="OpenSans, Open Sans"><tspan x="0" y="26">Lorem Ipsum Dolor</tspan></text>
+          <rect id="Rectangle-4" data-name="Rectangle" width="800" height="1" fill="#e0e0e0"/>
+        </g>
+      </g>
+      <g id="headers_search_results" data-name="headers/search_results" transform="translate(685 1139.5)">
+        <g id="gradient_mask_white-2" data-name="gradient/mask/white" transform="translate(-685 -896)">
+          <rect id="gradient_mask_white-3" data-name="gradient/mask/white" width="988" height="63" fill="url(#linear-gradient)"/>
+        </g>
+      </g>
+    </g>
+    <g id="Dashboar_Search_Tab" data-name="Dashboar Search Tab" transform="translate(0 620)">
+      <rect id="Tab-Background" width="1080" height="106" fill="#004f8b"/>
+      <rect id="Search-Tab-Background" width="940" height="58" rx="8" transform="translate(55 24)" fill="#fff"/>
+      <rect id="Button-Background" width="181" height="54" rx="8" transform="translate(812 26)" fill="#cbd42c"/>
+      <g id="text_bars_default" data-name="text/bars/default" transform="translate(84 35.633)">
+        <text id="unactive_input_text" data-name="unactive input text" transform="translate(0 26)" fill="#707070" font-size="24" font-family="Helvetica"><tspan x="0" y="0">What are you looking for?</tspan></text>
+      </g>
+      <text id="Search-2" data-name="Search" transform="translate(853 63)" fill="#fff" font-size="26" font-family="Helvetica-Bold, Helvetica" font-weight="700"><tspan x="0" y="0">SEARCH</tspan></text>
+    </g>
+    <g id="keyboard_letters" data-name="keyboard letters" transform="translate(0 1521)">
+      <g id="Keyboard" transform="translate(0 -0.5)">
+        <rect id="Rectangle_13" data-name="Rectangle 13" width="1080" height="398" transform="translate(0 2)" fill="#fff"/>
+        <g id="key" transform="translate(59 30)">
+          <rect id="Mask-37" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key-2" data-name="key" clip-path="url(#clip-path-3)">
+            <rect id="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_10" data-name="key copy 10" transform="translate(95 118)">
+          <rect id="Mask-38" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_10-2" data-name="key copy 10" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-2" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_20" data-name="key copy 20" transform="translate(46 206)">
+          <rect id="Mask-39" data-name="Mask" width="171" height="75" rx="7" fill="none"/>
+          <g id="key_copy_20-2" data-name="key copy 20" clip-path="url(#clip-path-5)">
+            <rect id="color_bg-3" data-name="color_bg" width="171" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_31" data-name="key copy 31" transform="translate(46 294)">
+          <rect id="Mask-40" data-name="Mask" width="111" height="75" rx="7" fill="none"/>
+          <g id="key_copy_31-2" data-name="key copy 31" clip-path="url(#clip-path-6)">
+            <rect id="color_bg-4" data-name="color_bg" width="111" height="75" fill="#1796d6"/>
+          </g>
+        </g>
+        <g id="key_copy_32" data-name="key copy 32" transform="translate(172 294)">
+          <rect id="Mask-41" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_32-2" data-name="key copy 32" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-5" data-name="color_bg" width="73" height="75" fill="#1796d6"/>
+          </g>
+        </g>
+        <g id="key_copy_22" data-name="key copy 22" transform="translate(232 206)">
+          <rect id="Mask-42" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_22-2" data-name="key copy 22" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-6" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_33" data-name="key copy 33" transform="translate(260 294)">
+          <rect id="Mask-43" data-name="Mask" width="514" height="75" rx="7" fill="none"/>
+          <g id="key_copy_33-2" data-name="key copy 33" clip-path="url(#clip-path-9)">
+            <rect id="color_bg-7" data-name="color_bg" width="514" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_23" data-name="key copy 23" transform="translate(320 206)">
+          <rect id="Mask-44" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_23-2" data-name="key copy 23" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-8" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_24" data-name="key copy 24" transform="translate(409 206)">
+          <rect id="Mask-45" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_24-2" data-name="key copy 24" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-9" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_25" data-name="key copy 25" transform="translate(497 206)">
+          <rect id="Mask-46" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_25-2" data-name="key copy 25" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-10" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_26" data-name="key copy 26" transform="translate(585 206)">
+          <rect id="Mask-47" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_26-2" data-name="key copy 26" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-11" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_27" data-name="key copy 27" transform="translate(673 206)">
+          <rect id="Mask-48" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_27-2" data-name="key copy 27" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-12" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_28" data-name="key copy 28" transform="translate(762 206)">
+          <rect id="Mask-49" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_28-2" data-name="key copy 28" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-13" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_34" data-name="key copy 34" transform="translate(789 294)">
+          <rect id="Mask-50" data-name="Mask" width="122" height="75" rx="7" fill="none"/>
+          <g id="key_copy_34-2" data-name="key copy 34" clip-path="url(#clip-path-16)">
+            <rect id="color_bg-14" data-name="color_bg" width="122" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_29" data-name="key copy 29" transform="translate(850 206)">
+          <rect id="Mask-51" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_29-2" data-name="key copy 29" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-15" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_30" data-name="key copy 30" transform="translate(937 206)">
+          <rect id="Mask-52" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_30-2" data-name="key copy 30" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-16" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_11" data-name="key copy 11" transform="translate(183 118)">
+          <rect id="Mask-53" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_11-2" data-name="key copy 11" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-17" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_12" data-name="key copy 12" transform="translate(271 118)">
+          <rect id="Mask-54" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_12-2" data-name="key copy 12" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-18" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_13" data-name="key copy 13" transform="translate(359 118)">
+          <rect id="Mask-55" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_13-2" data-name="key copy 13" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-19" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_14" data-name="key copy 14" transform="translate(447 118)">
+          <rect id="Mask-56" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_14-2" data-name="key copy 14" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-20" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_15" data-name="key copy 15" transform="translate(535 118)">
+          <rect id="Mask-57" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_15-2" data-name="key copy 15" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-21" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_16" data-name="key copy 16" transform="translate(623 118)">
+          <rect id="Mask-58" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_16-2" data-name="key copy 16" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-22" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_17" data-name="key copy 17" transform="translate(711 118)">
+          <rect id="Mask-59" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_17-2" data-name="key copy 17" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-23" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_18" data-name="key copy 18" transform="translate(799 118)">
+          <rect id="Mask-60" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_18-2" data-name="key copy 18" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-24" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_19" data-name="key copy 19" transform="translate(887 118)">
+          <rect id="Mask-61" data-name="Mask" width="149" height="75" rx="7" fill="none"/>
+          <g id="key_copy_19-2" data-name="key copy 19" clip-path="url(#clip-path-27)">
+            <rect id="color_bg-25" data-name="color_bg" width="149" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy" data-name="key copy" transform="translate(147 30)">
+          <rect id="Mask-62" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy-2" data-name="key copy" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-26" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_2" data-name="key copy 2" transform="translate(235 30)">
+          <rect id="Mask-63" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_2-2" data-name="key copy 2" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-27" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_3" data-name="key copy 3" transform="translate(323 30)">
+          <rect id="Mask-64" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_3-2" data-name="key copy 3" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-28" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_4" data-name="key copy 4" transform="translate(411 30)">
+          <rect id="Mask-65" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_4-2" data-name="key copy 4" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-29" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_5" data-name="key copy 5" transform="translate(499 30)">
+          <rect id="Mask-66" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_5-2" data-name="key copy 5" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-30" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_6" data-name="key copy 6" transform="translate(587 30)">
+          <rect id="Mask-67" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_6-2" data-name="key copy 6" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-31" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_7" data-name="key copy 7" transform="translate(675 30)">
+          <rect id="Mask-68" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_7-2" data-name="key copy 7" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-32" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_8" data-name="key copy 8" transform="translate(763 30)">
+          <rect id="Mask-69" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_8-2" data-name="key copy 8" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-33" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_9" data-name="key copy 9" transform="translate(851 30)">
+          <rect id="Mask-70" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_9-2" data-name="key copy 9" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-34" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_21" data-name="key copy 21" transform="translate(939 30)">
+          <rect id="Mask-71" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_21-2" data-name="key copy 21" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-35" data-name="color_bg" width="73" height="75" fill="#1796d6"/>
+          </g>
+        </g>
+        <g id="key_copy_35" data-name="key copy 35" transform="translate(926 294)">
+          <rect id="Mask-72" data-name="Mask" width="86" height="75" rx="7" fill="none"/>
+          <g id="key_copy_35-2" data-name="key copy 35" clip-path="url(#clip-path-38)">
+            <rect id="color_bg-36" data-name="color_bg" width="86" height="75" fill="#1796d6"/>
+          </g>
+        </g>
+        <path id="Line" d="M.5,1.5h1079" transform="translate(0 -1)" fill="none" stroke="#d3e9e8" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1"/>
+        <text id="v" transform="translate(526.5 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">v</tspan></text>
+        <text id="g" transform="translate(478.5 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">g</tspan></text>
+        <text id="t" transform="translate(444 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">t</tspan></text>
+        <text id="b" transform="translate(613.5 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">b</tspan></text>
+        <text id="h" transform="translate(565.5 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">h</tspan></text>
+        <text id="y" transform="translate(530 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">y</tspan></text>
+        <text id="n" transform="translate(700.5 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">n</tspan></text>
+        <text id="j" transform="translate(657.5 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">j</tspan></text>
+        <text id="u" transform="translate(616.5 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">u</tspan></text>
+        <text id="m" transform="translate(784.5 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">m</tspan></text>
+        <text id="k" transform="translate(741 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">k</tspan></text>
+        <text id="i" transform="translate(709.5 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">i</tspan></text>
+        <text id="p" transform="translate(881 64)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">p</tspan></text>
+        <text id="Caret_Square_Outlined_Left_-_FontAwesome" data-name="Caret Square Outlined Left - FontAwesome" transform="translate(964 77)" fill="#fff" font-size="26" font-family="FontAwesome7Pro-Regular, 'Font Awesome \37  Pro'"><tspan x="0" y="0"></tspan></text>
+        <text id="_" data-name="!" transform="translate(882 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">!</tspan></text>
+        <text id="l" transform="translate(834.5 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">l</tspan></text>
+        <text id="o" transform="translate(793 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">o</tspan></text>
+        <text id="_2" data-name="?" transform="translate(967 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">?</tspan></text>
+        <text id="_.com" data-name=".com" transform="translate(819.5 339)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">.com</tspan></text>
+        <text id="Enter" transform="translate(928 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">Enter</tspan></text>
+        <text id="_3" data-name="@" transform="translate(197 342)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">@</tspan></text>
+        <text id="_123._" data-name="123.,?" transform="translate(66 342)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">123.,?</tspan></text>
+        <text id="a" transform="translate(124 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">a</tspan></text>
+        <text id="q" transform="translate(87.5 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">q</tspan></text>
+        <text id="z" transform="translate(262 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">z</tspan></text>
+        <text id="s" transform="translate(214.5 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">s</tspan></text>
+        <text id="w" transform="translate(172.5 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">w</tspan></text>
+        <text id="x" transform="translate(349 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">x</tspan></text>
+        <text id="d" transform="translate(300.5 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">d</tspan></text>
+        <text id="e" transform="translate(265 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">e</tspan></text>
+        <text id="c" transform="translate(439 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">c</tspan></text>
+        <text id="f" transform="translate(392.5 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">f</tspan></text>
+        <text id="r" transform="translate(356 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">r</tspan></text>
+        <text id="_4" data-name="" transform="translate(121.5 253.5)" fill="#fff" font-size="26" font-family="FontAwesome7Pro-Regular, 'Font Awesome \37  Pro'"><tspan x="0" y="0"></tspan></text>
+      </g>
+      <text id="_5" data-name="" transform="translate(951 312)" fill="#fff" font-size="36" font-family="FontAwesome7Pro-Regular, 'Font Awesome \37  Pro'"><tspan x="0" y="32"></tspan></text>
+    </g>
+  </g>
+</svg>

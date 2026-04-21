@@ -17,3 +17,14 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
+
+/* Oculta scrollbars nativos. En kiosk touchscreen no queremos chrome del SO. */
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge legacy */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* WebKit */
+  width: 0;
+  height: 0;
+}

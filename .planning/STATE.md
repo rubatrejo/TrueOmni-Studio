@@ -6,13 +6,13 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Fase 3.3 cerrada con pulido completo (Olas 1-8 + 14 fixes V1 + 5 fixes V2).
+**Fase activa:** Fases 3.4, 3.5 y 3.6 cerradas con pulido. Commit `2b7d557`.
 
-**Última fase cerrada:** Fase 3.3 — módulo de Listings (Restaurants / Things to Do / Stay) con Detail + Filter/Sort + Favoritos + Email/Phone + Directions + 360 totalmente funcionales.
+**Última fase cerrada:** Fase 3.6 — Digital Brochure (reader con pdf.js v3 + controles grandes arriba + Send to Email/Phone).
 
-**Siguiente acción concreta:** Abrir Fase 4 (primer cliente real) o el siguiente módulo que Rubén decida (Itinerary Builder quizás, ya que los favoritos ya están conectados).
+**Siguiente acción concreta:** Abrir Fase 4 (primer cliente real con branding + Lighthouse) o añadir un nuevo módulo si Rubén lo pide (Itinerary Builder aprovecha los buckets de favoritos).
 
-**Bloqueos:** ninguno.
+**Bloqueos:** ninguno. El PDF grande (54MB) quedó reemplazado por el comprimido (9.8MB) en `public/brochures/stlvg26_compressed.pdf`.
 
 **TODO de i18n (aplazado a Fase 5 — validador zod + migración a config.textos):**
 
@@ -426,6 +426,48 @@ driving/walking, SEE 360 funcional, favorite toast).
   arriba donde está el logo) — corregido.
 
 **Fase:** 3.3 cerrada con pulido V1 + V2 completo.
+
+---
+
+### Sesión 2026-04-21 — Fases 3.4 Events + 3.5 Social Wall + 3.6 Digital Brochure
+
+**Hecho:**
+
+- **Fase 3.4 Events** cerrada: `HomeEventsModule` (kind='events'), `EventItem` con date/time/venue/price, utils `events-date/filter/sort`, `EventsModule` con `WeekPicker` (pill "hoy" preseleccionada filtrando por día, flechas cambian semana), `EventsList` + `EventCard` horizontal con cover A4, `EventsFilterOverlay` 4 dims (Category/Venue/Price/Features), `SortOverlay` generalizado con `options` prop. `ListingDetail` adaptado para reusar (eventMeta + secondaryCta + favoritesKind). `favorites.ts` refactor a factoría: `useFavorites` + `useEventFavorites`. 46 eventos mock en 3 semanas.
+- **Fase 3.5 Social Wall**: `HomeSocialWallModule` con `SocialPost` (image/video/text/gallery) + 6 sources + `SocialAuthor` + `SocialHighlight`. Utils `social-date` (timeAgo) + `social-sources`. `SocialWallModule` con banner gradient (Highlights + #hashtag sticky en hero), tabs por red (solo los handles configurados), masonry CSS columns 3-col, `seededShuffle` para variar orden en cada repetición (48 posts mínimo). `SocialPostCard` con gradient overlay dark-bottom→transparent-top sobre la media, badge de red, play icon en video, counter en gallery. 4 modales centrados con X estilo listings-detail: Image, Video (autoplay muted loop con toggle pause/play + workaround React muted bug), Text, Gallery (carrousel con arrows). 22 posts mock + 3 highlights + 4 handles.
+- **Fase 3.6 Digital Brochure**: `HomeDigitalBrochureModule` con `BrochureItem` (pdfUrl + cover A4 + metadata). `pdfjs-dist@3.11.174` (downgrade desde v5 que rompe con Next 15 webpack). Worker en `public/pdfjs/pdf.worker.min.js`. `next.config.mjs` con alias `canvas: false` para skip del native. Utils `pdfjs-setup` (`loadPdf` cached + onProgress) + `brochures-filter`. `BrochuresModule` con toolbar style listings (label + search only), tabs grandes, `BrochureCard` 880×300 con cover 212×300 (ratio A4), `BrochuresSearchOverlay` con QWERTY + autocomplete. `BrochureReader` con header azul (title + SEND TO EMAIL/PHONE), controles arriba (counter 132px + grid + slider + zoom), flechas laterales top 35%, `BrochurePdfPage` render canvas, `BrochureGridOverview` 4-col thumbs, `LoadingState` con barra de progreso, `ErrorState` con fallback link, `BackButton` flotante. 4 brochures mock (St. Louis usando `stlvg26_compressed.pdf` 9.8MB local).
+- **Pulido Listings** post-3.3: filter overlay centrado vertical + gap antes de CLEAR/APPLY; directions map flex-shrink:0 (no encoge en walking); X top-right consistente detail+directions; NumericKeypad fondo ajustado al ancho; SendTo modals auto-height; mapa detail zoom 15 + pin 48×68; `ActionRow` centrado vertical cuando no hay reserveUrl; phone en 2ª línea del detail cuando hay eventMeta; tipografía detail unificada 22px medium + rowGap 12.
+- **Pulido Events** post-V1: cards 880×300 con padding-left 140 (no tapa home button), week header 34px bold 800 azul claro #1e88c6, venues/features sin Waterfront/Free Parking, ordenamiento consistente.
+- **Fix 22 URLs rotas**: 17 Unsplash 404 (listings + events + social wall) reemplazadas por IDs verificadas. 5 videos del gtv-videos-bucket Google (403) → MDN + samplelib.
+- Commit único `2b7d557` con los 3 módulos + pulidos + URL fixes.
+
+**Verificado:**
+
+- `pnpm check` (typecheck + lint + format) limpio en cada checkpoint.
+- Carga del PDF real (stlvg26_compressed 9.8MB) en el reader funciona tras downgrade a pdfjs v3 + `canvas: false` en webpack alias.
+- Playwright/browser manual por el usuario en `/home/events`, `/home/social-wall`, `/home/digital-brochure`, `/home/digital-brochure/st-louis-art-bound`.
+- 164 URLs del config.json verificadas con HEAD requests (0 rotas).
+
+**Pendiente / siguiente:**
+
+- Fase 4 — primer cliente real con branding, Lighthouse en producción, handoff.
+- Cuando Rubén mande: Itinerary Builder (consumirá `kiosk_favorites` + `kiosk_event_favorites` buckets).
+- Posible pulido adicional del Social Wall si el diff visual vs SVG no convence (v2 de cards con avatar más grande, o refinar el overlay gradient).
+- El PDF original de 54MB (`stlvg26.pdf`) quedó en `public/brochures/` por si se quiere usar; borrar si no se usa para no pesar en el repo.
+- Los archivos muertos del pre-iframe intento (`brochure-pdf-page.tsx`, controls, grid, pdfjs-setup) se rehicieron — ahora todos en uso.
+- Testing automatizado: quedan los `react-hooks/exhaustive-deps` warnings pre-existentes en `directions-map-with-route.tsx` y `directions-modal.tsx` (deliberados por refs inestables).
+
+**Decisiones:**
+
+- **pdfjs-dist v3 en lugar de v5**: v5 dispara `Object.defineProperty called on non-object` con el webpack/ESM handler de Next 15. v3 es CJS-compatible y funciona sin `transpilePackages`. Worker en `.js` (no `.mjs`). Si Next 16 llega con mejor ESM handling, reconsiderar upgrade.
+- **`canvas: false` en webpack alias**: pdfjs declara `canvas` (native Node) como dep opcional. En browser no aplica pero webpack lo busca. Alias a false skipea sin break.
+- **Reader custom con pdf.js canvas render** en lugar de iframe nativo. El viewer nativo muestra toolbar con descargar/imprimir/compartir/3-dots que no aplican al kiosk público. Con canvas tenemos control total.
+- **Controls arriba del stage** (no bottom como era el patrón inicial). Rubén pidió moverlos para que no chocaran con el área del BackButton flotante. Flechas laterales quedan en `top: 35%` (arriba del BackButton que va de y=1000 a y=1232).
+- **Kind discriminator en modules** extendido: `'listings' | 'events' | 'social-wall' | 'digital-brochure'`. La unión `HomeModuleVariant` crece por fase. Cada ruta `/home/[module]` + `/home/[module]/[slug]` hace switch explícito.
+- **Favoritos factorizados**: `createFavoritesStore(storageKey, kind)` permite buckets independientes. Events y Listings no se mezclan aunque ambos suman al toast "Added to itinerary".
+- **ListingDetail como componente compartido**: event detail reusa el shell del listing detail con props `eventMeta` (2 líneas: date+time / phone) + `secondaryCta` (GET TICKETS si hay ticketsUrl) + `favoritesKind`. Evita duplicar 500 líneas.
+
+**Fase:** Fases 3.4, 3.5 y 3.6 cerradas. Lista para Fase 4.
 
 ---
 

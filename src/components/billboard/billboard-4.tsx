@@ -1,20 +1,19 @@
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 
+import { AccessibilityIcon, EnglishButton } from './billboard-footer-parts';
+
 /**
  * Billboard 4 — variante "Bandas horizontales + sidebars verticales".
  *
- * Layout del SVG Billboard 4:
- * - Banda 1 (y=0..389): landscape image + overlay #004f8b 87% con logo
- *   TrueOmni white centered.
- * - Banda 2 (y=389..835): fireworks/events image + gradient overlay 33%.
- * - Separador blanco (y=835..1280) o área con card central.
- * - Banda 3 (y=1280..1726): cityscape image + gradient overlay 74%.
- * - Footer (y=1726..1920): #004f8b con logo footer.
- * - Sidebar labels rotados -90°:
- *   · EVENTS (blue #004f8b) en left a y=835.
- *   · START (olive #b9bd39) en left a y=1726.
- *   · FOOD (blue #1796d6) a derecha.
- * - "See ADS" @ (43.5, 36.5) Open Sans Bold 36px blanco.
+ * Layout según ref-b4:
+ * - Banda 1 (y=0..330): header azul #004f8b con TrueOmni logo blanco.
+ * - Sidebar EVENTS vertical (blue #004f8b) sobre banda 2.
+ * - Banda 2 (y=330..830): fireworks/events photo.
+ * - Sidebar FOOD vertical (blue #1796d6) derecha sobre banda 3.
+ * - Banda 3 (y=830..1330): cityscape photo (landscape.jpg).
+ * - Sidebar START vertical (olive #b9bd39) izquierda sobre banda 4.
+ * - Banda 4 (y=1330..1730): grass/lake photo + icono arrow circle grande.
+ * - Footer (y=1730..1920): #004f8b con TrueOmni + accesibilidad + ENGLISH.
  */
 export function Billboard4() {
   return (
@@ -23,120 +22,145 @@ export function Billboard4() {
       className="relative h-full w-full overflow-hidden"
       style={{ backgroundColor: '#fff' }}
     >
-      {/* See ADS title */}
-      <span
-        className="absolute z-10 font-sans font-bold text-white underline"
-        style={{ left: '43.5px', top: '36.5px', fontSize: '36px' }}
+      {/* Banda 1 (y=0..330) header azul + logo */}
+      <div
+        className="absolute inset-x-0 flex items-center justify-center"
+        style={{ top: '0', height: '330px', backgroundColor: '#004f8b' }}
       >
-        See ADS
-      </span>
-
-      {/* Banda 1 (y=0..389) landscape + blue overlay + logo */}
-      <div className="absolute inset-x-0 overflow-hidden" style={{ top: '0', height: '389px' }}>
-        <img
-          src="/assets/billboard-4/landscape.jpg"
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,79,139,0.87)' }} />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <TrueOmniLogo className="h-[128px] w-auto text-white" />
-        </div>
+        <TrueOmniLogo className="h-[128px] w-auto text-white" />
       </div>
 
-      {/* Banda 2 (y=389..835) fireworks */}
-      <div className="absolute inset-x-0 overflow-hidden" style={{ top: '389px', height: '446px' }}>
+      {/* Banda 2 (y=330..830) fireworks */}
+      <div className="absolute inset-x-0 overflow-hidden" style={{ top: '330px', height: '500px' }}>
         <img
           src="/assets/billboard-4/events.jpg"
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 100%)',
-            opacity: 0.33,
-          }}
+      </div>
+
+      {/* Banda 3 (y=830..1330) cityscape */}
+      <div className="absolute inset-x-0 overflow-hidden" style={{ top: '830px', height: '500px' }}>
+        <img
+          src="/assets/billboard-4/landscape.jpg"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
         />
       </div>
 
-      {/* White band (y=835..1280): placeholder/separator, mantiene estructura */}
-      <div
-        className="absolute inset-x-0 flex items-center justify-center"
-        style={{ top: '835px', height: '445px', backgroundColor: '#fff' }}
-      >
-        <TrueOmniLogo className="h-[90px] w-auto text-[#2f2f2f]" />
-      </div>
-
-      {/* Banda 3 (y=1280..1726) cityscape */}
+      {/* Banda 4 (y=1330..1730) grass/lake + arrow circle */}
       <div
         className="absolute inset-x-0 overflow-hidden"
-        style={{ top: '1280px', height: '446px' }}
+        style={{ top: '1330px', height: '400px' }}
       >
         <img
           src="/assets/billboard-4/things-to-do.jpg"
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 100%)',
-            opacity: 0.74,
-          }}
-        />
+        {/* Arrow circle grande a la derecha */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="200"
+          height="200"
+          viewBox="-10 -10 120 120"
+          fill="none"
+          stroke="#fff"
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="absolute"
+          style={{ right: '180px', top: '50%', transform: 'translateY(-50%)' }}
+        >
+          <path d="M46.023,72.912,67.534,51.4m0,0L46.023,29.889M67.534,51.4H3m8.15,26.889a48.4,48.4,0,1,0,0-53.778" />
+        </svg>
       </div>
 
-      {/* Footer (y=1726..1920) */}
+      {/* Footer (y=1730..1920) */}
       <div
-        className="absolute inset-x-0 flex items-center"
+        className="absolute left-0 right-0 flex items-center justify-between"
         style={{
-          top: '1726px',
-          height: '194px',
+          bottom: '0',
+          height: '190px',
           backgroundColor: '#004f8b',
           paddingLeft: '59px',
+          paddingRight: '59px',
         }}
       >
         <TrueOmniLogo className="h-[65px] w-auto text-white" />
+        <AccessibilityIcon size={80} color="#fff" />
+        <EnglishButton width={244} height={80} fontSize={26} />
       </div>
 
-      {/* Sidebar EVENTS — rotate(-90) posicionado en left, y=835..(835-446=389)
-          Con rotación: width=446 altura=162 se convierte en altura=446 ancho=162
-          La barra queda vertical, pegada al lado izquierdo. */}
+      {/* Sidebar EVENTS — left, sobre banda 2 (y=330..830) */}
       <div
         className="absolute z-10 flex items-center justify-center"
         style={{
           left: '0',
-          top: '389px',
-          width: '162px',
-          height: '446px',
+          top: '330px',
+          width: '140px',
+          height: '500px',
           backgroundColor: '#004f8b',
         }}
       >
         <span
           className="font-display font-bold uppercase text-white"
-          style={{ fontSize: '70px', transform: 'rotate(-90deg)', letterSpacing: '0.05em' }}
+          style={{
+            fontSize: '72px',
+            letterSpacing: '0.05em',
+            writingMode: 'vertical-rl',
+            transform: 'rotate(180deg)',
+          }}
         >
           Events
         </span>
       </div>
 
-      {/* Sidebar FOOD — derecha, y=835..1280 (aprox) */}
+      {/* Sidebar FOOD — right, sobre banda 3 (y=830..1330) */}
       <div
         className="absolute z-10 flex items-center justify-center"
         style={{
           right: '0',
-          top: '835px',
-          width: '162px',
-          height: '445px',
+          top: '830px',
+          width: '140px',
+          height: '500px',
           backgroundColor: '#1796d6',
         }}
       >
         <span
           className="font-display font-bold uppercase text-white"
-          style={{ fontSize: '70px', transform: 'rotate(-90deg)', letterSpacing: '0.05em' }}
+          style={{
+            fontSize: '72px',
+            letterSpacing: '0.05em',
+            writingMode: 'vertical-rl',
+            transform: 'rotate(180deg)',
+          }}
         >
           Food
+        </span>
+      </div>
+
+      {/* Sidebar START — left, sobre banda 4 (y=1330..1730) */}
+      <div
+        className="absolute z-10 flex items-center justify-center"
+        style={{
+          left: '0',
+          top: '1330px',
+          width: '140px',
+          height: '400px',
+          backgroundColor: '#b9bd39',
+        }}
+      >
+        <span
+          className="font-display font-bold uppercase text-white"
+          style={{
+            fontSize: '72px',
+            letterSpacing: '0.05em',
+            writingMode: 'vertical-rl',
+            transform: 'rotate(180deg)',
+          }}
+        >
+          Start
         </span>
       </div>
     </div>

@@ -1,36 +1,34 @@
 'use client';
 
-import type { CSSProperties, ReactNode } from 'react';
-import { useEffect, useRef } from 'react';
+import type { ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 
 const KIOSK_WIDTH_PX = 1080;
 const KIOSK_HEIGHT_PX = 1920;
-/** Margen alrededor del canvas dentro del viewport (dev-view). */
-const VIEWPORT_PADDING_PX = 48;
+
+/** Padding horizontal alrededor del canvas (dev-view). */
+const VIEWPORT_PADDING_X_PX = 80;
+/** Padding arriba del canvas (dev-view). */
+const VIEWPORT_PADDING_TOP_PX = 64;
+/** Espacio reservado debajo del canvas para el dev-nav (fuera del frame). */
+const BOTTOM_NAV_SPACE_PX = 180;
 
 /**
  * Canvas fijo 1080×1920 (retrato) escalado para caber en el viewport
  * del navegador sin scroll, preservando el aspecto 9:16.
  *
- * El escalado se aplica con `transform: scale(var(--kiosk-scale))` y la
- * variable se calcula en un useEffect (resize-aware). Los hijos siguen
- * diseñándose en el espacio lógico 1080×1920 (posiciones absolutas
- * exactas del SVG, sin cálculo manual).
+ * El wrapper exterior tiene las dimensiones escaladas reales (layout-aware)
+ * y el canvas interno se escala desde top-left. Esto garantiza que el
+ * espacio debajo del frame es real y puede alojar el dev-nav sin solaparse.
  */
 export function KioskCanvas({ children }: { children: ReactNode }) {
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
 
   useEffect(() => {
-    const el = wrapperRef.current;
-    if (!el) return;
-
     const updateScale = () => {
-      const available = {
-        w: window.innerWidth - VIEWPORT_PADDING_PX * 2,
-        h: window.innerHeight - VIEWPORT_PADDING_PX * 2,
-      };
-      const scale = Math.min(available.w / KIOSK_WIDTH_PX, available.h / KIOSK_HEIGHT_PX);
-      el.style.setProperty('--kiosk-scale', String(scale));
+      const availW = window.innerWidth - VIEWPORT_PADDING_X_PX * 2;
+      const availH = window.innerHeight - VIEWPORT_PADDING_TOP_PX - BOTTOM_NAV_SPACE_PX;
+      setScale(Math.min(availW / KIOSK_WIDTH_PX, availH / KIOSK_HEIGHT_PX));
     };
 
     updateScale();
@@ -40,20 +38,30 @@ export function KioskCanvas({ children }: { children: ReactNode }) {
 
   return (
     <div
-      ref={wrapperRef}
-      className="fixed inset-0 flex items-center justify-center overflow-hidden bg-background"
-      style={{ ['--kiosk-scale' as string]: 1 } as CSSProperties}
+      className="fixed inset-0 flex justify-center overflow-hidden bg-zinc-100 dark:bg-zinc-900"
+      style={{
+        paddingTop: VIEWPORT_PADDING_TOP_PX,
+        paddingBottom: BOTTOM_NAV_SPACE_PX,
+      }}
     >
       <div
-        data-kiosk-canvas
-        className="relative origin-center overflow-hidden bg-background text-foreground shadow-2xl"
         style={{
-          width: `${KIOSK_WIDTH_PX}px`,
-          height: `${KIOSK_HEIGHT_PX}px`,
-          transform: 'scale(var(--kiosk-scale))',
+          width: KIOSK_WIDTH_PX * scale,
+          height: KIOSK_HEIGHT_PX * scale,
         }}
       >
-        {children}
+        <div
+          data-kiosk-canvas
+          className="relative overflow-hidden bg-background text-foreground shadow-2xl"
+          style={{
+            width: `${KIOSK_WIDTH_PX}px`,
+            height: `${KIOSK_HEIGHT_PX}px`,
+            transform: `scale(${scale})`,
+            transformOrigin: 'top left',
+          }}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );

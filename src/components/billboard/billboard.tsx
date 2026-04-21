@@ -1,3 +1,4 @@
+import { KioskCanvas } from '@/components/kiosk-canvas';
 import { getConfig } from '@/lib/config';
 
 import { Billboard0 } from './billboard-0';
@@ -22,7 +23,8 @@ interface BillboardProps {
 }
 
 /**
- * Switcher de variante Billboard.
+ * Switcher de variante Billboard. El canvas 1080×1920 se wrappea aquí
+ * para que el dev-nav (sibling) quede fuera del contexto de transform.
  * Prioridad:
  *   1. Prop `variant` (útil para navegación dev vía URL).
  *   2. `config.features.billboard_variant` (producción, por cliente).
@@ -34,5 +36,9 @@ export async function Billboard({ variant: override }: BillboardProps = {}) {
   const variant: BillboardVariant =
     typeof raw === 'number' && raw in VARIANTS ? (raw as BillboardVariant) : 0;
   const Component = VARIANTS[variant];
-  return <Component />;
+  return (
+    <KioskCanvas>
+      <Component />
+    </KioskCanvas>
+  );
 }

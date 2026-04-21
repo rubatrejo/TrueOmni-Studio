@@ -1,39 +1,35 @@
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 
+import { AccessibilityIcon, EnglishButton } from './billboard-footer-parts';
+
 /**
- * Billboard 3 — variante "Dark blue + grid 2×3 con overlay".
+ * Billboard 3 — variante "2 cards arriba + banner central + 2 cards abajo".
  *
- * Layout del SVG Billboard 3:
- * - Fondo gradiente linear #004f8b (top) → negro (bottom).
- * - "See ADS" Open Sans Bold 36px blanco underline arriba-izquierda.
- * - Grid 2×3 de cards 525×525 rx=9 con photos + overlay #11100d al 35.2%.
- * - "TOUCH TO START" 60px @ footer + chevron.
- * - Logo TrueOmni blanco.
+ * Layout según ref-b3:
+ * - Fila 1 (y=0..450): FOOD & DRINK (eat.jpg) + EVENTS (events.jpg).
+ * - Banner central (y=450..1230): foto grass/city con overlay azul dark,
+ *   TrueOmni logo centrado + TOUCH TO START + arrow circle.
+ * - Fila 2 (y=1230..1720): THINGS TO DO (play.jpg) + ITINERARY BUILDER
+ *   (things-to-do.jpg como "bikes").
+ * - Footer (y=1720..1920): #004f8b con TrueOmni + accesibilidad + ENGLISH.
  */
 export function Billboard3() {
   const cardBase = 'absolute overflow-hidden';
-  const cardSize = { width: '525px', height: '525px', borderRadius: '9px' } as const;
-  const overlayStyle = { backgroundColor: 'rgba(17,16,13,0.352)' } as const;
+  const topRowSize = { width: '540px', height: '475px' } as const;
+  const bottomRowSize = { width: '540px', height: '475px' } as const;
+  const overlayStyle = { backgroundColor: 'rgba(0,0,0,0.35)' } as const;
   const labelClass =
     'absolute font-display font-bold uppercase leading-[1.05] text-white tracking-wide';
-  const labelStyle = { left: '40px', bottom: '40px', fontSize: '70px' } as const;
+  const labelStyle = { left: '40px', bottom: '40px', fontSize: '64px' } as const;
 
   return (
     <div
       data-billboard="3"
       className="relative h-full w-full overflow-hidden"
-      style={{ background: 'linear-gradient(to bottom, #004f8b 0%, #000 100%)' }}
+      style={{ backgroundColor: '#004f8b' }}
     >
-      {/* See ADS Title */}
-      <span
-        className="absolute font-sans font-bold text-white underline"
-        style={{ left: '43.5px', top: '36.5px', fontSize: '36px' }}
-      >
-        See ADS
-      </span>
-
-      {/* Row 1 (y=100) */}
-      <div className={cardBase} style={{ ...cardSize, left: '0px', top: '100px' }}>
+      {/* Fila 1: FOOD & DRINK + EVENTS (y=0..450) */}
+      <div className={cardBase} style={{ ...topRowSize, left: '0', top: '0' }}>
         <img
           src="/assets/billboard-3/eat.jpg"
           alt=""
@@ -45,7 +41,7 @@ export function Billboard3() {
           Drink
         </span>
       </div>
-      <div className={cardBase} style={{ ...cardSize, left: '555px', top: '100px' }}>
+      <div className={cardBase} style={{ ...topRowSize, left: '540px', top: '0' }}>
         <img
           src="/assets/billboard-3/events.jpg"
           alt=""
@@ -57,21 +53,44 @@ export function Billboard3() {
         </span>
       </div>
 
-      {/* Row 2 (y=655) */}
-      <div className={cardBase} style={{ ...cardSize, left: '0px', top: '655px' }}>
+      {/* Banner central (y=475..1245): grass/city + logo + TOUCH TO START */}
+      <div className="absolute inset-x-0 overflow-hidden" style={{ top: '475px', height: '770px' }}>
         <img
-          src="/assets/billboard-3/play.jpg"
+          src="/assets/billboard-4/things-to-do.jpg"
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0" style={overlayStyle} />
-        <span className={labelClass} style={labelStyle}>
-          Stay
-        </span>
+        <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,79,139,0.6)' }} />
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-16">
+          <TrueOmniLogo className="h-[110px] w-auto text-white" />
+          <div className="flex items-center gap-10">
+            <span
+              className="font-display font-bold uppercase text-white"
+              style={{ fontSize: '72px', letterSpacing: '0.02em' }}
+            >
+              Touch to start
+            </span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="110"
+              height="110"
+              viewBox="-10 -10 120 120"
+              fill="none"
+              stroke="#fff"
+              strokeWidth="10"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M46.023,72.912,67.534,51.4m0,0L46.023,29.889M67.534,51.4H3m8.15,26.889a48.4,48.4,0,1,0,0-53.778" />
+            </svg>
+          </div>
+        </div>
       </div>
-      <div className={cardBase} style={{ ...cardSize, left: '555px', top: '655px' }}>
+
+      {/* Fila 2: THINGS TO DO + ITINERARY BUILDER (y=1230..1720) */}
+      <div className={cardBase} style={{ ...bottomRowSize, left: '0', top: '1245px' }}>
         <img
-          src="/assets/billboard-3/things-to-do.jpg"
+          src="/assets/billboard-3/play.jpg"
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
@@ -79,57 +98,37 @@ export function Billboard3() {
         <span className={labelClass} style={labelStyle}>
           Things
           <br />
-          to do
+          to Do
         </span>
       </div>
-
-      {/* Row 3 (y=1210) */}
-      <div className={cardBase} style={{ ...cardSize, left: '0px', top: '1210px' }}>
+      <div className={cardBase} style={{ ...bottomRowSize, left: '540px', top: '1245px' }}>
         <img
-          src="/assets/billboard-3/play.jpg"
+          src="/assets/billboard-3/things-to-do.jpg"
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0" style={overlayStyle} />
         <span className={labelClass} style={labelStyle}>
-          Play
-        </span>
-      </div>
-      <div className={cardBase} style={{ ...cardSize, left: '555px', top: '1210px' }}>
-        <img
-          src="/assets/billboard-3/events.jpg"
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0" style={overlayStyle} />
-        <span className={labelClass} style={labelStyle}>
-          Itinerary
+          Itineray
           <br />
           Builder
         </span>
       </div>
 
-      {/* Footer (y=1745 → 1920, altura 175px) */}
+      {/* Footer (y=1720..1920): #004f8b con TrueOmni + accesibilidad + ENGLISH */}
       <div
-        className="absolute inset-x-0 flex items-center justify-center gap-6"
-        style={{ top: '1745px', height: '175px' }}
+        className="absolute left-0 right-0 flex items-center justify-between"
+        style={{
+          bottom: '0',
+          height: '200px',
+          backgroundColor: '#004f8b',
+          paddingLeft: '59px',
+          paddingRight: '59px',
+        }}
       >
-        <TrueOmniLogo className="h-[50px] w-auto text-white" />
-        <span
-          className="font-display font-bold uppercase text-white"
-          style={{ fontSize: '60px', letterSpacing: '0.02em' }}
-        >
-          Touch to start
-        </span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="36"
-          height="24"
-          viewBox="0 -12 18 14"
-          fill="#fff"
-        >
-          <path d="M17.776-3.066l-8.281-8.27a.707.707,0,0,0-1,0L.209-3.066a.721.721,0,0,0,0,1.016L2.062-.209a.707.707,0,0,0,1,0L8.993-6.136,14.919-.209a.707.707,0,0,0,1,0l1.853-1.842A.721.721,0,0,0,17.776-3.066Z" />
-        </svg>
+        <TrueOmniLogo className="h-[65px] w-auto text-white" />
+        <AccessibilityIcon size={80} color="#fff" />
+        <EnglishButton width={244} height={80} fontSize={26} />
       </div>
     </div>
   );

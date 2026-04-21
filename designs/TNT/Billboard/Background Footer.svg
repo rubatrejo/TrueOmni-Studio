@@ -1,0 +1,16 @@
+<svg id="Group_7390" data-name="Group 7390" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" height="218" viewBox="0 0 1080 218">
+  <defs>
+    <clipPath id="clip-path">
+      <path id="Mask" d="M0,0-1080,83.636V218H0Z" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-2">
+      <path id="Mask-2" data-name="Mask" d="M0,0,1080,83.636V218H0Z" fill="none"/>
+    </clipPath>
+  </defs>
+  <g id="Back_Tab" data-name="Back Tab" transform="translate(1080)" clip-path="url(#clip-path)">
+    <rect id="color_bg" width="1080" height="218" transform="translate(-1080)" fill="#1796d6"/>
+  </g>
+  <g id="Front_Tab" data-name="Front Tab" clip-path="url(#clip-path-2)">
+    <path id="color_bg-2" data-name="color_bg" d="M0,0H1080V218H0Z" fill="#004f8b"/>
+  </g>
+</svg>

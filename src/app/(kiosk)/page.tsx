@@ -1,5 +1,6 @@
+import Link from 'next/link';
+
 import { Billboard } from '@/components/billboard/billboard';
-import { BillboardDevNav } from '@/components/billboard/billboard-dev-nav';
 
 interface PageProps {
   searchParams: Promise<{ variant?: string }>;
@@ -8,12 +9,14 @@ interface PageProps {
 export default async function KioskHomePage({ searchParams }: PageProps) {
   const { variant: variantParam } = await searchParams;
   const override = variantParam ? Number(variantParam) : undefined;
-  const isDev = process.env.NODE_ENV !== 'production';
 
   return (
-    <>
+    <Link
+      href="/home"
+      aria-label="Tocar para empezar — abre el Main Dashboard"
+      className="block focus:outline-none"
+    >
       <Billboard variant={Number.isFinite(override) ? override : undefined} />
-      {isDev ? <BillboardDevNav /> : null}
-    </>
+    </Link>
   );
 }

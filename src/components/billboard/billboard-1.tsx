@@ -1,5 +1,7 @@
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 
+import { AccessibilityIcon, EnglishButton } from './billboard-footer-parts';
+
 /**
  * Billboard 1 — variante "Grid + Clock + Weather".
  *
@@ -26,7 +28,9 @@ export function Billboard1() {
       className="relative h-full w-full overflow-hidden"
       style={{ backgroundColor: '#fff' }}
     >
-      {/* Header: landscape photo + overlay + clock/weather */}
+      {/* Header 1020×310 @ (30,30): landscape photo + gradient overlay 0.74
+          (linear #015cb7 → #f2f2f2 horizontal) + clock/weather widget.
+          Texto posicionado con coords verbatim del SVG. */}
       <div
         className="absolute overflow-hidden"
         style={{
@@ -42,49 +46,52 @@ export function Billboard1() {
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
-        {/* Overlay gradient #004f8b con opacity 0.74 */}
+        {/* Overlay gradient horizontal verbatim: stops #015cb7 → #f2f2f2, opacity 0.74 */}
         <div
           className="absolute inset-0"
           style={{
-            background: 'linear-gradient(to bottom, rgba(0,79,139,0) 0%, rgba(0,79,139,0.74) 100%)',
+            background: 'linear-gradient(to right, #015cb7 0%, #f2f2f2 100%)',
+            opacity: 0.74,
           }}
         />
-        {/* Reloj y fecha (izquierda). Posiciones absolutas dentro del header. */}
-        <div className="absolute" style={{ left: '80px', top: '60px' }}>
-          <div
-            className="font-display font-bold text-white"
-            style={{ fontSize: '80px', lineHeight: '1' }}
-          >
-            10:37 a.m.
-          </div>
-          <div
-            className="font-display font-bold text-white"
-            style={{ fontSize: '30px', lineHeight: '1', marginTop: '18px' }}
-          >
-            Friday, December 10, 2025
+
+        {/* 10:37 a.m. baseline (80,191) abs → header-relative (50,161). fontSize 80 */}
+        <span
+          className="absolute font-display font-bold text-white"
+          style={{ left: '50px', top: '95px', fontSize: '80px', lineHeight: '1' }}
+        >
+          10:37 a.m.
+        </span>
+        {/* Friday, December 10, 2025 baseline (80,250) abs → (50,220). fontSize 30 */}
+        <span
+          className="absolute font-display font-bold text-white"
+          style={{ left: '50px', top: '195px', fontSize: '30px', lineHeight: '1' }}
+        >
+          Friday, December 10, 2025
+        </span>
+
+        {/* Weather widget: icono + 50° + Cloudy, alineado a la derecha */}
+        <div className="absolute flex items-center gap-5" style={{ right: '50px', top: '60px' }}>
+          <img
+            src="/assets/billboard-1/weather-icon.png"
+            alt=""
+            style={{ width: '140px', height: 'auto' }}
+          />
+          <div className="flex flex-col items-start">
+            <span
+              className="font-display font-bold text-white"
+              style={{ fontSize: '90px', lineHeight: '1' }}
+            >
+              50°
+            </span>
+            <span
+              className="font-display font-bold text-white"
+              style={{ fontSize: '32px', lineHeight: '1', marginTop: '18px' }}
+            >
+              Cloudy
+            </span>
           </div>
         </div>
-        {/* Weather (derecha): temp + condition + icono. */}
-        <div className="absolute" style={{ right: '40px', top: '55px', textAlign: 'right' }}>
-          <div
-            className="font-display font-bold text-white"
-            style={{ fontSize: '90px', lineHeight: '1' }}
-          >
-            50°
-          </div>
-          <div
-            className="font-display font-bold text-white"
-            style={{ fontSize: '32px', lineHeight: '1', marginTop: '22px' }}
-          >
-            Cloudy
-          </div>
-        </div>
-        <img
-          src="/assets/billboard-1/weather-icon.png"
-          alt=""
-          className="absolute"
-          style={{ right: '170px', top: '50px', width: '120px', height: 'auto' }}
-        />
       </div>
 
       {/* THINGS TO DO card (495×410 @ 30, 374) */}
@@ -147,31 +154,37 @@ export function Billboard1() {
           <br />
           Builder
         </div>
-        {/* Route icon (SVG paths verbatim del SVG) */}
+        {/* Route icon — paths verbatim de designs/TNT/Billboard/Itinery-Icon.svg */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="70"
-          height="90"
-          viewBox="0 0 60 80"
+          width="120"
+          height="120"
+          viewBox="0 0 101.998 102.58"
           fill="#fff"
           className="ml-auto"
           role="img"
           aria-label="Ruta"
         >
-          <path
-            d="M83.481,161.9a7.4,7.4,0,1,0-7.4,7.4A7.411,7.411,0,0,0,83.481,161.9Z"
-            transform="translate(-53.064 -121.821)"
-          />
-          <path
-            d="M39.99,122.237a21.4,21.4,0,0,0,4.66-13.4,21.637,21.637,0,1,0-43.273,0,21.407,21.407,0,0,0,4.666,13.409l16.971,21.337Zm-32.268-13.4a15.292,15.292,0,0,1,30.583,0,15.111,15.111,0,0,1-3.286,9.459L23.014,133.388l-12-15.087A15.116,15.116,0,0,1,7.722,108.836Z"
-            transform="translate(0 -68.756)"
-          />
+          <g transform="translate(-1.377)">
+            <path
+              d="M136.294,71.716H101.052a5.914,5.914,0,0,1,0-11.828h29.012a9.517,9.517,0,1,0,12.145-12.145V0H109.857V27.761h26.007V47.744a9.563,9.563,0,0,0-5.8,5.8H101.052a12.259,12.259,0,0,0,0,24.519h35.242a5.914,5.914,0,0,1,0,11.828H77.165a9.518,9.518,0,1,0,0,6.345h59.129a12.259,12.259,0,0,0,0-24.519ZM116.2,21.416V6.345h19.662V21.416Zm22.834,32.127a3.173,3.173,0,1,1-3.173,3.173A3.176,3.176,0,0,1,139.036,53.543ZM68.193,96.235a3.173,3.173,0,1,1,3.173-3.173A3.176,3.176,0,0,1,68.193,96.235Z"
+              transform="translate(-45.179)"
+            />
+            <path
+              d="M83.481,161.9a7.4,7.4,0,1,0-7.4,7.4A7.411,7.411,0,0,0,83.481,161.9Z"
+              transform="translate(-53.064 -121.821)"
+            />
+            <path
+              d="M39.99,122.237a21.4,21.4,0,0,0,4.66-13.4,21.637,21.637,0,1,0-43.273,0,21.407,21.407,0,0,0,4.666,13.409l16.971,21.337Zm-32.268-13.4a15.292,15.292,0,0,1,30.583,0,15.111,15.111,0,0,1-3.286,9.459L23.014,133.388l-12-15.087A15.116,15.116,0,0,1,7.722,108.836Z"
+              transform="translate(0 -68.756)"
+            />
+          </g>
         </svg>
       </div>
 
       {/* PHOTO BOOTH card (495×208 @ 30, 1488) blue #1796d6 */}
       <div
-        className="absolute flex items-center justify-center overflow-hidden"
+        className="absolute flex items-center overflow-hidden"
         style={{
           left: '30px',
           top: '1488px',
@@ -179,10 +192,31 @@ export function Billboard1() {
           height: '208px',
           borderRadius: '9px',
           backgroundColor: '#1796d6',
+          paddingLeft: '36px',
+          paddingRight: '36px',
         }}
       >
+        {/* Camera icon — verbatim de designs/TNT/Billboard/Photo_Booth-Icon.svg */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="120"
+          height="114"
+          viewBox="0 0 110.382 104.639"
+          fill="none"
+          stroke="#fff"
+          strokeWidth="7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          role="img"
+          aria-label="Cámara"
+        >
+          <path
+            d="M3,43.2H8.743c5.352,0,8.028,0,10.139.874A11.488,11.488,0,0,1,25.1,50.3c.874,2.111.874,4.787.874,10.139s0,8.028-.874,10.139a11.488,11.488,0,0,1-6.217,6.217c-2.111.874-4.787.874-10.139.874H3M94.9,20.23V14.487A11.487,11.487,0,0,0,83.408,3H71.921A11.487,11.487,0,0,0,60.435,14.487V20.23M21.379,100.639H88c6.433,0,9.65,0,12.107-1.252a11.485,11.485,0,0,0,5.02-5.02c1.252-2.457,1.252-5.674,1.252-12.107V38.609c0-6.433,0-9.65-1.252-12.107a11.485,11.485,0,0,0-5.02-5.02C97.653,20.23,94.436,20.23,88,20.23H21.379c-6.433,0-9.65,0-12.107,1.252a11.486,11.486,0,0,0-5.02,5.02C3,28.959,3,32.176,3,38.609V82.26c0,6.433,0,9.65,1.252,12.107a11.485,11.485,0,0,0,5.02,5.02C11.729,100.639,14.946,100.639,21.379,100.639Zm62.029-40.2A17.23,17.23,0,1,1,66.178,43.2,17.23,17.23,0,0,1,83.408,60.435Z"
+            transform="translate(0.5 0.5)"
+          />
+        </svg>
         <div
-          className="text-center font-display font-bold uppercase leading-[1.2] text-white"
+          className="ml-auto font-display font-bold uppercase leading-[1.05] text-white"
           style={{ fontSize: '50px' }}
         >
           Photo
@@ -256,12 +290,20 @@ export function Billboard1() {
         </svg>
       </div>
 
-      {/* Footer 1080×194 @ y=1726 plano #004f8b con logo */}
+      {/* Footer 1080×194 @ y=1726 plano #004f8b: logo + accesibilidad + ENGLISH */}
       <div
-        className="absolute left-0 right-0 flex items-center"
-        style={{ bottom: '0', height: '194px', backgroundColor: '#004f8b', paddingLeft: '59px' }}
+        className="absolute left-0 right-0 flex items-center justify-between"
+        style={{
+          bottom: '0',
+          height: '194px',
+          backgroundColor: '#004f8b',
+          paddingLeft: '59px',
+          paddingRight: '59px',
+        }}
       >
         <TrueOmniLogo className="h-[65px] w-auto text-white" />
+        <AccessibilityIcon size={80} color="#fff" />
+        <EnglishButton width={244} height={80} fontSize={26} />
       </div>
     </div>
   );

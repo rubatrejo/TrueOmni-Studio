@@ -6,13 +6,13 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Fase 3 — Pantallas del kiosk (esperando SVGs de Adobe XD).
+**Fase activa:** Fase 3.3 — Listings module (Restaurants/Things to Do/Stay), Olas 1-2 completas (scaffolding + main screen). Olas 3-8 pendientes.
 
-**Última fase cerrada:** Fase 2 — Sistema de tokens + cargador de cliente.
+**Última fase cerrada:** Fase 3.2 — Home / Main Dashboard (header clock+weather live, search overlay, language dropdown, weather popup, grid 16 tiles + wayfinding). Además Fase 3.1 pulida pixel-perfect verbatim SVG (B1-B4 + iconos reales wheelchair ISA / Itinerary / Photo Booth).
 
-**Siguiente acción concreta:** cuando Rubén entregue los primeros SVGs del XD, depositarlos en `designs/NN-nombre.svg` + spec en `designs/NN-nombre.md` e invocar `/pantalla NN-nombre` para empezar la primera sub-fase de Fase 3.
+**Siguiente acción concreta:** Ola 3 del módulo de Listings — Detail screen + Mapbox (route `/home/[module]/[slug]`, mapa real con coords del listing, botones Website/Reserve/Email/Phone/Favorites). Plan completo en `~/.claude/plans/b-tambien-nifty-island.md`.
 
-**Bloqueos:** Fase 3 depende de los SVGs. Sin ellos, no se puede planificar pantallas concretas. Fases 4/5 dependen de 3.
+**Bloqueos:** ninguno. Token Mapbox ya configurado en `.env.local` + `config.integraciones.mapbox_token`. `mapbox-gl` instalado.
 
 **Decisiones globales vigentes:**
 
@@ -154,6 +154,86 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 - Dep `server-only` mantiene los cargadores fuera del bundle cliente.
 
 **Fase:** 2 — Sistema de tokens + cargador de cliente.
+
+### Sesión 2026-04-20 — Pulido Billboards + Fase 3.2 Home completa + Fase 3.3 Ola 1-2
+
+**Hecho:**
+
+- **Billboards B1-B4 pixel-perfect** contra SVGs en `designs/TNT/Billboard/`:
+  coords/tamaños verbatim, weather widget alineado, iconos reales (wheelchair
+  ISA, Itinerary, Photo Booth camera), 5 variantes alineadas en 540×475.
+- **Dev-nav eliminado** de todo el kiosk (era solo para dev).
+- **Fase 3.2 — Main Dashboard (Home) completa** (7 olas):
+  - Layout sticky header + search + grid scrollable + wayfinding banner.
+  - `HomeHeader` con clock + fecha + weather LIVE desde **Open-Meteo**
+    (timezone America/Phoenix, locale en-US). Coords Phoenix (33.4484, -112.074).
+  - `WeatherPopup` verbatim SVG: cabecera azul rounded-bottom 576×510 con
+    cloud icon grande + 92° + date + time, forecast 5 días con iconos
+    dinámicos por weatherCode, OK button.
+  - `LanguageDropdown`: 244×80 olive con globe + ENGLISH + chevron up,
+    abre hacia arriba 5 idiomas dentro del frame.
+  - `SearchOverlay` + `OnScreenKeyboard`: modal fijo dentro del canvas,
+    teclado QWERTY verbatim SVG (posiciones exactas de cada tecla).
+  - `CategoryGrid` 2-col tiles 460×460 + `WayfindingBanner` 950×460.
+  - 17 rutas stub en `/home/[module]` para módulos future.
+  - Scrollbars ocultos, gradient blanco scroll-hint al fondo.
+- **Fase 3.3 Ola 1-2 — Listings module scaffolding + main screen**:
+  - Tipos `HomeModule` + `Listing` + `mapbox_token` en config.
+  - 90 listings (30 × restaurants/things-to-do/stay) con URLs Unsplash reales,
+    popularity, features, coords Phoenix metro, hours, website, opentable.
+  - `mapbox-gl` + `@types/mapbox-gl` instalados; token en `.env.local`
+    y `config.integraciones.mapbox_token`.
+  - `ListingsModule` + `ListingsToolbar` (4 cells verbatim SVG) + `ListingsGrid`
+    (infinite scroll 12→30) + `ListingCard` (293×268 con heart + dark footer)
+    + `FloatingHomeButton`.
+  - Ruta `/home/[module]` ahora detecta si hay módulo en config y renderiza
+    ListingsModule; si no, cae al stub "Coming soon".
+- **Referencias XD depositadas** en `designs/Home/`, `designs/Listings/`,
+  `designs/TNT/Billboard/`.
+
+**Verificado:**
+
+- Playwright screenshots de: / (landing), /home, /home popup weather,
+  /home language dropdown open, /home search modal, /home/restaurants.
+- `pnpm check` (typecheck + lint + format) limpio.
+- 90 listings renderean con fotos Unsplash reales en /home/restaurants,
+  /home/things-to-do, /home/stay, cada uno con data distinta.
+
+**Pendiente / siguiente:**
+
+- **Fase 3.3 Olas 3-8** (próxima sesión, contexto fresco):
+  - Ola 3: Detail screen + Mapbox (nueva ruta `/home/[module]/[slug]`).
+  - Ola 4: Favoritos sessionStorage (hook `useFavorites`, heart toggle).
+  - Ola 5: Filter + Sort overlay (features/open-now/price + sort options).
+  - Ola 6: Send to Email / Phone modales (reusa OnScreenKeyboard + nuevo
+    NumericKeypad).
+  - Ola 7: Get Directions modal (Mapbox route + turn-by-turn) + Threshold
+    360 iframe modal.
+  - Ola 8: Verificación visual (revisor-visual vs SVGs, auditor-white-label).
+- Plan detallado: `~/.claude/plans/b-tambien-nifty-island.md`.
+- Tasks registradas: IDs 10-15.
+
+**Decisiones:**
+
+- Patrón **"modal dentro del frame"**: `fixed inset-0` dentro del
+  `KioskCanvas` (que tiene `transform: scale`) hace que el modal se contenga
+  al canvas, no al viewport. Aplicado a Weather Popup, Search Overlay,
+  Language Dropdown. Próximos modales deben seguir el mismo patrón (nada
+  de `createPortal` a `document.body`).
+- **Listings module** = **1 componente parametrizado**, no 3 archivos. La
+  ruta `/home/[module]` resuelve runtime contra `config.features.home.modules`.
+  Cada cliente renombra ("Food & Drink" → "Dine") y puebla listings sólo
+  tocando JSON.
+- **Favoritos en sessionStorage** (no localStorage) — se borra al cerrar
+  sesión. Itinerary Builder (fase posterior) leerá el mismo storage.
+- **Weather Popup icons**: usan el mismo `WeatherIcon` (shared) con código
+  WMO del Open-Meteo — header y popup SIEMPRE muestran el mismo símbolo
+  para el clima actual.
+- **Layout del Home**: `home/layout.tsx` es passthrough. Cada page wrappea
+  su propio `KioskCanvas` + shell, porque los módulos tienen hero+toolbar
+  distinto al Dashboard.
+
+**Fase:** 3.2 cerrada, 3.3 Ola 1-2 completa. Siguen Olas 3-8.
 
 ---
 

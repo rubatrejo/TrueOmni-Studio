@@ -108,8 +108,8 @@ export function FilterOverlay({
       </button>
 
       <div
-        className="flex h-full w-full flex-col items-center"
-        style={{ paddingTop: '50px', paddingBottom: '40px' }}
+        className="flex h-full w-full flex-col items-center justify-center"
+        style={{ paddingTop: '40px', paddingBottom: '40px' }}
       >
         <h2
           id="filters-title"
@@ -120,6 +120,7 @@ export function FilterOverlay({
             fontWeight: 700,
             letterSpacing: '0.04em',
             marginBottom: '36px',
+            flexShrink: 0,
           }}
         >
           FILTERS
@@ -127,7 +128,7 @@ export function FilterOverlay({
 
         <div
           className="scrollbar-hide flex flex-col items-center overflow-y-auto"
-          style={{ width: '960px', flex: '1 1 auto', rowGap: '28px' }}
+          style={{ width: '960px', rowGap: '28px', flexShrink: 0 }}
         >
           <Section title="Features">
             <div
@@ -190,7 +191,7 @@ export function FilterOverlay({
         {/* Botones */}
         <div
           className="flex items-center justify-center"
-          style={{ columnGap: '32px', marginTop: '30px' }}
+          style={{ columnGap: '32px', marginTop: '60px', flexShrink: 0 }}
         >
           <button
             type="button"

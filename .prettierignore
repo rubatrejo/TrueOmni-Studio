@@ -7,3 +7,4 @@ clients/*/assets
 designs
 *.svg
 .planning/verifications
+public/pdfjs/

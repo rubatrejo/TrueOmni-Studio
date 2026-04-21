@@ -60,6 +60,8 @@ export interface Listing {
 
 /** Módulo de listings parametrizado por cliente (Restaurants, Things to Do, Stay). */
 export interface HomeModule {
+  /** Discriminador opcional (default = 'listings'). Events usa `kind: 'events'`. */
+  kind?: 'listings';
   /** Display name configurable por cliente ("Food & Drink", "Dine", etc.). */
   label: string;
   heroImage: string;
@@ -69,6 +71,139 @@ export interface HomeModule {
   features: string[];
   listings: Listing[];
 }
+
+/** Un evento del módulo Events (fecha + hora + venue). */
+export interface EventItem {
+  slug: string;
+  title: string;
+  /** Una de `HomeEventsModule.categories` (ej. 'Music', 'Sports'). */
+  category: string;
+  image: string;
+  /** Fecha ISO local 'YYYY-MM-DD'. */
+  date: string;
+  /** Hora inicio 'HH:MM' (24h local). */
+  startTime: string;
+  /** Hora fin 'HH:MM' (24h local). */
+  endTime: string;
+  /** Una de `HomeEventsModule.venues`. */
+  venue: string;
+  /** `'free'` o `'paid'` — combinado con `priceBand` si paid. */
+  priceMode: 'free' | 'paid';
+  priceBand?: 1 | 2 | 3 | 4;
+  /** Tags filtrables (subset de `module.features`). */
+  features: string[];
+  popularity: number;
+  address: string;
+  phone: string;
+  coords: { lat: number; lng: number };
+  website: string;
+  /** Si existe, renderiza botón "GET TICKETS" en el detail. */
+  ticketsUrl?: string;
+  description: string;
+  directions: { icon: string; distance: string; instruction: string }[];
+}
+
+/** Módulo de Events (calendario + lista por día + detail). */
+export interface HomeEventsModule {
+  kind: 'events';
+  label: string;
+  heroImage: string;
+  /** Categorías del filtro Category (OR). */
+  categories: string[];
+  /** Lugares del filtro Venue (OR). */
+  venues: string[];
+  /** Features/tags del filtro Features (AND). */
+  features: string[];
+  events: EventItem[];
+}
+
+/** Red social soportada por el módulo Social Wall. */
+export type SocialSource = 'x' | 'instagram' | 'pinterest' | 'youtube' | 'facebook' | 'tiktok';
+
+/** Tipo de post del Social Wall. */
+export type SocialPostType = 'image' | 'video' | 'text' | 'gallery';
+
+export interface SocialAuthor {
+  /** Nombre visible del autor. Ej. "Anne Smith". */
+  name: string;
+  /** Handle sin arroba. Ej. "annesmith". */
+  username: string;
+  /** URL del avatar (cuadrado recomendado). */
+  avatar: string;
+}
+
+export interface SocialPost {
+  id: string;
+  source: SocialSource;
+  type: SocialPostType;
+  author: SocialAuthor;
+  /** ISO 'YYYY-MM-DDTHH:MM:SSZ' o 'YYYY-MM-DD HH:MM'. */
+  publishedAt: string;
+  /** Puede ir vacía para type='image' sin caption visible. */
+  caption: string;
+  /** URL del media principal (image o video). */
+  mediaUrl?: string;
+  /** Poster/thumbnail usado en la card para type='video'. */
+  videoPoster?: string;
+  /** Solo type='gallery'. */
+  galleryUrls?: string[];
+  /** Ratio width/height del media. Default 1. Usado para el masonry. */
+  aspectRatio?: number;
+  /** Link externo al post original. No se abre en el kiosk. */
+  permalink?: string;
+}
+
+export interface SocialHighlight {
+  id: string;
+  /** Imagen cuadrada para el círculo (logo o foto). */
+  image: string;
+  /** Label opcional. */
+  label?: string;
+}
+
+export interface HomeSocialWallModule {
+  kind: 'social-wall';
+  label: string;
+  heroImage: string;
+  /** Hashtag sin '#' — la UI añade el prefijo. */
+  hashtag: string;
+  /** Handles públicos por red. Las keys presentes activan sus tabs. */
+  handles?: Partial<Record<SocialSource, string>>;
+  highlights: SocialHighlight[];
+  posts: SocialPost[];
+}
+
+export interface BrochureItem {
+  slug: string;
+  title: string;
+  /** Una de `HomeDigitalBrochureModule.categories`. */
+  category: string;
+  /** URL del cover (JPG/PNG). */
+  cover: string;
+  description: string;
+  /** "June, 2025" — human-readable. */
+  publishedLabel: string;
+  /** URL al PDF (mismo origin o con CORS habilitado). */
+  pdfUrl: string;
+  /** Número de páginas (para el scrubber `N/total` sin esperar al fetch). */
+  pageCount: number;
+}
+
+export interface HomeDigitalBrochureModule {
+  kind: 'digital-brochure';
+  label: string;
+  heroImage: string;
+  /** Tabs del listado. Implícitamente se añade "Select all" al inicio. */
+  categories: string[];
+  brochures: BrochureItem[];
+}
+
+/** Unión discriminada de los variants de módulo. */
+export type HomeModuleVariant =
+  | HomeModule
+  | HomeEventsModule
+  | HomeSocialWallModule
+  | HomeDigitalBrochureModule;
 
 /**
  * Configuración tipada de un cliente del kiosk.
@@ -112,8 +247,8 @@ export interface KioskConfig {
         image: string;
       };
       listings: HomeListing[];
-      /** Módulos configurables (Restaurants, Things to Do, Stay, etc.). */
-      modules?: Record<string, HomeModule>;
+      /** Módulos configurables (Listings o Events). Discriminados por `kind`. */
+      modules?: Record<string, HomeModuleVariant>;
     };
   };
   integraciones?: {

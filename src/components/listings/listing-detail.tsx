@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 import type { Listing } from '@/lib/config';
-import { useFavorites } from '@/lib/favorites';
+import { useEventFavorites, useFavorites } from '@/lib/favorites';
 
 import { DirectionsModal } from './directions-modal';
 import { FavoriteAddedToast } from './favorite-added-toast';
@@ -21,17 +21,46 @@ import { Threshold360Modal } from './threshold360-modal';
  * Card blanco 898×1589 rx=8 at (90, 166). Todas las coords en componentes
  * hijos son relativas al card.
  */
+export interface EventMeta {
+  /** ISO YYYY-MM-DD. */
+  date: string;
+  /** 'HH:MM' 24h. */
+  startTime: string;
+  /** 'HH:MM' 24h. */
+  endTime: string;
+  /** Texto ya formateado (ej: "February 27, 2026"). Si ausente se usa `date`. */
+  dateLabel?: string;
+  /** Texto ya formateado (ej: "7:00 – 10:00 PM"). Si ausente se construye. */
+  timeLabel?: string;
+}
+
+export interface SecondaryCta {
+  label: string;
+  href: string;
+  /** Color temático del botón. Default 'blue'. */
+  color?: 'blue' | 'olive' | 'outline-red';
+}
+
 export function ListingDetail({
   moduleKey,
   listing,
   mapboxToken,
   clientCoords,
+  eventMeta,
+  secondaryCta,
+  favoritesKind = 'listing',
 }: {
   moduleKey: string;
   listing: Listing;
   mapboxToken: string | undefined;
   /** Coords del cliente para la ruta del DirectionsModal. */
   clientCoords?: { lat: number; lng: number };
+  /** Si presente → la línea superior se formatea como evento (fecha + horario). */
+  eventMeta?: EventMeta;
+  /** Si presente y no hay `listing.reserveUrl` → se muestra en ese slot (GET TICKETS). */
+  secondaryCta?: SecondaryCta;
+  /** Discriminador del bucket de favoritos. `'event'` usa `useEventFavorites`. */
+  favoritesKind?: 'listing' | 'event';
 }) {
   const [emailOpen, setEmailOpen] = useState(false);
   const [phoneOpen, setPhoneOpen] = useState(false);
@@ -77,8 +106,13 @@ export function ListingDetail({
       >
         <DetailHeader moduleKey={moduleKey} listing={listing} />
         <HeroImage listing={listing} onSee360={() => setThreshold360Open(true)} />
-        <ActionRow listing={listing} />
-        <SharingRow slug={listing.slug} onEmailClick={openEmail} onPhoneClick={openPhone} />
+        <ActionRow listing={listing} eventMeta={eventMeta} secondaryCta={secondaryCta} />
+        <SharingRow
+          slug={listing.slug}
+          onEmailClick={openEmail}
+          onPhoneClick={openPhone}
+          favoritesKind={favoritesKind}
+        />
         <MapSection
           listing={listing}
           token={mapboxToken}
@@ -292,25 +326,64 @@ function See360Badge({ onClick }: { onClick: () => void }) {
 /* -------------------------------------------------------------------------- */
 /* Action row: Time/phone | WEBSITE | RESERVE NOW                              */
 /* -------------------------------------------------------------------------- */
-function ActionRow({ listing }: { listing: Listing }) {
+function ActionRow({
+  listing,
+  eventMeta,
+  secondaryCta,
+}: {
+  listing: Listing;
+  eventMeta?: EventMeta;
+  secondaryCta?: SecondaryCta;
+}) {
+  // Orden de precedencia en el slot "segundo botón":
+  //   1) listing.reserveUrl  → RESERVE NOW (OpenTable-ish)
+  //   2) secondaryCta        → botón configurable (GET TICKETS)
+  //   3) nada                → solo WEBSITE, centrado vertical
+  const hasReserve = Boolean(listing.reserveUrl);
+  const hasSecondary = !hasReserve && Boolean(secondaryCta);
+  const twoButtons = hasReserve || hasSecondary;
+  const websiteTop = twoButtons ? 581 : 624;
+
+  const primaryText = eventMeta
+    ? `${eventMeta.dateLabel ?? eventMeta.date}  |  ${
+        eventMeta.timeLabel ?? `${eventMeta.startTime} – ${eventMeta.endTime}`
+      }`
+    : `${listing.hours}  |  ${listing.phone}`;
+  const secondaryText = eventMeta ? listing.phone : null;
+
   return (
     <>
-      {/* Time and phone — Helvetica 20 black @ (59, 663.5) */}
-      <span
-        className="absolute"
+      {/* Time / phone — centrado vertical con el botón WEBSITE. Tipografía
+          unificada entre listings y events: 22px medium, gap 12px cuando hay
+          2 líneas (event). */}
+      <div
+        className="absolute flex flex-col justify-center"
         style={{
           left: '59px',
-          top: '646px',
-          fontSize: '20px',
-          lineHeight: '20px',
+          top: `${websiteTop}px`,
+          height: '64px',
           fontFamily: 'Helvetica, Arial, sans-serif',
           color: '#000',
+          whiteSpace: 'pre',
+          rowGap: '12px',
         }}
       >
-        {listing.hours}&nbsp;&nbsp;|&nbsp;&nbsp;{listing.phone}
-      </span>
+        <span style={{ fontSize: '22px', lineHeight: '22px', fontWeight: 500 }}>{primaryText}</span>
+        {secondaryText ? (
+          <span
+            style={{
+              fontSize: '22px',
+              lineHeight: '22px',
+              fontWeight: 500,
+              color: '#4a4a4a',
+            }}
+          >
+            {secondaryText}
+          </span>
+        ) : null}
+      </div>
 
-      {/* WEBSITE button @ (609, 581.128) 260×64 */}
+      {/* WEBSITE button 260×64 */}
       <a
         href={listing.website}
         target="_blank"
@@ -318,7 +391,7 @@ function ActionRow({ listing }: { listing: Listing }) {
         className="absolute flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
         style={{
           left: '609px',
-          top: '581px',
+          top: `${websiteTop}px`,
           width: '260px',
           height: '64px',
           borderRadius: '8px',
@@ -333,9 +406,41 @@ function ActionRow({ listing }: { listing: Listing }) {
         WEBSITE
       </a>
 
-      {/* RESERVE NOW button @ (609, 665) 260×64 — solo si listing.reserveUrl */}
-      {listing.reserveUrl && <ReserveNowButton href={listing.reserveUrl} />}
+      {/* Segundo botón: RESERVE NOW o CTA configurable (GET TICKETS). */}
+      {hasReserve && listing.reserveUrl ? <ReserveNowButton href={listing.reserveUrl} /> : null}
+      {hasSecondary && secondaryCta ? <SecondaryCtaButton cta={secondaryCta} /> : null}
     </>
+  );
+}
+
+function SecondaryCtaButton({ cta }: { cta: SecondaryCta }) {
+  const color = cta.color ?? 'blue';
+  const bg = color === 'olive' ? '#b9bd39' : '#1796d6';
+  const isOutlineRed = color === 'outline-red';
+  return (
+    <a
+      href={cta.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="absolute flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
+      style={{
+        left: '609px',
+        top: '665px',
+        width: '260px',
+        height: '64px',
+        borderRadius: '8px',
+        backgroundColor: isOutlineRed ? '#fff' : bg,
+        border: isOutlineRed ? '3px solid #db323a' : 'none',
+        fontFamily: 'Tahoma, Verdana, sans-serif',
+        fontSize: '20px',
+        lineHeight: '20px',
+        color: isOutlineRed ? '#db323a' : '#fff',
+        fontWeight: 600,
+        letterSpacing: '0.02em',
+      }}
+    >
+      {cta.label}
+    </a>
   );
 }
 
@@ -388,12 +493,18 @@ function SharingRow({
   slug,
   onEmailClick,
   onPhoneClick,
+  favoritesKind,
 }: {
   slug: string;
   onEmailClick: () => void;
   onPhoneClick: () => void;
+  favoritesKind: 'listing' | 'event';
 }) {
-  const { isFavorited, toggle } = useFavorites();
+  // Llamamos los DOS hooks siempre (reglas de React hooks). Ambos son stores
+  // externos ligeros (useSyncExternalStore). Escogemos el que corresponde.
+  const listingStore = useFavorites();
+  const eventStore = useEventFavorites();
+  const { isFavorited, toggle } = favoritesKind === 'event' ? eventStore : listingStore;
   const favorited = isFavorited(slug);
 
   return (

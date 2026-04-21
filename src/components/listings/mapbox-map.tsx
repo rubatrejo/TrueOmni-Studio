@@ -16,7 +16,7 @@ import { useEffect, useRef } from 'react';
 export function MapboxMap({
   token,
   coords,
-  zoom = 13,
+  zoom = 15,
   interactive = false,
   className,
   style,
@@ -49,8 +49,8 @@ export function MapboxMap({
     // Marker pin en el estilo del SVG (teardrop azul #004f8b).
     const el = document.createElement('div');
     el.setAttribute('aria-hidden', 'true');
-    el.style.width = '32px';
-    el.style.height = '46px';
+    el.style.width = '48px';
+    el.style.height = '68px';
     el.style.backgroundImage =
       "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 46'><path d='M16 0C7.2 0 0 7.2 0 16c0 10.7 13.2 27.5 15 29.4.6.7 1.4.7 2 0 1.8-1.9 15-18.7 15-29.4C32 7.2 24.8 0 16 0z' fill='%23004f8b'/><circle cx='16' cy='16' r='6' fill='%23fff'/></svg>\")";
     el.style.backgroundRepeat = 'no-repeat';

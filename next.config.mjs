@@ -18,6 +18,16 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const nextConfig = {
   reactStrictMode: true,
   outputFileTracingRoot: __dirname,
+  // pdfjs-dist declara `canvas` como dep opcional (native Node canvas). En
+  // browser no se usa pero webpack intenta resolverlo igual y explota con
+  // "Can't resolve '../build/Release/canvas.node'". Lo aliaseamos a `false`.
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      canvas: false,
+    };
+    return config;
+  },
 };
 
 export default nextConfig;

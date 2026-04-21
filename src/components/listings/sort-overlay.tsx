@@ -1,29 +1,35 @@
 'use client';
 
-import type { SortOrder } from '@/lib/listings-sort';
-import { SORT_OPTIONS } from '@/lib/listings-sort';
-
 import { useEscapeToClose } from './use-escape-to-close';
+
+/** Entrada genérica de orden para el SortOverlay. */
+export interface SortOptionItem {
+  value: string;
+  label: string;
+  disabled?: boolean;
+}
 
 /**
  * Overlay pequeño para elegir orden. No hay SVG para este overlay; el diseño
  * sigue el estilo del Filter (overlay dark + pills olive/blue al estilo del kit)
  * para mantener consistencia visual.
  *
- * Abre desde el toolbar sort-icon. Selección aplica inmediato y cierra.
+ * Configurable: recibe `options: SortOptionItem[]` y `current: string`, de modo
+ * que se pueda reutilizar desde Listings y Events (con sorts distintos).
  */
 export function SortOverlay({
   open,
   current,
-  distanceAvailable,
+  options,
+  title = 'SORT BY',
   onSelect,
   onCancel,
 }: {
   open: boolean;
-  current: SortOrder;
-  /** Si el cliente no tiene coords, se deshabilita la opción "distance". */
-  distanceAvailable: boolean;
-  onSelect: (next: SortOrder) => void;
+  current: string;
+  options: readonly SortOptionItem[];
+  title?: string;
+  onSelect: (next: string) => void;
   onCancel: () => void;
 }) {
   useEscapeToClose(open, onCancel);
@@ -56,12 +62,11 @@ export function SortOverlay({
           marginBottom: '60px',
         }}
       >
-        SORT BY
+        {title}
       </h2>
 
       <div className="relative flex flex-col" style={{ rowGap: '20px', width: '520px' }}>
-        {SORT_OPTIONS.map(({ value, label }) => {
-          const disabled = value === 'distance' && !distanceAvailable;
+        {options.map(({ value, label, disabled = false }) => {
           const selected = current === value;
           return (
             <button

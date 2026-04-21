@@ -1395,7 +1395,7 @@
               "slug": "lux-central",
               "title": "Lux Central",
               "subcategory": "Mexican",
-              "image": "https://images.unsplash.com/photo-1504674900247-ec6b0b1b798e?w=800&auto=format&fit=crop&q=80",
+              "image": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&auto=format&fit=crop&q=80",
               "hours": "7 am – 11 pm",
               "openHours": {
                 "mon": [7, 23],
@@ -1446,7 +1446,7 @@
               "slug": "cartel-coffee-lab",
               "title": "Cartel Coffee Lab",
               "subcategory": "Italian",
-              "image": "https://images.unsplash.com/photo-1559740021-3ef70b0a59ae?w=800&auto=format&fit=crop&q=80",
+              "image": "https://images.unsplash.com/photo-1559925393-8be0ec4767c8?w=800&auto=format&fit=crop&q=80",
               "hours": "10 am – 10 pm",
               "openHours": {
                 "mon": [7, 23],
@@ -1495,7 +1495,7 @@
               "slug": "los-olivos",
               "title": "Los Olivos",
               "subcategory": "American",
-              "image": "https://images.unsplash.com/photo-1520399892884-57f0bb10c0a5?w=800&auto=format&fit=crop&q=80",
+              "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
               "hours": "7 am – 11 pm",
               "openHours": {
                 "mon": [7, 23],
@@ -2053,7 +2053,7 @@
               "slug": "odysea-aquarium",
               "title": "OdySea Aquarium",
               "subcategory": "Museum",
-              "image": "https://images.unsplash.com/photo-1483639220020-9c11cd5b7f9e?w=800&auto=format&fit=crop&q=80",
+              "image": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop&q=80",
               "hours": "10 am – 10 pm",
               "openHours": {
                 "mon": [7, 23],
@@ -2152,7 +2152,7 @@
               "slug": "taliesin-west",
               "title": "Taliesin West",
               "subcategory": "Hike",
-              "image": "https://images.unsplash.com/photo-1545062372-5dd4b15ae3ef?w=800&auto=format&fit=crop&q=80",
+              "image": "https://images.unsplash.com/photo-1527576539890-dfa815648363?w=800&auto=format&fit=crop&q=80",
               "hours": "10 am – 10 pm",
               "openHours": {
                 "mon": [7, 23],
@@ -2349,7 +2349,7 @@
               "slug": "south-mountain-park",
               "title": "South Mountain Park",
               "subcategory": "Sports",
-              "image": "https://images.unsplash.com/photo-1541872703-74c5e44368f1?w=800&auto=format&fit=crop&q=80",
+              "image": "https://images.unsplash.com/photo-1508193638397-1c4234db14d8?w=800&auto=format&fit=crop&q=80",
               "hours": "10 am – 10 pm",
               "openHours": {
                 "mon": [7, 23],
@@ -2447,7 +2447,7 @@
               "slug": "hole-in-the-rock",
               "title": "Hole-in-the-Rock",
               "subcategory": "Park",
-              "image": "https://images.unsplash.com/photo-1533760881669-80db4d7b341a?w=800&auto=format&fit=crop&q=80",
+              "image": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&auto=format&fit=crop&q=80",
               "hours": "10 am – 10 pm",
               "openHours": {
                 "mon": [7, 23],
@@ -2792,7 +2792,7 @@
               "slug": "arizona-boardwalk",
               "title": "Arizona Boardwalk",
               "subcategory": "Park",
-              "image": "https://images.unsplash.com/photo-1502780402662-acc01917aa77?w=800&auto=format&fit=crop&q=80",
+              "image": "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800&auto=format&fit=crop&q=80",
               "hours": "7 am – 11 pm",
               "openHours": {
                 "mon": [7, 23],
@@ -2989,7 +2989,7 @@
               "slug": "goldfield-ghost-town",
               "title": "Goldfield Ghost Town",
               "subcategory": "Zoo",
-              "image": "https://images.unsplash.com/photo-1528543008541-a5ca3de0bb7f?w=800&auto=format&fit=crop&q=80",
+              "image": "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?w=800&auto=format&fit=crop&q=80",
               "hours": "7 am – 11 pm",
               "openHours": {
                 "mon": [7, 23],
@@ -3844,7 +3844,7 @@
               "slug": "camby-phoenix",
               "title": "Camby Phoenix",
               "subcategory": "B&B",
-              "image": "https://images.unsplash.com/photo-1520637836862-4d197d17c55a?w=800&auto=format&fit=crop&q=80",
+              "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&auto=format&fit=crop&q=80",
               "hours": "10 am – 10 pm",
               "openHours": {
                 "mon": [7, 23],
@@ -4139,7 +4139,7 @@
               "slug": "wigwam-resort",
               "title": "Wigwam Resort",
               "subcategory": "Luxury",
-              "image": "https://images.unsplash.com/photo-1590490350570-3cfe2dc3b38b?w=800&auto=format&fit=crop&q=80",
+              "image": "https://images.unsplash.com/photo-1455587734955-081b22074882?w=800&auto=format&fit=crop&q=80",
               "hours": "10 am – 10 pm",
               "openHours": {
                 "mon": [7, 23],
@@ -4188,7 +4188,7 @@
               "slug": "hyatt-regency-scottsdale",
               "title": "Hyatt Regency Scottsdale",
               "subcategory": "Hotel",
-              "image": "https://images.unsplash.com/photo-1587874522487-4e4f9a5b2716?w=800&auto=format&fit=crop&q=80",
+              "image": "https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&auto=format&fit=crop&q=80",
               "hours": "7 am – 11 pm",
               "openHours": {
                 "mon": [7, 23],
@@ -4676,6 +4676,1753 @@
                   "instruction": "Turn right at the 1st cross street onto US-191 S/US-26 W/US-89 S/W Broadway"
                 }
               ]
+            }
+          ]
+        },
+        "events": {
+          "kind": "events",
+          "label": "Upcoming Events",
+          "heroImage": "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&auto=format&fit=crop&q=75",
+          "categories": [
+            "Music",
+            "Sports",
+            "Conference",
+            "Festival",
+            "Food",
+            "Arts",
+            "Family",
+            "Comedy"
+          ],
+          "venues": ["Downtown", "Convention Center", "Stadium", "Theater", "Park"],
+          "features": ["Family-friendly", "Outdoor", "Indoor", "Accessible", "21+"],
+          "events": [
+            {
+              "slug": "spring-half-marathon",
+              "title": "Spring Half Marathon",
+              "category": "Sports",
+              "image": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-12",
+              "startTime": "07:00",
+              "endTime": "11:00",
+              "venue": "Downtown",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Outdoor", "Family-friendly", "Accessible"],
+              "popularity": 82,
+              "address": "100 E Washington St, Phoenix, AZ",
+              "phone": "(602) 555-0121",
+              "coords": { "lat": 33.4484, "lng": -112.074 },
+              "website": "https://example.com/spring-half-marathon",
+              "ticketsUrl": "https://example.com/spring-half-marathon/register",
+              "description": "Join runners from across the region for our annual spring race through Downtown Phoenix. Certified 13.1 course, start/finish at CityScape.\n\nPacer groups, hydration stations every 2 miles, and a post-race festival with music and food.",
+              "directions": [
+                {
+                  "icon": "straight",
+                  "distance": "0.3 mi",
+                  "instruction": "Head east on Van Buren St"
+                },
+                {
+                  "icon": "right",
+                  "distance": "0.7 mi",
+                  "instruction": "Turn right onto Central Ave"
+                },
+                { "icon": "arrive", "distance": "300 ft", "instruction": "Arrive at start line" }
+              ]
+            },
+            {
+              "slug": "design-conference-2026",
+              "title": "Design Conference 2026",
+              "category": "Conference",
+              "image": "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-14",
+              "startTime": "09:00",
+              "endTime": "17:00",
+              "venue": "Convention Center",
+              "priceMode": "paid",
+              "priceBand": 3,
+              "features": ["Indoor", "Accessible"],
+              "popularity": 70,
+              "address": "100 N 3rd St, Phoenix, AZ",
+              "phone": "(602) 555-0142",
+              "coords": { "lat": 33.4481, "lng": -112.0731 },
+              "website": "https://example.com/design-conf",
+              "ticketsUrl": "https://example.com/design-conf/tickets",
+              "description": "A full day of talks, workshops and networking for product designers, engineers and researchers. Keynotes from industry leaders, hands-on sessions, and evening mixer.",
+              "directions": [
+                { "icon": "right", "distance": "0.4 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "arrive",
+                  "distance": "200 ft",
+                  "instruction": "Arrive at Phoenix Convention Center"
+                }
+              ]
+            },
+            {
+              "slug": "food-truck-rally",
+              "title": "Food Truck Rally",
+              "category": "Food",
+              "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-18",
+              "startTime": "17:00",
+              "endTime": "22:00",
+              "venue": "Downtown",
+              "priceMode": "free",
+              "features": ["Outdoor", "Family-friendly"],
+              "popularity": 88,
+              "address": "2 E Jefferson St, Phoenix, AZ",
+              "phone": "(602) 555-0159",
+              "coords": { "lat": 33.4472, "lng": -112.0739 },
+              "website": "https://example.com/food-truck-rally",
+              "description": "Over 40 local food trucks gather for a night of tacos, barbecue, ice cream, and craft soda. Live DJ, family zone, and free admission.",
+              "directions": [
+                {
+                  "icon": "left",
+                  "distance": "0.5 mi",
+                  "instruction": "Head west on Jefferson St"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at Heritage Square"
+                }
+              ]
+            },
+            {
+              "slug": "sunday-brunch-fest",
+              "title": "Sunday Brunch Fest",
+              "category": "Food",
+              "image": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-19",
+              "startTime": "11:00",
+              "endTime": "14:00",
+              "venue": "Park",
+              "priceMode": "paid",
+              "priceBand": 1,
+              "features": ["Outdoor", "Family-friendly"],
+              "popularity": 64,
+              "address": "1201 N Galvin Pkwy, Phoenix, AZ",
+              "phone": "(602) 555-0163",
+              "coords": { "lat": 33.455, "lng": -112.071 },
+              "website": "https://example.com/brunch-fest",
+              "ticketsUrl": "https://example.com/brunch-fest/tickets",
+              "description": "All-you-can-eat brunch from top Valley chefs, live acoustic sets, and mimosa flights overlooking the lake.",
+              "directions": [
+                {
+                  "icon": "right",
+                  "distance": "1.2 mi",
+                  "instruction": "Head east on McDowell Rd"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "200 ft",
+                  "instruction": "Arrive at Papago Park entrance"
+                }
+              ]
+            },
+            {
+              "slug": "jazz-under-the-stars",
+              "title": "Jazz Under the Stars",
+              "category": "Music",
+              "image": "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-19",
+              "startTime": "20:00",
+              "endTime": "23:00",
+              "venue": "Park",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Outdoor", "21+"],
+              "popularity": 71,
+              "address": "1201 N Galvin Pkwy, Phoenix, AZ",
+              "phone": "(602) 555-0184",
+              "coords": { "lat": 33.456, "lng": -112.069 },
+              "website": "https://example.com/jazz-stars",
+              "ticketsUrl": "https://example.com/jazz-stars/tickets",
+              "description": "An intimate open-air jazz night featuring local quartets and a guest trumpeter under the spring sky.",
+              "directions": [
+                {
+                  "icon": "right",
+                  "distance": "1.3 mi",
+                  "instruction": "Head east on McDowell Rd"
+                },
+                { "icon": "arrive", "distance": "150 ft", "instruction": "Arrive at Ramada B" }
+              ]
+            },
+            {
+              "slug": "phoenix-art-fair",
+              "title": "Phoenix Art Fair",
+              "category": "Arts",
+              "image": "https://images.unsplash.com/photo-1578926288207-a90a5366759d?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-20",
+              "startTime": "10:00",
+              "endTime": "18:00",
+              "venue": "Convention Center",
+              "priceMode": "paid",
+              "priceBand": 1,
+              "features": ["Indoor", "Family-friendly", "Accessible"],
+              "popularity": 66,
+              "address": "100 N 3rd St, Phoenix, AZ",
+              "phone": "(602) 555-0198",
+              "coords": { "lat": 33.4481, "lng": -112.0731 },
+              "website": "https://example.com/phx-art-fair",
+              "ticketsUrl": "https://example.com/phx-art-fair/tickets",
+              "description": "Over 120 artists exhibit paintings, sculpture, and mixed-media works. Kids corner, live demonstrations, and artist talks throughout the day.",
+              "directions": [
+                { "icon": "right", "distance": "0.4 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "arrive",
+                  "distance": "200 ft",
+                  "instruction": "Arrive at Phoenix Convention Center"
+                }
+              ]
+            },
+            {
+              "slug": "spring-music-festival",
+              "title": "Spring Music Festival",
+              "category": "Festival",
+              "image": "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-21",
+              "startTime": "18:00",
+              "endTime": "22:00",
+              "venue": "Downtown",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Outdoor", "21+"],
+              "popularity": 92,
+              "address": "201 E Washington St, Phoenix, AZ",
+              "phone": "(602) 555-0211",
+              "coords": { "lat": 33.4489, "lng": -112.0716 },
+              "website": "https://example.com/spring-music",
+              "ticketsUrl": "https://example.com/spring-music/tickets",
+              "description": "Three stages, 18 bands, food and drinks. Headliners announced on the website — early-bird tickets still available.",
+              "directions": [
+                {
+                  "icon": "straight",
+                  "distance": "0.2 mi",
+                  "instruction": "Head east on Washington St"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at CityScape plaza"
+                }
+              ]
+            },
+            {
+              "slug": "suns-vs-warriors",
+              "title": "Suns vs Warriors",
+              "category": "Sports",
+              "image": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-21",
+              "startTime": "19:30",
+              "endTime": "22:00",
+              "venue": "Stadium",
+              "priceMode": "paid",
+              "priceBand": 3,
+              "features": ["Indoor", "Accessible"],
+              "popularity": 95,
+              "address": "201 E Jefferson St, Phoenix, AZ",
+              "phone": "(602) 555-0222",
+              "coords": { "lat": 33.4457, "lng": -112.0712 },
+              "website": "https://example.com/suns-warriors",
+              "ticketsUrl": "https://example.com/suns-warriors/tickets",
+              "description": "NBA regular-season matchup. Pregame concert at 18:30, doors open at 18:00.",
+              "directions": [
+                {
+                  "icon": "right",
+                  "distance": "0.3 mi",
+                  "instruction": "Head east on Jefferson St"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "150 ft",
+                  "instruction": "Arrive at Footprint Center"
+                }
+              ]
+            },
+            {
+              "slug": "farmers-market-wednesday",
+              "title": "Farmers Market",
+              "category": "Food",
+              "image": "https://images.unsplash.com/photo-1542838132-92c53300491e?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-22",
+              "startTime": "08:00",
+              "endTime": "13:00",
+              "venue": "Downtown",
+              "priceMode": "free",
+              "features": ["Outdoor", "Family-friendly"],
+              "popularity": 58,
+              "address": "721 N Central Ave, Phoenix, AZ",
+              "phone": "(602) 555-0234",
+              "coords": { "lat": 33.4567, "lng": -112.0739 },
+              "website": "https://example.com/phx-market",
+              "description": "Weekly producer market with fresh produce, artisan breads, coffee, and street food. Free entry, pet-friendly.",
+              "directions": [
+                {
+                  "icon": "left",
+                  "distance": "0.7 mi",
+                  "instruction": "Head north on Central Ave"
+                },
+                { "icon": "arrive", "distance": "100 ft", "instruction": "Arrive at Roosevelt Row" }
+              ]
+            },
+            {
+              "slug": "indie-film-screening",
+              "title": "Indie Film Screening",
+              "category": "Arts",
+              "image": "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-22",
+              "startTime": "20:00",
+              "endTime": "22:30",
+              "venue": "Theater",
+              "priceMode": "paid",
+              "priceBand": 1,
+              "features": ["Indoor", "21+"],
+              "popularity": 48,
+              "address": "1400 N Central Ave, Phoenix, AZ",
+              "phone": "(602) 555-0241",
+              "coords": { "lat": 33.4603, "lng": -112.0739 },
+              "website": "https://example.com/indie-night",
+              "ticketsUrl": "https://example.com/indie-night/tickets",
+              "description": "A curated selection of short films from emerging directors, followed by a Q&A panel.",
+              "directions": [
+                {
+                  "icon": "straight",
+                  "distance": "0.9 mi",
+                  "instruction": "Head north on Central Ave"
+                },
+                { "icon": "arrive", "distance": "100 ft", "instruction": "Arrive at FilmBar" }
+              ]
+            },
+            {
+              "slug": "comedy-night-thursday",
+              "title": "Comedy Night",
+              "category": "Comedy",
+              "image": "https://images.unsplash.com/photo-1527224538127-2104bb71c51b?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-23",
+              "startTime": "21:00",
+              "endTime": "23:00",
+              "venue": "Theater",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Indoor", "21+"],
+              "popularity": 74,
+              "address": "615 N 3rd Ave, Phoenix, AZ",
+              "phone": "(602) 555-0257",
+              "coords": { "lat": 33.4539, "lng": -112.0769 },
+              "website": "https://example.com/comedy-night",
+              "ticketsUrl": "https://example.com/comedy-night/tickets",
+              "description": "Stand-up showcase featuring three headliners on tour, hosted by local comedian Diana Cano.",
+              "directions": [
+                { "icon": "left", "distance": "0.6 mi", "instruction": "Head west on McDowell Rd" },
+                { "icon": "arrive", "distance": "100 ft", "instruction": "Arrive at Rebel Lounge" }
+              ]
+            },
+            {
+              "slug": "kids-science-expo",
+              "title": "Kids Science Expo",
+              "category": "Family",
+              "image": "https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-24",
+              "startTime": "10:00",
+              "endTime": "16:00",
+              "venue": "Convention Center",
+              "priceMode": "paid",
+              "priceBand": 1,
+              "features": ["Indoor", "Family-friendly", "Accessible"],
+              "popularity": 61,
+              "address": "100 N 3rd St, Phoenix, AZ",
+              "phone": "(602) 555-0266",
+              "coords": { "lat": 33.4481, "lng": -112.0731 },
+              "website": "https://example.com/kids-expo",
+              "ticketsUrl": "https://example.com/kids-expo/tickets",
+              "description": "Hands-on science activities, robotics demos, planetarium shows and a kids' meet-the-scientist panel.",
+              "directions": [
+                { "icon": "right", "distance": "0.4 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "arrive",
+                  "distance": "200 ft",
+                  "instruction": "Arrive at Phoenix Convention Center"
+                }
+              ]
+            },
+            {
+              "slug": "friday-football-finals",
+              "title": "Friday Football Finals",
+              "category": "Sports",
+              "image": "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-24",
+              "startTime": "19:00",
+              "endTime": "21:30",
+              "venue": "Stadium",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Outdoor", "Family-friendly", "Accessible"],
+              "popularity": 80,
+              "address": "1 Cardinals Dr, Glendale, AZ",
+              "phone": "(623) 555-0270",
+              "coords": { "lat": 33.5276, "lng": -112.2626 },
+              "website": "https://example.com/friday-finals",
+              "ticketsUrl": "https://example.com/friday-finals/tickets",
+              "description": "High school football finals with live brass band, fireworks and post-game autographs.",
+              "directions": [
+                {
+                  "icon": "right",
+                  "distance": "9.5 mi",
+                  "instruction": "Head northwest on I-10 W"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "0.2 mi",
+                  "instruction": "Arrive at State Farm Stadium"
+                }
+              ]
+            },
+            {
+              "slug": "tech-summit-2026",
+              "title": "Tech Summit 2026",
+              "category": "Conference",
+              "image": "https://images.unsplash.com/photo-1511578314322-379afb476865?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-25",
+              "startTime": "09:00",
+              "endTime": "17:00",
+              "venue": "Convention Center",
+              "priceMode": "paid",
+              "priceBand": 4,
+              "features": ["Indoor", "Accessible"],
+              "popularity": 77,
+              "address": "100 N 3rd St, Phoenix, AZ",
+              "phone": "(602) 555-0281",
+              "coords": { "lat": 33.4481, "lng": -112.0731 },
+              "website": "https://example.com/tech-summit",
+              "ticketsUrl": "https://example.com/tech-summit/tickets",
+              "description": "The region's biggest technology gathering. Keynotes on AI, cloud, and security. Startup expo floor and investor matchmaking.",
+              "directions": [
+                { "icon": "right", "distance": "0.4 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "arrive",
+                  "distance": "200 ft",
+                  "instruction": "Arrive at Phoenix Convention Center"
+                }
+              ]
+            },
+            {
+              "slug": "waterfront-concert",
+              "title": "Waterfront Concert Series",
+              "category": "Music",
+              "image": "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-25",
+              "startTime": "19:00",
+              "endTime": "22:00",
+              "venue": "Park",
+              "priceMode": "free",
+              "features": ["Outdoor", "Family-friendly"],
+              "popularity": 86,
+              "address": "80 N Arizona Pl, Chandler, AZ",
+              "phone": "(480) 555-0294",
+              "coords": { "lat": 33.4286, "lng": -111.939 },
+              "website": "https://example.com/waterfront-concert",
+              "description": "Live music on the waterfront. Bring a blanket and enjoy the sunset over the lake.",
+              "directions": [
+                { "icon": "left", "distance": "11 mi", "instruction": "Head east on US-60 E" },
+                {
+                  "icon": "arrive",
+                  "distance": "200 ft",
+                  "instruction": "Arrive at Tempe Town Lake"
+                }
+              ]
+            },
+            {
+              "slug": "open-mic-night",
+              "title": "Open Mic Night",
+              "category": "Comedy",
+              "image": "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-26",
+              "startTime": "20:00",
+              "endTime": "23:00",
+              "venue": "Downtown",
+              "priceMode": "free",
+              "features": ["Indoor", "21+"],
+              "popularity": 45,
+              "address": "415 E Roosevelt St, Phoenix, AZ",
+              "phone": "(602) 555-0307",
+              "coords": { "lat": 33.459, "lng": -112.0712 },
+              "website": "https://example.com/open-mic",
+              "description": "A welcoming stage for new comics, musicians and poets. Sign-ups open at 19:30.",
+              "directions": [
+                {
+                  "icon": "right",
+                  "distance": "1.0 mi",
+                  "instruction": "Head north on Central Ave"
+                },
+                { "icon": "arrive", "distance": "100 ft", "instruction": "Arrive at The Lost Leaf" }
+              ]
+            },
+            {
+              "slug": "symphony-orchestra-night",
+              "title": "Symphony Orchestra Night",
+              "category": "Music",
+              "image": "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-28",
+              "startTime": "19:30",
+              "endTime": "22:00",
+              "venue": "Theater",
+              "priceMode": "paid",
+              "priceBand": 3,
+              "features": ["Indoor", "Accessible"],
+              "popularity": 72,
+              "address": "75 N 2nd St, Phoenix, AZ",
+              "phone": "(602) 555-0318",
+              "coords": { "lat": 33.4503, "lng": -112.074 },
+              "website": "https://example.com/symphony",
+              "ticketsUrl": "https://example.com/symphony/tickets",
+              "description": "The Phoenix Symphony performs Dvořák's New World Symphony and Rachmaninoff's 2nd Piano Concerto.",
+              "directions": [
+                { "icon": "left", "distance": "0.3 mi", "instruction": "Head south on 2nd St" },
+                { "icon": "arrive", "distance": "100 ft", "instruction": "Arrive at Symphony Hall" }
+              ]
+            },
+            {
+              "slug": "tacos-tequila-fiesta",
+              "title": "Tacos & Tequila Fiesta",
+              "category": "Food",
+              "image": "https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-30",
+              "startTime": "17:00",
+              "endTime": "23:00",
+              "venue": "Park",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Outdoor", "21+"],
+              "popularity": 69,
+              "address": "80 N Arizona Pl, Chandler, AZ",
+              "phone": "(480) 555-0329",
+              "coords": { "lat": 33.4286, "lng": -111.939 },
+              "website": "https://example.com/tacos-tequila",
+              "ticketsUrl": "https://example.com/tacos-tequila/tickets",
+              "description": "40+ tacos from regional chefs, 25+ tequilas to sample, live mariachi and lucha-libre exhibition.",
+              "directions": [
+                { "icon": "left", "distance": "11 mi", "instruction": "Head east on US-60 E" },
+                {
+                  "icon": "arrive",
+                  "distance": "200 ft",
+                  "instruction": "Arrive at Tempe Town Lake"
+                }
+              ]
+            },
+            {
+              "slug": "may-day-parade",
+              "title": "May Day Parade",
+              "category": "Family",
+              "image": "https://images.unsplash.com/photo-1519750157634-b6d493a0f77c?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-05-01",
+              "startTime": "10:00",
+              "endTime": "13:00",
+              "venue": "Downtown",
+              "priceMode": "free",
+              "features": ["Outdoor", "Family-friendly", "Accessible"],
+              "popularity": 67,
+              "address": "50 E Adams St, Phoenix, AZ",
+              "phone": "(602) 555-0336",
+              "coords": { "lat": 33.449, "lng": -112.074 },
+              "website": "https://example.com/mayday",
+              "description": "Annual parade with floats from local schools, dance troupes, and community associations. Stretches from City Hall to Heritage Square.",
+              "directions": [
+                {
+                  "icon": "straight",
+                  "distance": "0.2 mi",
+                  "instruction": "Head east on Adams St"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at City Hall Plaza"
+                }
+              ]
+            },
+            {
+              "slug": "startup-pitch-night",
+              "title": "Startup Pitch Night",
+              "category": "Conference",
+              "image": "https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-05-02",
+              "startTime": "18:00",
+              "endTime": "21:00",
+              "venue": "Convention Center",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Indoor", "21+"],
+              "popularity": 53,
+              "address": "100 N 3rd St, Phoenix, AZ",
+              "phone": "(602) 555-0347",
+              "coords": { "lat": 33.4481, "lng": -112.0731 },
+              "website": "https://example.com/pitch-night",
+              "ticketsUrl": "https://example.com/pitch-night/tickets",
+              "description": "Eight early-stage startups pitch to a panel of investors. Networking reception with food trucks and local brewery tasting.",
+              "directions": [
+                { "icon": "right", "distance": "0.4 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "arrive",
+                  "distance": "200 ft",
+                  "instruction": "Arrive at Phoenix Convention Center"
+                }
+              ]
+            },
+            {
+              "slug": "yoga-in-the-park",
+              "title": "Yoga in the Park",
+              "category": "Family",
+              "image": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-19",
+              "startTime": "08:00",
+              "endTime": "09:30",
+              "venue": "Park",
+              "priceMode": "free",
+              "features": ["Outdoor", "Family-friendly", "Accessible"],
+              "popularity": 52,
+              "address": "1201 N Galvin Pkwy, Phoenix, AZ",
+              "phone": "(602) 555-0411",
+              "coords": { "lat": 33.4558, "lng": -112.07 },
+              "website": "https://example.com/park-yoga",
+              "description": "Sunrise community yoga flow for all levels. Bring your own mat, water provided.",
+              "directions": [
+                {
+                  "icon": "right",
+                  "distance": "1.2 mi",
+                  "instruction": "Head east on McDowell Rd"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "200 ft",
+                  "instruction": "Arrive at Papago Park lawn"
+                }
+              ]
+            },
+            {
+              "slug": "gallery-opening-reception",
+              "title": "Gallery Opening Reception",
+              "category": "Arts",
+              "image": "https://images.unsplash.com/photo-1531058020387-3be344556be6?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-19",
+              "startTime": "18:00",
+              "endTime": "21:00",
+              "venue": "Theater",
+              "priceMode": "free",
+              "features": ["Indoor", "21+"],
+              "popularity": 49,
+              "address": "221 E Roosevelt St, Phoenix, AZ",
+              "phone": "(602) 555-0423",
+              "coords": { "lat": 33.4593, "lng": -112.072 },
+              "website": "https://example.com/gallery-opening",
+              "description": "Opening night for our spring exhibition featuring six local painters. Live music and complimentary wine.",
+              "directions": [
+                {
+                  "icon": "left",
+                  "distance": "0.9 mi",
+                  "instruction": "Head north on Central Ave"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at Modified Arts gallery"
+                }
+              ]
+            },
+            {
+              "slug": "farmers-cooking-class",
+              "title": "Farmers Cooking Class",
+              "category": "Food",
+              "image": "https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-20",
+              "startTime": "18:00",
+              "endTime": "20:00",
+              "venue": "Downtown",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Indoor", "Family-friendly"],
+              "popularity": 56,
+              "address": "1 E Washington St, Phoenix, AZ",
+              "phone": "(602) 555-0432",
+              "coords": { "lat": 33.4479, "lng": -112.0739 },
+              "website": "https://example.com/cooking-class",
+              "ticketsUrl": "https://example.com/cooking-class/tickets",
+              "description": "Hands-on cooking class with farmers market produce. Learn three seasonal recipes, take home a cookbook.",
+              "directions": [
+                {
+                  "icon": "straight",
+                  "distance": "0.3 mi",
+                  "instruction": "Head east on Washington St"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "50 ft",
+                  "instruction": "Arrive at CityScape Test Kitchen"
+                }
+              ]
+            },
+            {
+              "slug": "poetry-slam",
+              "title": "Poetry Slam",
+              "category": "Arts",
+              "image": "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-20",
+              "startTime": "20:00",
+              "endTime": "22:30",
+              "venue": "Theater",
+              "priceMode": "paid",
+              "priceBand": 1,
+              "features": ["Indoor", "21+"],
+              "popularity": 51,
+              "address": "914 N 5th St, Phoenix, AZ",
+              "phone": "(602) 555-0446",
+              "coords": { "lat": 33.4584, "lng": -112.0695 },
+              "website": "https://example.com/poetry-slam",
+              "ticketsUrl": "https://example.com/poetry-slam/tickets",
+              "description": "Monthly poetry slam featuring 10 local performers competing for the championship cup. Sign-ups at 19:30.",
+              "directions": [
+                { "icon": "left", "distance": "0.8 mi", "instruction": "Head north on 5th St" },
+                { "icon": "arrive", "distance": "100 ft", "instruction": "Arrive at The Lost Leaf" }
+              ]
+            },
+            {
+              "slug": "morning-tai-chi",
+              "title": "Morning Tai Chi",
+              "category": "Family",
+              "image": "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-21",
+              "startTime": "07:00",
+              "endTime": "08:00",
+              "venue": "Park",
+              "priceMode": "free",
+              "features": ["Outdoor", "Family-friendly", "Accessible"],
+              "popularity": 42,
+              "address": "1202 N Galvin Pkwy, Phoenix, AZ",
+              "phone": "(602) 555-0459",
+              "coords": { "lat": 33.4562, "lng": -112.071 },
+              "website": "https://example.com/tai-chi",
+              "description": "Gentle morning tai chi session open to all ages and experience levels.",
+              "directions": [
+                {
+                  "icon": "right",
+                  "distance": "1.3 mi",
+                  "instruction": "Head east on McDowell Rd"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "150 ft",
+                  "instruction": "Arrive at Papago Park Ramada A"
+                }
+              ]
+            },
+            {
+              "slug": "startup-networking-mixer",
+              "title": "Startup Networking Mixer",
+              "category": "Conference",
+              "image": "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-21",
+              "startTime": "17:30",
+              "endTime": "20:00",
+              "venue": "Convention Center",
+              "priceMode": "free",
+              "features": ["Indoor", "21+"],
+              "popularity": 57,
+              "address": "100 N 3rd St, Phoenix, AZ",
+              "phone": "(602) 555-0467",
+              "coords": { "lat": 33.4481, "lng": -112.0731 },
+              "website": "https://example.com/startup-mixer",
+              "description": "Happy-hour mixer with founders, investors and operators. Light appetizers, coffee bar and co-working demo.",
+              "directions": [
+                { "icon": "right", "distance": "0.4 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "arrive",
+                  "distance": "200 ft",
+                  "instruction": "Arrive at Phoenix Convention Center"
+                }
+              ]
+            },
+            {
+              "slug": "outdoor-movie-night",
+              "title": "Outdoor Movie Night",
+              "category": "Family",
+              "image": "https://images.unsplash.com/photo-1512070679279-8988d32161be?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-22",
+              "startTime": "19:30",
+              "endTime": "22:30",
+              "venue": "Park",
+              "priceMode": "free",
+              "features": ["Outdoor", "Family-friendly"],
+              "popularity": 73,
+              "address": "1202 N Galvin Pkwy, Phoenix, AZ",
+              "phone": "(602) 555-0472",
+              "coords": { "lat": 33.4559, "lng": -112.072 },
+              "website": "https://example.com/movie-night",
+              "description": "Family movie screening under the stars. Bring a blanket. Popcorn and snacks on sale.",
+              "directions": [
+                {
+                  "icon": "right",
+                  "distance": "1.2 mi",
+                  "instruction": "Head east on McDowell Rd"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "200 ft",
+                  "instruction": "Arrive at Papago Park lawn"
+                }
+              ]
+            },
+            {
+              "slug": "salsa-dancing-class",
+              "title": "Salsa Dancing Class",
+              "category": "Music",
+              "image": "https://images.unsplash.com/photo-1504609813442-a8924e83f76e?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-23",
+              "startTime": "19:00",
+              "endTime": "21:00",
+              "venue": "Downtown",
+              "priceMode": "paid",
+              "priceBand": 1,
+              "features": ["Indoor", "21+"],
+              "popularity": 60,
+              "address": "455 N 3rd St, Phoenix, AZ",
+              "phone": "(602) 555-0488",
+              "coords": { "lat": 33.4531, "lng": -112.0725 },
+              "website": "https://example.com/salsa-class",
+              "ticketsUrl": "https://example.com/salsa-class/tickets",
+              "description": "Beginner salsa with open social floor from 20:30. No partner required, drinks available.",
+              "directions": [
+                { "icon": "left", "distance": "0.5 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at Crescent Ballroom"
+                }
+              ]
+            },
+            {
+              "slug": "book-club-meetup",
+              "title": "Book Club Meetup",
+              "category": "Arts",
+              "image": "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-23",
+              "startTime": "18:00",
+              "endTime": "20:00",
+              "venue": "Downtown",
+              "priceMode": "free",
+              "features": ["Indoor", "Accessible"],
+              "popularity": 38,
+              "address": "1221 N Central Ave, Phoenix, AZ",
+              "phone": "(602) 555-0491",
+              "coords": { "lat": 33.4602, "lng": -112.0739 },
+              "website": "https://example.com/book-club",
+              "description": "Monthly book club — this month we're discussing 'The Overstory' by Richard Powers. Drop-ins welcome.",
+              "directions": [
+                {
+                  "icon": "left",
+                  "distance": "1.0 mi",
+                  "instruction": "Head north on Central Ave"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at Changing Hands Bookstore"
+                }
+              ]
+            },
+            {
+              "slug": "craft-beer-tasting",
+              "title": "Local Craft Beer Tasting",
+              "category": "Food",
+              "image": "https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-24",
+              "startTime": "17:00",
+              "endTime": "20:00",
+              "venue": "Downtown",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Indoor", "21+"],
+              "popularity": 65,
+              "address": "121 E Monroe St, Phoenix, AZ",
+              "phone": "(602) 555-0506",
+              "coords": { "lat": 33.4493, "lng": -112.0729 },
+              "website": "https://example.com/beer-tasting",
+              "ticketsUrl": "https://example.com/beer-tasting/tickets",
+              "description": "Flight of 8 local craft beers paired with small bites from neighboring kitchens.",
+              "directions": [
+                {
+                  "icon": "straight",
+                  "distance": "0.3 mi",
+                  "instruction": "Head east on Monroe St"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "50 ft",
+                  "instruction": "Arrive at Arizona Wilderness Brewing"
+                }
+              ]
+            },
+            {
+              "slug": "community-cleanup-day",
+              "title": "Community Cleanup Day",
+              "category": "Family",
+              "image": "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-25",
+              "startTime": "08:00",
+              "endTime": "12:00",
+              "venue": "Park",
+              "priceMode": "free",
+              "features": ["Outdoor", "Family-friendly", "Accessible"],
+              "popularity": 47,
+              "address": "1202 N Galvin Pkwy, Phoenix, AZ",
+              "phone": "(602) 555-0519",
+              "coords": { "lat": 33.4562, "lng": -112.071 },
+              "website": "https://example.com/cleanup-day",
+              "description": "Volunteer-powered spring cleanup. Supplies provided. Coffee and bagels on the morning lawn.",
+              "directions": [
+                {
+                  "icon": "right",
+                  "distance": "1.2 mi",
+                  "instruction": "Head east on McDowell Rd"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "200 ft",
+                  "instruction": "Arrive at Papago Park pavilion"
+                }
+              ]
+            },
+            {
+              "slug": "vintage-car-show",
+              "title": "Vintage Car Show",
+              "category": "Family",
+              "image": "https://images.unsplash.com/photo-1493238792000-8113da705763?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-19",
+              "startTime": "10:00",
+              "endTime": "15:00",
+              "venue": "Downtown",
+              "priceMode": "paid",
+              "priceBand": 1,
+              "features": ["Outdoor", "Family-friendly", "Accessible"],
+              "popularity": 63,
+              "address": "1 E Jefferson St, Phoenix, AZ",
+              "phone": "(602) 555-0528",
+              "coords": { "lat": 33.4478, "lng": -112.0731 },
+              "website": "https://example.com/vintage-cars",
+              "ticketsUrl": "https://example.com/vintage-cars/tickets",
+              "description": "Over 80 classic cars from local collectors. Live rock-and-roll band and food trucks.",
+              "directions": [
+                {
+                  "icon": "left",
+                  "distance": "0.4 mi",
+                  "instruction": "Head west on Jefferson St"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at Heritage Square"
+                }
+              ]
+            },
+            {
+              "slug": "sunrise-5k",
+              "title": "Sunrise Community 5K",
+              "category": "Sports",
+              "image": "https://images.unsplash.com/photo-1486218119243-13883505764c?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-19",
+              "startTime": "06:30",
+              "endTime": "09:00",
+              "venue": "Park",
+              "priceMode": "paid",
+              "priceBand": 1,
+              "features": ["Outdoor", "Family-friendly", "Accessible"],
+              "popularity": 55,
+              "address": "1202 N Galvin Pkwy, Phoenix, AZ",
+              "phone": "(602) 555-0531",
+              "coords": { "lat": 33.4563, "lng": -112.0708 },
+              "website": "https://example.com/sunrise-5k",
+              "ticketsUrl": "https://example.com/sunrise-5k/register",
+              "description": "Charity 5K with pancake breakfast at the finish line. All ages welcome.",
+              "directions": [
+                {
+                  "icon": "right",
+                  "distance": "1.3 mi",
+                  "instruction": "Head east on McDowell Rd"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at Papago Park start line"
+                }
+              ]
+            },
+            {
+              "slug": "morning-photo-walk",
+              "title": "Morning Photo Walk",
+              "category": "Arts",
+              "image": "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-20",
+              "startTime": "07:00",
+              "endTime": "09:00",
+              "venue": "Park",
+              "priceMode": "free",
+              "features": ["Outdoor", "Family-friendly"],
+              "popularity": 39,
+              "address": "625 N Galvin Pkwy, Phoenix, AZ",
+              "phone": "(602) 555-0544",
+              "coords": { "lat": 33.4522, "lng": -112.0685 },
+              "website": "https://example.com/photo-walk",
+              "description": "Guided photo walk with a local photographer. Any camera or phone welcome.",
+              "directions": [
+                {
+                  "icon": "right",
+                  "distance": "1.5 mi",
+                  "instruction": "Head east on McDowell Rd"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at Papago Park entrance"
+                }
+              ]
+            },
+            {
+              "slug": "wine-tasting-evening",
+              "title": "Wine Tasting Evening",
+              "category": "Food",
+              "image": "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-20",
+              "startTime": "19:00",
+              "endTime": "22:00",
+              "venue": "Theater",
+              "priceMode": "paid",
+              "priceBand": 3,
+              "features": ["Indoor", "21+"],
+              "popularity": 61,
+              "address": "455 N 3rd St, Phoenix, AZ",
+              "phone": "(602) 555-0557",
+              "coords": { "lat": 33.4531, "lng": -112.0725 },
+              "website": "https://example.com/wine-tasting",
+              "ticketsUrl": "https://example.com/wine-tasting/tickets",
+              "description": "Seven hand-picked wines from Arizona wineries paired with charcuterie and artisan cheeses.",
+              "directions": [
+                { "icon": "left", "distance": "0.5 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at Crescent Ballroom"
+                }
+              ]
+            },
+            {
+              "slug": "lunchtime-concert",
+              "title": "Lunchtime Concert",
+              "category": "Music",
+              "image": "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-21",
+              "startTime": "12:00",
+              "endTime": "13:30",
+              "venue": "Downtown",
+              "priceMode": "free",
+              "features": ["Outdoor", "Family-friendly", "Accessible"],
+              "popularity": 48,
+              "address": "1 E Washington St, Phoenix, AZ",
+              "phone": "(602) 555-0562",
+              "coords": { "lat": 33.4479, "lng": -112.0739 },
+              "website": "https://example.com/lunch-concert",
+              "description": "Free outdoor lunchtime concert with local acoustic trio. Bring your lunch or grab from nearby food trucks.",
+              "directions": [
+                {
+                  "icon": "straight",
+                  "distance": "0.2 mi",
+                  "instruction": "Head east on Washington St"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "50 ft",
+                  "instruction": "Arrive at CityScape plaza"
+                }
+              ]
+            },
+            {
+              "slug": "professional-meetup-night",
+              "title": "Professional Meetup Night",
+              "category": "Conference",
+              "image": "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-21",
+              "startTime": "18:00",
+              "endTime": "20:30",
+              "venue": "Convention Center",
+              "priceMode": "free",
+              "features": ["Indoor", "21+", "Accessible"],
+              "popularity": 51,
+              "address": "100 N 3rd St, Phoenix, AZ",
+              "phone": "(602) 555-0573",
+              "coords": { "lat": 33.4481, "lng": -112.0731 },
+              "website": "https://example.com/pro-meetup",
+              "description": "Industry-specific networking across engineering, design, marketing, and ops. Name-tag matching and lightning intros.",
+              "directions": [
+                { "icon": "right", "distance": "0.4 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "arrive",
+                  "distance": "200 ft",
+                  "instruction": "Arrive at Phoenix Convention Center"
+                }
+              ]
+            },
+            {
+              "slug": "trivia-night-wednesday",
+              "title": "Trivia Night Wednesday",
+              "category": "Comedy",
+              "image": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-22",
+              "startTime": "19:30",
+              "endTime": "22:00",
+              "venue": "Downtown",
+              "priceMode": "free",
+              "features": ["Indoor", "21+"],
+              "popularity": 46,
+              "address": "522 E Van Buren St, Phoenix, AZ",
+              "phone": "(602) 555-0586",
+              "coords": { "lat": 33.4525, "lng": -112.0702 },
+              "website": "https://example.com/trivia-night",
+              "description": "Weekly pub trivia across six rounds. Teams up to six — prizes for the top three.",
+              "directions": [
+                {
+                  "icon": "right",
+                  "distance": "0.6 mi",
+                  "instruction": "Head east on Van Buren St"
+                },
+                { "icon": "arrive", "distance": "100 ft", "instruction": "Arrive at Hanny's" }
+              ]
+            },
+            {
+              "slug": "dog-park-meetup",
+              "title": "Dog Park Meetup",
+              "category": "Family",
+              "image": "https://images.unsplash.com/photo-1552053831-71594a27632d?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-22",
+              "startTime": "17:00",
+              "endTime": "19:00",
+              "venue": "Park",
+              "priceMode": "free",
+              "features": ["Outdoor", "Family-friendly", "Accessible"],
+              "popularity": 41,
+              "address": "1230 N 15th Ave, Phoenix, AZ",
+              "phone": "(602) 555-0594",
+              "coords": { "lat": 33.4582, "lng": -112.0895 },
+              "website": "https://example.com/dog-meetup",
+              "description": "Weekly off-leash dog meetup. Water bowls and treats provided. All sizes welcome.",
+              "directions": [
+                {
+                  "icon": "left",
+                  "distance": "1.1 mi",
+                  "instruction": "Head west on Encanto Blvd"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at Encanto Dog Park"
+                }
+              ]
+            },
+            {
+              "slug": "afternoon-tea-talks",
+              "title": "Afternoon Tea & Talks",
+              "category": "Arts",
+              "image": "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-23",
+              "startTime": "15:00",
+              "endTime": "17:00",
+              "venue": "Convention Center",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Indoor", "Accessible"],
+              "popularity": 37,
+              "address": "100 N 3rd St, Phoenix, AZ",
+              "phone": "(602) 555-0605",
+              "coords": { "lat": 33.4481, "lng": -112.0731 },
+              "website": "https://example.com/tea-talks",
+              "ticketsUrl": "https://example.com/tea-talks/tickets",
+              "description": "Afternoon tea service with three short artist talks from local creatives.",
+              "directions": [
+                { "icon": "right", "distance": "0.4 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "arrive",
+                  "distance": "200 ft",
+                  "instruction": "Arrive at Phoenix Convention Center"
+                }
+              ]
+            },
+            {
+              "slug": "weekly-5k-fun-run",
+              "title": "Weekly 5K Fun Run",
+              "category": "Sports",
+              "image": "https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-23",
+              "startTime": "06:30",
+              "endTime": "08:00",
+              "venue": "Park",
+              "priceMode": "free",
+              "features": ["Outdoor", "Family-friendly", "Accessible"],
+              "popularity": 44,
+              "address": "1202 N Galvin Pkwy, Phoenix, AZ",
+              "phone": "(602) 555-0611",
+              "coords": { "lat": 33.4563, "lng": -112.0708 },
+              "website": "https://example.com/weekly-5k",
+              "description": "Every Thursday — bring friends and dogs, 5K loop around the lake. Pay-what-you-can donation.",
+              "directions": [
+                {
+                  "icon": "right",
+                  "distance": "1.3 mi",
+                  "instruction": "Head east on McDowell Rd"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at Papago Park start line"
+                }
+              ]
+            },
+            {
+              "slug": "food-truck-friday",
+              "title": "Food Truck Friday",
+              "category": "Food",
+              "image": "https://images.unsplash.com/photo-1523986371872-9d3ba2e2a389?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-24",
+              "startTime": "11:30",
+              "endTime": "14:30",
+              "venue": "Downtown",
+              "priceMode": "free",
+              "features": ["Outdoor", "Family-friendly", "Accessible"],
+              "popularity": 68,
+              "address": "2 N Central Ave, Phoenix, AZ",
+              "phone": "(602) 555-0624",
+              "coords": { "lat": 33.4482, "lng": -112.074 },
+              "website": "https://example.com/food-truck-friday",
+              "description": "Lunchtime pop-up with 12 rotating food trucks every Friday. Seating in the plaza.",
+              "directions": [
+                {
+                  "icon": "straight",
+                  "distance": "0.2 mi",
+                  "instruction": "Head east on Washington St"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "50 ft",
+                  "instruction": "Arrive at Civic Space Park"
+                }
+              ]
+            },
+            {
+              "slug": "jazz-quartet-show",
+              "title": "Jazz Quartet Show",
+              "category": "Music",
+              "image": "https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-24",
+              "startTime": "20:00",
+              "endTime": "22:30",
+              "venue": "Theater",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Indoor", "21+"],
+              "popularity": 64,
+              "address": "75 N 2nd St, Phoenix, AZ",
+              "phone": "(602) 555-0633",
+              "coords": { "lat": 33.4503, "lng": -112.074 },
+              "website": "https://example.com/jazz-quartet",
+              "ticketsUrl": "https://example.com/jazz-quartet/tickets",
+              "description": "Live jazz quartet performing standards and originals in an intimate theater setting.",
+              "directions": [
+                { "icon": "left", "distance": "0.3 mi", "instruction": "Head south on 2nd St" },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at Orpheum Theatre"
+                }
+              ]
+            },
+            {
+              "slug": "street-art-tour",
+              "title": "Street Art Walking Tour",
+              "category": "Arts",
+              "image": "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-25",
+              "startTime": "10:30",
+              "endTime": "12:30",
+              "venue": "Downtown",
+              "priceMode": "paid",
+              "priceBand": 1,
+              "features": ["Outdoor", "Family-friendly"],
+              "popularity": 53,
+              "address": "800 N 1st Ave, Phoenix, AZ",
+              "phone": "(602) 555-0648",
+              "coords": { "lat": 33.4571, "lng": -112.0751 },
+              "website": "https://example.com/street-art",
+              "ticketsUrl": "https://example.com/street-art/tickets",
+              "description": "Guided walking tour of Roosevelt Row's murals and street art, with backstories from local artists.",
+              "directions": [
+                { "icon": "left", "distance": "0.9 mi", "instruction": "Head north on 1st Ave" },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at Roosevelt Row gateway"
+                }
+              ]
+            },
+            {
+              "slug": "saturday-brunch-market",
+              "title": "Saturday Brunch Market",
+              "category": "Food",
+              "image": "https://images.unsplash.com/photo-1493770348161-369560ae357d?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-25",
+              "startTime": "09:00",
+              "endTime": "13:00",
+              "venue": "Park",
+              "priceMode": "free",
+              "features": ["Outdoor", "Family-friendly"],
+              "popularity": 58,
+              "address": "1202 N Galvin Pkwy, Phoenix, AZ",
+              "phone": "(602) 555-0657",
+              "coords": { "lat": 33.4562, "lng": -112.071 },
+              "website": "https://example.com/brunch-market",
+              "description": "Saturday morning brunch market with fresh pastries, coffee, and live acoustic music on the lawn.",
+              "directions": [
+                {
+                  "icon": "right",
+                  "distance": "1.2 mi",
+                  "instruction": "Head east on McDowell Rd"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "150 ft",
+                  "instruction": "Arrive at Papago Park lawn"
+                }
+              ]
+            },
+            {
+              "slug": "family-fun-fair",
+              "title": "Family Fun Fair",
+              "category": "Family",
+              "image": "https://images.unsplash.com/photo-1515169067868-5387ec356754?w=900&auto=format&fit=crop&q=75",
+              "date": "2026-04-25",
+              "startTime": "14:00",
+              "endTime": "19:00",
+              "venue": "Park",
+              "priceMode": "paid",
+              "priceBand": 1,
+              "features": ["Outdoor", "Family-friendly", "Accessible"],
+              "popularity": 75,
+              "address": "1202 N Galvin Pkwy, Phoenix, AZ",
+              "phone": "(602) 555-0668",
+              "coords": { "lat": 33.4562, "lng": -112.071 },
+              "website": "https://example.com/family-fair",
+              "ticketsUrl": "https://example.com/family-fair/tickets",
+              "description": "Games, face painting, pony rides, and a climbing wall for kids. Food vendors and live family band on the mainstage.",
+              "directions": [
+                {
+                  "icon": "right",
+                  "distance": "1.2 mi",
+                  "instruction": "Head east on McDowell Rd"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "150 ft",
+                  "instruction": "Arrive at Papago Park main field"
+                }
+              ]
+            }
+          ]
+        },
+        "social-wall": {
+          "kind": "social-wall",
+          "label": "Social Wall",
+          "heroImage": "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=1200&auto=format&fit=crop&q=75",
+          "hashtag": "VisitPhoenix",
+          "handles": {
+            "x": "@visitphx",
+            "instagram": "visitphx",
+            "pinterest": "visitphx",
+            "youtube": "@visitphoenix"
+          },
+          "highlights": [
+            {
+              "id": "h1",
+              "label": "Yyram Fest",
+              "image": "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=200&h=200&fit=crop&q=75"
+            },
+            {
+              "id": "h2",
+              "label": "Paso Market",
+              "image": "https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&h=200&fit=crop&q=75"
+            },
+            {
+              "id": "h3",
+              "label": "Sponge Art",
+              "image": "https://images.unsplash.com/photo-1578926288207-a90a5366759d?w=200&h=200&fit=crop&q=75"
+            }
+          ],
+          "posts": [
+            {
+              "id": "p1",
+              "source": "instagram",
+              "type": "image",
+              "author": {
+                "name": "Anne Smith",
+                "username": "annesmith",
+                "avatar": "https://i.pravatar.cc/150?img=1"
+              },
+              "publishedAt": "2026-04-21T08:10:00Z",
+              "caption": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus non augue dui.",
+              "mediaUrl": "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 1.5
+            },
+            {
+              "id": "p2",
+              "source": "x",
+              "type": "image",
+              "author": {
+                "name": "Carlos Ruiz",
+                "username": "crusphx",
+                "avatar": "https://i.pravatar.cc/150?img=5"
+              },
+              "publishedAt": "2026-04-21T07:30:00Z",
+              "caption": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis non augue dui.",
+              "mediaUrl": "https://images.unsplash.com/photo-1493238792000-8113da705763?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 1.33
+            },
+            {
+              "id": "p3",
+              "source": "youtube",
+              "type": "video",
+              "author": {
+                "name": "Phoenix Trails",
+                "username": "phxtrails",
+                "avatar": "https://i.pravatar.cc/150?img=12"
+              },
+              "publishedAt": "2026-04-21T05:00:00Z",
+              "caption": "Sunrise on Camelback Mountain. Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+              "mediaUrl": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+              "videoPoster": "https://images.unsplash.com/photo-1552083375-1447ce886485?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 0.5625
+            },
+            {
+              "id": "p4",
+              "source": "pinterest",
+              "type": "image",
+              "author": {
+                "name": "Maria Lopez",
+                "username": "mariastyle",
+                "avatar": "https://i.pravatar.cc/150?img=20"
+              },
+              "publishedAt": "2026-04-20T21:15:00Z",
+              "caption": "",
+              "mediaUrl": "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 0.75
+            },
+            {
+              "id": "p5",
+              "source": "instagram",
+              "type": "image",
+              "author": {
+                "name": "Jamie Wilder",
+                "username": "jamiewild",
+                "avatar": "https://i.pravatar.cc/150?img=32"
+              },
+              "publishedAt": "2026-04-20T18:40:00Z",
+              "caption": "Ran into a moose on the morning trail — no big deal. Lorem ipsum dolor sit amet consectetur.",
+              "mediaUrl": "https://images.unsplash.com/photo-1484406566174-9da000fda645?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 0.9
+            },
+            {
+              "id": "p6",
+              "source": "x",
+              "type": "text",
+              "author": {
+                "name": "Tom Park",
+                "username": "tomp",
+                "avatar": "https://i.pravatar.cc/150?img=15"
+              },
+              "publishedAt": "2026-04-20T16:05:00Z",
+              "caption": "Best pizza night in downtown Phoenix. Would recommend to anyone visiting this weekend. #VisitPhoenix"
+            },
+            {
+              "id": "p7",
+              "source": "instagram",
+              "type": "gallery",
+              "author": {
+                "name": "Ava Flores",
+                "username": "avaf",
+                "avatar": "https://i.pravatar.cc/150?img=45"
+              },
+              "publishedAt": "2026-04-20T12:00:00Z",
+              "caption": "Weekend mood — swipe for the full day at Papago Park.",
+              "galleryUrls": [
+                "https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=900&auto=format&fit=crop&q=75",
+                "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=900&auto=format&fit=crop&q=75",
+                "https://images.unsplash.com/photo-1533105079780-92b9be482077?w=900&auto=format&fit=crop&q=75"
+              ],
+              "aspectRatio": 1.0
+            },
+            {
+              "id": "p8",
+              "source": "youtube",
+              "type": "video",
+              "author": {
+                "name": "Desert Life TV",
+                "username": "desertlife",
+                "avatar": "https://i.pravatar.cc/150?img=22"
+              },
+              "publishedAt": "2026-04-20T10:00:00Z",
+              "caption": "Highlights of the Spring Music Festival. Volume up!",
+              "mediaUrl": "https://download.samplelib.com/mp4/sample-20s.mp4",
+              "videoPoster": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 1.78
+            },
+            {
+              "id": "p9",
+              "source": "pinterest",
+              "type": "image",
+              "author": {
+                "name": "Priya Nair",
+                "username": "priyapins",
+                "avatar": "https://i.pravatar.cc/150?img=47"
+              },
+              "publishedAt": "2026-04-19T22:30:00Z",
+              "caption": "Boho lights + the desert sky. Lorem ipsum.",
+              "mediaUrl": "https://images.unsplash.com/photo-1504805572947-34fad45aed93?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 0.8
+            },
+            {
+              "id": "p10",
+              "source": "instagram",
+              "type": "image",
+              "author": {
+                "name": "Rafael Ortiz",
+                "username": "rafao",
+                "avatar": "https://i.pravatar.cc/150?img=55"
+              },
+              "publishedAt": "2026-04-19T20:00:00Z",
+              "caption": "Tacos on 7th Street. This is the way. Vivamus non augue dui.",
+              "mediaUrl": "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 1.0
+            },
+            {
+              "id": "p11",
+              "source": "x",
+              "type": "image",
+              "author": {
+                "name": "Kate Reyes",
+                "username": "katereyes",
+                "avatar": "https://i.pravatar.cc/150?img=48"
+              },
+              "publishedAt": "2026-04-19T17:20:00Z",
+              "caption": "Sunrise runner gang. Who's in for next Saturday?",
+              "mediaUrl": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 1.5
+            },
+            {
+              "id": "p12",
+              "source": "youtube",
+              "type": "video",
+              "author": {
+                "name": "PHX Shorts",
+                "username": "phxshorts",
+                "avatar": "https://i.pravatar.cc/150?img=17"
+              },
+              "publishedAt": "2026-04-19T12:00:00Z",
+              "caption": "60 seconds of Phoenix skyline.",
+              "mediaUrl": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/friday.mp4",
+              "videoPoster": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 1.78
+            },
+            {
+              "id": "p13",
+              "source": "instagram",
+              "type": "image",
+              "author": {
+                "name": "Luna Park",
+                "username": "lunap",
+                "avatar": "https://i.pravatar.cc/150?img=30"
+              },
+              "publishedAt": "2026-04-19T08:30:00Z",
+              "caption": "",
+              "mediaUrl": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 0.7
+            },
+            {
+              "id": "p14",
+              "source": "pinterest",
+              "type": "image",
+              "author": {
+                "name": "Eva Chen",
+                "username": "evacraft",
+                "avatar": "https://i.pravatar.cc/150?img=56"
+              },
+              "publishedAt": "2026-04-18T19:40:00Z",
+              "caption": "DIY planter — desert edition.",
+              "mediaUrl": "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 1.0
+            },
+            {
+              "id": "p15",
+              "source": "x",
+              "type": "text",
+              "author": {
+                "name": "Noah Davis",
+                "username": "noahd",
+                "avatar": "https://i.pravatar.cc/150?img=7"
+              },
+              "publishedAt": "2026-04-18T15:00:00Z",
+              "caption": "Traffic on I-10 is brutal today. Take Central Ave instead if you're coming downtown for the market."
+            },
+            {
+              "id": "p16",
+              "source": "instagram",
+              "type": "video",
+              "author": {
+                "name": "Valley Beats",
+                "username": "valleybeats",
+                "avatar": "https://i.pravatar.cc/150?img=52"
+              },
+              "publishedAt": "2026-04-18T11:10:00Z",
+              "caption": "Acoustic set at the farmers market.",
+              "mediaUrl": "https://download.samplelib.com/mp4/sample-10s.mp4",
+              "videoPoster": "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 0.5625
+            },
+            {
+              "id": "p17",
+              "source": "instagram",
+              "type": "image",
+              "author": {
+                "name": "Mia Flores",
+                "username": "miaflo",
+                "avatar": "https://i.pravatar.cc/150?img=49"
+              },
+              "publishedAt": "2026-04-17T22:30:00Z",
+              "caption": "Evening sky over the valley.",
+              "mediaUrl": "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 1.6
+            },
+            {
+              "id": "p18",
+              "source": "pinterest",
+              "type": "gallery",
+              "author": {
+                "name": "Paige Hall",
+                "username": "paigeh",
+                "avatar": "https://i.pravatar.cc/150?img=40"
+              },
+              "publishedAt": "2026-04-17T12:00:00Z",
+              "caption": "Vintage car show, my top picks.",
+              "galleryUrls": [
+                "https://images.unsplash.com/photo-1493238792000-8113da705763?w=900&auto=format&fit=crop&q=75",
+                "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=900&auto=format&fit=crop&q=75",
+                "https://images.unsplash.com/photo-1529390079861-591de354faf5?w=900&auto=format&fit=crop&q=75",
+                "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=900&auto=format&fit=crop&q=75"
+              ],
+              "aspectRatio": 1.33
+            },
+            {
+              "id": "p19",
+              "source": "x",
+              "type": "image",
+              "author": {
+                "name": "Leo Marin",
+                "username": "leom",
+                "avatar": "https://i.pravatar.cc/150?img=13"
+              },
+              "publishedAt": "2026-04-16T20:45:00Z",
+              "caption": "Downtown view from the top of the Orpheum.",
+              "mediaUrl": "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 0.75
+            },
+            {
+              "id": "p20",
+              "source": "youtube",
+              "type": "video",
+              "author": {
+                "name": "Phoenix Food Diary",
+                "username": "phxfooddiary",
+                "avatar": "https://i.pravatar.cc/150?img=24"
+              },
+              "publishedAt": "2026-04-15T18:00:00Z",
+              "caption": "Where to brunch this weekend — quick guide.",
+              "mediaUrl": "https://download.samplelib.com/mp4/sample-30s.mp4",
+              "videoPoster": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 1.78
+            },
+            {
+              "id": "p21",
+              "source": "instagram",
+              "type": "image",
+              "author": {
+                "name": "Sam Patel",
+                "username": "sampatel",
+                "avatar": "https://i.pravatar.cc/150?img=33"
+              },
+              "publishedAt": "2026-04-14T09:30:00Z",
+              "caption": "Papago lake in the morning. Lorem ipsum dolor sit amet.",
+              "mediaUrl": "https://images.unsplash.com/photo-1458668383970-8ddd3927deed?w=900&auto=format&fit=crop&q=75",
+              "aspectRatio": 1.5
+            },
+            {
+              "id": "p22",
+              "source": "x",
+              "type": "text",
+              "author": {
+                "name": "Ellie Carter",
+                "username": "ellie",
+                "avatar": "https://i.pravatar.cc/150?img=41"
+              },
+              "publishedAt": "2026-04-13T17:15:00Z",
+              "caption": "Public service announcement: the new bike trail along the canal opens Monday. Bring your camera."
+            }
+          ]
+        },
+        "digital-brochure": {
+          "kind": "digital-brochure",
+          "label": "Digital Brochures",
+          "heroImage": "https://images.unsplash.com/photo-1519682577862-22b62b24e493?w=1200&auto=format&fit=crop&q=75",
+          "categories": ["Guides", "Tours", "Things to Do", "Explore"],
+          "brochures": [
+            {
+              "slug": "st-louis-art-bound",
+              "title": "St. Louis - Art Bound",
+              "category": "Explore",
+              "cover": "https://images.unsplash.com/photo-1517976487492-5750f3195933?w=600&auto=format&fit=crop&q=75",
+              "description": "Step inside the 2025 Official Visitors Guide and see the city come alive. From bold flavors in local breweries to breathtaking art performances, this is your pass to everything St. Louis has to offer.",
+              "publishedLabel": "June, 2025",
+              "pdfUrl": "/brochures/stlvg26_compressed.pdf",
+              "pageCount": 68
+            },
+            {
+              "slug": "destination-maryland",
+              "title": "Destination Maryland. Official Travel Magazine",
+              "category": "Guides",
+              "cover": "https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?w=600&auto=format&fit=crop&q=75",
+              "description": "Having lasting memories from your vacation makes all the planning so worth it. Maryland is home to a variety of sights and adventures. You'll find amazing waterscapes, from mountain streams to rivers, the Chesapeake Bay, and more.",
+              "publishedLabel": "June, 2025",
+              "pdfUrl": "https://pdfobject.com/pdf/sample.pdf",
+              "pageCount": 6
+            },
+            {
+              "slug": "fairbanks-visitors-guide",
+              "title": "Fairbanks Official Visitors Guide",
+              "category": "Things to Do",
+              "cover": "https://images.unsplash.com/photo-1469521669194-babb45599def?w=600&auto=format&fit=crop&q=75",
+              "description": "Start your Alaska adventure with the 2025 Fairbanks guide. Aurora viewing, hot springs, sled-dog races, midnight sun hikes and cultural centers - the gateway to the North.",
+              "publishedLabel": "May, 2025",
+              "pdfUrl": "https://www.orimi.com/pdf-test.pdf",
+              "pageCount": 1
+            },
+            {
+              "slug": "arizona-trails",
+              "title": "Tour Arizona - Scenic Trails",
+              "category": "Tours",
+              "cover": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=75",
+              "description": "From Sedona's red rocks to the Grand Canyon's rim, discover Arizona's most breathtaking drives and hikes - with maps, pit-stops and insider tips for every season.",
+              "publishedLabel": "April, 2025",
+              "pdfUrl": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+              "pageCount": 1
             }
           ]
         }

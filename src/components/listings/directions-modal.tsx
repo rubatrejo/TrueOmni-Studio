@@ -146,43 +146,39 @@ export function DirectionsModal({
           boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
         }}
       >
-        {/* Header azul */}
+        {/* Header azul — mismo estilo que el detail (subtítulo 24 uppercase + título 60 Helvetica + X at 804,31) */}
         <div
           className="relative flex-shrink-0"
           style={{ width: '898px', height: '180px', backgroundColor: '#004f8b' }}
         >
-          <div
-            className="font-sans uppercase text-white"
+          <span
+            className="absolute font-sans uppercase text-white"
             style={{
-              position: 'absolute',
               left: '48px',
               top: '48px',
-              fontSize: '18px',
-              lineHeight: '18px',
-              letterSpacing: '0.14em',
-              opacity: 0.75,
+              fontSize: '24px',
+              lineHeight: '24px',
+              letterSpacing: '0.02em',
             }}
           >
             Directions to
-          </div>
-          <div
-            className="text-white"
+          </span>
+          <span
+            className="absolute text-white"
             style={{
-              position: 'absolute',
               left: '48px',
-              top: '78px',
-              fontSize: '48px',
-              lineHeight: '56px',
+              top: '81px',
+              fontSize: '60px',
+              lineHeight: '60px',
               fontFamily: 'Helvetica, Arial, sans-serif',
-              fontWeight: 700,
-              maxWidth: '700px',
+              maxWidth: '720px',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
             }}
           >
             {listing.title}
-          </div>
+          </span>
 
           <button
             type="button"
@@ -190,8 +186,8 @@ export function DirectionsModal({
             aria-label="Cerrar"
             className="absolute flex items-center justify-center text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
             style={{
-              right: '36px',
-              top: '40px',
+              left: '804px',
+              top: '31px',
               width: '70px',
               height: '70px',
             }}
@@ -203,8 +199,11 @@ export function DirectionsModal({
           </button>
         </div>
 
-        {/* Map */}
-        <div style={{ position: 'relative', width: '898px', height: '460px' }}>
+        {/* Map — flex-shrink:0 para que no se encoja cuando walking tiene muchos steps */}
+        <div
+          className="flex-shrink-0"
+          style={{ position: 'relative', width: '898px', height: '460px' }}
+        >
           <DirectionsMapWithRoute
             token={mapboxToken}
             origin={clientCoords}

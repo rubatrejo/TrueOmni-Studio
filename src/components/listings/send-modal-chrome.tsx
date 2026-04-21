@@ -43,22 +43,21 @@ export function SendModalChrome({
         style={{ backgroundColor: 'rgba(85,85,85,0.8)' }}
         tabIndex={-1}
       />
-      {/* Card */}
+      {/* Card — altura automática al contenido para no dejar espacio vacío */}
       <div
         className="absolute overflow-hidden bg-white"
         style={{
           left: '220px',
           top: '460px',
           width: '640px',
-          height: '480px',
           borderRadius: '10px',
           boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
-          padding: '40px',
+          padding: '36px 40px 36px 40px',
         }}
       >
         <h2
           className="text-center font-sans text-black"
-          style={{ fontSize: '28px', lineHeight: '28px', fontWeight: 700, marginBottom: '28px' }}
+          style={{ fontSize: '28px', lineHeight: '28px', fontWeight: 700, marginBottom: '24px' }}
         >
           {title}
         </h2>
@@ -134,7 +133,7 @@ export function CancelSendButtons({
   return (
     <div
       className="flex items-center justify-center"
-      style={{ columnGap: '24px', marginTop: '28px' }}
+      style={{ columnGap: '24px', marginTop: '22px' }}
     >
       <button
         type="button"

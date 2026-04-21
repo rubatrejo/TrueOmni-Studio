@@ -1,9 +1,12 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { BrochuresModule } from '@/components/digital-brochure/brochures-module';
+import { EventsModule } from '@/components/events/events-module';
 import { HomeHeader } from '@/components/home/header';
 import { KioskCanvas } from '@/components/kiosk-canvas';
 import { ListingsModule } from '@/components/listings/listings-module';
+import { SocialWallModule } from '@/components/social-wall/social-wall-module';
 import { getConfig } from '@/lib/config';
 
 interface PageProps {
@@ -24,8 +27,43 @@ export default async function ModulePage({ params }: PageProps) {
   const home = config.features?.home;
   if (!home) notFound();
 
-  // Módulo de listings (Restaurants / Things to Do / Stay)
+  // Módulos: detectamos `kind`. Social Wall / Events / Listings.
   const mod = home.modules?.[module];
+  if (mod?.kind === 'digital-brochure') {
+    return (
+      <KioskCanvas>
+        <BrochuresModule
+          moduleKey={module}
+          module={mod}
+          header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
+        />
+      </KioskCanvas>
+    );
+  }
+  if (mod?.kind === 'social-wall') {
+    return (
+      <KioskCanvas>
+        <SocialWallModule
+          moduleKey={module}
+          module={mod}
+          header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
+        />
+      </KioskCanvas>
+    );
+  }
+  if (mod?.kind === 'events') {
+    return (
+      <KioskCanvas>
+        <EventsModule
+          moduleKey={module}
+          module={mod}
+          clientCoords={config.client.coords}
+          clientTimezone={config.client.timezone}
+          header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
+        />
+      </KioskCanvas>
+    );
+  }
   if (mod) {
     return (
       <KioskCanvas>

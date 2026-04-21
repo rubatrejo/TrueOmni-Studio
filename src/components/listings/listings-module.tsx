@@ -9,7 +9,7 @@ import { useFavorites } from '@/lib/favorites';
 import type { FilterState } from '@/lib/listings-filter';
 import { applyFilters, EMPTY_FILTER, isFilterEmpty } from '@/lib/listings-filter';
 import type { SortOrder } from '@/lib/listings-sort';
-import { haversineMi, sortListings } from '@/lib/listings-sort';
+import { haversineMi, SORT_OPTIONS, sortListings } from '@/lib/listings-sort';
 
 import { FavoriteAddedToast } from './favorite-added-toast';
 import { FilterOverlay } from './filter-overlay';
@@ -130,9 +130,13 @@ export function ListingsModule({
       <SortOverlay
         open={sortOpen}
         current={sort}
-        distanceAvailable={!!clientCoords}
+        options={SORT_OPTIONS.map((o) => ({
+          value: o.value,
+          label: o.label,
+          disabled: o.value === 'distance' && !clientCoords,
+        }))}
         onSelect={(next) => {
-          setSort(next);
+          setSort(next as SortOrder);
           setSortOpen(false);
         }}
         onCancel={() => setSortOpen(false)}

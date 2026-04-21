@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 
 import type { Listing } from '@/lib/config';
 
@@ -39,10 +40,9 @@ export function ListingCard({
       className="relative block overflow-hidden focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-white"
       style={{ width: '293px', height: '268.63px' }}
     >
-      {/* Imagen 293×164.63 */}
+      {/* Imagen 293×164.63 con fallback azul si falla la carga */}
       <div className="absolute left-0 right-0 top-0 overflow-hidden" style={{ height: '164.63px' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={listing.image} alt="" className="h-full w-full object-cover" />
+        <ListingImage src={listing.image} title={listing.title} />
         {/* Heart circle @ top-right. Center at (225+32.5, 10+32.5) relative to card. */}
         <button
           type="button"
@@ -65,12 +65,14 @@ export function ListingCard({
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
+            width="38"
+            height="38"
             viewBox="0 0 24 24"
             fill={isFavorited ? '#e02020' : 'none'}
             stroke="#e02020"
-            strokeWidth="2.4"
+            strokeWidth={isFavorited ? 0 : 1.6}
+            strokeLinecap="round"
+            strokeLinejoin="round"
             aria-hidden
           >
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -136,5 +138,33 @@ export function ListingCard({
         </span>
       </div>
     </Link>
+  );
+}
+
+function ListingImage({ src, title }: { src: string; title: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <div
+        aria-hidden
+        className="flex h-full w-full items-center justify-center"
+        style={{
+          background: 'linear-gradient(135deg, #004f8b 0%, #1796d6 100%)',
+          color: '#ffffff',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          fontSize: '16px',
+          fontWeight: 700,
+          letterSpacing: '0.04em',
+          padding: '12px',
+          textAlign: 'center',
+        }}
+      >
+        {title}
+      </div>
+    );
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={src} alt="" className="h-full w-full object-cover" onError={() => setFailed(true)} />
   );
 }

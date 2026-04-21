@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { HomeHeader } from '@/components/home/header';
 import { KioskCanvas } from '@/components/kiosk-canvas';
 import { ListingsModule } from '@/components/listings/listings-module';
 import { getConfig } from '@/lib/config';
@@ -28,7 +29,12 @@ export default async function ModulePage({ params }: PageProps) {
   if (mod) {
     return (
       <KioskCanvas>
-        <ListingsModule moduleKey={module} module={mod} />
+        <ListingsModule
+          moduleKey={module}
+          module={mod}
+          clientCoords={config.client.coords}
+          header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
+        />
       </KioskCanvas>
     );
   }

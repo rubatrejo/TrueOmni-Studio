@@ -1,0 +1,330 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <filter id="Rectangle_11" x="159" y="560.5" width="760" height="541" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feFlood flood-opacity="0.22"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <clipPath id="clip-path">
+      <rect id="Mask" width="73" height="75" rx="7" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-3">
+      <rect id="Mask-3" data-name="Mask" width="171" height="75" rx="7" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-4">
+      <rect id="Mask-4" data-name="Mask" width="111" height="75" rx="7" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-7">
+      <rect id="Mask-7" data-name="Mask" width="514" height="75" rx="7" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-14">
+      <rect id="Mask-14" data-name="Mask" width="122" height="75" rx="7" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-25">
+      <rect id="Mask-25" data-name="Mask" width="149" height="75" rx="7" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-36">
+      <rect id="Mask-36" data-name="Mask" width="86" height="75" rx="7" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-Send_to_Email">
+      <rect width="1080" height="1920"/>
+    </clipPath>
+  </defs>
+  <g id="Send_to_Email" data-name="Send to Email" clip-path="url(#clip-Send_to_Email)">
+    <rect id="Overlay_Opacity" data-name="Overlay Opacity" width="1080" height="1920" transform="translate(0 0.5)" opacity="0.649"/>
+    <g id="Events_Send_to_Email_PopUp" data-name="Events Send to Email PopUp" transform="translate(189 590.5)">
+      <g id="Send_to_email-2" data-name="Send to email" transform="translate(1)">
+        <g id="Pop-ups_Small_Background" data-name="Pop-ups/Small/Background" transform="translate(-1)">
+          <g transform="matrix(1, 0, 0, 1, -189, -590.5)" filter="url(#Rectangle_11)">
+            <rect id="Rectangle_11-2" data-name="Rectangle 11" width="700" height="481" rx="8" transform="translate(189 590.5)" fill="#fff"/>
+          </g>
+        </g>
+        <text id="Send_to_e-mail" data-name="Send to e-mail" transform="translate(350 86)" font-size="36" font-family="Helvetica-Bold, Helvetica" font-weight="700"><tspan x="-123.021" y="0">Send to e-mail</tspan></text>
+        <g id="Fields_Empty" data-name="Fields/Empty" transform="translate(48 125)">
+          <g id="Rectangle_3" data-name="Rectangle 3" transform="translate(0 49)" fill="none" stroke="#979797" stroke-miterlimit="10" stroke-width="1">
+            <rect width="604" height="70" rx="8" stroke="none"/>
+            <rect x="0.5" y="0.5" width="603" height="69" rx="7.5" fill="none"/>
+          </g>
+          <text id="Placeholder" transform="translate(24 91)" fill="rgba(0,0,0,0.57)" font-size="24" font-family="Helvetica"><tspan x="0" y="0">example@mail.com</tspan></text>
+          <text id="Label" transform="translate(0 23)" font-size="24" font-family="Helvetica-Bold, Helvetica" font-weight="700"><tspan x="0" y="0">Enter your e-mail address</tspan></text>
+        </g>
+        <g id="Buttons_Action_Default_Copy" data-name="Buttons/Action/Default Copy" transform="translate(356.53 355)">
+          <rect id="Rectangle" width="214.353" height="63.769" rx="8" fill="#1796d6"/>
+          <text id="OK" transform="translate(107.5 40)" fill="#fff" font-size="24" font-family="OpenSans-Bold, Open Sans" font-weight="700"><tspan x="-31.969" y="0">SEND</tspan></text>
+        </g>
+        <g id="Buttons_Action_Default_Copy-2" data-name="Buttons/Action/Default Copy" transform="translate(101.53 355)">
+          <rect id="Rectangle-2" data-name="Rectangle" width="214.353" height="63.769" rx="8" fill="#b9bd39"/>
+          <text id="OK-2" data-name="OK" transform="translate(107.5 40)" fill="#fff" font-size="24" font-family="OpenSans-Bold, Open Sans" font-weight="700"><tspan x="-46.828" y="0">CANCEL</tspan></text>
+        </g>
+      </g>
+      <g id="Group" transform="translate(186 275)">
+        <text id="Label-2" data-name="Label" transform="translate(19 23)" fill="#979797" font-size="24" font-family="Tahoma" opacity="0.85"><tspan x="0" y="0">I accept Terms &amp; Conditions</tspan></text>
+        <g id="Rectangle-3" data-name="Rectangle" transform="translate(0 9)" fill="none" stroke="#979797" stroke-miterlimit="10" stroke-width="1">
+          <rect width="14" height="14" rx="1" stroke="none"/>
+          <rect x="0.5" y="0.5" width="13" height="13" rx="0.5" fill="none"/>
+        </g>
+        <path id="_" data-name="" d="M12.5,14H1.5A1.5,1.5,0,0,1,0,12.5V1.5A1.5,1.5,0,0,1,1.5,0h11A1.5,1.5,0,0,1,14,1.5v11A1.5,1.5,0,0,1,12.5,14ZM3.207,6.125a.5.5,0,0,0-.353.146l-.707.707a.5.5,0,0,0,0,.707l3.25,3.25a.5.5,0,0,0,.707,0l5.75-5.75a.5.5,0,0,0,0-.707l-.707-.707a.5.5,0,0,0-.707,0L5.75,8.461,3.56,6.271A.5.5,0,0,0,3.207,6.125Z" transform="translate(0 9)" fill="#b9bd39"/>
+        <path id="Path_2" data-name="Path 2" d="M0,.5H310" transform="translate(18.999 31)" fill="none" stroke="#979797" stroke-miterlimit="10" stroke-width="2"/>
+      </g>
+    </g>
+    <g id="keyboard_letters" data-name="keyboard letters" transform="translate(0 1521)">
+      <g id="Keyboard" transform="translate(0 -0.5)">
+        <rect id="Rectangle_13" data-name="Rectangle 13" width="1080" height="398" transform="translate(0 2)" fill="#fff"/>
+        <g id="key" transform="translate(59 30)">
+          <rect id="Mask-37" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key-2" data-name="key" clip-path="url(#clip-path)">
+            <rect id="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_10" data-name="key copy 10" transform="translate(95 118)">
+          <rect id="Mask-38" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_10-2" data-name="key copy 10" clip-path="url(#clip-path)">
+            <rect id="color_bg-2" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_20" data-name="key copy 20" transform="translate(46 206)">
+          <rect id="Mask-39" data-name="Mask" width="171" height="75" rx="7" fill="none"/>
+          <g id="key_copy_20-2" data-name="key copy 20" clip-path="url(#clip-path-3)">
+            <rect id="color_bg-3" data-name="color_bg" width="171" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_31" data-name="key copy 31" transform="translate(46 294)">
+          <rect id="Mask-40" data-name="Mask" width="111" height="75" rx="7" fill="none"/>
+          <g id="key_copy_31-2" data-name="key copy 31" clip-path="url(#clip-path-4)">
+            <rect id="color_bg-4" data-name="color_bg" width="111" height="75" fill="#1796d6"/>
+          </g>
+        </g>
+        <g id="key_copy_32" data-name="key copy 32" transform="translate(172 294)">
+          <rect id="Mask-41" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_32-2" data-name="key copy 32" clip-path="url(#clip-path)">
+            <rect id="color_bg-5" data-name="color_bg" width="73" height="75" fill="#1796d6"/>
+          </g>
+        </g>
+        <g id="key_copy_22" data-name="key copy 22" transform="translate(232 206)">
+          <rect id="Mask-42" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_22-2" data-name="key copy 22" clip-path="url(#clip-path)">
+            <rect id="color_bg-6" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_33" data-name="key copy 33" transform="translate(260 294)">
+          <rect id="Mask-43" data-name="Mask" width="514" height="75" rx="7" fill="none"/>
+          <g id="key_copy_33-2" data-name="key copy 33" clip-path="url(#clip-path-7)">
+            <rect id="color_bg-7" data-name="color_bg" width="514" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_23" data-name="key copy 23" transform="translate(320 206)">
+          <rect id="Mask-44" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_23-2" data-name="key copy 23" clip-path="url(#clip-path)">
+            <rect id="color_bg-8" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_24" data-name="key copy 24" transform="translate(409 206)">
+          <rect id="Mask-45" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_24-2" data-name="key copy 24" clip-path="url(#clip-path)">
+            <rect id="color_bg-9" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_25" data-name="key copy 25" transform="translate(497 206)">
+          <rect id="Mask-46" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_25-2" data-name="key copy 25" clip-path="url(#clip-path)">
+            <rect id="color_bg-10" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_26" data-name="key copy 26" transform="translate(585 206)">
+          <rect id="Mask-47" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_26-2" data-name="key copy 26" clip-path="url(#clip-path)">
+            <rect id="color_bg-11" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_27" data-name="key copy 27" transform="translate(673 206)">
+          <rect id="Mask-48" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_27-2" data-name="key copy 27" clip-path="url(#clip-path)">
+            <rect id="color_bg-12" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_28" data-name="key copy 28" transform="translate(762 206)">
+          <rect id="Mask-49" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_28-2" data-name="key copy 28" clip-path="url(#clip-path)">
+            <rect id="color_bg-13" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_34" data-name="key copy 34" transform="translate(789 294)">
+          <rect id="Mask-50" data-name="Mask" width="122" height="75" rx="7" fill="none"/>
+          <g id="key_copy_34-2" data-name="key copy 34" clip-path="url(#clip-path-14)">
+            <rect id="color_bg-14" data-name="color_bg" width="122" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_29" data-name="key copy 29" transform="translate(850 206)">
+          <rect id="Mask-51" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_29-2" data-name="key copy 29" clip-path="url(#clip-path)">
+            <rect id="color_bg-15" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_30" data-name="key copy 30" transform="translate(937 206)">
+          <rect id="Mask-52" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_30-2" data-name="key copy 30" clip-path="url(#clip-path)">
+            <rect id="color_bg-16" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_11" data-name="key copy 11" transform="translate(183 118)">
+          <rect id="Mask-53" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_11-2" data-name="key copy 11" clip-path="url(#clip-path)">
+            <rect id="color_bg-17" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_12" data-name="key copy 12" transform="translate(271 118)">
+          <rect id="Mask-54" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_12-2" data-name="key copy 12" clip-path="url(#clip-path)">
+            <rect id="color_bg-18" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_13" data-name="key copy 13" transform="translate(359 118)">
+          <rect id="Mask-55" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_13-2" data-name="key copy 13" clip-path="url(#clip-path)">
+            <rect id="color_bg-19" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_14" data-name="key copy 14" transform="translate(447 118)">
+          <rect id="Mask-56" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_14-2" data-name="key copy 14" clip-path="url(#clip-path)">
+            <rect id="color_bg-20" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_15" data-name="key copy 15" transform="translate(535 118)">
+          <rect id="Mask-57" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_15-2" data-name="key copy 15" clip-path="url(#clip-path)">
+            <rect id="color_bg-21" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_16" data-name="key copy 16" transform="translate(623 118)">
+          <rect id="Mask-58" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_16-2" data-name="key copy 16" clip-path="url(#clip-path)">
+            <rect id="color_bg-22" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_17" data-name="key copy 17" transform="translate(711 118)">
+          <rect id="Mask-59" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_17-2" data-name="key copy 17" clip-path="url(#clip-path)">
+            <rect id="color_bg-23" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_18" data-name="key copy 18" transform="translate(799 118)">
+          <rect id="Mask-60" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_18-2" data-name="key copy 18" clip-path="url(#clip-path)">
+            <rect id="color_bg-24" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_19" data-name="key copy 19" transform="translate(887 118)">
+          <rect id="Mask-61" data-name="Mask" width="149" height="75" rx="7" fill="none"/>
+          <g id="key_copy_19-2" data-name="key copy 19" clip-path="url(#clip-path-25)">
+            <rect id="color_bg-25" data-name="color_bg" width="149" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy" data-name="key copy" transform="translate(147 30)">
+          <rect id="Mask-62" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy-2" data-name="key copy" clip-path="url(#clip-path)">
+            <rect id="color_bg-26" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_2" data-name="key copy 2" transform="translate(235 30)">
+          <rect id="Mask-63" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_2-2" data-name="key copy 2" clip-path="url(#clip-path)">
+            <rect id="color_bg-27" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_3" data-name="key copy 3" transform="translate(323 30)">
+          <rect id="Mask-64" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_3-2" data-name="key copy 3" clip-path="url(#clip-path)">
+            <rect id="color_bg-28" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_4" data-name="key copy 4" transform="translate(411 30)">
+          <rect id="Mask-65" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_4-2" data-name="key copy 4" clip-path="url(#clip-path)">
+            <rect id="color_bg-29" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_5" data-name="key copy 5" transform="translate(499 30)">
+          <rect id="Mask-66" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_5-2" data-name="key copy 5" clip-path="url(#clip-path)">
+            <rect id="color_bg-30" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_6" data-name="key copy 6" transform="translate(587 30)">
+          <rect id="Mask-67" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_6-2" data-name="key copy 6" clip-path="url(#clip-path)">
+            <rect id="color_bg-31" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_7" data-name="key copy 7" transform="translate(675 30)">
+          <rect id="Mask-68" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_7-2" data-name="key copy 7" clip-path="url(#clip-path)">
+            <rect id="color_bg-32" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_8" data-name="key copy 8" transform="translate(763 30)">
+          <rect id="Mask-69" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_8-2" data-name="key copy 8" clip-path="url(#clip-path)">
+            <rect id="color_bg-33" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_9" data-name="key copy 9" transform="translate(851 30)">
+          <rect id="Mask-70" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_9-2" data-name="key copy 9" clip-path="url(#clip-path)">
+            <rect id="color_bg-34" data-name="color_bg" width="73" height="75" fill="#004f8b"/>
+          </g>
+        </g>
+        <g id="key_copy_21" data-name="key copy 21" transform="translate(939 30)">
+          <rect id="Mask-71" data-name="Mask" width="73" height="75" rx="7" fill="none"/>
+          <g id="key_copy_21-2" data-name="key copy 21" clip-path="url(#clip-path)">
+            <rect id="color_bg-35" data-name="color_bg" width="73" height="75" fill="#1796d6"/>
+          </g>
+        </g>
+        <g id="key_copy_35" data-name="key copy 35" transform="translate(926 294)">
+          <rect id="Mask-72" data-name="Mask" width="86" height="75" rx="7" fill="none"/>
+          <g id="key_copy_35-2" data-name="key copy 35" clip-path="url(#clip-path-36)">
+            <rect id="color_bg-36" data-name="color_bg" width="86" height="75" fill="#1796d6"/>
+          </g>
+        </g>
+        <path id="Line" d="M.5,1.5h1079" transform="translate(0 -1)" fill="none" stroke="#d3e9e8" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1"/>
+        <text id="v" transform="translate(526.5 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">v</tspan></text>
+        <text id="g" transform="translate(478.5 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">g</tspan></text>
+        <text id="t" transform="translate(444 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">t</tspan></text>
+        <text id="b" transform="translate(613.5 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">b</tspan></text>
+        <text id="h" transform="translate(565.5 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">h</tspan></text>
+        <text id="y" transform="translate(530 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">y</tspan></text>
+        <text id="n" transform="translate(700.5 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">n</tspan></text>
+        <text id="j" transform="translate(657.5 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">j</tspan></text>
+        <text id="u" transform="translate(616.5 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">u</tspan></text>
+        <text id="m" transform="translate(784.5 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">m</tspan></text>
+        <text id="k" transform="translate(741 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">k</tspan></text>
+        <text id="i" transform="translate(709.5 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">i</tspan></text>
+        <text id="p" transform="translate(881 64)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">p</tspan></text>
+        <text id="Caret_Square_Outlined_Left_-_FontAwesome" data-name="Caret Square Outlined Left - FontAwesome" transform="translate(964 77)" fill="#fff" font-size="26" font-family="FontAwesome7Pro-Regular, 'Font Awesome \37  Pro'"><tspan x="0" y="0"></tspan></text>
+        <text id="_2" data-name="!" transform="translate(882 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">!</tspan></text>
+        <text id="l" transform="translate(834.5 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">l</tspan></text>
+        <text id="o" transform="translate(793 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">o</tspan></text>
+        <text id="_3" data-name="?" transform="translate(967 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">?</tspan></text>
+        <text id="_.com" data-name=".com" transform="translate(819.5 339)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">.com</tspan></text>
+        <text id="Enter" transform="translate(928 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">Enter</tspan></text>
+        <text id="_4" data-name="@" transform="translate(197 342)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">@</tspan></text>
+        <text id="_123._" data-name="123.,?" transform="translate(66 342)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">123.,?</tspan></text>
+        <text id="a" transform="translate(124 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">a</tspan></text>
+        <text id="q" transform="translate(87.5 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">q</tspan></text>
+        <text id="z" transform="translate(262 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">z</tspan></text>
+        <text id="s" transform="translate(214.5 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">s</tspan></text>
+        <text id="w" transform="translate(172.5 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">w</tspan></text>
+        <text id="x" transform="translate(349 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">x</tspan></text>
+        <text id="d" transform="translate(300.5 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">d</tspan></text>
+        <text id="e" transform="translate(265 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">e</tspan></text>
+        <text id="c" transform="translate(439 249.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">c</tspan></text>
+        <text id="f" transform="translate(392.5 162.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">f</tspan></text>
+        <text id="r" transform="translate(356 74.5)" fill="#fff" font-size="26" font-family="OpenSans, Open Sans"><tspan x="0" y="0">r</tspan></text>
+        <text id="_5" data-name="" transform="translate(121.5 253.5)" fill="#fff" font-size="26" font-family="FontAwesome7Pro-Regular, 'Font Awesome \37  Pro'"><tspan x="0" y="0"></tspan></text>
+      </g>
+      <text id="_6" data-name="" transform="translate(951 312)" fill="#fff" font-size="36" font-family="FontAwesome7Pro-Regular, 'Font Awesome \37  Pro'"><tspan x="0" y="32"></tspan></text>
+    </g>
+  </g>
+</svg>

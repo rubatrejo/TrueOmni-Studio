@@ -49,3 +49,7 @@ coverage/
 # Screenshots dev scratchpad (billboard-*.png, b*-*.png)
 billboard-*.png
 b*-*.png
+
+# Debug screenshots de Playwright (transient)
+/*.png
+.playwright-mcp/

@@ -6,13 +6,17 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Fases 3.4, 3.5 y 3.6 cerradas con pulido. Commit `2b7d557`.
+**Fase activa:** Fases 3.7 (Map) y 3.8 (Ads) cerradas con pulido. Commit `8015777`.
 
-**Última fase cerrada:** Fase 3.6 — Digital Brochure (reader con pdf.js v3 + controles grandes arriba + Send to Email/Phone).
+**Última fase cerrada:** Fase 3.8 — Advertisement module (popup + hero + bottom + auto-detect light/dark theme en la X).
 
-**Siguiente acción concreta:** Abrir Fase 4 (primer cliente real con branding + Lighthouse) o añadir un nuevo módulo si Rubén lo pide (Itinerary Builder aprovecha los buckets de favoritos).
+**Siguiente acción concreta:** Abrir Fase 4 (primer cliente real con branding + Lighthouse + handoff) o Itinerary Builder (aprovecha los buckets de favoritos de listings + events).
 
-**Bloqueos:** ninguno. El PDF grande (54MB) quedó reemplazado por el comprimido (9.8MB) en `public/brochures/stlvg26_compressed.pdf`.
+**Bloqueos:** ninguno. El `alwaysShowWelcome` del MapModule está hardcoded en `true` para QA — apagarlo antes de Fase 4 / producción (ver `[module]/page.tsx` rama `map`).
+
+**TODO de QA pendiente:**
+
+- `alwaysShowWelcome={true}` en map es sólo para QA; pasar a false (o quitar prop) cuando Rubén apruebe el flow.
 
 **TODO de i18n (aplazado a Fase 5 — validador zod + migración a config.textos):**
 
@@ -468,6 +472,61 @@ driving/walking, SEE 360 funcional, favorite toast).
 - **ListingDetail como componente compartido**: event detail reusa el shell del listing detail con props `eventMeta` (2 líneas: date+time / phone) + `secondaryCta` (GET TICKETS si hay ticketsUrl) + `favoritesKind`. Evita duplicar 500 líneas.
 
 **Fase:** Fases 3.4, 3.5 y 3.6 cerradas. Lista para Fase 4.
+
+---
+
+### Sesión 2026-04-21 — Fase 3.7 Map + Fase 3.8 Advertisement
+
+**Hecho:**
+
+- **Fase 3.7 Map** (brainstorming → plan → 6 olas → pulido):
+  - Tipos `HomeMapModule` + `MapSource` + `MapItem` en `config.ts`.
+  - Data layer: `map-aggregator.ts` (agrega listings+events, auto-detect 4 sources, events window 7 días, jitter determinístico por source + slug porque el seed data comparte coords entre módulos), `map-filter.ts`, `map-walking-eta.ts` (haversine /5 km/h), `map-open-today.ts`, `map-detail-lookup.ts`.
+  - `MapCanvas` con Mapbox GL interactivo + clustering nativo (clusterRadius 18 / clusterMaxZoom 15) + pins verbatim del SVG por categoría con 4 iconos distintos (tenedor / ferris wheel / cama / calendario). Clusters azul oscuro `#004f8b` (antes coral). Selected pin 156×210 conserva color + icono + drop-shadow.
+  - `MapTopCarousel` + `MapTopCard` estilo `ListingCard` (293×269, active ×1.18 con lift −10 + borde azul, sin shadow). Primera card con padding izquierdo 65px alineado al logo.
+  - `MapChips` con "Select All" + colores que matchean los pins (Play `#004f8b`, Eat `#1796d6`, Stay `#b9bd39`, Events `#f16651`). Inactivos outline difuminado opacity 0.55.
+  - `MapToolbar` estilo `ListingsToolbar` con "Explore {client} Map" (template interpolado server-side) + search + filter.
+  - `MapPinBubble` verbatim `Map-Small-Detail.svg` — 540×278 (10% más grande), tipografía 28 bold / 16 medium / 17 mi-away, gradient dark-to-transparent bottom→top, X blanca. SEE MORE INFO abre `ListingDetail` **in-place** encima del mapa (nuevo prop `onClose` en `ListingDetail`) y cierra la bubble. ADD TO ITINERARY usa `useFavorites`/`useEventFavorites` según source.
+  - `MapWelcomePopup` (900×auto, gate por `sessionStorage kiosk_map_welcome_seen`, `alwaysShowWelcome` temporal para QA), `MapFilterOverlay` estilo `FilterOverlay` de listings (full-canvas dark, pills outline, CLEAR ALL olive + APPLY blue, pool recortado a la mitad para no saturar), `SearchOverlay` del home reutilizado con pool combinado.
+  - Hero 620px full: carrusel + chips dentro del hero (top:140→620), toolbar 118 por debajo del hero → total área azul 738 igual que los demás módulos. Gradient overlay del header sin imagen ahora fade-to-transparent-bottom (0.9→0).
+  - Cliente default `nombre` pasó a "Arizona" para ver el template funcionando.
+- **Fase 3.8 Advertisement**:
+  - Tipos `Ad` + `AdKind` (`popup|hero|bottom`) + `AdvertisementsConfig` + `AdTheme`.
+  - `src/lib/ads.ts`: `matchesRoute(pattern, path)` con wildcards `/*`, `getAdsForRoute`, `getAdsFromConfig`.
+  - `useAds(ads)` con `useSyncExternalStore` + `sessionStorage[kiosk_ads_dismissed]` gate (un ad cerrado no vuelve a salir en la sesión).
+  - `useImageCornerTheme(url)`: samplea canvas offscreen el cuadrante superior-derecho (25%×25%), calcula luminancia Rec.601, umbral 160 → `light`/`dark`. Cachea por URL. `ad.theme` del config sigue como override opcional.
+  - `AdCloseButton`: X con `filter: drop-shadow` dual-layer, color según theme (blanca con sombra oscura / negra con sombra clara). Sin background circular — flotante.
+  - `AdPopup` z-60 (bloqueante, tamaño nativo del asset, max 1000×1700), `AdHero` z-20 (1080×620 con `objectFit: fill` + inset:0 + bg `#000` para eliminar subpixel-gap), `AdBottom` z-30 (1080×185).
+  - `AdsSlot` orquestador se monta como sibling del módulo en `/home`, `/home/[module]` (todas las ramas del switch: listings/events/social-wall/digital-brochure/map) y `/home/[module]/[slug]` (listings/events/brochure detail).
+  - Config default con 4 ads de prueba: Lola's Lunch (popup → `/home/restaurants`), History of Art (hero → `/home` + `/home/things-to-do`), Uber Eats NFL (bottom dark → `/home` + `/home/restaurants`), Uber Eats $5 Off (bottom light → `/home/events`). Assets copiados a `clients/default/assets/ads/`.
+
+**Verificado:**
+
+- `pnpm check` (typecheck + lint + format:check) limpio.
+- Playwright MCP: `/home/map` con welcome + mapa + burbuja + 4 categorías de pins visibles (tras jitter).
+- Playwright MCP: `/home/restaurants` muestra popup Lola's + bottom Uber NFL, `/home/things-to-do` muestra hero Art (con hero del módulo oculto correctamente), `/home/events` muestra bottom Uber $5 Off con **X negra auto-detectada** por fondo blanco.
+- Cerrar un ad con la X lo deja oculto en la sesión (sessionStorage verificado).
+- Sin regresiones en los 5 módulos preexistentes (listings/events/social/brochure/map).
+
+**Pendiente / siguiente:**
+
+- Desactivar `alwaysShowWelcome` del Map antes de Fase 4 (prop temporal para QA del welcome popup).
+- `client.nombre = "Arizona"` queda como nombre del cliente default (confirmado por Rubén — el sistema siempre usa `client.nombre` para el template `{client}` del Map).
+- Fase 4 — primer cliente real con branding + Lighthouse + handoff.
+- O Itinerary Builder (ya hay buckets `kiosk_favorites` + `kiosk_event_favorites`).
+- Screenshots de verificación viven en `map-v*.png` / `ads-*.png` en la raíz del repo (NO .planning/verifications/); si se quieren archivar mover.
+
+**Decisiones:**
+
+- **Agregador con jitter determinístico por source+slug**: el seed data del config comparte coords entre los 3 módulos de listings (cada punto geográfico tiene 1 restaurant + 1 thing-to-do + 1 stay en el mismo lat/lng). Sin jitter los pins se apilan y el mapa se ve vacío. Amp 0.0025° + bias direccional por categoría (NW/NE/S) da dispersión visible sin "saltar" a otra colonia.
+- **Selected pin conserva color e icono de su categoría** (×1.28 base pin) en lugar de ser genérico coral con flecha — usuario decidió que sea reconocible por categoría también en estado seleccionado.
+- **Hero con `objectFit: fill`** en vez de `cover`: el ratio del asset (1098×638) es casi 1080×620 (1.72 vs 1.74). Con `fill` estira ~2% de distorsión imperceptible pero garantiza 100% cobertura sin cropping.
+- **Ads como sibling del módulo dentro del KioskCanvas**, no como Provider global. Cada page server carga `ads = getAdsFromConfig(config)` y pasa el array. Zero Context, zero prop drilling de módulos existentes (los módulos no saben que existen ads).
+- **Auto-detect del theme de X con canvas sampling** en lugar de forzar al cliente a declarar light/dark. El mismo origin-asset route handler evita CORS. `ad.theme` del config sigue siendo override manual si el detector falla.
+- **Popup bloquea, hero + bottom coexisten**: el popup tiene z-60 y cubre todo el canvas. Hero + bottom son siblings en la misma pantalla cuando el popup no aplica.
+- **Commit único para las 2 fases** (`8015777`): precedente `2b7d557` agrupaba 3.4-3.6. Los archivos compartidos (config.ts, `[module]/page.tsx`) tienen cambios en ambas fases que no se pueden separar sin edit-por-hunk interactivo.
+
+**Fase:** 3.7 Map + 3.8 Ads cerradas. Lista para Fase 4.
 
 ---
 

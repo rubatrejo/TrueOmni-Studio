@@ -44,6 +44,8 @@
   --warning: 38 92% 50%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
+  /* Lime green del check del thank-you del Survey (#32CD32). */
+  --survey-success: 120 61% 50%;
 
   /* ---------------------------------------------------------------------- */
   /*  TIPOGRAFÍA                                                            */

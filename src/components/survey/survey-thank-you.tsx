@@ -42,7 +42,7 @@ export function SurveyThankYou({
       className="survey-step-anim flex flex-col items-center"
       style={{ gap: '40px', maxWidth: '640px' }}
     >
-      {/* Check animado con halo expand */}
+      {/* Check animado con halo expand. Círculo blanco + palomita lime. */}
       <div className="relative flex items-center justify-center" style={{ height: '180px' }}>
         <span
           aria-hidden
@@ -50,7 +50,7 @@ export function SurveyThankYou({
           style={{
             width: '180px',
             height: '180px',
-            backgroundColor: 'hsl(var(--accent) / 0.4)',
+            backgroundColor: 'hsl(var(--primary-foreground) / 0.5)',
           }}
         />
         <span
@@ -59,8 +59,8 @@ export function SurveyThankYou({
           style={{
             width: '156px',
             height: '156px',
-            backgroundColor: 'hsl(var(--accent))',
-            boxShadow: '0 20px 50px -15px hsl(var(--accent) / 0.7)',
+            backgroundColor: 'hsl(var(--primary-foreground))',
+            boxShadow: '0 20px 50px -15px rgba(0,0,0,0.35)',
           }}
         />
         <svg
@@ -74,8 +74,8 @@ export function SurveyThankYou({
           <polyline
             className="survey-check-path"
             points="5 12 10 17 19 7"
-            stroke="hsl(var(--primary-foreground))"
-            strokeWidth="3.2"
+            stroke="hsl(var(--survey-success))"
+            strokeWidth="3.6"
             strokeLinecap="round"
             strokeLinejoin="round"
           />

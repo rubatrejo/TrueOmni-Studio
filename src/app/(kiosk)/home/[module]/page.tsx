@@ -8,6 +8,7 @@ import { HomeHeader } from '@/components/home/header';
 import { KioskCanvas } from '@/components/kiosk-canvas';
 import { ListingsModule } from '@/components/listings/listings-module';
 import { MapModule } from '@/components/map/map-module';
+import { PassesModule } from '@/components/passes/passes-module';
 import { SocialWallModule } from '@/components/social-wall/social-wall-module';
 import { getAdsFromConfig } from '@/lib/ads';
 import { getConfig } from '@/lib/config';
@@ -122,27 +123,14 @@ export default async function ModulePage({ params }: PageProps) {
     );
   }
   if (mod?.kind === 'passes') {
-    // Placeholder — el módulo se implementa en fase 3.10 ola 2.
     return (
       <KioskCanvas>
-        <div className="flex h-full w-full flex-col items-center justify-center gap-10 bg-white px-10 text-center">
-          <h1
-            className="font-display font-bold uppercase text-[#004f8b]"
-            style={{ fontSize: '90px', letterSpacing: '0.02em' }}
-          >
-            {mod.label}
-          </h1>
-          <p className="font-sans text-gray-600" style={{ fontSize: '32px' }}>
-            Coming soon
-          </p>
-          <Link
-            href="/home"
-            className="mt-4 inline-flex items-center justify-center rounded-[10px] bg-[#004f8b] font-sans font-bold uppercase text-white transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
-            style={{ fontSize: '26px', padding: '16px 40px', letterSpacing: '0.02em' }}
-          >
-            Back to Home
-          </Link>
-        </div>
+        <PassesModule
+          moduleKey={module}
+          module={mod}
+          textos={config.textos ?? {}}
+          header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
+        />
         <AdsSlot ads={ads} />
       </KioskCanvas>
     );

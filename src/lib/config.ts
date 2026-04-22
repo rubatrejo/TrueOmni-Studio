@@ -19,6 +19,79 @@ export interface HomeTile {
   image: string;
 }
 
+/** Intro del Survey mostrado en el primer paso. */
+export interface SurveyIntro {
+  title: string;
+  subtitle?: string;
+}
+
+/** Pantalla de agradecimiento tras enviar el survey. */
+export interface SurveyThankYou {
+  title: string;
+  message: string;
+  /** Ms antes de cerrar el overlay. Default 5000. */
+  autoCloseMs?: number;
+}
+
+/** Captura opcional de datos de contacto en un paso extra final. */
+export interface SurveyContactCapture {
+  enabled: boolean;
+  email?: boolean;
+  phone?: boolean;
+  disclaimer: string;
+}
+
+/** Pregunta del survey — union discriminada por `type`. */
+export type SurveyQuestion =
+  | {
+      id: string;
+      type: 'nps';
+      prompt: string;
+      optional?: boolean;
+      labels?: { low: string; high: string };
+    }
+  | {
+      id: string;
+      type: 'rating';
+      prompt: string;
+      optional?: boolean;
+      /** Número máximo de estrellas (default 5). */
+      max?: 5;
+    }
+  | {
+      id: string;
+      type: 'single-choice';
+      prompt: string;
+      optional?: boolean;
+      options: string[];
+    }
+  | {
+      id: string;
+      type: 'multi-choice';
+      prompt: string;
+      optional?: boolean;
+      options: string[];
+    }
+  | {
+      id: string;
+      type: 'text';
+      prompt: string;
+      optional?: boolean;
+      /** Caracteres máximos del textarea (default 500). */
+      maxLength?: number;
+    };
+
+/** Configuración completa del módulo Survey v1. */
+export interface SurveyConfig {
+  enabled: boolean;
+  /** Logo opcional; si falta se usa `branding.logo.default` del cliente. */
+  logo?: string;
+  intro: SurveyIntro;
+  questions: SurveyQuestion[];
+  contactCapture?: SurveyContactCapture;
+  thankYou: SurveyThankYou;
+}
+
 /** Ítem de búsqueda placeholder. Fases futuras lo reemplazan con data real. */
 export interface HomeListing {
   slug: string;
@@ -317,6 +390,7 @@ export interface KioskConfig {
         label: string;
         image: string;
       };
+      survey?: SurveyConfig;
       listings: HomeListing[];
       /** Módulos configurables (Listings o Events). Discriminados por `kind`. */
       modules?: Record<string, HomeModuleVariant>;

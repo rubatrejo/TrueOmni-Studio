@@ -41,7 +41,21 @@
     "map_chip_play": "Play",
     "map_chip_eat": "Eat",
     "map_chip_stay": "Stay",
-    "map_chip_events": "Events"
+    "map_chip_events": "Events",
+    "survey_back": "BACK",
+    "survey_next": "NEXT",
+    "survey_send": "SEND FEEDBACK",
+    "survey_step_label": "{current}/{total}",
+    "survey_optional": "Optional",
+    "survey_nps_number": "{n}",
+    "survey_text_counter": "{count}/{max}",
+    "survey_contact_email_label": "Email (optional)",
+    "survey_contact_phone_label": "Phone (optional)",
+    "survey_exit_confirm_title": "Leave survey?",
+    "survey_exit_confirm_message": "You'll lose your answers if you leave now.",
+    "survey_exit_confirm_cancel": "CANCEL",
+    "survey_exit_confirm_exit": "LEAVE",
+    "survey_thank_you_countdown": "Returning home in {seconds}s..."
   },
   "navegacion": {
     "home": "/",
@@ -145,12 +159,6 @@
           "image": "/assets/home/tiles/photo-booth.jpg"
         },
         {
-          "key": "sweepstakes",
-          "label": "Sweepstakes",
-          "enabled": true,
-          "image": "/assets/home/tiles/sweepstakes.jpg"
-        },
-        {
           "key": "trails",
           "label": "Trails",
           "enabled": true,
@@ -161,6 +169,56 @@
         "enabled": true,
         "label": "Wayfinding",
         "image": "/assets/home/tiles/wayfinding.jpg"
+      },
+      "survey": {
+        "enabled": true,
+        "intro": {
+          "title": "We value your feedback",
+          "subtitle": "Your answers help us improve this kiosk."
+        },
+        "questions": [
+          {
+            "id": "nps",
+            "type": "nps",
+            "prompt": "How likely are you to recommend this kiosk?",
+            "labels": { "low": "Not at all likely", "high": "Extremely likely" }
+          },
+          {
+            "id": "overall",
+            "type": "rating",
+            "prompt": "Overall, how would you rate your experience?"
+          },
+          {
+            "id": "purpose",
+            "type": "single-choice",
+            "prompt": "What brought you here today?",
+            "options": ["Tourism", "Business", "Local visit", "Other"]
+          },
+          {
+            "id": "interests",
+            "type": "multi-choice",
+            "prompt": "What interests you most?",
+            "options": ["Food & Drink", "Events", "History", "Nature", "Shopping"]
+          },
+          {
+            "id": "comment",
+            "type": "text",
+            "prompt": "Any other feedback?",
+            "optional": true,
+            "maxLength": 500
+          }
+        ],
+        "contactCapture": {
+          "enabled": false,
+          "email": true,
+          "phone": false,
+          "disclaimer": "We only use this to follow up if you asked for it."
+        },
+        "thankYou": {
+          "title": "Thanks for your feedback",
+          "message": "We read every response. Enjoy your visit!",
+          "autoCloseMs": 5000
+        }
       },
       "listings": [
         {

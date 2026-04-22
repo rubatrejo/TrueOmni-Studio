@@ -30,12 +30,11 @@ interface Props {
 }
 
 /**
- * Root cinematic del survey. Card altura fija (1440px) con 3 zonas verticales:
- *   - top (progress + X)
- *   - center (intro + question como H1 display + input)
- *   - bottom (navigation)
- * La zona de contenido es scrollable sólo si su altura excede — en práctica
- * todos los tipos caben dentro del slot reservado.
+ * Root del survey. Card 768×1152 con layout:
+ *   - header (X top-right)
+ *   - title anclado arriba (H1 59px)
+ *   - input area (centrado, flex-1)
+ *   - footer 3-col: BACK · dots · NEXT
  */
 export function SurveyOverlay({ config, client, textos, onClose }: Props) {
   const total = totalSteps(config);
@@ -76,9 +75,7 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
     onClose();
   }, [onClose]);
 
-  const handleBack = useCallback(() => {
-    setStep((s) => Math.max(0, s - 1));
-  }, []);
+  const handleBack = useCallback(() => setStep((s) => Math.max(0, s - 1)), []);
 
   const handleNext = useCallback(() => {
     if (isLastStep) {
@@ -107,31 +104,20 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
       <div className="survey-backdrop-anim absolute inset-0">
         <SurveyBackdrop onTap={handleCloseRequest} ariaLabel={textos.survey_exit_confirm_title} />
       </div>
+
       <div className="relative">
         <SurveyCard>
-          {/* TOP BAR — progress + X */}
-          <div
-            className="relative flex items-center justify-center"
-            style={{ paddingTop: '72px', paddingLeft: '96px', paddingRight: '96px' }}
-          >
-            <SurveyProgress current={step} total={total} />
-            <SurveyHeader
-              onClose={handleCloseRequest}
-              closeAriaLabel={textos.survey_exit_confirm_title}
-            />
-          </div>
+          {/* X close top-right */}
+          <SurveyHeader
+            onClose={handleCloseRequest}
+            closeAriaLabel={textos.survey_exit_confirm_title}
+          />
 
-          {/* CENTER — intro + question + input */}
-          <div
-            className="flex flex-1 flex-col items-center justify-center"
-            style={{
-              paddingLeft: '96px',
-              paddingRight: '96px',
-              paddingTop: '40px',
-              paddingBottom: '40px',
-            }}
-          >
-            {submitted ? (
+          {submitted ? (
+            <div
+              className="flex flex-1 flex-col items-center justify-center"
+              style={{ paddingLeft: '64px', paddingRight: '64px' }}
+            >
               <SurveyThankYou
                 title={config.thankYou.title}
                 message={config.thankYou.message}
@@ -139,56 +125,61 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
                 autoCloseMs={config.thankYou.autoCloseMs ?? 5000}
                 onAutoClose={onClose}
               />
-            ) : (
+            </div>
+          ) : (
+            <>
+              {/* HERO: título anclado arriba */}
               <div
-                key={`step-${step}`}
-                className="survey-step-anim flex w-full flex-col items-center"
-                style={{ gap: '56px' }}
+                className="flex flex-col items-center"
+                style={{
+                  paddingTop: '96px',
+                  paddingLeft: '56px',
+                  paddingRight: '56px',
+                  paddingBottom: '24px',
+                }}
               >
-                {step === 0 && config.intro?.subtitle ? (
-                  <p
-                    className="text-center font-sans uppercase"
-                    style={{
-                      fontSize: '14px',
-                      letterSpacing: '0.28em',
-                      opacity: 0.75,
-                      marginBottom: '-32px',
-                    }}
-                  >
-                    {config.intro.title}
-                  </p>
-                ) : null}
-
-                {/* Pregunta como H1 display — el título del paso */}
                 {currentQuestion ? (
                   <h1
-                    className="text-center font-display font-bold"
+                    key={`title-${step}`}
+                    className="survey-step-anim text-center font-display font-bold"
                     style={{
-                      fontSize: '64px',
+                      fontSize: '44px',
                       lineHeight: 1.08,
                       letterSpacing: '-0.02em',
-                      maxWidth: '720px',
+                      maxWidth: '620px',
                     }}
                   >
                     {currentQuestion.prompt}
                   </h1>
                 ) : (
                   <h1
-                    className="text-center font-display font-bold"
+                    key={`title-${step}`}
+                    className="survey-step-anim text-center font-display font-bold"
                     style={{
-                      fontSize: '56px',
+                      fontSize: '40px',
                       lineHeight: 1.1,
                       letterSpacing: '-0.015em',
-                      maxWidth: '720px',
+                      maxWidth: '620px',
                     }}
                   >
-                    {textos.survey_contact_email_label.replace(' (optional)', '') ||
-                      'Stay in touch'}
+                    Stay in touch
                   </h1>
                 )}
+              </div>
 
-                {/* Input area */}
-                <div className="flex w-full flex-col items-center">
+              {/* INPUT area: flex-1, centrado */}
+              <div
+                className="flex flex-1 flex-col items-center justify-center"
+                style={{
+                  paddingLeft: '56px',
+                  paddingRight: '56px',
+                  paddingBottom: '24px',
+                }}
+              >
+                <div
+                  key={`input-${step}`}
+                  className="survey-step-anim flex w-full flex-col items-center"
+                >
                   {currentQuestion ? (
                     <SurveyQuestionView
                       question={currentQuestion}
@@ -209,29 +200,28 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
                   ) : null}
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* BOTTOM — navigation (hidden cuando submitted) */}
-          {!submitted ? (
-            <div
-              style={{
-                paddingLeft: '96px',
-                paddingRight: '96px',
-                paddingBottom: '72px',
-                paddingTop: '24px',
-              }}
-            >
-              <SurveyNavigation
-                onBack={step > 0 ? handleBack : undefined}
-                onNext={handleNext}
-                backLabel={textos.survey_back}
-                nextLabel={nextLabel}
-                nextDisabled={nextDisabled}
-                isLastStep={isLastStep}
-              />
-            </div>
-          ) : null}
+              {/* FOOTER: BACK · dots · NEXT */}
+              <div
+                style={{
+                  paddingLeft: '56px',
+                  paddingRight: '56px',
+                  paddingBottom: '56px',
+                  paddingTop: '16px',
+                }}
+              >
+                <SurveyNavigation
+                  onBack={step > 0 ? handleBack : undefined}
+                  onNext={handleNext}
+                  backLabel={textos.survey_back}
+                  nextLabel={nextLabel}
+                  nextDisabled={nextDisabled}
+                  isLastStep={isLastStep}
+                  center={<SurveyProgress current={step} total={total} />}
+                />
+              </div>
+            </>
+          )}
         </SurveyCard>
       </div>
 

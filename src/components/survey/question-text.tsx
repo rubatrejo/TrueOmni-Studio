@@ -56,7 +56,7 @@ export function QuestionText({
 
   return (
     <div className="flex w-full flex-col items-center" style={{ gap: '24px' }}>
-      <div className="relative" style={{ width: '720px' }}>
+      <div className="relative" style={{ width: '600px' }}>
         <div
           className="w-full rounded-2xl font-sans"
           style={{
@@ -88,9 +88,9 @@ export function QuestionText({
       </div>
       <div
         style={{
-          transform: 'scale(0.74)',
+          transform: 'scale(0.62)',
           transformOrigin: 'top center',
-          marginBottom: '-50px',
+          marginBottom: '-80px',
         }}
       >
         <OnScreenKeyboard shift={shift} onKey={handleKey} />

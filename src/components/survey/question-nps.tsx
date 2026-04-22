@@ -20,7 +20,7 @@ export function QuestionNps({ value, onChange, labels }: Props) {
         role="radiogroup"
         aria-label="Rate from 0 to 10"
         className="survey-stagger flex items-center justify-center"
-        style={{ gap: '12px' }}
+        style={{ gap: '8px' }}
       >
         {SCALE.map((n) => {
           const selected = value === n;
@@ -33,9 +33,9 @@ export function QuestionNps({ value, onChange, labels }: Props) {
               onClick={() => onChange(n)}
               className="flex items-center justify-center rounded-full font-display font-bold transition-all duration-300 ease-out focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
               style={{
-                width: '64px',
-                height: '64px',
-                fontSize: '22px',
+                width: '52px',
+                height: '52px',
+                fontSize: '18px',
                 backgroundColor: selected
                   ? 'hsl(var(--accent))'
                   : 'hsl(var(--primary-foreground) / 0.95)',
@@ -55,10 +55,10 @@ export function QuestionNps({ value, onChange, labels }: Props) {
         <div
           className="flex w-full items-center justify-between font-sans font-medium"
           style={{
-            fontSize: '15px',
+            fontSize: '13px',
             opacity: 0.75,
-            maxWidth: '720px',
-            letterSpacing: '0.01em',
+            maxWidth: '620px',
+            letterSpacing: '0.02em',
           }}
         >
           <span>{labels.low}</span>

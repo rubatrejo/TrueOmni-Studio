@@ -1,11 +1,9 @@
 import { AdsSlot } from '@/components/ads/ads-slot';
-import { CategoryGrid } from '@/components/home/category-grid';
 import { HomeHeader } from '@/components/home/header';
 import { HomeShell } from '@/components/home/home-shell';
-import { WayfindingBanner } from '@/components/home/wayfinding-banner';
 import { KioskCanvas } from '@/components/kiosk-canvas';
 import { getAdsFromConfig } from '@/lib/ads';
-import { getConfig } from '@/lib/config';
+import { getConfig, type HomeTile } from '@/lib/config';
 
 export default async function HomePage() {
   const config = await getConfig();
@@ -20,12 +18,25 @@ export default async function HomePage() {
     );
   }
   const ads = getAdsFromConfig(config);
+  const tiles: HomeTile[] = home.tiles.filter((t) => t.enabled);
+  if (home.wayfinding?.enabled) {
+    tiles.push({
+      key: 'wayfinding',
+      label: home.wayfinding.label,
+      enabled: true,
+      image: home.wayfinding.image,
+    });
+  }
   return (
     <KioskCanvas>
-      <HomeShell header={<HomeHeader />} listings={home.listings}>
-        <CategoryGrid tiles={home.tiles.filter((t) => t.enabled)} />
-        {home.wayfinding?.enabled ? <WayfindingBanner wayfinding={home.wayfinding} /> : null}
-      </HomeShell>
+      <HomeShell
+        header={<HomeHeader />}
+        listings={home.listings}
+        tiles={tiles}
+        survey={home.survey}
+        client={{ slug: config.client.slug, logo: config.branding.logo.default }}
+        textos={config.textos}
+      />
       <AdsSlot ads={ads} />
     </KioskCanvas>
   );

@@ -1,24 +1,26 @@
+'use client';
+
 import Link from 'next/link';
 
 import type { HomeTile } from '@/lib/config';
 
+interface Props {
+  tile: HomeTile;
+  /** Si se provee, el tile dispara el callback en lugar de navegar. */
+  onClick?: () => void;
+}
+
 /**
  * Tile 460×460 rx=9 verbatim del SVG Dashboard. Foto + overlay #11100d al
- * 35.2% + label centrado (x=230 relativo al tile, y=249 baseline) fontSize 50
- * Montserrat-Bold white. Click navega a /home/{key}.
+ * 35.2% + label centrado. Click navega a /home/{key} por default, o dispara
+ * onClick si se provee (patrón para overlays como Survey).
  */
-export function CategoryTile({ tile }: { tile: HomeTile }) {
-  return (
-    <Link
-      href={`/home/${tile.key}`}
-      className="relative block overflow-hidden focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-white"
-      style={{ width: '460px', height: '460px', borderRadius: '9px' }}
-    >
+export function CategoryTile({ tile, onClick }: Props) {
+  const content = (
+    <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={tile.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
       <div className="absolute inset-0" style={{ backgroundColor: 'rgba(17,16,13,0.352)' }} />
-      {/* Label centrado: SVG tiene x=230 (centro del tile) con tspan x negativo
-          para right-align de cada word. Reproducimos con flex-center + textAlign. */}
       <span
         className="absolute flex items-center justify-center text-center font-display font-bold uppercase leading-[1.22] text-white"
         style={{
@@ -33,6 +35,24 @@ export function CategoryTile({ tile }: { tile: HomeTile }) {
       >
         {tile.label.toUpperCase()}
       </span>
+    </>
+  );
+
+  const sharedClassName =
+    'relative block overflow-hidden focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-white';
+  const sharedStyle = { width: '460px', height: '460px', borderRadius: '9px' };
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={sharedClassName} style={sharedStyle}>
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <Link href={`/home/${tile.key}`} className={sharedClassName} style={sharedStyle}>
+      {content}
     </Link>
   );
 }

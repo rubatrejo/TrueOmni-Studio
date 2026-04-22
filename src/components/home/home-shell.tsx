@@ -3,26 +3,37 @@
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
-import type { HomeListing } from '@/lib/config';
+import { SurveyOverlay } from '@/components/survey/survey-overlay';
+import type { HomeListing, HomeTile, SurveyConfig } from '@/lib/config';
 
+import { CategoryGrid } from './category-grid';
 import { SearchBar } from './search-bar';
 import { SearchOverlay } from './search-overlay';
 
 /**
- * Shell client-side del Home. Manda el estado del modal de búsqueda para que
- * el SearchBar abra un overlay DENTRO del frame del kiosk (no una nueva ruta).
- * El header se recibe como prop (render server-side desde el layout).
+ * Shell client-side del Home. Manda el estado de los overlays (search + survey)
+ * y renderiza el grid internamente para poder inyectar el callback del survey
+ * sin pasar funciones desde el Server Component padre.
  */
 export function HomeShell({
   header,
   listings,
-  children,
+  tiles,
+  survey,
+  client,
+  textos,
 }: {
   header: ReactNode;
   listings: readonly HomeListing[];
-  children: ReactNode;
+  tiles: readonly HomeTile[];
+  survey?: SurveyConfig;
+  client: { slug: string; logo?: string };
+  textos: Record<string, string>;
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
+  const [surveyOpen, setSurveyOpen] = useState(false);
+
+  const openSurvey = survey?.enabled ? () => setSurveyOpen(true) : undefined;
 
   return (
     <div
@@ -35,9 +46,8 @@ export function HomeShell({
         className="scrollbar-hide flex-1 overflow-y-auto overflow-x-hidden overscroll-contain"
         style={{ paddingTop: '40px', paddingBottom: '120px' }}
       >
-        {children}
+        <CategoryGrid tiles={tiles} onSurveyTap={openSurvey} />
       </main>
-      {/* Scroll-hint gradient */}
       <div
         aria-hidden
         className="pointer-events-none absolute bottom-0 left-0 right-0 z-20"
@@ -47,10 +57,16 @@ export function HomeShell({
             'linear-gradient(to top, #f8f8f8 0%, rgba(248,248,248,0.85) 30%, rgba(248,248,248,0) 100%)',
         }}
       />
-      {/* Search modal overlay — fixed inset-0 se contiene al canvas (tiene
-          transform:scale → fixed es relativo al canvas), cubre SOLO el frame. */}
       {searchOpen ? (
         <SearchOverlay listings={listings} onClose={() => setSearchOpen(false)} />
+      ) : null}
+      {surveyOpen && survey ? (
+        <SurveyOverlay
+          config={survey}
+          client={client}
+          textos={textos}
+          onClose={() => setSurveyOpen(false)}
+        />
       ) : null}
     </div>
   );

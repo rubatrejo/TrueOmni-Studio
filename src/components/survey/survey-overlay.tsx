@@ -12,12 +12,14 @@ import {
   type SurveyAnswer,
 } from '@/lib/survey';
 
+import { QuestionContact } from './question-contact';
 import { SurveyBackdrop } from './survey-backdrop';
 import { SurveyCard } from './survey-card';
 import { SurveyExitConfirm } from './survey-exit-confirm';
 import { SurveyHeader } from './survey-header';
 import { SurveyNavigation } from './survey-navigation';
 import { SurveyProgress } from './survey-progress';
+import { SurveyQuestionView } from './survey-question';
 import { SurveyThankYou } from './survey-thank-you';
 
 interface Props {
@@ -35,8 +37,6 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
   const total = totalSteps(config);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, SurveyAnswer>>({});
-  // setContact se usa en ola 3 cuando se conecta QuestionContact.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [contact, setContact] = useState<{ email?: string; phone?: string }>({});
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -88,9 +88,6 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
     setStep((s) => Math.min(total - 1, s + 1));
   }, [answers, client.slug, contact, isLastStep, total]);
 
-  // setAnswer se conecta en ola 3 vía SurveyQuestionView. Se define aquí
-  // para no tener que reintroducir useState + callback al wirear.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const setAnswer = useCallback((id: string, value: SurveyAnswer) => {
     setAnswers((prev) => ({ ...prev, [id]: value }));
   }, []);
@@ -138,12 +135,32 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
               ) : null}
 
               <div className="mb-4" style={{ minHeight: '420px' }}>
-                <div className="text-center font-display font-bold" style={{ fontSize: '28px' }}>
-                  {currentQuestion ? currentQuestion.prompt : textos.survey_contact_email_label}
-                </div>
-                <div className="mt-4 text-center text-sm opacity-60">
-                  [placeholder — question variant ola 3]
-                </div>
+                {currentQuestion ? (
+                  <>
+                    <h2
+                      className="mb-8 text-center font-display font-bold"
+                      style={{ fontSize: '32px', lineHeight: 1.25 }}
+                    >
+                      {currentQuestion.prompt}
+                    </h2>
+                    <SurveyQuestionView
+                      question={currentQuestion}
+                      value={answers[currentQuestion.id] ?? null}
+                      onChange={(v) => setAnswer(currentQuestion.id, v)}
+                      counterTemplate={textos.survey_text_counter}
+                    />
+                  </>
+                ) : config.contactCapture ? (
+                  <QuestionContact
+                    email={config.contactCapture.email ?? false}
+                    phone={config.contactCapture.phone ?? false}
+                    value={contact}
+                    onChange={setContact}
+                    emailLabel={textos.survey_contact_email_label}
+                    phoneLabel={textos.survey_contact_phone_label}
+                    disclaimer={config.contactCapture.disclaimer}
+                  />
+                ) : null}
               </div>
 
               <SurveyNavigation

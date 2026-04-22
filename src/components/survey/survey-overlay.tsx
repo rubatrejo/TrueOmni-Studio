@@ -130,7 +130,7 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
   return (
     <div
       className="absolute inset-0 z-[70] flex items-center justify-center"
-      style={{ paddingBottom: isTextStep ? '420px' : '0px' }}
+      style={{ paddingBottom: isTextStep && !submitted ? '420px' : '0px' }}
     >
       <div className="survey-backdrop-anim absolute inset-0">
         <SurveyBackdrop onTap={handleCloseRequest} ariaLabel={textos.survey_exit_confirm_title} />
@@ -172,7 +172,7 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
                   key={`title-${step}`}
                   className="survey-step-anim text-center font-display font-bold"
                   style={{
-                    fontSize: '38px',
+                    fontSize: '40px',
                     lineHeight: 1.1,
                     letterSpacing: '-0.015em',
                     maxWidth: '520px',
@@ -183,12 +183,12 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
                 {currentQuestion?.subtitle ? (
                   <p
                     key={`sub-${step}`}
-                    className="survey-step-anim text-center font-sans"
+                    className="survey-step-anim text-center font-sans font-medium"
                     style={{
-                      fontSize: '16px',
-                      lineHeight: 1.45,
-                      opacity: 0.82,
-                      maxWidth: '540px',
+                      fontSize: '20px',
+                      lineHeight: 1.4,
+                      opacity: 0.9,
+                      maxWidth: '560px',
                     }}
                   >
                     {currentQuestion.subtitle}

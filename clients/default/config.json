@@ -55,7 +55,20 @@
     "survey_exit_confirm_message": "You'll lose your answers if you leave now.",
     "survey_exit_confirm_cancel": "CANCEL",
     "survey_exit_confirm_exit": "LEAVE",
-    "survey_thank_you_countdown": "Returning home in {seconds}s..."
+    "survey_thank_you_countdown": "Returning home in {seconds}s...",
+    "passes_label": "Passes",
+    "passes_get_yours": "GET YOURS",
+    "passes_view_website": "View Website",
+    "passes_share_instruction": "SCAN THIS QR CODE TO HAVE YOUR PASS",
+    "passes_share_phone_label": "Enter your phone number",
+    "passes_share_country": "USA (+1)",
+    "passes_share_phone_placeholder": "000-555-0115",
+    "passes_share_terms": "I accept details",
+    "passes_share_send": "SEND",
+    "passes_share_cancel": "CANCEL",
+    "passes_sent_title": "You are all set!",
+    "passes_sent_message": "The pass was successfully sent",
+    "passes_sent_redirect_label": "Returning in {seconds}s..."
   },
   "navegacion": {
     "home": "/",
@@ -6766,6 +6779,124 @@
           },
           "defaultZoom": 15,
           "eventsWindowDays": 7
+        },
+        "passes": {
+          "kind": "passes",
+          "label": "Passes",
+          "heroImage": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1920&q=80",
+          "passes": [
+            {
+              "slug": "museum-pass",
+              "title": "Museum Pass",
+              "cover": "https://images.unsplash.com/photo-1565060169861-2d4b4e54c8c7?w=1200&q=80",
+              "bandwangoUrl": "https://app.bandwango.com/p/museum-pass",
+              "tagline": "Skip the line at 8 iconic museums.",
+              "activities": [
+                {
+                  "slug": "cheyenne-depot-museum",
+                  "title": "Cheyenne Depot Museum",
+                  "image": "https://images.unsplash.com/photo-1565060169861-2d4b4e54c8c7?w=600&q=80",
+                  "description": "Designated a National Historic Landmark, this former Union Pacific Depot has been restored to its original glory. Home to a visitor center and restaurant, the Depot also features the Cheyenne Depot Museum, rich with railroad history, exhibits and interactive displays, including an intricate working model.",
+                  "website": "https://example.com/cheyenne-depot"
+                },
+                {
+                  "slug": "heard-museum",
+                  "title": "Heard Museum",
+                  "image": "https://images.unsplash.com/photo-1566054757965-8c4085344c96?w=600&q=80",
+                  "description": "The Heard Museum advances American Indian art by presenting the stories of American Indian people from a first-person perspective. Founded in 1929, the Heard is internationally recognized for the quality of its collections and educational programming.",
+                  "website": "https://example.com/heard"
+                },
+                {
+                  "slug": "phoenix-art-museum",
+                  "title": "Phoenix Art Museum",
+                  "image": "https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=600&q=80",
+                  "description": "The largest art museum in the Southwestern United States, Phoenix Art Museum features a collection of more than 20,000 works of American, Asian, European, Latin American, Western American, modern and contemporary art.",
+                  "website": "https://example.com/phoenix-art"
+                },
+                {
+                  "slug": "musical-instrument-museum",
+                  "title": "Musical Instrument Museum",
+                  "image": "https://images.unsplash.com/photo-1466428996289-fb355538da1b?w=600&q=80",
+                  "description": "MIM is the world's only global musical instrument museum, offering guests a rich musical journey with nearly 7,000 instruments on display from around 200 countries and territories across the globe.",
+                  "website": "https://example.com/mim"
+                }
+              ]
+            },
+            {
+              "slug": "city-tour-pass",
+              "title": "City Tour Pass",
+              "cover": "https://images.unsplash.com/photo-1520583457224-aee11bad5112?w=1200&q=80",
+              "bandwangoUrl": "https://app.bandwango.com/p/city-tour-pass",
+              "tagline": "5 unforgettable tours in one pass.",
+              "activities": [
+                {
+                  "slug": "red-bus-tour",
+                  "title": "Red Bus City Tour",
+                  "image": "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&q=80",
+                  "description": "Hop-on hop-off double decker bus tour with 12 stops at the city's top landmarks. Audio guide available in 8 languages. Tickets valid 24 hours from first boarding.",
+                  "website": "https://example.com/red-bus"
+                },
+                {
+                  "slug": "walking-food-tour",
+                  "title": "Historic Walking Tour",
+                  "image": "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&q=80",
+                  "description": "Two-hour guided walking tour through the historic downtown district. Learn about the architecture, culture and hidden gems from our expert local guides. Small groups, max 12 people.",
+                  "website": "https://example.com/walking"
+                },
+                {
+                  "slug": "river-cruise",
+                  "title": "Sunset River Cruise",
+                  "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80",
+                  "description": "90-minute narrated cruise along the river at sunset. Complimentary drink included. Live music on Friday and Saturday evenings. Reservation recommended.",
+                  "website": "https://example.com/cruise"
+                },
+                {
+                  "slug": "bike-rental",
+                  "title": "All-day Bike Rental",
+                  "image": "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=600&q=80",
+                  "description": "Full-day cruiser bike rental from 8am to 8pm. Helmet, lock and city map included. Perfect for exploring the riverfront trail and downtown.",
+                  "website": "https://example.com/bikes"
+                }
+              ]
+            },
+            {
+              "slug": "food-drink-pass",
+              "title": "Food & Drink Pass",
+              "cover": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=80",
+              "bandwangoUrl": "https://app.bandwango.com/p/food-drink-pass",
+              "tagline": "Taste the best of the city in 10 stops.",
+              "activities": [
+                {
+                  "slug": "daddy-of-the-malt",
+                  "title": "Daddy of the Malt",
+                  "image": "https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=600&q=80",
+                  "description": "Craft brewery and tasting room with rotating selection of 16 house beers. Your pass includes a flight of 4 beers of your choice. Kid-friendly patio with lawn games.",
+                  "website": "https://example.com/malt"
+                },
+                {
+                  "slug": "farm-to-table",
+                  "title": "Farm to Table Bistro",
+                  "image": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80",
+                  "description": "Seasonal menu sourced from local farms. Your pass gets you a complimentary appetizer with any entrée. Reservations recommended for dinner.",
+                  "website": "https://example.com/farm"
+                },
+                {
+                  "slug": "coffee-roasters",
+                  "title": "Central Coffee Roasters",
+                  "image": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80",
+                  "description": "Award-winning coffee roaster and café. Pass includes a 12oz specialty drink of your choice. Bean tours available on weekends.",
+                  "website": "https://example.com/coffee"
+                },
+                {
+                  "slug": "gelato-stand",
+                  "title": "Nonna's Gelato",
+                  "image": "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&q=80",
+                  "description": "Authentic Italian gelato made fresh daily from a family recipe. Your pass includes one regular-size cup or cone with two flavors.",
+                  "website": "https://example.com/gelato"
+                }
+              ]
+            }
+          ]
         }
       }
     },

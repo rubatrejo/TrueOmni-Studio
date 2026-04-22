@@ -90,6 +90,11 @@ export default async function DetailPage({ params }: PageProps) {
     );
   }
 
+  // Passes — placeholder hasta fase 3.10 ola 3.
+  if (mod.kind === 'passes') {
+    notFound();
+  }
+
   // Listings
   const listing = mod.listings.find((l) => l.slug === slug);
   if (!listing) notFound();

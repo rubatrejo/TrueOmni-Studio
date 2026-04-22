@@ -312,13 +312,46 @@ export interface HomeMapModule {
   eventsWindowDays?: number;
 }
 
+/** Actividad incluida en un pass — display-only (title + image + desc + website). */
+export interface PassActivity {
+  slug: string;
+  title: string;
+  /** Path relativo o URL absoluta del thumbnail. */
+  image: string;
+  description: string;
+  /** Link externo que se abre al tap "View Website". */
+  website: string;
+}
+
+/** Pass individual — paquete de actividades regalable/comprable. */
+export interface PassItem {
+  slug: string;
+  title: string;
+  /** Cover del pass — path relativo a clients/{slug}/assets/ o URL absoluta. */
+  cover: string;
+  /** URL al pass en Bandwango. Codificado en el QR del share. */
+  bandwangoUrl: string;
+  /** Tagline corto opcional para la card y el hero del detail. */
+  tagline?: string;
+  activities: PassActivity[];
+}
+
+/** Módulo Passes — kind discriminator 'passes'. */
+export interface HomePassesModule {
+  kind: 'passes';
+  label: string;
+  heroImage: string;
+  passes: PassItem[];
+}
+
 /** Unión discriminada de los variants de módulo. */
 export type HomeModuleVariant =
   | HomeModule
   | HomeEventsModule
   | HomeSocialWallModule
   | HomeDigitalBrochureModule
-  | HomeMapModule;
+  | HomeMapModule
+  | HomePassesModule;
 
 /**
  * Publicidad declarativa por cliente (Fase 3.8). El kiosk renderiza ads

@@ -74,7 +74,7 @@ export function SurveyThankYou({
           <polyline
             className="survey-check-path"
             points="5 12 10 17 19 7"
-            stroke="hsl(var(--accent-foreground))"
+            stroke="hsl(var(--primary-foreground))"
             strokeWidth="3.2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -115,9 +115,9 @@ export function SurveyThankYou({
             className="h-full transition-all ease-linear"
             style={{
               width: `${progress}%`,
-              backgroundColor: 'hsl(var(--accent))',
+              backgroundColor: 'color-mix(in oklch, hsl(var(--primary)) 45%, black 55%)',
               transitionDuration: '1000ms',
-              boxShadow: '0 0 12px hsl(var(--accent) / 0.8)',
+              boxShadow: '0 0 12px rgba(0,0,0,0.55)',
             }}
           />
         </div>

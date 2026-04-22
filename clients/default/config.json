@@ -201,8 +201,8 @@
             "id": "interests",
             "type": "multi-choice",
             "prompt": "What interests you most?",
-            "subtitle": "Select all that apply — we will tailor recommendations to you.",
-            "options": ["Food & Drink", "Events", "History", "Nature", "Shopping"]
+            "subtitle": "Select all that apply. We will tailor recommendations to you.",
+            "options": ["Food & Drink", "Events", "History", "Nature"]
           },
           {
             "id": "comment",

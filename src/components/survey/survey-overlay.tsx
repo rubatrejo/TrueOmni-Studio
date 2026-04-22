@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { OnScreenKeyboard, type KeyboardKey } from '@/components/home/on-screen-keyboard';
 import type { SurveyConfig, SurveyQuestion } from '@/lib/config';
 import {
   buildResult,
@@ -30,11 +31,9 @@ interface Props {
 }
 
 /**
- * Root del survey. Card 768×1152 con layout:
- *   - header (X top-right)
- *   - title anclado arriba (H1 59px)
- *   - input area (centrado, flex-1)
- *   - footer 3-col: BACK · dots · NEXT
+ * Root del survey. Card 768×806 arriba/centro. Cuando la pregunta es `text`,
+ * el OnScreenKeyboard se monta FUERA del card, pegado al bottom del canvas
+ * (mismo patrón visual que SearchOverlay y SendToEmailModal).
  */
 export function SurveyOverlay({ config, client, textos, onClose }: Props) {
   const total = totalSteps(config);
@@ -43,12 +42,14 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
   const [contact, setContact] = useState<{ email?: string; phone?: string }>({});
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [shift, setShift] = useState(false);
 
   const isContactStep = config.contactCapture?.enabled === true && step === config.questions.length;
   const isLastStep = step === total - 1;
   const currentQuestion: SurveyQuestion | undefined = isContactStep
     ? undefined
     : config.questions[step];
+  const isTextStep = currentQuestion?.type === 'text';
 
   const handleCloseRequest = useCallback(() => {
     if (submitted) {
@@ -69,6 +70,11 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [handleCloseRequest]);
+
+  // Reset shift al cambiar de paso
+  useEffect(() => {
+    setShift(false);
+  }, [step]);
 
   const handleExitConfirmed = useCallback(() => {
     setShowExitConfirm(false);
@@ -91,6 +97,28 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
     setAnswers((prev) => ({ ...prev, [id]: value }));
   }, []);
 
+  const handleTextKey = useCallback(
+    (k: KeyboardKey) => {
+      if (!currentQuestion || currentQuestion.type !== 'text') return;
+      const maxLength = currentQuestion.maxLength ?? 500;
+      const cur = (answers[currentQuestion.id] as string | null) ?? '';
+      const append = (s: string) => setAnswer(currentQuestion.id, (cur + s).slice(0, maxLength));
+
+      if (k === 'BACKSPACE') return setAnswer(currentQuestion.id, cur.slice(0, -1));
+      if (k === 'SHIFT') return setShift((s) => !s);
+      if (k === 'SPACE') return append(' ');
+      if (k === 'ENTER') return append('\n');
+      if (k === 'AT') return append('@');
+      if (k === 'DOT_COM') return append('.com');
+      if (k === 'CLOSE' || k === 'SYMBOLS') return;
+      if (typeof k === 'string' && k.length === 1) {
+        append(k);
+        if (shift) setShift(false);
+      }
+    },
+    [answers, currentQuestion, setAnswer, shift],
+  );
+
   const nextDisabled = (() => {
     if (isContactStep) return false;
     if (!currentQuestion) return true;
@@ -100,14 +128,16 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
   const nextLabel = isLastStep ? textos.survey_send : textos.survey_next;
 
   return (
-    <div className="absolute inset-0 z-[70] flex items-center justify-center">
+    <div
+      className="absolute inset-0 z-[70] flex items-center justify-center"
+      style={{ paddingBottom: isTextStep ? '420px' : '0px' }}
+    >
       <div className="survey-backdrop-anim absolute inset-0">
         <SurveyBackdrop onTap={handleCloseRequest} ariaLabel={textos.survey_exit_confirm_title} />
       </div>
 
-      <div className="relative">
+      <div className="relative flex flex-col items-center">
         <SurveyCard>
-          {/* X close top-right */}
           <SurveyHeader
             onClose={handleCloseRequest}
             closeAriaLabel={textos.survey_exit_confirm_title}
@@ -116,7 +146,7 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
           {submitted ? (
             <div
               className="flex flex-1 flex-col items-center justify-center"
-              style={{ paddingLeft: '64px', paddingRight: '64px' }}
+              style={{ paddingLeft: '48px', paddingRight: '48px' }}
             >
               <SurveyThankYou
                 title={config.thankYou.title}
@@ -128,53 +158,47 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
             </div>
           ) : (
             <>
-              {/* HERO: título anclado arriba */}
               <div
                 className="flex flex-col items-center"
                 style={{
-                  paddingTop: '68px',
-                  paddingLeft: '48px',
-                  paddingRight: '48px',
-                  paddingBottom: '16px',
+                  paddingTop: '92px',
+                  paddingLeft: '56px',
+                  paddingRight: '56px',
+                  paddingBottom: '12px',
+                  gap: '14px',
                 }}
               >
-                {currentQuestion ? (
-                  <h1
-                    key={`title-${step}`}
-                    className="survey-step-anim text-center font-display font-bold"
+                <h1
+                  key={`title-${step}`}
+                  className="survey-step-anim text-center font-display font-bold"
+                  style={{
+                    fontSize: '38px',
+                    lineHeight: 1.1,
+                    letterSpacing: '-0.015em',
+                    maxWidth: '520px',
+                  }}
+                >
+                  {currentQuestion ? currentQuestion.prompt : 'Stay in touch'}
+                </h1>
+                {currentQuestion?.subtitle ? (
+                  <p
+                    key={`sub-${step}`}
+                    className="survey-step-anim text-center font-sans"
                     style={{
-                      fontSize: '44px',
-                      lineHeight: 1.08,
-                      letterSpacing: '-0.02em',
-                      maxWidth: '620px',
+                      fontSize: '16px',
+                      lineHeight: 1.45,
+                      opacity: 0.82,
+                      maxWidth: '540px',
                     }}
                   >
-                    {currentQuestion.prompt}
-                  </h1>
-                ) : (
-                  <h1
-                    key={`title-${step}`}
-                    className="survey-step-anim text-center font-display font-bold"
-                    style={{
-                      fontSize: '40px',
-                      lineHeight: 1.1,
-                      letterSpacing: '-0.015em',
-                      maxWidth: '620px',
-                    }}
-                  >
-                    Stay in touch
-                  </h1>
-                )}
+                    {currentQuestion.subtitle}
+                  </p>
+                ) : null}
               </div>
 
-              {/* INPUT area: flex-1, centrado */}
               <div
                 className="flex flex-1 flex-col items-center justify-center"
-                style={{
-                  paddingLeft: '48px',
-                  paddingRight: '48px',
-                  paddingBottom: '16px',
-                }}
+                style={{ paddingLeft: '48px', paddingRight: '48px', paddingBottom: '16px' }}
               >
                 <div
                   key={`input-${step}`}
@@ -201,13 +225,12 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
                 </div>
               </div>
 
-              {/* FOOTER: BACK · dots · NEXT */}
               <div
                 style={{
                   paddingLeft: '48px',
                   paddingRight: '48px',
-                  paddingBottom: '40px',
-                  paddingTop: '12px',
+                  paddingBottom: '36px',
+                  paddingTop: '8px',
                 }}
               >
                 <SurveyNavigation
@@ -223,6 +246,13 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
           )}
         </SurveyCard>
       </div>
+
+      {/* OnScreenKeyboard al bottom del canvas, fuera del card — sólo en text step */}
+      {isTextStep && !submitted ? (
+        <div className="absolute bottom-0 left-0 right-0 z-[71]">
+          <OnScreenKeyboard shift={shift} onKey={handleTextKey} />
+        </div>
+      ) : null}
 
       {showExitConfirm ? (
         <SurveyExitConfirm

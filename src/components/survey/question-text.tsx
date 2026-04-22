@@ -1,68 +1,30 @@
 'use client';
 
-import { useState } from 'react';
-
-import { OnScreenKeyboard, type KeyboardKey } from '@/components/home/on-screen-keyboard';
-
 interface Props {
   value: string | null;
-  onChange: (v: string) => void;
   maxLength?: number;
   counterTemplate: string;
   placeholder?: string;
 }
 
-const KEYBOARD_SCALE = 0.6;
-const KEYBOARD_NATIVE_W = 1080;
-const KEYBOARD_NATIVE_H = 398;
-const KEYBOARD_W = KEYBOARD_NATIVE_W * KEYBOARD_SCALE; // 648
-const KEYBOARD_H = KEYBOARD_NATIVE_H * KEYBOARD_SCALE; // ~239
-
 /**
- * Textarea display del mismo ancho que el OnScreenKeyboard escalado.
- * Counter 0/500 grande y prominente.
+ * Display-only del text question. El OnScreenKeyboard se monta FUERA del
+ * card, al bottom del canvas (mismo patrón que SearchOverlay / SendToEmailModal).
  */
 export function QuestionText({
   value,
-  onChange,
   maxLength = 500,
   counterTemplate,
   placeholder = 'Type here…',
 }: Props) {
-  const [shift, setShift] = useState(false);
   const current = value ?? '';
-
-  const append = (s: string) => {
-    onChange((current + s).slice(0, maxLength));
-  };
-
-  const handleKey = (k: KeyboardKey) => {
-    if (k === 'BACKSPACE') {
-      onChange(current.slice(0, -1));
-      return;
-    }
-    if (k === 'SHIFT') {
-      setShift((s) => !s);
-      return;
-    }
-    if (k === 'SPACE') return append(' ');
-    if (k === 'ENTER') return append('\n');
-    if (k === 'AT') return append('@');
-    if (k === 'DOT_COM') return append('.com');
-    if (k === 'CLOSE' || k === 'SYMBOLS') return;
-    if (typeof k === 'string' && k.length === 1) {
-      append(k);
-      if (shift) setShift(false);
-    }
-  };
-
   const counter = counterTemplate
     .replace('{count}', String(current.length))
     .replace('{max}', String(maxLength));
 
   return (
-    <div className="flex w-full flex-col items-center" style={{ gap: '16px' }}>
-      <div className="relative" style={{ width: `${KEYBOARD_W}px` }}>
+    <div className="mx-auto" style={{ width: '560px' }}>
+      <div className="relative">
         <div
           className="w-full rounded-2xl font-sans"
           style={{
@@ -92,25 +54,6 @@ export function QuestionText({
         >
           {counter}
         </span>
-      </div>
-      <div
-        style={{
-          width: `${KEYBOARD_W}px`,
-          height: `${KEYBOARD_H}px`,
-          position: 'relative',
-        }}
-      >
-        <div
-          style={{
-            transform: `scale(${KEYBOARD_SCALE})`,
-            transformOrigin: 'top left',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-          }}
-        >
-          <OnScreenKeyboard shift={shift} onKey={handleKey} />
-        </div>
       </div>
     </div>
   );

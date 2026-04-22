@@ -181,29 +181,34 @@
             "id": "nps",
             "type": "nps",
             "prompt": "How likely are you to recommend this kiosk?",
+            "subtitle": "Your honest rating helps us improve the experience for every visitor.",
             "labels": { "low": "Not at all likely", "high": "Extremely likely" }
           },
           {
             "id": "overall",
             "type": "rating",
-            "prompt": "Overall, how would you rate your experience?"
+            "prompt": "Overall, how would you rate your experience?",
+            "subtitle": "One tap is all it takes — from poor to excellent."
           },
           {
             "id": "purpose",
             "type": "single-choice",
             "prompt": "What brought you here today?",
+            "subtitle": "Understanding why people visit helps us serve you better.",
             "options": ["Tourism", "Business", "Local visit", "Other"]
           },
           {
             "id": "interests",
             "type": "multi-choice",
             "prompt": "What interests you most?",
+            "subtitle": "Select all that apply — we will tailor recommendations to you.",
             "options": ["Food & Drink", "Events", "History", "Nature", "Shopping"]
           },
           {
             "id": "comment",
             "type": "text",
             "prompt": "Any other feedback?",
+            "subtitle": "Share anything else on your mind — ideas, suggestions or praise.",
             "optional": true,
             "maxLength": 500
           }

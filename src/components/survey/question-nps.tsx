@@ -56,10 +56,10 @@ export function QuestionNps({ value, onChange, labels }: Props) {
         <div
           className="flex w-full items-center justify-between font-sans font-medium"
           style={{
-            fontSize: '13px',
-            opacity: 0.75,
+            fontSize: '17px',
+            opacity: 0.88,
             maxWidth: '620px',
-            letterSpacing: '0.02em',
+            letterSpacing: '0.01em',
           }}
         >
           <span>{labels.low}</span>

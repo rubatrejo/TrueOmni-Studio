@@ -55,7 +55,6 @@ export function SurveyQuestionView({ question, value, onChange, counterTemplate 
       return (
         <QuestionText
           value={typeof value === 'string' ? value : null}
-          onChange={(v) => onChange(v)}
           maxLength={question.maxLength ?? 500}
           counterTemplate={counterTemplate}
         />

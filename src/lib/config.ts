@@ -47,6 +47,8 @@ export type SurveyQuestion =
       id: string;
       type: 'nps';
       prompt: string;
+      /** Subtítulo opcional debajo del prompt (máx. 2 líneas). */
+      subtitle?: string;
       optional?: boolean;
       labels?: { low: string; high: string };
     }
@@ -54,6 +56,7 @@ export type SurveyQuestion =
       id: string;
       type: 'rating';
       prompt: string;
+      subtitle?: string;
       optional?: boolean;
       /** Número máximo de estrellas (default 5). */
       max?: 5;
@@ -62,6 +65,7 @@ export type SurveyQuestion =
       id: string;
       type: 'single-choice';
       prompt: string;
+      subtitle?: string;
       optional?: boolean;
       options: string[];
     }
@@ -69,6 +73,7 @@ export type SurveyQuestion =
       id: string;
       type: 'multi-choice';
       prompt: string;
+      subtitle?: string;
       optional?: boolean;
       options: string[];
     }
@@ -76,6 +81,7 @@ export type SurveyQuestion =
       id: string;
       type: 'text';
       prompt: string;
+      subtitle?: string;
       optional?: boolean;
       /** Caracteres máximos del textarea (default 500). */
       maxLength?: number;

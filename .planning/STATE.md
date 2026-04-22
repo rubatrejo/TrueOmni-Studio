@@ -6,24 +6,31 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Fases 3.7 (Map) y 3.8 (Ads) cerradas con pulido. Commit `8015777`.
+**Fase activa:** Fase 3.10 (Passes) cerrada en código. QA visual pendiente. Commit `731d3ee`.
 
-**Última fase cerrada:** Fase 3.8 — Advertisement module (popup + hero + bottom + auto-detect light/dark theme en la X).
+**Última fase cerrada:** Fase 3.10 — Passes module (listado · detail · share modal con QR · sent confirmation). Antes: Fase 3.9 Survey overlay V8.
 
-**Siguiente acción concreta:** Abrir Fase 4 (primer cliente real con branding + Lighthouse + handoff) o Itinerary Builder (aprovecha los buckets de favoritos de listings + events).
+**Siguiente acción concreta:** Verificación visual del módulo Passes con Playwright MCP (6 screenshots: listing · detail · share · sent · search · demo-cliente-a) + escribir `.planning/3-10-SUMMARY.md` + auditor white-label. Después: siguiente módulo del home (Tickets, Guestbook, Deals, Photo Booth, Trails, Itinerary Builder) o Fase 4 (primer cliente real).
 
-**Bloqueos:** ninguno. El `alwaysShowWelcome` del MapModule está hardcoded en `true` para QA — apagarlo antes de Fase 4 / producción (ver `[module]/page.tsx` rama `map`).
+**Bloqueos:** ninguno. `alwaysShowWelcome={true}` del MapModule sigue hardcoded para QA — apagarlo antes de Fase 4 / producción (`[module]/page.tsx` rama `map`).
 
 **TODO de QA pendiente:**
 
-- `alwaysShowWelcome={true}` en map es sólo para QA; pasar a false (o quitar prop) cuando Rubén apruebe el flow.
+- `alwaysShowWelcome={true}` en map.
+- Verificación visual Playwright del módulo Passes (saltada por context limit en la sesión de implementación).
+- Auditor white-label en `src/components/passes/` — el QR usa colores fijos `#0a1e3a` / `#ffffff` y el share-modal hereda los grises del send-modal-chrome ya existentes; documentar excepción si el auditor reporta.
 
 **TODO de i18n (aplazado a Fase 5 — validador zod + migración a config.textos):**
 
 - `src/app/(kiosk)/home/[module]/page.tsx:52` `"Coming soon"` (stub genérico).
 - `src/app/(kiosk)/home/[module]/page.tsx:59` `"Back to Home"` (link del stub).
-- `src/components/listings/send-to-phone-modal.tsx:90` `"USA (+1)"` — pendiente `config.client.country_code`.
+- `src/components/listings/send-to-phone-modal.tsx:90` `"USA (+1)"` — pendiente `config.client.country_code`. El módulo Passes hereda este TODO (textos.passes_share_country = "USA (+1)" igualmente fijo).
 - Strings del SharingRow del detail + toolbar del módulo de Listings ("WEBSITE", "RESERVE NOW", "SEND TO EMAIL/PHONE", "ADD TO FAVORITES", "FILTERS", "SORT BY", "CLOSE", "CANCEL", "SEND", "DESCRIPTION", "GET DIRECTIONS") vienen del SVG; se migran a `config.textos` cuando se internacionalice.
+- Activity-row del módulo Passes: el botón "View Website" usa `textos.passes_view_website` ✅ ya migrado.
+
+**Deps añadidas:** `qrcode.react@4.2` (Passes share modal — QR escaneable level H con logo TrueOmni centrado).
+
+**Tokens nuevos:** `--survey-success: 120 61% 50%` (lime `#32CD32` para checks de Survey thank-you y Passes sent-confirmation) — añadido a los 3 `tokens.css` (template, default, demo-cliente-a) en sesión 2026-04-22.
 
 **Decisiones globales vigentes:**
 
@@ -527,6 +534,52 @@ driving/walking, SEE 360 funcional, favorite toast).
 - **Commit único para las 2 fases** (`8015777`): precedente `2b7d557` agrupaba 3.4-3.6. Los archivos compartidos (config.ts, `[module]/page.tsx`) tienen cambios en ambas fases que no se pueden separar sin edit-por-hunk interactivo.
 
 **Fase:** 3.7 Map + 3.8 Ads cerradas. Lista para Fase 4.
+
+---
+
+### Sesión 2026-04-22 — Sweepstakes removal + Wayfinding tile + Fase 3.9 Survey overlay (V1→V8) + Fase 3.10 Passes module
+
+**Hecho:**
+
+- **Cleanup home grid**: removido tile Sweepstakes del config + asset; Wayfinding consolidado como tile del grid (no banner full-width). Resultado: 16 tiles en grid 2×8 perfecto, sin huecos.
+- **Fase 3.9 Survey overlay** completa con 8 iteraciones de pulido:
+  - V1: implementación inicial (5 question types: NPS · rating · single · multi · text + contact step opcional · thank-you con auto-close · confirm-exit · CustomEvent dispatch).
+  - V2 (cinematic): rediseño con skills Tier 1 cargados — backdrop blur 6px + card 960×1440 con gradient radial + glow + shadow 2xl + stagger entrance CSS + halo expand en thank-you check + question como H1 display 64px.
+  - V3-V6: ajustes de feedback iterativos — card 768×1152→768×806, dots al footer entre BACK/NEXT, "We value your feedback" eliminado, título arriba, NPS/rating/pills color azul oscuro (color-mix primary 45%+black 55%) en lugar de olive, subtítulos +20px medium, keyboard del text question movido fuera del card al bottom del canvas.
+  - V7: subtítulo de interests sin em dash, 4 opciones en vez de 5, thank-you check stroke blanco + bar azul oscuro.
+  - V8: thank-you círculo blanco + check verde lime `#32CD32` con nuevo token `--survey-success` añadido a los 3 tokens.css.
+  - Arquitectura final: SurveyHost a nivel KioskCanvas via `CustomEvent('kiosk:survey-open')` para z-index sobre AdsSlot.
+- **Fase 3.10 Passes module** brainstormeada + spec + plan atómico + ejecutada en una sesión:
+  - Brainstorming → spec en `docs/superpowers/specs/2026-04-22-passes-module-design.md` → plan atómico XML en `.planning/3-10-1-PLAN.md` (15 tasks en 4 olas).
+  - Ola 1: tipos `HomePassesModule`/`PassItem`/`PassActivity` + seed 3 passes×4 activities + 13 strings `passes_*` + `lib/passes.ts` (validación + dispatch v1) + `pnpm add qrcode.react@4.2`.
+  - Ola 2: `PassCard` 898×400 cover+overlay+title + `PassesGrid` vertical + `PassesToolbar` con search + `PassesModule` (compose) + rama `passes` en `[module]/page.tsx`.
+  - Olas 3+4 fundidos en un commit: `ActivityRow` + `PassDetail` overlay con CTA GET YOURS + `PassDetailWithShare` wrapper + `PassShareModal` (reusa SendModalChrome + NumericKeypad + TermsCheckbox + CancelSendButtons + QRCodeSVG con logo) + `PassSentConfirmation` (check lime) + `PassShareHost` orquestador via `CustomEvent('kiosk:pass-share-open')` + rama `passes` en `[slug]/page.tsx`.
+- 13 commits totales en la sesión (cleanup + 8× survey iteraciones + 4× passes implementación + spec/plan).
+
+**Verificado:**
+
+- `pnpm check` (typecheck + lint + format) limpio en cada checkpoint del survey y al cierre del passes.
+- Survey verificado visualmente con Playwright MCP en cada iteración V1→V8 (screenshots en `.planning/verifications/3-9-survey-*.png`).
+- Passes: code-complete pero **sin verificación visual con Playwright** (saltada por context limit a 84%). Pendiente para próxima sesión.
+
+**Pendiente / siguiente:**
+
+- **Verificación visual Passes** con Playwright MCP (6 screenshots: listing · detail · share · sent · search · branding demo-cliente-a).
+- **`.planning/3-10-SUMMARY.md`** escribir con cierre formal de fase 3.10.
+- **Auditor white-label** sobre `src/components/passes/` — el QR usa `#0a1e3a` y `#ffffff` fijos, share-modal hereda grises del send-modal-chrome ya existentes; documentar excepciones si reporta hallazgos.
+- Siguiente módulo del home (Tickets, Guestbook, Deals, Photo Booth, Trails, Itinerary Builder) o Fase 4 (primer cliente real con branding + Lighthouse + handoff).
+
+**Decisiones:**
+
+- **Color-mix con black 55%** (CSS color-mix in oklch) usado consistentemente para "azul oscuro" del primary (NPS selected, rating filled, pills selected, progress bar del thank-you). Evita añadir token `--primary-deep` y respeta white-label.
+- **Token `--survey-success: 120 61% 50%`** (lime `#32CD32`) añadido a los 3 tokens.css. Reusado en `PassSentConfirmation` para el check verde — consistencia entre módulos.
+- **CustomEvent para orquestación cross-component** en Survey y Passes: `kiosk:survey-open` y `kiosk:pass-share-open` permiten que el host del overlay viva a nivel KioskCanvas (sibling de AdsSlot) sin pasar funciones desde Server Components al cliente.
+- **No reuso de `ListingDetail` para Passes**: estructura distinta (CTA sticky en hero, sin map/directions, lista de activities en vez de description). Componente nuevo `PassDetail` específico — más mantenible.
+- **QR con `qrcode.react@4.2`** (named export `QRCodeSVG`, no default `QRCode` como decía el plan inicial — ajuste durante ejecución). Level H + logo `imageSettings.src='/assets/logo.svg'` con `excavate: true`.
+- **Phone input del Passes con tap-to-backspace** (el NumericKeypad no emite BACKSPACE). Affordance típica de kiosko táctil.
+- **PassShareModal y PassSentConfirmation usan colores fijos** del chrome del send-modal-chrome (`#9a9a9a`, `#d0d0d0`) — consistente con la excepción ya aceptada en send-to-phone-modal.
+
+**Fase:** 3.9 Survey + 3.10 Passes cerradas (Passes con QA visual pendiente).
 
 ---
 

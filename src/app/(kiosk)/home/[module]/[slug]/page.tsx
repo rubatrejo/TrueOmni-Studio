@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 
+import { AdsSlot } from '@/components/ads/ads-slot';
 import { BrochureReader } from '@/components/digital-brochure/brochure-reader';
 import { EventsModule } from '@/components/events/events-module';
 import { HomeHeader } from '@/components/home/header';
@@ -7,6 +8,7 @@ import { KioskCanvas } from '@/components/kiosk-canvas';
 import { ListingDetail } from '@/components/listings/listing-detail';
 import type { EventMeta, SecondaryCta } from '@/components/listings/listing-detail';
 import { ListingsModule } from '@/components/listings/listings-module';
+import { getAdsFromConfig } from '@/lib/ads';
 import type { EventItem, Listing } from '@/lib/config';
 import { getConfig } from '@/lib/config';
 import { formatEventDateLong, formatTimeRange } from '@/lib/events-date';
@@ -28,6 +30,7 @@ export default async function DetailPage({ params }: PageProps) {
   if (!mod) notFound();
 
   const mapboxToken = config.integraciones?.mapbox_token;
+  const ads = getAdsFromConfig(config);
 
   if (mod.kind === 'events') {
     const event = mod.events.find((e) => e.slug === slug);
@@ -63,6 +66,7 @@ export default async function DetailPage({ params }: PageProps) {
           secondaryCta={secondaryCta}
           favoritesKind="event"
         />
+        <AdsSlot ads={ads} />
       </KioskCanvas>
     );
   }
@@ -71,6 +75,9 @@ export default async function DetailPage({ params }: PageProps) {
   // del módulo. Cualquier /home/social-wall/* es 404.
   if (mod.kind === 'social-wall') notFound();
 
+  // Map no tiene ruta [slug] propia; cualquier detail navega a su módulo origen.
+  if (mod.kind === 'map') notFound();
+
   // Digital Brochure — reader fullscreen
   if (mod.kind === 'digital-brochure') {
     const brochure = mod.brochures.find((b) => b.slug === slug);
@@ -78,6 +85,7 @@ export default async function DetailPage({ params }: PageProps) {
     return (
       <KioskCanvas>
         <BrochureReader brochure={brochure} moduleKey={module} />
+        <AdsSlot ads={ads} />
       </KioskCanvas>
     );
   }
@@ -100,6 +108,7 @@ export default async function DetailPage({ params }: PageProps) {
         mapboxToken={mapboxToken}
         clientCoords={config.client.coords}
       />
+      <AdsSlot ads={ads} />
     </KioskCanvas>
   );
 }

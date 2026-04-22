@@ -1,13 +1,18 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { AdsSlot } from '@/components/ads/ads-slot';
 import { BrochuresModule } from '@/components/digital-brochure/brochures-module';
 import { EventsModule } from '@/components/events/events-module';
 import { HomeHeader } from '@/components/home/header';
 import { KioskCanvas } from '@/components/kiosk-canvas';
 import { ListingsModule } from '@/components/listings/listings-module';
+import { MapModule } from '@/components/map/map-module';
 import { SocialWallModule } from '@/components/social-wall/social-wall-module';
+import { getAdsFromConfig } from '@/lib/ads';
 import { getConfig } from '@/lib/config';
+import { getMapItems } from '@/lib/map-aggregator';
+import { buildMapDetailLookup } from '@/lib/map-detail-lookup';
 
 interface PageProps {
   params: Promise<{ module: string }>;
@@ -26,6 +31,7 @@ export default async function ModulePage({ params }: PageProps) {
   const config = await getConfig();
   const home = config.features?.home;
   if (!home) notFound();
+  const ads = getAdsFromConfig(config);
 
   // Módulos: detectamos `kind`. Social Wall / Events / Listings.
   const mod = home.modules?.[module];
@@ -37,6 +43,7 @@ export default async function ModulePage({ params }: PageProps) {
           module={mod}
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
         />
+        <AdsSlot ads={ads} />
       </KioskCanvas>
     );
   }
@@ -48,6 +55,7 @@ export default async function ModulePage({ params }: PageProps) {
           module={mod}
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
         />
+        <AdsSlot ads={ads} />
       </KioskCanvas>
     );
   }
@@ -61,6 +69,55 @@ export default async function ModulePage({ params }: PageProps) {
           clientTimezone={config.client.timezone}
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
         />
+        <AdsSlot ads={ads} />
+      </KioskCanvas>
+    );
+  }
+  if (mod?.kind === 'map') {
+    const t = config.textos ?? {};
+    const openUntilPrefix = t.map_open_until_prefix ?? 'Open until';
+    const items = getMapItems(config, mod, { openUntilPrefix });
+    const detailLookup = buildMapDetailLookup(config, mod, items);
+    const clientName = config.client.nombre;
+    const applyTemplate = (s: string) => s.replace(/\{client\}/g, clientName);
+    const exploreTitle = applyTemplate(t.map_explore_title ?? `Explore {client} Map`);
+    const resolvedWelcomeCopy = mod.welcomeCopy
+      ? {
+          ...mod.welcomeCopy,
+          title: applyTemplate(mod.welcomeCopy.title),
+          body: applyTemplate(mod.welcomeCopy.body),
+          subtitle: mod.welcomeCopy.subtitle ? applyTemplate(mod.welcomeCopy.subtitle) : undefined,
+          cta: applyTemplate(mod.welcomeCopy.cta),
+        }
+      : undefined;
+    const resolvedMod = resolvedWelcomeCopy ? { ...mod, welcomeCopy: resolvedWelcomeCopy } : mod;
+    return (
+      <KioskCanvas>
+        <MapModule
+          moduleKey={module}
+          module={resolvedMod}
+          clientCoords={config.client.coords}
+          mapboxToken={config.integraciones?.mapbox_token}
+          items={items}
+          detailLookup={detailLookup}
+          alwaysShowWelcome
+          textos={{
+            seeMoreInfo: t.map_see_more_info ?? 'SEE MORE INFO',
+            addToItinerary: t.map_add_to_itinerary ?? 'ADD TO ITINERARY',
+            addedToItinerary: t.map_added_to_itinerary ?? 'ADDED TO ITINERARY',
+            miAwaySuffix: t.map_mi_away_suffix ?? 'mi away',
+            minWalkingSuffix: t.map_min_walking_suffix ?? 'min',
+            filtersTitle: t.map_filters_title ?? 'FILTERS',
+            clearAll: t.map_clear_all ?? 'CLEAR ALL',
+            apply: t.map_apply ?? 'APPLY',
+            featuresLabel: t.map_features_label,
+            subcategoriesLabel: t.map_subcategories_label,
+            selectAll: t.map_select_all ?? 'Select All',
+            exploreTitle,
+          }}
+          header={<HomeHeader heroImage={null} showLanguage={false} height={620} />}
+        />
+        <AdsSlot ads={ads} />
       </KioskCanvas>
     );
   }
@@ -73,6 +130,7 @@ export default async function ModulePage({ params }: PageProps) {
           clientCoords={config.client.coords}
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
         />
+        <AdsSlot ads={ads} />
       </KioskCanvas>
     );
   }

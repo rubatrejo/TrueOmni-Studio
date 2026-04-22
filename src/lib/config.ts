@@ -198,12 +198,83 @@ export interface HomeDigitalBrochureModule {
   brochures: BrochureItem[];
 }
 
+/** Keys lógicas del chip de categoría del Map. */
+export type MapSource = 'restaurants' | 'things-to-do' | 'stay' | 'events';
+
+/** Módulo Map: agrega listings + events de los otros módulos del cliente. */
+export interface HomeMapModule {
+  kind: 'map';
+  label: string;
+  heroImage?: string;
+  /** Copy del welcome popup (overlay inicial). Si se omite no se muestra. */
+  welcomeCopy?: {
+    title: string;
+    subtitle?: string;
+    body: string;
+    cta: string;
+  };
+  /** Labels de los chips de categoría. Si se omiten se usa el default en inglés. */
+  chips?: {
+    play?: string;
+    eat?: string;
+    stay?: string;
+    events?: string;
+  };
+  /** Overrides de keys de módulos origen cuando un cliente no usa las keys estándar. */
+  sources?: {
+    play?: string;
+    eat?: string;
+    stay?: string;
+    events?: string;
+  };
+  defaultZoom?: number;
+  defaultCenter?: { lat: number; lng: number };
+  /** Ventana de eventos a mostrar (default 7 días desde hoy). */
+  eventsWindowDays?: number;
+}
+
 /** Unión discriminada de los variants de módulo. */
 export type HomeModuleVariant =
   | HomeModule
   | HomeEventsModule
   | HomeSocialWallModule
-  | HomeDigitalBrochureModule;
+  | HomeDigitalBrochureModule
+  | HomeMapModule;
+
+/**
+ * Publicidad declarativa por cliente (Fase 3.8). El kiosk renderiza ads
+ * según la ruta actual; el cliente declara el catálogo y asigna rutas.
+ *
+ * 3 tipos:
+ *   - `popup`  → modal bloqueante centrado (ej. flyer con QR).
+ *   - `hero`   → cubre los 620px del hero header (ej. ad landscape).
+ *   - `bottom` → strip horizontal pegado al bottom del canvas.
+ */
+export type AdKind = 'popup' | 'hero' | 'bottom';
+
+/** Tono del fondo de la imagen del ad — determina el color del botón X.
+ *  `dark` (default) → X blanca con sombra oscura.
+ *  `light`          → X negra con sombra clara. */
+export type AdTheme = 'dark' | 'light';
+
+export interface Ad {
+  id: string;
+  kind: AdKind;
+  /** Path/URL de la imagen (el QR ya viene dentro del asset, sin X). */
+  image: string;
+  alt?: string;
+  /** Rutas donde aplica. Paths exactos (`/home/restaurants`) o wildcards
+   *  con `/*` al final (`/home/restaurants/*`). Sin rutas = nunca se muestra. */
+  routes: string[];
+  /** Si false oculta el ad sin borrarlo. Default true. */
+  enabled?: boolean;
+  /** Tono del fondo para decidir el color del botón X. Default `dark`. */
+  theme?: AdTheme;
+}
+
+export interface AdvertisementsConfig {
+  ads: Ad[];
+}
 
 /**
  * Configuración tipada de un cliente del kiosk.
@@ -250,6 +321,8 @@ export interface KioskConfig {
       /** Módulos configurables (Listings o Events). Discriminados por `kind`. */
       modules?: Record<string, HomeModuleVariant>;
     };
+    /** Catálogo de ads declarativo (Fase 3.8). */
+    advertisements?: AdvertisementsConfig;
   };
   integraciones?: {
     api_base_url?: string;

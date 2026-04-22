@@ -49,6 +49,7 @@ export function ListingDetail({
   eventMeta,
   secondaryCta,
   favoritesKind = 'listing',
+  onClose,
 }: {
   moduleKey: string;
   listing: Listing;
@@ -61,6 +62,8 @@ export function ListingDetail({
   secondaryCta?: SecondaryCta;
   /** Discriminador del bucket de favoritos. `'event'` usa `useEventFavorites`. */
   favoritesKind?: 'listing' | 'event';
+  /** Si se provee, el botón X usa esta callback en lugar de navegar al módulo. */
+  onClose?: () => void;
 }) {
   const [emailOpen, setEmailOpen] = useState(false);
   const [phoneOpen, setPhoneOpen] = useState(false);
@@ -104,7 +107,7 @@ export function ListingDetail({
           boxShadow: '0 12px 24px rgba(0,0,0,0.25)',
         }}
       >
-        <DetailHeader moduleKey={moduleKey} listing={listing} />
+        <DetailHeader moduleKey={moduleKey} listing={listing} onClose={onClose} />
         <HeroImage listing={listing} onSee360={() => setThreshold360Open(true)} />
         <ActionRow listing={listing} eventMeta={eventMeta} secondaryCta={secondaryCta} />
         <SharingRow
@@ -175,7 +178,15 @@ export function ListingDetail({
 /* -------------------------------------------------------------------------- */
 /* Header azul con SUBCATEGORY + TITLE + X                                    */
 /* -------------------------------------------------------------------------- */
-function DetailHeader({ moduleKey, listing }: { moduleKey: string; listing: Listing }) {
+function DetailHeader({
+  moduleKey,
+  listing,
+  onClose,
+}: {
+  moduleKey: string;
+  listing: Listing;
+  onClose?: () => void;
+}) {
   return (
     <>
       {/* Fondo azul 899×312 */}
@@ -219,23 +230,35 @@ function DetailHeader({ moduleKey, listing }: { moduleKey: string; listing: List
         {listing.title}
       </span>
 
-      {/* Close X button — reemplaza Font Awesome `` por SVG simple blanco */}
-      <Link
-        href={`/home/${moduleKey}`}
-        aria-label="Cerrar detalle"
-        className="absolute flex items-center justify-center rounded-full text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
-        style={{
-          left: '804px',
-          top: '31px',
-          width: '70px',
-          height: '70px',
-        }}
-      >
-        <svg width="42" height="42" viewBox="0 0 24 24" aria-hidden>
-          <circle cx="12" cy="12" r="11" fill="none" stroke="#ffffff" strokeWidth="1.5" />
-          <path d="M8 8l8 8M16 8l-8 8" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      </Link>
+      {/* Close X button — reemplaza Font Awesome `` por SVG simple blanco.
+          Si se provee `onClose`, se usa esa callback (para overlays in-place);
+          si no, navega al módulo origen. */}
+      {onClose ? (
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Cerrar detalle"
+          className="absolute flex items-center justify-center rounded-full text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+          style={{ left: '804px', top: '31px', width: '70px', height: '70px' }}
+        >
+          <svg width="42" height="42" viewBox="0 0 24 24" aria-hidden>
+            <circle cx="12" cy="12" r="11" fill="none" stroke="#ffffff" strokeWidth="1.5" />
+            <path d="M8 8l8 8M16 8l-8 8" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </button>
+      ) : (
+        <Link
+          href={`/home/${moduleKey}`}
+          aria-label="Cerrar detalle"
+          className="absolute flex items-center justify-center rounded-full text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+          style={{ left: '804px', top: '31px', width: '70px', height: '70px' }}
+        >
+          <svg width="42" height="42" viewBox="0 0 24 24" aria-hidden>
+            <circle cx="12" cy="12" r="11" fill="none" stroke="#ffffff" strokeWidth="1.5" />
+            <path d="M8 8l8 8M16 8l-8 8" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </Link>
+      )}
     </>
   );
 }

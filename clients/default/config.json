@@ -2,7 +2,7 @@
   "$schema": "./config.schema.json",
   "client": {
     "slug": "default",
-    "nombre": "Kiosk por defecto",
+    "nombre": "Arizona",
     "locale": "en-US",
     "timezone": "America/Phoenix",
     "coords": {
@@ -24,7 +24,24 @@
     "cta_primaria": "Empezar",
     "cta_secundaria": "Más información",
     "pie_legal": "© 2026 Kiosk Portrait · Todos los derechos reservados",
-    "label_cliente_activo": "Cliente activo:"
+    "label_cliente_activo": "Cliente activo:",
+    "map_filters_title": "FILTERS",
+    "map_clear_all": "CLEAR ALL",
+    "map_apply": "APPLY",
+    "map_see_more_info": "SEE MORE INFO",
+    "map_add_to_itinerary": "ADD TO ITINERARY",
+    "map_added_to_itinerary": "ADDED TO ITINERARY",
+    "map_mi_away_suffix": "mi away",
+    "map_min_walking_suffix": "min",
+    "map_open_until_prefix": "Open until",
+    "map_welcome_title": "Welcome to Omni Maps",
+    "map_welcome_subtitle": "powered by Google",
+    "map_welcome_body": "Easily select by category, preference or location. Click on Get Directions to easily find walking or driving directions to 100's of places around you.",
+    "map_welcome_cta": "OK",
+    "map_chip_play": "Play",
+    "map_chip_eat": "Eat",
+    "map_chip_stay": "Stay",
+    "map_chip_events": "Events"
   },
   "navegacion": {
     "home": "/",
@@ -4711,7 +4728,10 @@
               "popularity": 82,
               "address": "100 E Washington St, Phoenix, AZ",
               "phone": "(602) 555-0121",
-              "coords": { "lat": 33.4484, "lng": -112.074 },
+              "coords": {
+                "lat": 33.4484,
+                "lng": -112.074
+              },
               "website": "https://example.com/spring-half-marathon",
               "ticketsUrl": "https://example.com/spring-half-marathon/register",
               "description": "Join runners from across the region for our annual spring race through Downtown Phoenix. Certified 13.1 course, start/finish at CityScape.\n\nPacer groups, hydration stations every 2 miles, and a post-race festival with music and food.",
@@ -4726,7 +4746,11 @@
                   "distance": "0.7 mi",
                   "instruction": "Turn right onto Central Ave"
                 },
-                { "icon": "arrive", "distance": "300 ft", "instruction": "Arrive at start line" }
+                {
+                  "icon": "arrive",
+                  "distance": "300 ft",
+                  "instruction": "Arrive at start line"
+                }
               ]
             },
             {
@@ -4744,12 +4768,19 @@
               "popularity": 70,
               "address": "100 N 3rd St, Phoenix, AZ",
               "phone": "(602) 555-0142",
-              "coords": { "lat": 33.4481, "lng": -112.0731 },
+              "coords": {
+                "lat": 33.4481,
+                "lng": -112.0731
+              },
               "website": "https://example.com/design-conf",
               "ticketsUrl": "https://example.com/design-conf/tickets",
               "description": "A full day of talks, workshops and networking for product designers, engineers and researchers. Keynotes from industry leaders, hands-on sessions, and evening mixer.",
               "directions": [
-                { "icon": "right", "distance": "0.4 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "right",
+                  "distance": "0.4 mi",
+                  "instruction": "Head north on 3rd St"
+                },
                 {
                   "icon": "arrive",
                   "distance": "200 ft",
@@ -4771,7 +4802,10 @@
               "popularity": 88,
               "address": "2 E Jefferson St, Phoenix, AZ",
               "phone": "(602) 555-0159",
-              "coords": { "lat": 33.4472, "lng": -112.0739 },
+              "coords": {
+                "lat": 33.4472,
+                "lng": -112.0739
+              },
               "website": "https://example.com/food-truck-rally",
               "description": "Over 40 local food trucks gather for a night of tacos, barbecue, ice cream, and craft soda. Live DJ, family zone, and free admission.",
               "directions": [
@@ -4802,7 +4836,10 @@
               "popularity": 64,
               "address": "1201 N Galvin Pkwy, Phoenix, AZ",
               "phone": "(602) 555-0163",
-              "coords": { "lat": 33.455, "lng": -112.071 },
+              "coords": {
+                "lat": 33.455,
+                "lng": -112.071
+              },
               "website": "https://example.com/brunch-fest",
               "ticketsUrl": "https://example.com/brunch-fest/tickets",
               "description": "All-you-can-eat brunch from top Valley chefs, live acoustic sets, and mimosa flights overlooking the lake.",
@@ -4834,7 +4871,10 @@
               "popularity": 71,
               "address": "1201 N Galvin Pkwy, Phoenix, AZ",
               "phone": "(602) 555-0184",
-              "coords": { "lat": 33.456, "lng": -112.069 },
+              "coords": {
+                "lat": 33.456,
+                "lng": -112.069
+              },
               "website": "https://example.com/jazz-stars",
               "ticketsUrl": "https://example.com/jazz-stars/tickets",
               "description": "An intimate open-air jazz night featuring local quartets and a guest trumpeter under the spring sky.",
@@ -4844,7 +4884,11 @@
                   "distance": "1.3 mi",
                   "instruction": "Head east on McDowell Rd"
                 },
-                { "icon": "arrive", "distance": "150 ft", "instruction": "Arrive at Ramada B" }
+                {
+                  "icon": "arrive",
+                  "distance": "150 ft",
+                  "instruction": "Arrive at Ramada B"
+                }
               ]
             },
             {
@@ -4862,12 +4906,19 @@
               "popularity": 66,
               "address": "100 N 3rd St, Phoenix, AZ",
               "phone": "(602) 555-0198",
-              "coords": { "lat": 33.4481, "lng": -112.0731 },
+              "coords": {
+                "lat": 33.4481,
+                "lng": -112.0731
+              },
               "website": "https://example.com/phx-art-fair",
               "ticketsUrl": "https://example.com/phx-art-fair/tickets",
               "description": "Over 120 artists exhibit paintings, sculpture, and mixed-media works. Kids corner, live demonstrations, and artist talks throughout the day.",
               "directions": [
-                { "icon": "right", "distance": "0.4 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "right",
+                  "distance": "0.4 mi",
+                  "instruction": "Head north on 3rd St"
+                },
                 {
                   "icon": "arrive",
                   "distance": "200 ft",
@@ -4890,7 +4941,10 @@
               "popularity": 92,
               "address": "201 E Washington St, Phoenix, AZ",
               "phone": "(602) 555-0211",
-              "coords": { "lat": 33.4489, "lng": -112.0716 },
+              "coords": {
+                "lat": 33.4489,
+                "lng": -112.0716
+              },
               "website": "https://example.com/spring-music",
               "ticketsUrl": "https://example.com/spring-music/tickets",
               "description": "Three stages, 18 bands, food and drinks. Headliners announced on the website — early-bird tickets still available.",
@@ -4922,7 +4976,10 @@
               "popularity": 95,
               "address": "201 E Jefferson St, Phoenix, AZ",
               "phone": "(602) 555-0222",
-              "coords": { "lat": 33.4457, "lng": -112.0712 },
+              "coords": {
+                "lat": 33.4457,
+                "lng": -112.0712
+              },
               "website": "https://example.com/suns-warriors",
               "ticketsUrl": "https://example.com/suns-warriors/tickets",
               "description": "NBA regular-season matchup. Pregame concert at 18:30, doors open at 18:00.",
@@ -4953,7 +5010,10 @@
               "popularity": 58,
               "address": "721 N Central Ave, Phoenix, AZ",
               "phone": "(602) 555-0234",
-              "coords": { "lat": 33.4567, "lng": -112.0739 },
+              "coords": {
+                "lat": 33.4567,
+                "lng": -112.0739
+              },
               "website": "https://example.com/phx-market",
               "description": "Weekly producer market with fresh produce, artisan breads, coffee, and street food. Free entry, pet-friendly.",
               "directions": [
@@ -4962,7 +5022,11 @@
                   "distance": "0.7 mi",
                   "instruction": "Head north on Central Ave"
                 },
-                { "icon": "arrive", "distance": "100 ft", "instruction": "Arrive at Roosevelt Row" }
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at Roosevelt Row"
+                }
               ]
             },
             {
@@ -4980,7 +5044,10 @@
               "popularity": 48,
               "address": "1400 N Central Ave, Phoenix, AZ",
               "phone": "(602) 555-0241",
-              "coords": { "lat": 33.4603, "lng": -112.0739 },
+              "coords": {
+                "lat": 33.4603,
+                "lng": -112.0739
+              },
               "website": "https://example.com/indie-night",
               "ticketsUrl": "https://example.com/indie-night/tickets",
               "description": "A curated selection of short films from emerging directors, followed by a Q&A panel.",
@@ -4990,7 +5057,11 @@
                   "distance": "0.9 mi",
                   "instruction": "Head north on Central Ave"
                 },
-                { "icon": "arrive", "distance": "100 ft", "instruction": "Arrive at FilmBar" }
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at FilmBar"
+                }
               ]
             },
             {
@@ -5008,13 +5079,24 @@
               "popularity": 74,
               "address": "615 N 3rd Ave, Phoenix, AZ",
               "phone": "(602) 555-0257",
-              "coords": { "lat": 33.4539, "lng": -112.0769 },
+              "coords": {
+                "lat": 33.4539,
+                "lng": -112.0769
+              },
               "website": "https://example.com/comedy-night",
               "ticketsUrl": "https://example.com/comedy-night/tickets",
               "description": "Stand-up showcase featuring three headliners on tour, hosted by local comedian Diana Cano.",
               "directions": [
-                { "icon": "left", "distance": "0.6 mi", "instruction": "Head west on McDowell Rd" },
-                { "icon": "arrive", "distance": "100 ft", "instruction": "Arrive at Rebel Lounge" }
+                {
+                  "icon": "left",
+                  "distance": "0.6 mi",
+                  "instruction": "Head west on McDowell Rd"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at Rebel Lounge"
+                }
               ]
             },
             {
@@ -5032,12 +5114,19 @@
               "popularity": 61,
               "address": "100 N 3rd St, Phoenix, AZ",
               "phone": "(602) 555-0266",
-              "coords": { "lat": 33.4481, "lng": -112.0731 },
+              "coords": {
+                "lat": 33.4481,
+                "lng": -112.0731
+              },
               "website": "https://example.com/kids-expo",
               "ticketsUrl": "https://example.com/kids-expo/tickets",
               "description": "Hands-on science activities, robotics demos, planetarium shows and a kids' meet-the-scientist panel.",
               "directions": [
-                { "icon": "right", "distance": "0.4 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "right",
+                  "distance": "0.4 mi",
+                  "instruction": "Head north on 3rd St"
+                },
                 {
                   "icon": "arrive",
                   "distance": "200 ft",
@@ -5060,7 +5149,10 @@
               "popularity": 80,
               "address": "1 Cardinals Dr, Glendale, AZ",
               "phone": "(623) 555-0270",
-              "coords": { "lat": 33.5276, "lng": -112.2626 },
+              "coords": {
+                "lat": 33.5276,
+                "lng": -112.2626
+              },
               "website": "https://example.com/friday-finals",
               "ticketsUrl": "https://example.com/friday-finals/tickets",
               "description": "High school football finals with live brass band, fireworks and post-game autographs.",
@@ -5092,12 +5184,19 @@
               "popularity": 77,
               "address": "100 N 3rd St, Phoenix, AZ",
               "phone": "(602) 555-0281",
-              "coords": { "lat": 33.4481, "lng": -112.0731 },
+              "coords": {
+                "lat": 33.4481,
+                "lng": -112.0731
+              },
               "website": "https://example.com/tech-summit",
               "ticketsUrl": "https://example.com/tech-summit/tickets",
               "description": "The region's biggest technology gathering. Keynotes on AI, cloud, and security. Startup expo floor and investor matchmaking.",
               "directions": [
-                { "icon": "right", "distance": "0.4 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "right",
+                  "distance": "0.4 mi",
+                  "instruction": "Head north on 3rd St"
+                },
                 {
                   "icon": "arrive",
                   "distance": "200 ft",
@@ -5119,11 +5218,18 @@
               "popularity": 86,
               "address": "80 N Arizona Pl, Chandler, AZ",
               "phone": "(480) 555-0294",
-              "coords": { "lat": 33.4286, "lng": -111.939 },
+              "coords": {
+                "lat": 33.4286,
+                "lng": -111.939
+              },
               "website": "https://example.com/waterfront-concert",
               "description": "Live music on the waterfront. Bring a blanket and enjoy the sunset over the lake.",
               "directions": [
-                { "icon": "left", "distance": "11 mi", "instruction": "Head east on US-60 E" },
+                {
+                  "icon": "left",
+                  "distance": "11 mi",
+                  "instruction": "Head east on US-60 E"
+                },
                 {
                   "icon": "arrive",
                   "distance": "200 ft",
@@ -5145,7 +5251,10 @@
               "popularity": 45,
               "address": "415 E Roosevelt St, Phoenix, AZ",
               "phone": "(602) 555-0307",
-              "coords": { "lat": 33.459, "lng": -112.0712 },
+              "coords": {
+                "lat": 33.459,
+                "lng": -112.0712
+              },
               "website": "https://example.com/open-mic",
               "description": "A welcoming stage for new comics, musicians and poets. Sign-ups open at 19:30.",
               "directions": [
@@ -5154,7 +5263,11 @@
                   "distance": "1.0 mi",
                   "instruction": "Head north on Central Ave"
                 },
-                { "icon": "arrive", "distance": "100 ft", "instruction": "Arrive at The Lost Leaf" }
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at The Lost Leaf"
+                }
               ]
             },
             {
@@ -5172,13 +5285,24 @@
               "popularity": 72,
               "address": "75 N 2nd St, Phoenix, AZ",
               "phone": "(602) 555-0318",
-              "coords": { "lat": 33.4503, "lng": -112.074 },
+              "coords": {
+                "lat": 33.4503,
+                "lng": -112.074
+              },
               "website": "https://example.com/symphony",
               "ticketsUrl": "https://example.com/symphony/tickets",
               "description": "The Phoenix Symphony performs Dvořák's New World Symphony and Rachmaninoff's 2nd Piano Concerto.",
               "directions": [
-                { "icon": "left", "distance": "0.3 mi", "instruction": "Head south on 2nd St" },
-                { "icon": "arrive", "distance": "100 ft", "instruction": "Arrive at Symphony Hall" }
+                {
+                  "icon": "left",
+                  "distance": "0.3 mi",
+                  "instruction": "Head south on 2nd St"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at Symphony Hall"
+                }
               ]
             },
             {
@@ -5196,12 +5320,19 @@
               "popularity": 69,
               "address": "80 N Arizona Pl, Chandler, AZ",
               "phone": "(480) 555-0329",
-              "coords": { "lat": 33.4286, "lng": -111.939 },
+              "coords": {
+                "lat": 33.4286,
+                "lng": -111.939
+              },
               "website": "https://example.com/tacos-tequila",
               "ticketsUrl": "https://example.com/tacos-tequila/tickets",
               "description": "40+ tacos from regional chefs, 25+ tequilas to sample, live mariachi and lucha-libre exhibition.",
               "directions": [
-                { "icon": "left", "distance": "11 mi", "instruction": "Head east on US-60 E" },
+                {
+                  "icon": "left",
+                  "distance": "11 mi",
+                  "instruction": "Head east on US-60 E"
+                },
                 {
                   "icon": "arrive",
                   "distance": "200 ft",
@@ -5223,7 +5354,10 @@
               "popularity": 67,
               "address": "50 E Adams St, Phoenix, AZ",
               "phone": "(602) 555-0336",
-              "coords": { "lat": 33.449, "lng": -112.074 },
+              "coords": {
+                "lat": 33.449,
+                "lng": -112.074
+              },
               "website": "https://example.com/mayday",
               "description": "Annual parade with floats from local schools, dance troupes, and community associations. Stretches from City Hall to Heritage Square.",
               "directions": [
@@ -5254,12 +5388,19 @@
               "popularity": 53,
               "address": "100 N 3rd St, Phoenix, AZ",
               "phone": "(602) 555-0347",
-              "coords": { "lat": 33.4481, "lng": -112.0731 },
+              "coords": {
+                "lat": 33.4481,
+                "lng": -112.0731
+              },
               "website": "https://example.com/pitch-night",
               "ticketsUrl": "https://example.com/pitch-night/tickets",
               "description": "Eight early-stage startups pitch to a panel of investors. Networking reception with food trucks and local brewery tasting.",
               "directions": [
-                { "icon": "right", "distance": "0.4 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "right",
+                  "distance": "0.4 mi",
+                  "instruction": "Head north on 3rd St"
+                },
                 {
                   "icon": "arrive",
                   "distance": "200 ft",
@@ -5281,7 +5422,10 @@
               "popularity": 52,
               "address": "1201 N Galvin Pkwy, Phoenix, AZ",
               "phone": "(602) 555-0411",
-              "coords": { "lat": 33.4558, "lng": -112.07 },
+              "coords": {
+                "lat": 33.4558,
+                "lng": -112.07
+              },
               "website": "https://example.com/park-yoga",
               "description": "Sunrise community yoga flow for all levels. Bring your own mat, water provided.",
               "directions": [
@@ -5311,7 +5455,10 @@
               "popularity": 49,
               "address": "221 E Roosevelt St, Phoenix, AZ",
               "phone": "(602) 555-0423",
-              "coords": { "lat": 33.4593, "lng": -112.072 },
+              "coords": {
+                "lat": 33.4593,
+                "lng": -112.072
+              },
               "website": "https://example.com/gallery-opening",
               "description": "Opening night for our spring exhibition featuring six local painters. Live music and complimentary wine.",
               "directions": [
@@ -5342,7 +5489,10 @@
               "popularity": 56,
               "address": "1 E Washington St, Phoenix, AZ",
               "phone": "(602) 555-0432",
-              "coords": { "lat": 33.4479, "lng": -112.0739 },
+              "coords": {
+                "lat": 33.4479,
+                "lng": -112.0739
+              },
               "website": "https://example.com/cooking-class",
               "ticketsUrl": "https://example.com/cooking-class/tickets",
               "description": "Hands-on cooking class with farmers market produce. Learn three seasonal recipes, take home a cookbook.",
@@ -5374,13 +5524,24 @@
               "popularity": 51,
               "address": "914 N 5th St, Phoenix, AZ",
               "phone": "(602) 555-0446",
-              "coords": { "lat": 33.4584, "lng": -112.0695 },
+              "coords": {
+                "lat": 33.4584,
+                "lng": -112.0695
+              },
               "website": "https://example.com/poetry-slam",
               "ticketsUrl": "https://example.com/poetry-slam/tickets",
               "description": "Monthly poetry slam featuring 10 local performers competing for the championship cup. Sign-ups at 19:30.",
               "directions": [
-                { "icon": "left", "distance": "0.8 mi", "instruction": "Head north on 5th St" },
-                { "icon": "arrive", "distance": "100 ft", "instruction": "Arrive at The Lost Leaf" }
+                {
+                  "icon": "left",
+                  "distance": "0.8 mi",
+                  "instruction": "Head north on 5th St"
+                },
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at The Lost Leaf"
+                }
               ]
             },
             {
@@ -5397,7 +5558,10 @@
               "popularity": 42,
               "address": "1202 N Galvin Pkwy, Phoenix, AZ",
               "phone": "(602) 555-0459",
-              "coords": { "lat": 33.4562, "lng": -112.071 },
+              "coords": {
+                "lat": 33.4562,
+                "lng": -112.071
+              },
               "website": "https://example.com/tai-chi",
               "description": "Gentle morning tai chi session open to all ages and experience levels.",
               "directions": [
@@ -5427,11 +5591,18 @@
               "popularity": 57,
               "address": "100 N 3rd St, Phoenix, AZ",
               "phone": "(602) 555-0467",
-              "coords": { "lat": 33.4481, "lng": -112.0731 },
+              "coords": {
+                "lat": 33.4481,
+                "lng": -112.0731
+              },
               "website": "https://example.com/startup-mixer",
               "description": "Happy-hour mixer with founders, investors and operators. Light appetizers, coffee bar and co-working demo.",
               "directions": [
-                { "icon": "right", "distance": "0.4 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "right",
+                  "distance": "0.4 mi",
+                  "instruction": "Head north on 3rd St"
+                },
                 {
                   "icon": "arrive",
                   "distance": "200 ft",
@@ -5453,7 +5624,10 @@
               "popularity": 73,
               "address": "1202 N Galvin Pkwy, Phoenix, AZ",
               "phone": "(602) 555-0472",
-              "coords": { "lat": 33.4559, "lng": -112.072 },
+              "coords": {
+                "lat": 33.4559,
+                "lng": -112.072
+              },
               "website": "https://example.com/movie-night",
               "description": "Family movie screening under the stars. Bring a blanket. Popcorn and snacks on sale.",
               "directions": [
@@ -5484,12 +5658,19 @@
               "popularity": 60,
               "address": "455 N 3rd St, Phoenix, AZ",
               "phone": "(602) 555-0488",
-              "coords": { "lat": 33.4531, "lng": -112.0725 },
+              "coords": {
+                "lat": 33.4531,
+                "lng": -112.0725
+              },
               "website": "https://example.com/salsa-class",
               "ticketsUrl": "https://example.com/salsa-class/tickets",
               "description": "Beginner salsa with open social floor from 20:30. No partner required, drinks available.",
               "directions": [
-                { "icon": "left", "distance": "0.5 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "left",
+                  "distance": "0.5 mi",
+                  "instruction": "Head north on 3rd St"
+                },
                 {
                   "icon": "arrive",
                   "distance": "100 ft",
@@ -5511,7 +5692,10 @@
               "popularity": 38,
               "address": "1221 N Central Ave, Phoenix, AZ",
               "phone": "(602) 555-0491",
-              "coords": { "lat": 33.4602, "lng": -112.0739 },
+              "coords": {
+                "lat": 33.4602,
+                "lng": -112.0739
+              },
               "website": "https://example.com/book-club",
               "description": "Monthly book club — this month we're discussing 'The Overstory' by Richard Powers. Drop-ins welcome.",
               "directions": [
@@ -5542,7 +5726,10 @@
               "popularity": 65,
               "address": "121 E Monroe St, Phoenix, AZ",
               "phone": "(602) 555-0506",
-              "coords": { "lat": 33.4493, "lng": -112.0729 },
+              "coords": {
+                "lat": 33.4493,
+                "lng": -112.0729
+              },
               "website": "https://example.com/beer-tasting",
               "ticketsUrl": "https://example.com/beer-tasting/tickets",
               "description": "Flight of 8 local craft beers paired with small bites from neighboring kitchens.",
@@ -5573,7 +5760,10 @@
               "popularity": 47,
               "address": "1202 N Galvin Pkwy, Phoenix, AZ",
               "phone": "(602) 555-0519",
-              "coords": { "lat": 33.4562, "lng": -112.071 },
+              "coords": {
+                "lat": 33.4562,
+                "lng": -112.071
+              },
               "website": "https://example.com/cleanup-day",
               "description": "Volunteer-powered spring cleanup. Supplies provided. Coffee and bagels on the morning lawn.",
               "directions": [
@@ -5604,7 +5794,10 @@
               "popularity": 63,
               "address": "1 E Jefferson St, Phoenix, AZ",
               "phone": "(602) 555-0528",
-              "coords": { "lat": 33.4478, "lng": -112.0731 },
+              "coords": {
+                "lat": 33.4478,
+                "lng": -112.0731
+              },
               "website": "https://example.com/vintage-cars",
               "ticketsUrl": "https://example.com/vintage-cars/tickets",
               "description": "Over 80 classic cars from local collectors. Live rock-and-roll band and food trucks.",
@@ -5636,7 +5829,10 @@
               "popularity": 55,
               "address": "1202 N Galvin Pkwy, Phoenix, AZ",
               "phone": "(602) 555-0531",
-              "coords": { "lat": 33.4563, "lng": -112.0708 },
+              "coords": {
+                "lat": 33.4563,
+                "lng": -112.0708
+              },
               "website": "https://example.com/sunrise-5k",
               "ticketsUrl": "https://example.com/sunrise-5k/register",
               "description": "Charity 5K with pancake breakfast at the finish line. All ages welcome.",
@@ -5667,7 +5863,10 @@
               "popularity": 39,
               "address": "625 N Galvin Pkwy, Phoenix, AZ",
               "phone": "(602) 555-0544",
-              "coords": { "lat": 33.4522, "lng": -112.0685 },
+              "coords": {
+                "lat": 33.4522,
+                "lng": -112.0685
+              },
               "website": "https://example.com/photo-walk",
               "description": "Guided photo walk with a local photographer. Any camera or phone welcome.",
               "directions": [
@@ -5698,12 +5897,19 @@
               "popularity": 61,
               "address": "455 N 3rd St, Phoenix, AZ",
               "phone": "(602) 555-0557",
-              "coords": { "lat": 33.4531, "lng": -112.0725 },
+              "coords": {
+                "lat": 33.4531,
+                "lng": -112.0725
+              },
               "website": "https://example.com/wine-tasting",
               "ticketsUrl": "https://example.com/wine-tasting/tickets",
               "description": "Seven hand-picked wines from Arizona wineries paired with charcuterie and artisan cheeses.",
               "directions": [
-                { "icon": "left", "distance": "0.5 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "left",
+                  "distance": "0.5 mi",
+                  "instruction": "Head north on 3rd St"
+                },
                 {
                   "icon": "arrive",
                   "distance": "100 ft",
@@ -5725,7 +5931,10 @@
               "popularity": 48,
               "address": "1 E Washington St, Phoenix, AZ",
               "phone": "(602) 555-0562",
-              "coords": { "lat": 33.4479, "lng": -112.0739 },
+              "coords": {
+                "lat": 33.4479,
+                "lng": -112.0739
+              },
               "website": "https://example.com/lunch-concert",
               "description": "Free outdoor lunchtime concert with local acoustic trio. Bring your lunch or grab from nearby food trucks.",
               "directions": [
@@ -5755,11 +5964,18 @@
               "popularity": 51,
               "address": "100 N 3rd St, Phoenix, AZ",
               "phone": "(602) 555-0573",
-              "coords": { "lat": 33.4481, "lng": -112.0731 },
+              "coords": {
+                "lat": 33.4481,
+                "lng": -112.0731
+              },
               "website": "https://example.com/pro-meetup",
               "description": "Industry-specific networking across engineering, design, marketing, and ops. Name-tag matching and lightning intros.",
               "directions": [
-                { "icon": "right", "distance": "0.4 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "right",
+                  "distance": "0.4 mi",
+                  "instruction": "Head north on 3rd St"
+                },
                 {
                   "icon": "arrive",
                   "distance": "200 ft",
@@ -5781,7 +5997,10 @@
               "popularity": 46,
               "address": "522 E Van Buren St, Phoenix, AZ",
               "phone": "(602) 555-0586",
-              "coords": { "lat": 33.4525, "lng": -112.0702 },
+              "coords": {
+                "lat": 33.4525,
+                "lng": -112.0702
+              },
               "website": "https://example.com/trivia-night",
               "description": "Weekly pub trivia across six rounds. Teams up to six — prizes for the top three.",
               "directions": [
@@ -5790,7 +6009,11 @@
                   "distance": "0.6 mi",
                   "instruction": "Head east on Van Buren St"
                 },
-                { "icon": "arrive", "distance": "100 ft", "instruction": "Arrive at Hanny's" }
+                {
+                  "icon": "arrive",
+                  "distance": "100 ft",
+                  "instruction": "Arrive at Hanny's"
+                }
               ]
             },
             {
@@ -5807,7 +6030,10 @@
               "popularity": 41,
               "address": "1230 N 15th Ave, Phoenix, AZ",
               "phone": "(602) 555-0594",
-              "coords": { "lat": 33.4582, "lng": -112.0895 },
+              "coords": {
+                "lat": 33.4582,
+                "lng": -112.0895
+              },
               "website": "https://example.com/dog-meetup",
               "description": "Weekly off-leash dog meetup. Water bowls and treats provided. All sizes welcome.",
               "directions": [
@@ -5838,12 +6064,19 @@
               "popularity": 37,
               "address": "100 N 3rd St, Phoenix, AZ",
               "phone": "(602) 555-0605",
-              "coords": { "lat": 33.4481, "lng": -112.0731 },
+              "coords": {
+                "lat": 33.4481,
+                "lng": -112.0731
+              },
               "website": "https://example.com/tea-talks",
               "ticketsUrl": "https://example.com/tea-talks/tickets",
               "description": "Afternoon tea service with three short artist talks from local creatives.",
               "directions": [
-                { "icon": "right", "distance": "0.4 mi", "instruction": "Head north on 3rd St" },
+                {
+                  "icon": "right",
+                  "distance": "0.4 mi",
+                  "instruction": "Head north on 3rd St"
+                },
                 {
                   "icon": "arrive",
                   "distance": "200 ft",
@@ -5865,7 +6098,10 @@
               "popularity": 44,
               "address": "1202 N Galvin Pkwy, Phoenix, AZ",
               "phone": "(602) 555-0611",
-              "coords": { "lat": 33.4563, "lng": -112.0708 },
+              "coords": {
+                "lat": 33.4563,
+                "lng": -112.0708
+              },
               "website": "https://example.com/weekly-5k",
               "description": "Every Thursday — bring friends and dogs, 5K loop around the lake. Pay-what-you-can donation.",
               "directions": [
@@ -5895,7 +6131,10 @@
               "popularity": 68,
               "address": "2 N Central Ave, Phoenix, AZ",
               "phone": "(602) 555-0624",
-              "coords": { "lat": 33.4482, "lng": -112.074 },
+              "coords": {
+                "lat": 33.4482,
+                "lng": -112.074
+              },
               "website": "https://example.com/food-truck-friday",
               "description": "Lunchtime pop-up with 12 rotating food trucks every Friday. Seating in the plaza.",
               "directions": [
@@ -5926,12 +6165,19 @@
               "popularity": 64,
               "address": "75 N 2nd St, Phoenix, AZ",
               "phone": "(602) 555-0633",
-              "coords": { "lat": 33.4503, "lng": -112.074 },
+              "coords": {
+                "lat": 33.4503,
+                "lng": -112.074
+              },
               "website": "https://example.com/jazz-quartet",
               "ticketsUrl": "https://example.com/jazz-quartet/tickets",
               "description": "Live jazz quartet performing standards and originals in an intimate theater setting.",
               "directions": [
-                { "icon": "left", "distance": "0.3 mi", "instruction": "Head south on 2nd St" },
+                {
+                  "icon": "left",
+                  "distance": "0.3 mi",
+                  "instruction": "Head south on 2nd St"
+                },
                 {
                   "icon": "arrive",
                   "distance": "100 ft",
@@ -5954,12 +6200,19 @@
               "popularity": 53,
               "address": "800 N 1st Ave, Phoenix, AZ",
               "phone": "(602) 555-0648",
-              "coords": { "lat": 33.4571, "lng": -112.0751 },
+              "coords": {
+                "lat": 33.4571,
+                "lng": -112.0751
+              },
               "website": "https://example.com/street-art",
               "ticketsUrl": "https://example.com/street-art/tickets",
               "description": "Guided walking tour of Roosevelt Row's murals and street art, with backstories from local artists.",
               "directions": [
-                { "icon": "left", "distance": "0.9 mi", "instruction": "Head north on 1st Ave" },
+                {
+                  "icon": "left",
+                  "distance": "0.9 mi",
+                  "instruction": "Head north on 1st Ave"
+                },
                 {
                   "icon": "arrive",
                   "distance": "100 ft",
@@ -5981,7 +6234,10 @@
               "popularity": 58,
               "address": "1202 N Galvin Pkwy, Phoenix, AZ",
               "phone": "(602) 555-0657",
-              "coords": { "lat": 33.4562, "lng": -112.071 },
+              "coords": {
+                "lat": 33.4562,
+                "lng": -112.071
+              },
               "website": "https://example.com/brunch-market",
               "description": "Saturday morning brunch market with fresh pastries, coffee, and live acoustic music on the lawn.",
               "directions": [
@@ -6012,7 +6268,10 @@
               "popularity": 75,
               "address": "1202 N Galvin Pkwy, Phoenix, AZ",
               "phone": "(602) 555-0668",
-              "coords": { "lat": 33.4562, "lng": -112.071 },
+              "coords": {
+                "lat": 33.4562,
+                "lng": -112.071
+              },
               "website": "https://example.com/family-fair",
               "ticketsUrl": "https://example.com/family-fair/tickets",
               "description": "Games, face painting, pony rides, and a climbing wall for kids. Food vendors and live family band on the mainstage.",
@@ -6425,8 +6684,63 @@
               "pageCount": 1
             }
           ]
+        },
+        "map": {
+          "kind": "map",
+          "label": "Map",
+          "heroImage": "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=1600&h=620&fit=crop",
+          "welcomeCopy": {
+            "title": "Welcome to {client} Map",
+            "subtitle": "powered by Google",
+            "body": "Easily select by category, preference or location. Click on Get Directions to easily find walking or driving directions to 100's of places around you.",
+            "cta": "OK"
+          },
+          "chips": {
+            "play": "Play",
+            "eat": "Eat",
+            "stay": "Stay",
+            "events": "Events"
+          },
+          "defaultZoom": 15,
+          "eventsWindowDays": 7
         }
       }
+    },
+    "advertisements": {
+      "ads": [
+        {
+          "id": "lolas-lunch",
+          "kind": "popup",
+          "image": "/assets/ads/lolas-lunch.png",
+          "alt": "Lola's Lunch Feast — any main dish + rice + drink for $150",
+          "routes": ["/home/restaurants"],
+          "enabled": true
+        },
+        {
+          "id": "history-of-art",
+          "kind": "hero",
+          "image": "/assets/ads/history-of-art.png",
+          "alt": "The History of Art — annual exhibition",
+          "routes": ["/home", "/home/things-to-do"],
+          "enabled": true
+        },
+        {
+          "id": "uber-eats-nfl",
+          "kind": "bottom",
+          "image": "/assets/ads/uber-eats-nfl.png",
+          "alt": "Uber Eats × NFL — Tonight I will be eating",
+          "routes": ["/home", "/home/restaurants"],
+          "enabled": true
+        },
+        {
+          "id": "uber-eats-5off",
+          "kind": "bottom",
+          "image": "/assets/ads/uber-eats-5off.png",
+          "alt": "Uber Eats — $5 off your first order",
+          "routes": ["/home/events"],
+          "enabled": true
+        }
+      ]
     }
   },
   "integraciones": {

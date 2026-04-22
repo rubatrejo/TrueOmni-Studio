@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { getConfig } from '@/lib/config';
 import { fetchWeather } from '@/lib/weather';
@@ -14,13 +16,27 @@ import { WeatherClock } from './weather-clock';
  *   - Clock + weather en (744, 40.5).
  *   - Button-Language en (418, 500) — solo si `showLanguage=true` (home dashboard).
  *     Los módulos de Listings ocultan el botón de lenguaje (propia toolbar abajo).
+ *   - `children` opcionales: se renderizan DENTRO del área del hero (z-10
+ *     sobre el gradient) empezando en `childrenTop` (default 170px, debajo
+ *     del logo/clock). Usado por el módulo Map para meter carrusel + chips
+ *     + toolbar dentro de los 620px del hero.
  */
 export async function HomeHeader({
   heroImage = '/assets/home/header-bg.jpg',
   showLanguage = true,
+  height = 620,
+  children,
+  childrenTop = 170,
 }: {
-  heroImage?: string;
+  /** URL de la imagen de fondo. `null` → sin imagen, sólo gradient sobre azul. */
+  heroImage?: string | null;
   showLanguage?: boolean;
+  /** Altura del header en px. Default 620 (SVG Dashboard). */
+  height?: number;
+  /** Contenido opcional dentro del área del hero. */
+  children?: ReactNode;
+  /** Offset vertical desde donde arranca `children` (deja espacio al logo/clock). */
+  childrenTop?: number;
 } = {}) {
   const config = await getConfig();
   const coords = config.client.coords;
@@ -28,11 +44,17 @@ export async function HomeHeader({
   return (
     <header
       className="relative overflow-hidden"
-      style={{ width: '1080px', height: '620px', flexShrink: 0 }}
+      style={{
+        width: '1080px',
+        height: `${height}px`,
+        flexShrink: 0,
+      }}
     >
-      {/* Background photo */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      {/* Background photo (opcional) */}
+      {heroImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      ) : null}
       {/* Linear gradient overlay — azul oscuro fijo en la parte superior
           para que logo + hora + clima se lean sobre cualquier foto.
           Fade a transparente hacia abajo para no ensuciar el hero. */}
@@ -65,6 +87,16 @@ export async function HomeHeader({
       {showLanguage ? (
         <div className="absolute" style={{ left: '418px', top: '500px' }}>
           <LanguageDropdown />
+        </div>
+      ) : null}
+
+      {/* Slot opcional para contenido dentro del hero (ej. Map). */}
+      {children ? (
+        <div
+          className="absolute left-0 right-0 z-10"
+          style={{ top: `${childrenTop}px`, bottom: 0 }}
+        >
+          {children}
         </div>
       ) : null}
     </header>

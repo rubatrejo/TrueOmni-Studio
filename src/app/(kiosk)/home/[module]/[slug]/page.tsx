@@ -8,6 +8,9 @@ import { KioskCanvas } from '@/components/kiosk-canvas';
 import { ListingDetail } from '@/components/listings/listing-detail';
 import type { EventMeta, SecondaryCta } from '@/components/listings/listing-detail';
 import { ListingsModule } from '@/components/listings/listings-module';
+import { PassDetailWithShare } from '@/components/passes/pass-detail-with-share';
+import { PassShareHost } from '@/components/passes/pass-share-host';
+import { PassesModule } from '@/components/passes/passes-module';
 import { getAdsFromConfig } from '@/lib/ads';
 import type { EventItem, Listing } from '@/lib/config';
 import { getConfig } from '@/lib/config';
@@ -90,9 +93,26 @@ export default async function DetailPage({ params }: PageProps) {
     );
   }
 
-  // Passes — placeholder hasta fase 3.10 ola 3.
   if (mod.kind === 'passes') {
-    notFound();
+    const pass = mod.passes.find((p) => p.slug === slug);
+    if (!pass) notFound();
+    return (
+      <KioskCanvas>
+        <PassesModule
+          moduleKey={module}
+          module={mod}
+          textos={config.textos ?? {}}
+          header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
+        />
+        <PassDetailWithShare moduleKey={module} pass={pass} textos={config.textos ?? {}} />
+        <PassShareHost
+          client={{ slug: config.client.slug }}
+          pass={pass}
+          textos={config.textos ?? {}}
+        />
+        <AdsSlot ads={ads} />
+      </KioskCanvas>
+    );
   }
 
   // Listings

@@ -28,3 +28,132 @@ body {
   width: 0;
   height: 0;
 }
+
+/* Survey overlay animations — cinematic entrance y stagger per-step. */
+@keyframes survey-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes survey-card-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes survey-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes survey-glow-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 hsl(var(--primary-foreground) / 0.45),
+      0 0 0 8px hsl(var(--accent) / 0.4);
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px hsl(var(--primary-foreground) / 0.25),
+      0 0 0 12px hsl(var(--accent) / 0);
+  }
+}
+@keyframes survey-check-draw {
+  from {
+    stroke-dashoffset: 60;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes survey-halo-expand {
+  from {
+    opacity: 0.7;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+.survey-backdrop-anim {
+  animation: survey-backdrop-in 240ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+.survey-card-anim {
+  animation: survey-card-in 420ms cubic-bezier(0.34, 1.2, 0.64, 1) both;
+}
+.survey-step-anim {
+  animation: survey-step-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.survey-stagger > * {
+  animation: survey-step-in 480ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.survey-stagger > *:nth-child(1) {
+  animation-delay: 60ms;
+}
+.survey-stagger > *:nth-child(2) {
+  animation-delay: 120ms;
+}
+.survey-stagger > *:nth-child(3) {
+  animation-delay: 180ms;
+}
+.survey-stagger > *:nth-child(4) {
+  animation-delay: 240ms;
+}
+.survey-stagger > *:nth-child(5) {
+  animation-delay: 300ms;
+}
+.survey-stagger > *:nth-child(6) {
+  animation-delay: 360ms;
+}
+.survey-stagger > *:nth-child(7) {
+  animation-delay: 420ms;
+}
+.survey-stagger > *:nth-child(8) {
+  animation-delay: 480ms;
+}
+.survey-stagger > *:nth-child(9) {
+  animation-delay: 540ms;
+}
+.survey-stagger > *:nth-child(10) {
+  animation-delay: 600ms;
+}
+.survey-stagger > *:nth-child(11) {
+  animation-delay: 660ms;
+}
+.survey-check-path {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: survey-check-draw 600ms cubic-bezier(0.4, 0, 0.2, 1) 220ms forwards;
+}
+.survey-halo {
+  animation: survey-halo-expand 1200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms both;
+}
+.survey-dot-active {
+  animation: survey-glow-pulse 2400ms ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .survey-backdrop-anim,
+  .survey-card-anim,
+  .survey-step-anim,
+  .survey-stagger > *,
+  .survey-check-path,
+  .survey-halo,
+  .survey-dot-active {
+    animation: none !important;
+  }
+}

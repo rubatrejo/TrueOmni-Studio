@@ -13,9 +13,8 @@ interface Props {
 }
 
 /**
- * Textarea display + OnScreenKeyboard del home. El keyboard se escala a 0.78
- * para caber en el ancho del card (880px ≈ 1080×0.78). Sigue el patrón de
- * SendToEmailModal / SearchOverlay — el texto se construye desde handleKey.
+ * Textarea display + OnScreenKeyboard del home escalado para caber en el card.
+ * El textarea es display-only; el input viene del teclado on-screen.
  */
 export function QuestionText({
   value,
@@ -28,11 +27,7 @@ export function QuestionText({
   const current = value ?? '';
 
   const append = (s: string) => {
-    if (current.length + s.length > maxLength) {
-      onChange((current + s).slice(0, maxLength));
-    } else {
-      onChange(current + s);
-    }
+    onChange((current + s).slice(0, maxLength));
   };
 
   const handleKey = (k: KeyboardKey) => {
@@ -44,25 +39,11 @@ export function QuestionText({
       setShift((s) => !s);
       return;
     }
-    if (k === 'SPACE') {
-      append(' ');
-      return;
-    }
-    if (k === 'ENTER') {
-      append('\n');
-      return;
-    }
-    if (k === 'AT') {
-      append('@');
-      return;
-    }
-    if (k === 'DOT_COM') {
-      append('.com');
-      return;
-    }
-    if (k === 'CLOSE' || k === 'SYMBOLS') {
-      return;
-    }
+    if (k === 'SPACE') return append(' ');
+    if (k === 'ENTER') return append('\n');
+    if (k === 'AT') return append('@');
+    if (k === 'DOT_COM') return append('.com');
+    if (k === 'CLOSE' || k === 'SYMBOLS') return;
     if (typeof k === 'string' && k.length === 1) {
       append(k);
       if (shift) setShift(false);
@@ -74,32 +55,32 @@ export function QuestionText({
     .replace('{max}', String(maxLength));
 
   return (
-    <div className="flex flex-col items-center" style={{ gap: '16px' }}>
-      <div className="relative" style={{ width: '100%', maxWidth: '720px' }}>
+    <div className="flex w-full flex-col items-center" style={{ gap: '24px' }}>
+      <div className="relative" style={{ width: '720px' }}>
         <div
           className="w-full rounded-2xl font-sans"
           style={{
-            minHeight: '160px',
-            padding: '20px',
+            minHeight: '140px',
+            padding: '24px',
             fontSize: '22px',
-            lineHeight: 1.4,
-            backgroundColor: 'hsl(var(--primary-foreground) / 0.1)',
-            border: '2px solid hsl(var(--primary-foreground) / 0.3)',
+            lineHeight: 1.45,
+            backgroundColor: 'hsl(var(--primary-foreground) / 0.08)',
+            border: '2px solid hsl(var(--primary-foreground) / 0.25)',
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-word',
             color: 'hsl(var(--primary-foreground))',
           }}
         >
-          {current || <span style={{ opacity: 0.5 }}>{placeholder}</span>}
+          {current || <span style={{ opacity: 0.45 }}>{placeholder}</span>}
         </div>
         <span
           className="absolute font-sans"
           style={{
-            right: '14px',
-            bottom: '10px',
-            fontSize: '14px',
+            right: '16px',
+            bottom: '12px',
+            fontSize: '13px',
             opacity: 0.7,
-            color: 'hsl(var(--primary-foreground))',
+            letterSpacing: '0.04em',
           }}
         >
           {counter}
@@ -107,9 +88,9 @@ export function QuestionText({
       </div>
       <div
         style={{
-          transform: 'scale(0.78)',
+          transform: 'scale(0.74)',
           transformOrigin: 'top center',
-          marginBottom: '-44px',
+          marginBottom: '-50px',
         }}
       >
         <OnScreenKeyboard shift={shift} onKey={handleKey} />

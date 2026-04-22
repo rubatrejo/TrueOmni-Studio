@@ -9,12 +9,12 @@ interface Props {
 function StarIcon({ filled }: { filled: boolean }) {
   return (
     <svg
-      width="68"
-      height="68"
+      width="88"
+      height="88"
       viewBox="0 0 24 24"
       fill={filled ? 'currentColor' : 'none'}
       stroke="currentColor"
-      strokeWidth="1.6"
+      strokeWidth="1.4"
       strokeLinejoin="round"
     >
       <polygon points="12 2 15.1 8.6 22 9.3 16.8 14 18.2 21 12 17.3 5.8 21 7.2 14 2 9.3 8.9 8.6 12 2" />
@@ -23,7 +23,8 @@ function StarIcon({ filled }: { filled: boolean }) {
 }
 
 /**
- * 5 estrellas 68×68 outline → filled olive. Tap fill 1..N. Scale 1.1 en la tap.
+ * 5 estrellas grandes (88×88). Rellena hasta N al tap.
+ * Selected star = scale-up + glow. Stagger entrance.
  */
 export function QuestionRating({ value, onChange, max = 5 }: Props) {
   const items = Array.from({ length: max }, (_, i) => i + 1);
@@ -31,11 +32,12 @@ export function QuestionRating({ value, onChange, max = 5 }: Props) {
     <div
       role="radiogroup"
       aria-label="Rate from 1 to 5"
-      className="flex items-center justify-center"
-      style={{ gap: '16px' }}
+      className="survey-stagger flex items-center justify-center"
+      style={{ gap: '20px' }}
     >
       {items.map((n) => {
         const filled = value !== null && n <= value;
+        const isLast = value === n;
         return (
           <button
             key={n}
@@ -44,10 +46,11 @@ export function QuestionRating({ value, onChange, max = 5 }: Props) {
             aria-checked={value === n}
             aria-label={`${n} star${n === 1 ? '' : 's'}`}
             onClick={() => onChange(n)}
-            className="transition-transform"
+            className="rounded-lg transition-all duration-300 ease-out focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
             style={{
-              color: filled ? 'hsl(var(--accent))' : 'hsl(var(--primary-foreground) / 0.85)',
-              transform: value === n ? 'scale(1.1)' : 'scale(1)',
+              color: filled ? 'hsl(var(--accent))' : 'hsl(var(--primary-foreground) / 0.55)',
+              transform: isLast ? 'scale(1.15)' : 'scale(1)',
+              filter: filled ? 'drop-shadow(0 8px 24px hsl(var(--accent) / 0.5))' : 'none',
             }}
           >
             <StarIcon filled={filled} />

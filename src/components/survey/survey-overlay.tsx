@@ -24,14 +24,18 @@ import { SurveyThankYou } from './survey-thank-you';
 
 interface Props {
   config: SurveyConfig;
-  client: { slug: string; logo?: string };
+  client: { slug: string };
   textos: Record<string, string>;
   onClose: () => void;
 }
 
 /**
- * Root del overlay. Maneja el state del paso, respuestas, confirm-exit y thank-you.
- * Las question variants se conectan en ola 3 vía SurveyQuestionView.
+ * Root cinematic del survey. Card altura fija (1440px) con 3 zonas verticales:
+ *   - top (progress + X)
+ *   - center (intro + question como H1 display + input)
+ *   - bottom (navigation)
+ * La zona de contenido es scrollable sólo si su altura excede — en práctica
+ * todos los tipos caben dentro del slot reservado.
  */
 export function SurveyOverlay({ config, client, textos, onClose }: Props) {
   const total = totalSteps(config);
@@ -61,9 +65,7 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        handleCloseRequest();
-      }
+      if (e.key === 'Escape') handleCloseRequest();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -101,68 +103,125 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
   const nextLabel = isLastStep ? textos.survey_send : textos.survey_next;
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center">
-      <SurveyBackdrop onTap={handleCloseRequest} ariaLabel={textos.survey_exit_confirm_title} />
+    <div className="absolute inset-0 z-[70] flex items-center justify-center">
+      <div className="survey-backdrop-anim absolute inset-0">
+        <SurveyBackdrop onTap={handleCloseRequest} ariaLabel={textos.survey_exit_confirm_title} />
+      </div>
       <div className="relative">
         <SurveyCard>
-          {submitted ? (
-            <SurveyThankYou
-              title={config.thankYou.title}
-              message={config.thankYou.message}
-              countdownTemplate={textos.survey_thank_you_countdown}
-              autoCloseMs={config.thankYou.autoCloseMs ?? 5000}
-              onAutoClose={onClose}
+          {/* TOP BAR — progress + X */}
+          <div
+            className="relative flex items-center justify-center"
+            style={{ paddingTop: '72px', paddingLeft: '96px', paddingRight: '96px' }}
+          >
+            <SurveyProgress current={step} total={total} />
+            <SurveyHeader
+              onClose={handleCloseRequest}
+              closeAriaLabel={textos.survey_exit_confirm_title}
             />
-          ) : (
-            <>
-              <SurveyHeader
-                logo={config.logo ?? client.logo}
-                onClose={handleCloseRequest}
-                closeAriaLabel={textos.survey_exit_confirm_title}
-              />
-              <SurveyProgress current={step} total={total} />
-              {step === 0 && config.intro.title ? (
-                <div className="mb-8 text-center">
-                  <h2 className="mb-2 font-display font-bold" style={{ fontSize: '44px' }}>
-                    {config.intro.title}
-                  </h2>
-                  {config.intro.subtitle ? (
-                    <p className="font-sans" style={{ fontSize: '22px', opacity: 0.85 }}>
-                      {config.intro.subtitle}
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
+          </div>
 
-              <div className="mb-4" style={{ minHeight: '420px' }}>
+          {/* CENTER — intro + question + input */}
+          <div
+            className="flex flex-1 flex-col items-center justify-center"
+            style={{
+              paddingLeft: '96px',
+              paddingRight: '96px',
+              paddingTop: '40px',
+              paddingBottom: '40px',
+            }}
+          >
+            {submitted ? (
+              <SurveyThankYou
+                title={config.thankYou.title}
+                message={config.thankYou.message}
+                countdownTemplate={textos.survey_thank_you_countdown}
+                autoCloseMs={config.thankYou.autoCloseMs ?? 5000}
+                onAutoClose={onClose}
+              />
+            ) : (
+              <div
+                key={`step-${step}`}
+                className="survey-step-anim flex w-full flex-col items-center"
+                style={{ gap: '56px' }}
+              >
+                {step === 0 && config.intro?.subtitle ? (
+                  <p
+                    className="text-center font-sans uppercase"
+                    style={{
+                      fontSize: '14px',
+                      letterSpacing: '0.28em',
+                      opacity: 0.75,
+                      marginBottom: '-32px',
+                    }}
+                  >
+                    {config.intro.title}
+                  </p>
+                ) : null}
+
+                {/* Pregunta como H1 display — el título del paso */}
                 {currentQuestion ? (
-                  <>
-                    <h2
-                      className="mb-8 text-center font-display font-bold"
-                      style={{ fontSize: '32px', lineHeight: 1.25 }}
-                    >
-                      {currentQuestion.prompt}
-                    </h2>
+                  <h1
+                    className="text-center font-display font-bold"
+                    style={{
+                      fontSize: '64px',
+                      lineHeight: 1.08,
+                      letterSpacing: '-0.02em',
+                      maxWidth: '720px',
+                    }}
+                  >
+                    {currentQuestion.prompt}
+                  </h1>
+                ) : (
+                  <h1
+                    className="text-center font-display font-bold"
+                    style={{
+                      fontSize: '56px',
+                      lineHeight: 1.1,
+                      letterSpacing: '-0.015em',
+                      maxWidth: '720px',
+                    }}
+                  >
+                    {textos.survey_contact_email_label.replace(' (optional)', '') ||
+                      'Stay in touch'}
+                  </h1>
+                )}
+
+                {/* Input area */}
+                <div className="flex w-full flex-col items-center">
+                  {currentQuestion ? (
                     <SurveyQuestionView
                       question={currentQuestion}
                       value={answers[currentQuestion.id] ?? null}
                       onChange={(v) => setAnswer(currentQuestion.id, v)}
                       counterTemplate={textos.survey_text_counter}
                     />
-                  </>
-                ) : config.contactCapture ? (
-                  <QuestionContact
-                    email={config.contactCapture.email ?? false}
-                    phone={config.contactCapture.phone ?? false}
-                    value={contact}
-                    onChange={setContact}
-                    emailLabel={textos.survey_contact_email_label}
-                    phoneLabel={textos.survey_contact_phone_label}
-                    disclaimer={config.contactCapture.disclaimer}
-                  />
-                ) : null}
+                  ) : config.contactCapture ? (
+                    <QuestionContact
+                      email={config.contactCapture.email ?? false}
+                      phone={config.contactCapture.phone ?? false}
+                      value={contact}
+                      onChange={setContact}
+                      emailLabel={textos.survey_contact_email_label}
+                      phoneLabel={textos.survey_contact_phone_label}
+                      disclaimer={config.contactCapture.disclaimer}
+                    />
+                  ) : null}
+                </div>
               </div>
+            )}
+          </div>
 
+          {/* BOTTOM — navigation (hidden cuando submitted) */}
+          {!submitted ? (
+            <div
+              style={{
+                paddingLeft: '96px',
+                paddingRight: '96px',
+                paddingBottom: '72px',
+                paddingTop: '24px',
+              }}
+            >
               <SurveyNavigation
                 onBack={step > 0 ? handleBack : undefined}
                 onNext={handleNext}
@@ -171,8 +230,8 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
                 nextDisabled={nextDisabled}
                 isLastStep={isLastStep}
               />
-            </>
-          )}
+            </div>
+          ) : null}
         </SurveyCard>
       </div>
 
@@ -190,5 +249,4 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
   );
 }
 
-// Exposed to be wired in ola 3.
 export type { SurveyAnswer };

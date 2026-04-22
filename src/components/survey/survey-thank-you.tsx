@@ -5,14 +5,14 @@ import { useEffect, useState } from 'react';
 interface Props {
   title: string;
   message: string;
-  countdownTemplate: string; // ej. "Returning home in {seconds}s..."
+  countdownTemplate: string;
   autoCloseMs: number;
   onAutoClose: () => void;
 }
 
 /**
- * Pantalla final: check animado + countdown descendente + auto-close.
- * Reemplaza al último paso del survey cuando el dispatch ya se ejecutó.
+ * Pantalla de cierre cinematic. Check con animación stroke-draw, halo que se
+ * expande, copy grande, countdown + progress bar olive.
  */
 export function SurveyThankYou({
   title,
@@ -21,7 +21,8 @@ export function SurveyThankYou({
   autoCloseMs,
   onAutoClose,
 }: Props) {
-  const [remaining, setRemaining] = useState(Math.ceil(autoCloseMs / 1000));
+  const totalSec = Math.ceil(autoCloseMs / 1000);
+  const [remaining, setRemaining] = useState(totalSec);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -34,55 +35,92 @@ export function SurveyThankYou({
     };
   }, [autoCloseMs, onAutoClose]);
 
-  const totalSeconds = Math.ceil(autoCloseMs / 1000);
-  const progress = ((totalSeconds - remaining) / totalSeconds) * 100;
+  const progress = ((totalSec - remaining) / totalSec) * 100;
 
   return (
     <div
-      className="flex flex-col items-center"
-      style={{ paddingTop: '24px', paddingBottom: '24px' }}
+      className="survey-step-anim flex flex-col items-center"
+      style={{ gap: '40px', maxWidth: '640px' }}
     >
-      <div
-        className="mb-8 flex items-center justify-center rounded-full bg-accent"
-        style={{
-          width: '120px',
-          height: '120px',
-          boxShadow: '0 0 0 8px hsl(var(--accent) / 0.25)',
-        }}
-      >
+      {/* Check animado con halo expand */}
+      <div className="relative flex items-center justify-center" style={{ height: '180px' }}>
+        <span
+          aria-hidden
+          className="survey-halo absolute rounded-full"
+          style={{
+            width: '180px',
+            height: '180px',
+            backgroundColor: 'hsl(var(--accent) / 0.4)',
+          }}
+        />
+        <span
+          aria-hidden
+          className="absolute rounded-full"
+          style={{
+            width: '156px',
+            height: '156px',
+            backgroundColor: 'hsl(var(--accent))',
+            boxShadow: '0 20px 50px -15px hsl(var(--accent) / 0.7)',
+          }}
+        />
         <svg
-          width="56"
-          height="56"
+          width="72"
+          height="72"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="hsl(var(--accent-foreground))"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          className="relative"
+          aria-hidden
         >
-          <polyline points="5 12 10 17 19 7" />
+          <polyline
+            className="survey-check-path"
+            points="5 12 10 17 19 7"
+            stroke="hsl(var(--accent-foreground))"
+            strokeWidth="3.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </div>
-      <h2 className="mb-3 text-center font-display font-bold" style={{ fontSize: '44px' }}>
+
+      <h1
+        className="text-center font-display font-bold"
+        style={{ fontSize: '56px', lineHeight: 1.08, letterSpacing: '-0.02em' }}
+      >
         {title}
-      </h2>
+      </h1>
+
       <p
-        className="mb-6 text-center font-sans"
-        style={{ fontSize: '22px', opacity: 0.9, maxWidth: '640px' }}
+        className="text-center font-sans"
+        style={{ fontSize: '22px', lineHeight: 1.45, opacity: 0.85, maxWidth: '560px' }}
       >
         {message}
       </p>
-      <p className="text-center font-sans" style={{ fontSize: '18px', opacity: 0.65 }}>
-        {countdownTemplate.replace('{seconds}', String(remaining))}
-      </p>
-      <div
-        className="mt-6 overflow-hidden rounded-full bg-primary-foreground/20"
-        style={{ width: '320px', height: '6px' }}
-      >
+
+      <div className="flex flex-col items-center" style={{ gap: '14px', marginTop: '8px' }}>
+        <p
+          className="text-center font-sans font-medium"
+          style={{ fontSize: '15px', opacity: 0.7, letterSpacing: '0.04em' }}
+        >
+          {countdownTemplate.replace('{seconds}', String(remaining))}
+        </p>
         <div
-          className="h-full bg-accent transition-all ease-linear"
-          style={{ width: `${progress}%`, transitionDuration: '1000ms' }}
-        />
+          className="overflow-hidden rounded-full"
+          style={{
+            width: '320px',
+            height: '4px',
+            backgroundColor: 'hsl(var(--primary-foreground) / 0.18)',
+          }}
+        >
+          <div
+            className="h-full transition-all ease-linear"
+            style={{
+              width: `${progress}%`,
+              backgroundColor: 'hsl(var(--accent))',
+              transitionDuration: '1000ms',
+              boxShadow: '0 0 12px hsl(var(--accent) / 0.8)',
+            }}
+          />
+        </div>
       </div>
     </div>
   );

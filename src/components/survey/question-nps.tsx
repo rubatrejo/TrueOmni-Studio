@@ -9,17 +9,18 @@ interface Props {
 const SCALE = Array.from({ length: 11 }, (_, i) => i); // 0..10
 
 /**
- * 11 círculos 56×56 con número dentro. Seleccionado = fill olive + scale.
- * Labels extremos debajo ("Not at all likely" / "Extremely likely").
+ * 11 círculos 0-10 airy con labels semánticos en los extremos.
+ * Selected = fill olive + glow pulse ring + scale-up.
+ * Stagger entrance al cambiar de paso.
  */
 export function QuestionNps({ value, onChange, labels }: Props) {
   return (
-    <div className="flex flex-col items-center" style={{ gap: '20px' }}>
+    <div className="flex w-full flex-col items-center" style={{ gap: '28px' }}>
       <div
         role="radiogroup"
         aria-label="Rate from 0 to 10"
-        className="flex items-center justify-center"
-        style={{ gap: '10px' }}
+        className="survey-stagger flex items-center justify-center"
+        style={{ gap: '12px' }}
       >
         {SCALE.map((n) => {
           const selected = value === n;
@@ -30,16 +31,19 @@ export function QuestionNps({ value, onChange, labels }: Props) {
               role="radio"
               aria-checked={selected}
               onClick={() => onChange(n)}
-              className="flex items-center justify-center rounded-full border-2 font-display font-bold transition-all"
+              className="flex items-center justify-center rounded-full font-display font-bold transition-all duration-300 ease-out focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
               style={{
-                width: '56px',
-                height: '56px',
+                width: '64px',
+                height: '64px',
                 fontSize: '22px',
-                backgroundColor: selected ? 'hsl(var(--accent))' : 'hsl(var(--primary-foreground))',
+                backgroundColor: selected
+                  ? 'hsl(var(--accent))'
+                  : 'hsl(var(--primary-foreground) / 0.95)',
                 color: selected ? 'hsl(var(--accent-foreground))' : 'hsl(var(--primary))',
-                borderColor: selected ? 'hsl(var(--accent))' : 'hsl(var(--primary-foreground))',
-                boxShadow: selected ? '0 0 0 4px hsl(var(--primary-foreground))' : 'none',
-                transform: selected ? 'scale(1.12)' : 'scale(1)',
+                boxShadow: selected
+                  ? '0 0 0 4px hsl(var(--primary-foreground)), 0 10px 28px -8px hsl(var(--accent) / 0.6)'
+                  : '0 4px 14px -4px hsl(0 0% 0% / 0.2)',
+                transform: selected ? 'scale(1.18) translateY(-4px)' : 'scale(1)',
               }}
             >
               {n}
@@ -49,8 +53,13 @@ export function QuestionNps({ value, onChange, labels }: Props) {
       </div>
       {labels ? (
         <div
-          className="flex w-full items-center justify-between font-sans"
-          style={{ fontSize: '16px', opacity: 0.85, maxWidth: '720px' }}
+          className="flex w-full items-center justify-between font-sans font-medium"
+          style={{
+            fontSize: '15px',
+            opacity: 0.75,
+            maxWidth: '720px',
+            letterSpacing: '0.01em',
+          }}
         >
           <span>{labels.low}</span>
           <span>{labels.high}</span>

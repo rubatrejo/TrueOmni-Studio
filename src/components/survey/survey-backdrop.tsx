@@ -17,7 +17,10 @@ export function SurveyBackdrop({ onTap, ariaLabel }: Props) {
       aria-label={ariaLabel}
       onClick={onTap}
       className="absolute inset-0 cursor-default"
-      style={{ backgroundColor: 'rgba(0,0,0,0.72)' }}
+      style={{
+        backgroundColor: 'rgba(0,0,0,0.88)',
+        backdropFilter: 'blur(6px)',
+      }}
     />
   );
 }

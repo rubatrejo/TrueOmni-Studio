@@ -3,7 +3,6 @@
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
-import { SurveyOverlay } from '@/components/survey/survey-overlay';
 import type { HomeListing, HomeTile, SurveyConfig } from '@/lib/config';
 
 import { CategoryGrid } from './category-grid';
@@ -11,29 +10,26 @@ import { SearchBar } from './search-bar';
 import { SearchOverlay } from './search-overlay';
 
 /**
- * Shell client-side del Home. Manda el estado de los overlays (search + survey)
- * y renderiza el grid internamente para poder inyectar el callback del survey
- * sin pasar funciones desde el Server Component padre.
+ * Shell client-side del Home. El survey vive en `SurveyHost` a nivel del
+ * KioskCanvas (para poder stackearse sobre los ads). Aquí sólo disparamos
+ * el evento global cuando el tile Survey se tapea.
  */
 export function HomeShell({
   header,
   listings,
   tiles,
   survey,
-  client,
-  textos,
 }: {
   header: ReactNode;
   listings: readonly HomeListing[];
   tiles: readonly HomeTile[];
   survey?: SurveyConfig;
-  client: { slug: string; logo?: string };
-  textos: Record<string, string>;
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
-  const [surveyOpen, setSurveyOpen] = useState(false);
 
-  const openSurvey = survey?.enabled ? () => setSurveyOpen(true) : undefined;
+  const openSurvey = survey?.enabled
+    ? () => window.dispatchEvent(new CustomEvent('kiosk:survey-open'))
+    : undefined;
 
   return (
     <div
@@ -59,14 +55,6 @@ export function HomeShell({
       />
       {searchOpen ? (
         <SearchOverlay listings={listings} onClose={() => setSearchOpen(false)} />
-      ) : null}
-      {surveyOpen && survey ? (
-        <SurveyOverlay
-          config={survey}
-          client={client}
-          textos={textos}
-          onClose={() => setSurveyOpen(false)}
-        />
       ) : null}
     </div>
   );

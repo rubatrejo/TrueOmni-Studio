@@ -15,7 +15,7 @@ export function SurveyCard({ children }: Props) {
       className="survey-card-anim relative mx-auto flex flex-col overflow-hidden text-primary-foreground"
       style={{
         width: '768px',
-        height: '1152px',
+        height: '806px',
         borderRadius: '28px',
         backgroundColor: 'hsl(var(--primary))',
         backgroundImage:

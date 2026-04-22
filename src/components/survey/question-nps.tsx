@@ -7,15 +7,15 @@ interface Props {
 }
 
 const SCALE = Array.from({ length: 11 }, (_, i) => i); // 0..10
+const FILL_DARK = 'color-mix(in oklch, hsl(var(--primary)) 45%, black 55%)';
 
 /**
- * 11 círculos 0-10 airy con labels semánticos en los extremos.
- * Selected = fill olive + glow pulse ring + scale-up.
- * Stagger entrance al cambiar de paso.
+ * 11 círculos 0-10. Selected = fill azul oscuro con borde blanco + scale.
+ * Stagger entrance.
  */
 export function QuestionNps({ value, onChange, labels }: Props) {
   return (
-    <div className="flex w-full flex-col items-center" style={{ gap: '28px' }}>
+    <div className="flex w-full flex-col items-center" style={{ gap: '24px' }}>
       <div
         role="radiogroup"
         aria-label="Rate from 0 to 10"
@@ -36,14 +36,15 @@ export function QuestionNps({ value, onChange, labels }: Props) {
                 width: '52px',
                 height: '52px',
                 fontSize: '18px',
-                backgroundColor: selected
-                  ? 'hsl(var(--accent))'
-                  : 'hsl(var(--primary-foreground) / 0.95)',
-                color: selected ? 'hsl(var(--accent-foreground))' : 'hsl(var(--primary))',
+                backgroundColor: selected ? FILL_DARK : 'hsl(var(--primary-foreground) / 0.95)',
+                color: selected ? 'hsl(var(--primary-foreground))' : 'hsl(var(--primary))',
+                border: selected
+                  ? '2px solid hsl(var(--primary-foreground))'
+                  : '2px solid transparent',
                 boxShadow: selected
-                  ? '0 0 0 4px hsl(var(--primary-foreground)), 0 10px 28px -8px hsl(var(--accent) / 0.6)'
-                  : '0 4px 14px -4px hsl(0 0% 0% / 0.2)',
-                transform: selected ? 'scale(1.18) translateY(-4px)' : 'scale(1)',
+                  ? '0 12px 24px -8px rgba(0,0,0,0.55)'
+                  : '0 4px 14px -4px rgba(0,0,0,0.2)',
+                transform: selected ? 'scale(1.15) translateY(-4px)' : 'scale(1)',
               }}
             >
               {n}

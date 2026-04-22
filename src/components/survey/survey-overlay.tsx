@@ -132,10 +132,10 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
               <div
                 className="flex flex-col items-center"
                 style={{
-                  paddingTop: '96px',
-                  paddingLeft: '56px',
-                  paddingRight: '56px',
-                  paddingBottom: '24px',
+                  paddingTop: '68px',
+                  paddingLeft: '48px',
+                  paddingRight: '48px',
+                  paddingBottom: '16px',
                 }}
               >
                 {currentQuestion ? (
@@ -171,9 +171,9 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
               <div
                 className="flex flex-1 flex-col items-center justify-center"
                 style={{
-                  paddingLeft: '56px',
-                  paddingRight: '56px',
-                  paddingBottom: '24px',
+                  paddingLeft: '48px',
+                  paddingRight: '48px',
+                  paddingBottom: '16px',
                 }}
               >
                 <div
@@ -204,10 +204,10 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
               {/* FOOTER: BACK · dots · NEXT */}
               <div
                 style={{
-                  paddingLeft: '56px',
-                  paddingRight: '56px',
-                  paddingBottom: '56px',
-                  paddingTop: '16px',
+                  paddingLeft: '48px',
+                  paddingRight: '48px',
+                  paddingBottom: '40px',
+                  paddingTop: '12px',
                 }}
               >
                 <SurveyNavigation
@@ -216,7 +216,6 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
                   backLabel={textos.survey_back}
                   nextLabel={nextLabel}
                   nextDisabled={nextDisabled}
-                  isLastStep={isLastStep}
                   center={<SurveyProgress current={step} total={total} />}
                 />
               </div>

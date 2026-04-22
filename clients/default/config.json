@@ -44,7 +44,7 @@
     "map_chip_events": "Events",
     "survey_back": "BACK",
     "survey_next": "NEXT",
-    "survey_send": "SEND FEEDBACK",
+    "survey_send": "SEND",
     "survey_step_label": "{current}/{total}",
     "survey_optional": "Optional",
     "survey_nps_number": "{n}",

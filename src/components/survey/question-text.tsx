@@ -12,9 +12,15 @@ interface Props {
   placeholder?: string;
 }
 
+const KEYBOARD_SCALE = 0.6;
+const KEYBOARD_NATIVE_W = 1080;
+const KEYBOARD_NATIVE_H = 398;
+const KEYBOARD_W = KEYBOARD_NATIVE_W * KEYBOARD_SCALE; // 648
+const KEYBOARD_H = KEYBOARD_NATIVE_H * KEYBOARD_SCALE; // ~239
+
 /**
- * Textarea display + OnScreenKeyboard del home escalado para caber en el card.
- * El textarea es display-only; el input viene del teclado on-screen.
+ * Textarea display del mismo ancho que el OnScreenKeyboard escalado.
+ * Counter 0/500 grande y prominente.
  */
 export function QuestionText({
   value,
@@ -55,15 +61,15 @@ export function QuestionText({
     .replace('{max}', String(maxLength));
 
   return (
-    <div className="flex w-full flex-col items-center" style={{ gap: '24px' }}>
-      <div className="relative" style={{ width: '600px' }}>
+    <div className="flex w-full flex-col items-center" style={{ gap: '16px' }}>
+      <div className="relative" style={{ width: `${KEYBOARD_W}px` }}>
         <div
           className="w-full rounded-2xl font-sans"
           style={{
-            minHeight: '140px',
-            padding: '24px',
-            fontSize: '22px',
-            lineHeight: 1.45,
+            minHeight: '220px',
+            padding: '20px 20px 56px 20px',
+            fontSize: '20px',
+            lineHeight: 1.4,
             backgroundColor: 'hsl(var(--primary-foreground) / 0.08)',
             border: '2px solid hsl(var(--primary-foreground) / 0.25)',
             whiteSpace: 'pre-wrap',
@@ -74,13 +80,14 @@ export function QuestionText({
           {current || <span style={{ opacity: 0.45 }}>{placeholder}</span>}
         </div>
         <span
-          className="absolute font-sans"
+          className="absolute font-sans font-bold"
           style={{
-            right: '16px',
-            bottom: '12px',
-            fontSize: '13px',
-            opacity: 0.7,
+            right: '20px',
+            bottom: '14px',
+            fontSize: '18px',
+            opacity: 0.92,
             letterSpacing: '0.04em',
+            color: 'hsl(var(--primary-foreground))',
           }}
         >
           {counter}
@@ -88,12 +95,22 @@ export function QuestionText({
       </div>
       <div
         style={{
-          transform: 'scale(0.62)',
-          transformOrigin: 'top center',
-          marginBottom: '-80px',
+          width: `${KEYBOARD_W}px`,
+          height: `${KEYBOARD_H}px`,
+          position: 'relative',
         }}
       >
-        <OnScreenKeyboard shift={shift} onKey={handleKey} />
+        <div
+          style={{
+            transform: `scale(${KEYBOARD_SCALE})`,
+            transformOrigin: 'top left',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+          }}
+        >
+          <OnScreenKeyboard shift={shift} onKey={handleKey} />
+        </div>
       </div>
     </div>
   );

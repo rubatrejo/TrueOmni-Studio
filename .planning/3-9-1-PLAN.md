@@ -8,6 +8,7 @@
 **Resumen:** Se implementa el módulo Survey como overlay modal dentro del `KioskCanvas`, montado desde `HomeShell` y disparado por el tile "Survey" del grid. Flow step-by-step con 5 tipos de pregunta (NPS, rating, single-choice, multi-choice, text), progress dots, contact capture opcional, confirm-exit al abandonar con respuestas, thank-you con auto-close y dispatch por `console.log` + `CustomEvent`. Cero hardcoded (tokens + `config.json` + `config.textos.survey_*`). El plan se ejecuta en 4 olas lógicas (Foundations → Shell → Questions → Integration) con 21 tasks atómicos. Cada ola termina con un `git add` específico + commit Conventional Commits (4 commits totales).
 
 **Orden de ejecución:**
+
 - Ola 1 (Foundations): tasks 1-3. Tipos + seed + lib.
 - Ola 2 (Shell): tasks 4-8. Chrome del overlay.
 - Ola 3 (Questions): tasks 9-14. 5 tipos + switch.
@@ -113,6 +114,7 @@
     ```
 
     **No modificar** nada más en este archivo. No tocar `HomeModule`, `HomeEventsModule`, etc.
+
   </action>
   <verify>
     - `pnpm typecheck` pasa limpio.
@@ -207,6 +209,7 @@
     Añadir en el mismo orden alfabético/lógico que los demás `textos` existentes (map_*, etc.).
 
     **Verificar que el JSON sigue siendo válido** tras la edición (comas, llaves). Si tu editor tiene auto-format, úsalo.
+
   </action>
   <verify>
     - `node -e "JSON.parse(require('fs').readFileSync('clients/default/config.json'))"` no lanza error.
@@ -319,6 +322,7 @@
     ```
 
     **No importar `server-only`** — este módulo se usa en client components.
+
   </action>
   <verify>
     - `pnpm typecheck` pasa limpio.
@@ -341,19 +345,19 @@
     git commit -m "feat(survey): tipos SurveyConfig + seed default + lib/survey.ts
 
 Fase 3.9 ola 1 (foundations). Prepara el contrato white-label:
-tipos en config.ts, 5 preguntas de ejemplo + 13 strings survey_* en
+tipos en config.ts, 5 preguntas de ejemplo + 13 strings survey\_\* en
 clients/default/config.json, helpers de validación + dispatch v1
 (console + CustomEvent) en lib/survey.ts."
-    ```
-  </action>
+
+````</action>
   <verify>
-    - `git log -1 --oneline` muestra el commit.
-    - `git status --short` limpio (de estos archivos).
-  </verify>
-  <done>
-    Commit creado.
-    Tree limpio de los tres archivos tocados.
-  </done>
+    -`git log -1 --oneline`muestra el commit.
+    -`git status --short` limpio (de estos archivos).
+</verify>
+<done>
+Commit creado.
+Tree limpio de los tres archivos tocados.
+</done>
 </task>
 
 <task type="auto">
@@ -457,6 +461,7 @@ clients/default/config.json, helpers de validación + dispatch v1
       );
     }
     ```
+
   </action>
   <verify>
     - Los 3 archivos existen.
@@ -515,6 +520,7 @@ clients/default/config.json, helpers de validación + dispatch v1
       );
     }
     ```
+
   </action>
   <verify>
     - `pnpm typecheck` + `pnpm lint` limpios.
@@ -589,6 +595,7 @@ clients/default/config.json, helpers de validación + dispatch v1
     ```
 
     **Nota:** `disabled:opacity-0` en BACK hace que desaparezca en step 0 (cuando `onBack` es undefined → `disabled`) manteniendo el layout simétrico sin romper el `justify-between`.
+
   </action>
   <verify>
     - `pnpm typecheck` + `pnpm lint` limpios.
@@ -682,6 +689,7 @@ clients/default/config.json, helpers de validación + dispatch v1
     ```
 
     **Nota tokens:** usa `bg-destructive` y `text-destructive-foreground`. Verificar que el template los define (deberían estar en `clients/_template/tokens.css`; si no, fallback a `bg-foreground` + `text-background`).
+
   </action>
   <verify>
     - `pnpm typecheck` + `pnpm lint` limpios.
@@ -775,6 +783,7 @@ clients/default/config.json, helpers de validación + dispatch v1
       );
     }
     ```
+
   </action>
   <verify>
     - `pnpm typecheck` + `pnpm lint` limpios.
@@ -974,6 +983,7 @@ clients/default/config.json, helpers de validación + dispatch v1
     **Warnings aceptables:** el `useEffect` para el Escape tiene `eslint-disable-next-line react-hooks/exhaustive-deps` porque dependemos de valores capturados por el closure y el re-registro es innecesario (patrón ya aceptado en `directions-modal.tsx`).
 
     El `setContact` se prepara pero no se usa aún hasta `question-contact` (task 13). Se usará en el wiring del task 14.
+
   </action>
   <verify>
     - `pnpm typecheck` + `pnpm lint` limpios (excepto warnings ya aceptados).
@@ -1006,16 +1016,15 @@ backdrop, card azul, header con logo+X, progress dots, footer de
 navegación BACK/NEXT/SEND, modal de confirm-exit anidado y pantalla
 de thank-you con countdown. Root SurveyOverlay compone todo con
 placeholder para las 5 question variants (ola 3)."
-    ```
-  </action>
+```  </action>
   <verify>
-    - `git log -1 --oneline` muestra el commit de ola 2.
-    - `git status --short` limpio.
-  </verify>
-  <done>
-    Commit creado.
-    Tree limpio.
-  </done>
+    -`git log -1 --oneline`muestra el commit de ola 2.
+    -`git status --short` limpio.
+</verify>
+<done>
+Commit creado.
+Tree limpio.
+</done>
 </task>
 
 <task type="auto">
@@ -1086,6 +1095,7 @@ placeholder para las 5 question variants (ola 3)."
       );
     }
     ```
+
   </action>
   <verify>
     - `pnpm typecheck` + `pnpm lint` limpios.
@@ -1154,6 +1164,7 @@ placeholder para las 5 question variants (ola 3)."
       );
     }
     ```
+
   </action>
   <verify>
     - `pnpm typecheck` + `pnpm lint` limpios.
@@ -1320,6 +1331,7 @@ placeholder para las 5 question variants (ola 3)."
       );
     }
     ```
+
   </action>
   <verify>
     - `pnpm typecheck` + `pnpm lint` limpios.
@@ -1404,6 +1416,7 @@ placeholder para las 5 question variants (ola 3)."
     **Importante — contrato de `OnScreenKeyboard`:** si al leer su API resulta que NO acepta `value`+`onChange` directamente, envolverlo en un wrapper adaptador dentro de este archivo. No modificar `on-screen-keyboard.tsx`. Si hay divergencia significativa, documentar en el SUMMARY de la fase y proponer un wrapper específico.
 
     `readOnly` en el textarea porque el foco del OnScreenKeyboard gobierna el input; el textarea es solo display.
+
   </action>
   <verify>
     - `pnpm typecheck` pasa (el typecheck revelará si la API de OnScreenKeyboard difiere — ajustar según).
@@ -1546,6 +1559,7 @@ placeholder para las 5 question variants (ola 3)."
     ```
 
     **Nota API:** verificar exact props de `OnScreenKeyboard` y `NumericKeypad`. Si alguna espera diferente (`onKey`, `onText`, etc.), adaptar aquí sin tocar los componentes originales.
+
   </action>
   <verify>
     - `pnpm typecheck` pasa (ajustar props si difieren).
@@ -1684,6 +1698,7 @@ placeholder para las 5 question variants (ola 3)."
     import { QuestionContact } from './question-contact';
     import { SurveyQuestionView } from './survey-question';
     ```
+
   </action>
   <verify>
     - `pnpm typecheck` + `pnpm lint` limpios.
@@ -1716,16 +1731,15 @@ NPS 0-10, rating 1-5 estrellas, single/multi choice pills, text con
 OnScreenKeyboard reusado, contact step con email (QWERTY) y phone
 (NumericKeypad) en subsecciones condicionales. SurveyQuestionView
 discrimina por type. Overlay wireado — fin del placeholder."
-    ```
-  </action>
+```  </action>
   <verify>
-    - `git log -1 --oneline` muestra el commit de ola 3.
-    - `git status --short` limpio de survey/.
-  </verify>
-  <done>
-    Commit creado.
-    Tree limpio.
-  </done>
+    -`git log -1 --oneline`muestra el commit de ola 3.
+    -`git status --short` limpio de survey/.
+</verify>
+<done>
+Commit creado.
+Tree limpio.
+</done>
 </task>
 
 <task type="auto">
@@ -1798,6 +1812,7 @@ discrimina por type. Overlay wireado — fin del placeholder."
     ```
 
     **Marcar `'use client'`** porque la variante button usa `onClick`.
+
   </action>
   <verify>
     - `pnpm typecheck` + `pnpm lint` limpios.
@@ -1980,6 +1995,7 @@ discrimina por type. Overlay wireado — fin del placeholder."
     ```
 
     **Nota sobre el shape:** `config.client` hoy expone `{ slug, nombre, locale, timezone?, coords? }` (sin logo). El logo del cliente vive en `config.branding.logo.default`. `config.textos` es `Record<string, string>` required (no optional). Por eso el plan pasa `logo: config.branding.logo.default` y `textos: config.textos` sin fallback.
+
   </action>
   <verify>
     - `pnpm typecheck` + `pnpm lint` limpios.
@@ -2047,22 +2063,21 @@ al CategoryTile sin wrappers. Verificación visual con Playwright:
 6 screenshots cubriendo los 5 tipos de pregunta, thank-you,
 confirm-exit y branding por cliente (default + demo-cliente-a).
 Auditor white-label sin hallazgos críticos."
-    ```
-  </action>
+```  </action>
   <verify>
-    - `pnpm check` limpio.
-    - Los 7+ screenshots existen en `.planning/verifications/`.
-    - `git log -3 --oneline` muestra los 4 commits de la fase 3.9.
-    - `grep -REn "#[0-9a-fA-F]{3,8}" src/components/survey/` sin resultados.
-    - Navegar `/home` con `KIOSK_CLIENT=demo-cliente-a` muestra card naranja sin edits en .tsx.
-  </verify>
-  <done>
-    Módulo Survey funcional, 6 tipos (5 questions + contact) operativos.
-    White-label respetado.
-    Screenshots evidencian el flow completo en 2 clientes.
-    SUMMARY.md escrito.
-    Commit de cierre hecho.
-  </done>
+    -`pnpm check`limpio.
+    - Los 7+ screenshots existen en`.planning/verifications/`.
+    - `git log -3 --oneline`muestra los 4 commits de la fase 3.9.
+    -`grep -REn "#[0-9a-fA-F]{3,8}" src/components/survey/`sin resultados.
+    - Navegar`/home`con`KIOSK_CLIENT=demo-cliente-a` muestra card naranja sin edits en .tsx.
+</verify>
+<done>
+Módulo Survey funcional, 6 tipos (5 questions + contact) operativos.
+White-label respetado.
+Screenshots evidencian el flow completo en 2 clientes.
+SUMMARY.md escrito.
+Commit de cierre hecho.
+</done>
 </task>
 
 ---
@@ -2081,10 +2096,11 @@ Al completar los 17 tasks:
 
 ## Riesgos + mitigaciones
 
-| Riesgo | Mitigación |
-|---|---|
-| API de `OnScreenKeyboard` / `NumericKeypad` no encaja con los props asumidos | Task 12/13 lo detecta primero via `grep`. Adaptar con wrapper en el archivo del question; nunca modificar el componente shared. |
-| El `config.textos` no contiene las claves `survey_*` | Task 2 las añade explícitamente. El overlay accede via `textos.survey_back` etc. — si falta una, Next.js muestra `undefined` en UI (detectado en Playwright del task 21). |
-| El tile "Survey" renderiza antes de que el `survey.enabled` sea true | CategoryGrid sólo pasa `onSurveyTap` si el home lo recibió. Tile sin callback vuelve a Link → stub "Coming soon" (comportamiento documentado). |
-| Thank-you countdown con tab inactiva | React sigue ejecutando `setTimeout` en background. Al volver, overlay cierra. Edge case aceptado, documentado en spec §8. |
-| Textarea no arroja `focus()` automático | El `OnScreenKeyboard` monta siempre en paso text; el input es `readOnly` y no necesita foco nativo. |
+| Riesgo                                                                       | Mitigación                                                                                                                                                                |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API de `OnScreenKeyboard` / `NumericKeypad` no encaja con los props asumidos | Task 12/13 lo detecta primero via `grep`. Adaptar con wrapper en el archivo del question; nunca modificar el componente shared.                                           |
+| El `config.textos` no contiene las claves `survey_*`                         | Task 2 las añade explícitamente. El overlay accede via `textos.survey_back` etc. — si falta una, Next.js muestra `undefined` en UI (detectado en Playwright del task 21). |
+| El tile "Survey" renderiza antes de que el `survey.enabled` sea true         | CategoryGrid sólo pasa `onSurveyTap` si el home lo recibió. Tile sin callback vuelve a Link → stub "Coming soon" (comportamiento documentado).                            |
+| Thank-you countdown con tab inactiva                                         | React sigue ejecutando `setTimeout` en background. Al volver, overlay cierra. Edge case aceptado, documentado en spec §8.                                                 |
+| Textarea no arroja `focus()` automático                                      | El `OnScreenKeyboard` monta siempre en paso text; el input es `readOnly` y no necesita foco nativo.                                                                       |
+````

@@ -61,10 +61,11 @@ export function GuestbookStartScreen({
         <p
           className="text-center font-sans"
           style={{
-            fontSize: '22px',
-            lineHeight: '32px',
+            fontSize: '28px',
+            lineHeight: '40px',
             color: '#4a4a4a',
-            maxWidth: '820px',
+            maxWidth: '900px',
+            fontWeight: 400,
           }}
         >
           {subtitle}

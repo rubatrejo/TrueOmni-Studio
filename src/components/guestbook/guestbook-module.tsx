@@ -161,6 +161,16 @@ export function GuestbookModule({
         ref={globeRef}
         token={mapboxToken}
         earthStart={mod.earthStart}
+        overlayPins={
+          phase === 'start' || phase === 'form'
+            ? mod.seedPins.map((p, i) => ({
+                id: p.id,
+                coords: p.coords,
+                // Rotamos ciclicamente entre los 5 pins del catálogo.
+                image: mod.pinCatalog[i % mod.pinCatalog.length]?.image ?? p.pinImage,
+              }))
+            : undefined
+        }
         style={globeStyle}
       />
 

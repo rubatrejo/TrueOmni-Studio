@@ -25,15 +25,23 @@ export interface GlobeHandle {
  * API imperativa vía ref: `flyToZip({ lat, lng })` — resuelve cuando
  * termina la animación (`moveend`).
  */
+export interface GlobeOverlayPin {
+  id: string;
+  coords: { lat: number; lng: number };
+  image: string;
+}
+
 export const GuestbookGlobeCanvas = forwardRef<
   GlobeHandle,
   {
     token: string | undefined;
     earthStart?: { center: { lat: number; lng: number }; zoom: number };
+    overlayPins?: readonly GlobeOverlayPin[];
     className?: string;
     style?: React.CSSProperties;
   }
->(function GuestbookGlobeCanvas({ token, earthStart, className, style }, ref) {
+>(function GuestbookGlobeCanvas({ token, earthStart, overlayPins, className, style }, ref) {
+  const overlayMarkersRef = useRef<mapboxgl.Marker[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const onStreetsRef = useRef(false);
@@ -107,6 +115,36 @@ export const GuestbookGlobeCanvas = forwardRef<
       mapRef.current = null;
     };
   }, [token, earthStart?.center.lat, earthStart?.center.lng, earthStart?.zoom]);
+
+  // Renderea los overlayPins como markers que giran con el globo.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !overlayPins) return;
+
+    for (const m of overlayMarkersRef.current) m.remove();
+    overlayMarkersRef.current = [];
+
+    void import('mapbox-gl').then((mod) => {
+      const Marker = mod.Marker;
+      if (!Marker) return;
+      for (const p of overlayPins) {
+        const el = document.createElement('div');
+        el.style.width = '46px';
+        el.style.height = '58px';
+        el.style.pointerEvents = 'none';
+        el.innerHTML = `<img src="${p.image}" alt="" style="width:46px;height:58px;filter:drop-shadow(0 3px 5px rgba(0,0,0,0.4));" />`;
+        const m = new Marker({ element: el, anchor: 'bottom' })
+          .setLngLat([p.coords.lng, p.coords.lat])
+          .addTo(map);
+        overlayMarkersRef.current.push(m);
+      }
+    });
+
+    return () => {
+      for (const m of overlayMarkersRef.current) m.remove();
+      overlayMarkersRef.current = [];
+    };
+  }, [overlayPins]);
 
   useImperativeHandle(
     ref,

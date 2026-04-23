@@ -135,15 +135,18 @@ export function GuestbookModule({
   // Layout: globo siempre presente. Las pantallas Start/Form se montan
   // encima durante esas phases. En transition el globo es full-screen
   // (sin UI). En map la UI del rail + finish se muestra sobre el mapa.
+  // Posicionamiento del globo como "media luna" asomando desde abajo
+  // (como el mockup pantalla 0). El canvas es más alto que la parte
+  // visible: el centro del globo cae debajo del viewport → solo se ve
+  // el top del planeta.
   const globeStyle: React.CSSProperties =
     phase === 'start' || phase === 'form'
       ? {
           position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          top: phase === 'start' ? '880px' : '960px',
-          height: phase === 'start' ? '1040px' : '960px',
+          left: '-200px',
+          right: '-200px',
+          top: phase === 'start' ? '1100px' : '1180px',
+          height: '1600px',
           zIndex: 0,
         }
       : {

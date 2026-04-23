@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { OnScreenKeyboard, type KeyboardKey } from '@/components/home/on-screen-keyboard';
+import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { NumericKeypad, type NumericKey } from '@/components/listings/numeric-keypad';
 import type { GuestbookCountry } from '@/lib/config';
 
@@ -273,6 +274,8 @@ export function GuestbookFormScreen({
           <OnScreenKeyboard shift={shift} onKey={handleQwerty} />
         ) : null}
       </div>
+
+      <FloatingHomeButton />
 
       <GuestbookCountryDropdown
         open={countryOpen}

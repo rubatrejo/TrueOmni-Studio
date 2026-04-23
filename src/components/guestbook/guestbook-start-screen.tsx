@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { FloatingHomeButton } from '@/components/listings/floating-home-button';
+
 /**
  * Pantalla 0 del Guestbook: hero (ballerinas) arriba, título + subtítulo
  * centrado, botón START, y el globo crop visible en la parte inferior.
@@ -90,6 +92,8 @@ export function GuestbookStartScreen({
           {ctaLabel}
         </button>
       </div>
+
+      <FloatingHomeButton />
     </div>
   );
 }

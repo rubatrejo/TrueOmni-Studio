@@ -10,6 +10,7 @@ import { ListingsModule } from '@/components/listings/listings-module';
 import { MapModule } from '@/components/map/map-module';
 import { PassesModule } from '@/components/passes/passes-module';
 import { SocialWallModule } from '@/components/social-wall/social-wall-module';
+import { TicketsModule } from '@/components/tickets/tickets-module';
 import { getAdsFromConfig } from '@/lib/ads';
 import { getConfig } from '@/lib/config';
 import { getMapItems } from '@/lib/map-aggregator';
@@ -136,8 +137,22 @@ export default async function ModulePage({ params }: PageProps) {
     );
   }
   if (mod?.kind === 'tickets') {
-    // Placeholder hasta T13 del plan — implementa TicketsModule + rama real.
-    notFound();
+    const eventsModule = config.features?.home?.modules?.events;
+    const allEvents = eventsModule && eventsModule.kind === 'events' ? eventsModule.events : [];
+    return (
+      <KioskCanvas>
+        <TicketsModule
+          moduleKey={module}
+          module={mod}
+          allEvents={allEvents}
+          clientCoords={config.client.coords}
+          clientTimezone={config.client.timezone}
+          textos={config.textos ?? {}}
+          header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
+        />
+        <AdsSlot ads={ads} />
+      </KioskCanvas>
+    );
   }
   if (mod) {
     return (

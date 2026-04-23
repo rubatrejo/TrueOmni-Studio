@@ -36,7 +36,10 @@ export interface EventMeta {
 
 export interface SecondaryCta {
   label: string;
-  href: string;
+  /** URL externa (apertura en tab nueva). Mutuamente exclusivo con onClick. */
+  href?: string;
+  /** Callback sincrónico. Mutuamente exclusivo con href. */
+  onClick?: () => void;
   /** Color temático del botón. Default 'blue'. */
   color?: 'blue' | 'olive' | 'outline-red';
 }
@@ -440,27 +443,38 @@ function SecondaryCtaButton({ cta }: { cta: SecondaryCta }) {
   const color = cta.color ?? 'blue';
   const bg = color === 'olive' ? '#b9bd39' : '#1796d6';
   const isOutlineRed = color === 'outline-red';
+  const sharedStyle = {
+    left: '609px',
+    top: '665px',
+    width: '260px',
+    height: '64px',
+    borderRadius: '8px',
+    backgroundColor: isOutlineRed ? '#fff' : bg,
+    border: isOutlineRed ? '3px solid #db323a' : 'none',
+    fontFamily: 'Tahoma, Verdana, sans-serif',
+    fontSize: '20px',
+    lineHeight: '20px',
+    color: isOutlineRed ? '#db323a' : '#fff',
+    fontWeight: 600,
+    letterSpacing: '0.02em',
+  } as const;
+  const className =
+    'absolute flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300';
+
+  if (cta.onClick) {
+    return (
+      <button type="button" onClick={cta.onClick} className={className} style={sharedStyle}>
+        {cta.label}
+      </button>
+    );
+  }
   return (
     <a
       href={cta.href}
       target="_blank"
       rel="noopener noreferrer"
-      className="absolute flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
-      style={{
-        left: '609px',
-        top: '665px',
-        width: '260px',
-        height: '64px',
-        borderRadius: '8px',
-        backgroundColor: isOutlineRed ? '#fff' : bg,
-        border: isOutlineRed ? '3px solid #db323a' : 'none',
-        fontFamily: 'Tahoma, Verdana, sans-serif',
-        fontSize: '20px',
-        lineHeight: '20px',
-        color: isOutlineRed ? '#db323a' : '#fff',
-        fontWeight: 600,
-        letterSpacing: '0.02em',
-      }}
+      className={className}
+      style={sharedStyle}
     >
       {cta.label}
     </a>

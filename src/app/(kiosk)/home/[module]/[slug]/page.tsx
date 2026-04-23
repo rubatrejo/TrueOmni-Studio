@@ -6,11 +6,14 @@ import { EventsModule } from '@/components/events/events-module';
 import { HomeHeader } from '@/components/home/header';
 import { KioskCanvas } from '@/components/kiosk-canvas';
 import { ListingDetail } from '@/components/listings/listing-detail';
-import type { EventMeta, SecondaryCta } from '@/components/listings/listing-detail';
+import type { EventMeta } from '@/components/listings/listing-detail';
 import { ListingsModule } from '@/components/listings/listings-module';
 import { PassDetailWithShare } from '@/components/passes/pass-detail-with-share';
 import { PassQrHost } from '@/components/passes/pass-qr-host';
 import { PassesModule } from '@/components/passes/passes-module';
+import { QrPurchaseHost } from '@/components/shared/qr-purchase-host';
+import { TicketDetailWithBuy } from '@/components/tickets/ticket-detail-with-buy';
+import { TicketsModule } from '@/components/tickets/tickets-module';
 import { getAdsFromConfig } from '@/lib/ads';
 import type { EventItem, Listing } from '@/lib/config';
 import { getConfig } from '@/lib/config';
@@ -47,9 +50,8 @@ export default async function DetailPage({ params }: PageProps) {
       dateLabel: formatEventDateLong(event.date),
       timeLabel: formatTimeRange(event.startTime, event.endTime),
     };
-    const secondaryCta: SecondaryCta | undefined = event.ticketsUrl
-      ? { label: 'GET TICKETS', href: event.ticketsUrl, color: 'blue' }
-      : undefined;
+    const textos = config.textos ?? {};
+    const hasTicket = event.ticket != null;
 
     return (
       <KioskCanvas>
@@ -60,15 +62,53 @@ export default async function DetailPage({ params }: PageProps) {
           clientTimezone={config.client.timezone}
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
         />
-        <ListingDetail
-          moduleKey={module}
-          listing={listing}
-          mapboxToken={mapboxToken}
-          clientCoords={config.client.coords}
-          eventMeta={eventMeta}
-          secondaryCta={secondaryCta}
-          favoritesKind="event"
-        />
+        {hasTicket ? (
+          <TicketDetailWithBuy
+            moduleKey={module}
+            listing={listing}
+            eventMeta={eventMeta}
+            textos={textos}
+            mapboxToken={mapboxToken}
+            clientCoords={config.client.coords}
+          />
+        ) : (
+          <ListingDetail
+            moduleKey={module}
+            listing={listing}
+            mapboxToken={mapboxToken}
+            clientCoords={config.client.coords}
+            eventMeta={eventMeta}
+            secondaryCta={
+              event.ticketsUrl
+                ? { label: 'GET TICKETS', href: event.ticketsUrl, color: 'blue' }
+                : undefined
+            }
+            favoritesKind="event"
+          />
+        )}
+        {hasTicket && event.ticket ? (
+          <QrPurchaseHost
+            eventName="kiosk:ticket-purchase-open"
+            title={event.title.toUpperCase()}
+            purchaseUrl={event.ticket.purchaseUrl}
+            priceDisplay={event.ticket.priceDisplay}
+            textos={{
+              qr_instruction:
+                textos.tickets_share_instruction ?? 'SCAN QR OR GET SMS TO BUY YOUR TICKET',
+              qr_phone_label: textos.tickets_share_phone_label ?? 'Enter your phone number',
+              qr_country: textos.tickets_share_country ?? 'USA (+1)',
+              qr_phone_placeholder: textos.tickets_share_phone_placeholder ?? '000-555-0115',
+              qr_phone_aria:
+                textos.tickets_share_phone_aria ?? 'Phone number. Tap to edit via keypad.',
+              qr_terms: textos.tickets_share_terms ?? 'I accept details',
+              qr_send: textos.tickets_share_send ?? 'SEND',
+            }}
+            sentTitle={textos.tickets_sent_title ?? 'Link sent!'}
+            sentMessage={
+              textos.tickets_sent_message ?? 'Check your phone to complete the purchase.'
+            }
+          />
+        ) : null}
         <AdsSlot ads={ads} />
       </KioskCanvas>
     );
@@ -117,8 +157,62 @@ export default async function DetailPage({ params }: PageProps) {
   }
 
   if (mod.kind === 'tickets') {
-    // Placeholder hasta T16 del plan — implementa detail + QrPurchaseHost.
-    notFound();
+    const eventsModule = config.features?.home?.modules?.events;
+    const allEvents = eventsModule && eventsModule.kind === 'events' ? eventsModule.events : [];
+    const event = allEvents.find((e) => e.slug === slug && e.ticket != null);
+    if (!event || !event.ticket) notFound();
+
+    const listing = eventToListing(event);
+    const eventMeta: EventMeta = {
+      date: event.date,
+      startTime: event.startTime,
+      endTime: event.endTime,
+      dateLabel: formatEventDateLong(event.date),
+      timeLabel: formatTimeRange(event.startTime, event.endTime),
+    };
+    const textos = config.textos ?? {};
+
+    return (
+      <KioskCanvas>
+        <TicketsModule
+          moduleKey={module}
+          module={mod}
+          allEvents={allEvents}
+          clientCoords={config.client.coords}
+          clientTimezone={config.client.timezone}
+          textos={textos}
+          header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
+        />
+        <TicketDetailWithBuy
+          moduleKey={module}
+          listing={listing}
+          eventMeta={eventMeta}
+          textos={textos}
+          mapboxToken={mapboxToken}
+          clientCoords={config.client.coords}
+        />
+        <QrPurchaseHost
+          eventName="kiosk:ticket-purchase-open"
+          title={event.title.toUpperCase()}
+          purchaseUrl={event.ticket.purchaseUrl}
+          priceDisplay={event.ticket.priceDisplay}
+          textos={{
+            qr_instruction:
+              textos.tickets_share_instruction ?? 'SCAN QR OR GET SMS TO BUY YOUR TICKET',
+            qr_phone_label: textos.tickets_share_phone_label ?? 'Enter your phone number',
+            qr_country: textos.tickets_share_country ?? 'USA (+1)',
+            qr_phone_placeholder: textos.tickets_share_phone_placeholder ?? '000-555-0115',
+            qr_phone_aria:
+              textos.tickets_share_phone_aria ?? 'Phone number. Tap to edit via keypad.',
+            qr_terms: textos.tickets_share_terms ?? 'I accept details',
+            qr_send: textos.tickets_share_send ?? 'SEND',
+          }}
+          sentTitle={textos.tickets_sent_title ?? 'Link sent!'}
+          sentMessage={textos.tickets_sent_message ?? 'Check your phone to complete the purchase.'}
+        />
+        <AdsSlot ads={ads} />
+      </KioskCanvas>
+    );
   }
 
   // Listings

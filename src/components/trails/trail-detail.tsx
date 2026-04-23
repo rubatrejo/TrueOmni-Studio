@@ -51,7 +51,7 @@ export function TrailDetail({
       mapboxToken={mapboxToken}
       clientCoords={clientCoords}
       favoritesKind="trail"
-      cardHeight={1780}
+      contentHeight={1800}
       mapSlot={
         <TrailMapTabs
           trail={trail}

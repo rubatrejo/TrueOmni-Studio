@@ -89,10 +89,14 @@ export function ListingCard({
           className="absolute font-sans uppercase text-white"
           style={{
             left: '20px',
+            right: '20px',
             top: '12px',
             fontSize: '12px',
             lineHeight: '1',
             letterSpacing: '0.04em',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}
         >
           {listing.subcategory}
@@ -101,10 +105,14 @@ export function ListingCard({
           className="absolute font-sans text-white"
           style={{
             left: '20px',
+            right: '20px',
             top: '28px',
             fontSize: '22px',
             lineHeight: '1',
             fontWeight: 600,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}
         >
           {listing.title}
@@ -113,10 +121,14 @@ export function ListingCard({
           className="absolute font-sans text-white"
           style={{
             left: '20px',
+            right: '20px',
             top: '60px',
             fontSize: '14px',
             lineHeight: '1',
             fontWeight: 300,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}
         >
           {distance}
@@ -127,11 +139,15 @@ export function ListingCard({
           className="absolute font-sans"
           style={{
             left: '20px',
+            right: '20px',
             top: '82px',
             fontSize: '12px',
             lineHeight: '1',
             fontWeight: 600,
             color: '#b9bd39',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}
         >
           Open until {openUntil}

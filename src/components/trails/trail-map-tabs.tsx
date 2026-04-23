@@ -143,17 +143,17 @@ export function TrailMapTabs({
       <div
         className="flex"
         style={{
-          height: '46px',
+          height: '68px',
           borderBottom: '1px solid #e0e0e0',
-          backgroundColor: '#ffffff',
+          backgroundColor: '#f1f3f5',
         }}
       >
         <Tab label={defaultTabLabel} active={tab === 'default'} onClick={() => setTab('default')} />
         <Tab label={trailTabLabel} active={tab === 'trail'} onClick={() => setTab('trail')} />
       </div>
 
-      {/* Mapa — altura = 312 - 46 - 72 (address row) = 194 */}
-      <div className="relative" style={{ height: '266px', width: '899px' }}>
+      {/* Mapa — altura = 384 - 68 - 1 (divider) - 70 (address row) = 245 */}
+      <div className="relative" style={{ height: '245px', width: '899px' }}>
         {token ? (
           <div
             ref={containerRef}
@@ -237,23 +237,17 @@ function Tab({ label, active, onClick }: { label: string; active: boolean; onCli
       aria-pressed={active}
       className="relative flex-1 font-sans focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-blue-300"
       style={{
-        height: '46px',
-        backgroundColor: '#ffffff',
-        color: active ? '#004f8b' : '#6e6e6e',
-        fontSize: '16px',
-        lineHeight: '16px',
+        height: '68px',
+        backgroundColor: active ? '#004f8b' : '#f1f3f5',
+        color: active ? '#ffffff' : '#4a4a4a',
+        fontSize: '22px',
+        lineHeight: '22px',
         fontWeight: active ? 700 : 500,
         letterSpacing: '0.04em',
+        transition: 'background-color 0.15s ease-out, color 0.15s ease-out',
       }}
     >
       {label}
-      {active ? (
-        <span
-          aria-hidden
-          className="absolute inset-x-0 bottom-0"
-          style={{ height: '3px', backgroundColor: '#004f8b' }}
-        />
-      ) : null}
     </button>
   );
 }

@@ -58,6 +58,7 @@ export function ListingDetail({
   stickyBuyCta,
   eventMetaOnHero = false,
   cardHeight,
+  contentHeight,
 }: {
   moduleKey: string;
   listing: Listing;
@@ -84,8 +85,15 @@ export function ListingDetail({
   stickyBuyCta?: { label: string; priceDisplay: string; onClick: () => void };
   /** Si true, el `eventMeta` se renderea sobre el hero con gradient oscuro (Tickets). */
   eventMetaOnHero?: boolean;
-  /** Override de la altura del card. Default 1589. Útil cuando el `extraDetails` es grande (Trails Considerations). */
+  /** Override de la altura del card visible (viewport). Default 1589. */
   cardHeight?: number;
+  /**
+   * Override de la altura del contenido intrínseco (wrapper interno). Si
+   * excede `cardHeight` el card gana scroll vertical. Default = cardHeight
+   * (sin scroll). Usar cuando `extraDetails` añade contenido que no cabe
+   * en el viewport estándar (ej. Trails Considerations).
+   */
+  contentHeight?: number;
 }) {
   const [emailOpen, setEmailOpen] = useState(false);
   const [phoneOpen, setPhoneOpen] = useState(false);
@@ -116,10 +124,14 @@ export function ListingDetail({
         style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
       />
 
-      {/* Card blanco 898×variable at (90, 166). Si hay stickyBuyCta o extraDetails, se amplía. */}
+      {/* Card blanco 898×cardHeight at (90, 166). Contenedor scrollable:
+          el card outer mantiene altura visible fija; el wrapper interno
+          define la altura intrínseca del contenido (`contentHeight`).
+          Si contentHeight > cardHeight, el card gana scroll vertical. */}
       <div
-        className="absolute overflow-hidden"
+        className="scrollbar-hide"
         style={{
+          position: 'absolute',
           left: '90px',
           top: '166px',
           width: '898px',
@@ -127,57 +139,67 @@ export function ListingDetail({
           backgroundColor: '#ffffff',
           borderRadius: '8px',
           boxShadow: '0 12px 24px rgba(0,0,0,0.25)',
+          overflowY: 'auto',
+          overflowX: 'hidden',
         }}
       >
-        <DetailHeader moduleKey={moduleKey} listing={listing} onClose={onClose} />
-        <HeroImage
-          listing={listing}
-          onSee360={() => setThreshold360Open(true)}
-          eventMetaOverlay={eventMetaOnHero ? eventMeta : undefined}
-          phoneOverlay={eventMetaOnHero ? listing.phone : undefined}
-        />
-        <ActionRow
-          listing={listing}
-          eventMeta={eventMetaOnHero ? undefined : eventMeta}
-          secondaryCta={secondaryCta}
-        />
-        <SharingRow
-          slug={listing.slug}
-          onEmailClick={openEmail}
-          onPhoneClick={openPhone}
-          favoritesKind={favoritesKind}
-        />
-        {mapSlot ? (
-          <div
-            className="absolute"
-            style={{ left: 0, top: '844px', width: '899px', height: '384px' }}
-          >
-            {mapSlot}
-          </div>
-        ) : (
-          <MapSection
+        <div
+          style={{
+            position: 'relative',
+            width: '898px',
+            height: `${contentHeight ?? cardHeight ?? 1589}px`,
+          }}
+        >
+          <DetailHeader moduleKey={moduleKey} listing={listing} onClose={onClose} />
+          <HeroImage
             listing={listing}
-            token={mapboxToken}
-            onGetDirections={() => setDirectionsOpen(true)}
+            onSee360={() => setThreshold360Open(true)}
+            eventMetaOverlay={eventMetaOnHero ? eventMeta : undefined}
+            phoneOverlay={eventMetaOnHero ? listing.phone : undefined}
           />
-        )}
-        <DescriptionSection listing={listing} />
-        {extraDetails ? (
-          <div
-            className="absolute"
-            style={{
-              left: '48px',
-              top: '1470px',
-              width: '802px',
-              paddingTop: '16px',
-              borderTop: '1px solid #e8e8e8',
-            }}
-          >
-            {extraDetails}
-          </div>
-        ) : null}
-        {null}
-        {stickyBuyCta ? null : null}
+          <ActionRow
+            listing={listing}
+            eventMeta={eventMetaOnHero ? undefined : eventMeta}
+            secondaryCta={secondaryCta}
+          />
+          <SharingRow
+            slug={listing.slug}
+            onEmailClick={openEmail}
+            onPhoneClick={openPhone}
+            favoritesKind={favoritesKind}
+          />
+          {mapSlot ? (
+            <div
+              className="absolute"
+              style={{ left: 0, top: '844px', width: '899px', height: '384px' }}
+            >
+              {mapSlot}
+            </div>
+          ) : (
+            <MapSection
+              listing={listing}
+              token={mapboxToken}
+              onGetDirections={() => setDirectionsOpen(true)}
+            />
+          )}
+          <DescriptionSection listing={listing} />
+          {extraDetails ? (
+            <div
+              className="absolute"
+              style={{
+                left: '48px',
+                top: '1470px',
+                width: '802px',
+                paddingTop: '16px',
+                borderTop: '1px solid #e8e8e8',
+              }}
+            >
+              {extraDetails}
+            </div>
+          ) : null}
+          {null}
+          {stickyBuyCta ? null : null}
+        </div>
       </div>
 
       {/* Modales */}
@@ -264,23 +286,34 @@ function DetailHeader({
         style={{
           left: '48px',
           top: '48px',
+          maxWidth: '720px',
           fontSize: '24px',
           lineHeight: '24px',
           letterSpacing: '0.02em',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          display: 'block',
         }}
       >
         {listing.subcategory}
       </span>
 
-      {/* TITLE @ (48, 81), Helvetica 60, white, baseline y=46 */}
+      {/* TITLE @ (48, 81), Helvetica 60, white, baseline y=46.
+          Truncado a 1 línea con ellipsis si excede el ancho disponible. */}
       <span
         className="absolute text-white"
         style={{
           left: '48px',
           top: '81px',
+          maxWidth: '720px',
           fontSize: '60px',
           lineHeight: '60px',
           fontFamily: 'Helvetica, Arial, sans-serif',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          display: 'block',
         }}
       >
         {listing.title}

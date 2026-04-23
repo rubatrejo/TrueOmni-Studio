@@ -173,25 +173,34 @@ export function DealRedeemModal({
             <SendButton label={sendPhoneLabel} onClick={onSendPhone} />
             <SendButton label={sendEmailLabel} onClick={onSendEmail} />
           </div>
-
-          <button
-            type="button"
-            onClick={onCancel}
-            className="font-sans focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
-            style={{
-              marginTop: '6px',
-              fontSize: '16px',
-              lineHeight: '16px',
-              fontWeight: 600,
-              color: '#6e6e6e',
-              letterSpacing: '0.04em',
-              padding: '8px 16px',
-              backgroundColor: 'transparent',
-            }}
-          >
-            {cancelLabel}
-          </button>
         </div>
+
+        <button
+          type="button"
+          onClick={onCancel}
+          aria-label={cancelLabel}
+          className="absolute flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+          style={{
+            top: '16px',
+            right: '16px',
+            width: '44px',
+            height: '44px',
+            borderRadius: '50%',
+            border: '1.5px solid #ffffff',
+            backgroundColor: 'rgba(0,0,0,0.35)',
+            color: '#ffffff',
+            zIndex: 2,
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
+            <path
+              d="M6 6l12 12M18 6l-12 12"
+              stroke="#ffffff"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
       </div>
     </div>
   );

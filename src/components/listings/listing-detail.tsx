@@ -129,76 +129,104 @@ export function ListingDetail({
           define la altura intrínseca del contenido (`contentHeight`).
           Si contentHeight > cardHeight, el card gana scroll vertical. */}
       <div
-        className="scrollbar-hide"
         style={{
           position: 'absolute',
           left: '90px',
           top: '166px',
           width: '898px',
           height: `${cardHeight ?? 1589}px`,
-          backgroundColor: '#ffffff',
           borderRadius: '8px',
           boxShadow: '0 12px 24px rgba(0,0,0,0.25)',
-          overflowY: 'auto',
-          overflowX: 'hidden',
         }}
       >
+        {/* Scroll-hint gradient: pista visual de que hay más contenido abajo.
+            Solo se muestra si el contenido excede la altura visible. */}
+        {contentHeight && contentHeight > (cardHeight ?? 1589) ? (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute"
+            style={{
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: '120px',
+              background:
+                'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.92) 72%, rgba(255,255,255,1) 100%)',
+              zIndex: 2,
+              borderBottomLeftRadius: '8px',
+              borderBottomRightRadius: '8px',
+            }}
+          />
+        ) : null}
+
         <div
+          className="scrollbar-hide"
           style={{
-            position: 'relative',
-            width: '898px',
-            height: `${contentHeight ?? cardHeight ?? 1589}px`,
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#ffffff',
+            borderRadius: '8px',
+            overflowY: 'auto',
+            overflowX: 'hidden',
           }}
         >
-          <DetailHeader moduleKey={moduleKey} listing={listing} onClose={onClose} />
-          <HeroImage
-            listing={listing}
-            onSee360={() => setThreshold360Open(true)}
-            eventMetaOverlay={eventMetaOnHero ? eventMeta : undefined}
-            phoneOverlay={eventMetaOnHero ? listing.phone : undefined}
-          />
-          <ActionRow
-            listing={listing}
-            eventMeta={eventMetaOnHero ? undefined : eventMeta}
-            secondaryCta={secondaryCta}
-          />
-          <SharingRow
-            slug={listing.slug}
-            onEmailClick={openEmail}
-            onPhoneClick={openPhone}
-            favoritesKind={favoritesKind}
-          />
-          {mapSlot ? (
-            <div
-              className="absolute"
-              style={{ left: 0, top: '844px', width: '899px', height: '384px' }}
-            >
-              {mapSlot}
-            </div>
-          ) : (
-            <MapSection
+          <div
+            style={{
+              position: 'relative',
+              width: '898px',
+              height: `${contentHeight ?? cardHeight ?? 1589}px`,
+            }}
+          >
+            <DetailHeader moduleKey={moduleKey} listing={listing} onClose={onClose} />
+            <HeroImage
               listing={listing}
-              token={mapboxToken}
-              onGetDirections={() => setDirectionsOpen(true)}
+              onSee360={() => setThreshold360Open(true)}
+              eventMetaOverlay={eventMetaOnHero ? eventMeta : undefined}
+              phoneOverlay={eventMetaOnHero ? listing.phone : undefined}
             />
-          )}
-          <DescriptionSection listing={listing} />
-          {extraDetails ? (
-            <div
-              className="absolute"
-              style={{
-                left: '48px',
-                top: '1470px',
-                width: '802px',
-                paddingTop: '16px',
-                borderTop: '1px solid #e8e8e8',
-              }}
-            >
-              {extraDetails}
-            </div>
-          ) : null}
-          {null}
-          {stickyBuyCta ? null : null}
+            <ActionRow
+              listing={listing}
+              eventMeta={eventMetaOnHero ? undefined : eventMeta}
+              secondaryCta={secondaryCta}
+            />
+            <SharingRow
+              slug={listing.slug}
+              onEmailClick={openEmail}
+              onPhoneClick={openPhone}
+              favoritesKind={favoritesKind}
+            />
+            {mapSlot ? (
+              <div
+                className="absolute"
+                style={{ left: 0, top: '844px', width: '899px', height: '384px' }}
+              >
+                {mapSlot}
+              </div>
+            ) : (
+              <MapSection
+                listing={listing}
+                token={mapboxToken}
+                onGetDirections={() => setDirectionsOpen(true)}
+              />
+            )}
+            <DescriptionSection listing={listing} />
+            {extraDetails ? (
+              <div
+                className="absolute"
+                style={{
+                  left: '48px',
+                  top: '1470px',
+                  width: '802px',
+                  paddingTop: '16px',
+                  borderTop: '1px solid #e8e8e8',
+                }}
+              >
+                {extraDetails}
+              </div>
+            ) : null}
+            {null}
+            {stickyBuyCta ? null : null}
+          </div>
         </div>
       </div>
 

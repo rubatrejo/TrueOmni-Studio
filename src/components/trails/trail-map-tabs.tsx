@@ -235,10 +235,10 @@ function Tab({ label, active, onClick }: { label: string; active: boolean; onCli
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className="relative flex-1 font-sans focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-blue-300"
+      className="relative flex-1 font-sans focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-white/60"
       style={{
         height: '68px',
-        backgroundColor: active ? '#004f8b' : '#f1f3f5',
+        backgroundColor: active ? '#b9bd39' : '#f1f3f5',
         color: active ? '#ffffff' : '#4a4a4a',
         fontSize: '22px',
         lineHeight: '22px',

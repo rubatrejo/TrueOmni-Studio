@@ -146,8 +146,16 @@ const eventFavorites = createFavoritesStore({
   kind: 'event',
 });
 
+const trailFavorites = createFavoritesStore({
+  storageKey: 'kiosk_trail_favorites',
+  kind: 'trail',
+});
+
 /** Hook del bucket de listings (retrocompatible con Fase 3.3). */
 export const useFavorites = listingFavorites.useStore;
 
 /** Hook del bucket de events (Fase 3.4). */
 export const useEventFavorites = eventFavorites.useStore;
+
+/** Hook del bucket de trails (Fase 3.13). */
+export const useTrailFavorites = trailFavorites.useStore;

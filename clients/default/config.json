@@ -98,7 +98,26 @@
     "deals_filters_title": "FILTERS",
     "deals_filter_features": "Features",
     "deals_clear_all": "CLEAR ALL",
-    "deals_apply": "APPLY"
+    "deals_apply": "APPLY",
+    "trails_label": "Trails",
+    "trails_empty": "No trails available right now.",
+    "trails_considerations_title": "CONSIDERATIONS",
+    "trails_consideration_distance": "Distance",
+    "trails_consideration_difficulty": "Difficulty",
+    "trails_consideration_duration": "Duration",
+    "trails_consideration_elevation": "Elevation Gain",
+    "trails_consideration_type": "Trail Type",
+    "trails_consideration_dog_friendly": "Dog Friendly",
+    "trails_dog_friendly_yes": "Yes",
+    "trails_dog_friendly_no": "No",
+    "trails_map_tab_default": "Default Map",
+    "trails_map_tab_trail": "Trail Map",
+    "trails_filters_title": "FILTERS",
+    "trails_filter_features": "Features",
+    "trails_filter_difficulty": "Difficulty",
+    "trails_filter_type": "Trail Type",
+    "trails_clear_all": "CLEAR ALL",
+    "trails_apply": "APPLY"
   },
   "navegacion": {
     "home": "/",
@@ -8125,6 +8144,852 @@
               "features": ["Tech", "Entertainment"],
               "popularity": 64,
               "discountValue": 55
+            }
+          ]
+        },
+        "trails": {
+          "kind": "trails",
+          "label": "Trails",
+          "heroImage": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=80",
+          "subcategories": ["Mountain", "Desert", "Canyon", "Urban"],
+          "features": [
+            "Shaded",
+            "Kid Friendly",
+            "Permit Required",
+            "Scenic Views",
+            "Rocky",
+            "Stroller Friendly",
+            "Wildflowers",
+            "Waterfall"
+          ],
+          "difficulties": ["Easy", "Moderate", "Hard"],
+          "trailTypes": ["Loop", "Out & Back", "Point to Point"],
+          "trails": [
+            {
+              "slug": "camelback-mountain-echo-canyon",
+              "title": "Camelback Mountain (Echo Canyon)",
+              "subcategory": "Mountain",
+              "image": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=900&q=80",
+              "hours": "Sunrise – Sunset",
+              "features": ["Scenic Views", "Rocky"],
+              "popularity": 95,
+              "address": "5700 N Echo Canyon Pkwy, Phoenix, AZ 85018",
+              "phone": "(602) 261-8318",
+              "coords": { "lat": 33.5144, "lng": -111.9642 },
+              "website": "https://www.phoenix.gov/parks/trails/locations/camelback-mountain",
+              "description": "Iconic Phoenix summit hike. Echo Canyon trail is steep and technical with handrails and boulder scrambles. Stunning 360° views from the top. Bring more water than you think you need — this trail has no shade and becomes dangerous in hot weather.",
+              "directions": [
+                {
+                  "icon": "car",
+                  "distance": "3.1 mi",
+                  "instruction": "Head northeast on E Camelback Rd"
+                },
+                {
+                  "icon": "turn-right",
+                  "distance": "0.4 mi",
+                  "instruction": "Turn right onto N Echo Canyon Pkwy"
+                },
+                {
+                  "icon": "flag",
+                  "distance": "",
+                  "instruction": "Arrive at Echo Canyon trailhead parking"
+                }
+              ],
+              "considerations": {
+                "distance": "2.4 mi",
+                "difficulty": "Hard",
+                "duration": "2-3 hours",
+                "elevationGain": "1,280 ft",
+                "trailType": "Out & Back",
+                "dogFriendly": false
+              },
+              "trailMap": {
+                "geojson": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [-111.9642, 33.5144],
+                    [-111.9638, 33.5148],
+                    [-111.9633, 33.5151],
+                    [-111.9628, 33.5153],
+                    [-111.9622, 33.5155],
+                    [-111.9617, 33.5157],
+                    [-111.9612, 33.5158],
+                    [-111.9607, 33.5159],
+                    [-111.9602, 33.5159],
+                    [-111.9597, 33.5158],
+                    [-111.9594, 33.5156],
+                    [-111.9591, 33.5153]
+                  ]
+                },
+                "defaultCenter": { "lat": 33.5154, "lng": -111.9615 },
+                "defaultZoom": 15
+              }
+            },
+            {
+              "slug": "piestewa-peak-summit",
+              "title": "Piestewa Peak Summit Trail",
+              "subcategory": "Mountain",
+              "image": "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=900&q=80",
+              "hours": "Sunrise – Sunset",
+              "features": ["Scenic Views", "Rocky"],
+              "popularity": 88,
+              "address": "2701 E Squaw Peak Dr, Phoenix, AZ 85016",
+              "phone": "(602) 261-8318",
+              "coords": { "lat": 33.5372, "lng": -112.018 },
+              "website": "https://www.phoenix.gov/parks/trails/locations/piestewa-peak",
+              "description": "Popular Phoenix Mountains Preserve summit. Steep and rocky with stone steps the whole way up. Expect crowds on weekends. Great sunrise/sunset views of the Valley of the Sun.",
+              "directions": [
+                { "icon": "car", "distance": "5.2 mi", "instruction": "Take AZ-51 S to exit 5" },
+                {
+                  "icon": "turn-right",
+                  "distance": "0.8 mi",
+                  "instruction": "Turn right onto E Squaw Peak Dr"
+                },
+                {
+                  "icon": "flag",
+                  "distance": "",
+                  "instruction": "Arrive at Piestewa Peak trailhead"
+                }
+              ],
+              "considerations": {
+                "distance": "2.2 mi",
+                "difficulty": "Hard",
+                "duration": "1-2 hours",
+                "elevationGain": "1,208 ft",
+                "trailType": "Out & Back",
+                "dogFriendly": false
+              },
+              "trailMap": {
+                "geojson": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [-112.018, 33.5372],
+                    [-112.0178, 33.5378],
+                    [-112.0176, 33.5383],
+                    [-112.0174, 33.5388],
+                    [-112.0171, 33.5392],
+                    [-112.0167, 33.5395],
+                    [-112.0163, 33.5398],
+                    [-112.0158, 33.54],
+                    [-112.0153, 33.5401],
+                    [-112.0148, 33.5401],
+                    [-112.0143, 33.54]
+                  ]
+                },
+                "defaultCenter": { "lat": 33.539, "lng": -112.0165 },
+                "defaultZoom": 15
+              }
+            },
+            {
+              "slug": "south-mountain-national-trail",
+              "title": "South Mountain National Trail",
+              "subcategory": "Mountain",
+              "image": "https://images.unsplash.com/photo-1559521783-1d1599583485?w=900&q=80",
+              "hours": "5 am – 7 pm",
+              "features": ["Scenic Views", "Rocky"],
+              "popularity": 78,
+              "address": "10409 S Central Ave, Phoenix, AZ 85042",
+              "phone": "(602) 262-7393",
+              "coords": { "lat": 33.35, "lng": -112.05 },
+              "website": "https://www.phoenix.gov/parks/trails/locations/south-mountain",
+              "description": "Traverse the full length of South Mountain Park — one of the largest municipal parks in the US. Point-to-point hike with dramatic ridgelines and saguaro-studded valleys. Arrange a shuttle or second vehicle.",
+              "directions": [
+                {
+                  "icon": "car",
+                  "distance": "12 mi",
+                  "instruction": "Head south on I-10 W, exit 22"
+                },
+                {
+                  "icon": "turn-right",
+                  "distance": "1.2 mi",
+                  "instruction": "Right onto S Central Ave"
+                },
+                { "icon": "flag", "distance": "", "instruction": "Arrive at Pima Canyon trailhead" }
+              ],
+              "considerations": {
+                "distance": "14.5 mi",
+                "difficulty": "Moderate",
+                "duration": "7-9 hours",
+                "elevationGain": "2,600 ft",
+                "trailType": "Point to Point",
+                "dogFriendly": true
+              },
+              "trailMap": {
+                "geojson": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [-112.05, 33.35],
+                    [-112.045, 33.351],
+                    [-112.04, 33.352],
+                    [-112.035, 33.353],
+                    [-112.03, 33.354],
+                    [-112.025, 33.355],
+                    [-112.02, 33.356],
+                    [-112.015, 33.357],
+                    [-112.01, 33.358],
+                    [-112.005, 33.359],
+                    [-112.0, 33.36],
+                    [-111.995, 33.361]
+                  ]
+                },
+                "defaultCenter": { "lat": 33.3555, "lng": -112.0225 },
+                "defaultZoom": 12
+              }
+            },
+            {
+              "slug": "toms-thumb",
+              "title": "Tom's Thumb Trail",
+              "subcategory": "Mountain",
+              "image": "https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?w=900&q=80",
+              "hours": "Sunrise – Sunset",
+              "features": ["Scenic Views", "Rocky", "Wildflowers"],
+              "popularity": 82,
+              "address": "23015 N 128th St, Scottsdale, AZ 85255",
+              "phone": "(480) 998-7971",
+              "coords": { "lat": 33.69, "lng": -111.84 },
+              "website": "https://www.scottsdaleaz.gov/parks/tom-thumb",
+              "description": "Scottsdale's iconic granite thumb-shaped formation. Steep climb with world-class rock scenery — popular with climbers. Wildflower bloom in spring is incredible.",
+              "directions": [
+                {
+                  "icon": "car",
+                  "distance": "18 mi",
+                  "instruction": "Take AZ-101 Loop N to exit 38"
+                },
+                {
+                  "icon": "turn-right",
+                  "distance": "3.8 mi",
+                  "instruction": "Right on N 128th St"
+                },
+                { "icon": "flag", "distance": "", "instruction": "Arrive at trailhead parking" }
+              ],
+              "considerations": {
+                "distance": "4.0 mi",
+                "difficulty": "Hard",
+                "duration": "3-4 hours",
+                "elevationGain": "1,600 ft",
+                "trailType": "Out & Back",
+                "dogFriendly": true
+              },
+              "trailMap": {
+                "geojson": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [-111.84, 33.69],
+                    [-111.8395, 33.6905],
+                    [-111.8389, 33.691],
+                    [-111.8383, 33.6915],
+                    [-111.8377, 33.6919],
+                    [-111.837, 33.6922],
+                    [-111.8364, 33.6924],
+                    [-111.8357, 33.6925],
+                    [-111.835, 33.6924],
+                    [-111.8343, 33.6922],
+                    [-111.8337, 33.6918]
+                  ]
+                },
+                "defaultCenter": { "lat": 33.6912, "lng": -111.837 },
+                "defaultZoom": 15
+              }
+            },
+            {
+              "slug": "hidden-valley-papago",
+              "title": "Hidden Valley Loop",
+              "subcategory": "Desert",
+              "image": "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?w=900&q=80",
+              "hours": "5 am – 7 pm",
+              "features": ["Kid Friendly", "Stroller Friendly", "Scenic Views"],
+              "popularity": 70,
+              "address": "625 N Galvin Pkwy, Phoenix, AZ 85008",
+              "phone": "(602) 262-4539",
+              "coords": { "lat": 33.46, "lng": -112.01 },
+              "website": "https://www.phoenix.gov/parks/trails/locations/papago",
+              "description": "Gentle loop through the red sandstone formations of Papago Park. Great for families and first-time desert hikers. Kids love the natural stone arches and the climb up to the Hole-in-the-Rock viewpoint.",
+              "directions": [
+                {
+                  "icon": "car",
+                  "distance": "4.5 mi",
+                  "instruction": "Head east on E Van Buren St"
+                },
+                {
+                  "icon": "turn-right",
+                  "distance": "0.6 mi",
+                  "instruction": "Right on N Galvin Pkwy"
+                },
+                { "icon": "flag", "distance": "", "instruction": "Arrive at Papago Park" }
+              ],
+              "considerations": {
+                "distance": "2.5 mi",
+                "difficulty": "Easy",
+                "duration": "1 hour",
+                "elevationGain": "150 ft",
+                "trailType": "Loop",
+                "dogFriendly": true
+              },
+              "trailMap": {
+                "geojson": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [-112.01, 33.46],
+                    [-112.0095, 33.4605],
+                    [-112.0088, 33.4608],
+                    [-112.008, 33.4609],
+                    [-112.0072, 33.4608],
+                    [-112.0065, 33.4605],
+                    [-112.006, 33.46],
+                    [-112.0058, 33.4595],
+                    [-112.006, 33.459],
+                    [-112.0065, 33.4587],
+                    [-112.0072, 33.4586],
+                    [-112.008, 33.4587],
+                    [-112.0088, 33.459],
+                    [-112.0095, 33.4595],
+                    [-112.01, 33.46]
+                  ]
+                },
+                "defaultCenter": { "lat": 33.4598, "lng": -112.0079 },
+                "defaultZoom": 15
+              }
+            },
+            {
+              "slug": "papago-butte-loop",
+              "title": "Papago Butte Loop",
+              "subcategory": "Urban",
+              "image": "https://images.unsplash.com/photo-1487088678257-3a541e6e3922?w=900&q=80",
+              "hours": "5 am – 7 pm",
+              "features": ["Kid Friendly", "Scenic Views"],
+              "popularity": 62,
+              "address": "625 N Galvin Pkwy, Phoenix, AZ 85008",
+              "phone": "(602) 262-4539",
+              "coords": { "lat": 33.46, "lng": -111.95 },
+              "website": "https://www.phoenix.gov/parks/trails/locations/papago",
+              "description": "Short loop around the central butte of Papago Park. Perfect morning walk with views of the Phoenix Zoo, Desert Botanical Garden, and downtown skyline.",
+              "directions": [
+                { "icon": "car", "distance": "4.2 mi", "instruction": "Take E Van Buren St east" },
+                {
+                  "icon": "turn-left",
+                  "distance": "0.3 mi",
+                  "instruction": "Left into Papago Park"
+                },
+                { "icon": "flag", "distance": "", "instruction": "Park near the butte" }
+              ],
+              "considerations": {
+                "distance": "1.2 mi",
+                "difficulty": "Easy",
+                "duration": "30 min",
+                "elevationGain": "80 ft",
+                "trailType": "Loop",
+                "dogFriendly": true
+              },
+              "trailMap": {
+                "geojson": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [-111.95, 33.46],
+                    [-111.9495, 33.4603],
+                    [-111.949, 33.4604],
+                    [-111.9485, 33.4603],
+                    [-111.9482, 33.46],
+                    [-111.9483, 33.4597],
+                    [-111.9487, 33.4595],
+                    [-111.9493, 33.4595],
+                    [-111.9498, 33.4597],
+                    [-111.95, 33.46]
+                  ]
+                },
+                "defaultCenter": { "lat": 33.4599, "lng": -111.9491 },
+                "defaultZoom": 16
+              }
+            },
+            {
+              "slug": "mcdowell-sonoran-preserve",
+              "title": "McDowell Sonoran Preserve Loop",
+              "subcategory": "Desert",
+              "image": "https://images.unsplash.com/photo-1444080748397-f442aa95c3e5?w=900&q=80",
+              "hours": "Sunrise – Sunset",
+              "features": ["Scenic Views", "Wildflowers"],
+              "popularity": 74,
+              "address": "18333 N Thompson Peak Pkwy, Scottsdale, AZ 85255",
+              "phone": "(480) 312-7013",
+              "coords": { "lat": 33.65, "lng": -111.75 },
+              "website": "https://www.scottsdaleaz.gov/preserve",
+              "description": "Sprawling Sonoran Desert preserve. This loop covers representative terrain with saguaros, ironwoods, and seasonal washes. Bring binoculars for bird watching.",
+              "directions": [
+                { "icon": "car", "distance": "22 mi", "instruction": "Take AZ-101 Loop N" },
+                {
+                  "icon": "turn-right",
+                  "distance": "1.5 mi",
+                  "instruction": "Right on Thompson Peak Pkwy"
+                },
+                { "icon": "flag", "distance": "", "instruction": "Arrive at Gateway Access Area" }
+              ],
+              "considerations": {
+                "distance": "6.5 mi",
+                "difficulty": "Moderate",
+                "duration": "3-4 hours",
+                "elevationGain": "700 ft",
+                "trailType": "Loop",
+                "dogFriendly": true
+              },
+              "trailMap": {
+                "geojson": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [-111.75, 33.65],
+                    [-111.748, 33.651],
+                    [-111.7455, 33.6515],
+                    [-111.743, 33.6515],
+                    [-111.741, 33.651],
+                    [-111.7395, 33.65],
+                    [-111.739, 33.6485],
+                    [-111.7395, 33.647],
+                    [-111.741, 33.646],
+                    [-111.743, 33.6455],
+                    [-111.7455, 33.6455],
+                    [-111.748, 33.646],
+                    [-111.75, 33.647],
+                    [-111.7505, 33.6485],
+                    [-111.75, 33.65]
+                  ]
+                },
+                "defaultCenter": { "lat": 33.6485, "lng": -111.7445 },
+                "defaultZoom": 13
+              }
+            },
+            {
+              "slug": "pinnacle-peak",
+              "title": "Pinnacle Peak Trail",
+              "subcategory": "Mountain",
+              "image": "https://images.unsplash.com/photo-1490682143684-14369e18dce3?w=900&q=80",
+              "hours": "Sunrise – Sunset",
+              "features": ["Scenic Views", "Rocky"],
+              "popularity": 80,
+              "address": "26802 N 102nd Way, Scottsdale, AZ 85262",
+              "phone": "(480) 312-0990",
+              "coords": { "lat": 33.73, "lng": -111.85 },
+              "website": "https://www.scottsdaleaz.gov/parks/pinnacle-peak-park",
+              "description": "Well-maintained desert trail with interpretive signs, restrooms, and shaded benches. Watch for rock climbers on the pinnacle. Great family-friendly moderate hike.",
+              "directions": [
+                {
+                  "icon": "car",
+                  "distance": "26 mi",
+                  "instruction": "Take AZ-101 Loop N to Pima Rd"
+                },
+                {
+                  "icon": "turn-right",
+                  "distance": "5.2 mi",
+                  "instruction": "Right on Happy Valley Rd"
+                },
+                { "icon": "flag", "distance": "", "instruction": "Arrive at Pinnacle Peak Park" }
+              ],
+              "considerations": {
+                "distance": "3.5 mi",
+                "difficulty": "Moderate",
+                "duration": "2 hours",
+                "elevationGain": "650 ft",
+                "trailType": "Out & Back",
+                "dogFriendly": false
+              },
+              "trailMap": {
+                "geojson": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [-111.85, 33.73],
+                    [-111.849, 33.7303],
+                    [-111.848, 33.7306],
+                    [-111.847, 33.7308],
+                    [-111.846, 33.7309],
+                    [-111.845, 33.731],
+                    [-111.844, 33.731],
+                    [-111.8432, 33.7308],
+                    [-111.8428, 33.7304]
+                  ]
+                },
+                "defaultCenter": { "lat": 33.7306, "lng": -111.8465 },
+                "defaultZoom": 15
+              }
+            },
+            {
+              "slug": "lost-dog-wash",
+              "title": "Lost Dog Wash Trail",
+              "subcategory": "Desert",
+              "image": "https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?w=900&q=80",
+              "hours": "Sunrise – Sunset",
+              "features": ["Shaded", "Scenic Views"],
+              "popularity": 65,
+              "address": "12601 N 124th St, Scottsdale, AZ 85259",
+              "phone": "(480) 312-7013",
+              "coords": { "lat": 33.61, "lng": -111.78 },
+              "website": "https://www.scottsdaleaz.gov/preserve",
+              "description": "Shaded wash hike along the McDowell foothills. The riparian sections see higher wildlife activity at dawn and dusk.",
+              "directions": [
+                { "icon": "car", "distance": "20 mi", "instruction": "Take AZ-101 Loop N" },
+                {
+                  "icon": "turn-right",
+                  "distance": "2.0 mi",
+                  "instruction": "Right on N 124th St"
+                },
+                {
+                  "icon": "flag",
+                  "distance": "",
+                  "instruction": "Arrive at Lost Dog Wash trailhead"
+                }
+              ],
+              "considerations": {
+                "distance": "4.5 mi",
+                "difficulty": "Moderate",
+                "duration": "2-3 hours",
+                "elevationGain": "400 ft",
+                "trailType": "Loop",
+                "dogFriendly": true
+              },
+              "trailMap": {
+                "geojson": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [-111.78, 33.61],
+                    [-111.779, 33.6108],
+                    [-111.7775, 33.6114],
+                    [-111.776, 33.6117],
+                    [-111.7745, 33.6117],
+                    [-111.773, 33.6114],
+                    [-111.7718, 33.6108],
+                    [-111.771, 33.61],
+                    [-111.7712, 33.609],
+                    [-111.772, 33.6082],
+                    [-111.7735, 33.6078],
+                    [-111.7752, 33.6078],
+                    [-111.777, 33.6082],
+                    [-111.7785, 33.609],
+                    [-111.78, 33.61]
+                  ]
+                },
+                "defaultCenter": { "lat": 33.6098, "lng": -111.7755 },
+                "defaultZoom": 14
+              }
+            },
+            {
+              "slug": "wind-cave-trail",
+              "title": "Wind Cave Trail (Usery Mountain)",
+              "subcategory": "Mountain",
+              "image": "https://images.unsplash.com/photo-1533331660534-f16d0f9b61bb?w=900&q=80",
+              "hours": "6 am – 8 pm",
+              "features": ["Scenic Views", "Rocky", "Permit Required"],
+              "popularity": 72,
+              "address": "3939 N Usery Pass Rd, Mesa, AZ 85207",
+              "phone": "(480) 984-0032",
+              "coords": { "lat": 33.48, "lng": -111.61 },
+              "website": "https://www.maricopacountyparks.net/park-locator/usery-mountain-regional-park",
+              "description": "Moderately challenging hike to a large wind-carved cave with panoramic views. Park entry fee required. Start early in summer — exposure is significant.",
+              "directions": [
+                {
+                  "icon": "car",
+                  "distance": "28 mi",
+                  "instruction": "Take US-60 E to Ellsworth Rd"
+                },
+                {
+                  "icon": "turn-left",
+                  "distance": "2.3 mi",
+                  "instruction": "Left on Usery Pass Rd"
+                },
+                { "icon": "flag", "distance": "", "instruction": "Arrive at Usery Mountain Park" }
+              ],
+              "considerations": {
+                "distance": "3.0 mi",
+                "difficulty": "Moderate",
+                "duration": "2 hours",
+                "elevationGain": "800 ft",
+                "trailType": "Out & Back",
+                "dogFriendly": true
+              },
+              "trailMap": {
+                "geojson": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [-111.61, 33.48],
+                    [-111.6093, 33.4806],
+                    [-111.6085, 33.4811],
+                    [-111.6076, 33.4815],
+                    [-111.6066, 33.4817],
+                    [-111.6056, 33.4817],
+                    [-111.6046, 33.4815],
+                    [-111.6037, 33.4811],
+                    [-111.603, 33.4806]
+                  ]
+                },
+                "defaultCenter": { "lat": 33.4812, "lng": -111.6065 },
+                "defaultZoom": 15
+              }
+            },
+            {
+              "slug": "gateway-loop",
+              "title": "Gateway Loop",
+              "subcategory": "Desert",
+              "image": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=900&q=80",
+              "hours": "Sunrise – Sunset",
+              "features": ["Scenic Views", "Wildflowers"],
+              "popularity": 68,
+              "address": "18333 N Thompson Peak Pkwy, Scottsdale, AZ 85255",
+              "phone": "(480) 312-7013",
+              "coords": { "lat": 33.65, "lng": -111.91 },
+              "website": "https://www.scottsdaleaz.gov/preserve",
+              "description": "Classic McDowell Sonoran loop. Well-marked, scenic and accessible with gentle grades. Excellent trail running route.",
+              "directions": [
+                {
+                  "icon": "car",
+                  "distance": "15 mi",
+                  "instruction": "Take AZ-101 Loop N to Thompson Peak"
+                },
+                {
+                  "icon": "turn-right",
+                  "distance": "1.5 mi",
+                  "instruction": "Right on Thompson Peak Pkwy"
+                },
+                { "icon": "flag", "distance": "", "instruction": "Arrive at Gateway Access Area" }
+              ],
+              "considerations": {
+                "distance": "4.4 mi",
+                "difficulty": "Moderate",
+                "duration": "2-3 hours",
+                "elevationGain": "500 ft",
+                "trailType": "Loop",
+                "dogFriendly": true
+              },
+              "trailMap": {
+                "geojson": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [-111.91, 33.65],
+                    [-111.909, 33.6508],
+                    [-111.9078, 33.6513],
+                    [-111.9065, 33.6515],
+                    [-111.9052, 33.6513],
+                    [-111.9042, 33.6508],
+                    [-111.9035, 33.65],
+                    [-111.9038, 33.6491],
+                    [-111.9047, 33.6485],
+                    [-111.906, 33.6482],
+                    [-111.9075, 33.6485],
+                    [-111.9088, 33.6491],
+                    [-111.91, 33.65]
+                  ]
+                },
+                "defaultCenter": { "lat": 33.6498, "lng": -111.9067 },
+                "defaultZoom": 14
+              }
+            },
+            {
+              "slug": "black-mountain-cave-creek",
+              "title": "Black Mountain",
+              "subcategory": "Mountain",
+              "image": "https://images.unsplash.com/photo-1506260408121-e353d10b87c7?w=900&q=80",
+              "hours": "Sunrise – Sunset",
+              "features": ["Scenic Views", "Rocky"],
+              "popularity": 58,
+              "address": "34924 N Maricopa Hwy, Cave Creek, AZ 85331",
+              "phone": "(480) 488-6601",
+              "coords": { "lat": 33.82, "lng": -111.94 },
+              "website": "https://www.cavecreek.org/black-mountain",
+              "description": "Hidden local favorite in Cave Creek. Short but steep summit with outstanding views north to the Bradshaw Mountains.",
+              "directions": [
+                {
+                  "icon": "car",
+                  "distance": "33 mi",
+                  "instruction": "Take I-17 N to Carefree Hwy"
+                },
+                {
+                  "icon": "turn-right",
+                  "distance": "6.1 mi",
+                  "instruction": "Right on Cave Creek Rd"
+                },
+                {
+                  "icon": "flag",
+                  "distance": "",
+                  "instruction": "Arrive at Black Mountain trailhead"
+                }
+              ],
+              "considerations": {
+                "distance": "3.4 mi",
+                "difficulty": "Moderate",
+                "duration": "2 hours",
+                "elevationGain": "1,000 ft",
+                "trailType": "Loop",
+                "dogFriendly": true
+              },
+              "trailMap": {
+                "geojson": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [-111.94, 33.82],
+                    [-111.9395, 33.8207],
+                    [-111.9388, 33.8212],
+                    [-111.938, 33.8215],
+                    [-111.9372, 33.8215],
+                    [-111.9365, 33.8212],
+                    [-111.936, 33.8207],
+                    [-111.9358, 33.82],
+                    [-111.9362, 33.8193],
+                    [-111.937, 33.8188],
+                    [-111.938, 33.8186],
+                    [-111.939, 33.8188],
+                    [-111.9398, 33.8193],
+                    [-111.94, 33.82]
+                  ]
+                },
+                "defaultCenter": { "lat": 33.8201, "lng": -111.9379 },
+                "defaultZoom": 14
+              }
+            },
+            {
+              "slug": "waterfall-trail-white-tank",
+              "title": "Waterfall Trail (White Tank)",
+              "subcategory": "Canyon",
+              "image": "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=900&q=80",
+              "hours": "6 am – 8 pm",
+              "features": ["Kid Friendly", "Stroller Friendly", "Waterfall", "Permit Required"],
+              "popularity": 75,
+              "address": "20304 W White Tank Mountain Rd, Waddell, AZ 85355",
+              "phone": "(623) 935-2505",
+              "coords": { "lat": 33.6, "lng": -112.51 },
+              "website": "https://www.maricopacountyparks.net/park-locator/white-tank-mountain-regional-park",
+              "description": "Short paved trail to a seasonal waterfall nestled in a rocky canyon. Look for ancient petroglyphs on the canyon walls. Wheelchair-accessible in the first mile.",
+              "directions": [
+                { "icon": "car", "distance": "42 mi", "instruction": "Take I-10 W to Olive Ave" },
+                {
+                  "icon": "turn-right",
+                  "distance": "4.5 mi",
+                  "instruction": "Right on White Tank Mountain Rd"
+                },
+                { "icon": "flag", "distance": "", "instruction": "Arrive at trailhead parking" }
+              ],
+              "considerations": {
+                "distance": "2.0 mi",
+                "difficulty": "Easy",
+                "duration": "1 hour",
+                "elevationGain": "200 ft",
+                "trailType": "Out & Back",
+                "dogFriendly": true
+              },
+              "trailMap": {
+                "geojson": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [-112.51, 33.6],
+                    [-112.5093, 33.6004],
+                    [-112.5085, 33.6007],
+                    [-112.5076, 33.6009],
+                    [-112.5067, 33.601],
+                    [-112.5058, 33.601],
+                    [-112.505, 33.6008]
+                  ]
+                },
+                "defaultCenter": { "lat": 33.6005, "lng": -112.5075 },
+                "defaultZoom": 15
+              }
+            },
+            {
+              "slug": "sunrise-trail-mcdowell",
+              "title": "Sunrise Trail",
+              "subcategory": "Mountain",
+              "image": "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=900&q=80",
+              "hours": "Sunrise – Sunset",
+              "features": ["Scenic Views", "Rocky"],
+              "popularity": 66,
+              "address": "12300 N 128th St, Scottsdale, AZ 85259",
+              "phone": "(480) 312-7013",
+              "coords": { "lat": 33.62, "lng": -111.79 },
+              "website": "https://www.scottsdaleaz.gov/preserve",
+              "description": "True to its name — this is one of the best sunrise hikes in the Scottsdale area. The eastern ridge catches the first light over the Superstitions.",
+              "directions": [
+                { "icon": "car", "distance": "21 mi", "instruction": "Take AZ-101 Loop N" },
+                {
+                  "icon": "turn-right",
+                  "distance": "2.2 mi",
+                  "instruction": "Right on N 128th St"
+                },
+                { "icon": "flag", "distance": "", "instruction": "Arrive at Sunrise trailhead" }
+              ],
+              "considerations": {
+                "distance": "4.3 mi",
+                "difficulty": "Moderate",
+                "duration": "2-3 hours",
+                "elevationGain": "860 ft",
+                "trailType": "Out & Back",
+                "dogFriendly": true
+              },
+              "trailMap": {
+                "geojson": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [-111.79, 33.62],
+                    [-111.7892, 33.6206],
+                    [-111.7883, 33.6211],
+                    [-111.7873, 33.6214],
+                    [-111.7862, 33.6216],
+                    [-111.785, 33.6217],
+                    [-111.7838, 33.6216],
+                    [-111.7827, 33.6214],
+                    [-111.7818, 33.6211]
+                  ]
+                },
+                "defaultCenter": { "lat": 33.6211, "lng": -111.7859 },
+                "defaultZoom": 15
+              }
+            },
+            {
+              "slug": "dreamy-draw",
+              "title": "Dreamy Draw Loop",
+              "subcategory": "Urban",
+              "image": "https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=900&q=80",
+              "hours": "5 am – 7 pm",
+              "features": ["Kid Friendly", "Stroller Friendly", "Shaded"],
+              "popularity": 54,
+              "address": "2421 E Northern Ave, Phoenix, AZ 85028",
+              "phone": "(602) 262-4565",
+              "coords": { "lat": 33.54, "lng": -112.03 },
+              "website": "https://www.phoenix.gov/parks/trails/locations/dreamy-draw",
+              "description": "Easy urban loop inside the Phoenix Mountains Preserve. Popular with joggers and families. Interpretive signs about local geology and flora along the way.",
+              "directions": [
+                {
+                  "icon": "car",
+                  "distance": "6.8 mi",
+                  "instruction": "Take AZ-51 N to Northern Ave"
+                },
+                {
+                  "icon": "turn-right",
+                  "distance": "0.5 mi",
+                  "instruction": "Right on E Northern Ave"
+                },
+                { "icon": "flag", "distance": "", "instruction": "Arrive at Dreamy Draw trailhead" }
+              ],
+              "considerations": {
+                "distance": "1.5 mi",
+                "difficulty": "Easy",
+                "duration": "45 min",
+                "elevationGain": "120 ft",
+                "trailType": "Loop",
+                "dogFriendly": true
+              },
+              "trailMap": {
+                "geojson": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [-112.03, 33.54],
+                    [-112.0294, 33.5404],
+                    [-112.0286, 33.5406],
+                    [-112.0278, 33.5406],
+                    [-112.0271, 33.5403],
+                    [-112.0268, 33.5398],
+                    [-112.027, 33.5392],
+                    [-112.0276, 33.5388],
+                    [-112.0284, 33.5386],
+                    [-112.0293, 33.5388],
+                    [-112.03, 33.5393],
+                    [-112.03, 33.54]
+                  ]
+                },
+                "defaultCenter": { "lat": 33.5396, "lng": -112.0283 },
+                "defaultZoom": 16
+              }
             }
           ]
         }

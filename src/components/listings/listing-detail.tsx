@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 import type { Listing } from '@/lib/config';
-import { useEventFavorites, useFavorites } from '@/lib/favorites';
+import { useEventFavorites, useFavorites, useTrailFavorites } from '@/lib/favorites';
 
 import { DirectionsModal } from './directions-modal';
 import { FavoriteAddedToast } from './favorite-added-toast';
@@ -54,8 +54,10 @@ export function ListingDetail({
   favoritesKind = 'listing',
   onClose,
   extraDetails,
+  mapSlot,
   stickyBuyCta,
   eventMetaOnHero = false,
+  cardHeight,
 }: {
   moduleKey: string;
   listing: Listing;
@@ -67,15 +69,23 @@ export function ListingDetail({
   /** Si presente y no hay `listing.reserveUrl` → se muestra en ese slot (GET TICKETS). */
   secondaryCta?: SecondaryCta;
   /** Discriminador del bucket de favoritos. `'event'` usa `useEventFavorites`. */
-  favoritesKind?: 'listing' | 'event';
+  favoritesKind?: 'listing' | 'event' | 'trail';
   /** Si se provee, el botón X usa esta callback en lugar de navegar al módulo. */
   onClose?: () => void;
-  /** Slot opcional (Tickets) renderizado entre Map y DESCRIPTION. */
+  /** Slot opcional (Tickets/Trails) renderizado entre Map y DESCRIPTION. */
   extraDetails?: React.ReactNode;
+  /**
+   * Slot opcional que reemplaza el bloque `MapSection` completo
+   * (mapa + divider + address + GET DIRECTIONS). Trails lo usa para
+   * inyectar `<TrailMapTabs>` con su propio chrome.
+   */
+  mapSlot?: React.ReactNode;
   /** CTA full-width sticky en el bottom del card (Tickets). Si presente, card crece +140px. */
   stickyBuyCta?: { label: string; priceDisplay: string; onClick: () => void };
   /** Si true, el `eventMeta` se renderea sobre el hero con gradient oscuro (Tickets). */
   eventMetaOnHero?: boolean;
+  /** Override de la altura del card. Default 1589. Útil cuando el `extraDetails` es grande (Trails Considerations). */
+  cardHeight?: number;
 }) {
   const [emailOpen, setEmailOpen] = useState(false);
   const [phoneOpen, setPhoneOpen] = useState(false);
@@ -113,7 +123,7 @@ export function ListingDetail({
           left: '90px',
           top: '166px',
           width: '898px',
-          height: '1589px',
+          height: `${cardHeight ?? 1589}px`,
           backgroundColor: '#ffffff',
           borderRadius: '8px',
           boxShadow: '0 12px 24px rgba(0,0,0,0.25)',
@@ -137,11 +147,20 @@ export function ListingDetail({
           onPhoneClick={openPhone}
           favoritesKind={favoritesKind}
         />
-        <MapSection
-          listing={listing}
-          token={mapboxToken}
-          onGetDirections={() => setDirectionsOpen(true)}
-        />
+        {mapSlot ? (
+          <div
+            className="absolute"
+            style={{ left: 0, top: '844px', width: '899px', height: '384px' }}
+          >
+            {mapSlot}
+          </div>
+        ) : (
+          <MapSection
+            listing={listing}
+            token={mapboxToken}
+            onGetDirections={() => setDirectionsOpen(true)}
+          />
+        )}
         <DescriptionSection listing={listing} />
         {extraDetails ? (
           <div
@@ -650,13 +669,15 @@ function SharingRow({
   slug: string;
   onEmailClick: () => void;
   onPhoneClick: () => void;
-  favoritesKind: 'listing' | 'event';
+  favoritesKind: 'listing' | 'event' | 'trail';
 }) {
-  // Llamamos los DOS hooks siempre (reglas de React hooks). Ambos son stores
+  // Llamamos los TRES hooks siempre (reglas de React hooks). Todos son stores
   // externos ligeros (useSyncExternalStore). Escogemos el que corresponde.
   const listingStore = useFavorites();
   const eventStore = useEventFavorites();
-  const { isFavorited, toggle } = favoritesKind === 'event' ? eventStore : listingStore;
+  const trailStore = useTrailFavorites();
+  const { isFavorited, toggle } =
+    favoritesKind === 'event' ? eventStore : favoritesKind === 'trail' ? trailStore : listingStore;
   const favorited = isFavorited(slug);
 
   return (

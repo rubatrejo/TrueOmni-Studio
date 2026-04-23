@@ -12,6 +12,7 @@ import { MapModule } from '@/components/map/map-module';
 import { PassesModule } from '@/components/passes/passes-module';
 import { SocialWallModule } from '@/components/social-wall/social-wall-module';
 import { TicketsModule } from '@/components/tickets/tickets-module';
+import { TrailsModule } from '@/components/trails/trails-module';
 import { getAdsFromConfig } from '@/lib/ads';
 import { getConfig } from '@/lib/config';
 import { getMapItems } from '@/lib/map-aggregator';
@@ -161,6 +162,20 @@ export default async function ModulePage({ params }: PageProps) {
         <DealsModule
           moduleKey={module}
           module={mod}
+          textos={config.textos ?? {}}
+          header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
+        />
+        <AdsSlot ads={ads} />
+      </KioskCanvas>
+    );
+  }
+  if (mod?.kind === 'trails') {
+    return (
+      <KioskCanvas>
+        <TrailsModule
+          moduleKey={module}
+          module={mod}
+          clientCoords={config.client.coords}
           textos={config.textos ?? {}}
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
         />

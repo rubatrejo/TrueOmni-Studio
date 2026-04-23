@@ -6,11 +6,11 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Fase 3.12 (Deals) cerrada. Commit pending.
+**Fase activa:** Fase 3.13 (Trails) cerrada. Commit pending.
 
-**Última fase cerrada:** Fase 3.12 — Deals module (grid de cupones con modal redeem que muestra QR escaneable + botones SEND TO PHONE / SEND TO EMAIL). Antes: Fase 3.11 Tickets cerrada con pulido v2-v9 (`bd2ccae`).
+**Última fase cerrada:** Fase 3.13 — Trails module (15 rutas con detail que incluye tabs Default/Trail Map + panel Considerations con 6 campos). Antes: Fase 3.12 Deals (`97fcc43` + `e430df4`) y Fase 3.11 Tickets (`bd2ccae`).
 
-**Siguiente acción concreta:** Siguiente módulo del home (Guestbook, Photo Booth, Trails, Itinerary Builder) o Fase 4 (primer cliente real — branding + Lighthouse + handoff). Itinerary Builder sigue siendo el candidato natural para cerrar el arc de favoritos.
+**Siguiente acción concreta:** Siguiente módulo del home (Guestbook, Photo Booth, Itinerary Builder) o Fase 4 (primer cliente real). Itinerary Builder es candidato natural: ya hay 3 buckets `kiosk_favorites` + `kiosk_event_favorites` + `kiosk_trail_favorites`.
 
 **Bloqueos:** ninguno. `alwaysShowWelcome={true}` del MapModule sigue hardcoded para QA — apagarlo antes de Fase 4 / producción (`[module]/page.tsx` rama `map`).
 
@@ -21,6 +21,9 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 - Fase 3.12 Deals: auditor ejecutado — solo fallbacks `??` defensivos (patrón idéntico a Tickets/Passes). Reporte en `.planning/3-12-SUMMARY.md`.
 - Fase 3.12 Deals: verificación visual con `KIOSK_CLIENT=demo-cliente-a` pendiente (requiere reiniciar dev server). Los textos `deals_*` están traducidos al español en `demo-cliente-a/config.json`.
 - Fase 3.12 Deals: cover Sephora (URL Unsplash `photo-1522335789203-aaa95c1cb28a`) puede estar 404; fallback gradient azul activo via `onError`. Verificar y reemplazar URL si persiste.
+- Fase 3.13 Trails: **map aggregator integration pendiente** — `src/lib/map-aggregator.ts` no incluye trails como source. Añadir chip `trails` con color propio (propuesta: verde oliva `#b9bd39` o verde bosque). Detalles en `.planning/3-13-SUMMARY.md`.
+- Fase 3.13 Trails: **GET DIRECTIONS del TrailMapTabs** usa `window.open(maps.google.com)` como fallback v1. Integrar `DirectionsModal` con turn-by-turn de Mapbox en v2 (requiere exponer callback del modal encapsulado en `ListingDetail`).
+- Fase 3.13 Trails: auditor no ejecutado — strings defensivos `??` (mismo patrón tolerado en Tickets/Passes/Deals). Los hex (`#1796d6` del layer, `#004f8b` del pin, `#004f8b` de iconos Considerations) pertenecen al design system global.
 
 **TODO i18n deuda compartida filter-overlay** (aplazado a Fase 5 — pasada de tokenización de strings):
 
@@ -626,6 +629,43 @@ driving/walking, SEE 360 funcional, favorite toast).
 - **`ListingsToolbar` reusada para Tickets** (no archivo nuevo) — el chrome es idéntico a Events.
 
 **Fase:** 3.10 Passes cerrada con QA + 3.11 Tickets completa.
+
+---
+
+### Sesión 2026-04-23 — Fase 3.13 Trails module (4 olas en un pase)
+
+**Hecho:**
+
+- Brainstorming aprobado en plan mode: `kind: 'trails'` discriminado + considerations rich (6 campos) + tabs horizontales Default/Trail + GeoJSON embed + card reusa ListingCard + filter 3 secciones + bucket favoritos propio + 15 trails seed.
+- Spec formal en `docs/superpowers/specs/2026-04-23-trails-module-design.md`. Plan XML en `.planning/3-13-1-PLAN.md`.
+- **Ola 1 (config + tipos):** `Trail`, `TrailConsiderations`, `TrailDifficulty`, `TrailType`, `HomeTrailsModule` añadidos a `src/lib/config.ts` + union. `src/lib/trails.ts` con `TrailFilterState`, `EMPTY_TRAILS_FILTER`, `applyTrailsFilter` (AND features + OR difficulty + OR type), `searchTrails`, `trailToListing` adapter. `useTrailFavorites` exportado desde `favorites.ts` (bucket `kiosk_trail_favorites`). 15 trails seed (Arizona classics: Camelback, Piestewa, South Mountain, Tom's Thumb, Pinnacle Peak, Hidden Valley, Papago Butte, McDowell Sonoran, Lost Dog Wash, Wind Cave, Gateway Loop, Black Mountain, Waterfall, Sunrise, Dreamy Draw) con GeoJSON LineString embed (~10-15 puntos) + considerations completas. 21 textos `trails_*` en los 3 clientes (default EN, \_template EN, demo-cliente-a ES).
+- **Ola 2 (UI listing):** `TrailsModule` (compose) + `TrailsFilterOverlay` (3 secciones Features AND + Difficulty OR + Trail Type OR) en `src/components/trails/`. Reusa `ListingsGrid` + `ListingCard` vía `trailToListing`. Rama `case 'trails'` en `[module]/page.tsx`.
+- **Ola 3 (detail):** Extendido `ListingDetail` con props `mapSlot?: ReactNode` y `cardHeight?: number`, y aceptar `favoritesKind='trail'` en el SharingRow (llamando `useTrailFavorites`). Nuevos en `src/components/trails/`: `TrailMapTabs` (tabs horizontales + un solo MapboxMap con source/layer GeoJSON controlado por visibility + fit bounds al activar trail), `ConsiderationsPanel` (grid 2-col de 6 rows con iconos SVG — solo rendera campos definidos), `TrailDetail` wrapper que inyecta mapSlot + extraDetails + cardHeight=1780. Rama `kind === 'trails'` en `[slug]/page.tsx`.
+- **Ola 4 (QA + cierre):** `pnpm check` limpio. 4 Playwright screenshots: listing, detail default-tab, detail trail-tab (polyline + fit bounds), detail full con 6 considerations.
+
+**Verificado:**
+
+- `pnpm check` (typecheck + lint + format:check) limpio en cada checkpoint.
+- Playwright MCP: `/home/trails` con 15 cards ordenadas por popularity. Detail de Camelback muestra tabs; Trail Map activo dibuja la polyline azul #1796d6 con fit bounds. 6 considerations renderean correctamente (Distance 2.4 mi, Difficulty Hard, Duration 2-3 hours, Elevation 1,280 ft, Trail Type Out & Back, Dog Friendly No).
+
+**Pendiente / siguiente:**
+
+- **Map aggregator integration** — añadir source `trails` al `src/lib/map-aggregator.ts` con chip propio (propuesta color olive o verde bosque). El Map module actualmente no muestra trails.
+- **GET DIRECTIONS del TrailMapTabs** — v1 abre `maps.google.com` externo. v2 integrar `DirectionsModal` con turn-by-turn (requiere exponer callback desde `ListingDetail`).
+- Verificación visual con `KIOSK_CLIENT=demo-cliente-a` (textos ES listos).
+- Siguiente módulo del home (Guestbook, Photo Booth, Itinerary Builder) o Fase 4.
+
+**Decisiones:**
+
+- **`kind: 'trails'` discriminado** en vez de `HomeModule` genérico. Razón: shape `Trail` con considerations + trailMap embebido, no contamina `Listing`. Costo: rama propia en el switch del routing.
+- **Reuso masivo via adapter `trailToListing`** en vez de crear `TrailCard`/`TrailsGrid` propios. Evita duplicar ~500 líneas de card + grid + favorites. Pierde especificidad menor (priceRange neutro que no afecta).
+- **`ListingDetail` extendido con `mapSlot?` + `cardHeight?`** en vez de componente nuevo `TrailDetail` independiente. Un `TrailDetail` wrapper de 70 líneas vs duplicar 900 líneas del shell. Props estrictamente aditivas, retrocompat.
+- **Tabs horizontales encima del mapa** (no segmented pill, no toggle button). Más convencional + espacio suficiente en el slot 384px.
+- **GeoJSON embed en config** (no URL externa). Sin fetch runtime, sin cache invalidation, payload razonable (~2-3 KB/trail).
+- **Sort reusa `SORT_OPTIONS`** de listings. Distance funciona con clientCoords. Price se muestra pero no aplica (priceRange=1 neutro en el adapter — el cliente no ve ordenamiento útil por precio, se puede ocultar en v2 si molesta).
+- **3 buckets de favoritos separados** (`listing`, `event`, `trail`). Trade-off: 3 hooks en el SharingRow llamados siempre vs complejidad de un bucket único polimórfico. useSyncExternalStore es barato; hooks separados son más claros.
+
+**Fase:** 3.13 Trails cerrada (con map aggregator integration pendiente).
 
 ---
 

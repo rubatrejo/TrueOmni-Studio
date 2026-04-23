@@ -73,10 +73,12 @@ Subfases cerradas:
 - [x] 3.10 — Passes module (2026-04-22).
 - [x] 3.11 — Tickets module + iteraciones v2-v9 (2026-04-22).
 - [x] 3.12 — Deals module (2026-04-23).
+- [x] 3.13 — Trails module con tabs de mapa + Considerations (2026-04-23).
 
 Pendientes:
 
-- [ ] Guestbook, Photo Booth, Trails, Itinerary Builder (prioridad por definir).
+- [ ] Guestbook, Photo Booth, Itinerary Builder (prioridad por definir).
+- [ ] Map aggregator integration para trails (follow-up de 3.13).
 
 Cada sub-fase cumple:
 

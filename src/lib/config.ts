@@ -407,6 +407,72 @@ export interface HomeDealsModule {
   qrLogo?: string;
 }
 
+/** Nivel de dificultad de un trail. */
+export type TrailDifficulty = 'Easy' | 'Moderate' | 'Hard';
+
+/** Forma topológica del trail. */
+export type TrailType = 'Loop' | 'Out & Back' | 'Point to Point';
+
+/** Información estructurada de un trail mostrada en el panel "Considerations". */
+export interface TrailConsiderations {
+  /** Ej. "5.2 mi" (texto libre, el cliente elige unidades). */
+  distance: string;
+  difficulty: TrailDifficulty;
+  /** Ej. "2-3 hours" (texto libre). Opcional. */
+  duration?: string;
+  /** Ej. "1,280 ft" o "390 m". Opcional. */
+  elevationGain?: string;
+  trailType?: TrailType;
+  /** Si true muestra el indicador "Dog Friendly". Ausente = desconocido. */
+  dogFriendly?: boolean;
+}
+
+/** Un trail del módulo Trails. Extiende la idea de Listing con considerations + trailMap. */
+export interface Trail {
+  slug: string;
+  title: string;
+  /** Ej. "Mountain", "Desert", "Canyon". Se muestra en el header del detail. */
+  subcategory: string;
+  image: string;
+  /** Horario human-readable. Ej. "Sunrise – Sunset". */
+  hours: string;
+  /** Subset de `HomeTrailsModule.features` (AND en filter). */
+  features: string[];
+  popularity: number;
+  /** Dirección del trailhead. */
+  address: string;
+  /** Contacto del parque / trailhead info. */
+  phone: string;
+  coords: { lat: number; lng: number };
+  website: string;
+  description: string;
+  /** Turn-by-turn mock para el Directions modal. */
+  directions: { icon: string; distance: string; instruction: string }[];
+  considerations: TrailConsiderations;
+  /** GeoJSON del recorrido + hints para el tab "Trail Map". */
+  trailMap: {
+    geojson: { type: 'LineString'; coordinates: [number, number][] };
+    defaultCenter?: { lat: number; lng: number };
+    defaultZoom?: number;
+  };
+}
+
+/** Módulo Trails — kind discriminator 'trails'. */
+export interface HomeTrailsModule {
+  kind: 'trails';
+  label: string;
+  heroImage: string;
+  /** Subcategorías del pool (ej. "Mountain", "Desert"). Usadas como chips opcionales. */
+  subcategories: string[];
+  /** Catálogo de features AND del filter. */
+  features: string[];
+  /** Difficulties OR del filter (subset de TrailDifficulty). */
+  difficulties: TrailDifficulty[];
+  /** Trail types OR del filter (subset de TrailType). */
+  trailTypes: TrailType[];
+  trails: Trail[];
+}
+
 /** Unión discriminada de los variants de módulo. */
 export type HomeModuleVariant =
   | HomeModule
@@ -416,7 +482,8 @@ export type HomeModuleVariant =
   | HomeMapModule
   | HomePassesModule
   | HomeTicketsModule
-  | HomeDealsModule;
+  | HomeDealsModule
+  | HomeTrailsModule;
 
 /**
  * Publicidad declarativa por cliente (Fase 3.8). El kiosk renderiza ads

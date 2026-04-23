@@ -14,6 +14,8 @@ import { PassesModule } from '@/components/passes/passes-module';
 import { QrPurchaseHost } from '@/components/shared/qr-purchase-host';
 import { TicketDetailWithBuy } from '@/components/tickets/ticket-detail-with-buy';
 import { TicketsModule } from '@/components/tickets/tickets-module';
+import { TrailDetail } from '@/components/trails/trail-detail';
+import { TrailsModule } from '@/components/trails/trails-module';
 import { getAdsFromConfig } from '@/lib/ads';
 import type { EventItem, Listing } from '@/lib/config';
 import { getConfig } from '@/lib/config';
@@ -40,6 +42,30 @@ export default async function DetailPage({ params }: PageProps) {
 
   // Deals no tiene detail fullscreen — la interacción es listing → modal redeem.
   if (mod.kind === 'deals') notFound();
+
+  if (mod.kind === 'trails') {
+    const trail = mod.trails.find((t) => t.slug === slug);
+    if (!trail) notFound();
+    return (
+      <KioskCanvas>
+        <TrailsModule
+          moduleKey={module}
+          module={mod}
+          clientCoords={config.client.coords}
+          textos={config.textos ?? {}}
+          header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
+        />
+        <TrailDetail
+          moduleKey={module}
+          trail={trail}
+          mapboxToken={mapboxToken}
+          clientCoords={config.client.coords}
+          textos={config.textos ?? {}}
+        />
+        <AdsSlot ads={ads} />
+      </KioskCanvas>
+    );
+  }
 
   if (mod.kind === 'events') {
     const event = mod.events.find((e) => e.slug === slug);

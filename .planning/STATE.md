@@ -6,11 +6,11 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Fase 3.13 (Trails) cerrada. Commit pending.
+**Fase activa:** Fase 3.14 (Guestbook) cerrada. Commit pending.
 
-**Última fase cerrada:** Fase 3.13 — Trails module (15 rutas con detail que incluye tabs Default/Trail Map + panel Considerations con 6 campos). Antes: Fase 3.12 Deals (`97fcc43` + `e430df4`) y Fase 3.11 Tickets (`bd2ccae`).
+**Última fase cerrada:** Fase 3.14 — Guestbook module (flujo Start → Form → Transition Earth-like → Map con drag&drop + comment). Antes: Fase 3.13 Trails (`ad7f2e1` + `e75f469` + `a678509`), Fase 3.12 Deals, Fase 3.11 Tickets.
 
-**Siguiente acción concreta:** Siguiente módulo del home (Guestbook, Photo Booth, Itinerary Builder) o Fase 4 (primer cliente real). Itinerary Builder es candidato natural: ya hay 3 buckets `kiosk_favorites` + `kiosk_event_favorites` + `kiosk_trail_favorites`.
+**Siguiente acción concreta:** Siguiente módulo del home (Photo Booth, Itinerary Builder) o Fase 4 (primer cliente real). Itinerary Builder es candidato natural — ya hay 3 buckets de favoritos + Guestbook tiene su propio bucket.
 
 **Bloqueos:** ninguno. `alwaysShowWelcome={true}` del MapModule sigue hardcoded para QA — apagarlo antes de Fase 4 / producción (`[module]/page.tsx` rama `map`).
 
@@ -629,6 +629,49 @@ driving/walking, SEE 360 funcional, favorite toast).
 - **`ListingsToolbar` reusada para Tickets** (no archivo nuevo) — el chrome es idéntico a Events.
 
 **Fase:** 3.10 Passes cerrada con QA + 3.11 Tickets completa.
+
+---
+
+### Sesión 2026-04-23 — Fase 3.14 Guestbook module (5 olas en un pase)
+
+**Hecho:**
+
+- Brainstorming aprobado en plan mode con 4 preguntas críticas: persistencia (seed + sessionStorage v1, backend v2), geocoding (Mapbox API real con fallback), animación (projection globe + flyTo), drag&drop (pointer events + unproject).
+- Spec en `docs/superpowers/specs/2026-04-23-guestbook-module-design.md`. Plan XML en `.planning/3-14-1-PLAN.md`.
+- **Ola 1 (data):** Tipos `Guestbook*` en config.ts + union. `guestbook-geo.ts` (Mapbox Geocoding v5 con timeout 5s + null fallback). `guestbook-bbox.ts` (filter by proximity usando bbox lat/lng). `guestbook-store.ts` (sessionStorage bucket `kiosk_guestbook_user_pins`). 22 textos + 5 pinCatalog + 20 countries + 15 seedPins con avatars Unsplash + comentarios mock. 5 SVGs inline para pins (star-blue, avatar-man, avatar-woman, usa-flag, x-olive).
+- **Ola 2 (Start + Form):** `GuestbookModule` con máquina de estados `start|form|transition|map`. `GuestbookStartScreen` (hero + CTA + globe crop). `GuestbookFormScreen` con fields grid 2-row + QWERTY (OnScreenKeyboard reusado) + NumericKeypad para zip + CountryDropdown overlay. Validación Name+Email+Zip+Privacy. Rama `case 'guestbook'` en [module]/page.tsx + guard notFound en [slug]/page.tsx.
+- **Ola 3 (Globe canvas):** `GuestbookGlobeCanvas` forwardRef con imperative `flyToZip(coords)`. Un solo MapboxMap que persiste entre phases con `projection: 'globe'` + satellite-streets-v12. Al completar flyTo: switch a streets-v12 + atmosphere setFog con star-intensity 0.6.
+- **Ola 4 (Map + drag&drop):** `GuestbookMapScreen` renderea seedPins como `mapboxgl.Marker` DOM (avatar circular + stem azul). `GuestbookPinRail` con pointer events capture + clone visual fijo mientras drag. `onPointerUp` → `map.unproject()` → coord. Comment modal con QWERTY. FINISH olive button tras confirm.
+- **Ola 5 (QA + docs):** Playwright MCP screenshots `3-14-guestbook-start-v3.png` + `3-14-guestbook-form.png` con globo projection globe visible (atmosphere + star field). SUMMARY + COVERAGE + spec + STATE + ROADMAP. `pnpm typecheck` + `pnpm format:check` limpios.
+
+**Verificado:**
+
+- Start screen: hero ballerinas + título + CTA + globo Mapbox con projection globe visible abajo (atmosphere glow, star field).
+- Form screen: fields + checkboxes + QWERTY + globo entre form y teclado.
+- Globo renderea correctamente con `projection: 'globe'` y style `satellite-streets-v12`.
+- Fallback placeholder cuando token no disponible ("Globe unavailable").
+- `pnpm typecheck` limpio, `pnpm format:check` limpio.
+- Flujo end-to-end (transition + map + drag + modal) testeable manualmente — no se automatizó porque requiere 40+ taps QWERTY.
+
+**Pendiente / siguiente:**
+
+- **Assets custom del XD**: los 5 pin SVGs son placeholders simples. Reemplazar con assets oficiales si Rubén los entrega como PNGs/SVGs separados.
+- **Hero ballerinas**: URL Unsplash. Reemplazar con asset del XD.
+- **Testing end-to-end** con Playwright MCP del flujo completo (bloqueado por 40+ taps QWERTY).
+- **Auditor white-label** sobre `src/components/guestbook/` (expected: fallbacks `??` defensivos, colores del design system).
+- Siguiente módulo (Photo Booth, Itinerary Builder) o Fase 4.
+
+**Decisiones:**
+
+- **Un solo MapboxMap que persiste** entre phases (vs montar/desmontar). Razón: evita reinicialización de WebGL context y mantiene state de globe. El canvas está en el component padre con `position: absolute` cambiando coords según phase.
+- **Projection globe + satellite inicial → streets-v12 al llegar** (no 2 mapas separados). Razón: `setStyle()` preserva markers si no se remueven. Smooth transition visual.
+- **Pointer events (no HTML5 drag&drop)**. Razón: HTML5 drag API no funciona bien en kiosks táctiles + no tiene API para obtener clientX/Y durante drop. Pointer events con `setPointerCapture` es más fiable.
+- **Validación en el form screen** (no en el módulo padre). Razón: encapsular lógica cerca del UI; el `doSubmit` del Form invoca `onSubmit` del padre.
+- **`ENTER` en comment modal = newline** (no submit). Razón: el user puede dejar mensajes multi-línea.
+- **`useRef` + `forwardRef` + `useImperativeHandle`** para el globe. Razón: el parent necesita llamar `flyToZip` imperativamente al submit; con un callback regular se perdería al re-render.
+- **Seed + sessionStorage v1** en vez de backend ahora. Razón: kiosk offline-friendly, sin depender de API externa para un feature visual. Backend diferido a Fase 5+ cuando haya infraestructura.
+
+**Fase:** 3.14 Guestbook cerrada (con testing manual pendiente del flujo completo por Rubén).
 
 ---
 

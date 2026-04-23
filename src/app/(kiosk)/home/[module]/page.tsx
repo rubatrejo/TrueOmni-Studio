@@ -5,6 +5,7 @@ import { AdsSlot } from '@/components/ads/ads-slot';
 import { DealsModule } from '@/components/deals/deals-module';
 import { BrochuresModule } from '@/components/digital-brochure/brochures-module';
 import { EventsModule } from '@/components/events/events-module';
+import { GuestbookModule } from '@/components/guestbook/guestbook-module';
 import { HomeHeader } from '@/components/home/header';
 import { KioskCanvas } from '@/components/kiosk-canvas';
 import { ListingsModule } from '@/components/listings/listings-module';
@@ -180,6 +181,20 @@ export default async function ModulePage({ params }: PageProps) {
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
         />
         <AdsSlot ads={ads} />
+      </KioskCanvas>
+    );
+  }
+  if (mod?.kind === 'guestbook') {
+    return (
+      <KioskCanvas>
+        <GuestbookModule
+          module={mod}
+          mapboxToken={config.integraciones?.mapbox_token}
+          textos={config.textos ?? {}}
+          clientFallbackCoords={config.client.coords}
+          startHeader={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
+          formHeader={<HomeHeader heroImage={null} showLanguage={false} height={180} />}
+        />
       </KioskCanvas>
     );
   }

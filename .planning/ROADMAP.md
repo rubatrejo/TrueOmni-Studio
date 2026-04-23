@@ -74,11 +74,13 @@ Subfases cerradas:
 - [x] 3.11 — Tickets module + iteraciones v2-v9 (2026-04-22).
 - [x] 3.12 — Deals module (2026-04-23).
 - [x] 3.13 — Trails module con tabs de mapa + Considerations (2026-04-23).
+- [x] 3.14 — Guestbook module con Earth zoom + drag&drop + comments (2026-04-23).
 
 Pendientes:
 
-- [ ] Guestbook, Photo Booth, Itinerary Builder (prioridad por definir).
+- [ ] Photo Booth, Itinerary Builder (prioridad por definir).
 - [ ] Map aggregator integration para trails (follow-up de 3.13).
+- [ ] Backend real para Guestbook (Fase 5+).
 
 Cada sub-fase cumple:
 

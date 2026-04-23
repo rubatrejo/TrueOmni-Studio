@@ -457,6 +457,52 @@ export interface Trail {
   };
 }
 
+/** Una opción del catálogo de pins que el usuario puede arrastrar al mapa. */
+export interface GuestbookPinOption {
+  id: string;
+  /** Path relativo a `clients/{slug}/assets/` o URL absoluta. Imagen del pin. */
+  image: string;
+  label: string;
+}
+
+/** País preset para el dropdown del form Guestbook. */
+export interface GuestbookCountry {
+  /** Código ISO 3166-1 alpha-2 (ej. "US", "MX"). Usado por Mapbox geocoding. */
+  code: string;
+  name: string;
+}
+
+/** Pin seed de otro "usuario" que el operador configura en el cliente. */
+export interface GuestbookSeedPin {
+  id: string;
+  authorName: string;
+  zipCode: string;
+  coords: { lat: number; lng: number };
+  /** Path/URL del avatar que se dibuja en el mapa. */
+  pinImage: string;
+  /** Ej. "Today", "Yesterday", "Jan 14". */
+  dateLabel: string;
+  /** Dirección legible mostrada en el popup del pin. */
+  address: string;
+  comment?: string;
+}
+
+/** Módulo Guestbook — kind discriminator 'guestbook'. */
+export interface HomeGuestbookModule {
+  kind: 'guestbook';
+  label: string;
+  /** Imagen del hero superior de la pantalla Start (ej. ballerinas). */
+  heroImage: string;
+  /** 5 pins arrastrables que el usuario puede elegir. */
+  pinCatalog: GuestbookPinOption[];
+  /** Países preset del dropdown del form. */
+  countries: GuestbookCountry[];
+  /** Pins seed de otros "usuarios" que se muestran en el mapa. */
+  seedPins: GuestbookSeedPin[];
+  /** Center + zoom inicial del globo (phases start/form). Default world-view. */
+  earthStart?: { center: { lat: number; lng: number }; zoom: number };
+}
+
 /** Módulo Trails — kind discriminator 'trails'. */
 export interface HomeTrailsModule {
   kind: 'trails';
@@ -483,7 +529,8 @@ export type HomeModuleVariant =
   | HomePassesModule
   | HomeTicketsModule
   | HomeDealsModule
-  | HomeTrailsModule;
+  | HomeTrailsModule
+  | HomeGuestbookModule;
 
 /**
  * Publicidad declarativa por cliente (Fase 3.8). El kiosk renderiza ads

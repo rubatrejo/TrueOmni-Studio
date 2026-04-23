@@ -117,7 +117,30 @@
     "trails_filter_difficulty": "Difficulty",
     "trails_filter_type": "Trail Type",
     "trails_clear_all": "CLEAR ALL",
-    "trails_apply": "APPLY"
+    "trails_apply": "APPLY",
+    "guestbook_label": "Guestbook",
+    "guestbook_start_title": "Sign our Guestbook!",
+    "guestbook_start_subtitle": "Share your experiences with other guests and show the world what you enjoyed the most out of your stay.",
+    "guestbook_start_cta": "START",
+    "guestbook_form_title": "Start your Guestbook!",
+    "guestbook_field_name": "Complete Name",
+    "guestbook_field_email": "Email",
+    "guestbook_field_phone": "Phone",
+    "guestbook_field_country": "Country",
+    "guestbook_field_zip": "Zip Code",
+    "guestbook_terms_privacy": "Accept our Privacy policy",
+    "guestbook_terms_updates": "Receive Destination Email Updates",
+    "guestbook_next_cta": "NEXT",
+    "guestbook_pin_title": "Let's pin your location",
+    "guestbook_pin_subtitle": "Select your favorite pin and drop it in the map",
+    "guestbook_pin_comment_placeholder": "Write a short comment…",
+    "guestbook_pin_today": "Today",
+    "guestbook_pin_confirm": "CONFIRM",
+    "guestbook_pin_close": "CANCEL",
+    "guestbook_finish_cta": "FINISH",
+    "guestbook_thanks_title": "Thanks for signing!",
+    "guestbook_invalid_zip_fallback": "Couldn't find that zip code, showing the local area instead.",
+    "guestbook_country_select_title": "Select Country"
   },
   "navegacion": {
     "home": "/",
@@ -8990,6 +9013,201 @@
                 "defaultCenter": { "lat": 33.5396, "lng": -112.0283 },
                 "defaultZoom": 16
               }
+            }
+          ]
+        },
+        "guestbook": {
+          "kind": "guestbook",
+          "label": "Guestbook",
+          "heroImage": "https://images.unsplash.com/photo-1518834107812-67b0b7c58434?w=1920&q=80",
+          "earthStart": { "center": { "lat": 20, "lng": -60 }, "zoom": 1.6 },
+          "pinCatalog": [
+            { "id": "star", "image": "/assets/guestbook/pins/star-blue.svg", "label": "Star" },
+            {
+              "id": "man",
+              "image": "/assets/guestbook/pins/avatar-man.svg",
+              "label": "Traveler M"
+            },
+            {
+              "id": "woman",
+              "image": "/assets/guestbook/pins/avatar-woman.svg",
+              "label": "Traveler W"
+            },
+            { "id": "usa", "image": "/assets/guestbook/pins/usa-flag.svg", "label": "USA" },
+            { "id": "x", "image": "/assets/guestbook/pins/x-olive.svg", "label": "Highlight" }
+          ],
+          "countries": [
+            { "code": "US", "name": "United States" },
+            { "code": "MX", "name": "Mexico" },
+            { "code": "CA", "name": "Canada" },
+            { "code": "GB", "name": "United Kingdom" },
+            { "code": "FR", "name": "France" },
+            { "code": "DE", "name": "Germany" },
+            { "code": "ES", "name": "Spain" },
+            { "code": "IT", "name": "Italy" },
+            { "code": "PT", "name": "Portugal" },
+            { "code": "NL", "name": "Netherlands" },
+            { "code": "BR", "name": "Brazil" },
+            { "code": "AR", "name": "Argentina" },
+            { "code": "CL", "name": "Chile" },
+            { "code": "CO", "name": "Colombia" },
+            { "code": "JP", "name": "Japan" },
+            { "code": "AU", "name": "Australia" },
+            { "code": "NZ", "name": "New Zealand" },
+            { "code": "IE", "name": "Ireland" },
+            { "code": "SE", "name": "Sweden" },
+            { "code": "CH", "name": "Switzerland" }
+          ],
+          "seedPins": [
+            {
+              "id": "pin-regina",
+              "authorName": "Regina Devao",
+              "zipCode": "33131",
+              "coords": { "lat": 25.7683, "lng": -80.1973 },
+              "pinImage": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
+              "dateLabel": "Today",
+              "address": "284 Allen St. Miami, Florida",
+              "comment": "I loved this new Miami bar and we had the greatest time with my friends and family."
+            },
+            {
+              "id": "pin-marcus",
+              "authorName": "Marcus Chen",
+              "zipCode": "33131",
+              "coords": { "lat": 25.7738, "lng": -80.1895 },
+              "pinImage": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80",
+              "dateLabel": "Yesterday",
+              "address": "1100 Brickell Ave. Miami, Florida",
+              "comment": "Perfect view of the bay from the rooftop pool. Will come back every year."
+            },
+            {
+              "id": "pin-sofia",
+              "authorName": "Sofia Ramirez",
+              "zipCode": "33130",
+              "coords": { "lat": 25.7616, "lng": -80.2032 },
+              "pinImage": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80",
+              "dateLabel": "Jan 14",
+              "address": "900 SW 5th Ave. Miami, Florida",
+              "comment": "Amazing Cuban coffee. The staff made us feel like family."
+            },
+            {
+              "id": "pin-james",
+              "authorName": "James O'Connor",
+              "zipCode": "33139",
+              "coords": { "lat": 25.7907, "lng": -80.13 },
+              "pinImage": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&q=80",
+              "dateLabel": "Jan 12",
+              "address": "Ocean Dr. Miami Beach, Florida",
+              "comment": "South Beach at sunrise is unreal. Don't miss Lincoln Road."
+            },
+            {
+              "id": "pin-ava",
+              "authorName": "Ava Thompson",
+              "zipCode": "33131",
+              "coords": { "lat": 25.7715, "lng": -80.19 },
+              "pinImage": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80",
+              "dateLabel": "Jan 10",
+              "address": "300 SE 3rd Ave. Miami, Florida",
+              "comment": "Brickell food scene is top notch. Try the tasting menu."
+            },
+            {
+              "id": "pin-carlos",
+              "authorName": "Carlos Medina",
+              "zipCode": "33132",
+              "coords": { "lat": 25.7753, "lng": -80.1844 },
+              "pinImage": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80",
+              "dateLabel": "Jan 9",
+              "address": "600 Biscayne Blvd. Miami, Florida",
+              "comment": "Downtown arts and science museum - kids loved it."
+            },
+            {
+              "id": "pin-emma",
+              "authorName": "Emma Patel",
+              "zipCode": "33131",
+              "coords": { "lat": 25.766, "lng": -80.191 },
+              "pinImage": "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=200&q=80",
+              "dateLabel": "Jan 8",
+              "address": "1200 S Miami Ave. Miami, Florida",
+              "comment": "Bayfront walk at night is magical."
+            },
+            {
+              "id": "pin-liam",
+              "authorName": "Liam Brooks",
+              "zipCode": "33130",
+              "coords": { "lat": 25.758, "lng": -80.208 },
+              "pinImage": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80",
+              "dateLabel": "Jan 7",
+              "address": "Little Havana. Miami, Florida",
+              "comment": "Salsa dancing on Calle Ocho. Incredible energy."
+            },
+            {
+              "id": "pin-priya",
+              "authorName": "Priya Sharma",
+              "zipCode": "33131",
+              "coords": { "lat": 25.7701, "lng": -80.196 },
+              "pinImage": "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=200&q=80",
+              "dateLabel": "Jan 5",
+              "address": "Brickell City Centre. Miami, Florida",
+              "comment": "Shopping and dining in one place. Great spa too."
+            },
+            {
+              "id": "pin-noah",
+              "authorName": "Noah Wright",
+              "zipCode": "33139",
+              "coords": { "lat": 25.785, "lng": -80.134 },
+              "pinImage": "https://images.unsplash.com/photo-1463453091185-61582044d556?w=200&q=80",
+              "dateLabel": "Jan 3",
+              "address": "Art Deco District. Miami Beach, Florida",
+              "comment": "Architecture tour was the highlight of our trip."
+            },
+            {
+              "id": "pin-isabella",
+              "authorName": "Isabella Cruz",
+              "zipCode": "33130",
+              "coords": { "lat": 25.7633, "lng": -80.201 },
+              "pinImage": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=200&q=80",
+              "dateLabel": "Dec 28",
+              "address": "Wynwood Walls. Miami, Florida",
+              "comment": "Street art everywhere. Go during the day for photos."
+            },
+            {
+              "id": "pin-ethan",
+              "authorName": "Ethan Lee",
+              "zipCode": "33132",
+              "coords": { "lat": 25.778, "lng": -80.179 },
+              "pinImage": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=200&q=80",
+              "dateLabel": "Dec 22",
+              "address": "Bayside Marketplace. Miami, Florida",
+              "comment": "Fun boat tour of Millionaire's Row."
+            },
+            {
+              "id": "pin-mia",
+              "authorName": "Mia Johnson",
+              "zipCode": "33131",
+              "coords": { "lat": 25.7685, "lng": -80.1925 },
+              "pinImage": "https://images.unsplash.com/photo-1554151228-14d9def656e4?w=200&q=80",
+              "dateLabel": "Dec 15",
+              "address": "Mary Brickell Village. Miami, Florida",
+              "comment": "Happy hour at the rooftop bars is a must."
+            },
+            {
+              "id": "pin-leo",
+              "authorName": "Leo Martinez",
+              "zipCode": "33130",
+              "coords": { "lat": 25.755, "lng": -80.215 },
+              "pinImage": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80",
+              "dateLabel": "Dec 10",
+              "address": "The Roads. Miami, Florida",
+              "comment": "Hidden gem neighborhood with amazing Cuban food."
+            },
+            {
+              "id": "pin-zoe",
+              "authorName": "Zoe Anderson",
+              "zipCode": "33131",
+              "coords": { "lat": 25.7672, "lng": -80.1945 },
+              "pinImage": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&q=80",
+              "dateLabel": "Nov 30",
+              "address": "Perez Art Museum. Miami, Florida",
+              "comment": "Contemporary art with beautiful bay views. Free on Thursdays."
             }
           ]
         }

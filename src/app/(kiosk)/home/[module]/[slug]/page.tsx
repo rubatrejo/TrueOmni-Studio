@@ -43,6 +43,9 @@ export default async function DetailPage({ params }: PageProps) {
   // Deals no tiene detail fullscreen — la interacción es listing → modal redeem.
   if (mod.kind === 'deals') notFound();
 
+  // Guestbook es un flujo completo sin detail por slug.
+  if (mod.kind === 'guestbook') notFound();
+
   if (mod.kind === 'trails') {
     const trail = mod.trails.find((t) => t.slug === slug);
     if (!trail) notFound();

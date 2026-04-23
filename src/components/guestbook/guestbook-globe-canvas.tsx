@@ -48,11 +48,23 @@ export const GuestbookGlobeCanvas = forwardRef<
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: 'mapbox://styles/mapbox/satellite-streets-v12',
+      style: 'mapbox://styles/mapbox/standard',
       center: [center.lng, center.lat],
       zoom,
       interactive: false,
       attributionControl: false,
+    });
+    // Standard style tiene config properties para ocultar etiquetas.
+    // Se aplica tras style.load para garantizar que el basemap está listo.
+    map.on('style.load', () => {
+      try {
+        map.setConfigProperty('basemap', 'showPlaceLabels', false);
+        map.setConfigProperty('basemap', 'showRoadLabels', false);
+        map.setConfigProperty('basemap', 'showPointOfInterestLabels', false);
+        map.setConfigProperty('basemap', 'showTransitLabels', false);
+      } catch {
+        /* estilo sin soporte de config */
+      }
     });
 
     // Rotación continua del globo — efecto Framer/Globe interactivo.

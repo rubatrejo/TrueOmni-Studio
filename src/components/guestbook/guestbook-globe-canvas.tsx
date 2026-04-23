@@ -78,7 +78,7 @@ export const GuestbookGlobeCanvas = forwardRef<
     // Rotación continua del globo — efecto Framer/Globe interactivo.
     // Cada 'moveend' añade una pequeña rotación en lng si spinning está on
     // y el zoom es suficientemente out (solo en Start / Form).
-    const SECONDS_PER_REVOLUTION = 120;
+    const SECONDS_PER_REVOLUTION = 60;
     const MAX_SPIN_ZOOM = 5;
     const spin = () => {
       if (!spinningRef.current) return;
@@ -135,7 +135,7 @@ export const GuestbookGlobeCanvas = forwardRef<
           el.style.display = 'block';
           // Usa height fijo + width auto para respetar el aspect ratio
           // natural del PNG (evita que se vean comprimidos).
-          el.innerHTML = `<img src="${p.image}" alt="" style="height:70px;width:auto;filter:drop-shadow(0 4px 7px rgba(0,0,0,0.45));display:block;" />`;
+          el.innerHTML = `<img src="${p.image}" alt="" style="height:96px;width:auto;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.5));display:block;" />`;
           const m = new Marker({ element: el, anchor: 'bottom' })
             .setLngLat([p.coords.lng, p.coords.lat])
             .addTo(map);

@@ -137,9 +137,9 @@ export const GuestbookGlobeCanvas = forwardRef<
           el.style.transition = 'opacity 0.6s ease-out';
           // Pseudo-3D con perspective + rotateX. Sombra elíptica debajo.
           el.innerHTML = `
-            <div style="position:relative;width:auto;height:128px;transform-style:preserve-3d;pointer-events:none;">
-              <div style="position:absolute;left:50%;bottom:-6px;transform:translateX(-50%) rotateX(75deg);width:72px;height:22px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,0.45) 0%,rgba(0,0,0,0) 70%);"></div>
-              <img src="${p.image}" alt="" style="position:relative;height:116px;width:auto;display:block;transform:perspective(380px) rotateX(22deg);transform-origin:50% 100%;filter:drop-shadow(0 7px 9px rgba(0,0,0,0.4));" />
+            <div style="position:relative;width:auto;height:140px;transform-style:preserve-3d;pointer-events:none;">
+              <div style="position:absolute;left:50%;bottom:-4px;transform:translateX(-50%) rotateX(75deg);width:76px;height:22px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,0.45) 0%,rgba(0,0,0,0) 70%);"></div>
+              <img src="${p.image}" alt="" style="position:relative;height:132px;width:auto;display:block;transform:perspective(520px) rotateX(12deg);transform-origin:50% 100%;filter:drop-shadow(0 7px 9px rgba(0,0,0,0.4));" />
             </div>
           `;
           const m = new Marker({

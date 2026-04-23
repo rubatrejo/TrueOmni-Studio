@@ -350,8 +350,9 @@ function HeroImage({
             aria-hidden
             className="absolute inset-x-0 bottom-0"
             style={{
-              height: '180px',
-              background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.75) 100%)',
+              height: '240px',
+              background:
+                'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.9) 100%)',
             }}
           />
           <div
@@ -366,11 +367,11 @@ function HeroImage({
           >
             <div
               style={{
-                fontSize: '22px',
-                lineHeight: '26px',
-                fontWeight: 600,
+                fontSize: '30px',
+                lineHeight: '34px',
+                fontWeight: 700,
                 letterSpacing: '0.02em',
-                textShadow: '0 2px 4px rgba(0,0,0,0.45)',
+                textShadow: '0 2px 6px rgba(0,0,0,0.6)',
               }}
             >
               {eventMetaOverlay.dateLabel}
@@ -380,12 +381,12 @@ function HeroImage({
             {phoneOverlay ? (
               <div
                 style={{
-                  marginTop: '4px',
-                  fontSize: '18px',
-                  lineHeight: '22px',
-                  fontWeight: 500,
-                  opacity: 0.88,
-                  textShadow: '0 2px 4px rgba(0,0,0,0.45)',
+                  marginTop: '8px',
+                  fontSize: '24px',
+                  lineHeight: '28px',
+                  fontWeight: 600,
+                  opacity: 0.95,
+                  textShadow: '0 2px 6px rgba(0,0,0,0.6)',
                 }}
               >
                 {phoneOverlay}
@@ -462,9 +463,11 @@ function ActionRow({
   const hasReserve = Boolean(listing.reserveUrl);
   const hasSecondary = !hasReserve && Boolean(secondaryCta);
   const twoButtons = hasReserve || hasSecondary;
-  const websiteTop = twoButtons ? 581 : 624;
+  const hideMetaCol = !eventMeta && !listing.hours;
+  const websiteTop = hideMetaCol ? 665 : twoButtons ? 581 : 624;
+  const websiteLeft = hideMetaCol ? 59 : 609;
 
-  const hideMetaColumn = !eventMeta && !listing.hours;
+  const hideMetaColumn = hideMetaCol;
   const primaryText = eventMeta
     ? `${eventMeta.dateLabel ?? eventMeta.date}  |  ${
         eventMeta.timeLabel ?? `${eventMeta.startTime} – ${eventMeta.endTime}`
@@ -514,7 +517,7 @@ function ActionRow({
         rel="noopener noreferrer"
         className="absolute flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
         style={{
-          left: '609px',
+          left: `${websiteLeft}px`,
           top: `${websiteTop}px`,
           width: '260px',
           height: '64px',

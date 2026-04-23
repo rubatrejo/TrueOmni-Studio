@@ -32,7 +32,7 @@ interface MapChipsProps {
 
 const CHIP_HEIGHT = 54;
 const CHIP_RADIUS = 8;
-const SELECT_ALL_COLOR = '#3b3b3b'; // neutro (gris oscuro) para distinguirlo de las categorías
+const SELECT_ALL_COLOR = '#555555'; // neutro (gris oscuro) para distinguirlo de las categorías
 
 export function MapChips({
   chips,

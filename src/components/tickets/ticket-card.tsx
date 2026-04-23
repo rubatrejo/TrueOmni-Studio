@@ -72,7 +72,7 @@ export function TicketCard({
             flex: 1,
             height: '158px',
             borderRadius: '8px',
-            backgroundColor: '#3b3b3b',
+            backgroundColor: '#555555',
             boxShadow: '0 6px 14px rgba(0,0,0,0.12)',
           }}
         >

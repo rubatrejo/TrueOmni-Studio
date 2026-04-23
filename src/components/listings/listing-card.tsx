@@ -7,7 +7,7 @@ import type { Listing } from '@/lib/config';
 
 /**
  * Card verbatim SVG Food & Drink (Component_469).
- *   - Card 293×268.63 total: imagen 293×164.63 arriba + footer #3b3b3b 293×104.
+ *   - Card 293×268.63 total: imagen 293×164.63 arriba + footer #555555 293×104.
  *   - Heart circle 65px (r=32.5) semi-transparente #fff/0.699 en top-right de la imagen.
  *   - Footer dark:
  *     · "SUBCATEGORY" OpenSans 12px white @ (20, 13) baseline.
@@ -80,10 +80,10 @@ export function ListingCard({
         </button>
       </div>
 
-      {/* Footer dark #3b3b3b 293×104 @ y=164.63 */}
+      {/* Footer dark #555555 293×104 @ y=164.63 */}
       <div
         className="absolute left-0 right-0 overflow-hidden"
-        style={{ top: '164.63px', height: '104px', backgroundColor: '#3b3b3b' }}
+        style={{ top: '164.63px', height: '104px', backgroundColor: '#555555' }}
       >
         <span
           className="absolute font-sans uppercase text-white"

@@ -9,7 +9,7 @@ import type { MapItem } from '@/lib/map-item';
  * Card del carrusel superior del Map. MISMO contenido y estructura que
  * `ListingCard` del módulo Listings (Fase 3.3) para mantener consistencia:
  *   - Imagen arriba con heart top-right (ratio ~293×164).
- *   - Footer oscuro (#3b3b3b) con SUBCATEGORY + title + distance + open until.
+ *   - Footer oscuro (#555555) con SUBCATEGORY + title + distance + open until.
  *
  * Selección:
  *   - normal   → 293 × 268.63 (tamaño canon de ListingCard).
@@ -112,7 +112,7 @@ export function MapTopCard({ item, active, distanceMi, onClick }: MapTopCardProp
       {/* Footer dark */}
       <div
         className="absolute left-0 right-0 overflow-hidden"
-        style={{ top: `${imgH}px`, height: `${footerH}px`, backgroundColor: '#3b3b3b' }}
+        style={{ top: `${imgH}px`, height: `${footerH}px`, backgroundColor: '#555555' }}
       >
         <span
           className="absolute font-sans uppercase text-white"

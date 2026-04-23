@@ -82,7 +82,7 @@ export function EventCard({
         >
           <EventImage src={event.image} alt={event.title} />
           <div
-            className="flex flex-col justify-center"
+            className="relative flex flex-col justify-center"
             style={{
               flex: 1,
               padding: '0 28px',
@@ -116,6 +116,28 @@ export function EventCard({
             >
               {timeLabel}
             </span>
+            {event.ticket ? (
+              <span
+                className="font-display font-bold"
+                style={{
+                  position: 'absolute',
+                  top: '14px',
+                  right: '14px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  height: '44px',
+                  paddingLeft: '20px',
+                  paddingRight: '20px',
+                  borderRadius: '999px',
+                  backgroundColor: '#ffffff',
+                  color: '#004f8b',
+                  fontSize: '21px',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                {event.ticket.priceDisplay}
+              </span>
+            ) : null}
           </div>
         </div>
       </div>

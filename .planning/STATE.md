@@ -6,9 +6,9 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Fase 3.14 (Guestbook) cerrada. Commit pending.
+**Fase activa:** Fase 3.14 (Guestbook) cerrada con 14 commits de pulido visual (pins oficiales, rotación, pseudo-3D, layout media-luna, vista global, smooth fade).
 
-**Última fase cerrada:** Fase 3.14 — Guestbook module (flujo Start → Form → Transition Earth-like → Map con drag&drop + comment). Antes: Fase 3.13 Trails (`ad7f2e1` + `e75f469` + `a678509`), Fase 3.12 Deals, Fase 3.11 Tickets.
+**Última fase cerrada:** Fase 3.14 — Guestbook module + pulidos visuales (`f81e183` → `a55a0d8`). Antes: Fase 3.13 Trails (`ad7f2e1` + `e75f469` + `a678509`), Fase 3.12 Deals, Fase 3.11 Tickets.
 
 **Siguiente acción concreta:** Siguiente módulo del home (Photo Booth, Itinerary Builder) o Fase 4 (primer cliente real). Itinerary Builder es candidato natural — ya hay 3 buckets de favoritos + Guestbook tiene su propio bucket.
 
@@ -629,6 +629,47 @@ driving/walking, SEE 360 funcional, favorite toast).
 - **`ListingsToolbar` reusada para Tickets** (no archivo nuevo) — el chrome es idéntico a Events.
 
 **Fase:** 3.10 Passes cerrada con QA + 3.11 Tickets completa.
+
+---
+
+### Sesión 2026-04-23 — Guestbook pulidos visuales (14 commits post-inicial)
+
+**Hecho:**
+
+- Validación del form relajada temporalmente a "solo zip" para QA (`guestbook-form-screen.tsx` con TODO). Restaurar Name+Email+Zip+Privacy al cierre de QA.
+- Pins oficiales del XD (`Pin-1..5.png`) copiados a `clients/default/assets/guestbook/pins/`, config actualizado. Globe canvas recibe `overlayPins` prop con sus coords y las renderea como `mapboxgl.Marker` que giran con el planeta.
+- Globe con **rotación continua** tipo Framer: `setInterval` vía `moveend` + `easeTo(lng -= 360/60s)`. 60s por vuelta. Se apaga automáticamente al submit para no competir con `flyTo`.
+- Estilo del globe cambiado a `mapbox://styles/mapbox/standard` con `setConfigProperty('basemap','showPlaceLabels',false)` (+ road/POI/transit) para ocultar etiquetas. Fog sin galaxia: `space-color: rgb(248,248,248)` + `star-intensity: 0`.
+- Layout **media-luna**: globo con `top: 1220px, height: 1600px, left: -200, right: -200` en phase start — solo asoma la parte superior del planeta. Zoom inicial 1.6→3.0, center `(lat:15, lng:-90)` para ver USA/Mexico/Central America de frente.
+- `FloatingHomeButton` añadido a Start y Form screens.
+- Subtítulo de Start: 22px→28px, lineHeight 32→40, maxWidth 820→900.
+- 16 coords decorativas globales (`GLOBE_DECORATIVE_COORDS`) para los pins que giran con el globo: NY, LA, Miami, CDMX, Lima, Rio, París, Roma, Moscú, El Cairo, Nairobi, Johannesburg, New Delhi, Tokyo, Singapur, Sydney. Separadas ≥1500 km. Reemplaza los seedPins Miami-only durante phase start/form.
+- **Pseudo-3D**: `transform: perspective(520px) rotateX(12deg); transform-origin: 50% 100%` en cada pin + sombra elíptica proyectada (radial-gradient con `rotateX(75deg)`) para simular contacto con la superficie. Final: rotateX 12° (menos aplastado) + height 132px del img.
+- **Smooth fade al horizonte**: `occludedOpacity: 0` en Marker options + `transition: opacity 0.6s ease-out` en el element → al cruzar el terminator los pins se desvanecen gradualmente.
+
+**Verificado:**
+
+- `pnpm typecheck` limpio tras cada commit.
+- Browser manual: globe standard sin labels girando, 16 pins distribuidos visibles al rotar, pseudo-3D con sombra, fade smooth al desaparecer.
+
+**Pendiente / siguiente:**
+
+- Restaurar validación completa del form (Name+Email+Zip+Privacy) tras QA.
+- Hero ballerinas aún con URL Unsplash — reemplazar con asset oficial.
+- Testing end-to-end del flujo completo (bloqueado por 40+ taps QWERTY).
+- **Pins 3D reales** (GLB models o Three.js custom layer) pospuestos. Opción 2 (GLB) requiere assets de un diseñador 3D (~2h); opción 3 (Three.js) requiere +500KB de bundle y ~3-4h. El pseudo-3D actual se consideró suficiente.
+- Auditor white-label sobre `src/components/guestbook/`.
+- Backend real en Fase 5+.
+
+**Decisiones:**
+
+- **Pseudo-3D vs real 3D**: descartadas opciones GLB y Three.js por costo. El perspective+rotateX+ground-shadow logra el look deseado sin deps ni assets extra.
+- **Pins decorativos distribuidos** (coords globales) en vez de seedPins literales para phase start/form. Razón: los 15 seedPins están todos en Miami (lat 25.76, lng -80.19) — al girar el globo solo se verían pins en un cluster chico. Los seedPins reales siguen usándose en phase=map filtrados por proximidad al zip del user.
+- **`occludedOpacity: 0`** en lugar del default 0.2. Con `transition: opacity` en el element el fade del Marker se ve smooth y el pin "desaparece" limpio detrás del globo en lugar de mostrarse fantasma detrás de la superficie.
+- **60s/vuelta** (vs 120s inicial) — Rubén pidió "un poquito más rápido".
+- **Aspect ratio natural** con `height: fixed + width: auto` en todos los pins (globe, rail, map markers) — antes con w×h fijos los PNGs se comprimían.
+
+**Fase:** 3.14 Guestbook cerrada con pulido visual aprobado.
 
 ---
 

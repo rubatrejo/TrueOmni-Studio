@@ -31,21 +31,25 @@ type Phase = 'start' | 'form' | 'transition' | 'map';
  * haya pins visibles independientemente de la rotación.
  */
 const GLOBE_DECORATIVE_COORDS: ReadonlyArray<{ lat: number; lng: number }> = [
+  // América ~separación 1500+ km
   { lat: 40.71, lng: -74.0 }, // New York
   { lat: 34.05, lng: -118.24 }, // Los Angeles
   { lat: 25.77, lng: -80.19 }, // Miami
   { lat: 19.43, lng: -99.13 }, // Mexico City
+  { lat: -12.05, lng: -77.04 }, // Lima
   { lat: -22.9, lng: -43.17 }, // Rio de Janeiro
+  // Europa / África
   { lat: 48.85, lng: 2.35 }, // Paris
-  { lat: 51.5, lng: -0.12 }, // London
   { lat: 41.9, lng: 12.49 }, // Rome
-  { lat: 35.68, lng: 139.69 }, // Tokyo
-  { lat: -33.86, lng: 151.2 }, // Sydney
-  { lat: 1.35, lng: 103.82 }, // Singapore
   { lat: 55.75, lng: 37.61 }, // Moscow
   { lat: 30.04, lng: 31.23 }, // Cairo
   { lat: -1.29, lng: 36.82 }, // Nairobi
-  { lat: 43.65, lng: -79.38 }, // Toronto
+  { lat: -26.2, lng: 28.04 }, // Johannesburg
+  // Asia / Oceanía
+  { lat: 28.61, lng: 77.21 }, // New Delhi
+  { lat: 35.68, lng: 139.69 }, // Tokyo
+  { lat: 1.35, lng: 103.82 }, // Singapore
+  { lat: -33.86, lng: 151.2 }, // Sydney
 ];
 
 export function GuestbookModule({

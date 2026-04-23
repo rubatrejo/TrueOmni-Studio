@@ -133,18 +133,23 @@ export const GuestbookGlobeCanvas = forwardRef<
           const el = document.createElement('div');
           el.style.pointerEvents = 'none';
           el.style.display = 'block';
-          // Pseudo-3D con perspective + rotateX. El pin se ve inclinado
-          // hacia el usuario ("flotando" sobre el globo) con una sombra
-          // elíptica proyectada debajo que simula contacto con la
-          // superficie. transform-origin bottom para que la "base"
-          // quede anclada al lat/lng.
+          // Smooth fade al entrar/salir del horizonte del globo.
+          el.style.transition = 'opacity 0.6s ease-out';
+          // Pseudo-3D con perspective + rotateX. Sombra elíptica debajo.
           el.innerHTML = `
-            <div style="position:relative;width:auto;height:108px;transform-style:preserve-3d;pointer-events:none;">
-              <div style="position:absolute;left:50%;bottom:-6px;transform:translateX(-50%) rotateX(75deg);width:60px;height:18px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,0.45) 0%,rgba(0,0,0,0) 70%);"></div>
-              <img src="${p.image}" alt="" style="position:relative;height:96px;width:auto;display:block;transform:perspective(340px) rotateX(22deg);transform-origin:50% 100%;filter:drop-shadow(0 6px 8px rgba(0,0,0,0.35));" />
+            <div style="position:relative;width:auto;height:128px;transform-style:preserve-3d;pointer-events:none;">
+              <div style="position:absolute;left:50%;bottom:-6px;transform:translateX(-50%) rotateX(75deg);width:72px;height:22px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,0.45) 0%,rgba(0,0,0,0) 70%);"></div>
+              <img src="${p.image}" alt="" style="position:relative;height:116px;width:auto;display:block;transform:perspective(380px) rotateX(22deg);transform-origin:50% 100%;filter:drop-shadow(0 7px 9px rgba(0,0,0,0.4));" />
             </div>
           `;
-          const m = new Marker({ element: el, anchor: 'bottom' })
+          const m = new Marker({
+            element: el,
+            anchor: 'bottom',
+            // Mapbox oculta markers cuando están detrás del globo.
+            // occludedOpacity 0 + transition CSS hace que el fade sea
+            // smooth en lugar de abrupto cuando cruzan el terminator.
+            occludedOpacity: 0,
+          })
             .setLngLat([p.coords.lng, p.coords.lat])
             .addTo(map);
           overlayMarkersRef.current.push(m);

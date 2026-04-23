@@ -9,6 +9,7 @@ export interface GlobeHandle {
   flyToZip: (coords: { lat: number; lng: number }) => Promise<void>;
   getMap: () => mapboxgl.Map | null;
   resize: () => void;
+  setSpinning: (enabled: boolean) => void;
 }
 
 /**
@@ -36,6 +37,7 @@ export const GuestbookGlobeCanvas = forwardRef<
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const onStreetsRef = useRef(false);
+  const spinningRef = useRef(true);
 
   useEffect(() => {
     if (!token || !containerRef.current) return;
@@ -52,6 +54,22 @@ export const GuestbookGlobeCanvas = forwardRef<
       interactive: false,
       attributionControl: false,
     });
+
+    // Rotación continua del globo — efecto Framer/Globe interactivo.
+    // Cada 'moveend' añade una pequeña rotación en lng si spinning está on
+    // y el zoom es suficientemente out (solo en Start / Form).
+    const SECONDS_PER_REVOLUTION = 120;
+    const MAX_SPIN_ZOOM = 5;
+    const spin = () => {
+      if (!spinningRef.current) return;
+      if (map.getZoom() > MAX_SPIN_ZOOM) return;
+      const c = map.getCenter();
+      const distancePerSec = 360 / SECONDS_PER_REVOLUTION;
+      c.lng -= distancePerSec;
+      map.easeTo({ center: c, duration: 1000, easing: (n) => n });
+    };
+    map.on('moveend', spin);
+    map.on('load', () => spin());
     map.on('style.load', () => {
       try {
         map.setProjection('globe');
@@ -80,6 +98,9 @@ export const GuestbookGlobeCanvas = forwardRef<
     (): GlobeHandle => ({
       getMap: () => mapRef.current,
       resize: () => mapRef.current?.resize(),
+      setSpinning: (enabled) => {
+        spinningRef.current = enabled;
+      },
       flyToZip: (coords) =>
         new Promise<void>((resolve) => {
           const map = mapRef.current;
@@ -87,6 +108,8 @@ export const GuestbookGlobeCanvas = forwardRef<
             resolve();
             return;
           }
+          // Stop spinning antes del flyTo para que no compita con la animación.
+          spinningRef.current = false;
           const done = () => {
             map.off('moveend', done);
             // Al llegar al zoom de calle, pasar a street-level style para

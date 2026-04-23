@@ -110,7 +110,7 @@ export function ListingDetail({
           left: '90px',
           top: '166px',
           width: '898px',
-          height: extraDetails ? '1700px' : '1589px',
+          height: '1589px',
           backgroundColor: '#ffffff',
           borderRadius: '8px',
           boxShadow: '0 12px 24px rgba(0,0,0,0.25)',
@@ -136,9 +136,9 @@ export function ListingDetail({
             className="absolute"
             style={{
               left: '48px',
-              top: '1555px',
+              top: '1470px',
               width: '802px',
-              paddingTop: '24px',
+              paddingTop: '16px',
               borderTop: '1px solid #e8e8e8',
             }}
           >
@@ -152,14 +152,14 @@ export function ListingDetail({
             className="absolute flex items-center justify-center font-sans font-bold uppercase text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
             style={{
               left: '30px',
-              right: '30px',
-              top: '479px',
+              top: '474px',
+              width: '420px',
               height: '80px',
               borderRadius: '12px',
-              backgroundColor: '#1796d6',
-              fontSize: '24px',
+              background: 'linear-gradient(135deg, #004f8b 0%, #1796d6 100%)',
+              fontSize: '22px',
               letterSpacing: '0.08em',
-              columnGap: '16px',
+              columnGap: '14px',
               boxShadow: '0 14px 28px -6px rgba(0,0,0,0.45)',
             }}
           >
@@ -168,12 +168,12 @@ export function ListingDetail({
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                height: '42px',
-                paddingLeft: '16px',
-                paddingRight: '16px',
+                height: '40px',
+                paddingLeft: '14px',
+                paddingRight: '14px',
                 borderRadius: '999px',
-                backgroundColor: 'rgba(255,255,255,0.22)',
-                fontSize: '20px',
+                backgroundColor: 'rgba(255,255,255,0.24)',
+                fontSize: '18px',
                 letterSpacing: '0.04em',
               }}
             >

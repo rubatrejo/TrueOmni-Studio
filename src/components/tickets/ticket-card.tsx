@@ -89,16 +89,14 @@ export function TicketCard({
                 right: '14px',
                 display: 'inline-flex',
                 alignItems: 'center',
-                height: '40px',
-                paddingLeft: '18px',
-                paddingRight: '18px',
+                height: '44px',
+                paddingLeft: '20px',
+                paddingRight: '20px',
                 borderRadius: '999px',
-                background:
-                  'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.85) 100%)',
-                color: '#ffffff',
-                fontSize: '19px',
+                backgroundColor: '#ffffff',
+                color: '#004f8b',
+                fontSize: '21px',
                 letterSpacing: '0.04em',
-                boxShadow: '0 4px 10px rgba(0,0,0,0.45)',
               }}
             >
               {event.ticket.priceDisplay}

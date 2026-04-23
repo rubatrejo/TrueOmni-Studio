@@ -72,10 +72,12 @@ export function GuestbookFormScreen({
 
   void onBack;
 
-  const valid = useMemo(
-    () => name.trim().length > 1 && EMAIL_RE.test(email) && ZIP_RE.test(zip) && acceptPrivacy,
-    [name, email, zip, acceptPrivacy],
-  );
+  // TODO Fase 3.14 QA: validación completa (Name+Email+Zip+Privacy).
+  // Temporal durante pruebas: solo Zip Code requerido.
+  const valid = useMemo(() => ZIP_RE.test(zip), [zip]);
+  void name;
+  void email;
+  void acceptPrivacy;
 
   // Auto-cerrar el shift tras un keypress en caps-once mode sería más UX-rich
   // pero para v1 dejamos el toggle manual.

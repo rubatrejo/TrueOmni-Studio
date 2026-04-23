@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import type { HomeGuestbookModule } from '@/lib/config';
@@ -123,6 +123,14 @@ export function GuestbookModule({
   );
 
   const getGlobeMap = useCallback(() => globeRef.current?.getMap() ?? null, []);
+
+  // Al cambiar phase (sobre todo start/form ↔ map) el container del globe
+  // cambia de tamaño inline. Mapbox necesita un resize manual para
+  // ajustar el canvas WebGL a las nuevas dimensiones.
+  useEffect(() => {
+    const t = setTimeout(() => globeRef.current?.resize(), 50);
+    return () => clearTimeout(t);
+  }, [phase]);
 
   // Layout: globo siempre presente. Las pantallas Start/Form se montan
   // encima durante esas phases. En transition el globo es full-screen

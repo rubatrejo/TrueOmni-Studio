@@ -8,6 +8,7 @@ import { useEffect, useImperativeHandle, useRef, forwardRef } from 'react';
 export interface GlobeHandle {
   flyToZip: (coords: { lat: number; lng: number }) => Promise<void>;
   getMap: () => mapboxgl.Map | null;
+  resize: () => void;
 }
 
 /**
@@ -78,6 +79,7 @@ export const GuestbookGlobeCanvas = forwardRef<
     ref,
     (): GlobeHandle => ({
       getMap: () => mapRef.current,
+      resize: () => mapRef.current?.resize(),
       flyToZip: (coords) =>
         new Promise<void>((resolve) => {
           const map = mapRef.current;

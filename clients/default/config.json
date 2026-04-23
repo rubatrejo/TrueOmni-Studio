@@ -9022,19 +9022,19 @@
           "heroImage": "https://images.unsplash.com/photo-1518834107812-67b0b7c58434?w=1920&q=80",
           "earthStart": { "center": { "lat": 20, "lng": -60 }, "zoom": 1.6 },
           "pinCatalog": [
-            { "id": "star", "image": "/assets/guestbook/pins/star-blue.svg", "label": "Star" },
+            { "id": "star", "image": "/assets/guestbook/pins/pin-1.png", "label": "Star" },
             {
               "id": "man",
-              "image": "/assets/guestbook/pins/avatar-man.svg",
+              "image": "/assets/guestbook/pins/pin-2.png",
               "label": "Traveler M"
             },
             {
               "id": "woman",
-              "image": "/assets/guestbook/pins/avatar-woman.svg",
+              "image": "/assets/guestbook/pins/pin-3.png",
               "label": "Traveler W"
             },
-            { "id": "usa", "image": "/assets/guestbook/pins/usa-flag.svg", "label": "USA" },
-            { "id": "x", "image": "/assets/guestbook/pins/x-olive.svg", "label": "Highlight" }
+            { "id": "usa", "image": "/assets/guestbook/pins/pin-4.png", "label": "USA" },
+            { "id": "x", "image": "/assets/guestbook/pins/pin-5.png", "label": "Highlight" }
           ],
           "countries": [
             { "code": "US", "name": "United States" },

@@ -153,7 +153,7 @@ export function GuestbookModule({
         };
 
   return (
-    <div className="relative h-full w-full overflow-hidden" style={{ backgroundColor: '#000000' }}>
+    <div className="relative h-full w-full overflow-hidden" style={{ backgroundColor: '#f8f8f8' }}>
       <GuestbookGlobeCanvas
         ref={globeRef}
         token={mapboxToken}

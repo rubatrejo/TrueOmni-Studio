@@ -73,13 +73,16 @@ export const GuestbookGlobeCanvas = forwardRef<
     map.on('style.load', () => {
       try {
         map.setProjection('globe');
-        // "Atmosphere" blue halo around the globe.
+        // Fog sin galaxia: space-color match con el fondo claro de la
+        // página (para que el planeta se vea flotando sobre blanco) y
+        // star-intensity 0 (sin estrellas). Solo mantiene el halo
+        // atmosférico azul alrededor del planeta.
         map.setFog({
           color: 'rgb(220, 230, 245)',
-          'high-color': 'rgb(30, 55, 100)',
-          'horizon-blend': 0.04,
-          'space-color': 'rgb(10, 15, 30)',
-          'star-intensity': 0.6,
+          'high-color': 'rgb(180, 210, 240)',
+          'horizon-blend': 0.02,
+          'space-color': 'rgb(248, 248, 248)',
+          'star-intensity': 0,
         });
       } catch {
         /* proyección no soportada en esta versión */
@@ -162,7 +165,7 @@ export const GuestbookGlobeCanvas = forwardRef<
       aria-label="Globe"
       className={className}
       style={{
-        background: '#000',
+        background: '#f8f8f8',
         ...style,
       }}
     />

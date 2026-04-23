@@ -6,19 +6,24 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Fase 3.10 (Passes) cerrada en código. QA visual pendiente. Commit `731d3ee`.
+**Fase activa:** Fase 3.11 (Tickets) cerrada. 4 olas. Último commit pending (cierre).
 
-**Última fase cerrada:** Fase 3.10 — Passes module (listado · detail · share modal con QR · sent confirmation). Antes: Fase 3.9 Survey overlay V8.
+**Última fase cerrada:** Fase 3.11 — Tickets module (subset de Events con venta de boletos via QR purchase modal compartido con Passes). Antes: Fase 3.10 Passes (cerrada con fixes UI + `e16365d`).
 
-**Siguiente acción concreta:** Verificación visual del módulo Passes con Playwright MCP (6 screenshots: listing · detail · share · sent · search · demo-cliente-a) + escribir `.planning/3-10-SUMMARY.md` + auditor white-label. Después: siguiente módulo del home (Tickets, Guestbook, Deals, Photo Booth, Trails, Itinerary Builder) o Fase 4 (primer cliente real).
+**Siguiente acción concreta:** Siguiente módulo del home (Guestbook, Deals, Photo Booth, Trails, Itinerary Builder) o Fase 4 (primer cliente real — branding + Lighthouse + handoff). Itinerary Builder es el candidato natural si se quiere cerrar el arc de favoritos (ya hay buckets `kiosk_favorites` + `kiosk_event_favorites` — Tickets reusa el segundo).
 
 **Bloqueos:** ninguno. `alwaysShowWelcome={true}` del MapModule sigue hardcoded para QA — apagarlo antes de Fase 4 / producción (`[module]/page.tsx` rama `map`).
 
 **TODO de QA pendiente:**
 
 - `alwaysShowWelcome={true}` en map.
-- Verificación visual Playwright del módulo Passes (saltada por context limit en la sesión de implementación).
-- Auditor white-label en `src/components/passes/` — el QR usa colores fijos `#0a1e3a` / `#ffffff` y el share-modal hereda los grises del send-modal-chrome ya existentes; documentar excepción si el auditor reporta.
+- Fase 3.11 Tickets: auditor white-label ejecutado — reporte en `.planning/3-11-SUMMARY.md`.
+
+**TODO i18n deuda compartida filter-overlay** (aplazado a Fase 5 — pasada de tokenización de strings):
+
+- `events-filter-overlay.tsx` + `tickets-filter-overlay.tsx` + `map-filter-overlay.tsx`: "FILTERS" (título), "Features"/"Category"/"Venue"/"Price" (section titles), "Free" (price label), "CLEAR ALL", "APPLY", aria-label "Cerrar filtros". Auditor Fase 3.11 los detectó en Tickets; son heredados idénticos de los otros overlays. Tokenizar a `textos.filters_*` de una vez (afecta 3 overlays).
+- `qr-purchase-modal.tsx`: aria-label "Cerrar" del botón X (heredado Passes 3.10).
+- `[slug]/page.tsx` rama events: `"GET TICKETS"` legacy del `secondaryCta` cuando event tiene `ticketsUrl` pero no `.ticket`. Tokenizar a `textos.events_get_tickets_cta`.
 
 **TODO de i18n (aplazado a Fase 5 — validador zod + migración a config.textos):**
 
@@ -580,6 +585,44 @@ driving/walking, SEE 360 funcional, favorite toast).
 - **PassShareModal y PassSentConfirmation usan colores fijos** del chrome del send-modal-chrome (`#9a9a9a`, `#d0d0d0`) — consistente con la excepción ya aceptada en send-to-phone-modal.
 
 **Fase:** 3.9 Survey + 3.10 Passes cerradas (Passes con QA visual pendiente).
+
+---
+
+### Sesión 2026-04-22 — Passes QA cierre + Fase 3.11 Tickets completa (4 olas)
+
+**Hecho:**
+
+- **Passes Fase 3.10 QA/fixes/commit** (`e16365d`): toolbar idéntica a Things to Do (`#004f8b` + font-sans 36px + search 56×56 filled + divider), PassCard banner 80% width centrado, GET YOURS h76/paddingX56/fs22, 3 passes más (Adventure/Wellness/Family → 6 total con 42 activities), 48/48 URLs verificadas HTTP 200 (7 reemplazos), PassShareModal rediseñado con chrome propio.
+- **Fase 3.11 Tickets completa** en 4 olas:
+  - **Ola 1** (`741687e`): tipos + refactor QR a `src/components/shared/` + 10 events ticketables distribuidos + textos + tile + modules.tickets.
+  - **Ola 2** (`4826f73`): `src/lib/tickets.ts` + `TicketCard` con badge pill precio + `TicketsList` + `TicketsFilterOverlay` + `TicketsModule` + ruta listing.
+  - **Ola 3** (`ba6577a`): `SecondaryCta.onClick` opcional + `TicketDetailWithBuy` + rama `tickets` en `[slug]/page.tsx` + Events con `.ticket` reusa el mismo QR modal.
+  - **Ola 4** (TBD commit cierre): 5 screenshots Playwright + auditor white-label + SUMMARY + STATE.
+
+**Verificado:**
+
+- `pnpm check` (typecheck + lint + format) limpio tras cada ola.
+- Playwright MCP smoke end-to-end: `/home/tickets` listing, `/home/tickets/jazz-in-the-park` detail con BUY TICKET, QR modal con precio `$20–35`, sent confirmation `Link sent!`, `/home/events/jazz-in-the-park` reutiliza el mismo flow. Passes regresión validada: QR modal idéntico al pre-refactor.
+- Auditor white-label sobre `src/components/tickets/` + `src/components/shared/qr-*.tsx` + ramas modificadas: 8 strings literales (FILTERS, Features/Category/Venue/Price, Free, CLEAR ALL, APPLY, aria-labels) — TODOS heredados de Events/Passes pre-existentes. Documentados como deuda compartida en STATE TODO i18n para pasada futura.
+- Fetch HEAD sobre 11 URLs nuevas (hero tickets + 10 covers): 0 rotas.
+
+**Pendiente / siguiente:**
+
+- Siguiente módulo del home (Guestbook, Deals, Photo Booth, Trails, Itinerary Builder) o Fase 4 (primer cliente real).
+- Tokenización estricta de strings del filter-overlay (3 módulos afectados) + aria "Cerrar" del QR modal + "GET TICKETS" legacy en rama events — deuda documentada en sección TODO i18n.
+
+**Decisiones:**
+
+- **Tickets ⊂ Events filtered** — `modules.tickets` sin `events[]` propio; el pool se lee de `modules.events.events[]` y filtra por `ticket != null`.
+- **Extract QR flow a `shared/`** — `QrPurchaseModal` + `QrPurchaseHost` + `SentConfirmation` reutilizados por Passes y Tickets. Cada consumidor mapea sus propias keys (`passes_share_*` / `tickets_share_*`) al shape genérico `qr_*`.
+- **`PassQrHost` wrapper client** — necesario porque el `onSent` callback (telemetría `buildShareResult`/`dispatchShareResult`) no cruza Server→Client en Next 15. Tickets no necesita wrapper análogo porque no ejecuta telemetría en v1.
+- **Events con `.ticket` también usa QR popup** — consistencia UX. `ticketsUrl` legacy queda solo si no hay `.ticket`.
+- **Favoritos bucket compartido `kiosk_event_favorites`** — un event con ticket = mismo estado de favorito en ambos módulos.
+- **Catálogo del filter-overlay derivado del pool visible** — evita categorías/venues sin tickets activos.
+- **Badge de precio pill blanco sobre cover** (no banda `priceBand`) — `priceDisplay` string flexible (`$25`, `$15–30`, `From $10`, `$150`). `priceBand` se mantiene para el filtro de price.
+- **`ListingsToolbar` reusada para Tickets** (no archivo nuevo) — el chrome es idéntico a Events.
+
+**Fase:** 3.10 Passes cerrada con QA + 3.11 Tickets completa.
 
 ---
 

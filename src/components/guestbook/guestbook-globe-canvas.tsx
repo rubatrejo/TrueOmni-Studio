@@ -131,10 +131,11 @@ export const GuestbookGlobeCanvas = forwardRef<
       const addPins = () => {
         for (const p of overlayPins) {
           const el = document.createElement('div');
-          el.style.width = '70px';
-          el.style.height = '88px';
           el.style.pointerEvents = 'none';
-          el.innerHTML = `<img src="${p.image}" alt="" style="width:70px;height:88px;filter:drop-shadow(0 4px 7px rgba(0,0,0,0.45));display:block;" />`;
+          el.style.display = 'block';
+          // Usa height fijo + width auto para respetar el aspect ratio
+          // natural del PNG (evita que se vean comprimidos).
+          el.innerHTML = `<img src="${p.image}" alt="" style="height:70px;width:auto;filter:drop-shadow(0 4px 7px rgba(0,0,0,0.45));display:block;" />`;
           const m = new Marker({ element: el, anchor: 'bottom' })
             .setLngLat([p.coords.lng, p.coords.lat])
             .addTo(map);

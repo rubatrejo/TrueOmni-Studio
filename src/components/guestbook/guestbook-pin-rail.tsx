@@ -143,8 +143,8 @@ function PinRailItem({
           alt={option.label}
           draggable={false}
           style={{
-            width: '72px',
             height: '90px',
+            width: 'auto',
             pointerEvents: 'none',
             filter: used ? 'grayscale(0.8)' : 'none',
             display: 'block',

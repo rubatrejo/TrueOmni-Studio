@@ -25,6 +25,29 @@ import { GuestbookStartScreen } from './guestbook-start-screen';
  */
 type Phase = 'start' | 'form' | 'transition' | 'map';
 
+/**
+ * Coords decorativas distribuidas por el mundo para los pins que giran
+ * con el globo en phase start/form. Seleccionadas para que siempre
+ * haya pins visibles independientemente de la rotación.
+ */
+const GLOBE_DECORATIVE_COORDS: ReadonlyArray<{ lat: number; lng: number }> = [
+  { lat: 40.71, lng: -74.0 }, // New York
+  { lat: 34.05, lng: -118.24 }, // Los Angeles
+  { lat: 25.77, lng: -80.19 }, // Miami
+  { lat: 19.43, lng: -99.13 }, // Mexico City
+  { lat: -22.9, lng: -43.17 }, // Rio de Janeiro
+  { lat: 48.85, lng: 2.35 }, // Paris
+  { lat: 51.5, lng: -0.12 }, // London
+  { lat: 41.9, lng: 12.49 }, // Rome
+  { lat: 35.68, lng: 139.69 }, // Tokyo
+  { lat: -33.86, lng: 151.2 }, // Sydney
+  { lat: 1.35, lng: 103.82 }, // Singapore
+  { lat: 55.75, lng: 37.61 }, // Moscow
+  { lat: 30.04, lng: 31.23 }, // Cairo
+  { lat: -1.29, lng: 36.82 }, // Nairobi
+  { lat: 43.65, lng: -79.38 }, // Toronto
+];
+
 export function GuestbookModule({
   module: mod,
   mapboxToken,
@@ -163,11 +186,14 @@ export function GuestbookModule({
         earthStart={mod.earthStart}
         overlayPins={
           phase === 'start' || phase === 'form'
-            ? mod.seedPins.map((p, i) => ({
-                id: p.id,
-                coords: p.coords,
-                // Rotamos ciclicamente entre los 5 pins del catálogo.
-                image: mod.pinCatalog[i % mod.pinCatalog.length]?.image ?? p.pinImage,
+            ? // Distribución decorativa global para que al girar el globo
+              // se vean pins por todo el mundo (no solo Miami). Los
+              // seedPins reales (con comment/author) se usan en phase=map
+              // filtrados por proximidad al zip del user.
+              GLOBE_DECORATIVE_COORDS.map((coords, i) => ({
+                id: `globe-${i}`,
+                coords,
+                image: mod.pinCatalog[i % mod.pinCatalog.length]?.image ?? '',
               }))
             : undefined
         }

@@ -464,7 +464,7 @@ function ActionRow({
   const hasSecondary = !hasReserve && Boolean(secondaryCta);
   const twoButtons = hasReserve || hasSecondary;
   const hideMetaCol = !eventMeta && !listing.hours;
-  const websiteTop = hideMetaCol ? 665 : twoButtons ? 581 : 624;
+  const websiteTop = hideMetaCol ? 632 : twoButtons ? 581 : 624;
   const websiteLeft = 609;
 
   const hideMetaColumn = hideMetaCol;
@@ -539,7 +539,7 @@ function ActionRow({
         <SecondaryCtaButton
           cta={secondaryCta}
           leftOverride={hideMetaCol ? 59 : undefined}
-          topOverride={hideMetaCol ? 665 : undefined}
+          topOverride={hideMetaCol ? 632 : undefined}
         />
       ) : null}
     </>

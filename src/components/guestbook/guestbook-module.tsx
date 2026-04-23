@@ -145,7 +145,7 @@ export function GuestbookModule({
           position: 'absolute',
           left: '-200px',
           right: '-200px',
-          top: phase === 'start' ? '1100px' : '1180px',
+          top: phase === 'start' ? '1220px' : '1280px',
           height: '1600px',
           zIndex: 0,
         }

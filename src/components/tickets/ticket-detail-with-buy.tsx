@@ -41,11 +41,12 @@ export function TicketDetailWithBuy({
       mapboxToken={mapboxToken}
       clientCoords={clientCoords}
       eventMeta={eventMeta}
+      eventMetaOnHero
       favoritesKind="event"
-      stickyBuyCta={{
-        label: textos.tickets_buy_cta ?? 'BUY TICKET',
-        priceDisplay,
+      secondaryCta={{
+        label: `${textos.tickets_buy_cta ?? 'BUY TICKET'}  ${priceDisplay}`,
         onClick: () => window.dispatchEvent(new CustomEvent('kiosk:ticket-purchase-open')),
+        color: 'blue',
       }}
       extraDetails={
         <TicketExtraInfo durationLabel={durationLabel} category={category} features={features} />

@@ -55,6 +55,7 @@ export function ListingDetail({
   onClose,
   extraDetails,
   stickyBuyCta,
+  eventMetaOnHero = false,
 }: {
   moduleKey: string;
   listing: Listing;
@@ -73,6 +74,8 @@ export function ListingDetail({
   extraDetails?: React.ReactNode;
   /** CTA full-width sticky en el bottom del card (Tickets). Si presente, card crece +140px. */
   stickyBuyCta?: { label: string; priceDisplay: string; onClick: () => void };
+  /** Si true, el `eventMeta` se renderea sobre el hero con gradient oscuro (Tickets). */
+  eventMetaOnHero?: boolean;
 }) {
   const [emailOpen, setEmailOpen] = useState(false);
   const [phoneOpen, setPhoneOpen] = useState(false);
@@ -117,8 +120,17 @@ export function ListingDetail({
         }}
       >
         <DetailHeader moduleKey={moduleKey} listing={listing} onClose={onClose} />
-        <HeroImage listing={listing} onSee360={() => setThreshold360Open(true)} />
-        <ActionRow listing={listing} eventMeta={eventMeta} secondaryCta={secondaryCta} />
+        <HeroImage
+          listing={listing}
+          onSee360={() => setThreshold360Open(true)}
+          eventMetaOverlay={eventMetaOnHero ? eventMeta : undefined}
+          phoneOverlay={eventMetaOnHero ? listing.phone : undefined}
+        />
+        <ActionRow
+          listing={listing}
+          eventMeta={eventMetaOnHero ? undefined : eventMeta}
+          secondaryCta={secondaryCta}
+        />
         <SharingRow
           slug={listing.slug}
           onEmailClick={openEmail}
@@ -145,42 +157,8 @@ export function ListingDetail({
             {extraDetails}
           </div>
         ) : null}
-        {stickyBuyCta ? (
-          <button
-            type="button"
-            onClick={stickyBuyCta.onClick}
-            className="absolute flex items-center justify-center font-sans font-bold uppercase text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
-            style={{
-              left: '30px',
-              top: '474px',
-              width: '420px',
-              height: '80px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #004f8b 0%, #1796d6 100%)',
-              fontSize: '22px',
-              letterSpacing: '0.08em',
-              columnGap: '14px',
-              boxShadow: '0 14px 28px -6px rgba(0,0,0,0.45)',
-            }}
-          >
-            <span>{stickyBuyCta.label}</span>
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                height: '40px',
-                paddingLeft: '14px',
-                paddingRight: '14px',
-                borderRadius: '999px',
-                backgroundColor: 'rgba(255,255,255,0.24)',
-                fontSize: '18px',
-                letterSpacing: '0.04em',
-              }}
-            >
-              {stickyBuyCta.priceDisplay}
-            </span>
-          </button>
-        ) : null}
+        {null}
+        {stickyBuyCta ? null : null}
       </div>
 
       {/* Modales */}
@@ -325,7 +303,17 @@ function DetailHeader({
 /* -------------------------------------------------------------------------- */
 /* Hero image 899×369 @ y=190                                                  */
 /* -------------------------------------------------------------------------- */
-function HeroImage({ listing, onSee360 }: { listing: Listing; onSee360: () => void }) {
+function HeroImage({
+  listing,
+  onSee360,
+  eventMetaOverlay,
+  phoneOverlay,
+}: {
+  listing: Listing;
+  onSee360: () => void;
+  eventMetaOverlay?: EventMeta;
+  phoneOverlay?: string;
+}) {
   const [failed, setFailed] = useState(false);
   return (
     <div
@@ -356,6 +344,56 @@ function HeroImage({ listing, onSee360 }: { listing: Listing; onSee360: () => vo
       )}
 
       {listing.threshold360Url && <See360Badge onClick={onSee360} />}
+      {eventMetaOverlay ? (
+        <>
+          <div
+            aria-hidden
+            className="absolute inset-x-0 bottom-0"
+            style={{
+              height: '180px',
+              background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.75) 100%)',
+            }}
+          />
+          <div
+            className="absolute"
+            style={{
+              left: '36px',
+              right: '36px',
+              bottom: '22px',
+              color: '#ffffff',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '22px',
+                lineHeight: '26px',
+                fontWeight: 600,
+                letterSpacing: '0.02em',
+                textShadow: '0 2px 4px rgba(0,0,0,0.45)',
+              }}
+            >
+              {eventMetaOverlay.dateLabel}
+              {' | '}
+              {eventMetaOverlay.timeLabel}
+            </div>
+            {phoneOverlay ? (
+              <div
+                style={{
+                  marginTop: '4px',
+                  fontSize: '18px',
+                  lineHeight: '22px',
+                  fontWeight: 500,
+                  opacity: 0.88,
+                  textShadow: '0 2px 4px rgba(0,0,0,0.45)',
+                }}
+              >
+                {phoneOverlay}
+              </div>
+            ) : null}
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }
@@ -426,6 +464,7 @@ function ActionRow({
   const twoButtons = hasReserve || hasSecondary;
   const websiteTop = twoButtons ? 581 : 624;
 
+  const hideMetaColumn = !eventMeta && !listing.hours;
   const primaryText = eventMeta
     ? `${eventMeta.dateLabel ?? eventMeta.date}  |  ${
         eventMeta.timeLabel ?? `${eventMeta.startTime} – ${eventMeta.endTime}`
@@ -435,35 +474,38 @@ function ActionRow({
 
   return (
     <>
-      {/* Time / phone — centrado vertical con el botón WEBSITE. Tipografía
-          unificada entre listings y events: 22px medium, gap 12px cuando hay
-          2 líneas (event). */}
-      <div
-        className="absolute flex flex-col justify-center"
-        style={{
-          left: '59px',
-          top: `${websiteTop}px`,
-          height: '64px',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          color: '#000',
-          whiteSpace: 'pre',
-          rowGap: '12px',
-        }}
-      >
-        <span style={{ fontSize: '22px', lineHeight: '22px', fontWeight: 500 }}>{primaryText}</span>
-        {secondaryText ? (
-          <span
-            style={{
-              fontSize: '22px',
-              lineHeight: '22px',
-              fontWeight: 500,
-              color: '#4a4a4a',
-            }}
-          >
-            {secondaryText}
+      {/* Time / phone — centrado vertical con el botón WEBSITE. Oculto si Tickets
+          renderea el eventMeta en el hero (hideMetaColumn = true). */}
+      {hideMetaColumn ? null : (
+        <div
+          className="absolute flex flex-col justify-center"
+          style={{
+            left: '59px',
+            top: `${websiteTop}px`,
+            height: '64px',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            color: '#000',
+            whiteSpace: 'pre',
+            rowGap: '12px',
+          }}
+        >
+          <span style={{ fontSize: '22px', lineHeight: '22px', fontWeight: 500 }}>
+            {primaryText}
           </span>
-        ) : null}
-      </div>
+          {secondaryText ? (
+            <span
+              style={{
+                fontSize: '22px',
+                lineHeight: '22px',
+                fontWeight: 500,
+                color: '#4a4a4a',
+              }}
+            >
+              {secondaryText}
+            </span>
+          ) : null}
+        </div>
+      )}
 
       {/* WEBSITE button 260×64 */}
       <a

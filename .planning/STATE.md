@@ -12,6 +12,8 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 **Siguiente acción concreta:** Siguiente módulo del home (Guestbook, Deals, Photo Booth, Trails, Itinerary Builder) o Fase 4 (primer cliente real — branding + Lighthouse + handoff). Itinerary Builder es el candidato natural si se quiere cerrar el arc de favoritos (ya hay buckets `kiosk_favorites` + `kiosk_event_favorites` — Tickets reusa el segundo).
 
+Fase 3.11 Tickets incluye pulido v2-v9 aprobado (BUY TICKET olive + fecha/hora/teléfono sobre hero con gradient + WEBSITE/BUY side-by-side centrados + pill precio en EventCard cuando hay venta). Commits en `bd2ccae`.
+
 **Bloqueos:** ninguno. `alwaysShowWelcome={true}` del MapModule sigue hardcoded para QA — apagarlo antes de Fase 4 / producción (`[module]/page.tsx` rama `map`).
 
 **TODO de QA pendiente:**
@@ -623,6 +625,44 @@ driving/walking, SEE 360 funcional, favorite toast).
 - **`ListingsToolbar` reusada para Tickets** (no archivo nuevo) — el chrome es idéntico a Events.
 
 **Fase:** 3.10 Passes cerrada con QA + 3.11 Tickets completa.
+
+---
+
+### Sesión 2026-04-22 — Fase 3.11 Tickets iteraciones v2-v9 + pill precio en Events
+
+**Hecho:**
+
+- 8 iteraciones de pulido post-cierre en Tickets + propagación a Events:
+  - v2 (`55c8198`): 10 tickets más, badge reubicado al text panel, BUY TICKET full-width, event info block.
+  - v3 (`25baa7c`): fix amontonamiento event info, BUY TICKET full-width del card, pill listing grande top-right.
+  - v4 (`4ead5d0`): pill de vuelta al text panel top-right + BUY TICKET sobre hero + 3 tickets más (total 23 ticketables).
+  - v5 (`c36a7f4`): card height uniforme 1589, BUY TICKET gradient 50% width, pill listing blanco sin shadow, texto azul oscuro.
+  - v6 (`a6e71b1`): fecha/hora/teléfono SOBRE el hero con gradient oscuro→transparente, BUY TICKET vuelve al slot secondaryCta alineado con WEBSITE, ActionRow oculta columna meta cuando `hideMetaCol`.
+  - v7 (`335b429`): texto hero más grande (30px/24px), gradient más pronunciado (240px), WEBSITE/BUY side-by-side, BUY color olive `#b9bd39`.
+  - v8 (`690e4fd`): invertidos — BUY left, WEBSITE right. Phone a 30px bold. Gradient 310px height.
+  - v9 (`5d61972`): botones centrados al medio de la sección (top 632 en vez de 665).
+- Pill precio en `EventCard` (`bd2ccae`): si `event.ticket` presente, muestra pill blanco con precio azul oscuro top-right del text panel — consistencia entre módulos Events y Tickets.
+
+**Verificado:**
+
+- `pnpm check` limpio en cada iteración.
+- Playwright MCP screenshots en `.planning/verifications/3-11-v{2..6}-{listing,detail,qr-modal}.png`.
+- Regresión Passes sin cambios (flow QR idéntico al pre-refactor).
+
+**Pendiente / siguiente:**
+
+- Apagar `alwaysShowWelcome={true}` del MapModule antes de Fase 4.
+- TODO i18n deuda compartida filter-overlay (8 strings heredados de Events/Passes) — ya documentada.
+- Siguiente módulo del home (Guestbook, Deals, Photo Booth, Trails, Itinerary Builder) o Fase 4 (primer cliente real).
+
+**Decisiones:**
+
+- **Texto date/time/phone sobre hero con gradient** — más inmersivo que ActionRow izquierda tradicional. Solo para tickets via `eventMetaOnHero` prop.
+- **BUY TICKET color olive** — verde consistente con iconos SEND TO EMAIL/PHONE del send-modal-chrome. Priceinclude integrado en el label: `"BUY TICKET  $20–35"`.
+- **ListingDetail ahora acepta `leftOverride`/`topOverride` en SecondaryCtaButton** — permite reposicionar el CTA sin cambiar layout default de Listings/Events. Mantiene retrocompat.
+- **`EventCard` detecta `event.ticket`** para mostrar pill — sin cambio de tipo (ticket ya es opcional). Events sin venta siguen igual.
+
+**Fase:** 3.11 Tickets cerrada con pulido visual aprobado por Rubén.
 
 ---
 

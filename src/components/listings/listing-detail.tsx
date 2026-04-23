@@ -53,6 +53,7 @@ export function ListingDetail({
   secondaryCta,
   favoritesKind = 'listing',
   onClose,
+  extraDetails,
 }: {
   moduleKey: string;
   listing: Listing;
@@ -67,6 +68,8 @@ export function ListingDetail({
   favoritesKind?: 'listing' | 'event';
   /** Si se provee, el botón X usa esta callback en lugar de navegar al módulo. */
   onClose?: () => void;
+  /** Slot opcional (Tickets) renderizado entre Map y DESCRIPTION (y=1205). */
+  extraDetails?: React.ReactNode;
 }) {
   const [emailOpen, setEmailOpen] = useState(false);
   const [phoneOpen, setPhoneOpen] = useState(false);
@@ -124,6 +127,14 @@ export function ListingDetail({
           token={mapboxToken}
           onGetDirections={() => setDirectionsOpen(true)}
         />
+        {extraDetails ? (
+          <div
+            className="absolute"
+            style={{ left: '48px', top: '1205px', width: '802px', height: '70px' }}
+          >
+            {extraDetails}
+          </div>
+        ) : null}
         <DescriptionSection listing={listing} />
       </div>
 

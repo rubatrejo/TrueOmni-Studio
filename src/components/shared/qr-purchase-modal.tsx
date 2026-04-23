@@ -20,6 +20,10 @@ interface Props {
   purchaseUrl: string;
   /** Precio opcional visible encima del QR (solo Tickets; Passes no usa). */
   priceDisplay?: string;
+  /** Label custom del botón submit. Si no se pasa, usa `textos.qr_send`. */
+  submitLabel?: string;
+  /** Si true, el submit es full-width (modo compra). Default false (pill 320px). */
+  submitFullWidth?: boolean;
   textos: Record<string, string>;
   /** Logo centrado en el QR. Si se omite, el QR no lleva imagen. */
   qrLogo?: string;
@@ -41,6 +45,8 @@ export function QrPurchaseModal({
   title,
   purchaseUrl,
   priceDisplay,
+  submitLabel,
+  submitFullWidth = false,
   textos,
   qrLogo,
   onCancel,
@@ -229,23 +235,25 @@ export function QrPurchaseModal({
             />
           </div>
 
-          <div className="flex justify-center">
+          <div className={submitFullWidth ? 'flex' : 'flex justify-center'}>
             <button
               type="button"
               onClick={handleSend}
               disabled={!valid}
               className="font-sans font-bold uppercase text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
               style={{
-                width: '320px',
-                height: '68px',
-                borderRadius: '8px',
+                width: submitFullWidth ? '100%' : '320px',
+                height: submitFullWidth ? '82px' : '68px',
+                borderRadius: '10px',
                 backgroundColor: valid ? '#1796d6' : 'rgba(23,150,214,0.5)',
-                fontSize: '22px',
+                fontSize: submitFullWidth ? '26px' : '22px',
                 letterSpacing: '0.08em',
                 cursor: valid ? 'pointer' : 'not-allowed',
+                boxShadow:
+                  submitFullWidth && valid ? '0 10px 22px -6px rgba(23,150,214,0.55)' : undefined,
               }}
             >
-              {textos.qr_send ?? 'SEND'}
+              {submitLabel ?? textos.qr_send ?? 'SEND'}
             </button>
           </div>
         </div>

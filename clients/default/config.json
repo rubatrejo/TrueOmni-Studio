@@ -4916,6 +4916,33 @@
               ]
             },
             {
+              "slug": "basketball-playoff-ii",
+              "title": "Basketball Playoff Game",
+              "category": "Sports",
+              "image": "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&q=80",
+              "date": "2026-04-22",
+              "startTime": "19:30",
+              "endTime": "22:00",
+              "venue": "Footprint Center",
+              "priceMode": "paid",
+              "priceBand": 3,
+              "features": ["Indoor", "Reserved seating"],
+              "popularity": 88,
+              "address": "201 E Jefferson St, Phoenix, AZ",
+              "phone": "(602) 555-0501",
+              "coords": {
+                "lat": 33.4458,
+                "lng": -112.0711
+              },
+              "website": "https://example.com/suns-playoff",
+              "description": "Game 3 of the Western Conference playoffs. Lower-bowl seats available. Doors open 18:00.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$55",
+                "purchaseUrl": "https://tickets.example.com/basketball-playoff-ii"
+              }
+            },
+            {
               "slug": "sunday-brunch-fest",
               "title": "Sunday Brunch Fest",
               "category": "Food",
@@ -5046,6 +5073,33 @@
                   "instruction": "Arrive at Phoenix Convention Center"
                 }
               ]
+            },
+            {
+              "slug": "rodeo-arena-night",
+              "title": "Rodeo Arena Night",
+              "category": "Family",
+              "image": "https://images.unsplash.com/photo-1562577309-4932fdd64cd1?w=600&q=80",
+              "date": "2026-04-22",
+              "startTime": "18:00",
+              "endTime": "21:30",
+              "venue": "Corona Ranch Arena",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Outdoor", "Family-friendly", "Parking"],
+              "popularity": 74,
+              "address": "7611 S 27th Ave, Phoenix, AZ",
+              "phone": "(602) 555-0524",
+              "coords": {
+                "lat": 33.3629,
+                "lng": -112.1104
+              },
+              "website": "https://example.com/rodeo",
+              "description": "Bull riding, barrel racing, and bronc riding. BBQ dinner available on site. All ages welcome.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$28",
+                "purchaseUrl": "https://tickets.example.com/rodeo-arena-night"
+              }
             },
             {
               "slug": "spring-music-festival",
@@ -5213,6 +5267,33 @@
               ]
             },
             {
+              "slug": "broadway-hamilton",
+              "title": "Hamilton — National Tour",
+              "category": "Arts",
+              "image": "https://images.unsplash.com/photo-1503095396549-807759245b35?w=600&q=80",
+              "date": "2026-04-22",
+              "startTime": "20:00",
+              "endTime": "22:45",
+              "venue": "ASU Gammage",
+              "priceMode": "paid",
+              "priceBand": 4,
+              "features": ["Indoor", "Reserved seating"],
+              "popularity": 92,
+              "address": "1200 S Forest Ave, Tempe, AZ",
+              "phone": "(602) 555-0548",
+              "coords": {
+                "lat": 33.4147,
+                "lng": -111.9342
+              },
+              "website": "https://example.com/hamilton",
+              "description": "The award-winning Broadway musical comes to Phoenix for a limited 8-show run. Suitable ages 10+.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$85–220",
+                "purchaseUrl": "https://tickets.example.com/broadway-hamilton"
+              }
+            },
+            {
               "slug": "comedy-night-thursday",
               "title": "Comedy Night",
               "category": "Comedy",
@@ -5342,6 +5423,33 @@
               "ticket": {
                 "priceDisplay": "$25",
                 "purchaseUrl": "https://tickets.example.com/cardinals-preseason"
+              }
+            },
+            {
+              "slug": "wine-pairing-dinner",
+              "title": "Wine Pairing Dinner",
+              "category": "Festival",
+              "image": "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=600&q=80",
+              "date": "2026-04-22",
+              "startTime": "18:30",
+              "endTime": "22:00",
+              "venue": "Kai Restaurant",
+              "priceMode": "paid",
+              "priceBand": 4,
+              "features": ["Indoor", "21+"],
+              "popularity": 68,
+              "address": "5594 W Wild Horse Pass Blvd, Chandler, AZ",
+              "phone": "(602) 555-0572",
+              "coords": {
+                "lat": 33.1945,
+                "lng": -112.0523
+              },
+              "website": "https://example.com/wine-dinner",
+              "description": "5-course prix fixe menu paired with 5 regional wines. Sommelier-guided tasting. Reservations required.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$145",
+                "purchaseUrl": "https://tickets.example.com/wine-pairing-dinner"
               }
             },
             {
@@ -5481,6 +5589,33 @@
               ]
             },
             {
+              "slug": "city-5k-fun-run",
+              "title": "City 5K Fun Run",
+              "category": "Sports",
+              "image": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&q=80",
+              "date": "2026-04-23",
+              "startTime": "07:00",
+              "endTime": "09:30",
+              "venue": "Papago Park",
+              "priceMode": "paid",
+              "priceBand": 1,
+              "features": ["Outdoor", "Family-friendly"],
+              "popularity": 55,
+              "address": "625 N Galvin Pkwy, Phoenix, AZ",
+              "phone": "(602) 555-0595",
+              "coords": {
+                "lat": 33.4619,
+                "lng": -111.9447
+              },
+              "website": "https://example.com/5k-run",
+              "description": "Chip-timed 5K with finisher medals for all participants. Kids' fun run at 08:30. Post-race breakfast included.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "From $20",
+                "purchaseUrl": "https://tickets.example.com/city-5k-fun-run"
+              }
+            },
+            {
               "slug": "opera-la-traviata",
               "title": "La Traviata",
               "category": "Arts",
@@ -5611,6 +5746,33 @@
               ]
             },
             {
+              "slug": "craft-beer-festival",
+              "title": "Craft Beer Festival",
+              "category": "Festival",
+              "image": "https://images.unsplash.com/photo-1436076863939-06870fe779c2?w=600&q=80",
+              "date": "2026-04-23",
+              "startTime": "14:00",
+              "endTime": "20:00",
+              "venue": "Margaret T. Hance Park",
+              "priceMode": "paid",
+              "priceBand": 3,
+              "features": ["Outdoor", "21+"],
+              "popularity": 81,
+              "address": "1202 N 3rd St, Phoenix, AZ",
+              "phone": "(602) 555-0620",
+              "coords": {
+                "lat": 33.462,
+                "lng": -112.0718
+              },
+              "website": "https://example.com/beer-fest",
+              "description": "50+ craft breweries from Arizona and the Southwest. Includes 10 tasting tickets + commemorative glass.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$55–85",
+                "purchaseUrl": "https://tickets.example.com/craft-beer-festival"
+              }
+            },
+            {
               "slug": "yoga-in-the-park",
               "title": "Yoga in the Park",
               "category": "Family",
@@ -5737,6 +5899,33 @@
                   "instruction": "Arrive at CityScape Test Kitchen"
                 }
               ]
+            },
+            {
+              "slug": "magic-show-phoenix",
+              "title": "Live Magic Show",
+              "category": "Arts",
+              "image": "https://images.unsplash.com/photo-1543076447-215ad9ba6923?w=600&q=80",
+              "date": "2026-04-24",
+              "startTime": "19:00",
+              "endTime": "21:00",
+              "venue": "Orpheum Theatre",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Indoor", "Family-friendly"],
+              "popularity": 66,
+              "address": "203 W Adams St, Phoenix, AZ",
+              "phone": "(602) 555-0644",
+              "coords": {
+                "lat": 33.448,
+                "lng": -112.0781
+              },
+              "website": "https://example.com/magic-show",
+              "description": "90 minutes of illusions, mind-reading, and audience participation. Ages 8+.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$32",
+                "purchaseUrl": "https://tickets.example.com/magic-show-phoenix"
+              }
             },
             {
               "slug": "poetry-slam",
@@ -5867,6 +6056,33 @@
               ]
             },
             {
+              "slug": "latin-dance-night",
+              "title": "Latin Dance Night",
+              "category": "Music",
+              "image": "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600&q=80",
+              "date": "2026-04-24",
+              "startTime": "21:00",
+              "endTime": "02:00",
+              "venue": "Crescent Ballroom",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Indoor", "21+"],
+              "popularity": 72,
+              "address": "308 N 2nd Ave, Phoenix, AZ",
+              "phone": "(602) 555-0668",
+              "coords": {
+                "lat": 33.4511,
+                "lng": -112.0772
+              },
+              "website": "https://example.com/latin-dance",
+              "description": "Live salsa band + DJ. Beginner lesson at 21:30. Dress-code casual/dressy.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$22",
+                "purchaseUrl": "https://tickets.example.com/latin-dance-night"
+              }
+            },
+            {
               "slug": "outdoor-movie-night",
               "title": "Outdoor Movie Night",
               "category": "Family",
@@ -5992,6 +6208,33 @@
               "ticket": {
                 "priceDisplay": "From $10",
                 "purchaseUrl": "https://tickets.example.com/family-movie-matinee"
+              }
+            },
+            {
+              "slug": "circus-under-stars",
+              "title": "Circus Under the Stars",
+              "category": "Family",
+              "image": "https://images.unsplash.com/photo-1570824104453-508955ab713e?w=600&q=80",
+              "date": "2026-04-25",
+              "startTime": "18:30",
+              "endTime": "20:30",
+              "venue": "Salt River Fields",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Outdoor", "Family-friendly", "Parking"],
+              "popularity": 78,
+              "address": "7555 N Pima Rd, Scottsdale, AZ",
+              "phone": "(602) 555-0692",
+              "coords": {
+                "lat": 33.5443,
+                "lng": -111.8836
+              },
+              "website": "https://example.com/circus",
+              "description": "Aerial acrobats, clowns, and animal-free performances. Kids under 3 free.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "From $18",
+                "purchaseUrl": "https://tickets.example.com/circus-under-stars"
               }
             },
             {
@@ -6157,6 +6400,33 @@
               "ticket": {
                 "priceDisplay": "$20–35",
                 "purchaseUrl": "https://tickets.example.com/jazz-in-the-park"
+              }
+            },
+            {
+              "slug": "modern-art-exhibit",
+              "title": "Modern Art — Private View",
+              "category": "Arts",
+              "image": "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&q=80",
+              "date": "2026-04-25",
+              "startTime": "18:00",
+              "endTime": "21:00",
+              "venue": "Phoenix Art Museum",
+              "priceMode": "paid",
+              "priceBand": 3,
+              "features": ["Indoor", "21+"],
+              "popularity": 64,
+              "address": "1625 N Central Ave, Phoenix, AZ",
+              "phone": "(602) 555-0716",
+              "coords": {
+                "lat": 33.4719,
+                "lng": -112.0747
+              },
+              "website": "https://example.com/art-private-view",
+              "description": "Private view of 3 new exhibits with curator-led tour at 19:00. Hors d'oeuvres and wine included.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$65",
+                "purchaseUrl": "https://tickets.example.com/modern-art-exhibit"
               }
             },
             {

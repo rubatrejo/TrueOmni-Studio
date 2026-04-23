@@ -14,6 +14,10 @@ interface Props {
   purchaseUrl: string;
   /** Precio opcional (Tickets). */
   priceDisplay?: string;
+  /** Label custom del botón submit (ej. "BUY TICKET"). Si no, usa textos.qr_send. */
+  submitLabel?: string;
+  /** Si true, el submit es full-width (modo compra Tickets). */
+  submitFullWidth?: boolean;
   textos: Record<string, string>;
   qrLogo?: string;
   /** Textos del sent-confirmation. */
@@ -36,6 +40,8 @@ export function QrPurchaseHost({
   title,
   purchaseUrl,
   priceDisplay,
+  submitLabel,
+  submitFullWidth,
   textos,
   qrLogo,
   sentTitle,
@@ -62,6 +68,8 @@ export function QrPurchaseHost({
         title={title}
         purchaseUrl={purchaseUrl}
         priceDisplay={priceDisplay}
+        submitLabel={submitLabel}
+        submitFullWidth={submitFullWidth}
         textos={textos}
         qrLogo={qrLogo}
         onCancel={() => setPhase('closed')}

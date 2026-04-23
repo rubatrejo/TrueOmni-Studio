@@ -62,11 +62,15 @@ export default async function DetailPage({ params }: PageProps) {
           clientTimezone={config.client.timezone}
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
         />
-        {hasTicket ? (
+        {hasTicket && event.ticket ? (
           <TicketDetailWithBuy
             moduleKey={module}
             listing={listing}
             eventMeta={eventMeta}
+            features={event.features}
+            category={event.category}
+            durationLabel={formatDuration(event.startTime, event.endTime)}
+            priceDisplay={event.ticket.priceDisplay}
             textos={textos}
             mapboxToken={mapboxToken}
             clientCoords={config.client.coords}
@@ -92,6 +96,8 @@ export default async function DetailPage({ params }: PageProps) {
             title={event.title.toUpperCase()}
             purchaseUrl={event.ticket.purchaseUrl}
             priceDisplay={event.ticket.priceDisplay}
+            submitLabel={textos.tickets_buy_cta ?? 'BUY TICKET'}
+            submitFullWidth
             textos={{
               qr_instruction:
                 textos.tickets_share_instruction ?? 'SCAN QR OR GET SMS TO BUY YOUR TICKET',
@@ -187,6 +193,10 @@ export default async function DetailPage({ params }: PageProps) {
           moduleKey={module}
           listing={listing}
           eventMeta={eventMeta}
+          features={event.features}
+          category={event.category}
+          durationLabel={formatDuration(event.startTime, event.endTime)}
+          priceDisplay={event.ticket.priceDisplay}
           textos={textos}
           mapboxToken={mapboxToken}
           clientCoords={config.client.coords}
@@ -196,6 +206,8 @@ export default async function DetailPage({ params }: PageProps) {
           title={event.title.toUpperCase()}
           purchaseUrl={event.ticket.purchaseUrl}
           priceDisplay={event.ticket.priceDisplay}
+          submitLabel={textos.tickets_buy_cta ?? 'BUY TICKET'}
+          submitFullWidth
           textos={{
             qr_instruction:
               textos.tickets_share_instruction ?? 'SCAN QR OR GET SMS TO BUY YOUR TICKET',
@@ -262,4 +274,17 @@ function eventToListing(event: EventItem): Listing {
     description: event.description,
     directions: event.directions,
   };
+}
+
+/** Formatea "HH:MM"–"HH:MM" a duration label tipo "3h" o "1h 30min". */
+function formatDuration(startTime: string, endTime: string): string {
+  const [sh, sm] = startTime.split(':').map(Number);
+  const [eh, em] = endTime.split(':').map(Number);
+  let totalMin = eh * 60 + em - (sh * 60 + sm);
+  if (totalMin < 0) totalMin += 24 * 60; // cruza medianoche
+  const hours = Math.floor(totalMin / 60);
+  const mins = totalMin % 60;
+  if (hours === 0) return `${mins}min`;
+  if (mins === 0) return `${hours}h`;
+  return `${hours}h ${mins}min`;
 }

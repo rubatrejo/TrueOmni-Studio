@@ -20,7 +20,22 @@
     "cta_primaria": "Comenzar",
     "cta_secundaria": "Saber más",
     "pie_legal": "© 2026 Demo Cliente A · Todos los derechos reservados",
-    "label_cliente_activo": "Estás viendo:"
+    "label_cliente_activo": "Estás viendo:",
+    "deals_label": "Ofertas",
+    "deals_expires_prefix": "EXPIRA",
+    "deals_promo_code_label": "USA CÓDIGO",
+    "deals_send_phone": "ENVIAR AL MÓVIL",
+    "deals_send_email": "ENVIAR AL EMAIL",
+    "deals_cancel": "CANCELAR",
+    "deals_empty": "No hay ofertas disponibles.",
+    "deals_sort_expiring": "Expira Pronto",
+    "deals_sort_recent": "Recientes",
+    "deals_sort_az": "A – Z",
+    "deals_sort_best": "Mejor Descuento",
+    "deals_filters_title": "FILTROS",
+    "deals_filter_features": "Categorías",
+    "deals_clear_all": "LIMPIAR",
+    "deals_apply": "APLICAR"
   },
   "navegacion": {
     "home": "/",

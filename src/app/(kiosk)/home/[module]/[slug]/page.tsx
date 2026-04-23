@@ -38,6 +38,9 @@ export default async function DetailPage({ params }: PageProps) {
   const mapboxToken = config.integraciones?.mapbox_token;
   const ads = getAdsFromConfig(config);
 
+  // Deals no tiene detail fullscreen — la interacción es listing → modal redeem.
+  if (mod.kind === 'deals') notFound();
+
   if (mod.kind === 'events') {
     const event = mod.events.find((e) => e.slug === slug);
     if (!event) notFound();

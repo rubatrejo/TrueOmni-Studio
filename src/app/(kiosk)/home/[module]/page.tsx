@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { AdsSlot } from '@/components/ads/ads-slot';
+import { DealsModule } from '@/components/deals/deals-module';
 import { BrochuresModule } from '@/components/digital-brochure/brochures-module';
 import { EventsModule } from '@/components/events/events-module';
 import { HomeHeader } from '@/components/home/header';
@@ -147,6 +148,19 @@ export default async function ModulePage({ params }: PageProps) {
           allEvents={allEvents}
           clientCoords={config.client.coords}
           clientTimezone={config.client.timezone}
+          textos={config.textos ?? {}}
+          header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
+        />
+        <AdsSlot ads={ads} />
+      </KioskCanvas>
+    );
+  }
+  if (mod?.kind === 'deals') {
+    return (
+      <KioskCanvas>
+        <DealsModule
+          moduleKey={module}
+          module={mod}
           textos={config.textos ?? {}}
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
         />

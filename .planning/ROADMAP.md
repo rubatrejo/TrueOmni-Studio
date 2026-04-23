@@ -59,16 +59,33 @@ primary naranja, textos distintos, sin tocar ningún `.tsx`.
 
 **Cubre:** R1, R2, R7, R8.
 
-- Una sub-fase por pantalla. Por definir cuando Rubén entregue los SVGs.
-- Cada sub-fase:
-  - [ ] SVG y specs depositados en `designs/`.
-  - [ ] Plan XML creado.
-  - [ ] Skills `frontend-design`, `ui-ux-pro-max`, `theme-factory` cargados.
-  - [ ] Componente construido.
-  - [ ] Screenshot + diff visual contra SVG.
-  - [ ] Audit con `web-design-guidelines`.
+Subfases cerradas:
 
-**Verificación por pantalla:** diff visual < 2px, accesibilidad AA mínimo, typecheck + lint limpios.
+- [x] 3.1 — Billboards B1-B4 (2026-04-20).
+- [x] 3.2 — Main Dashboard / Home (2026-04-20).
+- [x] 3.3 — Listings module (Restaurants / Things to Do / Stay) + pulido V1/V2 (2026-04-20).
+- [x] 3.4 — Events module (2026-04-21).
+- [x] 3.5 — Social Wall (2026-04-21).
+- [x] 3.6 — Digital Brochure (2026-04-21).
+- [x] 3.7 — Map module (2026-04-21).
+- [x] 3.8 — Advertisement system (2026-04-21).
+- [x] 3.9 — Survey overlay V1-V8 (2026-04-22).
+- [x] 3.10 — Passes module (2026-04-22).
+- [x] 3.11 — Tickets module + iteraciones v2-v9 (2026-04-22).
+- [x] 3.12 — Deals module (2026-04-23).
+
+Pendientes:
+
+- [ ] Guestbook, Photo Booth, Trails, Itinerary Builder (prioridad por definir).
+
+Cada sub-fase cumple:
+
+- SVG y specs depositados, plan XML creado.
+- Componente construido pixel-perfect.
+- Screenshot + diff visual contra SVG.
+- Audit con `auditor-white-label`.
+
+**Verificación por pantalla:** diff visual ±3px, accesibilidad AA mínimo, typecheck + lint limpios.
 
 ---
 

@@ -6,13 +6,11 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Fase 3.11 (Tickets) cerrada. 4 olas. Último commit pending (cierre).
+**Fase activa:** Fase 3.12 (Deals) cerrada. Commit pending.
 
-**Última fase cerrada:** Fase 3.11 — Tickets module (subset de Events con venta de boletos via QR purchase modal compartido con Passes). Antes: Fase 3.10 Passes (cerrada con fixes UI + `e16365d`).
+**Última fase cerrada:** Fase 3.12 — Deals module (grid de cupones con modal redeem que muestra QR escaneable + botones SEND TO PHONE / SEND TO EMAIL). Antes: Fase 3.11 Tickets cerrada con pulido v2-v9 (`bd2ccae`).
 
-**Siguiente acción concreta:** Siguiente módulo del home (Guestbook, Deals, Photo Booth, Trails, Itinerary Builder) o Fase 4 (primer cliente real — branding + Lighthouse + handoff). Itinerary Builder es el candidato natural si se quiere cerrar el arc de favoritos (ya hay buckets `kiosk_favorites` + `kiosk_event_favorites` — Tickets reusa el segundo).
-
-Fase 3.11 Tickets incluye pulido v2-v9 aprobado (BUY TICKET olive + fecha/hora/teléfono sobre hero con gradient + WEBSITE/BUY side-by-side centrados + pill precio en EventCard cuando hay venta). Commits en `bd2ccae`.
+**Siguiente acción concreta:** Siguiente módulo del home (Guestbook, Photo Booth, Trails, Itinerary Builder) o Fase 4 (primer cliente real — branding + Lighthouse + handoff). Itinerary Builder sigue siendo el candidato natural para cerrar el arc de favoritos.
 
 **Bloqueos:** ninguno. `alwaysShowWelcome={true}` del MapModule sigue hardcoded para QA — apagarlo antes de Fase 4 / producción (`[module]/page.tsx` rama `map`).
 
@@ -20,6 +18,9 @@ Fase 3.11 Tickets incluye pulido v2-v9 aprobado (BUY TICKET olive + fecha/hora/t
 
 - `alwaysShowWelcome={true}` en map.
 - Fase 3.11 Tickets: auditor white-label ejecutado — reporte en `.planning/3-11-SUMMARY.md`.
+- Fase 3.12 Deals: auditor ejecutado — solo fallbacks `??` defensivos (patrón idéntico a Tickets/Passes). Reporte en `.planning/3-12-SUMMARY.md`.
+- Fase 3.12 Deals: verificación visual con `KIOSK_CLIENT=demo-cliente-a` pendiente (requiere reiniciar dev server). Los textos `deals_*` están traducidos al español en `demo-cliente-a/config.json`.
+- Fase 3.12 Deals: cover Sephora (URL Unsplash `photo-1522335789203-aaa95c1cb28a`) puede estar 404; fallback gradient azul activo via `onError`. Verificar y reemplazar URL si persiste.
 
 **TODO i18n deuda compartida filter-overlay** (aplazado a Fase 5 — pasada de tokenización de strings):
 
@@ -625,6 +626,48 @@ driving/walking, SEE 360 funcional, favorite toast).
 - **`ListingsToolbar` reusada para Tickets** (no archivo nuevo) — el chrome es idéntico a Events.
 
 **Fase:** 3.10 Passes cerrada con QA + 3.11 Tickets completa.
+
+---
+
+### Sesión 2026-04-23 — Fase 3.12 Deals module (4 olas en un pase)
+
+**Hecho:**
+
+- Brainstorming aprobado en plan mode: flujo `listing → tap card → modal redeem (QR + 2 botones SEND) → SendToPhone/Email modals → SendConfirmationPopup`. Sin detail fullscreen, sin favoritos, con AdsSlot. 20 deals seed.
+- Spec formal en `docs/superpowers/specs/2026-04-23-deals-module-design.md`. Plan XML en `.planning/3-12-1-PLAN.md`.
+- **Ola 1 (config + tipos):** `Deal` + `HomeDealsModule` añadidos a `HomeModuleVariant` en `src/lib/config.ts`. `src/lib/deals.ts` con `DEAL_SORT_OPTIONS`, `filterActiveDeals`, `applyDealsFilter`, `sortDeals`, `searchDeals`, `formatDealExpiry`, `todayISO`. 20 deals seed en `clients/default/config.json` (Fashion/Food/Entertainment/Gym/Tech/Family/Beauty/Retail). 15 textos `deals_*` en los 3 clients (default en inglés, demo-cliente-a traducido al español).
+- **Ola 2 (UI listing):** Componentes en `src/components/deals/` — `DealsModule` compose, `DealsGrid` 3-col, `DealCard` (cover + title + shortDescription + expiry + originalPrice tachado condicional), `DealsFilterOverlay` (1 sección Features AND). Reusa `ListingsToolbar`, `SearchOverlay`, `SortOverlay`, `FloatingHomeButton`, `HomeHeader`, `AdsSlot`. Rama `case 'deals'` en `[module]/page.tsx`. Guard `notFound()` en `[slug]/page.tsx` (deals no tiene detail).
+- **Ola 3 (modal redeem):** `DealRedeemModal` verbatim SVG — cover con title+expiry overlay, headline, subtitle, longDescription, promo code pill opcional, QR 240×240 con logo normalizado (`resolveAssetPath` helper), 2 botones SEND side-by-side, CANCEL link. `DealRedeemHost` máquina de estados `closed | redeem | send-phone | send-email | sent` escuchando `CustomEvent('kiosk:deal-redeem-open')`. Delega a `SendToPhoneModal` / `SendToEmailModal` / `SendConfirmationPopup` de listings.
+- **Ola 4 (QA + cierre):** Playwright MCP screenshots — `3-12-ola2-deals-listing.png`, `3-12-ola2-filter-overlay.png`, `3-12-ola3-redeem-modal.png`, `3-12-ola3-send-phone.png`. Auditor white-label limpio (solo fallbacks `??`). Spec + SUMMARY + COVERAGE escritos.
+- `DealsSearchAdapter` wrapper del `SearchOverlay`: intercepta el click del Link (que iría a `/home/deals/{slug}` inexistente) y dispara CustomEvent en su lugar.
+
+**Verificado:**
+
+- `pnpm check` (typecheck + lint + format) limpio.
+- Playwright MCP: `/home/deals` con 20 cards en grid 3-col sorted ascending por expiresAt (sort default 'expiring-soon').
+- Tap card → modal redeem con data correcta (ejemplo: Chipotle Free Guac con headline, promo code `FREEGUAC`, QR escaneable).
+- SEND TO MY PHONE → `SendToPhoneModal` con `NumericKeypad` + input USA (+1).
+- Filter overlay: pills features `Fashion / Food / Entertainment / Gym / Tech / Family / Beauty / Retail` + CLEAR ALL olive + APPLY blue.
+- Auditor white-label: 0 colores hex nuevos (todos heredados del chrome). Strings literales son fallbacks `??` defensivos (mismo patrón que Tickets/Passes).
+
+**Pendiente / siguiente:**
+
+- Verificación visual con `KIOSK_CLIENT=demo-cliente-a` (reiniciar dev server con env var). Los textos en español están listos.
+- Cover Sephora puede ser 404 de Unsplash — el fallback gradient azul se activa, pero idealmente reemplazar URL.
+- Siguiente módulo (Guestbook, Photo Booth, Trails, Itinerary Builder) o Fase 4.
+
+**Decisiones:**
+
+- **Modal redeem custom** (no reusa `QrPurchaseModal`) — el shape es distinto: QR + 2 botones SEND simultáneos + cover con overlay del title + sin telemetría (v1). Componente dedicado en `src/components/deals/` mantiene separación de concerns.
+- **Sin detail fullscreen** — `[slug]/page.tsx` responde 404 para `kind === 'deals'`. La interacción es listing → modal directo, como confirmó Rubén en el brainstorming.
+- **Auto-filter de expirados primero** en el pipeline (`filterActiveDeals`). Los deals expirados no llegan al filter/sort/search. El operador del cliente mantiene el config al día.
+- **Sort custom** con 4 opciones propias (`expiring-soon` default, `recent`, `a-z`, `best-discount`). No reusa `SORT_OPTIONS` porque los criterios son distintos (no hay Distance ni Most Popular útil para cupones).
+- **Sin bucket de favoritos** — los deals caducan; `useDealFavorites` no aplica. Si el cliente lo pide en v2 se añade con `createFavoritesStore`.
+- **CustomEvent `kiosk:deal-redeem-open`** siguiendo el patrón de Survey/Passes/Tickets. Payload `{ dealSlug }` resuelto contra `deals[]` en el host.
+- **`DealsSearchAdapter`** en vez de modificar `SearchOverlay`. El overlay del Home usa `Link` para navegar; en Deals capturamos el click a nivel document antes de que navegue. Evita un prop drilling cross-módulo del `SearchOverlay`.
+- **`resolveAssetPath` helper** normaliza `qrLogo` relativo (`"assets/logo.svg"`) a absoluto (`"/assets/logo.svg"`). Documentado — replicable a `PassShareModal` si vemos 404 en los logs.
+
+**Fase:** 3.12 Deals cerrada.
 
 ---
 

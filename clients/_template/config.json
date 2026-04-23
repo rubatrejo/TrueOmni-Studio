@@ -52,7 +52,22 @@
     "tickets_sent_title": "Link sent!",
     "tickets_sent_message": "Check your phone to complete the purchase.",
     "tickets_empty": "No tickets available right now.",
-    "tickets_share_phone_aria": "Phone number. Tap to edit via keypad."
+    "tickets_share_phone_aria": "Phone number. Tap to edit via keypad.",
+    "deals_label": "Deals",
+    "deals_expires_prefix": "EXPIRES",
+    "deals_promo_code_label": "USE CODE",
+    "deals_send_phone": "SEND TO MY PHONE",
+    "deals_send_email": "SEND TO MY EMAIL",
+    "deals_cancel": "CANCEL",
+    "deals_empty": "No deals available right now.",
+    "deals_sort_expiring": "Expiring Soon",
+    "deals_sort_recent": "Recently Added",
+    "deals_sort_az": "A – Z",
+    "deals_sort_best": "Best Discount",
+    "deals_filters_title": "FILTERS",
+    "deals_filter_features": "Features",
+    "deals_clear_all": "CLEAR ALL",
+    "deals_apply": "APPLY"
   },
   "navegacion": {
     "home": "/",

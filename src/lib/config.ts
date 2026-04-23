@@ -364,6 +364,49 @@ export interface HomeTicketsModule {
   features?: string[];
 }
 
+/** Cupón/descuento mostrado en el módulo Deals. */
+export interface Deal {
+  slug: string;
+  /** Ej. "10% off Zara". */
+  title: string;
+  /** Texto breve de la card (~2 líneas). */
+  shortDescription: string;
+  /** Headline del modal redeem. Ej. "You're In Luck, 10% Coupons Are Back!". */
+  headline: string;
+  /** Subtitle del modal. Ej. "Exclusive Offer for Fashion Lovers!". */
+  subtitle: string;
+  /** Cuerpo del modal. Puede mencionar el `promoCode` en texto. */
+  longDescription: string;
+  /** Path relativo a `clients/{slug}/assets/` o URL absoluta. */
+  cover: string;
+  /** ISO 'YYYY-MM-DD'. Deals con `expiresAt < today` se auto-filtran. */
+  expiresAt: string;
+  /** Precio tachado visible en la card. Opcional. */
+  originalPrice?: string;
+  /** Código canjeable mostrado en el modal. Opcional. Ej. "ZARA10". */
+  promoCode?: string;
+  /** URL codificada en el QR del modal redeem. */
+  qrUrl: string;
+  /** Tags filtrables (subset de `HomeDealsModule.featureCatalog`). */
+  features: string[];
+  /** 0-100 — tiebreaker del sort. Opcional. */
+  popularity?: number;
+  /** Porcentaje de descuento (0-100) — usado por el sort "best-discount". */
+  discountValue?: number;
+}
+
+/** Módulo Deals — kind discriminator 'deals'. Grid de cupones con modal redeem. */
+export interface HomeDealsModule {
+  kind: 'deals';
+  label: string;
+  heroImage: string;
+  /** Catálogo de features visible en el filter overlay. */
+  featureCatalog: string[];
+  deals: Deal[];
+  /** Logo opcional centrado en el QR (mismo comportamiento que Passes). */
+  qrLogo?: string;
+}
+
 /** Unión discriminada de los variants de módulo. */
 export type HomeModuleVariant =
   | HomeModule
@@ -372,7 +415,8 @@ export type HomeModuleVariant =
   | HomeDigitalBrochureModule
   | HomeMapModule
   | HomePassesModule
-  | HomeTicketsModule;
+  | HomeTicketsModule
+  | HomeDealsModule;
 
 /**
  * Publicidad declarativa por cliente (Fase 3.8). El kiosk renderiza ads

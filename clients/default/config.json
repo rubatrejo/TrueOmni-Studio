@@ -5005,6 +5005,33 @@
               }
             },
             {
+              "slug": "taylor-tribute-concert",
+              "title": "Taylor Tribute Concert",
+              "category": "Music",
+              "image": "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=600&q=80",
+              "date": "2026-04-22",
+              "startTime": "20:30",
+              "endTime": "23:00",
+              "venue": "Van Buren",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Indoor", "21+"],
+              "popularity": 79,
+              "address": "401 W Van Buren St, Phoenix, AZ",
+              "phone": "(602) 555-0734",
+              "coords": {
+                "lat": 33.451,
+                "lng": -112.082
+              },
+              "website": "https://example.com/taylor-tribute",
+              "description": "Full album sing-along with live band + dance floor. 21+ only.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$35",
+                "purchaseUrl": "https://tickets.example.com/taylor-tribute"
+              }
+            },
+            {
               "slug": "jazz-under-the-stars",
               "title": "Jazz Under the Stars",
               "category": "Music",
@@ -5291,6 +5318,33 @@
               "ticket": {
                 "priceDisplay": "$85–220",
                 "purchaseUrl": "https://tickets.example.com/broadway-hamilton"
+              }
+            },
+            {
+              "slug": "improv-comedy-night",
+              "title": "Improv Comedy Night",
+              "category": "Arts",
+              "image": "https://images.unsplash.com/photo-1527224538127-2104bb71c51b?w=600&q=80",
+              "date": "2026-04-23",
+              "startTime": "19:30",
+              "endTime": "21:30",
+              "venue": "Torch Theatre",
+              "priceMode": "paid",
+              "priceBand": 1,
+              "features": ["Indoor", "Family-friendly"],
+              "popularity": 60,
+              "address": "2222 N 16th St, Phoenix, AZ",
+              "phone": "(602) 555-0741",
+              "coords": {
+                "lat": 33.4692,
+                "lng": -112.0424
+              },
+              "website": "https://example.com/improv",
+              "description": "4 teams × 25 minutos. Audiencia sugiere los temas. Todo apto público.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$15",
+                "purchaseUrl": "https://tickets.example.com/improv"
               }
             },
             {
@@ -5744,6 +5798,33 @@
                   "instruction": "Arrive at Phoenix Convention Center"
                 }
               ]
+            },
+            {
+              "slug": "garden-brunch-saturday",
+              "title": "Garden Brunch Saturday",
+              "category": "Festival",
+              "image": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80",
+              "date": "2026-04-25",
+              "startTime": "10:00",
+              "endTime": "13:00",
+              "venue": "Desert Botanical Garden",
+              "priceMode": "paid",
+              "priceBand": 3,
+              "features": ["Outdoor", "Family-friendly"],
+              "popularity": 68,
+              "address": "1201 N Galvin Pkwy, Phoenix, AZ",
+              "phone": "(602) 555-0769",
+              "coords": {
+                "lat": 33.4619,
+                "lng": -111.9447
+              },
+              "website": "https://example.com/garden-brunch",
+              "description": "Buffet + live jazz en los jardines. Entrada incluye tour guiado de cactus florecidos.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$48",
+                "purchaseUrl": "https://tickets.example.com/garden-brunch"
+              }
             },
             {
               "slug": "craft-beer-festival",

@@ -110,7 +110,7 @@ export function ListingDetail({
           left: '90px',
           top: '166px',
           width: '898px',
-          height: stickyBuyCta ? '1770px' : extraDetails ? '1700px' : '1589px',
+          height: extraDetails ? '1700px' : '1589px',
           backgroundColor: '#ffffff',
           borderRadius: '8px',
           boxShadow: '0 12px 24px rgba(0,0,0,0.25)',
@@ -153,14 +153,14 @@ export function ListingDetail({
             style={{
               left: '30px',
               right: '30px',
-              bottom: '28px',
-              height: '92px',
+              top: '479px',
+              height: '80px',
               borderRadius: '12px',
               backgroundColor: '#1796d6',
-              fontSize: '26px',
+              fontSize: '24px',
               letterSpacing: '0.08em',
-              columnGap: '18px',
-              boxShadow: '0 10px 22px -6px rgba(23,150,214,0.55)',
+              columnGap: '16px',
+              boxShadow: '0 14px 28px -6px rgba(0,0,0,0.45)',
             }}
           >
             <span>{stickyBuyCta.label}</span>
@@ -168,12 +168,12 @@ export function ListingDetail({
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                height: '46px',
-                paddingLeft: '18px',
-                paddingRight: '18px',
+                height: '42px',
+                paddingLeft: '16px',
+                paddingRight: '16px',
                 borderRadius: '999px',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                fontSize: '22px',
+                backgroundColor: 'rgba(255,255,255,0.22)',
+                fontSize: '20px',
                 letterSpacing: '0.04em',
               }}
             >

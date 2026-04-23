@@ -76,8 +76,11 @@ export function TicketCard({
             boxShadow: '0 6px 14px rgba(0,0,0,0.12)',
           }}
         >
-          <div style={{ position: 'relative', flexShrink: 0 }}>
-            <TicketImage src={event.image} alt={event.title} />
+          <TicketImage src={event.image} alt={event.title} />
+          <div
+            className="relative flex flex-col justify-center"
+            style={{ flex: 1, padding: '0 28px', color: '#ffffff', rowGap: '10px' }}
+          >
             <span
               className="font-display font-bold"
               style={{
@@ -91,20 +94,15 @@ export function TicketCard({
                 paddingRight: '18px',
                 borderRadius: '999px',
                 background:
-                  'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.8) 100%)',
+                  'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.85) 100%)',
                 color: '#ffffff',
                 fontSize: '19px',
                 letterSpacing: '0.04em',
-                boxShadow: '0 4px 10px rgba(0,0,0,0.4)',
+                boxShadow: '0 4px 10px rgba(0,0,0,0.45)',
               }}
             >
               {event.ticket.priceDisplay}
             </span>
-          </div>
-          <div
-            className="flex flex-col justify-center"
-            style={{ flex: 1, padding: '0 28px', color: '#ffffff', rowGap: '10px' }}
-          >
             <span
               style={{
                 fontFamily: 'Helvetica, Arial, sans-serif',

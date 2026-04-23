@@ -127,16 +127,25 @@ export const GuestbookGlobeCanvas = forwardRef<
     void import('mapbox-gl').then((mod) => {
       const Marker = mod.Marker;
       if (!Marker) return;
-      for (const p of overlayPins) {
-        const el = document.createElement('div');
-        el.style.width = '46px';
-        el.style.height = '58px';
-        el.style.pointerEvents = 'none';
-        el.innerHTML = `<img src="${p.image}" alt="" style="width:46px;height:58px;filter:drop-shadow(0 3px 5px rgba(0,0,0,0.4));" />`;
-        const m = new Marker({ element: el, anchor: 'bottom' })
-          .setLngLat([p.coords.lng, p.coords.lat])
-          .addTo(map);
-        overlayMarkersRef.current.push(m);
+
+      const addPins = () => {
+        for (const p of overlayPins) {
+          const el = document.createElement('div');
+          el.style.width = '70px';
+          el.style.height = '88px';
+          el.style.pointerEvents = 'none';
+          el.innerHTML = `<img src="${p.image}" alt="" style="width:70px;height:88px;filter:drop-shadow(0 4px 7px rgba(0,0,0,0.45));display:block;" />`;
+          const m = new Marker({ element: el, anchor: 'bottom' })
+            .setLngLat([p.coords.lng, p.coords.lat])
+            .addTo(map);
+          overlayMarkersRef.current.push(m);
+        }
+      };
+
+      if (map.isStyleLoaded()) {
+        addPins();
+      } else {
+        map.once('load', addPins);
       }
     });
 

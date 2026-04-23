@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import { BackButton } from '@/components/listings/back-button';
 import type { PassItem } from '@/lib/config';
 
@@ -13,6 +15,7 @@ interface Props {
 }
 
 export function PassDetail({ moduleKey, pass, textos, onShareOpen }: Props) {
+  const [heroError, setHeroError] = useState(false);
   return (
     <div
       className="absolute inset-0 z-40 flex flex-col overflow-hidden bg-white"
@@ -20,8 +23,23 @@ export function PassDetail({ moduleKey, pass, textos, onShareOpen }: Props) {
       aria-label={pass.title}
     >
       <div className="relative flex-shrink-0 overflow-hidden" style={{ height: '620px' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={pass.cover} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        {heroError ? (
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.7) 100%)',
+            }}
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={pass.cover}
+            alt=""
+            onError={() => setHeroError(true)}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
         <div
           className="absolute inset-0"
           style={{
@@ -29,18 +47,20 @@ export function PassDetail({ moduleKey, pass, textos, onShareOpen }: Props) {
               'linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.55) 100%)',
           }}
         />
+        {/* CTA GET YOURS — estilo consistente con ActivityRow (rounded-full bg-primary) */}
         <button
           type="button"
           onClick={onShareOpen}
-          className="absolute inline-flex items-center justify-center rounded-full bg-primary font-display font-bold uppercase tracking-[0.1em] text-primary-foreground transition hover:opacity-90 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+          className="absolute inline-flex items-center justify-center rounded-full bg-primary font-display font-bold uppercase text-primary-foreground transition hover:opacity-90 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
           style={{
             left: '50%',
             bottom: '72px',
             transform: 'translateX(-50%)',
-            height: '68px',
-            paddingLeft: '48px',
-            paddingRight: '48px',
-            fontSize: '20px',
+            height: '76px',
+            paddingLeft: '56px',
+            paddingRight: '56px',
+            fontSize: '22px',
+            letterSpacing: '0.08em',
             boxShadow: '0 14px 32px -10px rgba(0,0,0,0.4)',
           }}
         >
@@ -48,17 +68,17 @@ export function PassDetail({ moduleKey, pass, textos, onShareOpen }: Props) {
         </button>
       </div>
       <div
-        className="relative w-full bg-primary text-primary-foreground"
-        style={{ height: '118px' }}
+        className="relative w-full text-white"
+        style={{ height: '118px', backgroundColor: '#004f8b' }}
       >
         <span
-          className="absolute font-display font-semibold"
+          className="absolute font-sans"
           style={{
-            left: '91px',
+            left: '32.5px',
             top: '50%',
             transform: 'translateY(-50%)',
-            fontSize: '30px',
-            letterSpacing: '0.01em',
+            fontSize: '36px',
+            lineHeight: '1',
           }}
         >
           {pass.title}
@@ -79,7 +99,7 @@ export function PassDetail({ moduleKey, pass, textos, onShareOpen }: Props) {
               fontSize: '22px',
             }}
           >
-            Activities coming soon.
+            {textos.passes_activities_empty ?? 'Activities coming soon.'}
           </div>
         ) : (
           <div

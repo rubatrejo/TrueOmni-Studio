@@ -37,7 +37,10 @@
     "map_chip_play": "Play",
     "map_chip_eat": "Eat",
     "map_chip_stay": "Stay",
-    "map_chip_events": "Events"
+    "map_chip_events": "Events",
+    "passes_empty": "No passes available right now.",
+    "passes_activities_empty": "Activities coming soon.",
+    "passes_share_phone_aria": "Phone input. Tap to delete last digit."
   },
   "navegacion": {
     "home": "/",

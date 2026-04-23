@@ -12,11 +12,13 @@ interface Props {
   client: { slug: string };
   pass: PassItem;
   textos: Record<string, string>;
+  /** Logo centrado en el QR. Opcional — si falta, el QR no lleva imagen. */
+  qrLogo?: string;
 }
 
 type Phase = 'closed' | 'share' | 'sent';
 
-export function PassShareHost({ client, pass, textos }: Props) {
+export function PassShareHost({ client, pass, textos, qrLogo }: Props) {
   const [phase, setPhase] = useState<Phase>('closed');
 
   useEffect(() => {
@@ -43,6 +45,7 @@ export function PassShareHost({ client, pass, textos }: Props) {
         open={phase === 'share'}
         pass={pass}
         textos={textos}
+        qrLogo={qrLogo}
         onCancel={() => setPhase('closed')}
         onSent={handleSent}
       />

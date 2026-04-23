@@ -109,6 +109,7 @@ export default async function DetailPage({ params }: PageProps) {
           client={{ slug: config.client.slug }}
           pass={pass}
           textos={config.textos ?? {}}
+          qrLogo={mod.qrLogo}
         />
         <AdsSlot ads={ads} />
       </KioskCanvas>

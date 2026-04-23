@@ -342,6 +342,8 @@ export interface HomePassesModule {
   label: string;
   heroImage: string;
   passes: PassItem[];
+  /** Logo centrado en el QR del share modal (path relativo o URL). Si se omite, el QR no lleva logo. */
+  qrLogo?: string;
 }
 
 /** Unión discriminada de los variants de módulo. */

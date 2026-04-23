@@ -43,8 +43,18 @@ export function PassesModule({ moduleKey, module: mod, textos, header }: Props) 
         className="scrollbar-hide flex-1 overflow-y-auto overflow-x-hidden overscroll-contain"
         style={{ paddingTop: '40px', paddingBottom: '140px' }}
       >
-        <PassesGrid passes={mod.passes} />
+        <PassesGrid passes={mod.passes} emptyLabel={textos.passes_empty} />
       </main>
+      {/* Scroll-hint gradient: fade blanco→transparente de abajo arriba, pegado al bottom */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0"
+        style={{
+          height: '140px',
+          background: 'linear-gradient(to top, #ffffff 0%, rgba(255,255,255,0) 100%)',
+          zIndex: 10,
+        }}
+      />
       <FloatingHomeButton />
       {searchOpen ? (
         <SearchOverlay listings={searchPool} onClose={() => setSearchOpen(false)} />

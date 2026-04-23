@@ -68,7 +68,10 @@
     "passes_share_cancel": "CANCEL",
     "passes_sent_title": "You are all set!",
     "passes_sent_message": "The pass was successfully sent",
-    "passes_sent_redirect_label": "Returning in {seconds}s..."
+    "passes_sent_redirect_label": "Returning in {seconds}s...",
+    "passes_empty": "No passes available right now.",
+    "passes_activities_empty": "Activities coming soon.",
+    "passes_share_phone_aria": "Phone input. Tap to delete last digit."
   },
   "navegacion": {
     "home": "/",
@@ -6788,14 +6791,14 @@
             {
               "slug": "museum-pass",
               "title": "Museum Pass",
-              "cover": "https://images.unsplash.com/photo-1565060169861-2d4b4e54c8c7?w=1200&q=80",
+              "cover": "https://images.unsplash.com/photo-1554907984-15263bfd63bd?w=1200&q=80",
               "bandwangoUrl": "https://app.bandwango.com/p/museum-pass",
               "tagline": "Skip the line at 8 iconic museums.",
               "activities": [
                 {
                   "slug": "cheyenne-depot-museum",
                   "title": "Cheyenne Depot Museum",
-                  "image": "https://images.unsplash.com/photo-1565060169861-2d4b4e54c8c7?w=600&q=80",
+                  "image": "https://images.unsplash.com/photo-1524813686514-a57563d77965?w=600&q=80",
                   "description": "Designated a National Historic Landmark, this former Union Pacific Depot has been restored to its original glory. Home to a visitor center and restaurant, the Depot also features the Cheyenne Depot Museum, rich with railroad history, exhibits and interactive displays, including an intricate working model.",
                   "website": "https://example.com/cheyenne-depot"
                 },
@@ -6819,13 +6822,41 @@
                   "image": "https://images.unsplash.com/photo-1466428996289-fb355538da1b?w=600&q=80",
                   "description": "MIM is the world's only global musical instrument museum, offering guests a rich musical journey with nearly 7,000 instruments on display from around 200 countries and territories across the globe.",
                   "website": "https://example.com/mim"
+                },
+                {
+                  "slug": "desert-botanical",
+                  "title": "Desert Botanical Museum",
+                  "image": "https://images.unsplash.com/photo-1509023464722-18d996393ca8?w=600&q=80",
+                  "description": "A living museum with over 50,000 desert plants across 140 acres. Walk through immersive themed trails, see rare cactus species in bloom and explore desert wildlife exhibits. Year-round indoor and outdoor exhibitions.",
+                  "website": "https://example.com/desert-botanical"
+                },
+                {
+                  "slug": "arizona-science-center",
+                  "title": "Arizona Science Center",
+                  "image": "https://images.unsplash.com/photo-1576086213369-97a306d36557?w=600&q=80",
+                  "description": "Four floors of hands-on science exhibits, a planetarium and a five-story IMAX theater. Perfect for all ages, featuring rotating special exhibits on space, biology and technology.",
+                  "website": "https://example.com/science-center"
+                },
+                {
+                  "slug": "scottsdale-museum-west",
+                  "title": "Scottsdale Museum of the West",
+                  "image": "https://images.unsplash.com/photo-1554907984-15263bfd63bd?w=600&q=80",
+                  "description": "Smithsonian-affiliated museum celebrating the art, history and culture of the American West. Permanent collection of over 800 works by leading Western artists, plus rotating exhibitions.",
+                  "website": "https://example.com/scottsdale-west"
+                },
+                {
+                  "slug": "childrens-museum-phoenix",
+                  "title": "Children's Museum of Phoenix",
+                  "image": "https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=600&q=80",
+                  "description": "Three floors of interactive exhibits designed for kids under 10. Featuring the iconic Noodle Forest, the Schuff-Perini Climber and dozens of hands-on learning stations.",
+                  "website": "https://example.com/childrens-museum"
                 }
               ]
             },
             {
               "slug": "city-tour-pass",
               "title": "City Tour Pass",
-              "cover": "https://images.unsplash.com/photo-1520583457224-aee11bad5112?w=1200&q=80",
+              "cover": "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1200&q=80",
               "bandwangoUrl": "https://app.bandwango.com/p/city-tour-pass",
               "tagline": "5 unforgettable tours in one pass.",
               "activities": [
@@ -6856,6 +6887,34 @@
                   "image": "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=600&q=80",
                   "description": "Full-day cruiser bike rental from 8am to 8pm. Helmet, lock and city map included. Perfect for exploring the riverfront trail and downtown.",
                   "website": "https://example.com/bikes"
+                },
+                {
+                  "slug": "helicopter-tour",
+                  "title": "Helicopter City Tour",
+                  "image": "https://images.unsplash.com/photo-1519074002996-a69e7ac46a42?w=600&q=80",
+                  "description": "30-minute scenic helicopter ride with panoramic views of the skyline, landmarks and surrounding mountains. Up to 4 passengers per flight. Weather-dependent.",
+                  "website": "https://example.com/helicopter"
+                },
+                {
+                  "slug": "old-town-trolley",
+                  "title": "Old Town Trolley Ride",
+                  "image": "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=600&q=80",
+                  "description": "Ride the historic trolley through Old Town with live narration from a costumed guide. 45-minute loop with 6 stops at museums, art galleries and the farmer's market.",
+                  "website": "https://example.com/trolley"
+                },
+                {
+                  "slug": "night-photo-tour",
+                  "title": "Night Photography Tour",
+                  "image": "https://images.unsplash.com/photo-1493514789931-586cb221d7a7?w=600&q=80",
+                  "description": "2.5-hour guided night walk through the best-lit spots in the city. Professional photographer teaches long-exposure and low-light techniques. Tripod provided.",
+                  "website": "https://example.com/night-photo"
+                },
+                {
+                  "slug": "desert-jeep-safari",
+                  "title": "Desert Jeep Safari",
+                  "image": "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&q=80",
+                  "description": "3-hour off-road jeep adventure into the Sonoran Desert. Stops at ancient petroglyph sites, cactus forests and a sunset overlook. Snacks and water included.",
+                  "website": "https://example.com/jeep"
                 }
               ]
             },
@@ -6893,6 +6952,187 @@
                   "image": "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&q=80",
                   "description": "Authentic Italian gelato made fresh daily from a family recipe. Your pass includes one regular-size cup or cone with two flavors.",
                   "website": "https://example.com/gelato"
+                },
+                {
+                  "slug": "steakhouse-44",
+                  "title": "Steakhouse 44",
+                  "image": "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=80",
+                  "description": "Classic American steakhouse with prime cuts and an extensive wine list. Pass gets you a complimentary glass of house wine with any entrée. Dress code smart-casual.",
+                  "website": "https://example.com/steakhouse44"
+                },
+                {
+                  "slug": "taco-festival",
+                  "title": "Taco Alley",
+                  "image": "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=80",
+                  "description": "12 family-owned taquerías along a pedestrian alley. Pass includes a tasting flight of 3 signature tacos from any 3 stalls. Salsa bar included.",
+                  "website": "https://example.com/taco-alley"
+                },
+                {
+                  "slug": "rooftop-cocktail-bar",
+                  "title": "Skyline Rooftop Bar",
+                  "image": "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=600&q=80",
+                  "description": "Open-air rooftop bar with panoramic city views. Pass includes one signature craft cocktail. Live DJ Fridays and Saturdays. 21+ after 9pm.",
+                  "website": "https://example.com/rooftop"
+                },
+                {
+                  "slug": "chocolate-wine-tasting",
+                  "title": "Chocolate & Wine Tasting",
+                  "image": "https://images.unsplash.com/photo-1511920170033-f8396924c348?w=600&q=80",
+                  "description": "Guided 90-minute pairing with 5 artisan chocolates and 5 local wines. Small groups of 12 in a cozy tasting room downtown. Daily at 3pm and 6pm.",
+                  "website": "https://example.com/chocolate-wine"
+                }
+              ]
+            },
+            {
+              "slug": "adventure-pass",
+              "title": "Adventure Pass",
+              "cover": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=1200&q=80",
+              "bandwangoUrl": "https://app.bandwango.com/p/adventure-pass",
+              "tagline": "Thrills across 6 adrenaline-pumping experiences.",
+              "activities": [
+                {
+                  "slug": "hot-air-balloon",
+                  "title": "Sunrise Hot-Air Balloon",
+                  "image": "https://images.unsplash.com/photo-1507608443039-bfde4fbcd142?w=600&q=80",
+                  "description": "Floating 1-hour ride at dawn over the Sonoran Desert with champagne toast on landing. Capacity 8 per basket. Weather-dependent.",
+                  "website": "https://example.com/balloon"
+                },
+                {
+                  "slug": "zipline-canyon",
+                  "title": "Canyon Zipline",
+                  "image": "https://images.unsplash.com/photo-1533460004989-cef01064af7e?w=600&q=80",
+                  "description": "Four-line zipline course with the longest run at 1,500 ft. Full safety gear, guided by certified instructors. Ages 10+, weight 70-270 lbs.",
+                  "website": "https://example.com/zipline"
+                },
+                {
+                  "slug": "rock-climbing",
+                  "title": "Indoor Rock Climbing",
+                  "image": "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=600&q=80",
+                  "description": "40+ routes from beginner to advanced. Pass covers gear rental (shoes, harness, chalk) and intro lesson. Bouldering area included.",
+                  "website": "https://example.com/climb"
+                },
+                {
+                  "slug": "kayak-lake",
+                  "title": "Lake Kayak Rental",
+                  "image": "https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=600&q=80",
+                  "description": "Two-hour kayak rental on Saguaro Lake. Single or tandem. Life vests and paddle included. Launch dock open 7am-5pm.",
+                  "website": "https://example.com/kayak"
+                },
+                {
+                  "slug": "atv-tour",
+                  "title": "ATV Desert Tour",
+                  "image": "https://images.unsplash.com/photo-1494783367193-149034c05e8f?w=600&q=80",
+                  "description": "Two-hour guided ATV ride through desert washes and ridge lines. Helmets and goggles provided. Minimum age 16 with valid license.",
+                  "website": "https://example.com/atv"
+                },
+                {
+                  "slug": "skydive",
+                  "title": "Tandem Skydive",
+                  "image": "https://images.unsplash.com/photo-1521673461164-de300ebcfb17?w=600&q=80",
+                  "description": "13,000 ft tandem jump with certified instructor. 60-second free fall, 5-minute canopy ride. Video and photo package available.",
+                  "website": "https://example.com/skydive"
+                }
+              ]
+            },
+            {
+              "slug": "wellness-pass",
+              "title": "Wellness Pass",
+              "cover": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1200&q=80",
+              "bandwangoUrl": "https://app.bandwango.com/p/wellness-pass",
+              "tagline": "Reset and recharge across 6 spa experiences.",
+              "activities": [
+                {
+                  "slug": "desert-hot-springs",
+                  "title": "Desert Hot Springs",
+                  "image": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
+                  "description": "Access to mineral hot springs pools and cold plunge. Pass includes towel service and one herbal tea. Open 7am-10pm daily.",
+                  "website": "https://example.com/hot-springs"
+                },
+                {
+                  "slug": "swedish-massage",
+                  "title": "Swedish Massage",
+                  "image": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&q=80",
+                  "description": "60-minute full-body Swedish massage with aromatherapy. Licensed therapists. Includes use of sauna and steam room before or after session.",
+                  "website": "https://example.com/massage"
+                },
+                {
+                  "slug": "yoga-flow",
+                  "title": "Sunrise Yoga Flow",
+                  "image": "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&q=80",
+                  "description": "75-minute vinyasa flow class with outdoor deck view. All levels welcome. Mats and props provided. Classes Mon-Sat at 7am.",
+                  "website": "https://example.com/yoga"
+                },
+                {
+                  "slug": "meditation-studio",
+                  "title": "Sound Bath Meditation",
+                  "image": "https://images.unsplash.com/photo-1528715471579-d1bcf0ba5e83?w=600&q=80",
+                  "description": "45-minute guided meditation with crystal singing bowls and gongs. Perfect for stress relief. Reserved cushions provided.",
+                  "website": "https://example.com/meditation"
+                },
+                {
+                  "slug": "facial-treatment",
+                  "title": "Signature Facial",
+                  "image": "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=600&q=80",
+                  "description": "60-minute customized facial with steam, exfoliation and mask. Licensed estheticians select products for your skin type.",
+                  "website": "https://example.com/facial"
+                },
+                {
+                  "slug": "salt-cave",
+                  "title": "Himalayan Salt Cave",
+                  "image": "https://images.unsplash.com/photo-1552693673-1bf958298935?w=600&q=80",
+                  "description": "45-minute halotherapy session in a zero-gravity lounger surrounded by Himalayan salt walls. Known to support respiratory health.",
+                  "website": "https://example.com/salt-cave"
+                }
+              ]
+            },
+            {
+              "slug": "family-pass",
+              "title": "Family Pass",
+              "cover": "https://images.unsplash.com/photo-1602002418082-a4443e081dd1?w=1200&q=80",
+              "bandwangoUrl": "https://app.bandwango.com/p/family-pass",
+              "tagline": "6 attractions the whole family will love.",
+              "activities": [
+                {
+                  "slug": "zoo-admission",
+                  "title": "Phoenix Zoo Admission",
+                  "image": "https://images.unsplash.com/photo-1456926631375-92c8ce872def?w=600&q=80",
+                  "description": "General admission for up to 2 adults and 2 kids. 1,200+ animals across 125 acres. Includes Safari Train ride and Monkey Village.",
+                  "website": "https://example.com/zoo"
+                },
+                {
+                  "slug": "aquarium-visit",
+                  "title": "OdySea Aquarium",
+                  "image": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&q=80",
+                  "description": "2-million-gallon aquarium with 65 exhibits featuring sharks, rays, otters and penguins. Pass covers the rotating shark cage experience.",
+                  "website": "https://example.com/aquarium"
+                },
+                {
+                  "slug": "trampoline-park",
+                  "title": "Sky Zone Trampoline Park",
+                  "image": "https://images.unsplash.com/photo-1547483238-2cbf881a559f?w=600&q=80",
+                  "description": "90 minutes of open jump plus dodgeball court, foam pit and ninja warrior course. Grip socks required (sold on site).",
+                  "website": "https://example.com/trampoline"
+                },
+                {
+                  "slug": "mini-golf",
+                  "title": "Castle Mini Golf",
+                  "image": "https://images.unsplash.com/photo-1592919505780-303950717480?w=600&q=80",
+                  "description": "Two 18-hole courses through a medieval castle theme. Arcade tokens included with the pass. Open until 10pm weekends.",
+                  "website": "https://example.com/mini-golf"
+                },
+                {
+                  "slug": "ice-skating",
+                  "title": "Ice Den Skating Rink",
+                  "image": "https://images.unsplash.com/photo-1578271887552-5ac3a72752bc?w=600&q=80",
+                  "description": "Public skate session (90 min) with skate rental included. Snack bar on site. Sessions daily at 11am, 2pm and 5pm.",
+                  "website": "https://example.com/ice"
+                },
+                {
+                  "slug": "waterpark",
+                  "title": "Big Surf Waterpark",
+                  "image": "https://images.unsplash.com/photo-1519638831568-d9897f54ed69?w=600&q=80",
+                  "description": "Full-day access to 20+ slides, lazy river and America's original wave pool. Cabana upgrades available. Summer season only (May-Sept).",
+                  "website": "https://example.com/waterpark"
                 }
               ]
             }

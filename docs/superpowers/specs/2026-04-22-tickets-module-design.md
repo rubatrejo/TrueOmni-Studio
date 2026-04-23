@@ -8,6 +8,7 @@
 El kiosk ya tiene un módulo **Events** (Fase 3.4) que muestra todos los eventos de un cliente. Algunos eventos venden boletos; otros solo son informativos. El módulo **Tickets** es una vista filtrada sobre el superset de eventos: muestra únicamente los que tienen venta de boletos activa, con precio visible en la card y un CTA de compra en el detail que abre un popup con QR (mismo patrón del share de Passes) para que el usuario complete la compra en su teléfono (escaneo) o reciba el link por SMS.
 
 **Decisiones arquitecturales base:**
+
 1. Tickets ⊂ Events — filtrado por la presencia del campo `ticket` en `EventItem`. Fuente de verdad única en `modules.events.events[]`.
 2. El flow QR + teléfono se **extrae** del módulo Passes a un componente compartido (`QrPurchaseModal` + `QrPurchaseHost`) reutilizable por Passes, Tickets y Events.
 3. Events con `ticket` configurado **también** usa el QR popup (no `ticketsUrl` externo). `ticketsUrl` queda como legacy: si solo ese está presente, comportamiento viejo.
@@ -58,16 +59,18 @@ Añadir `HomeTicketsModule` al union `HomeModuleVariant`.
 **Refactor:** mover `PassShareModal` + `PassShareHost` a `src/components/shared/` como componente genérico.
 
 **Archivos nuevos:**
+
 - `src/components/shared/qr-purchase-modal.tsx` — renombrado desde `PassShareModal`.
 - `src/components/shared/qr-purchase-host.tsx` — renombrado desde `PassShareHost`; acepta prop `eventName` para escuchar el `CustomEvent` correcto.
 
 **Props genéricas:**
+
 ```ts
 interface QrPurchaseModalProps {
   open: boolean;
   title: string;
-  purchaseUrl: string;       // valor del QR + payload SMS
-  priceDisplay?: string;     // opcional, visible arriba del QR en Tickets
+  purchaseUrl: string; // valor del QR + payload SMS
+  priceDisplay?: string; // opcional, visible arriba del QR en Tickets
   textos: Record<string, string>;
   qrLogo?: string;
   onCancel: () => void;
@@ -76,10 +79,12 @@ interface QrPurchaseModalProps {
 ```
 
 **Eventos emitidos por cada consumidor:**
+
 - Passes: `kiosk:pass-share-open` (detail: `{passSlug, passTitle, purchaseUrl}`).
 - Tickets / Events ticketable: `kiosk:ticket-purchase-open` (detail: `{eventSlug, eventTitle, purchaseUrl, priceDisplay}`).
 
 **Archivos de Passes a actualizar** (cambio de imports + nombres):
+
 - `src/components/passes/pass-detail-with-share.tsx`
 - `src/app/(kiosk)/home/[module]/[slug]/page.tsx` (rama `passes`)
 
@@ -91,12 +96,13 @@ Los textos `passes_share_*` del config pasan a ser props `textos` (cada módulo 
 
 Directorio: `src/components/tickets/`
 
-| Archivo | Propósito | Basado en |
-|---|---|---|
-| `tickets-module.tsx` | Root client. Lee `modules.events.events[]`, filtra `e.ticket != null`, renderiza toolbar + week-picker + grid + scroll-hint. | `events-module.tsx` |
-| `ticket-card.tsx` | Card horizontal (dims de `EventCard`) + **badge de precio** pill blanco con texto primary en esquina top-right del cover. | `event-card.tsx` |
-| `tickets-list.tsx` | Lista vertical de `TicketCard`, empty state propio. | `events-list.tsx` |
-| `tickets-filter-overlay.tsx` | Idéntico a `EventsFilterOverlay`: Category / Venue / Price / Features. | `events-filter-overlay.tsx` |
+| Archivo                      | Propósito                                                                                                                    | Basado en                   |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| `tickets-module.tsx`         | Root client. Lee `modules.events.events[]`, filtra `e.ticket != null`, renderiza toolbar + week-picker + grid + scroll-hint. | `events-module.tsx`         |
+| `ticket-card.tsx`            | Card horizontal (dims de `EventCard`) + **badge de precio** pill blanco con texto primary en esquina top-right del cover.    | `event-card.tsx`            |
+| `tickets-list.tsx`           | Lista vertical de `TicketCard`, empty state propio.                                                                          | `events-list.tsx`           |
+| `tickets-filter-overlay.tsx` | Idéntico a `EventsFilterOverlay`: Category / Venue / Price / Features.                                                       | `events-filter-overlay.tsx` |
+
 **Toolbar:** reuso directo de `ListingsToolbar` (la misma que usa Events). Label parametrizado vía prop `label`. No se crea archivo nuevo.
 
 **Reuso directo** (sin modificar): `ListingsToolbar`, `WeekPicker`, `BackButton`, `FloatingHomeButton`, `SearchOverlay`, `AdsSlot`.
@@ -108,6 +114,7 @@ Directorio: `src/components/tickets/`
 **`src/app/(kiosk)/home/[module]/page.tsx`**: añadir rama `if (mod.kind === 'tickets') return <TicketsModule ... />`.
 
 **`src/app/(kiosk)/home/[module]/[slug]/page.tsx`**:
+
 - **Rama `tickets`** nueva. Resuelve el event en `modules.events.events[]`. Si no existe o no tiene `ticket`, `notFound()`. Renderiza `ListingDetail` con `eventMeta` + `secondaryCta = { label: textos.tickets_buy_cta, onClick: dispatch('kiosk:ticket-purchase-open', {...}) }`. Monta `<QrPurchaseHost eventName="kiosk:ticket-purchase-open" ... />` sibling al detail.
 - **Rama `events` existente**: dispara el mismo `kiosk:ticket-purchase-open` si `event.ticket` está presente. Si solo tiene `ticketsUrl` legacy → comportamiento viejo (URL externa). Monta `<QrPurchaseHost>` sibling siempre que `event.ticket` exista.
 
@@ -137,6 +144,7 @@ Cada ticketable event incluye los campos de `EventItem` más:
 ```
 
 **Mix de precios (variedad de formato):**
+
 - 3× `"$XX"` (precio único)
 - 3× `"$XX–YY"` (rango)
 - 2× `"From $XX"` (desde)
@@ -145,6 +153,7 @@ Cada ticketable event incluye los campos de `EventItem` más:
 Las 10 URLs de imágenes se verifican con `fetch HEAD` antes de cerrar fase — cero rotas.
 
 **Añadir bloque `modules.tickets`:**
+
 ```json
 "tickets": {
   "kind": "tickets",
@@ -225,11 +234,13 @@ src/components/passes/pass-share-host.tsx
 ## Verification
 
 ### Typecheck + lint + format
+
 ```bash
 pnpm check
 ```
 
 ### Visual (Playwright MCP) — screenshots mínimos:
+
 1. `/home/tickets` listing con ticket-cards y badge de precio visible.
 2. `/home/tickets/<slug>` detail con CTA "BUY TICKET" grande.
 3. QR purchase modal abierto con título del event + price + QR + phone input.
@@ -237,20 +248,25 @@ pnpm check
 5. `/home/events/<slug-ticketable>` con el mismo CTA "BUY TICKET" disparando el mismo QR modal.
 
 ### Integridad de data
+
 Playwright `evaluate` con `fetch HEAD` sobre las ~11 URLs nuevas (10 covers + 1 hero tickets). Cero rotas antes de cerrar fase.
 
 ### Regresión Passes
+
 1. `/home/passes/museum-pass` → GET YOURS → el `QrPurchaseModal` refactorizado funciona igual.
 2. Completar flow SMS → `PassSentConfirmation` sigue apareciendo.
 
 ### Filtros
+
 1. `/home/tickets` → filter overlay → Category "Music" → solo tickets music.
 2. Clear all → todos.
 
 ### Favoritos compartidos
+
 1. `/home/events/<slug-ticketable>` tap heart → favorito.
 2. `/home/tickets` → ese event con heart filled.
 3. Tap heart en Tickets → desaparece también en Events.
 
 ### Auditor white-label
+
 Ejecutar `auditor-white-label` sobre `src/components/tickets/` y `src/components/shared/qr-*.tsx`. Cero hex/strings/paths hardcoded esperados (excepto excepciones heredadas del `send-modal-chrome`).

@@ -9,7 +9,12 @@ interface Props {
   onAutoClose: () => void;
 }
 
-export function PassSentConfirmation({ title, message, autoCloseMs = 3000, onAutoClose }: Props) {
+/**
+ * Pantalla de confirmación genérica tras completar un envío (pass share, ticket purchase).
+ * Overlay oscuro con card blanca + check verde lime + título + mensaje. Auto-close.
+ * Compartido entre Passes (Fase 3.10) y Tickets (Fase 3.11).
+ */
+export function SentConfirmation({ title, message, autoCloseMs = 3000, onAutoClose }: Props) {
   useEffect(() => {
     const timeout = setTimeout(onAutoClose, autoCloseMs);
     return () => clearTimeout(timeout);

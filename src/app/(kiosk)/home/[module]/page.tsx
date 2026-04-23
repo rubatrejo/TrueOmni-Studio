@@ -135,6 +135,10 @@ export default async function ModulePage({ params }: PageProps) {
       </KioskCanvas>
     );
   }
+  if (mod?.kind === 'tickets') {
+    // Placeholder hasta T13 del plan — implementa TicketsModule + rama real.
+    notFound();
+  }
   if (mod) {
     return (
       <KioskCanvas>

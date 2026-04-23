@@ -180,6 +180,13 @@ export interface EventItem {
   ticketsUrl?: string;
   description: string;
   directions: { icon: string; distance: string; instruction: string }[];
+  /** Si está presente, el evento vende boletos y aparece en el módulo Tickets. */
+  ticket?: {
+    /** Texto libre a mostrar en la card/detail: "$25", "$15–30", "From $10". */
+    priceDisplay: string;
+    /** URL absoluta que va codificada en el QR del popup de compra. */
+    purchaseUrl: string;
+  };
 }
 
 /** Módulo de Events (calendario + lista por día + detail). */
@@ -346,6 +353,17 @@ export interface HomePassesModule {
   qrLogo?: string;
 }
 
+/** Módulo Tickets — kind discriminator 'tickets'. Vista filtrada sobre events ticketables. */
+export interface HomeTicketsModule {
+  kind: 'tickets';
+  label: string;
+  heroImage: string;
+  /** Opcionales — si faltan, el filter overlay deriva del pool visible. */
+  categories?: string[];
+  venues?: string[];
+  features?: string[];
+}
+
 /** Unión discriminada de los variants de módulo. */
 export type HomeModuleVariant =
   | HomeModule
@@ -353,7 +371,8 @@ export type HomeModuleVariant =
   | HomeSocialWallModule
   | HomeDigitalBrochureModule
   | HomeMapModule
-  | HomePassesModule;
+  | HomePassesModule
+  | HomeTicketsModule;
 
 /**
  * Publicidad declarativa por cliente (Fase 3.8). El kiosk renderiza ads

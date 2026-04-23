@@ -71,7 +71,19 @@
     "passes_sent_redirect_label": "Returning in {seconds}s...",
     "passes_empty": "No passes available right now.",
     "passes_activities_empty": "Activities coming soon.",
-    "passes_share_phone_aria": "Phone input. Tap to delete last digit."
+    "passes_share_phone_aria": "Phone input. Tap to delete last digit.",
+    "tickets_label": "Tickets",
+    "tickets_buy_cta": "BUY TICKET",
+    "tickets_share_instruction": "SCAN QR OR GET SMS TO BUY YOUR TICKET",
+    "tickets_share_phone_label": "Enter your phone number",
+    "tickets_share_phone_placeholder": "000-555-0115",
+    "tickets_share_country": "USA (+1)",
+    "tickets_share_terms": "I accept details",
+    "tickets_share_send": "SEND",
+    "tickets_sent_title": "Link sent!",
+    "tickets_sent_message": "Check your phone to complete the purchase.",
+    "tickets_empty": "No tickets available right now.",
+    "tickets_share_phone_aria": "Phone number. Tap to edit via keypad."
   },
   "navegacion": {
     "home": "/",
@@ -198,7 +210,10 @@
             "type": "nps",
             "prompt": "How likely are you to recommend this kiosk?",
             "subtitle": "Your honest rating helps us improve the experience for every visitor.",
-            "labels": { "low": "Not at all likely", "high": "Extremely likely" }
+            "labels": {
+              "low": "Not at all likely",
+              "high": "Extremely likely"
+            }
           },
           {
             "id": "overall",
@@ -4936,6 +4951,33 @@
               ]
             },
             {
+              "slug": "indie-fest-2026",
+              "title": "Indie Festival 2026",
+              "category": "Festival",
+              "image": "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=600&q=80",
+              "date": "2026-04-11",
+              "startTime": "16:00",
+              "endTime": "23:00",
+              "venue": "Roosevelt Row",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Outdoor", "Food trucks", "Family-friendly"],
+              "popularity": 78,
+              "address": "225 E Roosevelt St, Phoenix, AZ",
+              "phone": "(602) 555-0152",
+              "coords": {
+                "lat": 33.4591,
+                "lng": -112.0721
+              },
+              "website": "https://example.com/indie-fest",
+              "description": "Two days of indie music, local art, food trucks, and craft vendors. 15+ bands on 3 stages. Family-friendly zone until 9pm.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$15–30",
+                "purchaseUrl": "https://tickets.example.com/indie-fest-2026"
+              }
+            },
+            {
               "slug": "jazz-under-the-stars",
               "title": "Jazz Under the Stars",
               "category": "Music",
@@ -5109,6 +5151,33 @@
               ]
             },
             {
+              "slug": "symphony-spring-night",
+              "title": "Symphony Spring Night",
+              "category": "Music",
+              "image": "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=600&q=80",
+              "date": "2026-04-10",
+              "startTime": "19:30",
+              "endTime": "22:00",
+              "venue": "Symphony Hall",
+              "priceMode": "paid",
+              "priceBand": 3,
+              "features": ["Indoor", "Reserved seating"],
+              "popularity": 85,
+              "address": "75 N 2nd St, Phoenix, AZ",
+              "phone": "(602) 555-0181",
+              "coords": {
+                "lat": 33.4503,
+                "lng": -112.072
+              },
+              "website": "https://example.com/symphony",
+              "description": "Phoenix Symphony performs Tchaikovsky, Brahms, and a world premiere by a local composer. Pre-concert talk at 18:45 in the foyer.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$40",
+                "purchaseUrl": "https://tickets.example.com/symphony-spring-night"
+              }
+            },
+            {
               "slug": "indie-film-screening",
               "title": "Indie Film Screening",
               "category": "Arts",
@@ -5249,6 +5318,33 @@
               ]
             },
             {
+              "slug": "cardinals-preseason",
+              "title": "Cardinals Preseason Home Game",
+              "category": "Sports",
+              "image": "https://images.unsplash.com/photo-1461988091159-192b6df7054f?w=600&q=80",
+              "date": "2026-04-13",
+              "startTime": "13:00",
+              "endTime": "16:30",
+              "venue": "State Farm Stadium",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Outdoor", "Parking", "Family-friendly"],
+              "popularity": 82,
+              "address": "1 Cardinals Dr, Glendale, AZ",
+              "phone": "(602) 555-0215",
+              "coords": {
+                "lat": 33.5276,
+                "lng": -112.2626
+              },
+              "website": "https://example.com/cardinals",
+              "description": "Cardinals vs. Chargers preseason. Tailgating opens 4 hours before kickoff. Stadium tours available on matchday.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$25",
+                "purchaseUrl": "https://tickets.example.com/cardinals-preseason"
+              }
+            },
+            {
               "slug": "tech-summit-2026",
               "title": "Tech Summit 2026",
               "category": "Conference",
@@ -5383,6 +5479,33 @@
                   "instruction": "Arrive at Symphony Hall"
                 }
               ]
+            },
+            {
+              "slug": "opera-la-traviata",
+              "title": "La Traviata",
+              "category": "Arts",
+              "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
+              "date": "2026-04-15",
+              "startTime": "19:00",
+              "endTime": "22:30",
+              "venue": "Phoenix Opera House",
+              "priceMode": "paid",
+              "priceBand": 4,
+              "features": ["Indoor", "Reserved seating"],
+              "popularity": 72,
+              "address": "1202 N 3rd St, Phoenix, AZ",
+              "phone": "(602) 555-0243",
+              "coords": {
+                "lat": 33.462,
+                "lng": -112.0718
+              },
+              "website": "https://example.com/opera",
+              "description": "Verdi's classic performed in Italian with English surtitles. 3 acts, 2 intermissions. Dress: business casual or formal.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$45–80",
+                "purchaseUrl": "https://tickets.example.com/opera-la-traviata"
+              }
             },
             {
               "slug": "tacos-tequila-fiesta",
@@ -5521,6 +5644,33 @@
               ]
             },
             {
+              "slug": "comedy-night-live",
+              "title": "Stand-up Comedy Night",
+              "category": "Arts",
+              "image": "https://images.unsplash.com/photo-1527224538127-2104bb71c51b?w=600&q=80",
+              "date": "2026-04-16",
+              "startTime": "20:00",
+              "endTime": "22:00",
+              "venue": "Comedy Underground",
+              "priceMode": "paid",
+              "priceBand": 1,
+              "features": ["Indoor", "21+"],
+              "popularity": 68,
+              "address": "455 N 3rd St, Phoenix, AZ",
+              "phone": "(602) 555-0188",
+              "coords": {
+                "lat": 33.4515,
+                "lng": -112.0723
+              },
+              "website": "https://example.com/comedy",
+              "description": "Four headliners, one opener. Two-drink minimum. Doors at 19:30. General admission seating.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$18",
+                "purchaseUrl": "https://tickets.example.com/comedy-night-live"
+              }
+            },
+            {
               "slug": "gallery-opening-reception",
               "title": "Gallery Opening Reception",
               "category": "Arts",
@@ -5657,6 +5807,33 @@
               ]
             },
             {
+              "slug": "food-wine-expo",
+              "title": "Food & Wine Expo",
+              "category": "Festival",
+              "image": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80",
+              "date": "2026-04-18",
+              "startTime": "11:00",
+              "endTime": "18:00",
+              "venue": "Phoenix Convention Center",
+              "priceMode": "paid",
+              "priceBand": 4,
+              "features": ["Indoor", "21+"],
+              "popularity": 80,
+              "address": "100 N 3rd St, Phoenix, AZ",
+              "phone": "(602) 555-0250",
+              "coords": {
+                "lat": 33.448,
+                "lng": -112.0716
+              },
+              "website": "https://example.com/food-wine-expo",
+              "description": "80+ restaurants and 40+ wineries. 6 tasting flights included. Master sommelier classes on the hour. Premium ticket adds VIP lounge.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$120",
+                "purchaseUrl": "https://tickets.example.com/food-wine-expo"
+              }
+            },
+            {
               "slug": "startup-networking-mixer",
               "title": "Startup Networking Mixer",
               "category": "Conference",
@@ -5789,6 +5966,33 @@
                   "instruction": "Arrive at Changing Hands Bookstore"
                 }
               ]
+            },
+            {
+              "slug": "family-movie-matinee",
+              "title": "Family Movie Matinee",
+              "category": "Family",
+              "image": "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&q=80",
+              "date": "2026-04-20",
+              "startTime": "14:00",
+              "endTime": "16:00",
+              "venue": "Harkins Theatre",
+              "priceMode": "paid",
+              "priceBand": 1,
+              "features": ["Indoor", "Family-friendly"],
+              "popularity": 62,
+              "address": "5870 W Thunderbird Rd, Glendale, AZ",
+              "phone": "(602) 555-0295",
+              "coords": {
+                "lat": 33.608,
+                "lng": -112.184
+              },
+              "website": "https://example.com/matinee",
+              "description": "Family-friendly animated feature. Includes small popcorn and drink. All ages welcome, under 3 free.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "From $10",
+                "purchaseUrl": "https://tickets.example.com/family-movie-matinee"
+              }
             },
             {
               "slug": "craft-beer-tasting",
@@ -5927,6 +6131,33 @@
                   "instruction": "Arrive at Papago Park start line"
                 }
               ]
+            },
+            {
+              "slug": "jazz-in-the-park",
+              "title": "Jazz in the Park",
+              "category": "Music",
+              "image": "https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=600&q=80",
+              "date": "2026-04-22",
+              "startTime": "18:00",
+              "endTime": "21:00",
+              "venue": "Desert Botanical Garden",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Outdoor", "Picnic"],
+              "popularity": 75,
+              "address": "1201 N Galvin Pkwy, Phoenix, AZ",
+              "phone": "(602) 555-0341",
+              "coords": {
+                "lat": 33.4619,
+                "lng": -111.9447
+              },
+              "website": "https://example.com/jazz-park",
+              "description": "Outdoor jazz quartet among the cacti. Bring a blanket and a basket — food trucks on site too. Gates open 17:00.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$20–35",
+                "purchaseUrl": "https://tickets.example.com/jazz-in-the-park"
+              }
             },
             {
               "slug": "morning-photo-walk",
@@ -6096,6 +6327,33 @@
               ]
             },
             {
+              "slug": "marathon-relay-race",
+              "title": "Marathon Relay Race",
+              "category": "Sports",
+              "image": "https://images.unsplash.com/photo-1486218119243-13883505764c?w=600&q=80",
+              "date": "2026-04-24",
+              "startTime": "06:30",
+              "endTime": "11:00",
+              "venue": "Papago Park",
+              "priceMode": "paid",
+              "priceBand": 2,
+              "features": ["Outdoor", "Family-friendly"],
+              "popularity": 60,
+              "address": "625 N Galvin Pkwy, Phoenix, AZ",
+              "phone": "(602) 555-0374",
+              "coords": {
+                "lat": 33.4619,
+                "lng": -111.9447
+              },
+              "website": "https://example.com/marathon-relay",
+              "description": "4-person relay, 5 miles each leg. Finisher medals + post-race breakfast. Register solo and we match you with a team.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "From $22",
+                "purchaseUrl": "https://tickets.example.com/marathon-relay-race"
+              }
+            },
+            {
               "slug": "dog-park-meetup",
               "title": "Dog Park Meetup",
               "category": "Family",
@@ -6263,6 +6521,33 @@
                   "instruction": "Arrive at Orpheum Theatre"
                 }
               ]
+            },
+            {
+              "slug": "gala-fundraiser",
+              "title": "Spring Gala Fundraiser",
+              "category": "Arts",
+              "image": "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&q=80",
+              "date": "2026-04-25",
+              "startTime": "18:30",
+              "endTime": "23:00",
+              "venue": "Biltmore Hotel",
+              "priceMode": "paid",
+              "priceBand": 4,
+              "features": ["Indoor", "21+", "Formal"],
+              "popularity": 70,
+              "address": "2400 E Missouri Ave, Phoenix, AZ",
+              "phone": "(602) 555-0412",
+              "coords": {
+                "lat": 33.5144,
+                "lng": -112.0294
+              },
+              "website": "https://example.com/gala",
+              "description": "Black-tie gala for the arts foundation. 3-course dinner, live auction, and string quartet. Ticket includes welcome cocktail.",
+              "directions": [],
+              "ticket": {
+                "priceDisplay": "$150",
+                "purchaseUrl": "https://tickets.example.com/gala-fundraiser"
+              }
             },
             {
               "slug": "street-art-tour",
@@ -7137,6 +7422,11 @@
               ]
             }
           ]
+        },
+        "tickets": {
+          "kind": "tickets",
+          "label": "Tickets",
+          "heroImage": "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1920&q=80"
         }
       }
     },

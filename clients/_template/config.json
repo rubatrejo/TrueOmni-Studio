@@ -40,7 +40,19 @@
     "map_chip_events": "Events",
     "passes_empty": "No passes available right now.",
     "passes_activities_empty": "Activities coming soon.",
-    "passes_share_phone_aria": "Phone input. Tap to delete last digit."
+    "passes_share_phone_aria": "Phone input. Tap to delete last digit.",
+    "tickets_label": "Tickets",
+    "tickets_buy_cta": "BUY TICKET",
+    "tickets_share_instruction": "SCAN QR OR GET SMS TO BUY YOUR TICKET",
+    "tickets_share_phone_label": "Enter your phone number",
+    "tickets_share_phone_placeholder": "000-555-0115",
+    "tickets_share_country": "USA (+1)",
+    "tickets_share_terms": "I accept details",
+    "tickets_share_send": "SEND",
+    "tickets_sent_title": "Link sent!",
+    "tickets_sent_message": "Check your phone to complete the purchase.",
+    "tickets_empty": "No tickets available right now.",
+    "tickets_share_phone_aria": "Phone number. Tap to edit via keypad."
   },
   "navegacion": {
     "home": "/",

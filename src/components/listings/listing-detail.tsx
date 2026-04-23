@@ -54,6 +54,7 @@ export function ListingDetail({
   favoritesKind = 'listing',
   onClose,
   extraDetails,
+  stickyBuyCta,
 }: {
   moduleKey: string;
   listing: Listing;
@@ -68,8 +69,10 @@ export function ListingDetail({
   favoritesKind?: 'listing' | 'event';
   /** Si se provee, el botón X usa esta callback en lugar de navegar al módulo. */
   onClose?: () => void;
-  /** Slot opcional (Tickets) renderizado entre Map y DESCRIPTION (y=1205). */
+  /** Slot opcional (Tickets) renderizado entre Map y DESCRIPTION. */
   extraDetails?: React.ReactNode;
+  /** CTA full-width sticky en el bottom del card (Tickets). Si presente, card crece +140px. */
+  stickyBuyCta?: { label: string; priceDisplay: string; onClick: () => void };
 }) {
   const [emailOpen, setEmailOpen] = useState(false);
   const [phoneOpen, setPhoneOpen] = useState(false);
@@ -100,14 +103,14 @@ export function ListingDetail({
         style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
       />
 
-      {/* Card blanco 898×1589 at (90, 166) */}
+      {/* Card blanco 898×variable at (90, 166). Si hay stickyBuyCta o extraDetails, se amplía. */}
       <div
         className="absolute overflow-hidden"
         style={{
           left: '90px',
           top: '166px',
           width: '898px',
-          height: '1589px',
+          height: stickyBuyCta ? '1770px' : extraDetails ? '1700px' : '1589px',
           backgroundColor: '#ffffff',
           borderRadius: '8px',
           boxShadow: '0 12px 24px rgba(0,0,0,0.25)',
@@ -127,15 +130,57 @@ export function ListingDetail({
           token={mapboxToken}
           onGetDirections={() => setDirectionsOpen(true)}
         />
+        <DescriptionSection listing={listing} />
         {extraDetails ? (
           <div
             className="absolute"
-            style={{ left: '48px', top: '1205px', width: '802px', height: '70px' }}
+            style={{
+              left: '48px',
+              top: '1555px',
+              width: '802px',
+              paddingTop: '24px',
+              borderTop: '1px solid #e8e8e8',
+            }}
           >
             {extraDetails}
           </div>
         ) : null}
-        <DescriptionSection listing={listing} />
+        {stickyBuyCta ? (
+          <button
+            type="button"
+            onClick={stickyBuyCta.onClick}
+            className="absolute flex items-center justify-center font-sans font-bold uppercase text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
+            style={{
+              left: '30px',
+              right: '30px',
+              bottom: '28px',
+              height: '92px',
+              borderRadius: '12px',
+              backgroundColor: '#1796d6',
+              fontSize: '26px',
+              letterSpacing: '0.08em',
+              columnGap: '18px',
+              boxShadow: '0 10px 22px -6px rgba(23,150,214,0.55)',
+            }}
+          >
+            <span>{stickyBuyCta.label}</span>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                height: '46px',
+                paddingLeft: '18px',
+                paddingRight: '18px',
+                borderRadius: '999px',
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                fontSize: '22px',
+                letterSpacing: '0.04em',
+              }}
+            >
+              {stickyBuyCta.priceDisplay}
+            </span>
+          </button>
+        ) : null}
       </div>
 
       {/* Modales */}

@@ -76,7 +76,31 @@ export function TicketCard({
             boxShadow: '0 6px 14px rgba(0,0,0,0.12)',
           }}
         >
-          <TicketImage src={event.image} alt={event.title} />
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <TicketImage src={event.image} alt={event.title} />
+            <span
+              className="font-display font-bold"
+              style={{
+                position: 'absolute',
+                top: '14px',
+                right: '14px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                height: '40px',
+                paddingLeft: '18px',
+                paddingRight: '18px',
+                borderRadius: '999px',
+                background:
+                  'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.8) 100%)',
+                color: '#ffffff',
+                fontSize: '19px',
+                letterSpacing: '0.04em',
+                boxShadow: '0 4px 10px rgba(0,0,0,0.4)',
+              }}
+            >
+              {event.ticket.priceDisplay}
+            </span>
+          </div>
           <div
             className="flex flex-col justify-center"
             style={{ flex: 1, padding: '0 28px', color: '#ffffff', rowGap: '10px' }}
@@ -96,39 +120,17 @@ export function TicketCard({
             >
               {event.title}
             </span>
-            <div className="flex items-center" style={{ columnGap: '12px' }}>
-              <span
-                className="font-display font-bold"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  height: '28px',
-                  paddingLeft: '14px',
-                  paddingRight: '14px',
-                  borderRadius: '999px',
-                  background:
-                    'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.78) 100%)',
-                  color: '#ffffff',
-                  fontSize: '14px',
-                  letterSpacing: '0.04em',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.35)',
-                  flexShrink: 0,
-                }}
-              >
-                {event.ticket.priceDisplay}
-              </span>
-              <span
-                style={{
-                  fontFamily: 'Helvetica, Arial, sans-serif',
-                  fontSize: '16px',
-                  lineHeight: '16px',
-                  color: 'rgba(255,255,255,0.82)',
-                  letterSpacing: '0.02em',
-                }}
-              >
-                {timeLabel}
-              </span>
-            </div>
+            <span
+              style={{
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontSize: '16px',
+                lineHeight: '16px',
+                color: 'rgba(255,255,255,0.82)',
+                letterSpacing: '0.02em',
+              }}
+            >
+              {timeLabel}
+            </span>
           </div>
         </div>
       </div>

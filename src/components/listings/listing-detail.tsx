@@ -350,9 +350,9 @@ function HeroImage({
             aria-hidden
             className="absolute inset-x-0 bottom-0"
             style={{
-              height: '240px',
+              height: '310px',
               background:
-                'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.9) 100%)',
+                'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0.92) 100%)',
             }}
           />
           <div
@@ -381,10 +381,10 @@ function HeroImage({
             {phoneOverlay ? (
               <div
                 style={{
-                  marginTop: '8px',
-                  fontSize: '24px',
-                  lineHeight: '28px',
-                  fontWeight: 600,
+                  marginTop: '14px',
+                  fontSize: '30px',
+                  lineHeight: '34px',
+                  fontWeight: 700,
                   opacity: 0.95,
                   textShadow: '0 2px 6px rgba(0,0,0,0.6)',
                 }}
@@ -465,7 +465,7 @@ function ActionRow({
   const twoButtons = hasReserve || hasSecondary;
   const hideMetaCol = !eventMeta && !listing.hours;
   const websiteTop = hideMetaCol ? 665 : twoButtons ? 581 : 624;
-  const websiteLeft = hideMetaCol ? 59 : 609;
+  const websiteLeft = 609;
 
   const hideMetaColumn = hideMetaCol;
   const primaryText = eventMeta
@@ -535,18 +535,32 @@ function ActionRow({
 
       {/* Segundo botón: RESERVE NOW o CTA configurable (GET TICKETS). */}
       {hasReserve && listing.reserveUrl ? <ReserveNowButton href={listing.reserveUrl} /> : null}
-      {hasSecondary && secondaryCta ? <SecondaryCtaButton cta={secondaryCta} /> : null}
+      {hasSecondary && secondaryCta ? (
+        <SecondaryCtaButton
+          cta={secondaryCta}
+          leftOverride={hideMetaCol ? 59 : undefined}
+          topOverride={hideMetaCol ? 665 : undefined}
+        />
+      ) : null}
     </>
   );
 }
 
-function SecondaryCtaButton({ cta }: { cta: SecondaryCta }) {
+function SecondaryCtaButton({
+  cta,
+  leftOverride,
+  topOverride,
+}: {
+  cta: SecondaryCta;
+  leftOverride?: number;
+  topOverride?: number;
+}) {
   const color = cta.color ?? 'blue';
   const bg = color === 'olive' ? '#b9bd39' : '#1796d6';
   const isOutlineRed = color === 'outline-red';
   const sharedStyle = {
-    left: '609px',
-    top: '665px',
+    left: `${leftOverride ?? 609}px`,
+    top: `${topOverride ?? 665}px`,
     width: '260px',
     height: '64px',
     borderRadius: '8px',

@@ -6,11 +6,11 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Fase 3.14 (Guestbook) cerrada con 14 commits de pulido visual (pins oficiales, rotación, pseudo-3D, layout media-luna, vista global, smooth fade).
+**Fase activa:** Fase 3.14 (Guestbook) **aprobada por Rubén** tras una sesión larga de refactor visual + fixes funcionales (form layout, map screen rebuild, drag-and-drop).
 
-**Última fase cerrada:** Fase 3.14 — Guestbook module + pulidos visuales (`f81e183` → `a55a0d8`). Antes: Fase 3.13 Trails (`ad7f2e1` + `e75f469` + `a678509`), Fase 3.12 Deals, Fase 3.11 Tickets.
+**Última fase cerrada:** Fase 3.14 — Guestbook module completo + refactor sesión 2026-04-23. Antes: Fase 3.13 Trails, 3.12 Deals, 3.11 Tickets.
 
-**Siguiente acción concreta:** Siguiente módulo del home (Photo Booth, Itinerary Builder) o Fase 4 (primer cliente real). Itinerary Builder es candidato natural — ya hay 3 buckets de favoritos + Guestbook tiene su propio bucket.
+**Siguiente acción concreta:** Fase 3.15 — Itinerary Builder (candidato natural) o Fase 4 (primer cliente real).
 
 **Bloqueos:** ninguno. `alwaysShowWelcome={true}` del MapModule sigue hardcoded para QA — apagarlo antes de Fase 4 / producción (`[module]/page.tsx` rama `map`).
 
@@ -830,6 +830,49 @@ driving/walking, SEE 360 funcional, favorite toast).
 - **`EventCard` detecta `event.ticket`** para mostrar pill — sin cambio de tipo (ticket ya es opcional). Events sin venta siguen igual.
 
 **Fase:** 3.11 Tickets cerrada con pulido visual aprobado por Rubén.
+
+---
+
+### Sesión 2026-04-23 — Guestbook refactor sesión larga (form + map + drag&drop)
+
+**Hecho:**
+
+- **Start screen**: bloque `Sign our Guestbook!` bajado 75px (paddingTop 116→191); fondo `#f8f8f8 → #ffffff` para quitar división visible con el módulo.
+- **Form screen**: mismo título+subtítulo del start (ya no "Start your Guestbook!"); globo subido a `top: 800` con +5% zoom; pins decorativos reactivados; 2 gradients (top fade form→globo, bottom fade globo→teclado) pegados al keyboard en CSS y=1521; inputs 58→72, checkbox 24→30, NEXT 260×68 → 320×76; **`GuestbookFloatingBackButton`** nuevo usando el path SVG oficial de `clients/default/assets/button-back.svg` (no el chevron custom que había hecho).
+- **HomeHeader** nueva prop `gradientExtra?: number` que extiende el gradient N px por debajo del box (sin empujar layout); `overflow-hidden` solo si hay heroImage. Form/map headers pasan `gradientExtra={80}`.
+- **Map screen rebuild**: pin rail movido de bottom a `top: 210` (debajo del gradient extra del hero); pin rail +grande (paddings 20/28→44/56, title 22→32, subtitle 15→21, pin height 90→120, columnGap 24→56); shadow removido. Globe container en map phase `top: 550, bottom: 0`. `GuestbookFloatingBackButton` sobre el mapa. Header con logo+clock+weather arriba. FINISH button (420×92 olive rounded + shadow) movido al `finishSlot` del rail (debajo de los pins) — mapa ocupa full bottom.
+- **Pin assets**: 5 nuevos `pin-N-circle.png` copiados a `clients/default/assets/guestbook/pins/`. `GuestbookPinOption` gana campo opcional `circleImage`. pinCatalog del config cada uno con su `circleImage`.
+- **Seed pins**: usan el pin completo del catálogo (ciclado por índice), aspect ratio natural (113×183 → `height:120, width:auto`). Click seed → modal recibe `circleImage` matching (Pin-N-Circle.png) centrado con `object-fit: contain` sin border duplicado. 6 seed pins redistribuidos por Miami.
+- **Placed pin**: `height: 160, width: auto` + glow olive pulsante animado (`@keyframes gbPulse`) + drop-shadow fuerte → se distingue claramente de los seed.
+- **Modal comment**: `items-start + paddingTop 360 → items-center` (vertical centrado). Overlay oscurecido `0.35 → 0.55`.
+- **Drag-and-drop — fix definitivo del "starting point diferente"**: root cause era que `position: fixed` + ancestro con `transform: scale()` = containing block es el kiosk (no viewport). Clone se posicionaba en coords viewport dentro del sistema CSS del kiosk → offset visual grande. Fix: convertir cursor viewport → kiosk CSS coords (`(drag.x - kioskRect.left) / scale`), usar width/height en CSS (el kiosk los escala). **Verificado con test automatizado: tip del clone offset (0, 0) respecto al cursor.**
+- **handleDrop**: usa `canvas.offsetWidth/getBoundingClientRect` para calcular scale y convertir viewport → canvas-internal antes de `unproject` → pin se coloca exactamente donde el usuario soltó.
+- **`seedMarkers` useEffect**: `cancelled` flag contra race de React strict mode + async import (evita markers duplicados).
+- **Exit confirm modal** cuando tapa back en map phase: card blanca centrada con overlay oscuro, botones Cancel/Exit, redirect a `/home` al confirmar.
+- **Thank You popup tras FINISH**: card con check animado olive en círculo, gradient top + mensaje agradecimiento + auto-redirect a `/home` en 4s.
+- **Module wrapper bg**: `#f8f8f8 → #ffffff` uniforme en start/form/map.
+
+**Verificado:**
+
+- `pnpm typecheck` limpio en cada cambio (≥15 typechecks durante la sesión).
+- Playwright MCP: drag synthetic → modal abre → CONFIRM → pin queda en mapa con glow + FINISH aparece. DOM query confirma `.mapboxgl-marker` con `<img src="pin-1.png">` al placed coord.
+- Test final del drag: cursor viewport (500, 900) → clone tip bottom-center (500, 900). Offset 0,0.
+
+**Pendiente / siguiente:**
+
+- Fase 3.15 Itinerary Builder o Fase 4 primer cliente real.
+- `alwaysShowWelcome={true}` del MapModule sigue hardcoded (TODO pre-Fase 4).
+- TODOs i18n filter-overlay heredados (aplazados a Fase 5).
+
+**Decisiones:**
+
+- **`position: fixed` en kiosk escalado**: siempre convertir viewport→CSS coords antes de posicionar. Patrón replicable para cualquier futuro drag overlay dentro del kiosk.
+- **Pin tip = cursor exacto**: sin offsets a la "posición original del pin en el rail". Se siente más natural y evita saltos visuales. El pin se "levanta" desde el finger.
+- **Seed pins en catalog style** + **placed pin con glow distinct**: resuelve la ambigüedad "¿cuál es mi pin?" sin duplicar assets.
+- **`circleImage` opcional en pinCatalog**: permite que el popup muestre solo el círculo del pin (sin pointer) matching visualmente con el pin del mapa.
+- **Gradient `gradientExtra` en HomeHeader**: prop retrocompatible que no afecta a otros usos del header (default 0).
+
+**Fase:** 3.14 Guestbook aprobada por Rubén (refactor completo + drag&drop funcional).
 
 ---
 

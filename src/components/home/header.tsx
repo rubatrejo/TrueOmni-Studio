@@ -27,6 +27,7 @@ export async function HomeHeader({
   height = 620,
   children,
   childrenTop = 170,
+  gradientExtra = 0,
 }: {
   /** URL de la imagen de fondo. `null` → sin imagen, sólo gradient sobre azul. */
   heroImage?: string | null;
@@ -37,13 +38,17 @@ export async function HomeHeader({
   children?: ReactNode;
   /** Offset vertical desde donde arranca `children` (deja espacio al logo/clock). */
   childrenTop?: number;
+  /** Extiende el gradient del header N px por debajo del box del header
+   *  (sin afectar al flow del contenido que viene después). Útil para
+   *  hacer el fade más largo sin mover el layout. */
+  gradientExtra?: number;
 } = {}) {
   const config = await getConfig();
   const coords = config.client.coords;
   const weather = await fetchWeather(coords?.lat, coords?.lng);
   return (
     <header
-      className="relative overflow-hidden"
+      className={`relative ${heroImage ? 'overflow-hidden' : ''}`}
       style={{
         width: '1080px',
         height: `${height}px`,
@@ -57,12 +62,17 @@ export async function HomeHeader({
       ) : null}
       {/* Linear gradient overlay — azul oscuro fijo en la parte superior
           para que logo + hora + clima se lean sobre cualquier foto.
-          Fade a transparente hacia abajo para no ensuciar el hero. */}
+          Fade a transparente hacia abajo para no ensuciar el hero. Si
+          `gradientExtra > 0`, el div del gradient se alarga esa cantidad
+          de px por debajo del box del header (sin empujar el layout). */}
       <div
-        className="absolute inset-0"
+        className="absolute left-0 right-0"
         style={{
+          top: 0,
+          height: `${height + gradientExtra}px`,
           background:
             'linear-gradient(180deg, rgba(0,79,139,0.9) 0%, rgba(0,79,139,0.55) 30%, rgba(0,79,139,0) 70%)',
+          pointerEvents: 'none',
         }}
       />
 

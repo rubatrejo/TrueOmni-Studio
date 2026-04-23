@@ -38,12 +38,12 @@ export function GuestbookStartScreen({
       <div
         className="flex flex-col items-center"
         style={{
-          paddingTop: '96px',
+          paddingTop: '191px',
           paddingLeft: '60px',
           paddingRight: '60px',
           paddingBottom: '60px',
           rowGap: '20px',
-          backgroundColor: '#f8f8f8',
+          backgroundColor: '#ffffff',
         }}
       >
         <h1

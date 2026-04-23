@@ -59,6 +59,7 @@ export function GuestbookModule({
   clientFallbackCoords,
   startHeader,
   formHeader,
+  mapHeader,
 }: {
   module: HomeGuestbookModule;
   mapboxToken: string | undefined;
@@ -67,6 +68,7 @@ export function GuestbookModule({
   clientFallbackCoords?: { lat: number; lng: number };
   startHeader: ReactNode;
   formHeader: ReactNode;
+  mapHeader: ReactNode;
 }) {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>('start');
@@ -94,8 +96,10 @@ export function GuestbookModule({
   }, [mod.seedPins, userPins, textos.guestbook_pin_today]);
 
   const visibleSeedPins = useMemo(() => {
-    if (!userCoords) return seedPinsEnriched;
-    return filterPinsByProximity(seedPinsEnriched, userCoords, 6);
+    if (!userCoords) return seedPinsEnriched.slice(0, 6);
+    // Filtra por radio de 6 millas alrededor del zip y cap a 6 pins para
+    // no saturar el mapa.
+    return filterPinsByProximity(seedPinsEnriched, userCoords, 6).slice(0, 6);
   }, [seedPinsEnriched, userCoords]);
 
   const handleStart = useCallback(() => setPhase('form'), []);
@@ -128,6 +132,9 @@ export function GuestbookModule({
     [mapboxToken, clientFallbackCoords],
   );
 
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showFinishThanks, setShowFinishThanks] = useState(false);
+
   const handleFinish = useCallback(
     (placed: PlacedPin | null) => {
       if (placed && userData) {
@@ -144,46 +151,88 @@ export function GuestbookModule({
         };
         addUserPin(userPin);
       }
-      router.push('/home');
+      setShowFinishThanks(true);
     },
-    [userData, userAddress, addUserPin, router],
+    [userData, userAddress, addUserPin],
   );
+
+  // Redirect a /home 4s después de mostrar el popup de gracias.
+  useEffect(() => {
+    if (!showFinishThanks) return;
+    const t = setTimeout(() => router.push('/home'), 4000);
+    return () => clearTimeout(t);
+  }, [showFinishThanks, router]);
 
   const getGlobeMap = useCallback(() => globeRef.current?.getMap() ?? null, []);
 
   // Al cambiar phase (sobre todo start/form ↔ map) el container del globe
-  // cambia de tamaño inline. Mapbox necesita un resize manual para
-  // ajustar el canvas WebGL a las nuevas dimensiones.
+  // cambia de tamaño inline. Llamamos a resize() varias veces durante la
+  // transición CSS (0.7s) para mantener sincronizado el canvas WebGL con
+  // las nuevas dimensiones. Sin esto, unproject() devuelve coords basadas
+  // en el tamaño viejo del canvas.
   useEffect(() => {
-    const t = setTimeout(() => globeRef.current?.resize(), 50);
-    return () => clearTimeout(t);
+    const timers: NodeJS.Timeout[] = [];
+    for (const delay of [50, 200, 400, 600, 800, 1000]) {
+      timers.push(setTimeout(() => globeRef.current?.resize(), delay));
+    }
+    return () => {
+      for (const t of timers) clearTimeout(t);
+    };
   }, [phase]);
 
+  // Zoom + easeTo al pasar entre start ↔ form. Form hace un 15% zoom-in
+  // sobre el zoom base del config (earthStart.zoom) para acercar el
+  // planeta justo antes del flyTo al zip.
+  useEffect(() => {
+    const baseZoom = mod.earthStart?.zoom ?? 2.55;
+    // Form hace +5% zoom sobre el start (pedido del usuario tras
+    // reducir 10% del 15% inicial).
+    const target = phase === 'form' ? baseZoom * 1.05 : baseZoom;
+    const map = globeRef.current?.getMap();
+    if (!map) return;
+    if (phase === 'start' || phase === 'form') {
+      map.easeTo({ zoom: target, duration: 900, essential: true });
+    }
+  }, [phase, mod.earthStart?.zoom]);
+
   // Layout: globo siempre presente. Las pantallas Start/Form se montan
-  // encima durante esas phases. En transition el globo es full-screen
-  // (sin UI). En map la UI del rail + finish se muestra sobre el mapa.
-  // Posicionamiento del globo como "media luna" asomando desde abajo
-  // (como el mockup pantalla 0). El canvas es más alto que la parte
-  // visible: el centro del globo cae debajo del viewport → solo se ve
-  // el top del planeta.
+  // encima durante esas phases. En transition/map el globo pasa a
+  // full-screen. Sin CSS transition en el container — el flyTo de
+  // Mapbox anima la cámara, y el container cambia de tamaño al instante
+  // para evitar desincronización entre el canvas WebGL y el viewport
+  // (que rompe map.unproject()).
   const globeStyle: React.CSSProperties =
     phase === 'start' || phase === 'form'
       ? {
           position: 'absolute',
           left: '-200px',
           right: '-200px',
-          top: phase === 'start' ? '1220px' : '1280px',
-          height: '1600px',
+          top: phase === 'start' ? '1260px' : '800px',
+          bottom: phase === 'start' ? '-940px' : '-480px',
           zIndex: 0,
         }
-      : {
-          position: 'absolute',
-          inset: 0,
-          zIndex: 0,
-        };
+      : phase === 'map'
+        ? {
+            // Map phase: rail arriba en y=210, rail height ≈340 → map
+            // empieza en y=550 (50px más arriba que antes, sigue al rail).
+            position: 'absolute',
+            top: '550px',
+            bottom: '0px',
+            left: '0px',
+            right: '0px',
+            zIndex: 0,
+          }
+        : {
+            position: 'absolute',
+            top: '0px',
+            bottom: '0px',
+            left: '0px',
+            right: '0px',
+            zIndex: 0,
+          };
 
   return (
-    <div className="relative h-full w-full overflow-hidden" style={{ backgroundColor: '#f8f8f8' }}>
+    <div className="relative h-full w-full overflow-hidden" style={{ backgroundColor: '#ffffff' }}>
       <GuestbookGlobeCanvas
         ref={globeRef}
         token={mapboxToken}
@@ -191,9 +240,7 @@ export function GuestbookModule({
         overlayPins={
           phase === 'start' || phase === 'form'
             ? // Distribución decorativa global para que al girar el globo
-              // se vean pins por todo el mundo (no solo Miami). Los
-              // seedPins reales (con comment/author) se usan en phase=map
-              // filtrados por proximidad al zip del user.
+              // se vean pins por todo el mundo durante start y form.
               GLOBE_DECORATIVE_COORDS.map((coords, i) => ({
                 id: `globe-${i}`,
                 coords,
@@ -222,7 +269,10 @@ export function GuestbookModule({
         <div className="absolute inset-0" style={{ zIndex: 1, backgroundColor: 'transparent' }}>
           <GuestbookFormScreen
             header={formHeader}
-            title={textos.guestbook_form_title ?? 'Start your Guestbook!'}
+            title={textos.guestbook_start_title ?? 'Sign our Guestbook!'}
+            subtitle={
+              textos.guestbook_start_subtitle ?? 'Share your experiences with other guests.'
+            }
             labels={{
               name: textos.guestbook_field_name ?? 'Complete Name',
               email: textos.guestbook_field_email ?? 'Email',
@@ -274,6 +324,8 @@ export function GuestbookModule({
 
       {phase === 'map' && userCoords ? (
         <GuestbookMapScreen
+          header={mapHeader}
+          onBack={() => setShowExitConfirm(true)}
           getMap={getGlobeMap}
           seedPins={visibleSeedPins}
           pinCatalog={mod.pinCatalog}
@@ -291,6 +343,160 @@ export function GuestbookModule({
           }}
           onFinish={handleFinish}
         />
+      ) : null}
+
+      {/* Confirm-exit: si el user tapa back en map phase, preguntamos
+          si está seguro antes de perder los datos. */}
+      {showExitConfirm ? (
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ zIndex: 70 }}
+        >
+          <button
+            type="button"
+            aria-label="Cancelar"
+            onClick={() => setShowExitConfirm(false)}
+            className="absolute inset-0"
+            style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
+          />
+          <div
+            className="relative flex flex-col items-center"
+            style={{
+              width: '620px',
+              backgroundColor: '#ffffff',
+              borderRadius: '20px',
+              padding: '44px 52px 40px',
+              boxShadow: '0 40px 80px rgba(0,0,0,0.45)',
+              gap: '20px',
+            }}
+          >
+            <h3
+              className="text-center font-sans"
+              style={{ fontSize: '32px', lineHeight: 1.2, fontWeight: 700, color: '#004f8b' }}
+            >
+              {textos.guestbook_exit_title ?? 'Are you sure you want to exit?'}
+            </h3>
+            <p
+              className="text-center font-sans"
+              style={{ fontSize: '18px', lineHeight: 1.5, color: '#5a5a5a' }}
+            >
+              {textos.guestbook_exit_message ??
+                "You'll lose all the information you've entered."}
+            </p>
+            <div className="mt-2 flex items-center justify-center" style={{ gap: '14px' }}>
+              <button
+                type="button"
+                onClick={() => setShowExitConfirm(false)}
+                className="font-sans focus:outline-none"
+                style={{
+                  height: '56px',
+                  minWidth: '160px',
+                  paddingInline: '28px',
+                  border: '2px solid #bfbfbf',
+                  borderRadius: '999px',
+                  color: '#333',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  backgroundColor: '#ffffff',
+                }}
+              >
+                {textos.guestbook_exit_cancel ?? 'Cancel'}
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push('/home')}
+                className="font-sans text-white focus:outline-none"
+                style={{
+                  height: '56px',
+                  minWidth: '160px',
+                  paddingInline: '28px',
+                  borderRadius: '999px',
+                  fontSize: '16px',
+                  fontWeight: 700,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  backgroundColor: '#d14343',
+                  boxShadow: '0 10px 24px -6px rgba(209,67,67,0.5)',
+                }}
+              >
+                {textos.guestbook_exit_confirm ?? 'Exit'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Thank-you popup tras FINISH. Auto-redirect a /home en 4s. */}
+      {showFinishThanks ? (
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ zIndex: 70, backgroundColor: 'rgba(0,0,0,0.78)' }}
+        >
+          <div
+            className="relative flex flex-col items-center overflow-hidden bg-white"
+            style={{
+              width: '720px',
+              padding: '80px 72px 64px',
+              borderRadius: '24px',
+              boxShadow: '0 40px 80px rgba(0,0,0,0.45)',
+            }}
+          >
+            <div
+              aria-hidden
+              className="absolute inset-x-0 top-0"
+              style={{
+                height: '8px',
+                background: 'linear-gradient(90deg, #b9bd39 0%, #1796d6 100%)',
+              }}
+            />
+            <div
+              className="relative flex items-center justify-center"
+              style={{
+                width: '150px',
+                height: '150px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(185,189,57,0.14)',
+                marginBottom: '28px',
+              }}
+            >
+              <svg width="72" height="72" viewBox="0 0 24 24" aria-hidden>
+                <path
+                  d="M5 12l5 5 9-11"
+                  fill="none"
+                  stroke="#b9bd39"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <h3
+              className="text-center font-sans"
+              style={{
+                fontSize: '38px',
+                lineHeight: 1.15,
+                fontWeight: 700,
+                color: '#004f8b',
+                marginBottom: '14px',
+              }}
+            >
+              {textos.guestbook_thanks_title ?? 'Thanks for signing!'}
+            </h3>
+            <p
+              className="text-center font-sans"
+              style={{ fontSize: '20px', lineHeight: 1.45, color: '#5a5a5a' }}
+            >
+              {textos.guestbook_thanks_message ??
+                'Your pin is now on the map for other guests to see.'}
+            </p>
+          </div>
+        </div>
       ) : null}
     </div>
   );

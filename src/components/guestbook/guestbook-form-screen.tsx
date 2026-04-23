@@ -4,11 +4,11 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { OnScreenKeyboard, type KeyboardKey } from '@/components/home/on-screen-keyboard';
-import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { NumericKeypad, type NumericKey } from '@/components/listings/numeric-keypad';
 import type { GuestbookCountry } from '@/lib/config';
 
 import { GuestbookCountryDropdown } from './guestbook-country-dropdown';
+import { GuestbookFloatingBackButton } from './guestbook-floating-back-button';
 import { GuestbookFormFields, type GuestbookField } from './guestbook-form-fields';
 
 /**
@@ -35,6 +35,7 @@ export interface GuestbookFormData {
 export function GuestbookFormScreen({
   header,
   title,
+  subtitle,
   labels,
   countries,
   countrySelectTitle,
@@ -44,6 +45,7 @@ export function GuestbookFormScreen({
 }: {
   header: ReactNode;
   title: string;
+  subtitle: string;
   labels: {
     name: string;
     email: string;
@@ -70,8 +72,6 @@ export function GuestbookFormScreen({
   const [focused, setFocused] = useState<GuestbookField | 'country' | null>('name');
   const [shift, setShift] = useState(false);
   const [countryOpen, setCountryOpen] = useState(false);
-
-  void onBack;
 
   // TODO Fase 3.14 QA: validación completa (Name+Email+Zip+Privacy).
   // Temporal durante pruebas: solo Zip Code requerido.
@@ -165,19 +165,19 @@ export function GuestbookFormScreen({
       <div
         className="flex flex-col"
         style={{
-          paddingTop: '32px',
+          paddingTop: '60px',
           paddingLeft: '60px',
           paddingRight: '60px',
           paddingBottom: '40px',
-          rowGap: '22px',
-          backgroundColor: '#f8f8f8',
+          rowGap: '24px',
+          backgroundColor: 'transparent',
         }}
       >
         <h1
           className="text-center font-sans"
           style={{
-            fontSize: '40px',
-            lineHeight: '42px',
+            fontSize: '46px',
+            lineHeight: '50px',
             fontWeight: 700,
             color: '#004f8b',
             letterSpacing: '-0.01em',
@@ -185,6 +185,20 @@ export function GuestbookFormScreen({
         >
           {title}
         </h1>
+        <p
+          className="text-center font-sans"
+          style={{
+            fontSize: '26px',
+            lineHeight: '36px',
+            color: '#4a4a4a',
+            maxWidth: '900px',
+            alignSelf: 'center',
+            fontWeight: 400,
+            marginBottom: '12px',
+          }}
+        >
+          {subtitle}
+        </p>
 
         <div onClick={(e) => e.stopPropagation()}>
           <GuestbookFormFields
@@ -207,7 +221,7 @@ export function GuestbookFormScreen({
 
         <div
           className="flex flex-col"
-          style={{ rowGap: '12px', paddingLeft: '32px', paddingTop: '6px' }}
+          style={{ rowGap: '16px', paddingLeft: '32px', paddingTop: '10px' }}
         >
           <Checkbox
             checked={acceptPrivacy}
@@ -217,19 +231,19 @@ export function GuestbookFormScreen({
           <Checkbox checked={wantUpdates} label={labels.termsUpdates} onChange={setWantUpdates} />
         </div>
 
-        <div className="flex items-center justify-center" style={{ marginTop: '8px' }}>
+        <div className="flex items-center justify-center" style={{ marginTop: '14px' }}>
           <button
             type="button"
             onClick={doSubmit}
             disabled={!valid}
             className="font-sans text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
             style={{
-              width: '260px',
-              height: '68px',
-              borderRadius: '8px',
+              width: '320px',
+              height: '76px',
+              borderRadius: '10px',
               backgroundColor: valid ? '#1796d6' : '#b9c4cd',
-              fontSize: '22px',
-              lineHeight: '22px',
+              fontSize: '24px',
+              lineHeight: '24px',
               fontWeight: 700,
               letterSpacing: '0.08em',
               cursor: valid ? 'pointer' : 'not-allowed',
@@ -239,6 +253,39 @@ export function GuestbookFormScreen({
           </button>
         </div>
       </div>
+
+      {/* Dos gradients separan el globo del form (arriba) y del teclado
+          (abajo), sin cubrir los controles del form. Ambos son fade
+          sólido-blanco → transparente para blendear con la zona blanca
+          adyacente. */}
+      {/* Top fade: entre el final de NEXT (y≈798) y la parte visible del
+          globo. Empezamos en y=820 para no pisar el borde inferior del
+          botón NEXT. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0"
+        style={{
+          top: '820px',
+          height: '120px',
+          background:
+            'linear-gradient(to top, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 55%, rgba(255,255,255,1) 100%)',
+          zIndex: 2,
+        }}
+      />
+      {/* Bottom fade: blanco pegado al teclado, fade "de abajo a arriba".
+          El teclado empieza en CSS y≈1521 → bottom=399 deja el borde
+          inferior del gradient justo sobre el borde superior del teclado. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0"
+        style={{
+          bottom: '399px',
+          height: '260px',
+          background:
+            'linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.85) 30%, rgba(255,255,255,0.4) 65%, rgba(255,255,255,0) 100%)',
+          zIndex: 2,
+        }}
+      />
 
       {/* Teclado pegado al bottom, condicional por campo */}
       <div
@@ -275,7 +322,7 @@ export function GuestbookFormScreen({
         ) : null}
       </div>
 
-      <FloatingHomeButton />
+      <GuestbookFloatingBackButton onBack={onBack} />
 
       <GuestbookCountryDropdown
         open={countryOpen}
@@ -318,16 +365,16 @@ function Checkbox({
         aria-hidden
         className="inline-flex items-center justify-center"
         style={{
-          width: '24px',
-          height: '24px',
-          borderRadius: '4px',
+          width: '30px',
+          height: '30px',
+          borderRadius: '5px',
           border: '1.5px solid #6e6e6e',
           backgroundColor: checked ? '#1796d6' : '#ffffff',
           flexShrink: 0,
         }}
       >
         {checked ? (
-          <svg width="16" height="16" viewBox="0 0 24 24">
+          <svg width="20" height="20" viewBox="0 0 24 24">
             <path
               d="M5 12l5 5 9-11"
               fill="none"
@@ -341,8 +388,8 @@ function Checkbox({
       </span>
       <span
         style={{
-          fontSize: '16px',
-          lineHeight: '18px',
+          fontSize: '20px',
+          lineHeight: '22px',
           fontWeight: 600,
           color: '#3a3a3a',
         }}

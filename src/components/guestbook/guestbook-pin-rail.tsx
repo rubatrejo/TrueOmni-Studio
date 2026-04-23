@@ -1,53 +1,66 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import type { GuestbookPinOption } from '@/lib/config';
 
 /**
- * Barra inferior horizontal con los 5 pins del catálogo del cliente.
- * Cada pin es draggable: al hacer pointer down, aparece un clone fixed
- * que sigue el pointer hasta el `pointerup`.
+ * Barra inferior horizontal con los 5 pins del catálogo del cliente,
+ * dimensionada según mockup `5-Guestbook-Map_Pins_Draged.png`.
  *
- * Avisa al padre con `onDrop(optionId, clientX, clientY)`. El padre decide
- * si la coord cae dentro del mapa y ejecuta `map.unproject`.
- *
- * Si la opción `usedIds` la incluye, el pin se muestra atenuado (ya usado
- * en la sesión — en el mockup pantalla 5 el pin avatar-woman aparece
- * "gastado" tras usarse).
+ * Drag-and-drop:
+ *   - `pointerdown` en el button: guardamos el offset cursor→tip del pin,
+ *     marcamos `dragRef.current.active = true` y mostramos clone.
+ *   - Listeners `pointermove`/`pointerup`/`pointercancel` a nivel `window`
+ *     persistentes (montados una sola vez, no remontan). Leemos el estado
+ *     del drag desde un ref, no del state → sin race conditions.
+ *   - `pointerup`: reportamos al padre la posición de la punta del pin
+ *     (cursor + offset). Si el padre acepta, abre el modal de comment.
  */
+
+// Sizes — verbatim mockup.
+const RAIL_PIN_H = 140;
+const CLONE_H = 180;
+// PNG natural ratio 113/183 ≈ 0.617 → width @ height 180 ≈ 111.
+const CLONE_W = Math.round(CLONE_H * (113 / 183));
+
+interface PinRailProps {
+  title: string;
+  subtitle: string;
+  options: readonly GuestbookPinOption[];
+  usedIds: readonly string[];
+  onDrop: (optionId: string, clientX: number, clientY: number) => void;
+  /** Contenido opcional debajo de la fila de pins (ej. botón FINISH). */
+  finishSlot?: ReactNode;
+}
+
 export function GuestbookPinRail({
   title,
   subtitle,
   options,
   usedIds,
   onDrop,
-}: {
-  title: string;
-  subtitle: string;
-  options: readonly GuestbookPinOption[];
-  usedIds: readonly string[];
-  onDrop: (optionId: string, clientX: number, clientY: number) => void;
-}) {
+  finishSlot,
+}: PinRailProps) {
   return (
     <div
       className="flex w-full flex-col items-center"
       style={{
         backgroundColor: '#ffffff',
-        paddingTop: '20px',
-        paddingBottom: '28px',
-        boxShadow: '0 -8px 20px rgba(0,0,0,0.08)',
+        paddingTop: '44px',
+        paddingBottom: '56px',
       }}
     >
       <h3
         className="font-sans"
         style={{
-          fontSize: '22px',
-          lineHeight: '22px',
+          fontSize: '32px',
+          lineHeight: '34px',
           fontWeight: 700,
           color: '#004f8b',
           letterSpacing: '-0.01em',
-          marginBottom: '8px',
+          marginBottom: '10px',
         }}
       >
         {title}
@@ -55,19 +68,20 @@ export function GuestbookPinRail({
       <p
         className="font-sans"
         style={{
-          fontSize: '15px',
-          lineHeight: '18px',
+          fontSize: '21px',
+          lineHeight: '26px',
           color: '#6e6e6e',
-          marginBottom: '18px',
+          marginBottom: '30px',
         }}
       >
         {subtitle}
       </p>
-      <div className="flex items-end justify-center" style={{ columnGap: '24px' }}>
+      <div className="flex items-end justify-center" style={{ columnGap: '56px' }}>
         {options.map((o) => (
           <PinRailItem key={o.id} option={o} used={usedIds.includes(o.id)} onDrop={onDrop} />
         ))}
       </div>
+      {finishSlot}
     </div>
   );
 }
@@ -81,60 +95,131 @@ function PinRailItem({
   used: boolean;
   onDrop: (optionId: string, clientX: number, clientY: number) => void;
 }) {
-  const [dragging, setDragging] = useState<null | { x: number; y: number }>(null);
-  const pointerIdRef = useRef<number | null>(null);
+  // Estado visible del clone durante drag.
+  const [drag, setDrag] = useState<{ x: number; y: number } | null>(null);
 
-  // Auto-cleanup si el componente se desmonta durante el drag
+  // Ref con el estado vivo del drag — inmune a stale closures en listeners.
+  const dragRef = useRef<{
+    active: boolean;
+    offX: number;
+    offY: number;
+    pointerId: number | null;
+  }>({
+    active: false,
+    offX: 0,
+    offY: 0,
+    pointerId: null,
+  });
+
+  const onDropRef = useRef(onDrop);
   useEffect(() => {
+    onDropRef.current = onDrop;
+  }, [onDrop]);
+
+  const optionIdRef = useRef(option.id);
+  useEffect(() => {
+    optionIdRef.current = option.id;
+  }, [option.id]);
+
+  // Listeners persistentes a nivel window. Se montan UNA sola vez.
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      const d = dragRef.current;
+      if (!d.active) return;
+      if (d.pointerId !== null && d.pointerId !== e.pointerId) return;
+      setDrag({ x: e.clientX, y: e.clientY });
+    };
+    const onUp = (e: PointerEvent) => {
+      const d = dragRef.current;
+      if (!d.active) return;
+      if (d.pointerId !== null && d.pointerId !== e.pointerId) return;
+      // Pin tip está exactamente en el cursor (ver cloneStyle).
+      const tipX = e.clientX;
+      const tipY = e.clientY;
+      d.active = false;
+      d.pointerId = null;
+      setDrag(null);
+      onDropRef.current(optionIdRef.current, tipX, tipY);
+    };
+    const onCancel = () => {
+      const d = dragRef.current;
+      if (!d.active) return;
+      d.active = false;
+      d.pointerId = null;
+      setDrag(null);
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onCancel);
     return () => {
-      pointerIdRef.current = null;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onCancel);
     };
   }, []);
 
   const startDrag = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (used) return;
     e.preventDefault();
-    (e.currentTarget as HTMLButtonElement).setPointerCapture?.(e.pointerId);
-    pointerIdRef.current = e.pointerId;
-    setDragging({ x: e.clientX, y: e.clientY });
+    e.stopPropagation();
+    dragRef.current = {
+      active: true,
+      offX: 0,
+      offY: 0,
+      pointerId: e.pointerId,
+    };
+    setDrag({ x: e.clientX, y: e.clientY });
   };
 
-  const move = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (pointerIdRef.current !== e.pointerId) return;
-    setDragging({ x: e.clientX, y: e.clientY });
-  };
-
-  const end = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (pointerIdRef.current !== e.pointerId) return;
-    pointerIdRef.current = null;
-    const { clientX, clientY } = e;
-    setDragging(null);
-    onDrop(option.id, clientX, clientY);
-  };
+  // El kiosk tiene `transform: scale()` en un ancestro, lo que hace que
+  // `position: fixed` del clone use al kiosk como containing block (no
+  // al viewport). Por eso convertimos las coords del cursor (viewport)
+  // a coords CSS del kiosk antes de posicionar — y usamos width/height
+  // en CSS coords (el kiosk las escalará automáticamente al renderear).
+  let cloneStyle: React.CSSProperties | null = null;
+  if (drag) {
+    const kioskEl = document.querySelector('[data-kiosk-canvas]') as HTMLElement | null;
+    const kioskRect = kioskEl?.getBoundingClientRect();
+    const scale = kioskEl
+      ? (() => {
+          const t = window.getComputedStyle(kioskEl).transform;
+          if (t && t !== 'none') {
+            const m = t.match(/matrix\(([-0-9.]+)/);
+            if (m && m[1]) return parseFloat(m[1]);
+          }
+          return 1;
+        })()
+      : 1;
+    const kx = kioskRect ? (drag.x - kioskRect.left) / scale : drag.x;
+    const ky = kioskRect ? (drag.y - kioskRect.top) / scale : drag.y;
+    cloneStyle = {
+      left: `${kx - CLONE_W / 2}px`,
+      top: `${ky - CLONE_H}px`,
+      width: `${CLONE_W}px`,
+      height: `${CLONE_H}px`,
+    };
+  }
 
   return (
     <>
       <button
         type="button"
         onPointerDown={startDrag}
-        onPointerMove={move}
-        onPointerUp={end}
-        onPointerCancel={() => {
-          pointerIdRef.current = null;
-          setDragging(null);
-        }}
         disabled={used}
         aria-label={option.label}
         className="focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
         style={{
-          width: '72px',
-          height: '90px',
-          opacity: used ? 0.25 : 1,
+          height: `${RAIL_PIN_H}px`,
+          opacity: used ? 0.25 : drag ? 0.3 : 1,
           cursor: used ? 'not-allowed' : 'grab',
           touchAction: 'none',
           backgroundColor: 'transparent',
           border: 'none',
           padding: 0,
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
+          transition: 'opacity 0.15s ease-out',
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -143,7 +228,7 @@ function PinRailItem({
           alt={option.label}
           draggable={false}
           style={{
-            height: '90px',
+            height: `${RAIL_PIN_H}px`,
             width: 'auto',
             pointerEvents: 'none',
             filter: used ? 'grayscale(0.8)' : 'none',
@@ -151,17 +236,14 @@ function PinRailItem({
           }}
         />
       </button>
-      {dragging ? (
+      {cloneStyle ? (
         <div
           aria-hidden
           className="pointer-events-none fixed"
           style={{
-            left: `${dragging.x - 48}px`,
-            top: `${dragging.y - 120}px`,
-            width: '96px',
-            height: '120px',
+            ...cloneStyle,
             zIndex: 70,
-            filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.35))',
+            filter: 'drop-shadow(0 12px 22px rgba(0,0,0,0.45))',
           }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -169,7 +251,7 @@ function PinRailItem({
             src={option.image}
             alt=""
             draggable={false}
-            style={{ width: '96px', height: '120px', display: 'block' }}
+            style={{ width: '100%', height: '100%', display: 'block' }}
           />
         </div>
       ) : null}

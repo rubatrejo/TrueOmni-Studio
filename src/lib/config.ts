@@ -460,8 +460,10 @@ export interface Trail {
 /** Una opción del catálogo de pins que el usuario puede arrastrar al mapa. */
 export interface GuestbookPinOption {
   id: string;
-  /** Path relativo a `clients/{slug}/assets/` o URL absoluta. Imagen del pin. */
+  /** Path relativo a `clients/{slug}/assets/` o URL absoluta. Imagen del pin completo (círculo + pointer). */
   image: string;
+  /** Imagen del círculo solo (sin pointer) — usado dentro del popup de comentarios para que el avatar coincida con el pin del mapa. */
+  circleImage?: string;
   label: string;
 }
 

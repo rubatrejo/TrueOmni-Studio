@@ -9020,21 +9020,38 @@
           "kind": "guestbook",
           "label": "Guestbook",
           "heroImage": "https://images.unsplash.com/photo-1518834107812-67b0b7c58434?w=1920&q=80",
-          "earthStart": { "center": { "lat": 15, "lng": -90 }, "zoom": 3.0 },
+          "earthStart": { "center": { "lat": 15, "lng": -90 }, "zoom": 2.55 },
           "pinCatalog": [
-            { "id": "star", "image": "/assets/guestbook/pins/pin-1.png", "label": "Star" },
+            {
+              "id": "star",
+              "image": "/assets/guestbook/pins/pin-1.png",
+              "circleImage": "/assets/guestbook/pins/pin-1-circle.png",
+              "label": "Star"
+            },
             {
               "id": "man",
               "image": "/assets/guestbook/pins/pin-2.png",
+              "circleImage": "/assets/guestbook/pins/pin-2-circle.png",
               "label": "Traveler M"
             },
             {
               "id": "woman",
               "image": "/assets/guestbook/pins/pin-3.png",
+              "circleImage": "/assets/guestbook/pins/pin-3-circle.png",
               "label": "Traveler W"
             },
-            { "id": "usa", "image": "/assets/guestbook/pins/pin-4.png", "label": "USA" },
-            { "id": "x", "image": "/assets/guestbook/pins/pin-5.png", "label": "Highlight" }
+            {
+              "id": "usa",
+              "image": "/assets/guestbook/pins/pin-4.png",
+              "circleImage": "/assets/guestbook/pins/pin-4-circle.png",
+              "label": "USA"
+            },
+            {
+              "id": "x",
+              "image": "/assets/guestbook/pins/pin-5.png",
+              "circleImage": "/assets/guestbook/pins/pin-5-circle.png",
+              "label": "Highlight"
+            }
           ],
           "countries": [
             { "code": "US", "name": "United States" },
@@ -9063,7 +9080,7 @@
               "id": "pin-regina",
               "authorName": "Regina Devao",
               "zipCode": "33131",
-              "coords": { "lat": 25.7683, "lng": -80.1973 },
+              "coords": { "lat": 25.7778, "lng": -80.1845 },
               "pinImage": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
               "dateLabel": "Today",
               "address": "284 Allen St. Miami, Florida",
@@ -9073,7 +9090,7 @@
               "id": "pin-marcus",
               "authorName": "Marcus Chen",
               "zipCode": "33131",
-              "coords": { "lat": 25.7738, "lng": -80.1895 },
+              "coords": { "lat": 25.7698, "lng": -80.1962 },
               "pinImage": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80",
               "dateLabel": "Yesterday",
               "address": "1100 Brickell Ave. Miami, Florida",
@@ -9083,7 +9100,7 @@
               "id": "pin-sofia",
               "authorName": "Sofia Ramirez",
               "zipCode": "33130",
-              "coords": { "lat": 25.7616, "lng": -80.2032 },
+              "coords": { "lat": 25.7765, "lng": -80.2042 },
               "pinImage": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80",
               "dateLabel": "Jan 14",
               "address": "900 SW 5th Ave. Miami, Florida",
@@ -9093,7 +9110,7 @@
               "id": "pin-james",
               "authorName": "James O'Connor",
               "zipCode": "33139",
-              "coords": { "lat": 25.7907, "lng": -80.13 },
+              "coords": { "lat": 25.7632, "lng": -80.1918 },
               "pinImage": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&q=80",
               "dateLabel": "Jan 12",
               "address": "Ocean Dr. Miami Beach, Florida",
@@ -9103,7 +9120,7 @@
               "id": "pin-ava",
               "authorName": "Ava Thompson",
               "zipCode": "33131",
-              "coords": { "lat": 25.7715, "lng": -80.19 },
+              "coords": { "lat": 25.771, "lng": -80.1822 },
               "pinImage": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80",
               "dateLabel": "Jan 10",
               "address": "300 SE 3rd Ave. Miami, Florida",
@@ -9113,7 +9130,7 @@
               "id": "pin-carlos",
               "authorName": "Carlos Medina",
               "zipCode": "33132",
-              "coords": { "lat": 25.7753, "lng": -80.1844 },
+              "coords": { "lat": 25.7578, "lng": -80.1996 },
               "pinImage": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80",
               "dateLabel": "Jan 9",
               "address": "600 Biscayne Blvd. Miami, Florida",

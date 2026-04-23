@@ -193,7 +193,12 @@ export default async function ModulePage({ params }: PageProps) {
           textos={config.textos ?? {}}
           clientFallbackCoords={config.client.coords}
           startHeader={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
-          formHeader={<HomeHeader heroImage={null} showLanguage={false} height={180} />}
+          formHeader={
+            <HomeHeader heroImage={null} showLanguage={false} height={180} gradientExtra={80} />
+          }
+          mapHeader={
+            <HomeHeader heroImage={null} showLanguage={false} height={180} gradientExtra={80} />
+          }
         />
       </KioskCanvas>
     );

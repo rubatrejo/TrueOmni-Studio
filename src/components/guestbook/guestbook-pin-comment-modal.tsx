@@ -88,10 +88,9 @@ export function GuestbookPinCommentModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="guestbook-pin-modal-title"
-      className="absolute inset-0 flex items-start justify-center"
+      className="absolute inset-0 flex items-center justify-center"
       style={{
         zIndex: 60,
-        paddingTop: '360px',
       }}
     >
       <button
@@ -100,7 +99,7 @@ export function GuestbookPinCommentModal({
         onClick={onCancel}
         className="absolute inset-0 cursor-default focus:outline-none"
         tabIndex={-1}
-        style={{ backgroundColor: 'rgba(0,0,0,0.35)' }}
+        style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
       />
 
       <div
@@ -113,25 +112,28 @@ export function GuestbookPinCommentModal({
           padding: '70px 40px 32px 40px',
         }}
       >
-        {/* Avatar flotante arriba */}
+        {/* Avatar flotante arriba — usa la imagen Pin-N-Circle.png que ya
+            trae su propio diseño circular con borde. Sin wrapper extra. */}
         <div
           aria-hidden
-          className="absolute flex items-center justify-center overflow-hidden"
+          className="absolute flex items-center justify-center"
           style={{
             top: '-52px',
             left: 'calc(50% - 52px)',
             width: '104px',
             height: '104px',
-            borderRadius: '50%',
-            border: '4px solid #1796d6',
-            backgroundColor: '#ffffff',
           }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={pinImage}
             alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.25))',
+            }}
           />
         </div>
 

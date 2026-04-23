@@ -62,6 +62,11 @@ export const GuestbookGlobeCanvas = forwardRef<
       interactive: false,
       attributionControl: false,
     });
+    // Padding.bottom sube el centro efectivo del globo dentro del canvas
+    // para que el ecuador caiga dentro del crop visible. Valor bajo para
+    // dejar el globo algo más abajo (se ve menos polo, pero no tanto que
+    // el centro del planeta salga por debajo del viewport).
+    map.setPadding({ top: 0, bottom: 100, left: 0, right: 0 });
     // Standard style tiene config properties para ocultar etiquetas.
     // Se aplica tras style.load para garantizar que el basemap está listo.
     map.on('style.load', () => {
@@ -101,7 +106,7 @@ export const GuestbookGlobeCanvas = forwardRef<
           color: 'rgb(220, 230, 245)',
           'high-color': 'rgb(180, 210, 240)',
           'horizon-blend': 0.02,
-          'space-color': 'rgb(248, 248, 248)',
+          'space-color': 'rgb(255, 255, 255)',
           'star-intensity': 0,
         });
       } catch {
@@ -124,6 +129,72 @@ export const GuestbookGlobeCanvas = forwardRef<
     for (const m of overlayMarkersRef.current) m.remove();
     overlayMarkersRef.current = [];
 
+    // Refs por pin para actualizar su transform 3D cada frame.
+    const pinRefs: {
+      el: HTMLElement;
+      wrap: HTMLElement;
+      img: HTMLImageElement;
+      lat: number;
+      lng: number;
+    }[] = [];
+
+    // 3D real del sprite: cada pin se orienta a la normal de la esfera en
+    // su lat/lng. Damping 0.7 evita que pins en el ecuador visual se
+    // aplasten totalmente (conservamos legibilidad del PNG).
+    const TILT_DAMPING = 0.7;
+    // Banda angular (en cosφ) en la que pin hace fade-in/fade-out + scale
+    // cuando cruza el horizonte. 0.25 ≈ últimos ~25° antes del terminator.
+    const FADE_START = 0.25;
+    const updatePinOrientations = () => {
+      // Por encima del zoom de globo, ya no hay curvatura — transform neutro.
+      if (map.getZoom() > 5) {
+        for (const { el, wrap, img } of pinRefs) {
+          img.style.transform = '';
+          wrap.style.transform = '';
+          el.style.opacity = '1';
+        }
+        return;
+      }
+      const c = map.getCenter();
+      for (const { el, wrap, img, lat, lng } of pinRefs) {
+        let dLng = lng - c.lng;
+        while (dLng > 180) dLng -= 360;
+        while (dLng < -180) dLng += 360;
+        const dLat = lat - c.lat;
+        const dLatRad = (dLat * Math.PI) / 180;
+        const dLngRad = (dLng * Math.PI) / 180;
+        // cosφ = coseno del ángulo entre la normal del pin y el eje de
+        // cámara. 1 = pin mirando de frente; 0 = pin en el horizonte;
+        // <0 = pin detrás del globo.
+        const cosPhi = Math.cos(dLatRad) * Math.cos(dLngRad);
+
+        let opacity: number;
+        let scale: number;
+        if (cosPhi <= 0) {
+          // Detrás del globo: invisible, escala mínima (base para la
+          // próxima vez que emerja).
+          opacity = 0;
+          scale = 0.65;
+        } else if (cosPhi < FADE_START) {
+          // Zona de fade: cerca del horizonte. Interpola opacity y scale
+          // suavemente con ease-out.
+          const t = cosPhi / FADE_START;
+          const ease = t * t * (3 - 2 * t); // smoothstep
+          opacity = ease;
+          scale = 0.65 + ease * 0.35;
+        } else {
+          opacity = 1;
+          scale = 1;
+        }
+        el.style.opacity = String(opacity);
+        wrap.style.transform = `scale(${scale})`;
+
+        const rotX = -dLat * TILT_DAMPING;
+        const rotY = dLng * TILT_DAMPING;
+        img.style.transform = `perspective(560px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      }
+    };
+
     void import('mapbox-gl').then((mod) => {
       const Marker = mod.Marker;
       if (!Marker) return;
@@ -133,27 +204,38 @@ export const GuestbookGlobeCanvas = forwardRef<
           const el = document.createElement('div');
           el.style.pointerEvents = 'none';
           el.style.display = 'block';
-          // Smooth fade al entrar/salir del horizonte del globo.
-          el.style.transition = 'opacity 0.6s ease-out';
-          // Pseudo-3D con perspective + rotateX. Sombra elíptica debajo.
+          el.style.opacity = '0';
+          el.style.willChange = 'opacity';
+          // El `wrap` anida el pin + su sombra y recibe el `scale()` que
+          // anima la aparición/desaparición. El `<img>` interno recibe
+          // rotateX/rotateY por frame para el tilt según la normal.
+          // `transform-origin: 50% 100%` en el wrap → el escalado pivota
+          // en la base del pin (contacto con la superficie), que es
+          // también el anchor del Marker de Mapbox.
           el.innerHTML = `
-            <div style="position:relative;width:auto;height:140px;transform-style:preserve-3d;pointer-events:none;">
+            <div style="position:relative;width:auto;height:140px;transform-style:preserve-3d;transform-origin:50% 100%;pointer-events:none;will-change:transform;">
               <div style="position:absolute;left:50%;bottom:-4px;transform:translateX(-50%) rotateX(75deg);width:76px;height:22px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,0.45) 0%,rgba(0,0,0,0) 70%);"></div>
-              <img src="${p.image}" alt="" style="position:relative;height:132px;width:auto;display:block;transform:perspective(520px) rotateX(12deg);transform-origin:50% 100%;filter:drop-shadow(0 7px 9px rgba(0,0,0,0.4));" />
+              <img src="${p.image}" alt="" style="position:relative;height:132px;width:auto;display:block;transform-origin:50% 100%;filter:drop-shadow(0 7px 9px rgba(0,0,0,0.4));will-change:transform;" />
             </div>
           `;
+          const wrapEl = el.firstElementChild;
+          const imgEl = el.querySelector('img');
+          if (wrapEl instanceof HTMLElement && imgEl instanceof HTMLImageElement) {
+            pinRefs.push({ el, wrap: wrapEl, img: imgEl, lat: p.coords.lat, lng: p.coords.lng });
+          }
           const m = new Marker({
             element: el,
             anchor: 'bottom',
-            // Mapbox oculta markers cuando están detrás del globo.
-            // occludedOpacity 0 + transition CSS hace que el fade sea
-            // smooth en lugar de abrupto cuando cruzan el terminator.
-            occludedOpacity: 0,
+            // Deshabilitamos el fade nativo de Mapbox (occludedOpacity) —
+            // manejamos opacidad y escala nosotros con cosφ para tener un
+            // fade-in/fade-out continuo en la banda del terminator.
+            occludedOpacity: 1,
           })
             .setLngLat([p.coords.lng, p.coords.lat])
             .addTo(map);
           overlayMarkersRef.current.push(m);
         }
+        updatePinOrientations();
       };
 
       if (map.isStyleLoaded()) {
@@ -163,7 +245,13 @@ export const GuestbookGlobeCanvas = forwardRef<
       }
     });
 
+    // 'render' se dispara en cada frame de animación del mapa. Al estar
+    // el globo girando continuamente, esto refresca las orientaciones
+    // de todos los pins a 60fps sin coste perceptible (15 pins).
+    map.on('render', updatePinOrientations);
+
     return () => {
+      map.off('render', updatePinOrientations);
       for (const m of overlayMarkersRef.current) m.remove();
       overlayMarkersRef.current = [];
     };
@@ -203,6 +291,9 @@ export const GuestbookGlobeCanvas = forwardRef<
             curve: 1.6,
             speed: 0.55,
             essential: true,
+            // Reset del padding del globo (usado en start/form para subir
+            // el ecuador) para que en street-view el zip quede centrado.
+            padding: { top: 0, bottom: 0, left: 0, right: 0 },
           });
         }),
     }),
@@ -238,7 +329,7 @@ export const GuestbookGlobeCanvas = forwardRef<
       aria-label="Globe"
       className={className}
       style={{
-        background: '#f8f8f8',
+        background: '#ffffff',
         ...style,
       }}
     />

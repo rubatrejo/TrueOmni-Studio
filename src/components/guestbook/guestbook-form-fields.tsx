@@ -38,8 +38,8 @@ export function GuestbookFormFields({
   onOpenCountry: () => void;
 }) {
   return (
-    <div className="flex flex-col" style={{ rowGap: '16px' }}>
-      <div className="flex" style={{ columnGap: '16px' }}>
+    <div className="flex flex-col" style={{ rowGap: '20px' }}>
+      <div className="flex" style={{ columnGap: '20px' }}>
         <InputShell
           placeholder={labels.name}
           value={values.name}
@@ -55,7 +55,7 @@ export function GuestbookFormFields({
           flex={1}
         />
       </div>
-      <div className="flex" style={{ columnGap: '16px' }}>
+      <div className="flex" style={{ columnGap: '20px' }}>
         <InputShell
           placeholder={labels.phone}
           value={values.phone}
@@ -107,14 +107,14 @@ function InputShell({
       className="flex items-center font-sans focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
       style={{
         flex: `${flex} 1 0`,
-        height: '58px',
-        padding: '0 20px',
-        borderRadius: '6px',
+        height: '72px',
+        padding: '0 24px',
+        borderRadius: '8px',
         backgroundColor: '#ffffff',
         border: focused ? '2px solid #1796d6' : '1px solid #c7c7c7',
         color: hasValue ? '#1a1a1a' : '#8a8a8a',
-        fontSize: '18px',
-        lineHeight: '18px',
+        fontSize: '22px',
+        lineHeight: '22px',
         fontWeight: 500,
         textAlign: 'left',
         justifyContent: 'space-between',
@@ -133,7 +133,7 @@ function InputShell({
         {hasValue ? value : placeholder}
       </span>
       {withChevron ? (
-        <span aria-hidden style={{ fontSize: '10px', color: '#8a8a8a', marginLeft: '8px' }}>
+        <span aria-hidden style={{ fontSize: '12px', color: '#8a8a8a', marginLeft: '10px' }}>
           ▼
         </span>
       ) : null}

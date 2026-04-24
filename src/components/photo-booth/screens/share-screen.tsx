@@ -131,33 +131,32 @@ export function ShareScreen({
         ) : null}
       </div>
 
-      {/* Follow us pill ancho con iconos sociales oficiales + QR integrado */}
+      {/* Follow us card (izquierda) — solo branding, sin QR adentro */}
       <div
-        className="absolute flex items-center"
+        className="absolute flex flex-col items-center justify-center"
         style={{
           left: 80,
-          top: 1470,
-          width: 920,
-          height: 180,
-          borderRadius: 90,
+          top: 1380,
+          width: 600,
+          height: 200,
+          borderRadius: 28,
           background: '#ffffff',
           boxShadow: '0 14px 40px rgba(0,0,0,0.30)',
-          padding: '0 24px 0 56px',
-          gap: 28,
+          gap: 18,
         }}
       >
         <span
           style={{
             color: '#000',
             fontFamily: "'Open Sans', system-ui",
-            fontSize: 38,
+            fontSize: 28,
             fontWeight: 700,
-            whiteSpace: 'nowrap',
+            letterSpacing: '0.04em',
           }}
         >
           {labels.follow}
         </span>
-        <div style={{ display: 'flex', gap: 18, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
           {/* X (Twitter) — logo oficial verbatim */}
           {social?.x ? (
             <svg width={64} height={64} viewBox="0 0 1200 1227" aria-hidden="true">
@@ -197,42 +196,45 @@ export function ShareScreen({
           ) : null}
         </div>
 
-        <div style={{ flex: 1 }} />
+      </div>
+
+      {/* QR card independiente (derecha de Follow us) — diseño limpio */}
+      <div
+        className="absolute flex flex-col items-center justify-center"
+        style={{
+          left: 700,
+          top: 1380,
+          width: 300,
+          height: 200,
+          borderRadius: 28,
+          background: '#ffffff',
+          boxShadow: '0 14px 40px rgba(0,0,0,0.30)',
+          gap: 8,
+          padding: 18,
+        }}
+      >
         <div
           style={{
+            width: 140,
+            height: 140,
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
-            gap: 2,
+            justifyContent: 'center',
           }}
         >
-          <div
-            style={{
-              width: 132,
-              height: 132,
-              padding: 8,
-              borderRadius: 18,
-              background: '#ffffff',
-              border: '2px solid hsl(var(--photo-tabs-bg))',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <QRCodeSVG value={qrUrl} size={116} level="H" includeMargin={false} />
-          </div>
-          <span
-            style={{
-              fontSize: 14,
-              fontFamily: "'Open Sans', system-ui",
-              fontWeight: 700,
-              color: 'hsl(var(--photo-tabs-bg))',
-              letterSpacing: '0.05em',
-            }}
-          >
-            {labels.scanMe}
-          </span>
+          <QRCodeSVG value={qrUrl} size={140} level="H" includeMargin={false} />
         </div>
+        <span
+          style={{
+            fontSize: 16,
+            fontFamily: "'Open Sans', system-ui",
+            fontWeight: 700,
+            color: 'hsl(var(--photo-tabs-bg))',
+            letterSpacing: '0.1em',
+          }}
+        >
+          {labels.scanMe}
+        </span>
       </div>
 
       {/* Send to Email — pill solid olive (matches "CLEAR ALL" filter style) */}
@@ -257,7 +259,7 @@ export function ShareScreen({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 8px 18px rgba(185,189,57,0.35)',
+          boxShadow: 'none',
         }}
       >
         {labels.emailCta}
@@ -285,7 +287,7 @@ export function ShareScreen({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 8px 18px rgba(23,150,214,0.35)',
+          boxShadow: 'none',
         }}
       >
         {labels.textCta}

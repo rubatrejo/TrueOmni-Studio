@@ -1,27 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useRef } from 'react';
 
 import type { PhotoBoothFrame } from '@/lib/config';
 
-/**
- * Posiciones verbatim del SVG `0-Photo_Booth-Start.svg` para los círculos
- * del carrusel inferior. Coordenadas absolutas del viewport 1080×1920.
- * El 1er entry es el círculo central "START"; el resto son satélites.
- */
-const CAROUSEL_CIRCLES = [
-  { role: 'start' as const, cx: 540, cy: 1507, r: 126 },
-  { role: 'satellite' as const, cx: -245, cy: 1507, r: 106, slotIndex: 0 },
-  { role: 'satellite' as const, cx: 10, cy: 1507, r: 106, slotIndex: 1 },
-  { role: 'satellite' as const, cx: 265, cy: 1507, r: 106, slotIndex: 2 },
-  { role: 'satellite' as const, cx: 838, cy: 1507, r: 106, slotIndex: 3 },
-  { role: 'satellite' as const, cx: 1077, cy: 1507, r: 106, slotIndex: 4 },
-  { role: 'satellite' as const, cx: 1309, cy: 1507, r: 106, slotIndex: 5 },
-];
-
 interface StartScreenProps {
-  /** Frames configurados por el cliente. Los slots del carrusel se llenan
-   *  ciclando `frames[i % frames.length]`. */
   frames: Array<PhotoBoothFrame & { resolvedImage: string; resolvedThumbnail: string }>;
   selectedFrameId: string | null;
   onSelectFrame: (id: string) => void;
@@ -36,16 +19,14 @@ interface StartScreenProps {
 }
 
 /**
- * UI de la fase `'live'` del Photo Booth. Paths verbatim del SVG
- * `0-Photo_Booth-Start.svg` (el header y la live camera los pone el
- * módulo padre). Se compone de:
- *   - overlay gradient inferior (dark) para contraste de botones.
- *   - home button (semicircle izq).
- *   - carrusel de FRAMES + START central.
- *   - TIMER pill + EXPERIENCE pill.
+ * UI de la fase `'live'` del Photo Booth.
  *
- * Al seleccionar un frame se debe renderizar su overlay sobre la cámara
- * (el módulo se encarga de esa capa).
+ * Paths verbatim del SVG `0-Photo_Booth-Start.svg` para header, home button,
+ * pills inferiores y círculos del carrusel. El **carrusel de frames es
+ * scrollable horizontalmente** para soportar catálogos arbitrariamente
+ * grandes del cliente (superando los 6 slots originales del SVG). El
+ * botón **START** queda absolute fijo en el centro, superpuesto a la fila
+ * scroll — los thumbnails fluyen por detrás.
  */
 export function StartScreen({
   frames,
@@ -60,10 +41,24 @@ export function StartScreen({
   ariaHome,
   ariaShutter,
 }: StartScreenProps) {
-  const satellites = useMemo(
-    () => CAROUSEL_CIRCLES.filter((c) => c.role === 'satellite'),
-    [],
-  );
+  // Altura y centro del carrusel (verbatim SVG: y=1507 cy, r=106 satellites).
+  const CAROUSEL_TOP = 1507 - 130; // 1377
+  const CAROUSEL_HEIGHT = 260;
+
+  // Spacer equivale al diámetro del START circle + halo, para que los
+  // thumbnails de la fila scrollable nunca se solapen visualmente con el
+  // shutter central.
+  const START_SPACER_WIDTH = 280;
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    // Centrar el scroll en el spacer (donde está el START) para que la
+    // vista inicial muestre thumbnails simétricamente a ambos lados.
+    const el = scrollRef.current;
+    if (!el) return;
+    const targetScroll = (el.scrollWidth - el.clientWidth) / 2;
+    el.scrollLeft = targetScroll;
+  }, [frames.length]);
 
   return (
     <>
@@ -103,6 +98,7 @@ export function StartScreen({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          zIndex: 3,
         }}
       >
         <svg width={54} height={42} viewBox="0 0 54 42" aria-hidden="true">
@@ -113,102 +109,108 @@ export function StartScreen({
         </svg>
       </button>
 
-      {/* Círculos del carrusel (stroke blanco) + START central con icono cámara + label */}
-      <svg
-        width={1080}
-        height={260}
-        viewBox="0 0 1080 260"
-        style={{ position: 'absolute', left: 0, top: 1507 - 130, pointerEvents: 'none' }}
+      {/* Carrusel horizontal scrollable de frame thumbnails.
+          Contiene un spacer central (START_SPACER_WIDTH) que reserva el
+          espacio visual para el shutter central fijo. */}
+      <div
+        ref={scrollRef}
+        className="absolute"
+        style={{
+          left: 0,
+          top: CAROUSEL_TOP,
+          width: 1080,
+          height: CAROUSEL_HEIGHT,
+          overflowX: 'auto',
+          overflowY: 'hidden',
+          scrollbarWidth: 'none',
+          WebkitOverflowScrolling: 'touch',
+          zIndex: 1,
+        }}
       >
-        {satellites.map((c, i) => (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            height: '100%',
+            gap: 24,
+            padding: '0 48px',
+            width: 'max-content',
+          }}
+        >
+          {frames.slice(0, Math.ceil(frames.length / 2)).map((frame) => (
+            <FrameThumb
+              key={`left-${frame.id}`}
+              frame={frame}
+              selected={selectedFrameId === frame.id}
+              onSelect={() => onSelectFrame(frame.id)}
+            />
+          ))}
+          <div style={{ flex: '0 0 auto', width: START_SPACER_WIDTH, height: 212 }} />
+          {frames.slice(Math.ceil(frames.length / 2)).map((frame) => (
+            <FrameThumb
+              key={`right-${frame.id}`}
+              frame={frame}
+              selected={selectedFrameId === frame.id}
+              onSelect={() => onSelectFrame(frame.id)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* START button central fijo (shutter). Siempre visible encima del
+          scroll. */}
+      <div
+        className="pointer-events-none absolute"
+        style={{ left: 540 - 130, top: 1507 - 130, width: 260, height: 260, zIndex: 2 }}
+      >
+        <svg
+          width={260}
+          height={260}
+          viewBox="0 0 260 260"
+          style={{ position: 'absolute', inset: 0 }}
+        >
           <circle
-            key={`sat-${i}`}
-            cx={c.cx}
+            cx={130}
             cy={130}
-            r={c.r}
-            fill="none"
+            r={126}
+            fill="rgba(0,0,0,0.35)"
             stroke="#fff"
             strokeWidth={10}
           />
-        ))}
-        <circle cx={540} cy={130} r={126} fill="rgba(0,0,0,0.12)" stroke="#fff" strokeWidth={10} />
-        {/* Camera icon inside START */}
-        <g transform={`translate(${540 - 30}, ${130 - 34})`}>
-          <path
-            d="M59.262-55.037V-21.7a5.358,5.358,0,0,1-1.62,3.935,5.358,5.358,0,0,1-3.935,1.62H5.556a5.358,5.358,0,0,1-3.935-1.62A5.358,5.358,0,0,1,0-21.7V-55.037a5.358,5.358,0,0,1,1.62-3.935,5.358,5.358,0,0,1,3.935-1.62H15.741l1.389-3.82a6.7,6.7,0,0,1,1.215-1.852,5.426,5.426,0,0,1,1.794-1.273,5.355,5.355,0,0,1,2.2-.463H36.923a5.278,5.278,0,0,1,3.125.984,6.033,6.033,0,0,1,2.083,2.6l1.389,3.82H53.706a5.358,5.358,0,0,1,3.935,1.62A5.358,5.358,0,0,1,59.262-55.037ZM39.469-28.531a13.394,13.394,0,0,0,4.051-9.838,13.394,13.394,0,0,0-4.051-9.838,13.394,13.394,0,0,0-9.838-4.051,13.394,13.394,0,0,0-9.838,4.051,13.394,13.394,0,0,0-4.051,9.838,13.394,13.394,0,0,0,4.051,9.838,13.394,13.394,0,0,0,9.838,4.051A13.394,13.394,0,0,0,39.469-28.531ZM36.807-45.545a9.8,9.8,0,0,1,3.009,7.176,9.8,9.8,0,0,1-3.009,7.176,9.8,9.8,0,0,1-7.176,3.009,9.8,9.8,0,0,1-7.176-3.009,9.8,9.8,0,0,1-3.009-7.176,9.8,9.8,0,0,1,3.009-7.176,9.8,9.8,0,0,1,7.176-3.009A9.8,9.8,0,0,1,36.807-45.545Z"
-            transform="translate(0 68)"
-            fill="#fff"
-          />
-        </g>
-        <text
-          x={540}
-          y={218}
-          textAnchor="middle"
-          fill="#fff"
-          fontSize={19}
-          fontFamily="'Open Sans', system-ui"
-          fontWeight={700}
-        >
-          {startLabel}
-        </text>
-      </svg>
-
-      {/* Thumbnails de frames como botones (ciclan si hay menos de 6). */}
-      {satellites.map((c, i) => {
-        if (frames.length === 0) return null;
-        const frameIdx = (c.slotIndex ?? i) % frames.length;
-        const frame = frames[frameIdx]!;
-        const selected = selectedFrameId === frame.id;
-        return (
-          <button
-            key={`sat-btn-${i}`}
-            type="button"
-            aria-label={frame.label}
-            onClick={() => onSelectFrame(frame.id)}
-            className="absolute"
-            style={{
-              left: c.cx - 90,
-              top: 1507 - 90,
-              width: 180,
-              height: 180,
-              padding: 0,
-              border: 'none',
-              background: 'transparent',
-              borderRadius: '50%',
-              overflow: 'hidden',
-              boxShadow: selected
-                ? '0 0 0 6px hsl(var(--photo-accent-from))'
-                : undefined,
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={frame.resolvedThumbnail}
-              alt=""
-              draggable={false}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          <g transform="translate(100, 96)">
+            <path
+              d="M59.262-55.037V-21.7a5.358,5.358,0,0,1-1.62,3.935,5.358,5.358,0,0,1-3.935,1.62H5.556a5.358,5.358,0,0,1-3.935-1.62A5.358,5.358,0,0,1,0-21.7V-55.037a5.358,5.358,0,0,1,1.62-3.935,5.358,5.358,0,0,1,3.935-1.62H15.741l1.389-3.82a6.7,6.7,0,0,1,1.215-1.852,5.426,5.426,0,0,1,1.794-1.273,5.355,5.355,0,0,1,2.2-.463H36.923a5.278,5.278,0,0,1,3.125.984,6.033,6.033,0,0,1,2.083,2.6l1.389,3.82H53.706a5.358,5.358,0,0,1,3.935,1.62A5.358,5.358,0,0,1,59.262-55.037ZM39.469-28.531a13.394,13.394,0,0,0,4.051-9.838,13.394,13.394,0,0,0-4.051-9.838,13.394,13.394,0,0,0-9.838-4.051,13.394,13.394,0,0,0-9.838,4.051,13.394,13.394,0,0,0-4.051,9.838,13.394,13.394,0,0,0,4.051,9.838,13.394,13.394,0,0,0,9.838,4.051A13.394,13.394,0,0,0,39.469-28.531ZM36.807-45.545a9.8,9.8,0,0,1,3.009,7.176,9.8,9.8,0,0,1-3.009,7.176,9.8,9.8,0,0,1-7.176,3.009,9.8,9.8,0,0,1-7.176-3.009,9.8,9.8,0,0,1-3.009-7.176,9.8,9.8,0,0,1,3.009-7.176,9.8,9.8,0,0,1,7.176-3.009A9.8,9.8,0,0,1,36.807-45.545Z"
+              transform="translate(0 68)"
+              fill="#fff"
             />
-          </button>
-        );
-      })}
-
-      {/* Click target encima del START circle */}
-      <button
-        type="button"
-        aria-label={ariaShutter}
-        onClick={onStart}
-        className="absolute"
-        style={{
-          left: 540 - 126,
-          top: 1507 - 126,
-          width: 252,
-          height: 252,
-          padding: 0,
-          border: 'none',
-          background: 'transparent',
-          borderRadius: '50%',
-        }}
-      />
+          </g>
+          <text
+            x={130}
+            y={218}
+            textAnchor="middle"
+            fill="#fff"
+            fontSize={19}
+            fontFamily="'Open Sans', system-ui"
+            fontWeight={700}
+          >
+            {startLabel}
+          </text>
+        </svg>
+        <button
+          type="button"
+          aria-label={ariaShutter}
+          onClick={onStart}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            padding: 0,
+            border: 'none',
+            background: 'transparent',
+            borderRadius: '50%',
+            pointerEvents: 'auto',
+          }}
+        />
+      </div>
 
       {/* TIMER pill */}
       <button
@@ -232,6 +234,7 @@ export function StartScreen({
           alignItems: 'center',
           justifyContent: 'center',
           gap: 14,
+          zIndex: 3,
         }}
       >
         <svg width={64} height={68} viewBox="-1 0 68 68" aria-hidden="true">
@@ -269,6 +272,7 @@ export function StartScreen({
           alignItems: 'center',
           justifyContent: 'center',
           gap: 24,
+          zIndex: 3,
         }}
       >
         <span>{experienceLabel}</span>
@@ -285,5 +289,41 @@ export function StartScreen({
         />
       </button>
     </>
+  );
+}
+
+interface FrameThumbProps {
+  frame: PhotoBoothFrame & { resolvedThumbnail: string };
+  selected: boolean;
+  onSelect: () => void;
+}
+
+function FrameThumb({ frame, selected, onSelect }: FrameThumbProps) {
+  return (
+    <button
+      type="button"
+      aria-label={frame.label}
+      onClick={onSelect}
+      style={{
+        flex: '0 0 auto',
+        width: 212,
+        height: 212,
+        padding: 0,
+        borderRadius: '50%',
+        border: '10px solid #fff',
+        background: '#fff',
+        overflow: 'hidden',
+        boxShadow: selected ? '0 0 0 6px hsl(var(--photo-accent-from))' : undefined,
+        transition: 'box-shadow 0.15s ease-out',
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={frame.resolvedThumbnail}
+        alt=""
+        draggable={false}
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      />
+    </button>
   );
 }

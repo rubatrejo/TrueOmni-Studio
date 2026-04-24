@@ -268,7 +268,9 @@ export function PhotoBoothModule({
       const bg = resolvedBackgrounds.find((b) => b.id === selectedBackgroundId) ??
         resolvedBackgrounds[0];
       const backgroundImg = bg ? await loadImage(bg.resolvedImage) : null;
-      const frame = resolvedFrames.find((f) => f.id === selectedFrameId);
+      const frame = resolvedFrames.find(
+        (f) => f.id === selectedFrameId && f.image !== '',
+      );
       const frameImg = frame ? await loadImage(frame.resolvedImage) : null;
       const filter = filters.find((f) => f.id === selectedFilterId);
       // Resuelve imágenes de los stickers colocados (1080x1920 coords)
@@ -331,7 +333,9 @@ export function PhotoBoothModule({
     );
   }
 
-  const livePreviewFrame = resolvedFrames.find((f) => f.id === selectedFrameId);
+  const livePreviewFrame = resolvedFrames.find(
+    (f) => f.id === selectedFrameId && f.image !== '',
+  );
 
   return (
     <div

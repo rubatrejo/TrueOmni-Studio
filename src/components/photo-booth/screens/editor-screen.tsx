@@ -135,7 +135,9 @@ export function EditorScreen({
   ]);
 
   const selectedFilter = resolved.filters.find((f) => f.id === selectedFilterId);
-  const selectedFrame = resolved.frames.find((f) => f.id === selectedFrameId);
+  const selectedFrame = resolved.frames.find(
+    (f) => f.id === selectedFrameId && f.image !== '',
+  );
 
   return (
     <div

@@ -259,7 +259,9 @@ function FrameThumb({ frame, selected, onSelect }: FrameThumbProps) {
         border: '10px solid #fff',
         background: '#fff',
         overflow: 'hidden',
-        boxShadow: selected ? '0 0 0 6px hsl(var(--photo-accent-from))' : undefined,
+        boxShadow: selected
+          ? '0 0 0 6px hsl(var(--photo-tabs-bg)), 0 0 32px 8px hsl(var(--photo-tabs-bg) / 0.6)'
+          : undefined,
         transition: 'box-shadow 0.15s ease-out',
       }}
     >

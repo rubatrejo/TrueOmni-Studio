@@ -28,7 +28,7 @@ export function StickersRow({ stickers, onAdd }: StickersRowProps) {
         alignItems: 'center',
         gap: 48,
         padding: '16px 48px',
-        background: '#1796d6',
+        background: '#ffffff',
         scrollbarWidth: 'none',
       }}
     >

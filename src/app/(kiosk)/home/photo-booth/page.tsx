@@ -35,6 +35,9 @@ export default async function PhotoBoothPage() {
     resolvedImage: resolvePhotoBoothAsset(s.image),
   }));
   const mockImageSrc = resolvePhotoBoothAsset('assets/photo-booth/mock/demo-camera.jpg');
+  const shareBackgroundSrc = photoBooth.shareBackground
+    ? resolvePhotoBoothAsset(photoBooth.shareBackground)
+    : undefined;
   const logoSrc = resolvePhotoBoothAsset(config.branding.logo.default);
   const logoAlt = config.branding.logo.alt ?? config.client.nombre;
 
@@ -97,6 +100,7 @@ export default async function PhotoBoothPage() {
         resolvedStickers={resolvedStickers}
         filters={photoBooth.filters}
         mockImageSrc={mockImageSrc}
+        shareBackgroundSrc={shareBackgroundSrc}
         textos={textos}
         logoSrc={logoSrc}
         logoAlt={logoAlt}

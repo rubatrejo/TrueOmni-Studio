@@ -66,6 +66,7 @@ interface PhotoBoothModuleProps {
   resolvedStickers: Array<PhotoBoothSticker & { resolvedImage: string }>;
   filters: PhotoBoothConfig['filters'];
   mockImageSrc: string;
+  shareBackgroundSrc?: string;
   textos: PhotoBoothTextos;
   logoSrc: string;
   logoAlt: string;
@@ -74,12 +75,17 @@ interface PhotoBoothModuleProps {
   timezone?: string;
 }
 
-function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
+function loadImage(src: string): Promise<HTMLImageElement | null> {
+  return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => resolve(img);
-    img.onerror = reject;
+    img.onerror = () => {
+      // Si la imagen falla (red, CORS, 404), devolvemos null para que la
+      // composición continúe sin background y no rompa el flujo.
+      console.warn('[photo-booth] failed to load image:', src);
+      resolve(null);
+    };
     img.src = src;
   });
 }
@@ -91,6 +97,7 @@ export function PhotoBoothModule({
   resolvedStickers,
   filters,
   mockImageSrc,
+  shareBackgroundSrc,
   textos,
   logoSrc,
   logoAlt,
@@ -292,10 +299,10 @@ export function PhotoBoothModule({
       const frameImg = frame ? await loadImage(frame.resolvedImage) : null;
       const filter = filters.find((f) => f.id === selectedFilterId);
       // Resuelve imágenes de los stickers colocados (1080x1920 coords)
-      const stickerPlacements: StickerPlacement[] = await Promise.all(
+      const stickerPlacementsAll = await Promise.all(
         placedStickers.map(async (s) => {
           const img = await loadImage(s.src);
-          // Mapeo del photoRect 626x1114 a coords 1080x1920 (coords canvas out)
+          if (!img) return null;
           const scaleX = 1080 / 626;
           const scaleY = 1920 / 1114;
           return {
@@ -307,6 +314,9 @@ export function PhotoBoothModule({
             rotation: 0,
           };
         }),
+      );
+      const stickerPlacements: StickerPlacement[] = stickerPlacementsAll.filter(
+        (s): s is StickerPlacement => s !== null,
       );
       const blob = await composeFinal({
         capture: c.bitmap,
@@ -567,6 +577,7 @@ export function PhotoBoothModule({
             `pb-${Date.now()}`,
           )}
           social={config.social}
+          shareBackgroundSrc={shareBackgroundSrc}
           onHome={() => router.push('/home')}
           onEmail={() => showSent('email')}
           onText={() => showSent('text')}

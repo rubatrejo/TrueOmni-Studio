@@ -6,9 +6,10 @@ interface ShareSidebarProps {
 }
 
 /**
- * Botón "Share Photo" del editor — icono universal de Share + texto en
- * dos líneas debajo. Flechas animadas en loop apuntando hacia arriba al
- * botón para llamar la atención (~similar a un onboarding bounce).
+ * Botón "Share Photo" del editor.
+ * - Icono: arrow-out-of-box (Material/iOS share alternative).
+ * - Texto: "Share Photo" en 2 líneas, negro, debajo del botón.
+ * - Flechas: 3 chevrons DOWN animados arriba del botón apuntando hacia él.
  */
 export function ShareSidebar({ onShare, ariaLabel }: ShareSidebarProps) {
   return (
@@ -16,16 +17,16 @@ export function ShareSidebar({ onShare, ariaLabel }: ShareSidebarProps) {
       className="absolute"
       style={{
         left: 921,
-        top: 850,
+        top: 760,
         width: 140,
-        height: 320,
+        height: 380,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         gap: 14,
       }}
     >
-      {/* Flechas animadas (3 chevrons que se rellenan en loop apuntando arriba) */}
+      {/* Flechas DOWN apuntando AL botón (3 chevrons en cascada animada) */}
       <div
         aria-hidden="true"
         style={{
@@ -33,7 +34,7 @@ export function ShareSidebar({ onShare, ariaLabel }: ShareSidebarProps) {
           flexDirection: 'column',
           alignItems: 'center',
           gap: 4,
-          marginBottom: 6,
+          marginBottom: 10,
         }}
       >
         {[0, 1, 2].map((i) => (
@@ -48,8 +49,8 @@ export function ShareSidebar({ onShare, ariaLabel }: ShareSidebarProps) {
             }}
           >
             <path
-              d="M4 16 L24 4 L44 16"
-              stroke="hsl(var(--photo-share-arrow, var(--photo-tabs-bg)))"
+              d="M4 4 L24 16 L44 4"
+              stroke="hsl(var(--photo-tabs-bg))"
               strokeWidth={5}
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -58,7 +59,7 @@ export function ShareSidebar({ onShare, ariaLabel }: ShareSidebarProps) {
           </svg>
         ))}
       </div>
-      {/* Botón Share circular con icono universal de Share */}
+      {/* Botón Share circular con icono arrow-out-of-box */}
       <button
         type="button"
         aria-label={ariaLabel}
@@ -69,7 +70,7 @@ export function ShareSidebar({ onShare, ariaLabel }: ShareSidebarProps) {
           padding: 0,
           border: 'none',
           borderRadius: '50%',
-          background: '#0e518a',
+          background: 'hsl(var(--photo-tabs-bg))',
           boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
           display: 'flex',
           alignItems: 'center',
@@ -77,25 +78,27 @@ export function ShareSidebar({ onShare, ariaLabel }: ShareSidebarProps) {
           cursor: 'pointer',
         }}
       >
+        {/* Arrow-out-of-box icon */}
         <svg width={56} height={56} viewBox="0 0 24 24" aria-hidden="true">
-          {/* Icono Share (3 nodos + 2 conectores) — convención iOS/Material */}
-          <circle cx="18" cy="5" r="3" fill="#fff" />
-          <circle cx="6" cy="12" r="3" fill="#fff" />
-          <circle cx="18" cy="19" r="3" fill="#fff" />
-          <line x1="8.6" y1="10.6" x2="15.4" y2="6.4" stroke="#fff" strokeWidth={2} strokeLinecap="round" />
-          <line x1="8.6" y1="13.4" x2="15.4" y2="17.6" stroke="#fff" strokeWidth={2} strokeLinecap="round" />
+          <path
+            d="M12 3v12M12 3l-4 4M12 3l4 4M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"
+            stroke="#fff"
+            strokeWidth={2.2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
         </svg>
       </button>
-      {/* Texto "Share Photo" en 2 líneas */}
+      {/* Texto "Share Photo" en 2 líneas, negro */}
       <div
         style={{
-          color: '#fff',
+          color: '#000',
           fontFamily: "'Open Sans', system-ui",
           fontSize: 22,
           fontWeight: 700,
           textAlign: 'center',
           lineHeight: 1.15,
-          textShadow: '0 2px 6px rgba(0,0,0,0.5)',
         }}
       >
         <div>Share</div>
@@ -106,11 +109,11 @@ export function ShareSidebar({ onShare, ariaLabel }: ShareSidebarProps) {
           0%,
           100% {
             opacity: 0.25;
-            transform: translateY(4px);
+            transform: translateY(-4px);
           }
           50% {
             opacity: 1;
-            transform: translateY(-2px);
+            transform: translateY(2px);
           }
         }
       `}</style>

@@ -216,6 +216,9 @@ export interface PhotoBoothConfig {
   };
   /** Branding dentro de la tarjeta de la foto final. Default = logo del cliente. */
   shareCardLogo?: string;
+  /** Imagen de fondo de la pantalla Share (fullscreen 1080×1920). El cliente
+   *  la sube desde el CMS en producción; v1 usa un seed estático. */
+  shareBackground?: string;
   /** Feather del mask alpha (px) para suavizar bordes del cutout. Default 3. */
   edgeFeather?: number;
 }

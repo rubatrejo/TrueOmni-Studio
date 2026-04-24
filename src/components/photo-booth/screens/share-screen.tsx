@@ -9,6 +9,8 @@ interface ShareScreenProps {
   /** URL que se codifica en el QR (v1 placeholder). */
   qrUrl: string;
   social?: PhotoBoothConfig['social'];
+  /** Imagen de fondo fullscreen (1080×1920) configurable desde el CMS. */
+  shareBackgroundSrc?: string;
   onHome: () => void;
   onEmail: () => void;
   onText: () => void;
@@ -42,6 +44,7 @@ export function ShareScreen({
   blobUrl,
   qrUrl,
   social,
+  shareBackgroundSrc,
   onHome,
   onEmail,
   onText,
@@ -52,51 +55,64 @@ export function ShareScreen({
   return (
     <div
       className="absolute inset-0 overflow-hidden"
-      style={{ width: 1080, height: 1920, background: '#ffffff' }}
+      style={{ width: 1080, height: 1920, background: '#000' }}
     >
-      {/* Banda azul superior 397px que matches el gradient del KioskHeader
-          (proporciona base oscura para el logo+weather blancos del header). */}
+      {/* Fondo configurable desde el CMS del cliente — fullscreen 1080×1920 */}
+      {shareBackgroundSrc ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={shareBackgroundSrc}
+          alt=""
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
+      ) : null}
+      {/* Gradient overlay top-bottom para legibilidad del título y CTAs */}
       <div
         className="pointer-events-none absolute"
         style={{
-          left: 0,
-          top: 0,
-          width: 1080,
-          height: 397,
-          background: 'hsl(var(--photo-tabs-bg))',
+          inset: 0,
+          background:
+            'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 35%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.75) 100%)',
         }}
       />
 
-      {/* Título — debajo del header (logo+weather y=40-100) */}
+      {/* Título "SHARE YOUR MEMORIES" sobre la imagen */}
       <div
         className="absolute"
         style={{
           left: 0,
-          top: 440,
+          top: 220,
           width: 1080,
           textAlign: 'center',
-          color: 'hsl(var(--photo-tabs-bg))',
+          color: '#fff',
           fontFamily: "'Titillium Web', 'Open Sans', system-ui",
           fontSize: 57,
           fontWeight: 700,
           letterSpacing: '0.02em',
+          textShadow: '0 4px 16px rgba(0,0,0,0.7)',
         }}
       >
         {labels.title}
       </div>
 
-      {/* Photo card (centrado, con sombra suave) */}
+      {/* Photo card (centrado) */}
       <div
         className="absolute overflow-hidden"
         style={{
           left: 146,
-          top: 540,
+          top: 340,
           width: 788,
-          height: 900,
+          height: 1080,
           background: '#fff',
           borderRadius: 32,
-          boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
-          border: '1px solid rgba(0,0,0,0.06)',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
         }}
       >
         {blobUrl ? (
@@ -109,7 +125,7 @@ export function ShareScreen({
         ) : null}
       </div>
 
-      {/* Follow us pill ancho con iconos + QR integrado */}
+      {/* Follow us pill ancho con iconos sociales oficiales + QR integrado */}
       <div
         className="absolute flex items-center"
         style={{
@@ -119,17 +135,16 @@ export function ShareScreen({
           height: 180,
           borderRadius: 90,
           background: '#ffffff',
-          boxShadow: '0 14px 40px rgba(0,0,0,0.12)',
-          border: '1px solid rgba(0,0,0,0.05)',
+          boxShadow: '0 14px 40px rgba(0,0,0,0.30)',
           padding: '0 24px 0 56px',
-          gap: 24,
+          gap: 28,
         }}
       >
         <span
           style={{
-            color: 'hsl(var(--photo-text))',
-            fontFamily: "'Titillium Web', 'Open Sans', system-ui",
-            fontSize: 42,
+            color: '#000',
+            fontFamily: "'Open Sans', system-ui",
+            fontSize: 38,
             fontWeight: 700,
             whiteSpace: 'nowrap',
           }}
@@ -137,50 +152,52 @@ export function ShareScreen({
           {labels.follow}
         </span>
         <div style={{ display: 'flex', gap: 18, alignItems: 'center' }}>
-          {/* X / Twitter */}
+          {/* X (Twitter) — logo oficial verbatim */}
           {social?.x ? (
-            <svg width={56} height={56} viewBox="0 0 60 60" aria-hidden="true">
+            <svg width={64} height={64} viewBox="0 0 1200 1227" aria-hidden="true">
               <path
-                d="M14 8L30 28L46 8H52L34 31L54 56H42L28 38L14 56H8L26 32L8 8Z"
+                d="M714.163 519.284 1160.89 0H1055.03L667.137 450.887 357.328 0H0L468.492 681.821 0 1226.37H105.866L515.491 750.218 842.672 1226.37H1200L714.137 519.284h.026ZM569.165 687.828l-47.469-67.894-377.686-540.24h162.604l304.797 435.991 47.468 67.894 396.2 566.721H892.476L569.165 687.854v-.026Z"
                 fill="#000"
               />
             </svg>
           ) : null}
-          {/* Facebook */}
+          {/* Facebook — logo oficial f */}
           {social?.facebook ? (
-            <svg width={56} height={56} viewBox="0 0 60 60" aria-hidden="true">
-              <rect width={60} height={60} rx={10} fill="#1976d2" />
+            <svg width={64} height={64} viewBox="0 0 1024 1024" aria-hidden="true">
+              <circle cx={512} cy={512} r={512} fill="#1877F2" />
               <path
-                d="M38 20h-5v-4c0-2 1-2 3-2h3V7h-5a8 8 0 00-8 8v5h-4v7h4v20h7V27h4z"
+                d="M712 670l22-141H601V438c0-39 19-77 80-77h62V241s-56-10-110-10c-112 0-186 68-186 191v108H324v141h123v341a512 512 0 00154 0V670h111z"
                 fill="#fff"
               />
             </svg>
           ) : null}
-          {/* Instagram */}
+          {/* Instagram — logo oficial cámara */}
           {social?.instagram ? (
-            <svg width={56} height={56} viewBox="0 0 60 60" aria-hidden="true">
+            <svg width={64} height={64} viewBox="0 0 24 24" aria-hidden="true">
               <defs>
-                <linearGradient id="ig-grad-share" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stopColor="#f09433" />
-                  <stop offset="0.5" stopColor="#e6683c" />
-                  <stop offset="1" stopColor="#bc1888" />
-                </linearGradient>
+                <radialGradient id="ig-grad-real" cx="0.3" cy="1.05" r="1.4">
+                  <stop offset="0" stopColor="#fdf497" />
+                  <stop offset="0.05" stopColor="#fdf497" />
+                  <stop offset="0.45" stopColor="#fd5949" />
+                  <stop offset="0.6" stopColor="#d6249f" />
+                  <stop offset="0.9" stopColor="#285AEB" />
+                </radialGradient>
               </defs>
-              <rect width={60} height={60} rx={14} fill="url(#ig-grad-share)" />
-              <circle cx={30} cy={30} r={12} fill="none" stroke="#fff" strokeWidth={4} />
-              <circle cx={44} cy={16} r={3} fill="#fff" />
+              <rect x={1.5} y={1.5} width={21} height={21} rx={6} fill="url(#ig-grad-real)" />
+              <rect x={4.5} y={4.5} width={15} height={15} rx={4} fill="none" stroke="#fff" strokeWidth={1.4} />
+              <circle cx={12} cy={12} r={3.6} fill="none" stroke="#fff" strokeWidth={1.4} />
+              <circle cx={17.4} cy={6.6} r={1} fill="#fff" />
             </svg>
           ) : null}
         </div>
 
-        {/* Spacer + QR embebido en el pill */}
         <div style={{ flex: 1 }} />
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 4,
+            gap: 2,
           }}
         >
           <div
@@ -200,7 +217,7 @@ export function ShareScreen({
           </div>
           <span
             style={{
-              fontSize: 16,
+              fontSize: 14,
               fontFamily: "'Open Sans', system-ui",
               fontWeight: 700,
               color: 'hsl(var(--photo-tabs-bg))',
@@ -223,9 +240,9 @@ export function ShareScreen({
           width: 247,
           height: 86,
           borderRadius: 13,
-          border: '5px solid hsl(var(--photo-tabs-bg))',
-          background: '#fff',
-          color: 'hsl(var(--photo-tabs-bg))',
+          border: '5px solid #fff',
+          background: 'rgba(0,0,0,0.35)',
+          color: '#fff',
           fontFamily: "'Open Sans', system-ui",
           fontSize: 32,
           fontWeight: 700,
@@ -268,9 +285,9 @@ export function ShareScreen({
           width: 247,
           height: 86,
           borderRadius: 13,
-          border: '5px solid hsl(var(--photo-tabs-bg))',
-          background: '#fff',
-          color: 'hsl(var(--photo-tabs-bg))',
+          border: '5px solid #fff',
+          background: 'rgba(0,0,0,0.35)',
+          color: '#fff',
           fontFamily: "'Open Sans', system-ui",
           fontSize: 32,
           fontWeight: 700,

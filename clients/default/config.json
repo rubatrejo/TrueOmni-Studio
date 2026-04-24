@@ -9359,14 +9359,15 @@
           { "id": "leaf", "image": "assets/photo-booth/stickers/leaf.svg", "label": "Leaf", "defaultWidth": 180 },
           { "id": "music-note", "image": "assets/photo-booth/stickers/music-note.svg", "label": "Music", "defaultWidth": 160 }
         ],
-        "timer": { "enabled": true, "default": 10, "options": [3, 5, 10] },
+        "timer": { "enabled": true, "default": 3, "options": [3, 5, 10] },
         "shareUrlTemplate": "https://share.{client_slug}.kiosk.example/{id}",
         "social": {
           "x": "trueomni",
           "facebook": "trueomni",
           "instagram": "trueomni"
         },
-        "edgeFeather": 3
+        "edgeFeather": 3,
+        "shareBackground": "assets/photo-booth/share/share-bg.jpg"
       }
     },
     "advertisements": {

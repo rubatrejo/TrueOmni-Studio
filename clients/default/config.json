@@ -9330,9 +9330,9 @@
           { "id": "none", "image": "", "thumbnail": "assets/photo-booth/frames/Photo_Booth-Thumbnail_Frame_None.png", "label": "None" },
           { "id": "statue-of-liberty", "image": "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?w=1080&h=1920&fit=crop&q=80", "label": "Statue of Liberty" },
           { "id": "grand-canyon", "image": "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?w=1080&h=1920&fit=crop&q=80", "label": "Grand Canyon" },
-          { "id": "times-square", "image": "https://images.unsplash.com/photo-1556139966-f8b2a40dc1a4?w=1080&h=1920&fit=crop&q=80", "label": "NYC Skyline" },
+          { "id": "monument-valley", "image": "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1080&h=1920&fit=crop&q=80", "label": "Monument Valley AZ" },
           { "id": "yosemite", "image": "https://images.unsplash.com/photo-1561414927-6d86591d0c4f?w=1080&h=1920&fit=crop&q=80", "label": "Yosemite" },
-          { "id": "miami", "image": "https://images.unsplash.com/photo-1532375810709-75b1da00537c?w=1080&h=1920&fit=crop&q=80", "label": "Miami Beach" }
+          { "id": "antelope-canyon", "image": "https://images.unsplash.com/photo-1604975999044-188783d54fb3?w=1080&h=1920&fit=crop&q=80", "label": "Antelope Canyon AZ" }
         ],
         "frames": [
           { "id": "none", "image": "", "thumbnail": "assets/photo-booth/frames/Photo_Booth-Thumbnail_Frame_None.png", "label": "None" },

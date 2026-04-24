@@ -102,16 +102,17 @@ export function ShareScreen({
         {labels.title}
       </div>
 
-      {/* Photo card 9:16 — match aspect de la captura para evitar crop. */}
+      {/* Photo card aspect ratio EXACTO 9:16 = mismo aspect del blob para
+          evitar cualquier crop. Width 540 → Height 960. */}
       <div
         className="absolute overflow-hidden"
         style={{
-          left: 220,
-          top: 340,
-          width: 640,
-          height: 1100,
+          left: (1080 - 540) / 2,
+          top: 360,
+          width: 540,
+          height: 960,
           background: '#fff',
-          borderRadius: 32,
+          borderRadius: 28,
           boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
         }}
       >
@@ -120,7 +121,12 @@ export function ShareScreen({
           <img
             src={blobUrl}
             alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block',
+            }}
           />
         ) : null}
       </div>
@@ -229,55 +235,57 @@ export function ShareScreen({
         </div>
       </div>
 
-      {/* Send to Email button — patrón listing-style (sin icono interno) */}
+      {/* Send to Email — pill solid olive (matches "CLEAR ALL" filter style) */}
       <button
         type="button"
         onClick={onEmail}
         className="absolute font-sans"
         style={{
-          left: 200,
+          left: 130,
           top: 1727,
-          width: 320,
+          width: 380,
           height: 86,
-          borderRadius: 999,
-          border: '2px solid #fff',
-          background: 'rgba(0,0,0,0.35)',
+          borderRadius: 14,
+          border: 'none',
+          background: '#b9bd39',
           color: '#fff',
           fontFamily: "'Open Sans', system-ui",
           fontSize: 24,
           fontWeight: 700,
-          letterSpacing: '0.06em',
+          letterSpacing: '0.08em',
           textTransform: 'uppercase',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          boxShadow: '0 8px 18px rgba(185,189,57,0.35)',
         }}
       >
         {labels.emailCta}
       </button>
 
-      {/* Send to Phone button */}
+      {/* Send to Phone — pill solid azul (matches "APPLY" filter style) */}
       <button
         type="button"
         onClick={onText}
         className="absolute font-sans"
         style={{
-          left: 560,
+          left: 570,
           top: 1727,
-          width: 320,
+          width: 380,
           height: 86,
-          borderRadius: 999,
-          border: '2px solid #fff',
-          background: 'rgba(0,0,0,0.35)',
+          borderRadius: 14,
+          border: 'none',
+          background: '#1796d6',
           color: '#fff',
           fontFamily: "'Open Sans', system-ui",
           fontSize: 24,
           fontWeight: 700,
-          letterSpacing: '0.06em',
+          letterSpacing: '0.08em',
           textTransform: 'uppercase',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          boxShadow: '0 8px 18px rgba(23,150,214,0.35)',
         }}
       >
         {labels.textCta}

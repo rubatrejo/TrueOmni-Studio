@@ -48,12 +48,13 @@ export function AskAiTrigger({
       whileTap={{ scale: 0.92 }}
       onClick={openAi}
       aria-label={ariaLabel}
-      className="absolute z-40 flex items-center justify-center"
+      className="absolute flex items-center justify-center"
       style={{
         right: position.right,
         bottom: position.bottom,
         width: w,
         height: h,
+        zIndex: 45,
         background: 'transparent',
         border: 'none',
         padding: 0,

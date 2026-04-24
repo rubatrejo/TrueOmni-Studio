@@ -17,6 +17,7 @@ import type { PlacedSticker } from './editor/sticker-layer';
 import { CountdownOverlay } from './screens/countdown-overlay';
 import { EditorScreen } from './screens/editor-screen';
 import { KioskHeader } from './screens/kiosk-header';
+import { ShareScreen } from './screens/share-screen';
 import { StartScreen } from './screens/start-screen';
 
 type Phase = 'live' | 'countdown' | 'capturing' | 'editing' | 'sharing';
@@ -38,6 +39,13 @@ interface PhotoBoothTextos {
   tabBackgrounds: string;
   tabFrames: string;
   tabFilters: string;
+  shareTitle: string;
+  shareFollow: string;
+  shareScanMe: string;
+  shareEmailCta: string;
+  shareTextCta: string;
+  sentTitle: string;
+  sentBody: string;
 }
 
 interface PhotoBoothModuleProps {
@@ -246,10 +254,60 @@ export function PhotoBoothModule({
     setPhase('live');
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     setPhase('sharing');
-    // TODO(Ola 5): composición final con frame + filter + stickers cocidos +
-    // QR + modals de Email/Text.
+    // Compone la imagen final con frame + filter + stickers cocidos.
+    const c = captureRef.current;
+    if (!c || !c.bitmap) return;
+    try {
+      const bg = resolvedBackgrounds.find((b) => b.id === selectedBackgroundId) ??
+        resolvedBackgrounds[0];
+      const backgroundImg = bg ? await loadImage(bg.resolvedImage) : null;
+      const frame = resolvedFrames.find((f) => f.id === selectedFrameId);
+      const frameImg = frame ? await loadImage(frame.resolvedImage) : null;
+      const filter = filters.find((f) => f.id === selectedFilterId);
+      // Resuelve imágenes de los stickers colocados (1080x1920 coords)
+      const stickerPlacements: StickerPlacement[] = await Promise.all(
+        placedStickers.map(async (s) => {
+          const img = await loadImage(s.src);
+          // Mapeo del photoRect 626x1114 a coords 1080x1920 (coords canvas out)
+          const scaleX = 1080 / 626;
+          const scaleY = 1920 / 1114;
+          return {
+            image: img,
+            x: s.x * scaleX,
+            y: s.y * scaleY,
+            width: s.width * scaleX,
+            height: s.height * scaleY,
+            rotation: 0,
+          };
+        }),
+      );
+      const blob = await composeFinal({
+        capture: c.bitmap,
+        captureWidth: c.width,
+        captureHeight: c.height,
+        mask: c.mask,
+        background: backgroundImg,
+        frame: frameImg,
+        stickers: stickerPlacements,
+        cssFilter: filter?.cssFilter ?? 'none',
+        edgeFeather: config.edgeFeather ?? 3,
+      });
+      session.setBlob(blob);
+    } catch (err) {
+      setCaptureError(err instanceof Error ? err.message : 'Final compose failed');
+    }
+  };
+
+  const [sentMode, setSentMode] = useState<null | 'email' | 'text'>(null);
+  const showSent = (mode: 'email' | 'text') => {
+    setSentMode(mode);
+    setTimeout(() => {
+      setSentMode(null);
+      // Auto-return a Home tras confirmación
+      router.push('/home');
+    }, 4500);
   };
 
   const timerLabel =
@@ -373,11 +431,67 @@ export function PhotoBoothModule({
       )}
 
       {phase === 'sharing' && (
+        <ShareScreen
+          blobUrl={session.blobUrl}
+          qrUrl={(config.shareUrlTemplate ?? 'https://example.com/{id}').replace(
+            '{id}',
+            `pb-${Date.now()}`,
+          )}
+          social={config.social}
+          onHome={() => router.push('/home')}
+          onEmail={() => showSent('email')}
+          onText={() => showSent('text')}
+          labels={{
+            title: textos.shareTitle,
+            follow: textos.shareFollow,
+            emailCta: textos.shareEmailCta,
+            textCta: textos.shareTextCta,
+            scanMe: textos.shareScanMe,
+            ariaHome: textos.ariaHome,
+          }}
+          logoSrc={logoSrc}
+          logoAlt={logoAlt}
+        />
+      )}
+
+      {sentMode && (
         <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ background: 'hsl(var(--photo-share-bg))' }}
+          className="absolute inset-0 flex flex-col items-center justify-center"
+          style={{ background: 'hsl(var(--photo-countdown-bg) / 0.85)', gap: 24 }}
         >
-          <div style={{ color: '#fff', fontSize: 36 }}>Share screen (Ola 5)</div>
+          <svg width={120} height={120} viewBox="0 0 120 120" aria-hidden="true">
+            <circle cx={60} cy={60} r={54} fill="none" stroke="hsl(var(--photo-accent-to))" strokeWidth={8} />
+            <path
+              d="M38 60l16 16 28-32"
+              fill="none"
+              stroke="hsl(var(--photo-accent-to))"
+              strokeWidth={8}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <h2
+            style={{
+              color: 'hsl(var(--photo-share-title))',
+              fontFamily: 'var(--font-display)',
+              fontSize: 72,
+              fontWeight: 700,
+              margin: 0,
+            }}
+          >
+            {textos.sentTitle}
+          </h2>
+          <p
+            style={{
+              color: 'hsl(var(--photo-share-title))',
+              fontSize: 32,
+              maxWidth: 700,
+              textAlign: 'center',
+              padding: '0 48px',
+            }}
+          >
+            {textos.sentBody}
+          </p>
         </div>
       )}
 

@@ -964,6 +964,50 @@ driving/walking, SEE 360 funcional, favorite toast).
 
 ---
 
+### Sesión 2026-04-24 — Fase 3.16 Photo Booth module (5 olas, green-screen ML + editor + share)
+
+**Hecho:**
+
+- **Brainstorming aprobado en plan mode** (4 decisiones clave): green-screen post-captura (no live), share UI mock v1 (backend Fase 5+), stickers posicionables drag&drop en v1, single shot no burst. Plan en `~/.claude/plans/ok-ahara-vamos-a-validated-hedgehog.md`.
+- **Ola 1 — Setup (commit `8b3bc60`):** dep `@mediapipe/tasks-vision@0.10.34`, interfaces `PhotoBoothBackground/Frame/Filter/Sticker/TimerConfig/Config` en `config.ts` + `features.home.photoBooth?`. Tokens `--photo-*` en los 3 `tokens.css`. Bloque completo en `default/config.json` (3 bgs seed desde billboard heroes, 5 frames del Desktop, 6 filtros CSS, 6 stickers SVG creados, timer {3/5/10s}, shareUrlTemplate placeholder, social handles). Helper `src/lib/photo-booth.ts`. Asset logo default creado para resolver 404 pre-existente.
+- **Ola 2 — Captura pixel-perfect (commit `8b3bc60`):** ruta `/home/photo-booth`, phase machine (`'live' → 'countdown' → 'capturing' → 'editing' → 'sharing'`). Hooks `use-camera` (getUserMedia + fallback mock via `?mock=1` URL param o `NEXT_PUBLIC_KIOSK_PHOTO_MOCK=1` env o auto-fallback si dev falla), `use-countdown`. `CameraFeed` con mock image default. `PermissionGate` para denial. `KioskHeader` compartido (paths verbatim gradient + logo + weather+clock). `StartScreen` verbatim del SVG `0-Photo_Booth-Start`: overlay gradient bottom, home semicircle izq, carrusel 6 satélites + START central con camera icon, TIMER pill con clock icon, EXPERIENCE pill. `CountdownOverlay` verbatim con 2 círculos concéntricos + número Montserrat 140px animado con framer-motion.
+- **Ola 3 — Procesamiento (commit `fa0e9c2`):** `photo-booth-segment.ts` con MediaPipe SelfieSegmenter singleton lazy + warmupSegmenter(). Modelo desde `storage.googleapis.com`, WASM desde jsDelivr. `photo-booth-compose.ts` con pipeline canvas 1080×1920: bg → cutout (mask + feather blur 3px, `destination-in`) → frame → stickers → CSS filter (cocido). OffscreenCanvas con fallback. `use-photo-session` con blob-URL lifecycle. EditorScreen stub integrado para validar flujo. ImageBitmap cacheado en `captureRef` para re-compose sin re-captura.
+- **Ola 4 — Editor pantalla 4 pixel-perfect (commit `a2999fa`):** `editor-tabs.tsx` verbatim SVG (rect 1080×90 #1796d6, active rect 317×58 #004f8b). `options-carousel.tsx` horizontal scrollable con círculos 212×212 stroke blanco, selected glow accent. `stickers-row.tsx` horizontal scrollable. `sticker-layer.tsx` drag DOM con pointer events + setPointerCapture, compensa scale del KioskCanvas, double-click elimina. `share-sidebar.tsx` con QR icon paths verbatim. `editor-screen.tsx` con layout verbatim (top panel 446px, stickers y=455, tabs y=605, foto x=227 y=747 w=626 h=1114, share x=921 y=903, back button x=0 y=1163). Re-compose on-change de background (otros cambios son CSS preview hasta Share).
+- **Ola 5 — Share pantalla 5 + cierre (este commit):** `share-screen.tsx` con: foto blurred backdrop, gradient top, título "SHARE YOUR MEMORIES" (57px Titillium Web Bold), photo card 788×1353 rx=42 blanco con branding logo y foto inside, QR card separate sibling (para renderizar sobre Follow us pill) con `QRCodeSVG` nivel H, "Follow us" pill con X/Facebook/Instagram SVG icons inline (visible solo si config.social tiene el handle), EMAIL y TEXT CTAs verbatim (rect 247×86 rx=13 border 5px), home button semicircle. Sent! confirmation overlay con check icon + auto-return a `/home` tras 4.5s. Composición final con frame + filter + stickers cocidos al entrar a phase `'sharing'`.
+
+**Verificado:**
+
+- `pnpm typecheck` limpio en checkpoints de cada ola.
+- Playwright con `?mock=1`: flujo completo Start → TIMER off → EXPERIENCE → capturing spinner → MediaPipe segmenta → editor con tabs + carrusel + stickers → Share button → Share screen con QR + Email/Text visibles. Screenshots en `.planning/verifications/3-16-{start-final,editor-v1,share-final-v2}.png`.
+- Auditor white-label sin hallazgos tras corregir: mover strings `12:00 PM`/`50°`/fallback a `textos.photo_booth_*`, tokenizar `#004f8b` como `--photo-home-btn-bg` y `#fff` divider como `--photo-header-fg`. Usar `new Date()` real con locale+timezone del cliente.
+
+**Pendiente / siguiente:**
+
+- **LLM mock real para share** — backend en Fase 5+ (endpoint upload + QR real + SMTP/SMS).
+- **OnScreenKeyboard integration en email/text modals** — v1 solo muestra confirmación "Sent!". Implementar input real con `OnScreenKeyboard` + `KeyboardKey` adapter (patrón Ask AI, Guestbook).
+- **Assets reales de backgrounds** — cliente debe subir PNGs/JPGs 1080×1920. Los 3 placeholder (billboard heroes + header-bg) son útiles para testing pero no representativos.
+- **Emoji stickers reales** — los 6 SVGs creados son básicos. Podría mejorarse con Twemoji rendered o sticker PNG por cliente.
+- **Pixel-perfect iteración final del Share** — el SVG original tiene QR en posición específica que puede diferir ligeramente. Rubén debe validar visualmente y aprobar.
+- **Itinerary Builder module**, Fase 4 (primer cliente real), o LLM real para Ask AI.
+- **Bloque `home.photoBooth` en `_template` y `demo-cliente-a`** (ninguno tiene `features.home` configurado).
+
+**Decisiones:**
+
+- **Green-screen POST-captura** vs live preview (P1=A): 1 inferencia ML por foto, no 30-60 fps. Viable en hardware de kiosk sin GPU. MediaPipe SelfieSegmenter 200-600 ms por imagen.
+- **Share UI mock v1** (P2=A): consistente con Ask AI mock typewriter. QR con URL placeholder tokenizada. EMAIL/TEXT → "Sent!" confirmación sin envío real. Fase 5+ conecta backend.
+- **Stickers posicionables drag&drop v1** (P3=A): patrón de `guestbook-pin-rail` reutilizado. Scale/rotate diferidos a v1.1.
+- **Stickers como capa DOM** (no canvas) hasta Share: evita re-composiciones en cada mousemove. Se cuecen al final cuando user tapea Share.
+- **MediaPipe desde CDN** (storage.googleapis + jsDelivr WASM): evita bundlear 8 MB de `.tflite`. Cache-control permite reuso entre sesiones.
+- **`captureRef` con ImageBitmap + mask cacheados**: permite cambiar background en el editor sin re-capturar ni re-segmentar.
+- **Fallback mock en dev automático**: si `getUserMedia` falla en dev (Playwright, localhost sin cámara), cae a `permission='mock'` sirviendo una imagen estática. En prod falla a `'denied'` → `PermissionGate`.
+- **HTTPS requerido en prod** para `getUserMedia` — documentado en `3-16-CONTEXT.md`.
+- **QR card como sibling del photo card** (no inside): para renderizar sobre Follow us pill sin ser clippeado por overflow:hidden. Coords verbatim del SVG.
+- **SCAN ME** como texto separado del `qr_instruction` largo: pixel-perfect con SVG original ("SCAN ME" literal en el badge).
+
+**Fase:** 3.16 Photo Booth cerrada — módulo funcional con green-screen MediaPipe, editor con tabs + stickers DnD, share mock con QR + social + email/text. Pixel-close al SVG en las 4 pantallas principales (Start, Countdown, Editor, Share).
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

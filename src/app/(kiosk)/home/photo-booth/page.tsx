@@ -71,6 +71,14 @@ export default async function PhotoBoothPage() {
     tabBackgrounds: config.textos.photo_booth_tab_backgrounds ?? 'Backgrounds',
     tabFrames: config.textos.photo_booth_tab_frames ?? 'Frames',
     tabFilters: config.textos.photo_booth_tab_filters ?? 'Filters',
+    shareTitle: config.textos.photo_booth_share_title ?? 'SHARE YOUR MEMORIES',
+    shareFollow: config.textos.photo_booth_share_follow ?? 'Follow us',
+    shareScanMe: config.textos.photo_booth_share_scan_me ?? 'SCAN ME',
+    shareEmailCta: config.textos.photo_booth_share_email_cta ?? 'EMAIL',
+    shareTextCta: config.textos.photo_booth_share_text_cta ?? 'TEXT',
+    sentTitle: config.textos.photo_booth_sent_title ?? 'Sent!',
+    sentBody:
+      config.textos.photo_booth_sent_body ?? 'Check your inbox in a few seconds.',
   };
 
   return (

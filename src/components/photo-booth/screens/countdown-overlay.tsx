@@ -1,20 +1,37 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface CountdownOverlayProps {
   /** Número actual (3/2/1) — null cuando no está activo. */
   value: number | null;
+  /** Total de segundos iniciales del countdown. Usado para animar el
+   *  progreso del ring de 0 → 100% de manera proporcional. */
+  totalSeconds: number;
 }
 
+// Círculo del ring: cx=153, cy=153, r=143, stroke-width=20.
+// Circumference ≈ 2π * 143 ≈ 898.58.
+const RING_CIRCUMFERENCE = 2 * Math.PI * 143;
+
 /**
- * Overlay fullscreen con 2 círculos concéntricos + número gigante en el centro.
- * Paths verbatim del SVG `1-Photo_Booth-Countdown-3.svg` (y variantes 2/1).
- * Centro: (540, 1697), r=153, stroke #fff sw=20.
- * Número: font Montserrat-Bold 140px, centrado en (540, ~1720).
+ * Overlay fullscreen con 2 círculos concéntricos + número gigante en el
+ * centro. Paths verbatim del SVG `1-Photo_Booth-Countdown-3.svg`. El ring
+ * interior se va rellenando linealmente durante el countdown: empieza en
+ * 0% (stroke invisible) y termina en 100% (stroke completo) cuando el
+ * contador llega a 0.
  */
-export function CountdownOverlay({ value }: CountdownOverlayProps) {
+export function CountdownOverlay({ value, totalSeconds }: CountdownOverlayProps) {
   if (value === null) return null;
+
+  // Progreso 0..1 basado en cuánto ha pasado. value=totalSeconds → 0%,
+  // value=1 → (totalSeconds-1)/totalSeconds ≈ 100% cuando cuenta a 0.
+  // Usamos (totalSeconds - value + 1) para que el último tick (value=1)
+  // llegue cerca del 100% visualmente.
+  const elapsed = Math.max(0, totalSeconds - value + 1);
+  const progress = Math.min(1, elapsed / totalSeconds);
+  const dashoffset = RING_CIRCUMFERENCE * (1 - progress);
+
   return (
     <div
       className="pointer-events-none absolute inset-0"
@@ -30,14 +47,26 @@ export function CountdownOverlay({ value }: CountdownOverlayProps) {
         <g transform="translate(387 1544)" fill="none" stroke="#fff" strokeWidth={20} opacity={0.2}>
           <circle cx={153} cy={153} r={153} />
         </g>
-        {/* Arco animado (dasharray "350 2000") */}
-        <g transform="translate(387 1544)" fill="none" stroke="#fff" strokeWidth={20}>
-          <circle
+        {/* Arco de progreso que se rellena linealmente durante el countdown */}
+        <g
+          transform="translate(387 1544)"
+          fill="none"
+          stroke="#fff"
+          strokeWidth={20}
+          strokeLinecap="round"
+        >
+          <motion.circle
             cx={153}
             cy={153}
             r={143}
-            strokeDasharray="350 2000"
-            style={{ transformOrigin: '153px 153px', transform: 'rotate(-90deg)' }}
+            strokeDasharray={RING_CIRCUMFERENCE}
+            initial={false}
+            animate={{ strokeDashoffset: dashoffset }}
+            transition={{ duration: 1, ease: 'linear' }}
+            style={{
+              transformOrigin: '153px 153px',
+              transform: 'rotate(-90deg)',
+            }}
           />
         </g>
       </svg>

@@ -135,9 +135,9 @@ export function EditorScreen({
   ]);
 
   const selectedFilter = resolved.filters.find((f) => f.id === selectedFilterId);
-  const selectedFrame = resolved.frames.find(
-    (f) => f.id === selectedFrameId && f.image !== '',
-  );
+  // Nota: el frame seleccionado ya está cocido en `blobUrl` (el módulo
+  // re-compose al cambiar de frame), así que NO lo renderizamos aquí como
+  // overlay — sería doble.
 
   return (
     <div
@@ -194,23 +194,6 @@ export function EditorScreen({
             }}
           />
         ) : null}
-        {selectedFrame ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={selectedFrame.resolvedImage}
-            alt=""
-            draggable={false}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              pointerEvents: 'none',
-            }}
-          />
-        ) : null}
-
         {/* Capa de stickers */}
         <StickerLayer
           stickers={stickers}

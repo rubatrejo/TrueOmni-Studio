@@ -47,6 +47,10 @@ interface PhotoBoothTextos {
   shareTextCta: string;
   sentTitle: string;
   sentBody: string;
+  exitTitle: string;
+  exitMessage: string;
+  exitCancel: string;
+  exitConfirm: string;
 }
 
 interface PhotoBoothModuleProps {
@@ -116,6 +120,7 @@ export function PhotoBoothModule({
   const [activeTab, setActiveTab] = useState<EditorTab>('backgrounds');
   const [placedStickers, setPlacedStickers] = useState<PlacedSticker[]>([]);
   const [captureError, setCaptureError] = useState<string | null>(null);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const timerOptions = config.timer?.options ?? [3, 5, 10];
   const timerDefault = config.timer?.default ?? 10;
@@ -129,22 +134,26 @@ export function PhotoBoothModule({
   }, []);
 
   /**
-   * Recompone el blob con el background actualmente seleccionado. Usa el
-   * frame+mask cacheados en `captureRef`. Llamado tras la captura inicial y
-   * cada vez que el usuario cambia de background en el editor.
+   * Recompone el blob con el background + frame actualmente seleccionados.
+   * Usa el bitmap y mask cacheados en `captureRef`. Llamado tras la captura
+   * inicial y cada vez que el usuario cambia de background o frame en el
+   * editor. El frame se cuece en el blob (no es overlay DOM) — así la foto
+   * exportada ya trae el frame incluido.
    */
-  const recomposeBaseBlob = async (backgroundId: string | null) => {
+  const recomposeBaseBlob = async (backgroundId: string | null, frameId: string | null) => {
     const c = captureRef.current;
     if (!c || !c.bitmap) return;
     const bg = resolvedBackgrounds.find((b) => b.id === backgroundId) ?? resolvedBackgrounds[0];
     const backgroundImg = bg ? await loadImage(bg.resolvedImage) : null;
+    const frame = resolvedFrames.find((f) => f.id === frameId && f.image !== '');
+    const frameImg = frame ? await loadImage(frame.resolvedImage) : null;
     const blob = await composeFinal({
       capture: c.bitmap,
       captureWidth: c.width,
       captureHeight: c.height,
       mask: c.mask,
       background: backgroundImg,
-      frame: null,
+      frame: frameImg,
       stickers: [],
       cssFilter: 'none',
       edgeFeather: config.edgeFeather ?? 3,
@@ -175,7 +184,7 @@ export function PhotoBoothModule({
         width: captureWidth,
         height: captureHeight,
       };
-      await recomposeBaseBlob(selectedBackgroundId);
+      await recomposeBaseBlob(selectedBackgroundId, selectedFrameId);
       setPhase('editing');
     } catch (err) {
       setCaptureError(err instanceof Error ? err.message : 'Capture failed');
@@ -214,12 +223,15 @@ export function PhotoBoothModule({
   const onSelectBackground = (id: string) => {
     setSelectedBackgroundId(id);
     setHasTouchedBackground(true);
-    // En editor: recomponer con el nuevo bg.
-    if (phase === 'editing') void recomposeBaseBlob(id);
+    // En editor: recomponer con el nuevo bg + frame actual.
+    if (phase === 'editing') void recomposeBaseBlob(id, selectedFrameId);
   };
 
-  const onSelectFrame = (id: string) =>
-    setSelectedFrameId((prev) => (prev === id ? null : id));
+  const onSelectFrame = (id: string) => {
+    setSelectedFrameId(id);
+    // En editor: recomponer para cocer el nuevo frame en el blob.
+    if (phase === 'editing') void recomposeBaseBlob(selectedBackgroundId, id);
+  };
   const onSelectFilter = (id: string) => setSelectedFilterId(id);
 
   const onAddSticker = (sticker: (typeof resolvedStickers)[number]) => {
@@ -254,8 +266,9 @@ export function PhotoBoothModule({
     captureRef.current?.bitmap?.close();
     captureRef.current = null;
     setPlacedStickers([]);
-    setSelectedFrameId(null);
+    setSelectedFrameId(resolvedFrames[0]?.id ?? null);
     setSelectedFilterId(filters[0]?.id ?? null);
+    setShowExitConfirm(false);
     setPhase('live');
   };
 
@@ -373,8 +386,9 @@ export function PhotoBoothModule({
         </>
       )}
 
-      {/* Layer 2: header (solo fases con live cam visible) */}
-      {(phase === 'live' || phase === 'countdown' || phase === 'capturing') && (
+      {/* Layer 2: header (en live/countdown/capturing sobre cámara,
+          y también sobre el top panel azul del editor). */}
+      {phase !== 'sharing' && (
         <KioskHeader weather={weather} locale={locale} timezone={timezone} />
       )}
 
@@ -395,7 +409,9 @@ export function PhotoBoothModule({
         />
       )}
 
-      {phase === 'countdown' && <CountdownOverlay value={countdown.value} />}
+      {phase === 'countdown' && (
+        <CountdownOverlay value={countdown.value} totalSeconds={timerSeconds > 0 ? timerSeconds : 3} />
+      )}
 
       {phase === 'capturing' && (
         <div
@@ -435,7 +451,7 @@ export function PhotoBoothModule({
           onAddSticker={onAddSticker}
           onUpdateSticker={onUpdateSticker}
           onRemoveSticker={onRemoveSticker}
-          onBack={handleRetake}
+          onBack={() => setShowExitConfirm(true)}
           onShare={handleShare}
           labels={{
             tabs: {
@@ -447,6 +463,94 @@ export function PhotoBoothModule({
             ariaShare: textos.ariaShare,
           }}
         />
+      )}
+
+      {showExitConfirm && (
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ zIndex: 90 }}
+        >
+          <button
+            type="button"
+            aria-label={textos.exitCancel}
+            onClick={() => setShowExitConfirm(false)}
+            className="absolute inset-0"
+            style={{ backgroundColor: 'rgba(0,0,0,0.55)', border: 'none' }}
+          />
+          <div
+            className="relative flex flex-col items-center"
+            style={{
+              width: 720,
+              backgroundColor: '#ffffff',
+              borderRadius: 20,
+              padding: '52px 60px 48px',
+              boxShadow: '0 40px 80px rgba(0,0,0,0.45)',
+              gap: 22,
+            }}
+          >
+            <h3
+              className="text-center font-sans"
+              style={{
+                fontSize: 38,
+                lineHeight: 1.2,
+                fontWeight: 700,
+                color: 'hsl(var(--photo-home-btn-bg))',
+              }}
+            >
+              {textos.exitTitle}
+            </h3>
+            <p
+              className="text-center font-sans"
+              style={{ fontSize: 22, lineHeight: 1.5, color: '#5a5a5a' }}
+            >
+              {textos.exitMessage}
+            </p>
+            <div className="mt-2 flex items-center justify-center" style={{ gap: 18 }}>
+              <button
+                type="button"
+                onClick={() => setShowExitConfirm(false)}
+                className="font-sans focus:outline-none"
+                style={{
+                  height: 68,
+                  minWidth: 200,
+                  paddingInline: 34,
+                  border: '2px solid #bfbfbf',
+                  borderRadius: 999,
+                  color: '#333',
+                  fontSize: 20,
+                  fontWeight: 600,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  backgroundColor: '#ffffff',
+                }}
+              >
+                {textos.exitCancel}
+              </button>
+              <button
+                type="button"
+                onClick={handleRetake}
+                className="font-sans text-white focus:outline-none"
+                style={{
+                  height: 68,
+                  minWidth: 200,
+                  paddingInline: 34,
+                  borderRadius: 999,
+                  fontSize: 20,
+                  fontWeight: 700,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  backgroundColor: '#d14343',
+                  boxShadow: '0 10px 24px -6px rgba(209,67,67,0.5)',
+                  border: 'none',
+                }}
+              >
+                {textos.exitConfirm}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {phase === 'sharing' && (

@@ -178,7 +178,11 @@
     "photo_booth_aria_close": "Close",
     "photo_booth_aria_home": "Go home",
     "photo_booth_header_temp_placeholder": "50°",
-    "photo_booth_disabled": "Photo Booth is not configured for the active client."
+    "photo_booth_disabled": "Photo Booth is not configured for the active client.",
+    "photo_booth_exit_title": "Are you sure you want to leave?",
+    "photo_booth_exit_message": "You'll lose your photo and all the edits you've made.",
+    "photo_booth_exit_cancel": "Cancel",
+    "photo_booth_exit_confirm": "Leave"
   },
   "navegacion": {
     "home": "/",
@@ -9319,9 +9323,11 @@
       "photoBooth": {
         "enabled": true,
         "backgrounds": [
-          { "id": "landscape", "image": "assets/photo-booth/backgrounds/bg-landscape.jpg", "label": "Landscape" },
-          { "id": "desert", "image": "assets/photo-booth/backgrounds/bg-desert.jpg", "label": "Desert" },
-          { "id": "sunset", "image": "assets/photo-booth/backgrounds/bg-sunset.jpg", "label": "Sunset" }
+          { "id": "landscape", "image": "assets/photo-booth/backgrounds/landscape.jpg", "label": "Landscape" },
+          { "id": "desert", "image": "assets/photo-booth/backgrounds/desert.jpg", "label": "Desert" },
+          { "id": "sunset", "image": "assets/photo-booth/backgrounds/sunset.jpg", "label": "Sunset" },
+          { "id": "city", "image": "assets/photo-booth/backgrounds/city.png", "label": "City" },
+          { "id": "food", "image": "assets/photo-booth/backgrounds/food.jpg", "label": "Food" }
         ],
         "frames": [
           { "id": "none", "image": "", "thumbnail": "assets/photo-booth/frames/Photo_Booth-Thumbnail_Frame_None.png", "label": "None" },

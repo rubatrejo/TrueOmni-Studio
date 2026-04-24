@@ -33,14 +33,15 @@ export function KioskHeader({ weather, locale, timezone }: KioskHeaderProps) {
           height: 397,
           background:
             'linear-gradient(180deg, rgba(0,79,139,0.9) 0%, rgba(0,79,139,0.55) 30%, rgba(0,79,139,0) 100%)',
+          zIndex: 5,
         }}
       />
-      <div className="absolute" style={{ left: 65, top: 44 }}>
+      <div className="absolute" style={{ left: 65, top: 44, zIndex: 6 }}>
         <TrueOmniLogo className="h-[70px] w-auto text-white" />
       </div>
       <div
         className="absolute"
-        style={{ left: 744, top: 40, width: 300, height: 85 }}
+        style={{ left: 744, top: 40, width: 300, height: 85, zIndex: 6 }}
       >
         <WeatherClock initialWeather={weather} locale={locale} timezone={timezone} />
       </div>

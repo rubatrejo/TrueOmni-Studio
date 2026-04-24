@@ -70,6 +70,12 @@ export default async function PhotoBoothPage() {
     sentTitle: config.textos.photo_booth_sent_title ?? 'Sent!',
     sentBody:
       config.textos.photo_booth_sent_body ?? 'Check your inbox in a few seconds.',
+    exitTitle: config.textos.photo_booth_exit_title ?? 'Are you sure you want to leave?',
+    exitMessage:
+      config.textos.photo_booth_exit_message ??
+      "You'll lose your photo and all the edits you've made.",
+    exitCancel: config.textos.photo_booth_exit_cancel ?? 'Cancel',
+    exitConfirm: config.textos.photo_booth_exit_confirm ?? 'Leave',
   };
 
   return (

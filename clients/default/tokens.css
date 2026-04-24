@@ -59,7 +59,7 @@
   /*  Hex originales del paquete ask-ai → HSL para tokenizar y permitir     */
   /*  customización por cliente sin perder identidad visual del módulo.     */
   /* ---------------------------------------------------------------------- */
-  --ai-surface: 39 56% 95%; /* #F9F6F0 — bg modal */
+  --ai-surface: 0 0% 100%; /* #FFFFFF — bg modal (blanco puro) */
   --ai-text: 218 35% 14%; /* #172133 — títulos */
   --ai-text-soft: 213 38% 27%; /* #2C4560 — body / chips */
   --ai-accent-from: 201 95% 46%; /* #079EE2 — gradient mic + cursor */

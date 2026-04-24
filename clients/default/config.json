@@ -142,7 +142,7 @@
     "guestbook_invalid_zip_fallback": "Couldn't find that zip code, showing the local area instead.",
     "guestbook_country_select_title": "Select Country",
     "ai_title": "Ask AI",
-    "ai_subtitle": "Your personal San Diego guide",
+    "ai_subtitle": "Your personal {client_name} guide",
     "ai_input_placeholder": "Type your question...",
     "ai_send_label": "Send",
     "ai_loading_label": "Thinking...",
@@ -9242,7 +9242,7 @@
         "avatar": "assets/ai/trigger.svg",
         "heroVideo": "assets/ai/hero-video.mp4",
         "position": { "right": 24, "bottom": 24, "width": 504, "height": 191 },
-        "greeting": "Hi! I'm your guide to San Diego. Ask me anything about restaurants, events, activities, or getting around the area.",
+        "greeting": "Hi! I'm your guide to {client_name}. Ask me anything about restaurants, events, activities, or getting around the area.",
         "suggestedQuestions": [
           {
             "id": "restaurants",

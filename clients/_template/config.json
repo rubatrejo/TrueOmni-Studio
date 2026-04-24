@@ -111,7 +111,7 @@
     "guestbook_invalid_zip_fallback": "Couldn't find that zip code, showing the local area instead.",
     "guestbook_country_select_title": "Select Country",
     "ai_title": "Ask AI",
-    "ai_subtitle": "Your personal travel guide",
+    "ai_subtitle": "Your personal {client_name} guide",
     "ai_input_placeholder": "Type your question...",
     "ai_send_label": "Send",
     "ai_loading_label": "Thinking...",

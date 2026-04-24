@@ -79,7 +79,7 @@
     "guestbook_invalid_zip_fallback": "No encontramos ese código postal, mostrando el área local.",
     "guestbook_country_select_title": "Seleccionar país",
     "ai_title": "Pregunta a la IA",
-    "ai_subtitle": "Tu guía personal de San Diego",
+    "ai_subtitle": "Tu guía personal de {client_name}",
     "ai_input_placeholder": "Escribe tu pregunta...",
     "ai_send_label": "Enviar",
     "ai_loading_label": "Pensando...",

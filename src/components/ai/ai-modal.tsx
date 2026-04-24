@@ -337,7 +337,7 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
             <div className="flex flex-1 flex-col overflow-hidden">
               {/* Texto de respuesta. */}
               <div
-                className="flex-1 overflow-y-auto"
+                className="flex-1 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 style={{ paddingLeft: 48, paddingRight: 48, paddingTop: 28, paddingBottom: 16 }}
               >
                 {isTyping && !displayedText ? (

@@ -32,15 +32,17 @@ export default async function HomePage() {
     });
   }
   const askAi = home.askAi?.enabled ? home.askAi : null;
+  const interpolateClient = (raw: string) => raw.replaceAll('{client_name}', config.client.nombre);
   const askAiTextos = askAi
     ? {
         title: config.textos.ai_title ?? 'Ask AI',
-        subtitle: askAi.subtitle ?? config.textos.ai_subtitle ?? '',
+        subtitle: interpolateClient(askAi.subtitle ?? config.textos.ai_subtitle ?? ''),
         inputPlaceholder: config.textos.ai_input_placeholder ?? 'Type your question...',
         ariaClose: config.textos.ai_aria_close ?? 'Close Ask AI',
         ariaMic: config.textos.ai_aria_mic ?? 'Toggle voice input',
       }
     : null;
+  const askAiGreeting = askAi ? interpolateClient(askAi.greeting) : '';
   return (
     <KioskCanvas>
       <HomeShell
@@ -70,7 +72,7 @@ export default async function HomePage() {
           />
           <AiModalHost
             heroVideoSrc={resolveAiAssetPath(askAi.heroVideo)}
-            greeting={askAi.greeting}
+            greeting={askAiGreeting}
             suggestedQuestions={askAi.suggestedQuestions}
             textos={askAiTextos}
           />

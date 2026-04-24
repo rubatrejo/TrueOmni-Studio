@@ -211,13 +211,17 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Hero video 16:9 con overlay degradado y mic flotante.
-                Altura explícita (608 = 1080 * 9/16 redondeado) en vez de
-                `aspectRatio` para evitar rounding fraccional que dejaba
-                visible un row sub-píxel del backdrop oscuro entre el hero
-                y el body. marginBottom: -2 garantiza overlap. */}
+                Altura explícita 608 (1080 * 9/16) + marginBottom: -10 +
+                bg blanco explícito en el hero garantizan que no aparezca
+                ningún row sub-píxel del backdrop oscuro entre hero y body
+                aún con scaling fraccional del KioskCanvas. */}
             <div
               className="relative flex-shrink-0 overflow-hidden"
-              style={{ height: 608, marginBottom: -2 }}
+              style={{
+                height: 608,
+                marginBottom: -10,
+                backgroundColor: 'hsl(var(--ai-surface))',
+              }}
             >
               <video
                 src={heroVideoSrc}
@@ -231,7 +235,7 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
                 className="absolute inset-0"
                 style={{
                   background:
-                    'linear-gradient(180deg, hsl(var(--ai-text) / 0.25) 0%, hsl(var(--ai-text) / 0) 25%, transparent 60%, hsl(var(--ai-surface)) 100%)',
+                    'linear-gradient(180deg, hsl(var(--ai-text) / 0.25) 0%, hsl(var(--ai-text) / 0) 25%, hsl(var(--ai-surface) / 0) 60%, hsl(var(--ai-surface)) 100%)',
                 }}
               />
 

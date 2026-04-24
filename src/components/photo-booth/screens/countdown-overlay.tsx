@@ -43,8 +43,19 @@ export function CountdownOverlay({ value, totalSeconds }: CountdownOverlayProps)
         viewBox="0 0 1080 1920"
         style={{ position: 'absolute', inset: 0 }}
       >
-        {/* Fondo círculo (r=153, opacity 0.2) */}
-        <g transform="translate(387 1544)" fill="none" stroke="#fff" strokeWidth={20} opacity={0.2}>
+        {/* Backdrop negro 50% — para que el círculo y el número sean
+            legibles cuando hay un frame con muchos detalles atrás. */}
+        <g transform="translate(387 1544)">
+          <circle cx={153} cy={153} r={153} fill="rgba(0,0,0,0.5)" />
+        </g>
+        {/* Track del ring (verde 20% opacidad) */}
+        <g
+          transform="translate(387 1544)"
+          fill="none"
+          stroke="hsl(var(--photo-countdown-ring))"
+          strokeWidth={20}
+          opacity={0.2}
+        >
           <circle cx={153} cy={153} r={153} />
         </g>
         {/* Arco de progreso que se rellena linealmente durante el countdown.
@@ -85,7 +96,7 @@ export function CountdownOverlay({ value, totalSeconds }: CountdownOverlayProps)
             top: 1697 - 70,
             width: 100,
             height: 140,
-            color: 'hsl(var(--photo-countdown-number))',
+            color: 'hsl(var(--photo-countdown-ring))',
             fontFamily: "'Montserrat', system-ui",
             fontSize: 140,
             fontWeight: 700,

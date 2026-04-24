@@ -9,6 +9,7 @@ interface StartScreenProps {
   selectedFrameId: string | null;
   onSelectFrame: (id: string) => void;
   onStart: () => void;
+  onExperience: () => void;
   onToggleTimer: () => void;
   onHome: () => void;
   timerLabel: string;
@@ -32,6 +33,7 @@ export function StartScreen({
   selectedFrameId,
   onSelectFrame,
   onStart,
+  onExperience,
   onToggleTimer,
   onHome,
   timerLabel,
@@ -193,10 +195,11 @@ export function StartScreen({
         <span>{timerLabel}</span>
       </button>
 
-      {/* EXPERIENCE pill */}
+      {/* EXPERIENCE pill — abre popup cinematic "Coming Next" (placeholder
+          de un futuro flujo de experiencias inmersivas). */}
       <button
         type="button"
-        onClick={onStart}
+        onClick={onExperience}
         className="absolute"
         style={{
           left: 657,

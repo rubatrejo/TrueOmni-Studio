@@ -182,7 +182,11 @@
     "photo_booth_exit_title": "Are you sure\nyou want to leave?",
     "photo_booth_exit_message": "You'll lose your photo and all the edits you've made.",
     "photo_booth_exit_cancel": "Cancel",
-    "photo_booth_exit_confirm": "Leave"
+    "photo_booth_exit_confirm": "Leave",
+    "photo_booth_experience_kicker": "Coming Soon",
+    "photo_booth_experience_title": "Coming Next",
+    "photo_booth_experience_body": "An immersive {client_name} experience is on the way. Stay tuned for trips, AR tours and more — right from this kiosk.",
+    "photo_booth_experience_back": "Back to Photo Booth"
   },
   "navegacion": {
     "home": "/",
@@ -9323,11 +9327,11 @@
       "photoBooth": {
         "enabled": true,
         "backgrounds": [
-          { "id": "landscape", "image": "assets/photo-booth/backgrounds/landscape.jpg", "label": "Landscape" },
-          { "id": "desert", "image": "assets/photo-booth/backgrounds/desert.jpg", "label": "Desert" },
-          { "id": "sunset", "image": "assets/photo-booth/backgrounds/sunset.jpg", "label": "Sunset" },
-          { "id": "city", "image": "assets/photo-booth/backgrounds/city.png", "label": "City" },
-          { "id": "food", "image": "assets/photo-booth/backgrounds/food.jpg", "label": "Food" }
+          { "id": "statue-of-liberty", "image": "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?w=1080&h=1920&fit=crop&q=80", "label": "Statue of Liberty" },
+          { "id": "grand-canyon", "image": "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?w=1080&h=1920&fit=crop&q=80", "label": "Grand Canyon" },
+          { "id": "golden-gate", "image": "https://images.unsplash.com/photo-1521120098171-3b96d31fe2e7?w=1080&h=1920&fit=crop&q=80", "label": "Golden Gate Bridge" },
+          { "id": "times-square", "image": "https://images.unsplash.com/photo-1572476947456-21cd9d646c69?w=1080&h=1920&fit=crop&q=80", "label": "Times Square" },
+          { "id": "yellowstone", "image": "https://images.unsplash.com/photo-1605833556294-ea5c7a74f57d?w=1080&h=1920&fit=crop&q=80", "label": "Yellowstone" }
         ],
         "frames": [
           { "id": "none", "image": "", "thumbnail": "assets/photo-booth/frames/Photo_Booth-Thumbnail_Frame_None.png", "label": "None" },

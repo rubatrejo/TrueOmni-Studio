@@ -51,6 +51,10 @@ interface PhotoBoothTextos {
   exitMessage: string;
   exitCancel: string;
   exitConfirm: string;
+  experienceTeaserKicker: string;
+  experienceTeaserTitle: string;
+  experienceTeaserBody: string;
+  experienceTeaserBack: string;
 }
 
 interface PhotoBoothModuleProps {
@@ -121,6 +125,7 @@ export function PhotoBoothModule({
   const [placedStickers, setPlacedStickers] = useState<PlacedSticker[]>([]);
   const [captureError, setCaptureError] = useState<string | null>(null);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showExperienceTeaser, setShowExperienceTeaser] = useState(false);
 
   const timerOptions = config.timer?.options ?? [3, 5, 10];
   const timerDefault = config.timer?.default ?? 10;
@@ -386,11 +391,10 @@ export function PhotoBoothModule({
         </>
       )}
 
-      {/* Layer 2: header (en live/countdown/capturing sobre cámara,
-          y también sobre el top panel azul del editor). */}
-      {phase !== 'sharing' && (
-        <KioskHeader weather={weather} locale={locale} timezone={timezone} />
-      )}
+      {/* Layer 2: header siempre visible (logo + weather + clock).
+          Se renderiza superpuesto a la cámara en live/countdown/capturing,
+          al top panel azul en editing y al fondo blanco en sharing. */}
+      <KioskHeader weather={weather} locale={locale} timezone={timezone} />
 
       {/* Layer 3: fase activa */}
       {phase === 'live' && (
@@ -399,6 +403,7 @@ export function PhotoBoothModule({
           selectedFrameId={selectedFrameId}
           onSelectFrame={onSelectFrame}
           onStart={handleStart}
+          onExperience={() => setShowExperienceTeaser(true)}
           onToggleTimer={handleToggleTimer}
           onHome={() => router.push('/home')}
           timerLabel={timerLabel}
@@ -633,6 +638,91 @@ export function PhotoBoothModule({
           }}
         >
           {captureError}
+        </div>
+      )}
+
+      {showExperienceTeaser && (
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          className="absolute inset-0 flex items-center justify-center"
+          style={{
+            zIndex: 95,
+            background:
+              'radial-gradient(ellipse at center, rgba(7,12,30,0.85) 0%, rgba(0,0,0,0.96) 80%)',
+          }}
+        >
+          <button
+            type="button"
+            aria-label={textos.exitCancel}
+            onClick={() => setShowExperienceTeaser(false)}
+            className="absolute inset-0"
+            style={{ background: 'transparent', border: 'none' }}
+          />
+          <div
+            className="relative flex flex-col items-center text-center"
+            style={{ padding: '0 80px', gap: 24, color: '#fff', maxWidth: 880 }}
+          >
+            <div
+              style={{
+                fontFamily: "'Open Sans', system-ui",
+                fontSize: 22,
+                letterSpacing: '0.4em',
+                color: 'hsl(var(--photo-countdown-ring))',
+                textTransform: 'uppercase',
+              }}
+            >
+              {textos.experienceTeaserKicker}
+            </div>
+            <h2
+              style={{
+                fontFamily: "'Montserrat', system-ui",
+                fontSize: 120,
+                fontWeight: 800,
+                letterSpacing: '-0.02em',
+                lineHeight: 0.95,
+                background: 'linear-gradient(135deg, #fff 0%, #b9bd39 70%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                margin: 0,
+              }}
+            >
+              {textos.experienceTeaserTitle}
+            </h2>
+            <p
+              style={{
+                fontFamily: "'Open Sans', system-ui",
+                fontSize: 28,
+                lineHeight: 1.4,
+                color: 'rgba(255,255,255,0.85)',
+                maxWidth: 720,
+              }}
+            >
+              {textos.experienceTeaserBody}
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowExperienceTeaser(false)}
+              style={{
+                marginTop: 32,
+                padding: '20px 56px',
+                fontSize: 26,
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                fontFamily: "'Open Sans', system-ui",
+                color: '#fff',
+                background: 'transparent',
+                border: '3px solid hsl(var(--photo-countdown-ring))',
+                borderRadius: 9999,
+                cursor: 'pointer',
+                boxShadow: '0 0 40px rgba(185,189,57,0.35)',
+              }}
+            >
+              {textos.experienceTeaserBack}
+            </button>
+          </div>
         </div>
       )}
     </div>

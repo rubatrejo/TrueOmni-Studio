@@ -76,6 +76,16 @@ export default async function PhotoBoothPage() {
       "You'll lose your photo and all the edits you've made.",
     exitCancel: config.textos.photo_booth_exit_cancel ?? 'Cancel',
     exitConfirm: config.textos.photo_booth_exit_confirm ?? 'Leave',
+    experienceTeaserKicker:
+      config.textos.photo_booth_experience_kicker ?? 'Coming Soon',
+    experienceTeaserTitle:
+      config.textos.photo_booth_experience_title ?? 'Coming Next',
+    experienceTeaserBody: (
+      config.textos.photo_booth_experience_body ??
+      'An immersive {client_name} experience is on the way.'
+    ).replaceAll('{client_name}', config.client.nombre),
+    experienceTeaserBack:
+      config.textos.photo_booth_experience_back ?? 'Back to Photo Booth',
   };
 
   return (

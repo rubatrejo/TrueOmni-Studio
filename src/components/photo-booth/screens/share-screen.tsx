@@ -25,14 +25,18 @@ interface ShareScreenProps {
 }
 
 /**
- * Pantalla de share (pantalla 5) verbatim del SVG `5-Photo_Booth-Share.png.svg`.
- * - Fondo: foto compuesta fullscreen + gradient overlay oscuro top.
- * - Título "SHARE YOUR MEMORIES" centrado (y=245).
- * - Photo card blanco (x=146, y=311, 788×1353) con la foto final adentro +
- *   branding del cliente y QR + "SCAN ME".
- * - "Follow us" pill (y=1556) con 3 iconos sociales.
- * - Botones EMAIL y TEXT (y=1727).
- * - Home button semicircle (x=0, y=1163).
+ * Pantalla 5-Share del Photo Booth.
+ *
+ * Layout:
+ *   - Fondo blanco completo (sin foto blurred al fondo).
+ *   - Header: logo + weather/clock (vienen del módulo padre vía
+ *     `KioskHeader`, no se renderizan aquí).
+ *   - Título "SHARE YOUR MEMORIES".
+ *   - Photo card blanco con la foto final adentro.
+ *   - "Follow us" pill ANCHO con iconos sociales A LA IZQUIERDA y QR
+ *     code blanco INTEGRADO a la derecha (no sobre el photo card).
+ *   - Botones EMAIL y TEXT.
+ *   - Home button semicircle izquierda.
  */
 export function ShareScreen({
   blobUrl,
@@ -42,58 +46,36 @@ export function ShareScreen({
   onEmail,
   onText,
   labels,
-  logoSrc,
-  logoAlt,
+  logoSrc: _logoSrc,
+  logoAlt: _logoAlt,
 }: ShareScreenProps) {
   return (
     <div
       className="absolute inset-0 overflow-hidden"
-      style={{ width: 1080, height: 1920, background: 'hsl(var(--photo-share-bg))' }}
+      style={{ width: 1080, height: 1920, background: '#ffffff' }}
     >
-      {/* Fondo: foto fullscreen blurred como backdrop */}
-      {blobUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={blobUrl}
-          alt=""
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            filter: 'blur(24px) brightness(0.4)',
-            transform: 'scale(1.05)',
-          }}
-        />
-      ) : null}
+      {/* Banda azul superior 397px que matches el gradient del KioskHeader
+          (proporciona base oscura para el logo+weather blancos del header). */}
+      <div
+        className="pointer-events-none absolute"
+        style={{
+          left: 0,
+          top: 0,
+          width: 1080,
+          height: 397,
+          background: 'hsl(var(--photo-tabs-bg))',
+        }}
+      />
 
-      {/* Gradient top overlay */}
-      <svg
-        width={1080}
-        height={266}
-        viewBox="0 0 1080 266"
-        style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}
-      >
-        <defs>
-          <linearGradient id="pb-share-top" x1="0.5" x2="0.5" y2="1" gradientUnits="objectBoundingBox">
-            <stop offset="0" stopOpacity={0.8} />
-            <stop offset="1" stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <rect x={0} y={0} width={1080} height={266} fill="url(#pb-share-top)" />
-      </svg>
-
-      {/* Título */}
+      {/* Título — debajo del header (logo+weather y=40-100) */}
       <div
         className="absolute"
         style={{
           left: 0,
-          top: 210,
+          top: 440,
           width: 1080,
           textAlign: 'center',
-          color: 'hsl(var(--photo-share-title))',
+          color: 'hsl(var(--photo-tabs-bg))',
           fontFamily: "'Titillium Web', 'Open Sans', system-ui",
           fontSize: 57,
           fontWeight: 700,
@@ -103,134 +85,61 @@ export function ShareScreen({
         {labels.title}
       </div>
 
-      {/* Photo card blanco */}
+      {/* Photo card (centrado, con sombra suave) */}
       <div
         className="absolute overflow-hidden"
         style={{
           left: 146,
-          top: 311,
+          top: 540,
           width: 788,
-          height: 1353,
+          height: 900,
           background: '#fff',
-          borderRadius: 42,
-          boxShadow: '0 20px 60px rgb(0 0 0 / 0.4)',
+          borderRadius: 32,
+          boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
+          border: '1px solid rgba(0,0,0,0.06)',
         }}
       >
-        {/* Pequeño rect blanco con logo (branding dentro del card, y=323 - 311 = 12 abs interno) */}
-        <div
-          style={{
-            position: 'absolute',
-            left: 8,
-            top: 12,
-            width: 354,
-            height: 87,
-            borderRadius: 17,
-            background: '#fff',
-            display: 'flex',
-            alignItems: 'center',
-            padding: '0 24px',
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={logoSrc}
-            alt={logoAlt}
-            draggable={false}
-            style={{ height: 48 }}
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).style.display = 'none';
-            }}
-          />
-        </div>
-
-        {/* Photo inside card */}
         {blobUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={blobUrl}
             alt=""
-            style={{
-              position: 'absolute',
-              left: 27,
-              top: 25,
-              width: 734,
-              height: 1307,
-              objectFit: 'cover',
-              borderRadius: 24,
-            }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : null}
       </div>
 
-      {/* QR code badge — sibling del photo card para que renderice sobre
-          el Follow us pill (z-order superior). Coords abs del SVG:
-          translate(717.96, 1420.373 + 27.345) + mask inner padding. */}
-      <div
-        className="absolute"
-        style={{
-          left: 699,
-          top: 1398,
-          width: 236,
-          height: 286,
-          borderRadius: 10,
-          background: '#0088ce',
-          padding: 16,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 12,
-          color: '#fff',
-          zIndex: 10,
-          boxShadow: '0 8px 20px rgb(0 0 0 / 0.3)',
-        }}
-      >
-        <div
-          style={{
-            width: 204,
-            height: 204,
-            background: '#fff',
-            borderRadius: 10,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <QRCodeSVG value={qrUrl} size={184} level="H" includeMargin={false} />
-        </div>
-        <div
-          style={{
-            fontSize: 28,
-            fontFamily: "'Open Sans', system-ui",
-            fontWeight: 700,
-          }}
-        >
-          {labels.scanMe}
-        </div>
-      </div>
-
-      {/* Follow us pill */}
+      {/* Follow us pill ancho con iconos + QR integrado */}
       <div
         className="absolute flex items-center"
         style={{
-          left: 148,
-          top: 1556,
-          width: 601,
-          height: 106,
-          borderRadius: 38,
-          background: '#fff',
-          padding: '0 48px',
-          gap: 48,
-          color: 'hsl(var(--photo-text))',
-          fontFamily: "'Titillium Web', 'Open Sans', system-ui",
-          fontSize: 48,
-          fontWeight: 700,
+          left: 80,
+          top: 1470,
+          width: 920,
+          height: 180,
+          borderRadius: 90,
+          background: '#ffffff',
+          boxShadow: '0 14px 40px rgba(0,0,0,0.12)',
+          border: '1px solid rgba(0,0,0,0.05)',
+          padding: '0 24px 0 56px',
+          gap: 24,
         }}
       >
-        <span>{labels.follow}</span>
-        <div style={{ display: 'flex', gap: 24, alignItems: 'center', marginLeft: 'auto' }}>
+        <span
+          style={{
+            color: 'hsl(var(--photo-text))',
+            fontFamily: "'Titillium Web', 'Open Sans', system-ui",
+            fontSize: 42,
+            fontWeight: 700,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {labels.follow}
+        </span>
+        <div style={{ display: 'flex', gap: 18, alignItems: 'center' }}>
           {/* X / Twitter */}
           {social?.x ? (
-            <svg width={48} height={48} viewBox="0 0 60 60" aria-hidden="true">
+            <svg width={56} height={56} viewBox="0 0 60 60" aria-hidden="true">
               <path
                 d="M14 8L30 28L46 8H52L34 31L54 56H42L28 38L14 56H8L26 32L8 8Z"
                 fill="#000"
@@ -239,7 +148,7 @@ export function ShareScreen({
           ) : null}
           {/* Facebook */}
           {social?.facebook ? (
-            <svg width={60} height={60} viewBox="0 0 60 60" aria-hidden="true">
+            <svg width={56} height={56} viewBox="0 0 60 60" aria-hidden="true">
               <rect width={60} height={60} rx={10} fill="#1976d2" />
               <path
                 d="M38 20h-5v-4c0-2 1-2 3-2h3V7h-5a8 8 0 00-8 8v5h-4v7h4v20h7V27h4z"
@@ -249,19 +158,57 @@ export function ShareScreen({
           ) : null}
           {/* Instagram */}
           {social?.instagram ? (
-            <svg width={60} height={60} viewBox="0 0 60 60" aria-hidden="true">
+            <svg width={56} height={56} viewBox="0 0 60 60" aria-hidden="true">
               <defs>
-                <linearGradient id="ig-grad" x1="0" y1="0" x2="1" y2="1">
+                <linearGradient id="ig-grad-share" x1="0" y1="0" x2="1" y2="1">
                   <stop offset="0" stopColor="#f09433" />
                   <stop offset="0.5" stopColor="#e6683c" />
                   <stop offset="1" stopColor="#bc1888" />
                 </linearGradient>
               </defs>
-              <rect width={60} height={60} rx={14} fill="url(#ig-grad)" />
+              <rect width={60} height={60} rx={14} fill="url(#ig-grad-share)" />
               <circle cx={30} cy={30} r={12} fill="none" stroke="#fff" strokeWidth={4} />
               <circle cx={44} cy={16} r={3} fill="#fff" />
             </svg>
           ) : null}
+        </div>
+
+        {/* Spacer + QR embebido en el pill */}
+        <div style={{ flex: 1 }} />
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 4,
+          }}
+        >
+          <div
+            style={{
+              width: 132,
+              height: 132,
+              padding: 8,
+              borderRadius: 18,
+              background: '#ffffff',
+              border: '2px solid hsl(var(--photo-tabs-bg))',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <QRCodeSVG value={qrUrl} size={116} level="H" includeMargin={false} />
+          </div>
+          <span
+            style={{
+              fontSize: 16,
+              fontFamily: "'Open Sans', system-ui",
+              fontWeight: 700,
+              color: 'hsl(var(--photo-tabs-bg))',
+              letterSpacing: '0.05em',
+            }}
+          >
+            {labels.scanMe}
+          </span>
         </div>
       </div>
 
@@ -276,9 +223,9 @@ export function ShareScreen({
           width: 247,
           height: 86,
           borderRadius: 13,
-          border: '5px solid hsl(var(--photo-cta-border))',
-          background: 'transparent',
-          color: 'hsl(var(--photo-cta-text))',
+          border: '5px solid hsl(var(--photo-tabs-bg))',
+          background: '#fff',
+          color: 'hsl(var(--photo-tabs-bg))',
           fontFamily: "'Open Sans', system-ui",
           fontSize: 32,
           fontWeight: 700,
@@ -289,8 +236,23 @@ export function ShareScreen({
         }}
       >
         <svg width={48} height={36} viewBox="0 0 48 36" aria-hidden="true">
-          <rect x={1.5} y={1.5} width={45} height={33} rx={6} stroke="#fff" strokeWidth={2} fill="none" />
-          <path d="M3 3l21 18L45 3" stroke="#fff" strokeWidth={2} fill="none" strokeLinecap="round" />
+          <rect
+            x={1.5}
+            y={1.5}
+            width={45}
+            height={33}
+            rx={6}
+            stroke="currentColor"
+            strokeWidth={2}
+            fill="none"
+          />
+          <path
+            d="M3 3l21 18L45 3"
+            stroke="currentColor"
+            strokeWidth={2}
+            fill="none"
+            strokeLinecap="round"
+          />
         </svg>
         <span>{labels.emailCta}</span>
       </button>
@@ -306,9 +268,9 @@ export function ShareScreen({
           width: 247,
           height: 86,
           borderRadius: 13,
-          border: '5px solid hsl(var(--photo-cta-border))',
-          background: 'transparent',
-          color: 'hsl(var(--photo-cta-text))',
+          border: '5px solid hsl(var(--photo-tabs-bg))',
+          background: '#fff',
+          color: 'hsl(var(--photo-tabs-bg))',
           fontFamily: "'Open Sans', system-ui",
           fontSize: 32,
           fontWeight: 700,
@@ -321,19 +283,34 @@ export function ShareScreen({
         <svg width={42} height={38} viewBox="0 0 42 38" aria-hidden="true">
           <path
             d="M5 3h32a4 4 0 014 4v18a4 4 0 01-4 4H15l-8 6v-6H5a4 4 0 01-4-4V7a4 4 0 014-4z"
-            stroke="#fff"
+            stroke="currentColor"
             strokeWidth={2}
             fill="none"
             strokeLinejoin="round"
           />
-          <line x1={10} y1={12} x2={32} y2={12} stroke="#fff" strokeWidth={2} strokeLinecap="round" />
-          <line x1={10} y1={20} x2={32} y2={20} stroke="#fff" strokeWidth={2} strokeLinecap="round" />
+          <line
+            x1={10}
+            y1={12}
+            x2={32}
+            y2={12}
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+          />
+          <line
+            x1={10}
+            y1={20}
+            x2={32}
+            y2={20}
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+          />
         </svg>
         <span>{labels.textCta}</span>
       </button>
 
-      {/* Home button (semicircle left, alineado a top:1000 con
-          FloatingHomeButton del resto del kiosk). */}
+      {/* Home button (semicircle left, top:1000 alineado al resto) */}
       <button
         type="button"
         aria-label={labels.ariaHome}

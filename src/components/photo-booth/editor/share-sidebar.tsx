@@ -6,64 +6,114 @@ interface ShareSidebarProps {
 }
 
 /**
- * Botón "Share" circular verbatim del SVG `4-Photo_Booth-Experience.svg`:
- *   - translate(921, 903), circle r=58 fill="#0e518a".
- *   - QR icon interno (paths verbatim).
- *   - Texto "Share" debajo del círculo (font Montserrat-Bold 19px).
+ * Botón "Share Photo" del editor — icono universal de Share + texto en
+ * dos líneas debajo. Flechas animadas en loop apuntando hacia arriba al
+ * botón para llamar la atención (~similar a un onboarding bounce).
  */
 export function ShareSidebar({ onShare, ariaLabel }: ShareSidebarProps) {
   return (
-    <button
-      type="button"
-      aria-label={ariaLabel}
-      onClick={onShare}
+    <div
       className="absolute"
       style={{
         left: 921,
-        top: 903,
-        width: 116,
-        height: 140,
-        padding: 0,
-        border: 'none',
-        background: 'transparent',
-        cursor: 'pointer',
+        top: 850,
+        width: 140,
+        height: 320,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 14,
       }}
     >
-      <svg width={116} height={140} viewBox="0 0 116 140" aria-hidden="true">
-        <circle cx={58} cy={58} r={58} fill="#0e518a" />
-        <g transform="translate(2.554 -7.445)">
-          <rect x={64.448} y={63.444} width={8} height={9} rx={4} fill="#fff" />
-          <rect x={57.448} y={57.444} width={7} height={6} rx={3} fill="#fff" />
-          <rect x={72.448} y={72.444} width={6} height={6} rx={3} fill="#fff" />
-          <rect x={74.448} y={57.444} width={4} height={4} rx={2} fill="#fff" />
-          <rect x={57.448} y={73.444} width={5} height={5} rx={2.5} fill="#fff" />
-          <path
-            d="M290.422,32H275.349A3.349,3.349,0,0,0,272,35.349V50.422a3.349,3.349,0,0,0,3.349,3.349h15.073a3.349,3.349,0,0,0,3.349-3.349V35.349A3.349,3.349,0,0,0,290.422,32Zm-3.349,14.235a.837.837,0,0,1-.837.837h-6.7a.837.837,0,0,1-.837-.837v-6.7a.837.837,0,0,1,.837-.837h6.7a.837.837,0,0,1,.837.837Z"
-            transform="translate(-214.879)"
-            fill="#fff"
-          />
-          <path
-            d="M50.422,32H35.349A3.349,3.349,0,0,0,32,35.349V50.422a3.349,3.349,0,0,0,3.349,3.349H50.422a3.349,3.349,0,0,0,3.349-3.349V35.349A3.349,3.349,0,0,0,50.422,32ZM47.073,46.235a.837.837,0,0,1-.837.837h-6.7a.837.837,0,0,1-.837-.837v-6.7a.837.837,0,0,1,.837-.837h6.7a.837.837,0,0,1,.837.837Z"
-            fill="#fff"
-          />
-          <path
-            d="M50.422,272H35.349A3.349,3.349,0,0,0,32,275.349v15.073a3.349,3.349,0,0,0,3.349,3.349H50.422a3.349,3.349,0,0,0,3.349-3.349V275.349A3.349,3.349,0,0,0,50.422,272Zm-3.349,14.235a.837.837,0,0,1-.837.837h-6.7a.837.837,0,0,1-.837-.837v-6.7a.837.837,0,0,1,.837-.837h6.7a.837.837,0,0,1,.837.837Z"
-            transform="translate(0 -214.879)"
-            fill="#fff"
-          />
-        </g>
-        <text
-          x={58}
-          y={131}
-          textAnchor="middle"
-          fill="#fff"
-          fontSize={19}
-          fontFamily="'Montserrat', system-ui"
-          fontWeight={700}
-        >
-          Share
-        </text>
-      </svg>
-    </button>
+      {/* Flechas animadas (3 chevrons que se rellenan en loop apuntando arriba) */}
+      <div
+        aria-hidden="true"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 4,
+          marginBottom: 6,
+        }}
+      >
+        {[0, 1, 2].map((i) => (
+          <svg
+            key={i}
+            width={48}
+            height={20}
+            viewBox="0 0 48 20"
+            style={{
+              animation: `pb-share-arrow 1.4s ease-in-out infinite`,
+              animationDelay: `${i * 0.18}s`,
+            }}
+          >
+            <path
+              d="M4 16 L24 4 L44 16"
+              stroke="hsl(var(--photo-share-arrow, var(--photo-tabs-bg)))"
+              strokeWidth={5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+          </svg>
+        ))}
+      </div>
+      {/* Botón Share circular con icono universal de Share */}
+      <button
+        type="button"
+        aria-label={ariaLabel}
+        onClick={onShare}
+        style={{
+          width: 116,
+          height: 116,
+          padding: 0,
+          border: 'none',
+          borderRadius: '50%',
+          background: '#0e518a',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+        }}
+      >
+        <svg width={56} height={56} viewBox="0 0 24 24" aria-hidden="true">
+          {/* Icono Share (3 nodos + 2 conectores) — convención iOS/Material */}
+          <circle cx="18" cy="5" r="3" fill="#fff" />
+          <circle cx="6" cy="12" r="3" fill="#fff" />
+          <circle cx="18" cy="19" r="3" fill="#fff" />
+          <line x1="8.6" y1="10.6" x2="15.4" y2="6.4" stroke="#fff" strokeWidth={2} strokeLinecap="round" />
+          <line x1="8.6" y1="13.4" x2="15.4" y2="17.6" stroke="#fff" strokeWidth={2} strokeLinecap="round" />
+        </svg>
+      </button>
+      {/* Texto "Share Photo" en 2 líneas */}
+      <div
+        style={{
+          color: '#fff',
+          fontFamily: "'Open Sans', system-ui",
+          fontSize: 22,
+          fontWeight: 700,
+          textAlign: 'center',
+          lineHeight: 1.15,
+          textShadow: '0 2px 6px rgba(0,0,0,0.5)',
+        }}
+      >
+        <div>Share</div>
+        <div>Photo</div>
+      </div>
+      <style jsx>{`
+        @keyframes pb-share-arrow {
+          0%,
+          100% {
+            opacity: 0.25;
+            transform: translateY(4px);
+          }
+          50% {
+            opacity: 1;
+            transform: translateY(-2px);
+          }
+        }
+      `}</style>
+    </div>
   );
 }

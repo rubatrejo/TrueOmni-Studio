@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 
-import type { PhotoBoothBackground } from '@/lib/config';
+import type { PhotoBoothFrame } from '@/lib/config';
 
 /**
  * Posiciones verbatim del SVG `0-Photo_Booth-Start.svg` para los círculos
@@ -11,21 +11,20 @@ import type { PhotoBoothBackground } from '@/lib/config';
  */
 const CAROUSEL_CIRCLES = [
   { role: 'start' as const, cx: 540, cy: 1507, r: 126 },
-  { role: 'satellite' as const, cx: -245, cy: 1507, r: 106, bgIndex: 0 },
-  { role: 'satellite' as const, cx: 10, cy: 1507, r: 106, bgIndex: 1 },
-  { role: 'satellite' as const, cx: 265, cy: 1507, r: 106, bgIndex: 2 },
-  { role: 'satellite' as const, cx: 838, cy: 1507, r: 106, bgIndex: 3 },
-  { role: 'satellite' as const, cx: 1077, cy: 1507, r: 106, bgIndex: 4 },
-  { role: 'satellite' as const, cx: 1309, cy: 1507, r: 106, bgIndex: 5 },
+  { role: 'satellite' as const, cx: -245, cy: 1507, r: 106, slotIndex: 0 },
+  { role: 'satellite' as const, cx: 10, cy: 1507, r: 106, slotIndex: 1 },
+  { role: 'satellite' as const, cx: 265, cy: 1507, r: 106, slotIndex: 2 },
+  { role: 'satellite' as const, cx: 838, cy: 1507, r: 106, slotIndex: 3 },
+  { role: 'satellite' as const, cx: 1077, cy: 1507, r: 106, slotIndex: 4 },
+  { role: 'satellite' as const, cx: 1309, cy: 1507, r: 106, slotIndex: 5 },
 ];
 
 interface StartScreenProps {
-  /** Backgrounds configurados por el cliente. Los 6 slots del carrusel se
-   *  llenan ciclando `backgrounds[i % backgrounds.length]`. */
-  backgrounds: PhotoBoothBackground[];
-  selectedBackgroundId: string | null;
-  hasTouchedBackground: boolean;
-  onSelectBackground: (id: string) => void;
+  /** Frames configurados por el cliente. Los slots del carrusel se llenan
+   *  ciclando `frames[i % frames.length]`. */
+  frames: Array<PhotoBoothFrame & { resolvedImage: string; resolvedThumbnail: string }>;
+  selectedFrameId: string | null;
+  onSelectFrame: (id: string) => void;
   onStart: () => void;
   onToggleTimer: () => void;
   onHome: () => void;
@@ -37,19 +36,21 @@ interface StartScreenProps {
 }
 
 /**
- * UI de la fase `'live'` — overlay encima de la cámara. Paths verbatim del
- * SVG `0-Photo_Booth-Start.svg` (menos header y live preview, que son
- * renderizados por el módulo). Se compone de:
+ * UI de la fase `'live'` del Photo Booth. Paths verbatim del SVG
+ * `0-Photo_Booth-Start.svg` (el header y la live camera los pone el
+ * módulo padre). Se compone de:
  *   - overlay gradient inferior (dark) para contraste de botones.
  *   - home button (semicircle izq).
- *   - carrusel de backgrounds + START central.
+ *   - carrusel de FRAMES + START central.
  *   - TIMER pill + EXPERIENCE pill.
+ *
+ * Al seleccionar un frame se debe renderizar su overlay sobre la cámara
+ * (el módulo se encarga de esa capa).
  */
 export function StartScreen({
-  backgrounds,
-  selectedBackgroundId,
-  hasTouchedBackground,
-  onSelectBackground,
+  frames,
+  selectedFrameId,
+  onSelectFrame,
   onStart,
   onToggleTimer,
   onHome,
@@ -152,18 +153,18 @@ export function StartScreen({
         </text>
       </svg>
 
-      {/* Imágenes de los satélites como botones <img> */}
+      {/* Thumbnails de frames como botones (ciclan si hay menos de 6). */}
       {satellites.map((c, i) => {
-        if (backgrounds.length === 0) return null;
-        const bgIdx = (c.bgIndex ?? i) % backgrounds.length;
-        const bg: PhotoBoothBackground = backgrounds[bgIdx]!;
-        const selected = selectedBackgroundId === bg.id;
+        if (frames.length === 0) return null;
+        const frameIdx = (c.slotIndex ?? i) % frames.length;
+        const frame = frames[frameIdx]!;
+        const selected = selectedFrameId === frame.id;
         return (
           <button
             key={`sat-btn-${i}`}
             type="button"
-            aria-label={bg.label}
-            onClick={() => onSelectBackground(bg.id)}
+            aria-label={frame.label}
+            onClick={() => onSelectFrame(frame.id)}
             className="absolute"
             style={{
               left: c.cx - 90,
@@ -175,15 +176,14 @@ export function StartScreen({
               background: 'transparent',
               borderRadius: '50%',
               overflow: 'hidden',
-              boxShadow:
-                selected && hasTouchedBackground
-                  ? '0 0 0 6px hsl(var(--photo-accent-from))'
-                  : undefined,
+              boxShadow: selected
+                ? '0 0 0 6px hsl(var(--photo-accent-from))'
+                : undefined,
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={bg.thumbnail ?? bg.image}
+              src={frame.resolvedThumbnail}
               alt=""
               draggable={false}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}

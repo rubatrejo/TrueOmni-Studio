@@ -9324,11 +9324,11 @@
           { "id": "sunset", "image": "assets/photo-booth/backgrounds/bg-sunset.jpg", "label": "Sunset" }
         ],
         "frames": [
-          { "id": "frame-0", "image": "assets/photo-booth/frames/Photo_Booth-Frame_0.png", "label": "Classic" },
-          { "id": "frame-1", "image": "assets/photo-booth/frames/Photo_Booth-Frame_1.png", "label": "Postcard" },
-          { "id": "frame-2", "image": "assets/photo-booth/frames/Photo_Booth-Frame_2.png", "label": "Badge" },
-          { "id": "frame-3", "image": "assets/photo-booth/frames/Photo_Booth-Frame_3.png", "label": "Vintage" },
-          { "id": "frame-4", "image": "assets/photo-booth/frames/Photo_Booth-Frame_4.png", "label": "Clean" }
+          { "id": "frame-0", "image": "assets/photo-booth/frames/Photo_Booth-Frame_0.png", "thumbnail": "assets/photo-booth/frames/Photo_Booth-Thumbnail_Frame_0.png", "label": "Classic" },
+          { "id": "frame-1", "image": "assets/photo-booth/frames/Photo_Booth-Frame_1.png", "thumbnail": "assets/photo-booth/frames/Photo_Booth-Thumbnail_Frame_1.png", "label": "Postcard" },
+          { "id": "frame-2", "image": "assets/photo-booth/frames/Photo_Booth-Frame_2.png", "thumbnail": "assets/photo-booth/frames/Photo_Booth-Thumbnail_Frame_2.png", "label": "Badge" },
+          { "id": "frame-3", "image": "assets/photo-booth/frames/Photo_Booth-Frame_3.png", "thumbnail": "assets/photo-booth/frames/Photo_Booth-Thumbnail_Frame_3.png", "label": "Vintage" },
+          { "id": "frame-4", "image": "assets/photo-booth/frames/Photo_Booth-Frame_4.png", "thumbnail": "assets/photo-booth/frames/Photo_Booth-Thumbnail_Frame_4.png", "label": "Clean" }
         ],
         "filters": [
           { "id": "none", "label": "Original", "cssFilter": "none" },

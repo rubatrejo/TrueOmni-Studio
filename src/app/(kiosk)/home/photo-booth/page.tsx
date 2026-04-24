@@ -2,6 +2,7 @@ import { KioskCanvas } from '@/components/kiosk-canvas';
 import { PhotoBoothModule } from '@/components/photo-booth/photo-booth-module';
 import { getConfig } from '@/lib/config';
 import { resolvePhotoBoothAsset } from '@/lib/photo-booth';
+import { fetchWeather } from '@/lib/weather';
 
 export default async function PhotoBoothPage() {
   const config = await getConfig();
@@ -25,6 +26,9 @@ export default async function PhotoBoothPage() {
   const resolvedFrames = photoBooth.frames.map((f) => ({
     ...f,
     resolvedImage: resolvePhotoBoothAsset(f.image),
+    resolvedThumbnail: f.thumbnail
+      ? resolvePhotoBoothAsset(f.thumbnail)
+      : resolvePhotoBoothAsset(f.image),
   }));
   const resolvedStickers = photoBooth.stickers.map((s) => ({
     ...s,
@@ -34,23 +38,10 @@ export default async function PhotoBoothPage() {
   const logoSrc = resolvePhotoBoothAsset(config.branding.logo.default);
   const logoAlt = config.branding.logo.alt ?? config.client.nombre;
 
-  const now = new Date();
+  const coords = config.client.coords;
+  const weather = await fetchWeather(coords?.lat, coords?.lng);
   const locale = config.client.locale ?? 'en-US';
   const timezone = config.client.timezone;
-  const headerTime = now.toLocaleTimeString(locale, {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-    timeZone: timezone,
-  });
-  const headerDate = now.toLocaleDateString(locale, {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: timezone,
-  });
-  const headerTempLabel = config.textos.photo_booth_header_temp_placeholder ?? '50°';
 
   const textos = {
     timerOn: config.textos.photo_booth_timer_on ?? 'TIMER {seconds}s',
@@ -93,9 +84,9 @@ export default async function PhotoBoothPage() {
         textos={textos}
         logoSrc={logoSrc}
         logoAlt={logoAlt}
-        headerTime={headerTime}
-        headerDate={headerDate}
-        headerTempLabel={headerTempLabel}
+        weather={weather}
+        locale={locale}
+        timezone={timezone}
       />
     </KioskCanvas>
   );

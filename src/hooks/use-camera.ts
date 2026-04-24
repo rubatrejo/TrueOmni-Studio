@@ -36,11 +36,10 @@ function isMockEnabled(): boolean {
   return false;
 }
 
-/** En dev caemos automáticamente a mock si `getUserMedia` falla
- *  (kiosk sin cámara física, Playwright sin fake device, etc.). */
-function shouldFallbackToMock(): boolean {
-  return process.env.NODE_ENV !== 'production';
-}
+/* Nota: antes había un auto-fallback a mock en dev cuando `getUserMedia`
+ * fallaba, pero eso ocultaba el flujo de permisos al usuario en Chrome/
+ * Safari del kiosk. Ahora si falla cae a `'denied'` → `PermissionGate`
+ * con botón "Try again", salvo que el usuario entre con `?mock=1`. */
 
 /**
  * Hook de acceso a la webcam del kiosk con fallback a modo mock.
@@ -72,11 +71,6 @@ export function useCamera(): UseCameraResult {
       setError(null);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Camera unavailable';
-      if (shouldFallbackToMock()) {
-        setPermission('mock');
-        setError(null);
-        return;
-      }
       setError(msg);
       setPermission('denied');
     }

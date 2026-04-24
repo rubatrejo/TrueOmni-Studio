@@ -9,6 +9,7 @@ import { usePhotoSession } from '@/hooks/use-photo-session';
 import type { PhotoBoothConfig, PhotoBoothSticker } from '@/lib/config';
 import { composeFinal, type StickerPlacement } from '@/lib/photo-booth-compose';
 import { segmentSelfie, warmupSegmenter } from '@/lib/photo-booth-segment';
+import type { WeatherData } from '@/lib/weather';
 
 import { CameraFeed, type CameraFeedHandle } from './capture/camera-feed';
 import { PermissionGate } from './capture/permission-gate';
@@ -51,16 +52,18 @@ interface PhotoBoothTextos {
 interface PhotoBoothModuleProps {
   config: PhotoBoothConfig;
   resolvedBackgrounds: Array<PhotoBoothConfig['backgrounds'][number] & { resolvedImage: string }>;
-  resolvedFrames: Array<PhotoBoothConfig['frames'][number] & { resolvedImage: string }>;
+  resolvedFrames: Array<
+    PhotoBoothConfig['frames'][number] & { resolvedImage: string; resolvedThumbnail: string }
+  >;
   resolvedStickers: Array<PhotoBoothSticker & { resolvedImage: string }>;
   filters: PhotoBoothConfig['filters'];
   mockImageSrc: string;
   textos: PhotoBoothTextos;
   logoSrc: string;
   logoAlt: string;
-  headerTime: string;
-  headerDate: string;
-  headerTempLabel?: string;
+  weather: WeatherData;
+  locale: string;
+  timezone?: string;
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -83,9 +86,9 @@ export function PhotoBoothModule({
   textos,
   logoSrc,
   logoAlt,
-  headerTime,
-  headerDate,
-  headerTempLabel,
+  weather,
+  locale,
+  timezone,
 }: PhotoBoothModuleProps) {
   const router = useRouter();
   const camera = useCamera();
@@ -106,7 +109,9 @@ export function PhotoBoothModule({
     resolvedBackgrounds[0]?.id ?? null,
   );
   const [hasTouchedBackground, setHasTouchedBackground] = useState(false);
-  const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null);
+  const [selectedFrameId, setSelectedFrameId] = useState<string | null>(
+    resolvedFrames[0]?.id ?? null,
+  );
   const [selectedFilterId, setSelectedFilterId] = useState<string | null>(filters[0]?.id ?? null);
   const [activeTab, setActiveTab] = useState<EditorTab>('backgrounds');
   const [placedStickers, setPlacedStickers] = useState<PlacedSticker[]>([]);
@@ -326,11 +331,7 @@ export function PhotoBoothModule({
     );
   }
 
-  const backgroundsForStart = resolvedBackgrounds.map((b) => ({
-    ...b,
-    image: b.resolvedImage,
-    thumbnail: b.resolvedImage,
-  }));
+  const livePreviewFrame = resolvedFrames.find((f) => f.id === selectedFrameId);
 
   return (
     <div
@@ -339,32 +340,46 @@ export function PhotoBoothModule({
     >
       {/* Layer 1: live camera (visible durante live/countdown/capturing) */}
       {(phase === 'live' || phase === 'countdown' || phase === 'capturing') && (
-        <CameraFeed
-          ref={cameraRef}
-          permission={camera.permission}
-          stream={camera.stream}
-          mockImageSrc={mockImageSrc}
-        />
+        <>
+          <CameraFeed
+            ref={cameraRef}
+            permission={camera.permission}
+            stream={camera.stream}
+            mockImageSrc={mockImageSrc}
+          />
+          {/* Overlay live del frame seleccionado: preview del marco sobre
+              la cámara antes de la captura. */}
+          {livePreviewFrame ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={livePreviewFrame.resolvedImage}
+              alt=""
+              draggable={false}
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: 1080,
+                height: 1920,
+                objectFit: 'cover',
+                pointerEvents: 'none',
+              }}
+            />
+          ) : null}
+        </>
       )}
 
       {/* Layer 2: header (solo fases con live cam visible) */}
       {(phase === 'live' || phase === 'countdown' || phase === 'capturing') && (
-        <KioskHeader
-          logoSrc={logoSrc}
-          logoAlt={logoAlt}
-          time={headerTime}
-          date={headerDate}
-          tempLabel={headerTempLabel}
-        />
+        <KioskHeader weather={weather} locale={locale} timezone={timezone} />
       )}
 
       {/* Layer 3: fase activa */}
       {phase === 'live' && (
         <StartScreen
-          backgrounds={backgroundsForStart}
-          selectedBackgroundId={selectedBackgroundId}
-          hasTouchedBackground={hasTouchedBackground}
-          onSelectBackground={onSelectBackground}
+          frames={resolvedFrames}
+          selectedFrameId={selectedFrameId}
+          onSelectFrame={onSelectFrame}
           onStart={handleStart}
           onToggleTimer={handleToggleTimer}
           onHome={() => router.push('/home')}

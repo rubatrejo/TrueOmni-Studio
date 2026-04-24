@@ -1,91 +1,48 @@
 'use client';
 
+import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
+import { WeatherClock } from '@/components/home/weather-clock';
+import type { WeatherData } from '@/lib/weather';
+
 interface KioskHeaderProps {
-  logoSrc: string;
-  logoAlt: string;
-  time: string;
-  date: string;
-  tempLabel?: string;
+  weather: WeatherData;
+  locale: string;
+  timezone?: string;
 }
 
 /**
- * Header verbatim de los SVGs del Photo Booth. Gradient azul fade-in arriba
- * + logo a la izquierda + weather/clock a la derecha. Idéntico en Start,
- * Countdown, Editor y Share para mantener consistencia visual.
+ * Header del Photo Booth que reutiliza los componentes estándar del kiosk
+ * (`TrueOmniLogo` + `WeatherClock`) en las mismas coords que el Home. Se
+ * renderiza transparente encima de la live camera con un gradient azul
+ * suave para legibilidad del logo/weather.
+ *
+ * Coords verbatim del SVG `0-Photo_Booth-Start.svg`:
+ *   - Logo @ (65, 44).
+ *   - Weather + clock @ (744, 40).
  */
-export function KioskHeader({ logoSrc, logoAlt, time, date, tempLabel }: KioskHeaderProps) {
+export function KioskHeader({ weather, locale, timezone }: KioskHeaderProps) {
   return (
     <>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={1080}
-        height={397}
-        viewBox="0 0 1080 397"
-        style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none' }}
-      >
-        <defs>
-          <linearGradient
-            id="pb-header-fade"
-            x1="0.5"
-            x2="0.5"
-            y2="1"
-            gradientUnits="objectBoundingBox"
-          >
-            <stop offset="0" stopColor="#0e518a" stopOpacity={1} />
-            <stop offset="1" stopColor="#0e518a" stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <rect x={0} y={0} width={1080} height={397} fill="url(#pb-header-fade)" />
-      </svg>
-
+      {/* Gradient overlay transparent → azul oscuro para legibilidad */}
       <div
         className="pointer-events-none absolute"
-        style={{ left: 65, top: 43, right: 65, color: '#fff' }}
+        style={{
+          left: 0,
+          top: 0,
+          width: 1080,
+          height: 397,
+          background:
+            'linear-gradient(180deg, rgba(0,79,139,0.9) 0%, rgba(0,79,139,0.55) 30%, rgba(0,79,139,0) 100%)',
+        }}
+      />
+      <div className="absolute" style={{ left: 65, top: 44 }}>
+        <TrueOmniLogo className="h-[70px] w-auto text-white" />
+      </div>
+      <div
+        className="absolute"
+        style={{ left: 744, top: 40, width: 300, height: 85 }}
       >
-        <div
-          style={{
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 16,
-            fontFamily: "'Open Sans', system-ui",
-            fontSize: 25,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          <div style={{ lineHeight: 1.25, textAlign: 'right' }}>
-            <div>{time}</div>
-            <div style={{ fontSize: 23 }}>{date}</div>
-          </div>
-          <span
-            aria-hidden="true"
-            style={{
-              width: 1,
-              height: 25,
-              background: 'hsl(var(--photo-header-fg))',
-              display: 'inline-block',
-            }}
-          />
-          {tempLabel ? <span>{tempLabel}</span> : null}
-          <svg width={60} height={40} viewBox="0 0 60 40" aria-hidden="true">
-            <path
-              d="M51.711,19.2c.012-.227.018-.447.018-.663A15.5,15.5,0,0,0,22.311,11.664,8.2,8.2,0,0,0,17.76,10.3a8.287,8.287,0,0,0-8.252,7.715,11.424,11.424,0,0,0,3.9,22.156H50.5A10.52,10.52,0,0,0,51.711,19.2"
-              fill="#fff"
-            />
-          </svg>
-        </div>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={logoSrc}
-          alt={logoAlt}
-          draggable={false}
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).style.display = 'none';
-          }}
-          style={{ position: 'absolute', left: 0, top: 10, height: 64 }}
-        />
+        <WeatherClock initialWeather={weather} locale={locale} timezone={timezone} />
       </div>
     </>
   );

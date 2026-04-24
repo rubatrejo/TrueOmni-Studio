@@ -17,7 +17,7 @@ export function AdBottom({ ad, onDismiss }: { ad: Ad; onDismiss: () => void }) {
       role="complementary"
       aria-label={ad.alt ?? 'Advertisement'}
       className="absolute bottom-0 left-0 right-0 overflow-hidden"
-      style={{ height: '185px', zIndex: 30 }}
+      style={{ height: '185px', zIndex: 70 }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img

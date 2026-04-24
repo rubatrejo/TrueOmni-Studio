@@ -24,7 +24,7 @@ export function AdPopup({ ad, onDismiss }: { ad: Ad; onDismiss: () => void }) {
       aria-modal="true"
       aria-label={ad.alt ?? 'Advertisement'}
       className="absolute inset-0 flex items-center justify-center"
-      style={{ zIndex: 60, backgroundColor: 'rgba(0,0,0,0.75)' }}
+      style={{ zIndex: 80, backgroundColor: 'rgba(0,0,0,0.75)' }}
     >
       <div
         className="relative overflow-hidden rounded-[18px]"

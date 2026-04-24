@@ -20,7 +20,7 @@ export function AdHero({ ad, onDismiss }: { ad: Ad; onDismiss: () => void }) {
       role="complementary"
       aria-label={ad.alt ?? 'Advertisement'}
       className="absolute inset-x-0 top-0 overflow-hidden"
-      style={{ height: '620px', zIndex: 20, backgroundColor: '#000' }}
+      style={{ height: '620px', zIndex: 70, backgroundColor: '#000' }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img

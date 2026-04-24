@@ -9241,7 +9241,7 @@
         "enabled": true,
         "avatar": "assets/ai/trigger.svg",
         "heroVideo": "assets/ai/hero-video.mp4",
-        "position": { "right": 24, "bottom": 24, "width": 504, "height": 191 },
+        "position": { "right": 24, "bottom": 24, "width": 428, "height": 162 },
         "greeting": "Hi! I'm your guide to {client_name}. Ask me anything about restaurants, events, activities, or getting around the area.",
         "suggestedQuestions": [
           {

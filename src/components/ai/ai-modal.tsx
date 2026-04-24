@@ -3,7 +3,7 @@
 import { useGSAP } from '@gsap/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import gsap from 'gsap';
-import { Mic, SendHorizontal, X } from 'lucide-react';
+import { Mic, SendHorizontal } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { SuggestedQuestions } from '@/components/ai/suggested-questions';
@@ -229,13 +229,14 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
                 }}
               />
 
-              {/* Close button (X arriba-izq). */}
+              {/* Close button (X arriba-derecha) — usa el SVG estándar del
+                  kiosk (mismo path que AdCloseButton). */}
               <motion.button
                 type="button"
                 whileTap={{ scale: 0.9 }}
                 onClick={close}
                 aria-label={textos.ariaClose}
-                className="absolute left-3 top-3 flex items-center justify-center rounded-full"
+                className="absolute right-3 top-3 flex items-center justify-center rounded-full"
                 style={{
                   width: 32,
                   height: 32,
@@ -244,7 +245,14 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
                   WebkitBackdropFilter: 'blur(8px)',
                 }}
               >
-                <X className="h-4 w-4 text-white" strokeWidth={2} />
+                <svg width={16} height={16} viewBox="0 0 24 24" aria-hidden>
+                  <path
+                    d="M6 6l12 12M18 6L6 18"
+                    stroke="#ffffff"
+                    strokeWidth="2.8"
+                    strokeLinecap="round"
+                  />
+                </svg>
               </motion.button>
 
               {/* Mic button con listening rings (Web Speech API). */}

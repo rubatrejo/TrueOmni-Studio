@@ -211,11 +211,13 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Hero video 16:9 con overlay degradado y mic flotante.
-                marginBottom: -1 cubre cualquier gap subpíxel entre el final
-                del gradient y el bg del body (ambos son --ai-surface). */}
+                Altura explícita (608 = 1080 * 9/16 redondeado) en vez de
+                `aspectRatio` para evitar rounding fraccional que dejaba
+                visible un row sub-píxel del backdrop oscuro entre el hero
+                y el body. marginBottom: -2 garantiza overlap. */}
             <div
               className="relative flex-shrink-0 overflow-hidden"
-              style={{ aspectRatio: '16 / 9', marginBottom: -1 }}
+              style={{ height: 608, marginBottom: -2 }}
             >
               <video
                 src={heroVideoSrc}

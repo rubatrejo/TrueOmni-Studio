@@ -51,12 +51,14 @@ type SpeechRecognitionCtor = new () => SpeechRecognitionInstance;
 
 /**
  * Modal full-canvas del módulo Ask AI — verbatim del paquete original
- * (animaciones Framer + GSAP rings) pero adaptado para usar:
+ * (animaciones Framer + GSAP rings) pero adaptado para kiosk 1080×1920:
  *   - Tokens `--ai-*` en lugar de hex hardcoded.
  *   - Textos del cliente activo via prop `textos`.
  *   - `OnScreenKeyboard` del kiosk (en vez del VirtualKeyboard del paquete).
- *   - Web Speech API integrada en el botón mic del hero (en vez de en el
- *     keyboard como hacía el paquete).
+ *   - Web Speech API integrada en el botón mic del hero.
+ *   - Dimensiones tipográficas y de controles escaladas ~2.5× respecto al
+ *     diseño mobile original para garantizar legibilidad y target táctil
+ *     adecuados a un kiosk retrato 1080×1920.
  */
 export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
   const isOpen = useAiStore((s) => s.isOpen);
@@ -153,9 +155,7 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
     } else if (key === 'DOT_COM') {
       setInputValue((v) => v + '.com');
     } else if (typeof key === 'string') {
-      // Letras y símbolos: shift mayúsculas/minúsculas según estado.
       setInputValue((v) => v + (shift ? key.toUpperCase() : key.toLowerCase()));
-      // Al usar la primera letra mayúscula, soltamos shift (comportamiento iOS).
       if (shift) setShift(false);
     }
   }
@@ -185,8 +185,8 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
             transition={{ duration: 0.3 }}
             className="absolute inset-0 z-50"
             style={{
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
               backgroundColor: 'hsl(var(--ai-text) / 0.18)',
             }}
             onClick={close}
@@ -199,11 +199,13 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-            className="absolute bottom-0 left-0 right-0 z-50 flex flex-col overflow-hidden rounded-t-3xl"
+            className="absolute bottom-0 left-0 right-0 z-50 flex flex-col overflow-hidden"
             style={{
               height: inputFocused ? '85%' : '65%',
               backgroundColor: 'hsl(var(--ai-surface))',
-              boxShadow: '0 -8px 40px hsl(var(--ai-text) / 0.18)',
+              boxShadow: '0 -20px 100px hsl(var(--ai-text) / 0.18)',
+              borderTopLeftRadius: 60,
+              borderTopRightRadius: 60,
               transition: 'height 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
             onClick={(e) => e.stopPropagation()}
@@ -229,23 +231,24 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
                 }}
               />
 
-              {/* Close button (X arriba-derecha) — usa el SVG estándar del
-                  kiosk (mismo path que AdCloseButton). */}
+              {/* Close button (X arriba-derecha) — usa el SVG estándar del kiosk. */}
               <motion.button
                 type="button"
                 whileTap={{ scale: 0.9 }}
                 onClick={close}
                 aria-label={textos.ariaClose}
-                className="absolute right-3 top-3 flex items-center justify-center rounded-full"
+                className="absolute flex items-center justify-center rounded-full"
                 style={{
-                  width: 32,
-                  height: 32,
+                  top: 24,
+                  right: 24,
+                  width: 80,
+                  height: 80,
                   backgroundColor: 'hsl(var(--ai-text) / 0.3)',
                   backdropFilter: 'blur(8px)',
                   WebkitBackdropFilter: 'blur(8px)',
                 }}
               >
-                <svg width={16} height={16} viewBox="0 0 24 24" aria-hidden>
+                <svg width={40} height={40} viewBox="0 0 24 24" aria-hidden>
                   <path
                     d="M6 6l12 12M18 6L6 18"
                     stroke="#ffffff"
@@ -256,27 +259,27 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
               </motion.button>
 
               {/* Mic button con listening rings (Web Speech API). */}
-              <div ref={micRef} className="absolute" style={{ bottom: 12, right: 12 }}>
+              <div ref={micRef} className="absolute" style={{ bottom: 30, right: 30 }}>
                 {isListening && (
                   <>
                     <div
                       className="mic-ring-1 absolute rounded-full"
                       style={{
-                        width: 44,
-                        height: 44,
+                        width: 110,
+                        height: 110,
                         top: 0,
                         left: 0,
-                        border: '2px solid hsl(var(--ai-accent-from) / 0.4)',
+                        border: '5px solid hsl(var(--ai-accent-from) / 0.4)',
                       }}
                     />
                     <div
                       className="mic-ring-2 absolute rounded-full"
                       style={{
-                        width: 44,
-                        height: 44,
+                        width: 110,
+                        height: 110,
                         top: 0,
                         left: 0,
-                        border: '2px solid hsl(var(--ai-accent-from) / 0.25)',
+                        border: '5px solid hsl(var(--ai-accent-from) / 0.25)',
                       }}
                     />
                   </>
@@ -290,23 +293,24 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
                   aria-pressed={isListening}
                   className="relative flex items-center justify-center rounded-full"
                   style={{
-                    width: 44,
-                    height: 44,
+                    width: 110,
+                    height: 110,
                     background:
                       'linear-gradient(145deg, hsl(var(--ai-accent-from)), hsl(var(--ai-accent-to)))',
-                    boxShadow: '0 4px 14px hsl(var(--ai-accent-from) / 0.35)',
+                    boxShadow: '0 10px 35px hsl(var(--ai-accent-from) / 0.35)',
                     opacity: voiceSupported ? 1 : 0.5,
                   }}
                 >
-                  <Mic className="h-5 w-5 text-white" strokeWidth={2} />
+                  <Mic style={{ width: 50, height: 50, color: '#ffffff' }} strokeWidth={2} />
                 </motion.button>
               </div>
 
               {/* Title + subtitle. */}
-              <div className="absolute bottom-3 left-4">
+              <div className="absolute" style={{ bottom: 24, left: 36 }}>
                 <p
                   style={{
-                    fontSize: 16,
+                    fontSize: 44,
+                    lineHeight: 1.1,
                     fontFamily: 'var(--font-display)',
                     fontWeight: 700,
                     color: 'hsl(var(--ai-text))',
@@ -316,11 +320,12 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
                 </p>
                 <p
                   style={{
-                    fontSize: 11,
+                    fontSize: 26,
+                    lineHeight: 1.3,
                     fontFamily: 'var(--font-sans)',
                     fontWeight: 400,
                     color: 'hsl(var(--ai-text))',
-                    marginTop: 1,
+                    marginTop: 4,
                   }}
                 >
                   {textos.subtitle}
@@ -331,34 +336,45 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
             {/* Cuerpo: respuesta typewriter + chips + input + (keyboard si focused). */}
             <div className="flex flex-1 flex-col overflow-hidden">
               {/* Texto de respuesta. */}
-              <div className="flex-1 overflow-y-auto px-5 pb-2 pt-3">
+              <div
+                className="flex-1 overflow-y-auto"
+                style={{ paddingLeft: 48, paddingRight: 48, paddingTop: 28, paddingBottom: 16 }}
+              >
                 {isTyping && !displayedText ? (
-                  <div className="flex items-center gap-3 py-2">
+                  <div className="flex items-center" style={{ gap: 18, paddingTop: 8 }}>
                     <div
                       className="flex flex-shrink-0 items-center justify-center rounded-full"
                       style={{
-                        width: 28,
-                        height: 28,
+                        width: 70,
+                        height: 70,
                         background:
                           'linear-gradient(145deg, hsl(var(--ai-accent-from)), hsl(var(--ai-accent-to)))',
                       }}
                     >
-                      <Mic className="h-3.5 w-3.5 text-white" strokeWidth={2} />
+                      <Mic style={{ width: 32, height: 32, color: '#ffffff' }} strokeWidth={2} />
                     </div>
                     <div
-                      className="flex items-center gap-1 rounded-2xl px-4 py-2.5"
-                      style={{ backgroundColor: 'hsl(var(--ai-text-soft) / 0.06)' }}
+                      className="flex items-center"
+                      style={{
+                        gap: 8,
+                        paddingLeft: 26,
+                        paddingRight: 26,
+                        paddingTop: 18,
+                        paddingBottom: 18,
+                        borderRadius: 32,
+                        backgroundColor: 'hsl(var(--ai-text-soft) / 0.06)',
+                      }}
                     >
                       {[0, 1, 2].map((i) => (
                         <motion.div
                           key={i}
                           className="rounded-full"
                           style={{
-                            width: 6,
-                            height: 6,
+                            width: 14,
+                            height: 14,
                             backgroundColor: 'hsl(var(--ai-accent-from))',
                           }}
-                          animate={{ y: [0, -6, 0] }}
+                          animate={{ y: [0, -10, 0] }}
                           transition={{
                             duration: 0.6,
                             repeat: Infinity,
@@ -372,11 +388,11 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
                 ) : (
                   <p
                     style={{
-                      fontSize: 13,
+                      fontSize: 30,
                       fontFamily: 'var(--font-sans)',
                       fontWeight: 400,
                       color: 'hsl(var(--ai-text-soft))',
-                      lineHeight: 1.65,
+                      lineHeight: 1.5,
                     }}
                   >
                     {displayedText}
@@ -386,26 +402,39 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
 
               {/* Chips horizontales. */}
               <div
-                className="flex-shrink-0 py-2.5"
-                style={{ borderTop: '1px solid hsl(var(--ai-text) / 0.06)' }}
+                className="flex-shrink-0"
+                style={{
+                  paddingTop: 18,
+                  paddingBottom: 18,
+                  borderTop: '1px solid hsl(var(--ai-text) / 0.06)',
+                }}
               >
                 <SuggestedQuestions />
               </div>
 
               {/* Input bar. */}
-              <div className="flex-shrink-0 px-4 pb-3 pt-1">
+              <div
+                className="flex-shrink-0"
+                style={{ paddingLeft: 32, paddingRight: 32, paddingTop: 8, paddingBottom: 24 }}
+              >
                 <button
                   type="button"
-                  className="flex w-full items-center gap-2 rounded-full px-4 text-left"
+                  className="flex w-full items-center text-left"
                   style={{
-                    height: 44,
+                    gap: 16,
+                    height: 100,
+                    paddingLeft: 36,
+                    paddingRight: 36,
+                    borderRadius: 9999,
                     backgroundColor: inputFocused
                       ? 'hsl(var(--ai-input-bg))'
                       : 'hsl(var(--ai-text-soft) / 0.05)',
                     border: inputFocused
-                      ? '1.5px solid hsl(var(--ai-accent-from))'
-                      : '1px solid hsl(var(--ai-text-soft) / 0.08)',
-                    boxShadow: inputFocused ? '0 0 0 3px hsl(var(--ai-accent-from) / 0.1)' : 'none',
+                      ? '3px solid hsl(var(--ai-accent-from))'
+                      : '2px solid hsl(var(--ai-text-soft) / 0.08)',
+                    boxShadow: inputFocused
+                      ? '0 0 0 8px hsl(var(--ai-accent-from) / 0.1)'
+                      : 'none',
                     transition: 'all 0.2s ease',
                   }}
                   onClick={() => setInputFocused(true)}
@@ -415,21 +444,22 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
                       <span
                         className="flex-1 truncate"
                         style={{
-                          fontSize: 13,
+                          fontSize: 30,
                           fontFamily: 'var(--font-sans)',
                           fontWeight: 400,
                           color: inputValue ? 'hsl(var(--ai-text))' : 'hsl(var(--ai-text) / 0.3)',
-                          minHeight: 20,
+                          minHeight: 36,
                         }}
                       >
                         {inputValue || textos.inputPlaceholder}
                         <motion.span
-                          className="ml-px inline-block"
+                          className="inline-block"
                           animate={{ opacity: [1, 0] }}
                           transition={{ duration: 0.6, repeat: Infinity }}
                           style={{
-                            width: 1.5,
-                            height: 14,
+                            marginLeft: 4,
+                            width: 4,
+                            height: 32,
                             backgroundColor: 'hsl(var(--ai-accent-from))',
                             verticalAlign: 'text-bottom',
                           }}
@@ -448,8 +478,7 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
                           aria-label={textos.title}
                         >
                           <SendHorizontal
-                            className="h-5 w-5"
-                            style={{ color: 'hsl(var(--ai-accent-from))' }}
+                            style={{ width: 44, height: 44, color: 'hsl(var(--ai-accent-from))' }}
                             strokeWidth={2}
                           />
                         </motion.span>
@@ -458,7 +487,7 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
                   ) : (
                     <span
                       style={{
-                        fontSize: 13,
+                        fontSize: 30,
                         fontFamily: 'var(--font-sans)',
                         fontWeight: 400,
                         color: 'hsl(var(--ai-text) / 0.3)',

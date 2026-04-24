@@ -33,17 +33,25 @@ export function SuggestedQuestions() {
   );
 
   return (
-    <div ref={containerRef} className="flex gap-2 overflow-x-auto px-4">
+    <div
+      ref={containerRef}
+      className="flex overflow-x-auto"
+      style={{ gap: 14, paddingLeft: 36, paddingRight: 36 }}
+    >
       {suggestedQuestions.map((q) => (
         <motion.button
           key={q.id}
           type="button"
           whileTap={{ scale: 0.95 }}
           onClick={() => !isTyping && askQuestion(q.text)}
-          className="question-chip flex-shrink-0 rounded-full px-3.5 py-2"
+          className="question-chip flex-shrink-0 rounded-full"
           style={{
+            paddingLeft: 28,
+            paddingRight: 28,
+            paddingTop: 16,
+            paddingBottom: 16,
             backgroundColor: 'hsl(var(--ai-text-soft) / 0.06)',
-            border: '1px solid hsl(var(--ai-text-soft) / 0.1)',
+            border: '2px solid hsl(var(--ai-text-soft) / 0.12)',
             opacity: isTyping ? 0.4 : 1,
             transition: 'opacity 0.2s ease',
             whiteSpace: 'nowrap',
@@ -51,7 +59,7 @@ export function SuggestedQuestions() {
         >
           <span
             style={{
-              fontSize: '11px',
+              fontSize: 24,
               fontFamily: 'var(--font-sans)',
               fontWeight: 500,
               color: 'hsl(var(--ai-text-soft))',

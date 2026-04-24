@@ -497,6 +497,7 @@ export function PhotoBoothModule({
                 lineHeight: 1.2,
                 fontWeight: 700,
                 color: 'hsl(var(--photo-home-btn-bg))',
+                whiteSpace: 'pre-line',
               }}
             >
               {textos.exitTitle}

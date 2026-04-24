@@ -64,8 +64,8 @@ export function OptionsCarousel({
             onClick={() => onSelect(opt.id)}
             style={{
               flex: '0 0 auto',
-              width: 212,
-              height: 212,
+              width: 200,
+              height: 200,
               padding: 0,
               borderRadius: '50%',
               border: '10px solid #fff',

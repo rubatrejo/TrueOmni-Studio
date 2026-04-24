@@ -73,15 +73,16 @@
   /* ---------------------------------------------------------------------- */
   --photo-bg: 0 0% 100%;
   --photo-text: 218 35% 14%;
-  --photo-tabs-bg: 201 100% 40%;
+  --photo-tabs-bg: 206 100% 27%;
   --photo-tab-active: 0 0% 100%;
-  --photo-tab-inactive: 201 100% 40%;
+  --photo-tab-inactive: 206 100% 27%;
   --photo-tab-text-active: 218 35% 14%;
   --photo-tab-text-inactive: 0 0% 100%;
   --photo-sidebar-bg: 201 100% 40%;
   --photo-sidebar-icon: 0 0% 100%;
   --photo-countdown-bg: 0 0% 0%;
   --photo-countdown-number: 0 0% 100%;
+  --photo-countdown-ring: 62 53% 48%;
   --photo-share-bg: 0 0% 0%;
   --photo-share-title: 0 0% 100%;
   --photo-cta-border: 0 0% 100%;

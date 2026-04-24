@@ -74,15 +74,16 @@
   /* ---------------------------------------------------------------------- */
   --photo-bg: 0 0% 100%; /* fondo general del editor */
   --photo-text: 218 35% 14%; /* texto principal */
-  --photo-tabs-bg: 201 100% 40%; /* barra de tabs (Backgrounds/Frames/Filters) */
+  --photo-tabs-bg: 206 100% 27%; /* #004f8b — barra del editor (azul oscuro) */
   --photo-tab-active: 0 0% 100%; /* tab seleccionado */
-  --photo-tab-inactive: 201 100% 40%; /* tab no seleccionado */
+  --photo-tab-inactive: 206 100% 27%; /* tab no seleccionado */
   --photo-tab-text-active: 218 35% 14%; /* texto tab activo */
   --photo-tab-text-inactive: 0 0% 100%; /* texto tab inactivo */
   --photo-sidebar-bg: 201 100% 40%; /* barra lateral derecha */
   --photo-sidebar-icon: 0 0% 100%; /* flechas + icono QR */
   --photo-countdown-bg: 0 0% 0%; /* overlay 3-2-1 (aplicar con /alpha) */
   --photo-countdown-number: 0 0% 100%; /* número 3/2/1 */
+  --photo-countdown-ring: 62 53% 48%; /* #b9bd39 — olive verde del send-to-phone */
   --photo-share-bg: 0 0% 0%; /* fondo negro pantalla Share */
   --photo-share-title: 0 0% 100%; /* SHARE YOUR MEMORIES */
   --photo-cta-border: 0 0% 100%; /* borde botones EMAIL / TEXT */

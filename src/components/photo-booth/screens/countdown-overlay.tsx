@@ -47,11 +47,12 @@ export function CountdownOverlay({ value, totalSeconds }: CountdownOverlayProps)
         <g transform="translate(387 1544)" fill="none" stroke="#fff" strokeWidth={20} opacity={0.2}>
           <circle cx={153} cy={153} r={153} />
         </g>
-        {/* Arco de progreso que se rellena linealmente durante el countdown */}
+        {/* Arco de progreso que se rellena linealmente durante el countdown.
+            Color olive verde tomado del Send-to-Phone (#b9bd39). */}
         <g
           transform="translate(387 1544)"
           fill="none"
-          stroke="#fff"
+          stroke="hsl(var(--photo-countdown-ring))"
           strokeWidth={20}
           strokeLinecap="round"
         >

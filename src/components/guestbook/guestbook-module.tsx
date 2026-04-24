@@ -374,9 +374,15 @@ export function GuestbookModule({
           >
             <h3
               className="text-center font-sans"
-              style={{ fontSize: '32px', lineHeight: 1.2, fontWeight: 700, color: '#004f8b' }}
+              style={{
+                fontSize: '32px',
+                lineHeight: 1.2,
+                fontWeight: 700,
+                color: '#004f8b',
+                whiteSpace: 'pre-line',
+              }}
             >
-              {textos.guestbook_exit_title ?? 'Are you sure you want to exit?'}
+              {textos.guestbook_exit_title ?? 'Are you sure\nyou want to exit?'}
             </h3>
             <p
               className="text-center font-sans"

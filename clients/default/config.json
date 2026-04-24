@@ -179,7 +179,7 @@
     "photo_booth_aria_home": "Go home",
     "photo_booth_header_temp_placeholder": "50°",
     "photo_booth_disabled": "Photo Booth is not configured for the active client.",
-    "photo_booth_exit_title": "Are you sure you want to leave?",
+    "photo_booth_exit_title": "Are you sure\nyou want to leave?",
     "photo_booth_exit_message": "You'll lose your photo and all the edits you've made.",
     "photo_booth_exit_cancel": "Cancel",
     "photo_booth_exit_confirm": "Leave"
@@ -9343,7 +9343,9 @@
           { "id": "sepia", "label": "Sepia", "cssFilter": "sepia(0.8) saturate(1.1)" },
           { "id": "vintage", "label": "Vintage", "cssFilter": "contrast(1.05) sepia(0.35) saturate(1.2) hue-rotate(-10deg)" },
           { "id": "warm", "label": "Warm", "cssFilter": "saturate(1.2) contrast(1.05) brightness(1.02) hue-rotate(-5deg)" },
-          { "id": "cool", "label": "Cool", "cssFilter": "saturate(1.1) contrast(1.05) hue-rotate(15deg) brightness(1.02)" }
+          { "id": "cool", "label": "Cool", "cssFilter": "saturate(1.1) contrast(1.05) hue-rotate(15deg) brightness(1.02)" },
+          { "id": "punchy", "label": "Punchy", "cssFilter": "saturate(1.5) contrast(1.2) brightness(1.05)" },
+          { "id": "dramatic", "label": "Dramatic", "cssFilter": "contrast(1.4) brightness(0.9) saturate(1.1)" }
         ],
         "stickers": [
           { "id": "heart", "image": "assets/photo-booth/stickers/heart.svg", "label": "Heart", "defaultWidth": 180 },

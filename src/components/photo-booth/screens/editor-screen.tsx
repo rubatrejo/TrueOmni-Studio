@@ -12,7 +12,9 @@ import { StickersRow } from '../editor/stickers-row';
 
 interface EditorResolved {
   backgrounds: Array<PhotoBoothConfig['backgrounds'][number] & { resolvedImage: string }>;
-  frames: Array<PhotoBoothConfig['frames'][number] & { resolvedImage: string }>;
+  frames: Array<
+    PhotoBoothConfig['frames'][number] & { resolvedImage: string; resolvedThumbnail: string }
+  >;
   filters: PhotoBoothConfig['filters'];
   stickers: Array<PhotoBoothConfig['stickers'][number] & { resolvedImage: string }>;
 }
@@ -86,7 +88,7 @@ export function EditorScreen({
       return {
         options: resolved.frames.map<CarouselOption>((f) => ({
           id: f.id,
-          imageSrc: f.resolvedImage,
+          imageSrc: f.resolvedThumbnail,
           label: f.label,
         })),
         selectedId: selectedFrameId,

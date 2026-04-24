@@ -62,6 +62,8 @@ export default async function PhotoBoothPage() {
     ariaShutter: config.textos.photo_booth_aria_shutter ?? 'Take photo',
     ariaBack: config.textos.photo_booth_aria_back ?? 'Go back',
     ariaClose: config.textos.photo_booth_aria_close ?? 'Close',
+    retakeLabel: config.textos.photo_booth_retake ?? 'Retake',
+    shareCta: config.textos.photo_booth_share_email_cta ?? 'Share',
   };
 
   return (

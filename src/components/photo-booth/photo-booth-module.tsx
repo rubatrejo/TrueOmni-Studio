@@ -6,12 +6,14 @@ import { useEffect, useRef, useState } from 'react';
 import { useCamera } from '@/hooks/use-camera';
 import { useCountdown } from '@/hooks/use-countdown';
 import { usePhotoSession } from '@/hooks/use-photo-session';
-import type { PhotoBoothConfig } from '@/lib/config';
+import type { PhotoBoothConfig, PhotoBoothSticker } from '@/lib/config';
 import { composeFinal, type StickerPlacement } from '@/lib/photo-booth-compose';
 import { segmentSelfie, warmupSegmenter } from '@/lib/photo-booth-segment';
 
 import { CameraFeed, type CameraFeedHandle } from './capture/camera-feed';
 import { PermissionGate } from './capture/permission-gate';
+import type { EditorTab } from './editor/editor-tabs';
+import type { PlacedSticker } from './editor/sticker-layer';
 import { CountdownOverlay } from './screens/countdown-overlay';
 import { EditorScreen } from './screens/editor-screen';
 import { KioskHeader } from './screens/kiosk-header';
@@ -32,13 +34,18 @@ interface PhotoBoothTextos {
   ariaShutter: string;
   ariaBack: string;
   ariaClose: string;
-  retakeLabel: string;
-  shareCta: string;
+  ariaShare: string;
+  tabBackgrounds: string;
+  tabFrames: string;
+  tabFilters: string;
 }
 
 interface PhotoBoothModuleProps {
   config: PhotoBoothConfig;
   resolvedBackgrounds: Array<PhotoBoothConfig['backgrounds'][number] & { resolvedImage: string }>;
+  resolvedFrames: Array<PhotoBoothConfig['frames'][number] & { resolvedImage: string }>;
+  resolvedStickers: Array<PhotoBoothSticker & { resolvedImage: string }>;
+  filters: PhotoBoothConfig['filters'];
   mockImageSrc: string;
   textos: PhotoBoothTextos;
   logoSrc: string;
@@ -48,11 +55,6 @@ interface PhotoBoothModuleProps {
   headerTempLabel?: string;
 }
 
-/**
- * Descarga una imagen remota como HTMLImageElement (crossOrigin='anonymous'
- * para evitar tainted canvas). Usado por `composeFinal` cuando la fuente
- * no es ya un ImageBitmap.
- */
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -63,16 +65,12 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-/**
- * Orquestador del módulo Photo Booth. La live camera y el header son
- * layers permanentes; cada fase renderiza su overlay específico encima.
- *
- * Ola 2 cubrió 'live' y 'countdown'. Ola 3 añade 'capturing' (real) y
- * un stub de 'editing'. Ola 4 implementa el editor pixel-perfect.
- */
 export function PhotoBoothModule({
   config,
   resolvedBackgrounds,
+  resolvedFrames,
+  resolvedStickers,
+  filters,
   mockImageSrc,
   textos,
   logoSrc,
@@ -87,11 +85,23 @@ export function PhotoBoothModule({
   const cameraRef = useRef<CameraFeedHandle>(null);
   const session = usePhotoSession();
 
+  // Estado captura (se preserva entre re-composes del editor)
+  const captureRef = useRef<{
+    bitmap: ImageBitmap | null;
+    mask: Uint8Array;
+    width: number;
+    height: number;
+  } | null>(null);
+
   const [phase, setPhase] = useState<Phase>('live');
   const [selectedBackgroundId, setSelectedBackgroundId] = useState<string | null>(
     resolvedBackgrounds[0]?.id ?? null,
   );
   const [hasTouchedBackground, setHasTouchedBackground] = useState(false);
+  const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null);
+  const [selectedFilterId, setSelectedFilterId] = useState<string | null>(filters[0]?.id ?? null);
+  const [activeTab, setActiveTab] = useState<EditorTab>('backgrounds');
+  const [placedStickers, setPlacedStickers] = useState<PlacedSticker[]>([]);
   const [captureError, setCaptureError] = useState<string | null>(null);
 
   const timerOptions = config.timer?.options ?? [3, 5, 10];
@@ -99,12 +109,35 @@ export function PhotoBoothModule({
   const timerEnabled = config.timer?.enabled !== false;
   const [timerSeconds, setTimerSeconds] = useState<number>(timerEnabled ? timerDefault : -1);
 
-  // Mount: abrir cámara + precargar MediaPipe
   useEffect(() => {
     void camera.start();
     warmupSegmenter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /**
+   * Recompone el blob con el background actualmente seleccionado. Usa el
+   * frame+mask cacheados en `captureRef`. Llamado tras la captura inicial y
+   * cada vez que el usuario cambia de background en el editor.
+   */
+  const recomposeBaseBlob = async (backgroundId: string | null) => {
+    const c = captureRef.current;
+    if (!c || !c.bitmap) return;
+    const bg = resolvedBackgrounds.find((b) => b.id === backgroundId) ?? resolvedBackgrounds[0];
+    const backgroundImg = bg ? await loadImage(bg.resolvedImage) : null;
+    const blob = await composeFinal({
+      capture: c.bitmap,
+      captureWidth: c.width,
+      captureHeight: c.height,
+      mask: c.mask,
+      background: backgroundImg,
+      frame: null,
+      stickers: [],
+      cssFilter: 'none',
+      edgeFeather: config.edgeFeather ?? 3,
+    });
+    session.setBlob(blob);
+  };
 
   const capture = async () => {
     setCaptureError(null);
@@ -120,22 +153,16 @@ export function PhotoBoothModule({
       if (!captureWidth || !captureHeight) throw new Error('Camera source has no dimensions');
 
       const segResult = await segmentSelfie(source);
-      const bg = resolvedBackgrounds.find((b) => b.id === selectedBackgroundId) ??
-        resolvedBackgrounds[0];
-      const backgroundImg = bg ? await loadImage(bg.resolvedImage) : null;
-      const stickers: StickerPlacement[] = [];
-      const blob = await composeFinal({
-        capture: source,
-        captureWidth,
-        captureHeight,
+      // Congelar el frame capturado en un ImageBitmap para que la cámara
+      // (que sigue streaming en el fondo) no altere el bitmap original.
+      const bitmap = await createImageBitmap(source);
+      captureRef.current = {
+        bitmap,
         mask: segResult.mask,
-        background: backgroundImg,
-        frame: null,
-        stickers,
-        cssFilter: 'none',
-        edgeFeather: config.edgeFeather ?? 3,
-      });
-      session.setBlob(blob);
+        width: captureWidth,
+        height: captureHeight,
+      };
+      await recomposeBaseBlob(selectedBackgroundId);
       setPhase('editing');
     } catch (err) {
       setCaptureError(err instanceof Error ? err.message : 'Capture failed');
@@ -174,16 +201,55 @@ export function PhotoBoothModule({
   const onSelectBackground = (id: string) => {
     setSelectedBackgroundId(id);
     setHasTouchedBackground(true);
+    // En editor: recomponer con el nuevo bg.
+    if (phase === 'editing') void recomposeBaseBlob(id);
+  };
+
+  const onSelectFrame = (id: string) =>
+    setSelectedFrameId((prev) => (prev === id ? null : id));
+  const onSelectFilter = (id: string) => setSelectedFilterId(id);
+
+  const onAddSticker = (sticker: (typeof resolvedStickers)[number]) => {
+    const instanceId = `${sticker.id}-${Date.now()}`;
+    const w = sticker.defaultWidth ?? 180;
+    setPlacedStickers((prev) => [
+      ...prev,
+      {
+        instanceId,
+        stickerId: sticker.id,
+        src: sticker.resolvedImage,
+        x: 313, // centro del photo area (626/2)
+        y: 557, // centro (1114/2)
+        width: w,
+        height: w,
+      },
+    ]);
+  };
+
+  const onUpdateSticker = (id: string, patch: Partial<PlacedSticker>) => {
+    setPlacedStickers((prev) =>
+      prev.map((s) => (s.instanceId === id ? { ...s, ...patch } : s)),
+    );
+  };
+
+  const onRemoveSticker = (id: string) => {
+    setPlacedStickers((prev) => prev.filter((s) => s.instanceId !== id));
   };
 
   const handleRetake = () => {
     session.setBlob(null);
+    captureRef.current?.bitmap?.close();
+    captureRef.current = null;
+    setPlacedStickers([]);
+    setSelectedFrameId(null);
+    setSelectedFilterId(filters[0]?.id ?? null);
     setPhase('live');
   };
 
   const handleShare = () => {
     setPhase('sharing');
-    // TODO(Ola 5): share modal + QR
+    // TODO(Ola 5): composición final con frame + filter + stickers cocidos +
+    // QR + modals de Email/Text.
   };
 
   const timerLabel =
@@ -223,7 +289,7 @@ export function PhotoBoothModule({
         />
       )}
 
-      {/* Layer 2: header */}
+      {/* Layer 2: header (solo fases con live cam visible) */}
       {(phase === 'live' || phase === 'countdown' || phase === 'capturing') && (
         <KioskHeader
           logoSrc={logoSrc}
@@ -274,10 +340,35 @@ export function PhotoBoothModule({
       {phase === 'editing' && (
         <EditorScreen
           blobUrl={session.blobUrl}
+          resolved={{
+            backgrounds: resolvedBackgrounds,
+            frames: resolvedFrames,
+            filters,
+            stickers: resolvedStickers,
+          }}
+          activeTab={activeTab}
+          onChangeTab={setActiveTab}
+          selectedBackgroundId={selectedBackgroundId}
+          selectedFrameId={selectedFrameId}
+          selectedFilterId={selectedFilterId}
+          onSelectBackground={onSelectBackground}
+          onSelectFrame={onSelectFrame}
+          onSelectFilter={onSelectFilter}
+          stickers={placedStickers}
+          onAddSticker={onAddSticker}
+          onUpdateSticker={onUpdateSticker}
+          onRemoveSticker={onRemoveSticker}
           onBack={handleRetake}
           onShare={handleShare}
-          backLabel={textos.retakeLabel}
-          shareLabel={textos.shareCta}
+          labels={{
+            tabs: {
+              backgrounds: textos.tabBackgrounds,
+              frames: textos.tabFrames,
+              filters: textos.tabFilters,
+            },
+            ariaBack: textos.ariaBack,
+            ariaShare: textos.ariaShare,
+          }}
         />
       )}
 

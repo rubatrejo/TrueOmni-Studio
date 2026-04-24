@@ -22,13 +22,18 @@ export default async function PhotoBoothPage() {
     ...b,
     resolvedImage: resolvePhotoBoothAsset(b.image),
   }));
+  const resolvedFrames = photoBooth.frames.map((f) => ({
+    ...f,
+    resolvedImage: resolvePhotoBoothAsset(f.image),
+  }));
+  const resolvedStickers = photoBooth.stickers.map((s) => ({
+    ...s,
+    resolvedImage: resolvePhotoBoothAsset(s.image),
+  }));
   const mockImageSrc = resolvePhotoBoothAsset('assets/photo-booth/mock/demo-camera.jpg');
   const logoSrc = resolvePhotoBoothAsset(config.branding.logo.default);
   const logoAlt = config.branding.logo.alt ?? config.client.nombre;
 
-  // Header time + date derivados de `new Date()` SSR, formateados con el
-  // locale y timezone del cliente. El reloj no se actualiza en cliente en
-  // v1; Fase 5+ conectará un `<LiveClock>` que refresque cada minuto.
   const now = new Date();
   const locale = config.client.locale ?? 'en-US';
   const timezone = config.client.timezone;
@@ -62,8 +67,10 @@ export default async function PhotoBoothPage() {
     ariaShutter: config.textos.photo_booth_aria_shutter ?? 'Take photo',
     ariaBack: config.textos.photo_booth_aria_back ?? 'Go back',
     ariaClose: config.textos.photo_booth_aria_close ?? 'Close',
-    retakeLabel: config.textos.photo_booth_retake ?? 'Retake',
-    shareCta: config.textos.photo_booth_share_email_cta ?? 'Share',
+    ariaShare: config.textos.photo_booth_aria_share ?? 'Share photo',
+    tabBackgrounds: config.textos.photo_booth_tab_backgrounds ?? 'Backgrounds',
+    tabFrames: config.textos.photo_booth_tab_frames ?? 'Frames',
+    tabFilters: config.textos.photo_booth_tab_filters ?? 'Filters',
   };
 
   return (
@@ -71,6 +78,9 @@ export default async function PhotoBoothPage() {
       <PhotoBoothModule
         config={photoBooth}
         resolvedBackgrounds={resolvedBackgrounds}
+        resolvedFrames={resolvedFrames}
+        resolvedStickers={resolvedStickers}
+        filters={photoBooth.filters}
         mockImageSrc={mockImageSrc}
         textos={textos}
         logoSrc={logoSrc}

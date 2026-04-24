@@ -6,11 +6,11 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Fase 3.15 (Ask AI module) **cerrada** tras sesión de instalación full white-label desde el paquete portable `_packaged/ask-ai-module/`. UI idéntica al paquete preservada con tokens `--ai-*`, OnScreenKeyboard del kiosk reusado, voice (Web Speech) en mic del hero.
+**Fase activa:** Fase 3.15 (Ask AI module) **cerrada y aprobada por Rubén** tras iteración visual completa: trigger pastilla SVG, modal slide-down desde top, escalado kiosk 2.5×, X SVG nuestra top-right, fondo blanco, gap hero→body resuelto con triple-fix, subtitle/greeting interpolados con `{client_name}` (Arizona).
 
-**Última fase cerrada:** Fase 3.15 — Ask AI module (2026-04-23). Antes: 3.14 Guestbook, 3.13 Trails, 3.12 Deals, 3.11 Tickets.
+**Última fase cerrada:** Fase 3.15 — Ask AI module + iteración visual (2026-04-23). Antes: 3.14 Guestbook, 3.13 Trails, 3.12 Deals, 3.11 Tickets.
 
-**Siguiente acción concreta:** Photo Booth o Itinerary Builder (módulos del Home aún sin construir) o Fase 4 (primer cliente real).
+**Siguiente acción concreta:** reescribir contenido de las 8 suggested questions con lugares reales de Arizona (TODO de coherencia geográfica), o atacar Photo Booth / Itinerary Builder / Fase 4 (primer cliente real).
 
 **Bloqueos:** ninguno. `alwaysShowWelcome={true}` del MapModule sigue hardcoded para QA — apagarlo antes de Fase 4 / producción (`[module]/page.tsx` rama `map`).
 
@@ -918,6 +918,49 @@ driving/walking, SEE 360 funcional, favorite toast).
 - **Mock typewriter `setInterval(15ms)` verbatim del paquete** — preserva el feel original. Se reemplazará por streaming response cuando se conecte a Claude.
 
 **Fase:** 3.15 Ask AI cerrada (UI idéntica al paquete original, fully white-label, voice integrada en mic del hero).
+
+---
+
+### Sesión 2026-04-23 — Fase 3.15 Ask AI iteración visual (10 fixes post-cierre, módulo aprobado por Rubén)
+
+**Hecho:**
+
+- **Trigger swap (8204a0e + 7b8054c + 0202243):** avatar circular original `82×82` reemplazado por **pastilla SVG "Ask anything"** (`Group 6623.svg` con icono mic + texto + sombra embebida). Tamaño iterado: 280×106 → 504×191 (+80%) → 428×162 (-15% final). `AskAiTrigger` extendido con props `width`/`height` (legacy `size` mantiene compat para triggers cuadrados/circulares); `position` en config.json acepta `width`/`height` opcionales. Cuando `isCircular = false` se descarta el `overflow:hidden rounded-full` y el shadow extra (el SVG trae los suyos).
+- **Hero video real (416fdd7):** `avatar-tavus.mp4` 17 MB (vs 52 MB original) commiteado directo, sin necesidad de Git LFS. Servido desde `/assets/ai/hero-video.mp4` por el route handler.
+- **X icon (975e6f6):** del lucide-react `X` a SVG path nuestro (mismo `d="M6 6l12 12M18 6L6 18"` que `AdCloseButton`), reposicionado de `top-3 left-3` a `top-3 right-3`. Backdrop circular oscuro con blur preservado.
+- **Escalado kiosk (a6343f1):** todas las dimensiones del modal multiplicadas ~2.5× para corresponder a 1080×1920. Title 16→44, subtitle 11→26, body/greeting/input 13→30, chip 11→24. Close X 32→80, mic 44→110, ring border 2→5, input height 44→100, send icon 20→44, cursor 14→32, modal radius 24→60, paddings/gaps proporcionales. Box-shadow modal -8/40 → -20/100, accent ring 3→8.
+- **Interpolación cliente (1802845):** `textos.ai_subtitle` y `home.askAi.greeting` ahora son templates con `{client_name}` reemplazado por `config.client.nombre` en `home/page.tsx`. Default (Arizona) → "Your personal Arizona guide" + "Hi! I'm your guide to Arizona…". Token `--ai-surface` cambiado de cream `#F9F6F0` a blanco puro `#FFFFFF` en los 3 `tokens.css`. Body del modal con `[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden`.
+- **Slide-down (7179d9b):** modal desliza desde el TOP hacia abajo (no bottom→up). Anchor `bottom-0` → `top-0`, animación Framer `y:'100%'` → `y:'-100%'`, border radius `borderTopLeft/Right` → `borderBottomLeft/Right`, box-shadow direction inverso.
+- **Triple-fix del gap hero→body (0202243 + 3e4d240 + 2d936db):** 3 culpables apilados:
+  1. CSS keyword `transparent` (= `rgba(0,0,0,0)` negro) blendeaba mal a blanco → `hsl(var(--ai-surface) / 0)` (white(0) → white(1) limpio).
+  2. `aspectRatio:'16/9'` → `height: 608` explícito (1080 × 9/16 redondeado, sin fracción).
+  3. `marginBottom: -10` (overlap más generoso) + `backgroundColor: hsl(var(--ai-surface))` explícito en el hero como respaldo.
+
+**Verificado:**
+
+- `pnpm typecheck` limpio en cada checkpoint (~6 typechecks durante la iteración).
+- `pnpm lint` y `pnpm format:check` limpios en archivos AI; auditor white-label sin hallazgos en `src/components/ai/`.
+- 13 screenshots Playwright en `.planning/verifications/3-15-*.png` cubriendo: pill smaller, modal-from-top, gap fix v1/v2/v3/v4, modal con Arizona, modal sin gap definitivo.
+- DOM measurement post-fix: heroBottom 367.37 / bodyTop 366.37 → overlap real -1px en pantalla escalada (sin gap perceptible).
+
+**Pendiente / siguiente:**
+
+- **LLM real** (Fase 5+) sigue pendiente.
+- **Reescribir contenido de las 8 suggested questions con lugares reales de Arizona** — todavía mencionan Harbor Grill, La Jolla, USS Midway, Gaslamp Quarter, etc. (lugares de San Diego). Default cliente (Arizona) muestra contenido geográficamente incoherente; necesita pasada de contenido para Camelback Mountain, Old Town Scottsdale, Phoenix Art Museum, etc.
+- **Voice lang dinámico** (`recognition.lang = 'en-US'` hardcoded en `ai-modal.tsx:87`).
+- **Bloque `home.askAi`** para `_template` y `demo-cliente-a` cuando estos clientes tengan `features.home` configurado.
+- Photo Booth, Itinerary Builder o Fase 4 (primer cliente real).
+
+**Decisiones:**
+
+- **Pastilla SVG vs avatar circular**: la pastilla con texto + icono comunica mejor la affordance ("Ask anything"). Trigger refactorizado para soportar ambos modos (cuadrado/circular vs rectangular) sin breaking change.
+- **Slide desde top en vez de bottom**: contraintuitivo (trigger está abajo) pero deja la pastilla visible al abrir el modal — el usuario mantiene contexto de dónde tocó.
+- **Templates `{client_name}` en strings**: patrón replicable para cualquier futuro string que necesite el nombre del cliente. La interpolación se hace server-side en `home/page.tsx` (no client-side) para mantener el modelo "config + textos pasan crudos a componentes".
+- **Triple-fix del gap**: aprendizaje clave — `transparent` en CSS gradients es **negro** transparente, no white transparente. Hay que usar `hsl(var(--token) / 0)` cuando se quiere fade limpio a un color sólido. Footgun documentado.
+- **Hardcodear "San Diego" en seed content** fue un bug de white-label que pasó el primer auditor (porque las strings vivían en config.json no en JSX). El auditor solo detecta strings en JSX, no semánticos. Lección: revisar también el contenido del config para placeholders geográficos cuando el default cliente es de otra región.
+- **`marginBottom: -10` y `backgroundColor` explícito en hero** son defensivos contra subpíxel rendering del `transform: scale()` del KioskCanvas — patrón replicable para cualquier modal con hero que tenga gradient-to-bg.
+
+**Fase:** 3.15 Ask AI cerrada y aprobada por Rubén tras iteración visual.
 
 ---
 

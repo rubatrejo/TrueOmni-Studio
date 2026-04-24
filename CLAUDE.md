@@ -195,6 +195,8 @@ El subagent `auditor-white-label` fuerza estas reglas antes de cada commit.
 - ❌ Mezclar trabajo de varias fases en un commit.
 - ❌ Usar `git add -A` ciego; siempre archivos específicos.
 - ❌ Inventar fechas; obtenerlas con `date +%F`.
+- ❌ Usar la keyword `transparent` en CSS gradients que terminan en color sólido. `transparent` es `rgba(0,0,0,0)` (negro transparente) → blendea por grises muddy. Usar `hsl(var(--token) / 0)` para fade limpio a un color sólido tokenizado.
+- ❌ Hardcodear nombres geográficos (ciudades, lugares, regiones) en `config.textos.*` o en seed data (`home.modules.*`). El auditor solo detecta strings en JSX, no contenido. Usar templates `{client_name}` interpolados con `config.client.nombre` para todo lo que dependa del cliente activo.
 
 ---
 

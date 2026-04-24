@@ -60,6 +60,30 @@
   --ai-input-bg: 0 0% 100%; /* fondo del input al focusear (blanco) */
 
   /* ---------------------------------------------------------------------- */
+  /*  PHOTO BOOTH MODULE (Fase 3.16)                                        */
+  /* ---------------------------------------------------------------------- */
+  --photo-bg: 0 0% 100%;
+  --photo-text: 218 35% 14%;
+  --photo-tabs-bg: 24 95% 53%; /* naranja del cliente demo */
+  --photo-tab-active: 0 0% 100%;
+  --photo-tab-inactive: 24 95% 53%;
+  --photo-tab-text-active: 218 35% 14%;
+  --photo-tab-text-inactive: 0 0% 100%;
+  --photo-sidebar-bg: 24 95% 53%;
+  --photo-sidebar-icon: 0 0% 100%;
+  --photo-countdown-bg: 0 0% 0%;
+  --photo-countdown-number: 0 0% 100%;
+  --photo-share-bg: 0 0% 0%;
+  --photo-share-title: 0 0% 100%;
+  --photo-cta-border: 0 0% 100%;
+  --photo-cta-text: 0 0% 100%;
+  --photo-accent-from: 24 95% 53%;
+  --photo-accent-to: 152 64% 47%; /* verde menta del cliente demo */
+  --photo-sticker-shadow: 218 35% 14%;
+  --photo-home-btn-bg: 24 95% 40%; /* naranja oscuro del cliente demo */
+  --photo-header-fg: 0 0% 100%;
+
+  /* ---------------------------------------------------------------------- */
   /*  TIPOGRAFÍA                                                            */
   /* ---------------------------------------------------------------------- */
   --font-display:

@@ -148,7 +148,36 @@
     "ai_loading_label": "Thinking...",
     "ai_aria_open": "Open Ask AI assistant",
     "ai_aria_close": "Close Ask AI",
-    "ai_aria_mic": "Toggle voice input"
+    "ai_aria_mic": "Toggle voice input",
+    "photo_booth_title": "Photo Booth",
+    "photo_booth_subtitle": "Take a photo, make it yours",
+    "photo_booth_timer_on": "TIMER {seconds}s",
+    "photo_booth_timer_off": "TIMER OFF",
+    "photo_booth_start_cta": "EXPERIENCE",
+    "photo_booth_start_label": "START",
+    "photo_booth_processing": "Processing your photo…",
+    "photo_booth_permission_title": "Camera access needed",
+    "photo_booth_permission_body": "Allow camera access to take your photo. You can enable it from your device settings.",
+    "photo_booth_permission_retry": "Try again",
+    "photo_booth_tab_backgrounds": "Backgrounds",
+    "photo_booth_tab_frames": "Frames",
+    "photo_booth_tab_filters": "Filters",
+    "photo_booth_share_title": "SHARE YOUR MEMORIES",
+    "photo_booth_share_follow": "Follow us",
+    "photo_booth_share_email_cta": "EMAIL",
+    "photo_booth_share_text_cta": "TEXT",
+    "photo_booth_share_qr_instruction": "Scan to get your photo",
+    "photo_booth_sent_title": "Sent!",
+    "photo_booth_sent_body": "Check your inbox in a few seconds.",
+    "photo_booth_retake": "Retake",
+    "photo_booth_aria_open": "Open Photo Booth",
+    "photo_booth_aria_shutter": "Take photo",
+    "photo_booth_aria_back": "Go back",
+    "photo_booth_aria_share": "Share photo",
+    "photo_booth_aria_close": "Close",
+    "photo_booth_aria_home": "Go home",
+    "photo_booth_header_temp_placeholder": "50°",
+    "photo_booth_disabled": "Photo Booth is not configured for the active client."
   },
   "navegacion": {
     "home": "/",
@@ -9285,6 +9314,45 @@
             "response": "Bird Rock Coffee Roasters in La Jolla is award-winning — they roast their own beans on-site. In North Park, try Dark Horse Coffee Roasters for great espresso and pastries. Downtown, James Coffee Co. has a beautiful space in a converted warehouse. All three source directly from farms for exceptional quality."
           }
         ]
+      },
+      "photoBooth": {
+        "enabled": true,
+        "backgrounds": [
+          { "id": "landscape", "image": "assets/photo-booth/backgrounds/bg-landscape.jpg", "label": "Landscape" },
+          { "id": "desert", "image": "assets/photo-booth/backgrounds/bg-desert.jpg", "label": "Desert" },
+          { "id": "sunset", "image": "assets/photo-booth/backgrounds/bg-sunset.jpg", "label": "Sunset" }
+        ],
+        "frames": [
+          { "id": "frame-0", "image": "assets/photo-booth/frames/Photo_Booth-Frame_0.png", "label": "Classic" },
+          { "id": "frame-1", "image": "assets/photo-booth/frames/Photo_Booth-Frame_1.png", "label": "Postcard" },
+          { "id": "frame-2", "image": "assets/photo-booth/frames/Photo_Booth-Frame_2.png", "label": "Badge" },
+          { "id": "frame-3", "image": "assets/photo-booth/frames/Photo_Booth-Frame_3.png", "label": "Vintage" },
+          { "id": "frame-4", "image": "assets/photo-booth/frames/Photo_Booth-Frame_4.png", "label": "Clean" }
+        ],
+        "filters": [
+          { "id": "none", "label": "Original", "cssFilter": "none" },
+          { "id": "grayscale", "label": "Black & White", "cssFilter": "grayscale(1)" },
+          { "id": "sepia", "label": "Sepia", "cssFilter": "sepia(0.8) saturate(1.1)" },
+          { "id": "vintage", "label": "Vintage", "cssFilter": "contrast(1.05) sepia(0.35) saturate(1.2) hue-rotate(-10deg)" },
+          { "id": "warm", "label": "Warm", "cssFilter": "saturate(1.2) contrast(1.05) brightness(1.02) hue-rotate(-5deg)" },
+          { "id": "cool", "label": "Cool", "cssFilter": "saturate(1.1) contrast(1.05) hue-rotate(15deg) brightness(1.02)" }
+        ],
+        "stickers": [
+          { "id": "heart", "image": "assets/photo-booth/stickers/heart.svg", "label": "Heart", "defaultWidth": 180 },
+          { "id": "star", "image": "assets/photo-booth/stickers/star.svg", "label": "Star", "defaultWidth": 180 },
+          { "id": "balloon", "image": "assets/photo-booth/stickers/balloon.svg", "label": "Balloon", "defaultWidth": 160 },
+          { "id": "sunglasses", "image": "assets/photo-booth/stickers/sunglasses.svg", "label": "Sunglasses", "defaultWidth": 200 },
+          { "id": "leaf", "image": "assets/photo-booth/stickers/leaf.svg", "label": "Leaf", "defaultWidth": 180 },
+          { "id": "music-note", "image": "assets/photo-booth/stickers/music-note.svg", "label": "Music", "defaultWidth": 160 }
+        ],
+        "timer": { "enabled": true, "default": 10, "options": [3, 5, 10] },
+        "shareUrlTemplate": "https://share.{client_slug}.kiosk.example/{id}",
+        "social": {
+          "x": "trueomni",
+          "facebook": "trueomni",
+          "instagram": "trueomni"
+        },
+        "edgeFeather": 3
       }
     },
     "advertisements": {

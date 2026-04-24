@@ -136,6 +136,90 @@ export interface AskAiConfig {
   };
 }
 
+/** Background 1080×1920 subido por el cliente. Usado como fondo green-screen. */
+export interface PhotoBoothBackground {
+  id: string;
+  /** Path relativo (`assets/photo-booth/backgrounds/vangogh.jpg`) o URL absoluta. */
+  image: string;
+  /** Label visible en el carrusel. */
+  label: string;
+  /** Thumbnail opcional para el círculo del carrusel; si se omite se usa `image`. */
+  thumbnail?: string;
+}
+
+/** Frame PNG transparente 1080×1920 que va por encima de la foto compuesta. */
+export interface PhotoBoothFrame {
+  id: string;
+  image: string;
+  label: string;
+  thumbnail?: string;
+}
+
+/** Filtro CSS aplicado a la foto en el editor y cocido en el canvas final. */
+export interface PhotoBoothFilter {
+  id: string;
+  /** Label visible en el carrusel. */
+  label: string;
+  /** Valor de `ctx.filter` / `style.filter` — ej. "grayscale(1)", "saturate(1.3) contrast(1.1)". */
+  cssFilter: string;
+  /** Thumbnail opcional (imagen con el filtro ya aplicado para el preview). */
+  thumbnail?: string;
+}
+
+/** Sticker PNG que el usuario añade tapeando y reposiciona arrastrando. */
+export interface PhotoBoothSticker {
+  id: string;
+  /** Path del PNG con transparencia. */
+  image: string;
+  /** Label aria-label + hover. */
+  label: string;
+  /** Ancho por defecto al añadir (px, sistema de coordenadas 1080×1920). */
+  defaultWidth?: number;
+}
+
+/** Timer configurable antes de disparar. */
+export interface PhotoBoothTimerConfig {
+  /** Si false, oculta el toggle y dispara inmediatamente. */
+  enabled: boolean;
+  /** Segundos seleccionados por defecto (debe estar en `options`). */
+  default: number;
+  /** Opciones disponibles (3s, 5s, 10s típicamente). */
+  options: number[];
+}
+
+/**
+ * Configuración del módulo Photo Booth (Fase 3.16).
+ * Captura con cámara del kiosk, reemplazo de fondo estilo green-screen con
+ * MediaPipe SelfieSegmenter, editor con backgrounds/frames/filtros/stickers y
+ * share mock (QR + email + text — backend real en Fase 5+).
+ */
+export interface PhotoBoothConfig {
+  enabled: boolean;
+  /** Backgrounds para el reemplazo green-screen. Al menos 1 requerido. */
+  backgrounds: PhotoBoothBackground[];
+  /** Frames overlay. Vacío = no hay tab Frames. */
+  frames: PhotoBoothFrame[];
+  /** Filtros CSS. Vacío = no hay tab Filters. */
+  filters: PhotoBoothFilter[];
+  /** Stickers posicionables. Vacío = no se muestra la fila. */
+  stickers: PhotoBoothSticker[];
+  /** Config del timer; si se omite timer=10s por defecto con opciones [3,5,10]. */
+  timer?: PhotoBoothTimerConfig;
+  /** URL template para el QR de share. Sustituye `{id}` por UUID client-side.
+   *  Ej. "https://share.arizona.com/{id}". v1 es placeholder; Fase 5+ conecta backend. */
+  shareUrlTemplate?: string;
+  /** Handles sociales mostrados en la pantalla de Share (Follow us). */
+  social?: {
+    x?: string;
+    facebook?: string;
+    instagram?: string;
+  };
+  /** Branding dentro de la tarjeta de la foto final. Default = logo del cliente. */
+  shareCardLogo?: string;
+  /** Feather del mask alpha (px) para suavizar bordes del cutout. Default 3. */
+  edgeFeather?: number;
+}
+
 /** Ítem de búsqueda placeholder. Fases futuras lo reemplazan con data real. */
 export interface HomeListing {
   slug: string;
@@ -655,6 +739,8 @@ export interface KioskConfig {
       /** Módulo Ask AI (avatar flotante + modal). Sibling, no es un module variant
        *  porque no es un tile del grid ni tiene ruta `/home/{key}` propia. */
       askAi?: AskAiConfig;
+      /** Módulo Photo Booth (captura + editor + share). Ruta `/home/photo-booth`. */
+      photoBooth?: PhotoBoothConfig;
     };
     /** Catálogo de ads declarativo (Fase 3.8). */
     advertisements?: AdvertisementsConfig;

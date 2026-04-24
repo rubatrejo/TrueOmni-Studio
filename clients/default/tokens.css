@@ -69,6 +69,31 @@
   --ai-input-bg: 0 0% 100%; /* fondo del input al focusear (blanco) */
 
   /* ---------------------------------------------------------------------- */
+  /*  PHOTO BOOTH MODULE (Fase 3.16)                                        */
+  /*  Tokens del módulo Photo Booth (captura + editor + share).             */
+  /* ---------------------------------------------------------------------- */
+  --photo-bg: 0 0% 100%; /* fondo general del editor */
+  --photo-text: 218 35% 14%; /* texto principal */
+  --photo-tabs-bg: 201 100% 40%; /* barra de tabs (Backgrounds/Frames/Filters) */
+  --photo-tab-active: 0 0% 100%; /* tab seleccionado */
+  --photo-tab-inactive: 201 100% 40%; /* tab no seleccionado */
+  --photo-tab-text-active: 218 35% 14%; /* texto tab activo */
+  --photo-tab-text-inactive: 0 0% 100%; /* texto tab inactivo */
+  --photo-sidebar-bg: 201 100% 40%; /* barra lateral derecha */
+  --photo-sidebar-icon: 0 0% 100%; /* flechas + icono QR */
+  --photo-countdown-bg: 0 0% 0%; /* overlay 3-2-1 (aplicar con /alpha) */
+  --photo-countdown-number: 0 0% 100%; /* número 3/2/1 */
+  --photo-share-bg: 0 0% 0%; /* fondo negro pantalla Share */
+  --photo-share-title: 0 0% 100%; /* SHARE YOUR MEMORIES */
+  --photo-cta-border: 0 0% 100%; /* borde botones EMAIL / TEXT */
+  --photo-cta-text: 0 0% 100%; /* texto botones EMAIL / TEXT */
+  --photo-accent-from: 201 95% 46%; /* gradient mic / loader */
+  --photo-accent-to: 173 81% 30%; /* gradient mic / loader */
+  --photo-sticker-shadow: 218 35% 14%; /* sombra sutil de stickers */
+  --photo-home-btn-bg: 206 100% 27%; /* #004f8b — semicircle home button */
+  --photo-header-fg: 0 0% 100%; /* fg del header (divider + fallback) */
+
+  /* ---------------------------------------------------------------------- */
   /*  TIPOGRAFÍA                                                            */
   /* ---------------------------------------------------------------------- */
   /* --font-display: Montserrat (titulares, CTAs, categorías).

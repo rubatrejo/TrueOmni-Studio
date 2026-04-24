@@ -193,19 +193,19 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
             aria-hidden="true"
           />
 
-          {/* Modal — slide-up desde el bottom del canvas. */}
+          {/* Modal — slide-down desde el top del canvas. */}
           <motion.div
-            initial={{ y: '100%' }}
+            initial={{ y: '-100%' }}
             animate={{ y: 0 }}
-            exit={{ y: '100%' }}
+            exit={{ y: '-100%' }}
             transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-            className="absolute bottom-0 left-0 right-0 z-50 flex flex-col overflow-hidden"
+            className="absolute left-0 right-0 top-0 z-50 flex flex-col overflow-hidden"
             style={{
               height: inputFocused ? '85%' : '65%',
               backgroundColor: 'hsl(var(--ai-surface))',
-              boxShadow: '0 -20px 100px hsl(var(--ai-text) / 0.18)',
-              borderTopLeftRadius: 60,
-              borderTopRightRadius: 60,
+              boxShadow: '0 20px 100px hsl(var(--ai-text) / 0.18)',
+              borderBottomLeftRadius: 60,
+              borderBottomRightRadius: 60,
               transition: 'height 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
             onClick={(e) => e.stopPropagation()}

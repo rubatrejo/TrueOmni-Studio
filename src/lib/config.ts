@@ -123,8 +123,17 @@ export interface AskAiConfig {
   subtitle?: string;
   /** Chips horizontales con la respuesta typewriter asociada a cada uno. */
   suggestedQuestions: AskAiSuggestedQuestion[];
-  /** Posición del trigger flotante en el Home. Default {right:24,bottom:24,size:82}. */
-  position?: { right?: number; bottom?: number; size?: number };
+  /** Posición del trigger flotante en el Home.
+   *  - `size` (default 82) → trigger cuadrado/circular.
+   *  - `width` + `height` → trigger rectangular (ej. pastilla con texto y/o icono).
+   *  Si se declaran ambos, `width`/`height` ganan a `size`. */
+  position?: {
+    right?: number;
+    bottom?: number;
+    size?: number;
+    width?: number;
+    height?: number;
+  };
 }
 
 /** Ítem de búsqueda placeholder. Fases futuras lo reemplazan con data real. */

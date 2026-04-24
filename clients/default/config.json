@@ -9239,8 +9239,9 @@
       },
       "askAi": {
         "enabled": true,
-        "avatar": "assets/ai/avatar.png",
+        "avatar": "assets/ai/trigger.svg",
         "heroVideo": "assets/ai/hero-video.mp4",
+        "position": { "right": 24, "bottom": 24, "width": 280, "height": 106 },
         "greeting": "Hi! I'm your guide to San Diego. Ask me anything about restaurants, events, activities, or getting around the area.",
         "suggestedQuestions": [
           {

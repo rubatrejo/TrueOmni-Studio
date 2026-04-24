@@ -61,6 +61,8 @@ export default async function HomePage() {
             avatarSrc={resolveAiAssetPath(askAi.avatar)}
             ariaLabel={config.textos.ai_aria_open ?? 'Open Ask AI'}
             size={askAi.position?.size ?? 82}
+            width={askAi.position?.width}
+            height={askAi.position?.height}
             position={{
               right: askAi.position?.right ?? 24,
               bottom: askAi.position?.bottom ?? 24,

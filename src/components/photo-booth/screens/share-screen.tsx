@@ -332,7 +332,8 @@ export function ShareScreen({
         <span>{labels.textCta}</span>
       </button>
 
-      {/* Home button (semicircle left, y=1163) */}
+      {/* Home button (semicircle left, alineado a top:1000 con
+          FloatingHomeButton del resto del kiosk). */}
       <button
         type="button"
         aria-label={labels.ariaHome}
@@ -340,17 +341,19 @@ export function ShareScreen({
         className="absolute"
         style={{
           left: 0,
-          top: 1163,
+          top: 1000,
           width: 116,
           height: 232,
           padding: 0,
           border: 'none',
-          borderRadius: '0 116px 116px 0',
+          borderTopRightRadius: 116,
+          borderBottomRightRadius: 116,
           background: 'hsl(var(--photo-home-btn-bg))',
-          boxShadow: '0 8px 24px rgb(0 0 0 / 0.2)',
+          boxShadow: '12px 0 28px rgba(0,0,0,0.22)',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'flex-end',
+          paddingRight: 28,
         }}
       >
         <svg width={54} height={42} viewBox="0 0 54 42" aria-hidden="true">

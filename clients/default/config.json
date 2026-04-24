@@ -164,8 +164,8 @@
     "photo_booth_tab_filters": "Filters",
     "photo_booth_share_title": "SHARE YOUR MEMORIES",
     "photo_booth_share_follow": "Follow us",
-    "photo_booth_share_email_cta": "EMAIL",
-    "photo_booth_share_text_cta": "TEXT",
+    "photo_booth_share_email_cta": "Send to Email",
+    "photo_booth_share_text_cta": "Send to Phone",
     "photo_booth_share_qr_instruction": "Scan to get your photo",
     "photo_booth_share_scan_me": "SCAN ME",
     "photo_booth_sent_title": "Sent!",
@@ -9327,11 +9327,12 @@
       "photoBooth": {
         "enabled": true,
         "backgrounds": [
+          { "id": "none", "image": "", "thumbnail": "assets/photo-booth/frames/Photo_Booth-Thumbnail_Frame_None.png", "label": "None" },
           { "id": "statue-of-liberty", "image": "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?w=1080&h=1920&fit=crop&q=80", "label": "Statue of Liberty" },
           { "id": "grand-canyon", "image": "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?w=1080&h=1920&fit=crop&q=80", "label": "Grand Canyon" },
-          { "id": "golden-gate", "image": "https://images.unsplash.com/photo-1521120098171-3b96d31fe2e7?w=1080&h=1920&fit=crop&q=80", "label": "Golden Gate Bridge" },
-          { "id": "times-square", "image": "https://images.unsplash.com/photo-1572476947456-21cd9d646c69?w=1080&h=1920&fit=crop&q=80", "label": "Times Square" },
-          { "id": "yellowstone", "image": "https://images.unsplash.com/photo-1605833556294-ea5c7a74f57d?w=1080&h=1920&fit=crop&q=80", "label": "Yellowstone" }
+          { "id": "times-square", "image": "https://images.unsplash.com/photo-1556139966-f8b2a40dc1a4?w=1080&h=1920&fit=crop&q=80", "label": "NYC Skyline" },
+          { "id": "yosemite", "image": "https://images.unsplash.com/photo-1561414927-6d86591d0c4f?w=1080&h=1920&fit=crop&q=80", "label": "Yosemite" },
+          { "id": "miami", "image": "https://images.unsplash.com/photo-1532375810709-75b1da00537c?w=1080&h=1920&fit=crop&q=80", "label": "Miami Beach" }
         ],
         "frames": [
           { "id": "none", "image": "", "thumbnail": "assets/photo-booth/frames/Photo_Booth-Thumbnail_Frame_None.png", "label": "None" },

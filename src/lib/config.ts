@@ -136,10 +136,12 @@ export interface AskAiConfig {
   };
 }
 
-/** Background 1080×1920 subido por el cliente. Usado como fondo green-screen. */
+/** Background 1080×1920 subido por el cliente. Usado como fondo green-screen.
+ *  Caso especial: id "none" + image vacío → no se reemplaza el fondo, se usa
+ *  la foto original capturada por la cámara. */
 export interface PhotoBoothBackground {
   id: string;
-  /** Path relativo (`assets/photo-booth/backgrounds/vangogh.jpg`) o URL absoluta. */
+  /** Path relativo o URL absoluta. Vacío = sin reemplazo (usa foto original). */
   image: string;
   /** Label visible en el carrusel. */
   label: string;

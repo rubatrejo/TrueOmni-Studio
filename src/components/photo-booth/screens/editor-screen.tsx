@@ -76,7 +76,11 @@ export function EditorScreen({
       return {
         options: resolved.backgrounds.map<CarouselOption>((b) => ({
           id: b.id,
-          imageSrc: b.resolvedImage,
+          imageSrc: b.thumbnail
+            ? b.thumbnail.startsWith('http') || b.thumbnail.startsWith('/')
+              ? b.thumbnail
+              : `/${b.thumbnail}`
+            : b.resolvedImage || undefined,
           label: b.label,
         })),
         selectedId: selectedBackgroundId,

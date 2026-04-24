@@ -102,14 +102,14 @@ export function ShareScreen({
         {labels.title}
       </div>
 
-      {/* Photo card (centrado) */}
+      {/* Photo card 9:16 — match aspect de la captura para evitar crop. */}
       <div
         className="absolute overflow-hidden"
         style={{
-          left: 146,
+          left: 220,
           top: 340,
-          width: 788,
-          height: 1080,
+          width: 640,
+          height: 1100,
           background: '#fff',
           borderRadius: 32,
           boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
@@ -120,7 +120,7 @@ export function ShareScreen({
           <img
             src={blobUrl}
             alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
           />
         ) : null}
       </div>
@@ -229,102 +229,58 @@ export function ShareScreen({
         </div>
       </div>
 
-      {/* EMAIL button */}
+      {/* Send to Email button — patrón listing-style (sin icono interno) */}
       <button
         type="button"
         onClick={onEmail}
-        className="absolute"
+        className="absolute font-sans"
         style={{
-          left: 281,
+          left: 200,
           top: 1727,
-          width: 247,
+          width: 320,
           height: 86,
-          borderRadius: 13,
-          border: '5px solid #fff',
+          borderRadius: 999,
+          border: '2px solid #fff',
           background: 'rgba(0,0,0,0.35)',
           color: '#fff',
           fontFamily: "'Open Sans', system-ui",
-          fontSize: 32,
+          fontSize: 24,
           fontWeight: 700,
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 16,
         }}
       >
-        <svg width={48} height={36} viewBox="0 0 48 36" aria-hidden="true">
-          <rect
-            x={1.5}
-            y={1.5}
-            width={45}
-            height={33}
-            rx={6}
-            stroke="currentColor"
-            strokeWidth={2}
-            fill="none"
-          />
-          <path
-            d="M3 3l21 18L45 3"
-            stroke="currentColor"
-            strokeWidth={2}
-            fill="none"
-            strokeLinecap="round"
-          />
-        </svg>
-        <span>{labels.emailCta}</span>
+        {labels.emailCta}
       </button>
 
-      {/* TEXT button */}
+      {/* Send to Phone button */}
       <button
         type="button"
         onClick={onText}
-        className="absolute"
+        className="absolute font-sans"
         style={{
-          left: 553,
+          left: 560,
           top: 1727,
-          width: 247,
+          width: 320,
           height: 86,
-          borderRadius: 13,
-          border: '5px solid #fff',
+          borderRadius: 999,
+          border: '2px solid #fff',
           background: 'rgba(0,0,0,0.35)',
           color: '#fff',
           fontFamily: "'Open Sans', system-ui",
-          fontSize: 32,
+          fontSize: 24,
           fontWeight: 700,
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 16,
         }}
       >
-        <svg width={42} height={38} viewBox="0 0 42 38" aria-hidden="true">
-          <path
-            d="M5 3h32a4 4 0 014 4v18a4 4 0 01-4 4H15l-8 6v-6H5a4 4 0 01-4-4V7a4 4 0 014-4z"
-            stroke="currentColor"
-            strokeWidth={2}
-            fill="none"
-            strokeLinejoin="round"
-          />
-          <line
-            x1={10}
-            y1={12}
-            x2={32}
-            y2={12}
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-          />
-          <line
-            x1={10}
-            y1={20}
-            x2={32}
-            y2={20}
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-          />
-        </svg>
-        <span>{labels.textCta}</span>
+        {labels.textCta}
       </button>
 
       {/* Home button (semicircle left, top:1000 alineado al resto) */}

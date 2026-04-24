@@ -121,7 +121,7 @@ export function PhotoBoothModule({
 
   const [phase, setPhase] = useState<Phase>('live');
   const [selectedBackgroundId, setSelectedBackgroundId] = useState<string | null>(
-    resolvedBackgrounds[0]?.id ?? null,
+    resolvedBackgrounds.find((b) => b.id === 'none')?.id ?? resolvedBackgrounds[0]?.id ?? null,
   );
   const [hasTouchedBackground, setHasTouchedBackground] = useState(false);
   const [selectedFrameId, setSelectedFrameId] = useState<string | null>(
@@ -156,7 +156,8 @@ export function PhotoBoothModule({
     const c = captureRef.current;
     if (!c || !c.bitmap) return;
     const bg = resolvedBackgrounds.find((b) => b.id === backgroundId) ?? resolvedBackgrounds[0];
-    const backgroundImg = bg ? await loadImage(bg.resolvedImage) : null;
+    const useOriginal = !bg || bg.image === '';
+    const backgroundImg = !useOriginal && bg ? await loadImage(bg.resolvedImage) : null;
     const frame = resolvedFrames.find((f) => f.id === frameId && f.image !== '');
     const frameImg = frame ? await loadImage(frame.resolvedImage) : null;
     const blob = await composeFinal({
@@ -169,6 +170,7 @@ export function PhotoBoothModule({
       stickers: [],
       cssFilter: 'none',
       edgeFeather: config.edgeFeather ?? 3,
+      keepOriginalBackground: useOriginal,
     });
     session.setBlob(blob);
   };
@@ -281,7 +283,12 @@ export function PhotoBoothModule({
     setSelectedFrameId(resolvedFrames[0]?.id ?? null);
     setSelectedFilterId(filters[0]?.id ?? null);
     setShowExitConfirm(false);
-    setPhase('live');
+    // Si estamos en sharing → home (la sesión termina). En editing → live (retake).
+    if (phase === 'sharing') {
+      router.push('/home');
+    } else {
+      setPhase('live');
+    }
   };
 
   const handleShare = async () => {
@@ -292,7 +299,9 @@ export function PhotoBoothModule({
     try {
       const bg = resolvedBackgrounds.find((b) => b.id === selectedBackgroundId) ??
         resolvedBackgrounds[0];
-      const backgroundImg = bg ? await loadImage(bg.resolvedImage) : null;
+      const useOriginal = !bg || bg.image === '';
+      const backgroundImg =
+        !useOriginal && bg ? await loadImage(bg.resolvedImage) : null;
       const frame = resolvedFrames.find(
         (f) => f.id === selectedFrameId && f.image !== '',
       );
@@ -328,6 +337,7 @@ export function PhotoBoothModule({
         stickers: stickerPlacements,
         cssFilter: filter?.cssFilter ?? 'none',
         edgeFeather: config.edgeFeather ?? 3,
+        keepOriginalBackground: useOriginal,
       });
       session.setBlob(blob);
     } catch (err) {
@@ -578,7 +588,7 @@ export function PhotoBoothModule({
           )}
           social={config.social}
           shareBackgroundSrc={shareBackgroundSrc}
-          onHome={() => router.push('/home')}
+          onHome={() => setShowExitConfirm(true)}
           onEmail={() => showSent('email')}
           onText={() => showSent('text')}
           labels={{

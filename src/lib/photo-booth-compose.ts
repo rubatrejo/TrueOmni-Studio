@@ -38,6 +38,9 @@ export interface ComposeInput {
   cssFilter?: string;
   /** Feather (blur px) aplicado al mask alpha para suavizar edges. Default 3. */
   edgeFeather?: number;
+  /** Si true, NO se aplica green-screen — se usa la foto original cruda como
+   *  base. Útil para el background option "None". */
+  keepOriginalBackground?: boolean;
 }
 
 const OUT_W = 1080;
@@ -112,26 +115,7 @@ export async function composeFinal(input: ComposeInput): Promise<Blob> {
   const out = createCanvas(OUT_W, OUT_H);
   const ctx = get2d(out);
 
-  // 1. Background
-  if (background) {
-    ctx.drawImage(background, 0, 0, OUT_W, OUT_H);
-  } else {
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, OUT_W, OUT_H);
-  }
-
-  // 2. Cutout de la persona: pre-rendereamos el frame capturado + máscara
-  //    en un canvas auxiliar a la resolución de captura, luego lo escalamos
-  //    a 1080×1920 en la salida.
-  const personCanvas = createCanvas(captureWidth, captureHeight);
-  const personCtx = get2d(personCanvas);
-  personCtx.drawImage(capture, 0, 0, captureWidth, captureHeight);
-  const maskCanvas = maskToCanvas(mask, captureWidth, captureHeight, edgeFeather);
-  personCtx.globalCompositeOperation = 'destination-in';
-  personCtx.drawImage(maskCanvas, 0, 0);
-  personCtx.globalCompositeOperation = 'source-over';
-
-  // Escalar el personCanvas a la salida. Ajustar a cover (object-fit).
+  // Cálculos object-fit cover para mapear la captura a 1080×1920.
   const captureAspect = captureWidth / captureHeight;
   const outAspect = OUT_W / OUT_H;
   let drawW = OUT_W;
@@ -139,7 +123,6 @@ export async function composeFinal(input: ComposeInput): Promise<Blob> {
   let drawX = 0;
   let drawY = 0;
   if (captureAspect > outAspect) {
-    // Captura más ancha que 9:16 → crop horizontal
     drawH = OUT_H;
     drawW = OUT_H * captureAspect;
     drawX = (OUT_W - drawW) / 2;
@@ -148,7 +131,29 @@ export async function composeFinal(input: ComposeInput): Promise<Blob> {
     drawH = OUT_W / captureAspect;
     drawY = (OUT_H - drawH) / 2;
   }
-  ctx.drawImage(personCanvas, drawX, drawY, drawW, drawH);
+
+  if (input.keepOriginalBackground) {
+    // Sin green-screen: dibujamos la foto cruda fullscreen como base.
+    ctx.drawImage(capture, drawX, drawY, drawW, drawH);
+  } else {
+    // Green-screen pipeline:
+    // 1. Background (imagen cliente o negro si null).
+    if (background) {
+      ctx.drawImage(background, 0, 0, OUT_W, OUT_H);
+    } else {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, OUT_W, OUT_H);
+    }
+    // 2. Cutout de la persona con máscara feathered.
+    const personCanvas = createCanvas(captureWidth, captureHeight);
+    const personCtx = get2d(personCanvas);
+    personCtx.drawImage(capture, 0, 0, captureWidth, captureHeight);
+    const maskCanvas = maskToCanvas(mask, captureWidth, captureHeight, edgeFeather);
+    personCtx.globalCompositeOperation = 'destination-in';
+    personCtx.drawImage(maskCanvas, 0, 0);
+    personCtx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(personCanvas, drawX, drawY, drawW, drawH);
+  }
 
   // 3. Frame overlay
   if (frame) {

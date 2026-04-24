@@ -48,6 +48,18 @@
   --survey-success: 120 61% 50%;
 
   /* ---------------------------------------------------------------------- */
+  /*  ASK AI MODULE (Fase 3.15)                                             */
+  /* ---------------------------------------------------------------------- */
+  --ai-surface: 39 56% 95%; /* #F9F6F0 — bg modal */
+  --ai-text: 218 35% 14%; /* #172133 — títulos */
+  --ai-text-soft: 213 38% 27%; /* #2C4560 — body / chips */
+  --ai-accent-from: 201 95% 46%; /* #079EE2 — gradient mic + cursor */
+  --ai-accent-to: 173 81% 30%; /* #0E8C7E — gradient mic */
+  --ai-keyboard-bg: 218 39% 9%; /* #0D1321 — reservado v2 */
+  --ai-trigger-shadow: 218 35% 14%; /* sombra del avatar trigger */
+  --ai-input-bg: 0 0% 100%; /* fondo del input al focusear (blanco) */
+
+  /* ---------------------------------------------------------------------- */
   /*  TIPOGRAFÍA                                                            */
   /* ---------------------------------------------------------------------- */
   --font-display:

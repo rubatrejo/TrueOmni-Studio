@@ -77,7 +77,15 @@
     "guestbook_finish_cta": "TERMINAR",
     "guestbook_thanks_title": "¡Gracias por firmar!",
     "guestbook_invalid_zip_fallback": "No encontramos ese código postal, mostrando el área local.",
-    "guestbook_country_select_title": "Seleccionar país"
+    "guestbook_country_select_title": "Seleccionar país",
+    "ai_title": "Pregunta a la IA",
+    "ai_subtitle": "Tu guía personal de San Diego",
+    "ai_input_placeholder": "Escribe tu pregunta...",
+    "ai_send_label": "Enviar",
+    "ai_loading_label": "Pensando...",
+    "ai_aria_open": "Abrir asistente de IA",
+    "ai_aria_close": "Cerrar IA",
+    "ai_aria_mic": "Activar entrada de voz"
   },
   "navegacion": {
     "home": "/",

@@ -98,6 +98,35 @@ export interface SurveyConfig {
   thankYou: SurveyThankYou;
 }
 
+/** Pregunta sugerida del módulo Ask AI con su respuesta mock (typewriter). */
+export interface AskAiSuggestedQuestion {
+  id: string;
+  text: string;
+  response: string;
+}
+
+/**
+ * Configuración del módulo Ask AI (Fase 3.15).
+ * Avatar IA flotante en el Home que abre un modal con suggested questions,
+ * input + on-screen keyboard y mic con Web Speech API. v1 usa respuestas
+ * mock (typewriter); v2 conectará a un endpoint real (`/api/ai`).
+ */
+export interface AskAiConfig {
+  enabled: boolean;
+  /** Path relativo del PNG/JPG del avatar (servido desde `/assets/...`). */
+  avatar: string;
+  /** Path relativo del MP4/WebM del hero del modal (loop). */
+  heroVideo: string;
+  /** Texto de bienvenida que se muestra al abrir el modal (sin typewriter). */
+  greeting: string;
+  /** Subtítulo bajo el título "Ask AI" en el hero del modal. */
+  subtitle?: string;
+  /** Chips horizontales con la respuesta typewriter asociada a cada uno. */
+  suggestedQuestions: AskAiSuggestedQuestion[];
+  /** Posición del trigger flotante en el Home. Default {right:24,bottom:24,size:82}. */
+  position?: { right?: number; bottom?: number; size?: number };
+}
+
 /** Ítem de búsqueda placeholder. Fases futuras lo reemplazan con data real. */
 export interface HomeListing {
   slug: string;
@@ -614,6 +643,9 @@ export interface KioskConfig {
       listings: HomeListing[];
       /** Módulos configurables (Listings o Events). Discriminados por `kind`. */
       modules?: Record<string, HomeModuleVariant>;
+      /** Módulo Ask AI (avatar flotante + modal). Sibling, no es un module variant
+       *  porque no es un tile del grid ni tiene ruta `/home/{key}` propia. */
+      askAi?: AskAiConfig;
     };
     /** Catálogo de ads declarativo (Fase 3.8). */
     advertisements?: AdvertisementsConfig;

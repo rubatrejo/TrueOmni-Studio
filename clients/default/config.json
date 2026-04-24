@@ -140,7 +140,15 @@
     "guestbook_finish_cta": "FINISH",
     "guestbook_thanks_title": "Thanks for signing!",
     "guestbook_invalid_zip_fallback": "Couldn't find that zip code, showing the local area instead.",
-    "guestbook_country_select_title": "Select Country"
+    "guestbook_country_select_title": "Select Country",
+    "ai_title": "Ask AI",
+    "ai_subtitle": "Your personal San Diego guide",
+    "ai_input_placeholder": "Type your question...",
+    "ai_send_label": "Send",
+    "ai_loading_label": "Thinking...",
+    "ai_aria_open": "Open Ask AI assistant",
+    "ai_aria_close": "Close Ask AI",
+    "ai_aria_mic": "Toggle voice input"
   },
   "navegacion": {
     "home": "/",
@@ -9228,6 +9236,54 @@
             }
           ]
         }
+      },
+      "askAi": {
+        "enabled": true,
+        "avatar": "assets/ai/avatar.png",
+        "heroVideo": "assets/ai/hero-video.mp4",
+        "greeting": "Hi! I'm your guide to San Diego. Ask me anything about restaurants, events, activities, or getting around the area.",
+        "suggestedQuestions": [
+          {
+            "id": "restaurants",
+            "text": "Best restaurants nearby?",
+            "response": "Great choice! For fine dining, Harbor Grill on the waterfront serves incredible Pacific seafood with sunset views. If you're craving something unique, Gowoondon on San Diego Ave is the go-to for authentic Korean barbecue. Both are within a mile of here and highly rated by visitors."
+          },
+          {
+            "id": "events",
+            "text": "Events happening today?",
+            "response": "Today in San Diego you can catch the CRSSD Festival at Waterfront Park — it's a two-day electronic music event with international DJs. There's also a food truck gathering at Balboa Park and a sunset yoga session at La Jolla Shores. Want me to add any of these to your itinerary?"
+          },
+          {
+            "id": "itinerary",
+            "text": "Build me an itinerary",
+            "response": "I'd love to help! Here's a perfect San Diego day: Start with coffee at Bird Rock Coffee in La Jolla, head to Balboa Park for the museums, grab lunch at Harbor Grill, explore the Gaslamp Quarter in the afternoon, and finish with cocktails at Raised by Wolves. I can customize this based on your interests!"
+          },
+          {
+            "id": "getting-around",
+            "text": "How do I get around?",
+            "response": "San Diego has several great options. The MTS Trolley connects downtown to Old Town, Mission Valley, and the border. Ride-sharing is widely available. For the beaches, the bus Route 30 runs along the coast. Many attractions downtown are walkable, and you can rent electric scooters on almost every corner."
+          },
+          {
+            "id": "waterfront",
+            "text": "Things to do near the waterfront?",
+            "response": "The waterfront is packed! Visit the USS Midway Museum — it's an aircraft carrier turned museum right on the bay. Seaport Village has shops and restaurants with harbor views. You can take a harbor cruise, rent kayaks, or just walk the Embarcadero path. The Headquarters at Seaport is great for shopping too."
+          },
+          {
+            "id": "weather",
+            "text": "What's the weather like?",
+            "response": "Right now it's a beautiful 72F and sunny — typical San Diego weather! The forecast shows clear skies all week with temperatures between 68-75F. Perfect for outdoor activities. UV is moderate, so sunscreen is recommended if you're heading to the beach. Evening temperatures drop to around 60F."
+          },
+          {
+            "id": "nightlife",
+            "text": "Where's the nightlife?",
+            "response": "The Gaslamp Quarter is the heart of San Diego nightlife — dozens of bars, clubs, and lounges within a few blocks. For something special, try Raised by Wolves, a hidden speakeasy behind a bottle shop. Pacific Beach has a more casual, beachy vibe. North Park is the craft beer capital with 20+ breweries."
+          },
+          {
+            "id": "coffee",
+            "text": "Best coffee shops?",
+            "response": "Bird Rock Coffee Roasters in La Jolla is award-winning — they roast their own beans on-site. In North Park, try Dark Horse Coffee Roasters for great espresso and pastries. Downtown, James Coffee Co. has a beautiful space in a converted warehouse. All three source directly from farms for exceptional quality."
+          }
+        ]
       }
     },
     "advertisements": {

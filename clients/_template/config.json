@@ -109,7 +109,15 @@
     "guestbook_finish_cta": "FINISH",
     "guestbook_thanks_title": "Thanks for signing!",
     "guestbook_invalid_zip_fallback": "Couldn't find that zip code, showing the local area instead.",
-    "guestbook_country_select_title": "Select Country"
+    "guestbook_country_select_title": "Select Country",
+    "ai_title": "Ask AI",
+    "ai_subtitle": "Your personal travel guide",
+    "ai_input_placeholder": "Type your question...",
+    "ai_send_label": "Send",
+    "ai_loading_label": "Thinking...",
+    "ai_aria_open": "Open Ask AI assistant",
+    "ai_aria_close": "Close Ask AI",
+    "ai_aria_mic": "Toggle voice input"
   },
   "navegacion": {
     "home": "/",

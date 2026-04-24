@@ -6,16 +6,20 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Fase 3.14 (Guestbook) **aprobada por Rubén** tras una sesión larga de refactor visual + fixes funcionales (form layout, map screen rebuild, drag-and-drop).
+**Fase activa:** Fase 3.15 (Ask AI module) **cerrada** tras sesión de instalación full white-label desde el paquete portable `_packaged/ask-ai-module/`. UI idéntica al paquete preservada con tokens `--ai-*`, OnScreenKeyboard del kiosk reusado, voice (Web Speech) en mic del hero.
 
-**Última fase cerrada:** Fase 3.14 — Guestbook module completo + refactor sesión 2026-04-23. Antes: Fase 3.13 Trails, 3.12 Deals, 3.11 Tickets.
+**Última fase cerrada:** Fase 3.15 — Ask AI module (2026-04-23). Antes: 3.14 Guestbook, 3.13 Trails, 3.12 Deals, 3.11 Tickets.
 
-**Siguiente acción concreta:** Fase 3.15 — Itinerary Builder (candidato natural) o Fase 4 (primer cliente real).
+**Siguiente acción concreta:** Photo Booth o Itinerary Builder (módulos del Home aún sin construir) o Fase 4 (primer cliente real).
 
 **Bloqueos:** ninguno. `alwaysShowWelcome={true}` del MapModule sigue hardcoded para QA — apagarlo antes de Fase 4 / producción (`[module]/page.tsx` rama `map`).
 
 **TODO de QA pendiente:**
 
+- Fase 3.15 Ask AI: **LLM real** (Fase 5+) — reemplazar typewriter mock por endpoint `/api/ai` con Anthropic Claude usando `clients/{slug}/config.json` como system prompt.
+- Fase 3.15 Ask AI: **voice lang dinámico** — `recognition.lang = 'en-US'` hardcoded en `ai-modal.tsx:87`; debería leer de `config.client.locale` o `askAi.voiceLang`.
+- Fase 3.15 Ask AI: **fallback response configurable** — string `'I can help with that!...'` en `ai-store.ts:56` mover a `config.textos.ai_fallback_response`.
+- Fase 3.15 Ask AI: añadir bloque `home.askAi` a `_template` y `demo-cliente-a` cuando estos clientes tengan `features.home` configurado (hoy muestran placeholder de "no home").
 - `alwaysShowWelcome={true}` en map.
 - Fase 3.11 Tickets: auditor white-label ejecutado — reporte en `.planning/3-11-SUMMARY.md`.
 - Fase 3.12 Deals: auditor ejecutado — solo fallbacks `??` defensivos (patrón idéntico a Tickets/Passes). Reporte en `.planning/3-12-SUMMARY.md`.
@@ -39,9 +43,9 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 - Strings del SharingRow del detail + toolbar del módulo de Listings ("WEBSITE", "RESERVE NOW", "SEND TO EMAIL/PHONE", "ADD TO FAVORITES", "FILTERS", "SORT BY", "CLOSE", "CANCEL", "SEND", "DESCRIPTION", "GET DIRECTIONS") vienen del SVG; se migran a `config.textos` cuando se internacionalice.
 - Activity-row del módulo Passes: el botón "View Website" usa `textos.passes_view_website` ✅ ya migrado.
 
-**Deps añadidas:** `qrcode.react@4.2` (Passes share modal — QR escaneable level H con logo TrueOmni centrado).
+**Deps añadidas:** `qrcode.react@4.2` (Passes share modal — QR escaneable level H con logo TrueOmni centrado). `zustand@5.0`, `framer-motion@12.38`, `gsap@3.15`, `@gsap/react@2.1` (Fase 3.15 Ask AI module — store, animaciones modal/chips, mic rings).
 
-**Tokens nuevos:** `--survey-success: 120 61% 50%` (lime `#32CD32` para checks de Survey thank-you y Passes sent-confirmation) — añadido a los 3 `tokens.css` (template, default, demo-cliente-a) en sesión 2026-04-22.
+**Tokens nuevos:** `--survey-success: 120 61% 50%` (lime `#32CD32` para checks de Survey thank-you y Passes sent-confirmation) — añadido a los 3 `tokens.css` (template, default, demo-cliente-a) en sesión 2026-04-22. **Fase 3.15:** 8 tokens `--ai-*` añadidos a los 3 `tokens.css`: `--ai-surface`, `--ai-text`, `--ai-text-soft`, `--ai-accent-from`, `--ai-accent-to`, `--ai-keyboard-bg`, `--ai-trigger-shadow`, `--ai-input-bg`.
 
 **Decisiones globales vigentes:**
 
@@ -873,6 +877,47 @@ driving/walking, SEE 360 funcional, favorite toast).
 - **Gradient `gradientExtra` en HomeHeader**: prop retrocompatible que no afecta a otros usos del header (default 0).
 
 **Fase:** 3.14 Guestbook aprobada por Rubén (refactor completo + drag&drop funcional).
+
+---
+
+### Sesión 2026-04-23 — Fase 3.15 Ask AI module (instalación full white-label desde paquete portable)
+
+**Hecho:**
+
+- Brainstorming aprobado en plan mode (3 preguntas — modelo de integración, alcance del trigger, nivel white-label): A + A + C (overlay flotante global solo en Home, fully white-label con UI idéntica al paquete).
+- Plan en `~/.claude/plans/tambien-nos-falta-el-snappy-willow.md`. Spec equivalente en `.planning/3-15-SUMMARY.md`.
+- **Ola 1 (config + tipos + tokens + assets + deps):** 2 interfaces nuevas en `config.ts` (`AskAiSuggestedQuestion`, `AskAiConfig`) + campo `features.home.askAi?`. 8 tokens `--ai-*` añadidos a los 3 `tokens.css`. 8 textos `ai_*` (EN para default/_template, ES para demo-cliente-a). Bloque `home.askAi` completo en `default/config.json` (greeting + 8 suggested questions San Diego). Assets `avatar.png` (4.5 MB) + `hero-video.mp4` (52 MB) copiados desde `_packaged/ask-ai-module/public/` a `clients/default/assets/ai/`. Deps instaladas vía pnpm: `zustand@5.0`, `framer-motion@12.38`, `gsap@3.15`, `@gsap/react@2.1`.
+- **Ola 2 (componentes core):** `src/lib/ask-ai.ts` (helper `getAskAiConfig` + `resolveAiAssetPath`), `src/stores/ai-store.ts` (zustand con `hydrate` action server-driven), `src/components/ai/{ai-modal,ai-modal-host,ask-ai-trigger,suggested-questions}.tsx`. Modal usa OnScreenKeyboard del kiosk (no el del paquete con drag+voice). Voice movido al botón mic del hero (Web Speech API). Adapter `handleKey` traduce `KeyboardKey` del kiosk a operaciones sobre input string (mismo patrón que SearchOverlay/SendToEmailModal/GuestbookFormScreen).
+- **Ola 3 (integración):** `src/app/(kiosk)/home/page.tsx` lee `home.askAi`, monta `<AskAiTrigger />` y `<AiModalHost />` como hermanos de HomeShell/AdsSlot/SurveyHost. Si `enabled === false` no renderiza nada.
+- **Ola 4 (QA):** typecheck + lint + format limpios. Auditor white-label encontró un único hardcoded (`#FFFFFF` en input bg) → resuelto con token nuevo `--ai-input-bg`. Playwright verificó: trigger visible bottom-right, modal slide-up, hero Tavus video, mic gradient azul-teal, greeting + 8 chips, typewriter al tap chip (Harbor Grill), input + OnScreenKeyboard subiendo, escritura con tecla `a` → input mostró carácter + apareció Send button.
+
+**Verificado:**
+
+- `pnpm typecheck` limpio en 4 checkpoints.
+- `pnpm lint` y `pnpm format:check` limpios en archivos AI (errores residuales son pre-existentes del Guestbook).
+- Auditor white-label sin hallazgos en `src/components/ai/` tras añadir token `--ai-input-bg`.
+- Playwright MCP: 5 screenshots capturadas en `.planning/verifications/3-15-*.png` (home con trigger, modal abierto, typewriter, keyboard, typing).
+- Console error único = `favicon.ico` 404 (pre-existente, no relacionado).
+
+**Pendiente / siguiente:**
+
+- LLM real (Fase 5+): endpoint `/api/ai` con Anthropic Claude usando `clients/{slug}/config.json` como system prompt — reemplaza el typewriter mock de `ai-store.askQuestion`.
+- Voice lang dinámico en `ai-modal.tsx:87` (`recognition.lang = 'en-US'` hardcoded).
+- Fallback response configurable: mover string de `ai-store.ts:56` a `config.textos.ai_fallback_response`.
+- Bloque `home.askAi` para `_template` y `demo-cliente-a` cuando estos clientes tengan `features.home` configurado.
+- Photo Booth, Itinerary Builder o Fase 4 (primer cliente real).
+
+**Decisiones:**
+
+- **Overlay flotante global, no tile** (P1=A) — Ask AI es un asistente transversal, no encaja como uno más de los 14 tiles del Home. No tiene URL `/home/ask-ai`.
+- **Solo en Home en v1** (P2=A) — el modal queda mounted globally a futuro pero el trigger solo en `home/page.tsx`. Si en v2 se quiere en otras pantallas, basta añadir `<AskAiTrigger />` en esos `[module]/page.tsx`.
+- **Fully white-label preservando UI idéntica** (P3=C) — los hex del paquete se convirtieron a HSL y se añadieron como tokens `--ai-*`. UI y transiciones son verbatim del paquete; solo cambia que ahora son customizables por cliente.
+- **OnScreenKeyboard del kiosk vs VirtualKeyboard del paquete** — usamos el del kiosk (consistencia con Search, Guestbook, Survey, Tickets). Pierdes drag y voice en el keyboard, pero voice se mueve al mic del hero (igualmente accesible).
+- **`askAi` como sibling de `modules`, no como `HomeModuleVariant`** — evita que se cree ruta automática `/home/ask-ai` (no la queremos) y permite que el shape sea libre (no obliga a tener `label`/`heroImage` como un module).
+- **Hidratación del store via `useEffect` en `<AiModalHost>`** — el server component pasa `greeting`/`suggestedQuestions` como prop; el host lo inyecta al store en mount. Server-driven, sin fetch client-side, cero hydration mismatch.
+- **Mock typewriter `setInterval(15ms)` verbatim del paquete** — preserva el feel original. Se reemplazará por streaming response cuando se conecte a Claude.
+
+**Fase:** 3.15 Ask AI cerrada (UI idéntica al paquete original, fully white-label, voice integrada en mic del hero).
 
 ---
 

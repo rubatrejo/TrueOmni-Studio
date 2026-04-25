@@ -1008,6 +1008,55 @@ driving/walking, SEE 360 funcional, favorite toast).
 
 ---
 
+### Sesión 2026-04-24 (tarde) — Fase 3.16 iteraciones de pulido (11 commits incrementales)
+
+**Hecho (en orden cronológico):**
+
+- **Fix Ask AI (commit `074e3dc`):** ads (hero/bottom/popup) z-index a 70-80, por encima del pill Ask AI (45). Inversión de la decisión previa — los ads tienen prioridad visual máxima sobre cualquier overlay del Home. Memoria guardada en `feedback_ads_z_index.md`.
+- **Fix headers + frames + permisos (commit `87d92e4`):** KioskHeader del Photo Booth ahora usa `TrueOmniLogo` + `WeatherClock` estándar del kiosk con weather real (fetchWeather server-side, locale + timezone del cliente). Carrusel del Start cambia de backgrounds a frames con thumbnails (`Photo_Booth-Thumbnail_Frame_*.png`) + preview live del frame sobre la cámara. `useCamera` quita auto-fallback a mock en dev — ahora pide permisos reales de Chrome; mock solo si `?mock=1`.
+- **None frame + carrusel scrollable (commit `6347102`):** entry "none" como primer frame con thumbnail Photo_Booth-Thumbnail_Frame_None.png. Default seleccionado. Skip overlay si `image === ''`. Carrusel pasa de 6 posiciones absolutas fijas a flex horizontal scrollable con scrollLeft inicial centrado.
+- **Home button + TAKE PHOTO scroll (commit `fc84337`):** home/back en los 3 sub-screens del Photo Booth a `top:1000` matching `FloatingHomeButton` del resto del kiosk. START → "TAKE PHOTO" 2 líneas, dentro del scroll (item más, no fixed). Tamaño 260×260 vs 212×212 thumbnails.
+- **Countdown ring animado + editor pulido + frame cocido (commit `57d54bd`):** ring del countdown anima strokeDashoffset linealmente (1s/tick). Editor con 5 backgrounds, popup back warning estilo Guestbook ("Are you sure" en 2 líneas + CTA Cancel/Leave), KioskHeader visible en editor. Frame seleccionado **cocido en el blob** (recompose on-change). Editor ya no renderiza frame como overlay DOM separado.
+- **Barra dark + 8 filtros + thumbs 200 + ring verde (commit `a8f910f`):** `--photo-tabs-bg` 0088ce → 004f8b dark. Frames tab usa `f.resolvedThumbnail`. Popup título 2 líneas Photo Booth + Guestbook. Countdown ring color olive `#b9bd39` (del Send-to-Phone). 2 filtros añadidos (Punchy + Dramatic = 8 total). Thumbs 212→200 → 4.5 visibles.
+- **Stickers bar + countdown verde + Coming Next + Share rehecho + USA bgs (commit `aed2a21`):** stickers bar `#1796d6`. Countdown backdrop circle negro 50% + número y track ring verde olive. EXPERIENCE pill abre popup cinematic "Coming Next" con kicker, gradient title, body interpolado client_name, CTA back. Share button del editor: arrows DOWN apuntando al botón, "Share Photo" 2 líneas, icono universal Share. Share screen: fondo blanco, banda azul, título "SHARE YOUR MEMORIES", QR integrado en Follow us pill. Backgrounds Unsplash USA iconic (Statue Liberty, Grand Canyon, Golden Gate, Times Square, Yellowstone).
+- **Timer 3s + frame shadow + share rehecho con bg + iconos sociales oficiales (commit `230f00b`):** timer default 10→3s. Frame seleccionado en Start con shadow doble (ring sólido + glow blur 32px). `loadImage` tolerante (resolve null en error). Share button arrow-out-of-box icon, flechas DOWN, texto NEGRO. Stickers row fondo BLANCO. Share screen con `shareBackground` config-driven (foto `joseph-corl-OUtu8i12Nyo` que mandó Rubén). Iconos sociales OFICIALES (X verbatim, Facebook #1877F2 + f, Instagram gradient radial real). EMAIL/TEXT outline blanco bg negro 35%.
+- **None bg + share rename + confirm en home + foto contain (commit `15698ce`):** entry 'none' en backgrounds (default seleccionado) → composeFinal con `keepOriginalBackground: true` salta green-screen y usa foto cruda. Buttons rename "Send to Email" / "Send to Phone" sin iconos internos, estilo pill outline. Home button del share dispara confirm popup. `handleRetake` distingue por `phase` (sharing→home, editing→live).
+- **Bgs Arizona + photo aspect 9:16 + buttons olive/blue (commit `0f2f470`):** bandera India → Antelope Canyon AZ + NYC → Monument Valley AZ. Photo card 540×960 (aspect 9:16 exacto) con `objectFit:cover`. Buttons solid pills: Email olive `#b9bd39`, Phone azul `#1796d6` matching CLEAR ALL/APPLY del filter overlay.
+- **Quita glow buttons + Follow us / QR como 2 cards (commit `94fe031`):** `boxShadow: none` en buttons (quita el halo color). Follow us + QR rediseñado como **dos tarjetas blancas independientes lado a lado** (600×200 + 300×200, gap 20px, balanceadas) en y=1380. Sin overflow, esquinas redondeadas consistentes.
+
+**Verificado:**
+
+- 11 commits incrementales, todos con typecheck limpio.
+- Screenshots de verificación en `.planning/verifications/3-16-*.png` para cada cambio mayor.
+- Flujo end-to-end probado con Playwright (?mock=1): Start → frame select → TAKE PHOTO → countdown verde → segmenta → editor con 5 bgs/8 filters/stickers → Share button con arrows → share screen → CTAs.
+
+**Pendiente para próxima sesión:**
+
+- **Fix CRÍTICO:** wire up real de `SendToEmailModal` + `SendToPhoneModal` + `SentConfirmationPopup` (existentes en `src/components/listings/`) para los CTAs Send to Email/Phone. Actualmente solo muestran un overlay mock "Sent!". Rubén pidió flujo completo con keyboard + popup confirmación como en listings (screenshots de la sesión anterior muestran el patrón exacto: input + numeric keypad / on-screen keyboard + send button → popup verde "Sent to your phone" con check + auto-redirect home).
+- Backgrounds: algunos URLs Unsplash pueden 404. `loadImage` tolera el error pero idealmente verificar URLs estables o pre-descargar para producción. Actualmente: Antelope Canyon AZ, Grand Canyon, Monument Valley AZ, Yosemite, Statue of Liberty + None.
+- Bloque `home.photoBooth` para `_template` y `demo-cliente-a` cuando estos clientes tengan `features.home` configurado.
+- LLM real para Ask AI (Fase 5+).
+- Itinerary Builder, Photo Booth real-camera testing en kiosk físico.
+
+**Decisiones clave consolidadas en memoria** (`feedback_photo_booth_iterations.md`):
+
+- Header consistente: TrueOmniLogo + WeatherClock estándar.
+- FloatingHomeButton coords (top:1000, 116×232, #004f8b).
+- Popup 2 líneas con `whiteSpace: pre-line`.
+- Carrusel scrollable horizontal con scrollLeft centrado.
+- Shutter como item del scroll, no fixed.
+- None option pattern (image vacío + thumbnail dedicado).
+- Aspect 9:16 EXACTO en photo cards.
+- Iconos sociales oficiales (X/FB/IG verbatim).
+- Buttons sin glow colorido.
+- Cards balanceadas lado a lado (no overflow pills).
+- Permisos cámara reales en dev (sin auto-mock).
+- `loadImage` tolerante a fallos.
+
+**Fase:** 3.16 Photo Booth — pulido pendiente de Fix CRÍTICO de Send to Email/Phone modal real. Resto del módulo estable y aprobado visualmente.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

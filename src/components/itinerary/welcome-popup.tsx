@@ -2,6 +2,8 @@
 
 import Image from 'next/image';
 
+import { pinDataUri } from '@/components/map/map-pin-icons';
+import type { MapSource } from '@/lib/config';
 import { buildMapboxStaticUrl } from '@/lib/itinerary-asset';
 
 export interface WelcomePopupTextos {
@@ -27,13 +29,16 @@ export interface WelcomePopupProps {
   onClose: () => void;
 }
 
-/** Pin marker dibujado encima del mapa de fondo del welcome popup. */
+/** Pin con el mismo estilo del MapCanvas (teardrop + icono por categoría). */
 function CategoryPin({
+  source,
   label,
   x,
   y,
   alignLabel,
 }: {
+  /** Source del MapCanvas (define color + icono). 'venues' fallback a 'things-to-do'. */
+  source: MapSource;
   label: string;
   x: number;
   y: number;
@@ -49,24 +54,22 @@ function CategoryPin({
         flexDirection: alignLabel === 'right' ? 'row' : 'row-reverse',
       }}
     >
-      {/* Pin teardrop */}
-      <svg
-        width="38"
-        height="50"
-        viewBox="0 0 38 50"
-        className="drop-shadow-lg"
-        aria-hidden="true"
-      >
-        <path
-          d="M19 0C8.5 0 0 8.5 0 19c0 14 19 31 19 31s19-17 19-31C38 8.5 29.5 0 19 0z"
-          fill="hsl(var(--primary))"
-        />
-        <circle cx="19" cy="19" r="6.5" fill="white" />
-      </svg>
-      {/* Label pill */}
+      {/* Pin teardrop estilo Map. ~52×70 en el canvas (25% del tamaño base 140×188). */}
+      <Image
+        src={pinDataUri(source)}
+        alt=""
+        width={52}
+        height={70}
+        unoptimized
+        className="drop-shadow-md"
+      />
+      {/* Label pill blanco al lado del pin */}
       <div
-        className="rounded-md bg-white px-3 py-1 text-[12px] font-bold tracking-wider text-foreground shadow-md"
-        style={{ marginLeft: alignLabel === 'right' ? 8 : 0, marginRight: alignLabel === 'left' ? 8 : 0 }}
+        className="rounded-md bg-white px-3 py-[6px] text-[14px] font-bold tracking-[0.07em] text-foreground shadow-md"
+        style={{
+          marginLeft: alignLabel === 'right' ? 8 : 0,
+          marginRight: alignLabel === 'left' ? 8 : 0,
+        }}
       >
         {label}
       </div>
@@ -83,12 +86,13 @@ export function WelcomePopup(props: WelcomePopupProps) {
     lat: clientCoords?.lat,
     zoom: 12,
     width: 540,
-    height: 1080,
+    height: 960,
+    style: 'streets-v12',
   });
 
   return (
     <div
-      className="absolute inset-0 z-50 flex items-center justify-center"
+      className="absolute inset-0 z-50"
       role="dialog"
       aria-modal="true"
       aria-label={textos.title}
@@ -101,78 +105,101 @@ export function WelcomePopup(props: WelcomePopupProps) {
             alt=""
             fill
             sizes="1080px"
-            className="object-cover opacity-90"
+            className="object-cover"
             priority
             unoptimized
           />
         )}
-        {/* 4 pins de categoría superpuestos al mapa */}
-        <CategoryPin label={textos.categoryThings} x={170} y={350} alignLabel="right" />
-        <CategoryPin label={textos.categoryRestaurants} x={760} y={500} alignLabel="left" />
-        <CategoryPin label={textos.categoryStay} x={250} y={680} alignLabel="right" />
-        <CategoryPin label={textos.categoryVenues} x={820} y={780} alignLabel="left" />
+        {/* 4 pins de categoría — coords aproximadas del SVG verbatim */}
+        <CategoryPin
+          source="things-to-do"
+          label={textos.categoryThings}
+          x={235}
+          y={420}
+          alignLabel="right"
+        />
+        <CategoryPin
+          source="restaurants"
+          label={textos.categoryRestaurants}
+          x={750}
+          y={555}
+          alignLabel="left"
+        />
+        <CategoryPin
+          source="stay"
+          label={textos.categoryStay}
+          x={300}
+          y={760}
+          alignLabel="right"
+        />
+        <CategoryPin
+          source="events"
+          label={textos.categoryVenues}
+          x={835}
+          y={845}
+          alignLabel="left"
+        />
       </div>
 
-      {/* Backdrop semi-transparente para legibilidad */}
-      <div className="absolute inset-0 bg-black/15" aria-hidden="true" />
-
-      {/* Card central */}
-      <div
-        className="relative flex w-[860px] flex-col items-center rounded-[28px] bg-white px-16 py-14 shadow-2xl"
-        style={{ marginTop: 80 }}
-      >
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute right-6 top-6 flex h-12 w-12 items-center justify-center rounded-full bg-foreground/85 text-white transition hover:bg-foreground"
+      {/* Card central — coords aproximadas del SVG: y centrada vertical alrededor de 900-1340 */}
+      <div className="absolute inset-x-0 flex justify-center" style={{ top: 880 }}>
+        <div
+          className="relative flex w-[860px] flex-col items-center rounded-[28px] bg-white px-16 py-12 shadow-2xl"
+          style={{ minHeight: 440 }}
         >
-          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
-            <path
-              d="M5 5l10 10M15 5L5 15"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
-
-        <p
-          className="text-[18px] font-bold tracking-[0.18em]"
-          style={{ color: 'hsl(var(--primary))' }}
-        >
-          {textos.kicker}
-        </p>
-        <p className="mt-6 text-[26px] font-semibold tracking-[0.05em] text-foreground">
-          {textos.intro}
-        </p>
-        <h1
-          className="mt-3 text-center text-[44px] font-bold uppercase leading-[1.05] tracking-tight"
-          style={{ color: 'hsl(var(--primary))', whiteSpace: 'pre-line' }}
-        >
-          {textos.title}
-        </h1>
-        <p className="mt-6 max-w-[600px] text-center text-[19px] leading-[1.45] text-zinc-600">
-          {textos.body}
-        </p>
-
-        <div className="mt-10 flex gap-5">
           <button
             type="button"
-            onClick={onCreate}
-            className="flex h-[64px] items-center justify-center rounded-full px-10 text-[20px] font-semibold text-white shadow-md transition hover:opacity-95"
-            style={{ backgroundColor: 'hsl(var(--itinerary-olive))' }}
+            onClick={onClose}
+            aria-label="Close"
+            className="absolute right-6 top-6 flex h-12 w-12 items-center justify-center rounded-full bg-foreground/85 text-white transition hover:bg-foreground"
           >
-            {textos.createCta}
+            <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+              <path
+                d="M5 5l10 10M15 5L5 15"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+            </svg>
           </button>
-          <button
-            type="button"
-            onClick={onAi}
-            className="flex h-[64px] items-center justify-center rounded-full px-10 text-[20px] font-semibold text-white shadow-md transition hover:opacity-95"
-            style={{ backgroundColor: 'hsl(var(--primary))' }}
+
+          <p
+            className="text-[20px] font-bold tracking-[0.18em]"
+            style={{ color: 'hsl(var(--primary))' }}
           >
-            {textos.aiCta}
-          </button>
+            {textos.kicker}
+          </p>
+          <p className="mt-6 text-[28px] font-semibold tracking-[0.04em] text-foreground">
+            {textos.intro}
+          </p>
+          <h1
+            className="mt-3 text-center text-[48px] font-bold uppercase leading-[1.05] tracking-tight"
+            style={{ color: 'hsl(var(--primary))', whiteSpace: 'pre-line' }}
+          >
+            {textos.title}
+          </h1>
+          <p className="mt-6 max-w-[640px] text-center text-[20px] leading-[1.45] text-zinc-600">
+            {textos.body}
+          </p>
+
+          <div className="mt-10 flex gap-5">
+            <button
+              type="button"
+              onClick={onCreate}
+              className="flex h-[68px] items-center justify-center rounded-full px-12 text-[22px] font-semibold text-white shadow-md transition hover:opacity-95"
+              style={{ backgroundColor: 'hsl(var(--itinerary-olive))' }}
+            >
+              {textos.createCta}
+            </button>
+            <button
+              type="button"
+              onClick={onAi}
+              className="flex h-[68px] items-center justify-center rounded-full px-12 text-[22px] font-semibold text-white shadow-md transition hover:opacity-95"
+              style={{ backgroundColor: 'hsl(var(--primary))' }}
+            >
+              {textos.aiCta}
+            </button>
+          </div>
         </div>
       </div>
     </div>

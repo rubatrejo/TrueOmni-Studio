@@ -3,6 +3,9 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
+import { SendConfirmationPopup } from '@/components/listings/send-confirmation-popup';
+import { SendToEmailModal } from '@/components/listings/send-to-email-modal';
+import { SendToPhoneModal } from '@/components/listings/send-to-phone-modal';
 import { useCamera } from '@/hooks/use-camera';
 import { useCountdown } from '@/hooks/use-countdown';
 import { usePhotoSession } from '@/hooks/use-photo-session';
@@ -41,12 +44,13 @@ interface PhotoBoothTextos {
   tabFrames: string;
   tabFilters: string;
   shareTitle: string;
-  shareFollow: string;
-  shareScanMe: string;
   shareEmailCta: string;
   shareTextCta: string;
-  sentTitle: string;
-  sentBody: string;
+  shareScanKicker: string;
+  sentEmailTitle: string;
+  sentEmailBody: string;
+  sentPhoneTitle: string;
+  sentPhoneBody: string;
   exitTitle: string;
   exitMessage: string;
   exitCancel: string;
@@ -248,7 +252,11 @@ export function PhotoBoothModule({
   };
   const onSelectFilter = (id: string) => setSelectedFilterId(id);
 
-  const onAddSticker = (sticker: (typeof resolvedStickers)[number]) => {
+  const onAddSticker = (
+    sticker: (typeof resolvedStickers)[number],
+    x: number,
+    y: number,
+  ) => {
     const instanceId = `${sticker.id}-${Date.now()}`;
     const w = sticker.defaultWidth ?? 180;
     setPlacedStickers((prev) => [
@@ -257,8 +265,8 @@ export function PhotoBoothModule({
         instanceId,
         stickerId: sticker.id,
         src: sticker.resolvedImage,
-        x: 313, // centro del photo area (626/2)
-        y: 557, // centro (1114/2)
+        x,
+        y,
         width: w,
         height: w,
       },
@@ -345,14 +353,21 @@ export function PhotoBoothModule({
     }
   };
 
-  const [sentMode, setSentMode] = useState<null | 'email' | 'text'>(null);
-  const showSent = (mode: 'email' | 'text') => {
-    setSentMode(mode);
-    setTimeout(() => {
-      setSentMode(null);
-      // Auto-return a Home tras confirmación
-      router.push('/home');
-    }, 4500);
+  // Modales de envío: input real con teclado/numpad + popup confirmación.
+  // El popup `SendConfirmationPopup` hace auto-redirect a /home a los 5s.
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [phoneOpen, setPhoneOpen] = useState(false);
+  const [confirm, setConfirm] = useState<
+    { kind: 'email' | 'phone'; destination: string } | null
+  >(null);
+
+  const handleEmailSent = (email: string) => {
+    setEmailOpen(false);
+    setConfirm({ kind: 'email', destination: email });
+  };
+  const handlePhoneSent = (phone: string) => {
+    setPhoneOpen(false);
+    setConfirm({ kind: 'phone', destination: phone });
   };
 
   const timerLabel =
@@ -586,64 +601,51 @@ export function PhotoBoothModule({
             '{id}',
             `pb-${Date.now()}`,
           )}
-          social={config.social}
           shareBackgroundSrc={shareBackgroundSrc}
-          onHome={() => setShowExitConfirm(true)}
-          onEmail={() => showSent('email')}
-          onText={() => showSent('text')}
+          onBack={() => setPhase('editing')}
+          onEmail={() => setEmailOpen(true)}
+          onText={() => setPhoneOpen(true)}
           labels={{
             title: textos.shareTitle,
-            follow: textos.shareFollow,
             emailCta: textos.shareEmailCta,
             textCta: textos.shareTextCta,
-            scanMe: textos.shareScanMe,
-            ariaHome: textos.ariaHome,
+            scanKicker: textos.shareScanKicker,
+            ariaBack: textos.ariaBack,
           }}
           logoSrc={logoSrc}
           logoAlt={logoAlt}
         />
       )}
 
-      {sentMode && (
-        <div
-          className="absolute inset-0 flex flex-col items-center justify-center"
-          style={{ background: 'hsl(var(--photo-countdown-bg) / 0.85)', gap: 24 }}
-        >
-          <svg width={120} height={120} viewBox="0 0 120 120" aria-hidden="true">
-            <circle cx={60} cy={60} r={54} fill="none" stroke="hsl(var(--photo-accent-to))" strokeWidth={8} />
-            <path
-              d="M38 60l16 16 28-32"
-              fill="none"
-              stroke="hsl(var(--photo-accent-to))"
-              strokeWidth={8}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <h2
-            style={{
-              color: 'hsl(var(--photo-share-title))',
-              fontFamily: 'var(--font-display)',
-              fontSize: 72,
-              fontWeight: 700,
-              margin: 0,
-            }}
-          >
-            {textos.sentTitle}
-          </h2>
-          <p
-            style={{
-              color: 'hsl(var(--photo-share-title))',
-              fontSize: 32,
-              maxWidth: 700,
-              textAlign: 'center',
-              padding: '0 48px',
-            }}
-          >
-            {textos.sentBody}
-          </p>
-        </div>
-      )}
+      {/* Modales de envío reales — patrón compartido con listings/deals */}
+      <SendToEmailModal
+        open={emailOpen}
+        listingTitle="Photo Booth"
+        onCancel={() => setEmailOpen(false)}
+        onSent={handleEmailSent}
+      />
+      <SendToPhoneModal
+        open={phoneOpen}
+        listingTitle="Photo Booth"
+        onCancel={() => setPhoneOpen(false)}
+        onSent={handlePhoneSent}
+        onSwitchToKeyboard={() => {
+          setPhoneOpen(false);
+          setEmailOpen(true);
+        }}
+      />
+      <SendConfirmationPopup
+        open={confirm !== null}
+        kind={confirm?.kind ?? 'email'}
+        destination={confirm?.destination ?? ''}
+        title={
+          confirm?.kind === 'phone' ? textos.sentPhoneTitle : textos.sentEmailTitle
+        }
+        body={
+          confirm?.kind === 'phone' ? textos.sentPhoneBody : textos.sentEmailBody
+        }
+        onClose={() => setConfirm(null)}
+      />
 
       {captureError && (
         <div

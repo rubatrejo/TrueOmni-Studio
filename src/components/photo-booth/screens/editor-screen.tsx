@@ -1,14 +1,17 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 
-import type { PhotoBoothConfig } from '@/lib/config';
+import type { PhotoBoothConfig, PhotoBoothSticker } from '@/lib/config';
 
 import { EditorTabs, type EditorTab } from '../editor/editor-tabs';
 import { OptionsCarousel, type CarouselOption } from '../editor/options-carousel';
 import { ShareSidebar } from '../editor/share-sidebar';
 import { StickerLayer, type PlacedSticker } from '../editor/sticker-layer';
 import { StickersRow } from '../editor/stickers-row';
+
+const PHOTO_W = 626;
+const PHOTO_H = 1114;
 
 interface EditorResolved {
   backgrounds: Array<PhotoBoothConfig['backgrounds'][number] & { resolvedImage: string }>;
@@ -31,7 +34,8 @@ interface EditorScreenProps {
   onSelectFrame: (id: string) => void;
   onSelectFilter: (id: string) => void;
   stickers: PlacedSticker[];
-  onAddSticker: (sticker: EditorResolved['stickers'][number]) => void;
+  /** Agrega un sticker en (x, y) del photo area (0..626 × 0..1114). */
+  onAddSticker: (sticker: EditorResolved['stickers'][number], x: number, y: number) => void;
   onUpdateSticker: (id: string, patch: Partial<PlacedSticker>) => void;
   onRemoveSticker: (id: string) => void;
   onBack: () => void;
@@ -145,6 +149,32 @@ export function EditorScreen({
   // re-compose al cambiar de frame), así que NO lo renderizamos aquí como
   // overlay — sería doble.
 
+  // Ref al div de la foto para convertir client coords → photo coords al
+  // soltar un sticker arrastrado desde el carrusel.
+  const photoRef = useRef<HTMLDivElement>(null);
+
+  const handleStickerDrop = (
+    sticker: PhotoBoothSticker & { resolvedImage: string },
+    clientX: number,
+    clientY: number,
+  ) => {
+    const el = photoRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    // El kiosk-canvas tiene `transform: scale(...)`. El boundingClientRect
+    // ya devuelve dimensiones reales (escaladas). Para mapear a coords
+    // del photo area (CSS coords sin escalar), normalizamos por
+    // rect.width / PHOTO_W.
+    if (rect.width === 0 || rect.height === 0) return;
+    const scaleX = rect.width / PHOTO_W;
+    const scaleY = rect.height / PHOTO_H;
+    const x = (clientX - rect.left) / scaleX;
+    const y = (clientY - rect.top) / scaleY;
+    // Drop fuera del photo area → ignorar.
+    if (x < 0 || x > PHOTO_W || y < 0 || y > PHOTO_H) return;
+    onAddSticker(sticker, x, y);
+  };
+
   return (
     <div
       className="absolute inset-0"
@@ -169,19 +199,21 @@ export function EditorScreen({
       />
 
       {/* Stickers row */}
-      <StickersRow stickers={resolved.stickers} onAdd={onAddSticker} />
+      <StickersRow stickers={resolved.stickers} onDropAt={handleStickerDrop} />
 
       {/* Tabs */}
       <EditorTabs active={activeTab} onSelect={onChangeTab} labels={labels.tabs} />
 
       {/* Foto central con frame + filter aplicados */}
       <div
+        ref={photoRef}
+        data-photo-stickers-container
         className="absolute overflow-hidden"
         style={{
           left: 227,
           top: 747,
-          width: 626,
-          height: 1114,
+          width: PHOTO_W,
+          height: PHOTO_H,
           background: '#fff',
           borderRadius: 12,
           boxShadow: '0 10px 30px rgb(0 0 0 / 0.15)',

@@ -25,6 +25,7 @@ export default async function ItineraryBuilderPage() {
     <KioskCanvas>
       <ItineraryBuilderModule
         config={itinerary}
+        fullConfig={config}
         client={config.client}
         textos={config.textos}
         logoSrc={config.branding.logo.default}

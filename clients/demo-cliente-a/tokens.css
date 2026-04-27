@@ -85,6 +85,20 @@
   --photo-header-fg: 0 0% 100%;
 
   /* ---------------------------------------------------------------------- */
+  /*  ITINERARY BUILDER MODULE (Fase 3.17)                                  */
+  /* ---------------------------------------------------------------------- */
+  --itinerary-olive: 152 64% 47%; /* verde menta del cliente demo */
+  --itinerary-toolbar-bg: 24 95% 40%; /* naranja oscuro */
+  --itinerary-rail-bg: 30 30% 96%;
+  --itinerary-tab-active: 24 95% 40%;
+  --itinerary-tab-inactive: 30 30% 90%;
+  --itinerary-tab-text-active: 0 0% 100%;
+  --itinerary-tab-text-inactive: 218 35% 14%;
+  --itinerary-route-line: 24 95% 40%;
+  --itinerary-card-shadow: 218 35% 14%;
+  --itinerary-pin-fill: 0 0% 100%;
+
+  /* ---------------------------------------------------------------------- */
   /*  TIPOGRAFÍA                                                            */
   /* ---------------------------------------------------------------------- */
   --font-display:

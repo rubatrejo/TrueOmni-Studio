@@ -30,6 +30,7 @@ export default async function ItineraryBuilderPage() {
         logoSrc={config.branding.logo.default}
         logoAlt={config.branding.logo.alt ?? config.client.nombre}
         weather={weather}
+        mapboxToken={config.integraciones?.mapbox_token}
       />
     </KioskCanvas>
   );

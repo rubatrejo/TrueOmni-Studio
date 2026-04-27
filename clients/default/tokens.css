@@ -98,12 +98,12 @@
   /*  ITINERARY BUILDER MODULE (Fase 3.17)                                  */
   /* ---------------------------------------------------------------------- */
   --itinerary-olive: 62 53% 48%; /* #b9bd39 — CTA Create Itinerary / Send to Phone / progress slider */
-  --itinerary-toolbar-bg: 201 100% 40%; /* #0088ce — bottom map toolbar (= primary) */
+  --itinerary-toolbar-bg: 206 100% 27%; /* #004f8b — header banda azul + bottom map toolbar (azul oscuro) */
   --itinerary-rail-bg: 220 14% 96%; /* gris claro del rail inferior */
-  --itinerary-tab-active: 201 100% 40%; /* tab activo (= primary) */
-  --itinerary-tab-inactive: 220 14% 90%; /* tab inactivo gris */
+  --itinerary-tab-active: 206 100% 27%; /* tab activo (azul oscuro #004f8b) */
+  --itinerary-tab-inactive: 0 0% 67%; /* #aaaaaa — gris medio */
   --itinerary-tab-text-active: 0 0% 100%;
-  --itinerary-tab-text-inactive: 218 35% 14%;
+  --itinerary-tab-text-inactive: 0 0% 100%; /* blanco también en inactive (matching SVG) */
   --itinerary-route-line: 201 100% 40%; /* línea azul de ruta sobre el mapa */
   --itinerary-card-shadow: 218 35% 14%; /* sombra de cards de listings */
   --itinerary-pin-fill: 0 0% 100%; /* punto blanco interior del pin */

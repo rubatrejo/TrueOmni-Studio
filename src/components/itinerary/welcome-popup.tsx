@@ -29,7 +29,7 @@ export function WelcomePopup(props: WelcomePopupProps) {
       aria-modal="true"
       aria-label={textos.title}
     >
-      <div className="absolute inset-0 bg-black/50" aria-hidden="true" />
+      <div className="absolute inset-0 bg-black/70" aria-hidden="true" />
 
       <div className="absolute inset-0 flex items-center justify-center">
         <div
@@ -78,7 +78,7 @@ export function WelcomePopup(props: WelcomePopupProps) {
                 width: 260,
                 height: 72,
                 borderRadius: 8,
-                fontSize: 24,
+                fontSize: 23,
                 lineHeight: '24px',
                 fontWeight: 700,
                 letterSpacing: '0.06em',
@@ -95,7 +95,7 @@ export function WelcomePopup(props: WelcomePopupProps) {
                 width: 260,
                 height: 72,
                 borderRadius: 8,
-                fontSize: 24,
+                fontSize: 23,
                 lineHeight: '24px',
                 fontWeight: 700,
                 letterSpacing: '0.06em',

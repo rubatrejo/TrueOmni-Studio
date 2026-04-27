@@ -23,11 +23,11 @@ function FilterIcon({ size = 18 }: { size?: number }) {
 }
 
 /**
- * Fila de chips/tabs de categorías estilo SVG aprobado:
- * - Active: azul primary filled, texto blanco.
- * - Inactive: gris claro filled, texto oscuro.
+ * Fila de chips/tabs estilo SVG aprobado:
+ * - Active: azul oscuro #004f8b (token --itinerary-tab-active), texto blanco.
+ * - Inactive: gris medio #aaa (token --itinerary-tab-inactive), texto blanco.
  * - Icono filter (3 líneas) al inicio del label.
- * - Height 46px, borderRadius 6px, fontSize 14px tracking 0.06em.
+ * - Tabs anchos que llenan el canvas con flex-1, height 50px, esquinas 6px.
  */
 export function CategoryTabsRow({ tabs, activeSlug, onSelect }: CategoryTabsRowProps) {
   if (tabs.length === 0) return null;
@@ -45,11 +45,11 @@ export function CategoryTabsRow({ tabs, activeSlug, onSelect }: CategoryTabsRowP
             type="button"
             onClick={() => onSelect(tab.slug)}
             aria-pressed={isActive}
-            className="flex items-center justify-start gap-2 px-4 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="flex items-center justify-start gap-3 px-5 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
             style={{
-              flex: '1 0 auto',
-              minWidth: 200,
-              height: 46,
+              flex: '1 1 0',
+              minWidth: 0,
+              height: 50,
               borderRadius: 6,
               backgroundColor: isActive
                 ? 'hsl(var(--itinerary-tab-active))'
@@ -57,12 +57,12 @@ export function CategoryTabsRow({ tabs, activeSlug, onSelect }: CategoryTabsRowP
               color: isActive
                 ? 'hsl(var(--itinerary-tab-text-active))'
                 : 'hsl(var(--itinerary-tab-text-inactive))',
-              fontSize: 14,
+              fontSize: 15,
               fontWeight: 600,
-              letterSpacing: '0.04em',
+              letterSpacing: '0.02em',
             }}
           >
-            <FilterIcon />
+            <FilterIcon size={18} />
             <span className="truncate">{tab.label}</span>
           </button>
         );

@@ -30,7 +30,11 @@ export function ItineraryHeader(props: ItineraryHeaderProps) {
   return (
     <div
       className="absolute left-0 top-0 w-[1080px] text-white"
-      style={{ height: 230, backgroundColor: 'hsl(var(--primary))', zIndex: 10 }}
+      style={{
+        height: 230,
+        backgroundColor: 'hsl(var(--itinerary-toolbar-bg))',
+        zIndex: 10,
+      }}
     >
       <div className="absolute" style={{ left: 65, top: 44 }}>
         <TrueOmniLogo className="h-[70px] w-auto text-white" />

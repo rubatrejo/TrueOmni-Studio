@@ -1,41 +1,41 @@
 'use client';
 
-const DAY_LABELS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'] as const;
-const MONTHS = [
-  'JANUARY',
-  'FEBRUARY',
-  'MARCH',
-  'APRIL',
-  'MAY',
-  'JUNE',
-  'JULY',
-  'AUGUST',
-  'SEPTEMBER',
-  'OCTOBER',
-  'NOVEMBER',
-  'DECEMBER',
-] as const;
-
 export interface EventsWeekStripProps {
   /** Inicio (domingo) de la semana visible. */
   weekStart: Date;
   /** Día seleccionado dentro de la semana visible (0=domingo, 6=sábado). */
   selectedDayIndex: number;
+  /** Locale del cliente para traducir días/meses (Intl). Default 'en-US'. */
+  locale?: string;
   onDayChange: (dayIndex: number) => void;
   onPrevWeek: () => void;
   onNextWeek: () => void;
 }
 
-const formatRange = (weekStart: Date) => {
+const formatRange = (weekStart: Date, locale: string) => {
   const end = new Date(weekStart);
   end.setDate(end.getDate() + 6);
-  const startMonth = MONTHS[weekStart.getMonth()];
-  const endMonth = MONTHS[end.getMonth()];
+  const monthFmt = new Intl.DateTimeFormat(locale, { month: 'long' });
+  const startMonth = monthFmt.format(weekStart).toUpperCase();
+  const endMonth = monthFmt.format(end).toUpperCase();
   return `${startMonth} ${weekStart.getDate()} - ${endMonth} ${end.getDate()}`;
+};
+
+const buildDayLabels = (locale: string): string[] => {
+  // Genera labels SUN-SAT con Intl. Usamos un domingo conocido (2024-01-07).
+  const sunday = new Date(Date.UTC(2024, 0, 7));
+  const fmt = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' });
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(sunday);
+    d.setUTCDate(sunday.getUTCDate() + i);
+    return fmt.format(d).toUpperCase().slice(0, 3);
+  });
 };
 
 export function EventsWeekStrip(props: EventsWeekStripProps) {
   const { weekStart, selectedDayIndex, onDayChange, onPrevWeek, onNextWeek } = props;
+  const locale = props.locale ?? 'en-US';
+  const dayLabels = buildDayLabels(locale);
 
   return (
     <div
@@ -66,7 +66,7 @@ export function EventsWeekStrip(props: EventsWeekStripProps) {
           </svg>
         </button>
         <span className="mx-4 text-[20px] font-semibold tracking-wider">
-          {formatRange(weekStart)}
+          {formatRange(weekStart, locale)}
         </span>
         <button
           type="button"
@@ -86,7 +86,7 @@ export function EventsWeekStrip(props: EventsWeekStripProps) {
         </button>
       </div>
       <div className="flex w-full items-center justify-between gap-2">
-        {DAY_LABELS.map((label, i) => {
+        {dayLabels.map((label, i) => {
           const isActive = i === selectedDayIndex;
           return (
             <button

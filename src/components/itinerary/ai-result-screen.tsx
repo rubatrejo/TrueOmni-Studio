@@ -15,12 +15,16 @@ export interface AiResultScreenTextos {
   tabDayTemplate: string;
   startOver: string;
   finish: string;
+  sliderStart: string;
+  sliderStop: string;
 }
 
 export interface AiResultScreenProps {
   itinerary: GeneratedItinerary;
   resolveItem: (slug: string, kind: 'listing' | 'event' | 'trail') => ItineraryCatalogItem | null;
   textos: AiResultScreenTextos;
+  /** Labels por kind para el timeline, vienen de config.textos. */
+  kindLabels: Record<'breakfast' | 'lunch' | 'dinner' | 'activity' | 'event', string>;
   /** Logo del header. */
   logoSrc?: string;
   onStartOver: () => void;
@@ -98,13 +102,13 @@ export function AiResultScreen(props: AiResultScreenProps) {
       </div>
 
       <div className="flex-1 overflow-y-auto px-10 pt-5">
-        <AiResultTimeline entries={activeEntries} />
+        <AiResultTimeline entries={activeEntries} kindLabels={props.kindLabels} />
       </div>
 
       {/* Slider mock con play button + barra */}
       <div className="border-t border-zinc-200 px-10 pt-4">
         <div className="flex items-center gap-3">
-          <span className="text-[13px] font-semibold uppercase tracking-wider text-foreground">Start</span>
+          <span className="text-[13px] font-semibold uppercase tracking-wider text-foreground">{textos.sliderStart}</span>
           <button
             type="button"
             aria-label="Play preview"
@@ -121,7 +125,7 @@ export function AiResultScreen(props: AiResultScreenProps) {
               style={{ width: '20%', backgroundColor: 'hsl(var(--primary))' }}
             />
           </div>
-          <span className="text-[13px] font-semibold uppercase tracking-wider text-zinc-400">Stop</span>
+          <span className="text-[13px] font-semibold uppercase tracking-wider text-zinc-400">{textos.sliderStop}</span>
         </div>
       </div>
 
@@ -164,7 +168,7 @@ export function AiResultScreen(props: AiResultScreenProps) {
                 <svg width="20" height="20" viewBox="0 0 24 24">
                   <path
                     d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-                    fill="#e02020"
+                    fill="hsl(var(--itinerary-heart))"
                   />
                 </svg>
               </div>

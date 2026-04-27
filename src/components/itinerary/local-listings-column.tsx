@@ -8,6 +8,8 @@ export interface LocalListingsColumnProps {
   items: LocalListingItinerary[];
   onSelect: (slug: string) => void;
   emptyLabel: string;
+  /** Plantilla "{n} stops". */
+  stopsCountTemplate: string;
 }
 
 /**
@@ -57,7 +59,7 @@ export function LocalListingsColumn(props: LocalListingsColumnProps) {
               <div className="absolute inset-x-4 bottom-3 text-white">
                 <p className="text-[20px] font-bold leading-tight drop-shadow">{it.title}</p>
                 <p className="mt-1 text-[13px] uppercase tracking-wider opacity-90">
-                  {it.stops.length} stops
+                  {props.stopsCountTemplate.replace('{n}', String(it.stops.length))}
                 </p>
               </div>
             </button>

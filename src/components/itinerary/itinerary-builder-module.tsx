@@ -184,6 +184,9 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
       catalog: allCatalog,
       titleTemplate: config.ai.default_title_template,
       clientName: client.nombre,
+      dayLabelTemplate: textos.itinerary_ai_day_label_template ?? 'Day {n}',
+      planLabel: textos.itinerary_ai_plan_label ?? 'Plan',
+      durationFallback: textos.itinerary_ai_duration_fallback ?? 'Trip',
     }).then((result) => {
       if (cancelled) return;
       setAiResult(result);
@@ -249,6 +252,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             <EventsWeekStrip
               weekStart={weekStart}
               selectedDayIndex={selectedDayIndex}
+              locale={client.locale ?? 'en-US'}
               onDayChange={setSelectedDayIndex}
               onPrevWeek={() => setWeekStart((w) => shiftWeek(w, -1))}
               onNextWeek={() => setWeekStart((w) => shiftWeek(w, 1))}
@@ -263,6 +267,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             stops={mapStops}
             showRoute={showDriving}
             hideCatalogMarkers={hideMarkers}
+            unavailableLabel={textos.itinerary_map_unavailable}
             className="absolute"
             style={{
               left: 0,
@@ -290,7 +295,8 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
               collapsed={collapsedListings}
               onToggleCollapsed={() => setCollapsedListings((c) => !c)}
               clientCoords={client.coords}
-              emptyLabel="No items match your search."
+              emptyLabel={textos.itinerary_no_search_results ?? 'No items match your search.'}
+              distanceTemplate={textos.itinerary_distance_away ?? '{n} mi away'}
               onCardDragStart={(item, ev) => dnd.startDragCard(item, ev)}
             />
           )}
@@ -299,7 +305,10 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             <LocalListingsColumn
               items={config.local_listings}
               onSelect={setPreviewSlug}
-              emptyLabel="No pre-built itineraries available."
+              emptyLabel={
+                textos.itinerary_no_local_listings ?? 'No pre-built itineraries available.'
+              }
+              stopsCountTemplate={textos.itinerary_stops_count ?? '{n} stops'}
             />
           )}
 
@@ -325,6 +334,8 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             onRemove={(entry) => rail.remove(entry.slug, entry.kind)}
             visibleSlots={Math.max(3, rail.stops.length + 1)}
             caption={textos.itinerary_caption_drag_more ?? 'Drag more listings to add stops.'}
+            stopLabelTemplate={textos.itinerary_stop_label ?? 'Stop {n}'}
+            distanceTemplate={textos.itinerary_distance_away ?? '{n} mi away'}
             computeDistance={computeDistance}
             onSlotDragStart={(entry, item, fromIndex, ev) =>
               dnd.startDragStop(
@@ -346,6 +357,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
               itinerary={previewItinerary}
               resolveItem={(slug, kind) => catalogIndex.get(`${kind}:${slug}`) ?? null}
               useCtaLabel={textos.itinerary_local_use_cta ?? 'Use this itinerary'}
+              stopsCountTemplate={textos.itinerary_stops_count ?? '{n} stops'}
               closeAriaLabel="Close itinerary preview"
               onUse={() => {
                 rail.clear();
@@ -416,6 +428,15 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             tabDayTemplate: textos.itinerary_ai_result_tab_day ?? 'DAY {n}',
             startOver: textos.itinerary_ai_start_over ?? 'Start Over',
             finish: textos.itinerary_ai_finish_cta ?? 'Finish',
+            sliderStart: textos.itinerary_ai_result_slider_start ?? 'Start',
+            sliderStop: textos.itinerary_ai_result_slider_stop ?? 'Stop',
+          }}
+          kindLabels={{
+            breakfast: textos.itinerary_kind_breakfast ?? 'Breakfast',
+            lunch: textos.itinerary_kind_lunch ?? 'Lunch',
+            dinner: textos.itinerary_kind_dinner ?? 'Dinner',
+            activity: textos.itinerary_kind_activity ?? 'Activity',
+            event: textos.itinerary_kind_event ?? 'Event',
           }}
           logoSrc={props.logoSrc}
           onStartOver={() => setShowLeaveWarning(true)}

@@ -31,13 +31,15 @@ export interface ItineraryMapProps {
   hideCatalogMarkers: boolean;
   className?: string;
   style?: React.CSSProperties;
+  /** Texto mostrado cuando no hay token de Mapbox (white-label). */
+  unavailableLabel?: string;
 }
 
-/** Color del pin según el kind del item (alineado con tokens). */
+/** Color del pin según el kind del item — usa tokens del cliente. */
 function pinColorForKind(kind: ItineraryStopKind): string {
-  if (kind === 'event') return '#f5a623';
-  if (kind === 'trail') return '#0e8c7e';
-  return '#0088ce';
+  if (kind === 'event') return 'hsl(var(--itinerary-pin-event))';
+  if (kind === 'trail') return 'hsl(var(--itinerary-pin-trail))';
+  return 'hsl(var(--itinerary-pin-listing))';
 }
 
 /** SVG inline de un pin teardrop con relleno por kind. */
@@ -47,18 +49,19 @@ function pinSvg(kind: ItineraryStopKind, scale = 1) {
   const h = 36 * scale;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 28 36">
     <path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.3 21.7 0 14 0z" fill="${color}"/>
-    <circle cx="14" cy="14" r="5" fill="#ffffff"/>
+    <circle cx="14" cy="14" r="5" fill="hsl(var(--itinerary-pin-fill))"/>
   </svg>`;
 }
 
 /** Stop marker con número grande. */
 function stopMarkerSvg(index: number) {
+  const primary = 'hsl(var(--primary))';
   return `<div style="position:relative;width:48px;height:60px;">
     <svg width="48" height="60" viewBox="0 0 48 60" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;">
-      <path d="M24 0C10.7 0 0 10.7 0 24c0 17 24 36 24 36s24-19 24-36C48 10.7 37.3 0 24 0z" fill="hsl(201 100% 40%)"/>
-      <circle cx="24" cy="24" r="14" fill="#ffffff"/>
+      <path d="M24 0C10.7 0 0 10.7 0 24c0 17 24 36 24 36s24-19 24-36C48 10.7 37.3 0 24 0z" fill="${primary}"/>
+      <circle cx="24" cy="24" r="14" fill="hsl(var(--itinerary-pin-fill))"/>
     </svg>
-    <div style="position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;padding-top:14px;color:hsl(201 100% 40%);font-weight:700;font-size:18px;font-family:system-ui,sans-serif;">${index}</div>
+    <div style="position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;padding-top:14px;color:${primary};font-weight:700;font-size:18px;font-family:system-ui,sans-serif;">${index}</div>
   </div>`;
 }
 
@@ -100,13 +103,19 @@ export function ItineraryMap(props: ItineraryMapProps) {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] },
       });
+      // Mapbox no resuelve `var(--token)`, así que leemos el HSL del CSS root
+      // en runtime para mantener la línea de ruta tokenizada por cliente.
+      const routeHsl =
+        getComputedStyle(document.documentElement)
+          .getPropertyValue('--itinerary-route-line')
+          .trim() || '201 100% 40%';
       map.addLayer({
         id: 'itinerary-route-line',
         type: 'line',
         source: 'itinerary-route',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: {
-          'line-color': 'hsl(201, 100%, 40%)',
+          'line-color': `hsl(${routeHsl})`,
           'line-width': 5,
           'line-opacity': 0.85,
         },
@@ -184,22 +193,23 @@ export function ItineraryMap(props: ItineraryMapProps) {
   }, [stops, showRoute, ready]);
 
   if (!token) {
+    const label = props.unavailableLabel ?? 'Map unavailable';
     return (
       <div
         role="img"
-        aria-label="Map unavailable"
+        aria-label={label}
         className={className}
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#d8d8d8',
-          color: '#4a4a4a',
+          backgroundColor: 'hsl(var(--itinerary-map-fallback-bg))',
+          color: 'hsl(var(--itinerary-map-fallback-fg))',
           fontSize: '14px',
           ...style,
         }}
       >
-        Map unavailable (missing Mapbox token)
+        {label}
       </div>
     );
   }

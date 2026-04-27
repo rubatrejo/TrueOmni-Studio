@@ -13,6 +13,8 @@ export interface ListingsColumnProps {
   /** Coords del cliente para calcular distancias. */
   clientCoords?: { lat: number; lng: number };
   emptyLabel: string;
+  /** Plantilla del label de distancia, ej. "{n} mi away". */
+  distanceTemplate: string;
   onCardDragStart?: (
     item: ItineraryCatalogItem,
     ev: React.PointerEvent<HTMLDivElement>,
@@ -87,6 +89,7 @@ export function ListingsColumn(props: ListingsColumnProps) {
               isInRail={isInRail(item.slug, item.kind)}
               onToggle={onToggle}
               distanceMi={clientCoords ? haversineMi(item.coords, clientCoords) : undefined}
+              distanceTemplate={props.distanceTemplate}
               onDragStart={props.onCardDragStart}
             />
           ))

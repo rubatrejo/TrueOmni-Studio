@@ -106,6 +106,14 @@
   --itinerary-route-line: 201 100% 40%;
   --itinerary-card-shadow: 218 35% 14%;
   --itinerary-pin-fill: 0 0% 100%;
+  --itinerary-heart: 0 78% 50%;
+  --itinerary-heart-empty: 0 0% 74%;
+  --itinerary-pin-listing: 201 100% 40%;
+  --itinerary-pin-event: 36 91% 55%;
+  --itinerary-pin-trail: 172 82% 30%;
+  --itinerary-drag-ghost-bg: 220 7% 14%;
+  --itinerary-map-fallback-bg: 0 0% 85%;
+  --itinerary-map-fallback-fg: 0 0% 29%;
 
   /* ---------------------------------------------------------------------- */
   /*  TIPOGRAFÍA                                                            */

@@ -41,7 +41,7 @@ export function DragGhost({ payload, cursor }: DragGhostProps) {
         borderRadius: 12,
         overflow: 'hidden',
         boxShadow: '0 18px 38px rgba(0,0,0,0.45)',
-        background: '#1f2227',
+        background: 'hsl(var(--itinerary-drag-ghost-bg))',
       }}
     >
       {image ? (

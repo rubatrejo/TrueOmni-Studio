@@ -10,6 +10,8 @@ export interface ItineraryListingCardProps {
   onToggle: (item: ItineraryCatalogItem) => void;
   /** Distancia en millas desde el cliente. */
   distanceMi?: number;
+  /** Plantilla del label de distancia, ej. "{n} mi away". */
+  distanceTemplate?: string;
   /** Si está dentro del drag&drop, callback invocado al pointerdown. */
   onDragStart?: (item: ItineraryCatalogItem, ev: React.PointerEvent<HTMLDivElement>) => void;
 }
@@ -25,7 +27,11 @@ export interface ItineraryListingCardProps {
  * Coords aproximadas del SVG; pulido pixel-perfect en 3.17-13.
  */
 export function ItineraryListingCard(props: ItineraryListingCardProps) {
-  const { item, isInRail, onToggle, distanceMi, onDragStart } = props;
+  const { item, isInRail, onToggle, distanceMi, distanceTemplate, onDragStart } = props;
+  const distanceLabel =
+    distanceMi != null && distanceTemplate
+      ? distanceTemplate.replace('{n}', distanceMi.toFixed(1))
+      : null;
 
   return (
     <div
@@ -58,9 +64,7 @@ export function ItineraryListingCard(props: ItineraryListingCardProps) {
       {/* title + distance */}
       <div className="absolute inset-x-4 bottom-3 text-white">
         <p className="text-[20px] font-semibold leading-tight drop-shadow">{item.title}</p>
-        {distanceMi != null ? (
-          <p className="mt-1 text-[14px] opacity-90">{distanceMi.toFixed(1)} mi away</p>
-        ) : null}
+        {distanceLabel ? <p className="mt-1 text-[14px] opacity-90">{distanceLabel}</p> : null}
       </div>
       {/* heart toggle */}
       <button
@@ -72,15 +76,14 @@ export function ItineraryListingCard(props: ItineraryListingCardProps) {
         }}
         aria-label={isInRail ? 'Remove from itinerary' : 'Add to itinerary'}
         aria-pressed={isInRail}
-        className="absolute right-2 top-2 flex h-[50px] w-[50px] items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
-        style={{ backgroundColor: 'rgba(255,255,255,0.85)' }}
+        className="absolute right-2 top-2 flex h-[50px] w-[50px] items-center justify-center rounded-full bg-white/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
       >
         <svg
           width="28"
           height="28"
           viewBox="0 0 24 24"
-          fill={isInRail ? '#e02020' : 'none'}
-          stroke="#e02020"
+          fill={isInRail ? 'hsl(var(--itinerary-heart))' : 'none'}
+          stroke="hsl(var(--itinerary-heart))"
           strokeWidth={isInRail ? 0 : 1.8}
           strokeLinecap="round"
           strokeLinejoin="round"

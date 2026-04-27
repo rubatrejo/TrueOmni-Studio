@@ -13,6 +13,10 @@ export interface StopsRailProps {
   /** Total de slots visibles (incluye placeholders cuando hay menos stops). */
   visibleSlots?: number;
   caption: string;
+  /** Plantilla "Stop {n}". */
+  stopLabelTemplate: string;
+  /** Plantilla "{n} mi away". */
+  distanceTemplate: string;
   /** Callback de Haversine (distancia desde el cliente). */
   computeDistance?: (item: ItineraryCatalogItem) => number;
   /** Pointerdown en un slot ocupado → inicia drag para reorder. */
@@ -59,7 +63,12 @@ export function StopsRail(props: StopsRailProps) {
                 index={i + 1}
                 item={item}
                 onRemove={entry ? () => props.onRemove(entry) : undefined}
-                distanceLabel={distance != null ? `${distance.toFixed(1)} mi away` : undefined}
+                stopLabelTemplate={props.stopLabelTemplate}
+                distanceLabel={
+                  distance != null
+                    ? props.distanceTemplate.replace('{n}', distance.toFixed(1))
+                    : undefined
+                }
                 onDragHandle={
                   entry && item && props.onSlotDragStart
                     ? (ev) => props.onSlotDragStart?.(entry, item, i, ev)

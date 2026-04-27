@@ -10,6 +10,8 @@ export interface LocalListingPreviewProps {
   /** Resolver el item completo de cada stop (para thumbnails y títulos). */
   resolveItem: (slug: string, kind: 'listing' | 'event' | 'trail') => ItineraryCatalogItem | null;
   useCtaLabel: string;
+  /** Plantilla "{n} stops". */
+  stopsCountTemplate: string;
   closeAriaLabel?: string;
   onUse: () => void;
   onClose: () => void;
@@ -48,7 +50,7 @@ export function LocalListingPreview(props: LocalListingPreviewProps) {
           />
           <div className="absolute inset-x-8 bottom-6 text-white">
             <p className="text-[14px] uppercase tracking-wider opacity-90">
-              {itinerary.stops.length} stops
+              {props.stopsCountTemplate.replace('{n}', String(itinerary.stops.length))}
             </p>
             <h2 className="mt-1 text-[40px] font-bold leading-tight drop-shadow">
               {itinerary.title}

@@ -50,6 +50,14 @@ export interface GenerateItineraryOptions {
   clientName?: string;
   /** Delay artificial en ms para simular la latencia del LLM. Default 2400. */
   delayMs?: number;
+  /** Plantilla del label del día, ej. "Day {n}" tokenizado. */
+  dayLabelTemplate?: string;
+  /** Label cuando duration=0 ("A Few Hours"). */
+  planLabel?: string;
+  /** Fallback de la duración si no hay match con la pregunta. */
+  durationFallback?: string;
+  /** Frases narrativas por kind (mockeadas v1). Si se omite, usa defaults. */
+  mealPhrases?: Record<GeneratedEntryKind, string[]>;
 }
 
 const DEFAULT_DELAY_MS = 2400;
@@ -67,12 +75,16 @@ function resolveDays(preferences: AiPreferences, questions: AiQuestion[]): numbe
   return opt?.days ?? 1;
 }
 
-function durationLabel(preferences: AiPreferences, questions: AiQuestion[]): string {
+function durationLabel(
+  preferences: AiPreferences,
+  questions: AiQuestion[],
+  fallback: string,
+): string {
   const durationQ = questions.find((q) => q.key === 'duration');
-  if (!durationQ) return 'Trip';
+  if (!durationQ) return fallback;
   const value = preferences['duration'];
-  if (typeof value !== 'string') return 'Trip';
-  return durationQ.options.find((o) => o.value === value)?.label ?? 'Trip';
+  if (typeof value !== 'string') return fallback;
+  return durationQ.options.find((o) => o.value === value)?.label ?? fallback;
 }
 
 const interp = (tpl: string, vars: Record<string, string>) =>
@@ -103,7 +115,7 @@ function scoreItem(item: ItineraryCatalogItem, preferences: AiPreferences): numb
   return score;
 }
 
-const MEAL_PHRASES: Record<GeneratedEntryKind, string[]> = {
+const DEFAULT_MEAL_PHRASES: Record<GeneratedEntryKind, string[]> = {
   breakfast: [
     'Start your day at',
     'Kick things off with breakfast at',
@@ -121,15 +133,16 @@ function entryFor(
   kind: GeneratedEntryKind,
   item: ItineraryCatalogItem,
   i: number,
+  phrases: Record<GeneratedEntryKind, string[]>,
 ): GeneratedEntry {
-  const lead = pick(MEAL_PHRASES[kind], i);
+  const lead = pick(phrases[kind], i);
   return {
     kind,
     slug: item.slug,
     itemKind: item.kind,
     moduleSlug: item.moduleSlug,
     title: item.title,
-    description: `${lead} ${item.title} — ${item.subcategory.toLowerCase()} on ${item.address.split(',')[0] ?? 'site'}.`,
+    description: `${lead} ${item.title} — ${item.subcategory.toLowerCase()}, ${item.address.split(',')[0] ?? ''}.`,
   };
 }
 
@@ -153,6 +166,10 @@ export async function generateItinerary(
     titleTemplate = 'Itinerary for {duration_label}',
     clientName = '',
     delayMs = DEFAULT_DELAY_MS,
+    dayLabelTemplate = 'Day {n}',
+    planLabel = 'Plan',
+    durationFallback = 'Trip',
+    mealPhrases = DEFAULT_MEAL_PHRASES,
   } = opts;
 
   const days = resolveDays(preferences, questions);
@@ -184,14 +201,14 @@ export async function generateItinerary(
     if (a) {
       used.add(`${a.kind}:${a.slug}`);
       generatedDays.push({
-        label: 'Plan',
-        entries: [entryFor('activity', a, 0)],
+        label: planLabel,
+        entries: [entryFor('activity', a, 0, mealPhrases)],
       });
     }
     const r = takeNext(restaurants);
     if (r) {
       used.add(`${r.kind}:${r.slug}`);
-      generatedDays[0]?.entries.push(entryFor('lunch', r, 0));
+      generatedDays[0]?.entries.push(entryFor('lunch', r, 0, mealPhrases));
     }
   } else {
     for (let d = 0; d < days; d++) {
@@ -199,41 +216,43 @@ export async function generateItinerary(
       const breakfast = takeNext(restaurants);
       if (breakfast) {
         used.add(`${breakfast.kind}:${breakfast.slug}`);
-        entries.push(entryFor('breakfast', breakfast, d));
+        entries.push(entryFor('breakfast', breakfast, d, mealPhrases));
       }
       const activity = takeNext(activities);
       if (activity) {
         used.add(`${activity.kind}:${activity.slug}`);
-        entries.push(entryFor('activity', activity, d));
+        entries.push(entryFor('activity', activity, d, mealPhrases));
       }
       const lunch = takeNext(restaurants);
       if (lunch) {
         used.add(`${lunch.kind}:${lunch.slug}`);
-        entries.push(entryFor('lunch', lunch, d));
+        entries.push(entryFor('lunch', lunch, d, mealPhrases));
       }
-      // Si hay events que matchean, intercalamos uno (cuando preferencia activa events).
       const eventsPick = takeNext(events);
       if (eventsPick && (preferences['travel_type'] === 'events' || d === 0)) {
         used.add(`${eventsPick.kind}:${eventsPick.slug}`);
-        entries.push(entryFor('event', eventsPick, d));
+        entries.push(entryFor('event', eventsPick, d, mealPhrases));
       }
       const dinner = takeNext(restaurants);
       if (dinner) {
         used.add(`${dinner.kind}:${dinner.slug}`);
-        entries.push(entryFor('dinner', dinner, d));
+        entries.push(entryFor('dinner', dinner, d, mealPhrases));
       }
-      generatedDays.push({ label: `Day ${d + 1}`, entries });
+      generatedDays.push({
+        label: dayLabelTemplate.replace('{n}', String(d + 1)),
+        entries,
+      });
     }
   }
 
   const eventsTab: GeneratedEntry[] = events
     .filter((it) => !used.has(`${it.kind}:${it.slug}`))
     .slice(0, 3)
-    .map((e, i) => entryFor('event', e, i));
+    .map((e, i) => entryFor('event', e, i, mealPhrases));
 
   const title = interp(titleTemplate, {
     client_name: clientName,
-    duration_label: durationLabel(preferences, questions),
+    duration_label: durationLabel(preferences, questions, durationFallback),
   });
 
   if (delayMs > 0) {

@@ -11,6 +11,8 @@ export interface StopSlotProps {
   onRemove?: () => void;
   /** Distance text opcional (ej. "7.5 mi away"). */
   distanceLabel?: string;
+  /** Plantilla del label "Stop {n}" tokenizado. */
+  stopLabelTemplate: string;
   /** Pointerdown sobre el body de un slot ocupado → inicia drag para reorder. */
   onDragHandle?: (ev: React.PointerEvent<HTMLDivElement>) => void;
 }
@@ -20,7 +22,15 @@ export interface StopSlotProps {
  * label "Stop N" + distance + heart. Si está vacío, muestra placeholder con
  * un heart outline gris.
  */
-export function StopSlot({ index, item, onRemove, distanceLabel, onDragHandle }: StopSlotProps) {
+export function StopSlot({
+  index,
+  item,
+  onRemove,
+  distanceLabel,
+  stopLabelTemplate,
+  onDragHandle,
+}: StopSlotProps) {
+  const stopLabel = stopLabelTemplate.replace('{n}', String(index));
   return (
     <div
       data-itinerary-slot={index - 1}
@@ -33,7 +43,7 @@ export function StopSlot({ index, item, onRemove, distanceLabel, onDragHandle }:
         <span className="mr-1 inline-flex h-[18px] w-[18px] items-center justify-center rounded-full bg-primary text-[10px] text-white">
           {index}
         </span>
-        Stop {index}
+        {stopLabel}
       </div>
 
       {/* Body */}
@@ -77,7 +87,7 @@ export function StopSlot({ index, item, onRemove, distanceLabel, onDragHandle }:
             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
               <path
                 d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-                fill="#e02020"
+                fill="hsl(var(--itinerary-heart))"
               />
             </svg>
           </button>
@@ -88,7 +98,7 @@ export function StopSlot({ index, item, onRemove, distanceLabel, onDragHandle }:
             <path
               d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
               fill="none"
-              stroke="#bdbdbd"
+              stroke="hsl(var(--itinerary-heart-empty))"
               strokeWidth="1.6"
             />
           </svg>

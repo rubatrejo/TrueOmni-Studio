@@ -15,8 +15,12 @@ import { LOCAL_LISTINGS_TAB_SLUG, getItineraryTabs } from '@/lib/itinerary-tabs'
 import { useItineraryDnd } from '@/lib/use-itinerary-dnd';
 import type { WeatherData } from '@/lib/weather';
 
+import { generateItinerary, type GeneratedItinerary } from '@/lib/ai-itinerary';
+
 import { AiItineraryFloatingCard } from './ai-floating-card';
+import { AiLoadingScreen } from './ai-loading-screen';
 import { AiPopup } from './ai-popup';
+import { AiResultScreen } from './ai-result-screen';
 import { AiWizard, type AiAnswers } from './ai-wizard';
 import { CategoryTabsRow } from './category-tabs-row';
 import { DragGhost } from './drag-ghost';
@@ -112,7 +116,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
     ? config.local_listings.find((it) => it.slug === previewSlug) ?? null
     : null;
   const [aiAnswers, setAiAnswers] = useState<AiAnswers | null>(null);
-  void aiAnswers; // Sub-fase 3.17-10 lo usa para generar el itinerario.
+  const [aiResult, setAiResult] = useState<GeneratedItinerary | null>(null);
 
   const allCatalog = useMemo(() => getItineraryCatalogAll(fullConfig), [fullConfig]);
 
@@ -159,6 +163,33 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
   const center = client.coords ?? { lat: 33.4484, lng: -112.074 };
 
   const interp = { client_name: client.nombre };
+
+  // Trigger generación cuando entramos a phase ai-loading.
+  useEffect(() => {
+    if (phase !== 'ai-loading' || !aiAnswers) return;
+    let cancelled = false;
+    generateItinerary({
+      preferences: aiAnswers,
+      questions: config.ai.questions,
+      catalog: allCatalog,
+      titleTemplate: config.ai.default_title_template,
+      clientName: client.nombre,
+    }).then((result) => {
+      if (cancelled) return;
+      setAiResult(result);
+      setPhase('ai-result');
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    phase,
+    aiAnswers,
+    allCatalog,
+    config.ai.questions,
+    config.ai.default_title_template,
+    client.nombre,
+  ]);
 
   const dnd = useItineraryDnd({
     onDrop: (payload, target) => {
@@ -349,6 +380,43 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             setPhase('ai-loading');
           }}
           onCancel={() => setPhase('manual')}
+        />
+      )}
+
+      {phase === 'ai-loading' && (
+        <AiLoadingScreen
+          title={textos.itinerary_ai_loading_title ?? 'AI Itinerary Builder'}
+          body={
+            textos.itinerary_ai_loading_body ??
+            "We're building your perfect itinerary! This might take a few seconds…"
+          }
+          backgroundImage={config.ai.loading_image}
+          logoSrc={props.logoSrc}
+        />
+      )}
+
+      {phase === 'ai-result' && aiResult && (
+        <AiResultScreen
+          itinerary={aiResult}
+          resolveItem={(slug, kind) => catalogIndex.get(`${kind}:${slug}`) ?? null}
+          textos={{
+            resultTitle: textos.itinerary_ai_result_title ?? 'Itinerary',
+            tabEvents: textos.itinerary_ai_result_tab_events ?? 'EVENTS',
+            tabDayTemplate: textos.itinerary_ai_result_tab_day ?? 'DAY {n}',
+            startOver: textos.itinerary_ai_start_over ?? 'Start Over',
+            finish: textos.itinerary_ai_finish_cta ?? 'Finish',
+          }}
+          logoSrc={props.logoSrc}
+          onStartOver={() => setPhase('ai-popup')}
+          onFinish={() => {
+            // Sub-fase 3.17-11 inserta merge + popup confirmación.
+            aiResult.days.forEach((d) =>
+              d.entries.forEach((e) => rail.add(e.slug, e.itemKind)),
+            );
+            setPhase('manual');
+            setAiResult(null);
+            setAiAnswers(null);
+          }}
         />
       )}
 

@@ -12,10 +12,12 @@ import {
 } from '@/lib/itinerary-catalog';
 import { useItineraryRail, type ItineraryRailEntry } from '@/lib/itinerary-favorites';
 import { LOCAL_LISTINGS_TAB_SLUG, getItineraryTabs } from '@/lib/itinerary-tabs';
+import { useItineraryDnd } from '@/lib/use-itinerary-dnd';
 import type { WeatherData } from '@/lib/weather';
 
 import { AiItineraryFloatingCard } from './ai-floating-card';
 import { CategoryTabsRow } from './category-tabs-row';
+import { DragGhost } from './drag-ghost';
 import { ItineraryHeader } from './itinerary-header';
 import { ItineraryMap, type ItineraryMapStop } from './itinerary-map';
 import { ListingsColumn } from './listings-column';
@@ -134,6 +136,24 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
 
   const interp = { client_name: client.nombre };
 
+  const dnd = useItineraryDnd({
+    onDrop: (payload, target) => {
+      if (payload.type === 'card') {
+        // Drop card → añadir al rail si está sobre el rail.
+        if (target.overRail) {
+          rail.add(payload.item.slug, payload.item.kind);
+        }
+        return;
+      }
+      if (payload.type === 'stop') {
+        // Reorder dentro del rail.
+        if (target.slotIndex !== null && target.slotIndex !== payload.fromIndex) {
+          rail.reorder(payload.fromIndex, target.slotIndex);
+        }
+      }
+    },
+  });
+
   return (
     <div
       className="absolute inset-0 bg-background text-foreground"
@@ -190,6 +210,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
               onToggleCollapsed={() => setCollapsedListings((c) => !c)}
               clientCoords={client.coords}
               emptyLabel="No items match your search."
+              onCardDragStart={(item, ev) => dnd.startDragCard(item, ev)}
             />
           )}
 
@@ -216,7 +237,20 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             visibleSlots={Math.max(3, rail.stops.length + 1)}
             caption={textos.itinerary_caption_drag_more ?? 'Drag more listings to add stops.'}
             computeDistance={computeDistance}
+            onSlotDragStart={(entry, item, fromIndex, ev) =>
+              dnd.startDragStop(
+                {
+                  slug: entry.slug,
+                  kind: entry.kind,
+                  fromIndex,
+                  thumbnail: item.image,
+                  title: item.title,
+                },
+                ev,
+              )
+            }
           />
+          <DragGhost payload={dnd.dragPayload} cursor={dnd.cursorPos} />
         </>
       )}
 

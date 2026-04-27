@@ -11,6 +11,8 @@ export interface StopSlotProps {
   onRemove?: () => void;
   /** Distance text opcional (ej. "7.5 mi away"). */
   distanceLabel?: string;
+  /** Pointerdown sobre el body de un slot ocupado → inicia drag para reorder. */
+  onDragHandle?: (ev: React.PointerEvent<HTMLDivElement>) => void;
 }
 
 /**
@@ -18,9 +20,11 @@ export interface StopSlotProps {
  * label "Stop N" + distance + heart. Si está vacío, muestra placeholder con
  * un heart outline gris.
  */
-export function StopSlot({ index, item, onRemove, distanceLabel }: StopSlotProps) {
+export function StopSlot({ index, item, onRemove, distanceLabel, onDragHandle }: StopSlotProps) {
   return (
     <div
+      data-itinerary-slot={index - 1}
+      onPointerDown={item && onDragHandle ? onDragHandle : undefined}
       className="relative flex-shrink-0 overflow-hidden rounded-md bg-zinc-100"
       style={{ width: 200, height: 220 }}
     >

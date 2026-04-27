@@ -15,6 +15,13 @@ export interface StopsRailProps {
   caption: string;
   /** Callback de Haversine (distancia desde el cliente). */
   computeDistance?: (item: ItineraryCatalogItem) => number;
+  /** Pointerdown en un slot ocupado → inicia drag para reorder. */
+  onSlotDragStart?: (
+    entry: ItineraryRailEntry,
+    item: ItineraryCatalogItem,
+    fromIndex: number,
+    ev: React.PointerEvent<HTMLDivElement>,
+  ) => void;
 }
 
 /**
@@ -53,6 +60,11 @@ export function StopsRail(props: StopsRailProps) {
                 item={item}
                 onRemove={entry ? () => props.onRemove(entry) : undefined}
                 distanceLabel={distance != null ? `${distance.toFixed(1)} mi away` : undefined}
+                onDragHandle={
+                  entry && item && props.onSlotDragStart
+                    ? (ev) => props.onSlotDragStart?.(entry, item, i, ev)
+                    : undefined
+                }
               />
             );
           })}

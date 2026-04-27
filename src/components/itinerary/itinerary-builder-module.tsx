@@ -270,7 +270,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             className="absolute"
             style={{
               left: 0,
-              top: isEventsTab ? 450 : 320,
+              top: isEventsTab ? 470 : 340,
               right: 0,
               bottom: 366,
               zIndex: 5,

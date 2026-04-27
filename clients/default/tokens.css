@@ -100,8 +100,8 @@
   --itinerary-olive: 62 53% 48%; /* #b9bd39 — CTA Create Itinerary / Send to Phone / progress slider */
   --itinerary-toolbar-bg: 206 100% 27%; /* #004f8b — header banda azul + bottom map toolbar (azul oscuro) */
   --itinerary-rail-bg: 220 14% 96%; /* gris claro del rail inferior */
-  --itinerary-tab-active: 206 100% 27%; /* tab activo (azul oscuro #004f8b) */
-  --itinerary-tab-inactive: 0 0% 67%; /* #aaaaaa — gris medio */
+  --itinerary-tab-active: 201 80% 47%; /* #1796d6 — tab activo (azul medio Eat) verbatim del SVG */
+  --itinerary-tab-inactive: 0 0% 64%; /* #a3a3a3 — gris medio del SVG inactive */
   --itinerary-tab-text-active: 0 0% 100%;
   --itinerary-tab-text-inactive: 0 0% 100%; /* blanco también en inactive (matching SVG) */
   --itinerary-route-line: 201 100% 40%; /* línea azul de ruta sobre el mapa */

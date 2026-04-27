@@ -1,21 +1,11 @@
 'use client';
 
-import Image from 'next/image';
-
-import { pinDataUri } from '@/components/map/map-pin-icons';
-import type { MapSource } from '@/lib/config';
-
 export interface WelcomePopupTextos {
-  kicker: string;
   intro: string;
   title: string;
   body: string;
   createCta: string;
   aiCta: string;
-  categoryThings: string;
-  categoryRestaurants: string;
-  categoryStay: string;
-  categoryVenues: string;
 }
 
 export interface WelcomePopupProps {
@@ -25,57 +15,9 @@ export interface WelcomePopupProps {
   onClose: () => void;
 }
 
-/** Pin con el mismo estilo del MapCanvas (teardrop + icono por categoría). */
-function CategoryPin({
-  source,
-  label,
-  x,
-  y,
-  alignLabel,
-}: {
-  source: MapSource;
-  label: string;
-  x: number;
-  y: number;
-  alignLabel: 'right' | 'left';
-}) {
-  return (
-    <div
-      className="absolute flex items-center"
-      style={{
-        left: `${x}px`,
-        top: `${y}px`,
-        transform: 'translate(-50%, -100%)',
-        flexDirection: alignLabel === 'right' ? 'row' : 'row-reverse',
-      }}
-    >
-      <Image
-        src={pinDataUri(source)}
-        alt=""
-        width={56}
-        height={75}
-        unoptimized
-        className="drop-shadow-md"
-      />
-      <div
-        className="rounded-md bg-white px-3 py-[6px] text-[14px] font-bold tracking-[0.07em] text-foreground shadow-md"
-        style={{
-          marginLeft: alignLabel === 'right' ? 8 : 0,
-          marginRight: alignLabel === 'left' ? 8 : 0,
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-}
-
 /**
- * Welcome popup overlay del Itinerary Builder. NO tiene mapa propio: se
- * renderiza encima de la pantalla manual completa (header + tabs + listings
- * column + map + toolbar + rail), oscureciéndola con un backdrop semi-
- * transparente. Los 4 pins decorativos de categoría flotan en la zona del
- * mapa para destacar las 4 categorías principales.
+ * Welcome popup overlay del Itinerary Builder. Modal centrado al medio del
+ * canvas con backdrop negro 50% sobre la pantalla manual de fondo.
  */
 export function WelcomePopup(props: WelcomePopupProps) {
   const { textos, onCreate, onAi, onClose } = props;
@@ -87,41 +29,8 @@ export function WelcomePopup(props: WelcomePopupProps) {
       aria-modal="true"
       aria-label={textos.title}
     >
-      {/* Backdrop negro semi-transparente (50%) sobre el manual de atrás. */}
       <div className="absolute inset-0 bg-black/50" aria-hidden="true" />
 
-      {/* 4 pins decorativos sobre la zona del mapa (top:320 .. bottom:366
-          en el manual). Los posicionamos en coords absolute del canvas. */}
-      <CategoryPin
-        source="things-to-do"
-        label={textos.categoryThings}
-        x={345}
-        y={500}
-        alignLabel="right"
-      />
-      <CategoryPin
-        source="restaurants"
-        label={textos.categoryRestaurants}
-        x={780}
-        y={620}
-        alignLabel="left"
-      />
-      <CategoryPin
-        source="stay"
-        label={textos.categoryStay}
-        x={355}
-        y={780}
-        alignLabel="right"
-      />
-      <CategoryPin
-        source="events"
-        label={textos.categoryVenues}
-        x={820}
-        y={870}
-        alignLabel="left"
-      />
-
-      {/* Card central — verticalmente centrada en el canvas 1080×1920. */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div
           className="relative flex w-[860px] flex-col items-center rounded-[28px] bg-white px-16 py-14 shadow-2xl"
@@ -143,22 +52,19 @@ export function WelcomePopup(props: WelcomePopupProps) {
             </svg>
           </button>
 
-          <p
-            className="font-display text-[20px] font-bold tracking-[0.18em]"
-            style={{ color: 'hsl(var(--primary))' }}
-          >
-            {textos.kicker}
-          </p>
-          <p className="mt-6 font-display text-[28px] font-semibold tracking-[0.04em] text-foreground">
+          <p className="font-display text-[28px] font-semibold tracking-[0.04em] text-foreground">
             {textos.intro}
           </p>
           <h1
-            className="mt-3 text-center font-display text-[48px] font-bold uppercase leading-[1.05] tracking-tight"
+            className="mt-5 text-center font-display text-[64px] font-bold uppercase leading-[1.05] tracking-tight"
             style={{ color: 'hsl(var(--primary))', whiteSpace: 'pre-line' }}
           >
             {textos.title}
           </h1>
-          <p className="mt-6 max-w-[640px] text-center font-sans text-[20px] leading-[1.45] text-zinc-600">
+          <p
+            className="mt-7 max-w-[680px] text-center font-sans text-[20px] leading-[1.45] text-zinc-600"
+            style={{ whiteSpace: 'pre-line' }}
+          >
             {textos.body}
           </p>
 
@@ -175,7 +81,6 @@ export function WelcomePopup(props: WelcomePopupProps) {
                 paddingRight: 28,
                 fontSize: 16,
                 minWidth: 200,
-                boxShadow: '0 10px 24px -6px hsl(var(--itinerary-olive) / 0.5)',
               }}
             >
               {textos.createCta}
@@ -192,7 +97,6 @@ export function WelcomePopup(props: WelcomePopupProps) {
                 paddingRight: 28,
                 fontSize: 16,
                 minWidth: 200,
-                boxShadow: '0 10px 24px -6px hsl(var(--primary) / 0.5)',
               }}
             >
               {textos.aiCta}

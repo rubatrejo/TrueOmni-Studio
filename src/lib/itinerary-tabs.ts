@@ -44,28 +44,28 @@ function isItineraryEligible(slug: string, mod: HomeModuleVariant): boolean {
  * Devuelve la lista ordenada de tabs del Itinerary Builder para el cliente activo.
  * - Excluye `places-to-stay` (los hoteles no van en el itinerario).
  * - Incluye solo módulos cuyo `kind` sea `'listings' | 'events' | 'trails'`.
- * - Antepone el tab fijo `Local Listings` solo si el cliente declaró
+ * - Los tabs de módulo van primero (orden = orden de `features.home.modules`).
+ * - El tab fijo `Local Listings` se añade al FINAL solo si el cliente declaró
  *   `local_listings.length > 0`.
- *
- * El orden de los tabs sigue el orden de `features.home.modules` del config.
  */
 export function getItineraryTabs(
   config: KioskConfig,
   localListingsLabel: string,
 ): ItineraryTab[] {
   const tabs: ItineraryTab[] = [];
-  const itinerary = config.features?.home?.itinerary;
-  if (itinerary?.local_listings && itinerary.local_listings.length > 0) {
-    tabs.push({
-      slug: LOCAL_LISTINGS_TAB_SLUG,
-      label: localListingsLabel,
-      isModule: false,
-    });
-  }
 
   const modules = config.features?.home?.modules ?? {};
-  for (const [slug, mod] of Object.entries(modules)) {
-    if (!isItineraryEligible(slug, mod)) continue;
+  // Orden preferido: things-to-do primero (default tab), luego el resto del
+  // config. Mantenemos el orden interno del cliente para los demás slugs.
+  const moduleEntries = Object.entries(modules).filter(([slug, mod]) =>
+    isItineraryEligible(slug, mod),
+  );
+  moduleEntries.sort(([a], [b]) => {
+    if (a === 'things-to-do' && b !== 'things-to-do') return -1;
+    if (b === 'things-to-do' && a !== 'things-to-do') return 1;
+    return 0;
+  });
+  for (const [slug, mod] of moduleEntries) {
     const moduleKind = (mod.kind ?? 'listings') as 'listings' | 'events' | 'trails';
     tabs.push({
       slug,
@@ -75,6 +75,16 @@ export function getItineraryTabs(
       moduleKind,
     });
   }
+
+  const itinerary = config.features?.home?.itinerary;
+  if (itinerary?.local_listings && itinerary.local_listings.length > 0) {
+    tabs.push({
+      slug: LOCAL_LISTINGS_TAB_SLUG,
+      label: localListingsLabel,
+      isModule: false,
+    });
+  }
+
   return tabs;
 }
 

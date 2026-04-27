@@ -16,6 +16,7 @@ import { useItineraryDnd } from '@/lib/use-itinerary-dnd';
 import type { WeatherData } from '@/lib/weather';
 
 import { generateItinerary, type GeneratedItinerary } from '@/lib/ai-itinerary';
+import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { SendConfirmationPopup } from '@/components/listings/send-confirmation-popup';
 import { SendToEmailModal } from '@/components/listings/send-to-email-modal';
 import { SendToPhoneModal } from '@/components/listings/send-to-phone-modal';
@@ -310,6 +311,8 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             />
           )}
 
+          <FloatingHomeButton />
+
           <MapToolbar
             textos={{
               removeAll: textos.itinerary_remove_all ?? 'Remove All',
@@ -535,7 +538,6 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
       {phase === 'welcome' && (
         <WelcomePopup
           textos={{
-            kicker: textos.itinerary_welcome_kicker ?? 'NEW · 3D TRIP PLANNER',
             intro: textos.itinerary_welcome_intro ?? 'DISCOVER YOUR PERFECT VISIT',
             title: fmt(
               textos.itinerary_welcome_title ?? "WELCOME TO {client_name}'S\nOFFICIAL TRIP BUILDER.",
@@ -543,14 +545,9 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             ),
             body:
               textos.itinerary_welcome_body ??
-              'Discover the city your way curated for you or explored at your own pace.',
+              'Discover the city your way\ncurated for you or explored at your own pace.',
             createCta: textos.itinerary_welcome_create_cta ?? 'Create Itinerary',
             aiCta: textos.itinerary_welcome_ai_cta ?? 'AI Itinerary',
-            categoryThings: textos.itinerary_welcome_category_things ?? 'THINGS TO DO',
-            categoryRestaurants:
-              textos.itinerary_welcome_category_restaurants ?? 'RESTAURANTS',
-            categoryStay: textos.itinerary_welcome_category_stay ?? 'PLACES TO STAY',
-            categoryVenues: textos.itinerary_welcome_category_venues ?? 'VENUES',
           }}
           onCreate={() => setPhase('manual')}
           onAi={() => setPhase('ai-popup')}

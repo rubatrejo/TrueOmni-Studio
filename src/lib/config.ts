@@ -225,6 +225,88 @@ export interface PhotoBoothConfig {
   edgeFeather?: number;
 }
 
+/** Categoría posible de un stop dentro de un itinerario (mapea al bucket de favoritos). */
+export type ItineraryStopKind = 'listing' | 'event' | 'trail';
+
+/** Stop concreto dentro de un Local Listing pre-armado o de un itinerario AI generado. */
+export interface ItineraryStopRef {
+  /** Slug del listing/evento/trail referenciado dentro de su módulo origen. */
+  slug: string;
+  /** Discriminador del bucket donde vive (`useFavorites`, `useEventFavorites`, `useTrailFavorites`). */
+  kind: ItineraryStopKind;
+  /** Key del módulo del cliente donde vive el item (ej. "restaurants", "things-to-do", "events", "trails"). */
+  moduleSlug: string;
+}
+
+/** Itinerario pre-armado curado por el cliente desde el CMS (tab "Local Listings"). */
+export interface LocalListingItinerary {
+  slug: string;
+  title: string;
+  /** Cuerpo descriptivo mostrado en el preview. */
+  description: string;
+  /** Cover de la card y del preview (path relativo a `clients/{slug}/assets/` o URL absoluta). */
+  image: string;
+  stops: ItineraryStopRef[];
+}
+
+/** Opción de una pregunta del wizard AI. `days` solo aplica a la pregunta `duration`. */
+export interface AiQuestionOption {
+  value: string;
+  label: string;
+  /** Solo en la pregunta `duration`: número de días que genera el resultado.
+   *  0 = lista corta sin tabs DAY, 1 = un día, 3 = tres días. */
+  days?: number;
+}
+
+/** Pregunta del wizard AI — schema config-driven (Fase 3.17). */
+export interface AiQuestion {
+  /** Identificador estable (ej. `duration`, `travel_type`, `activities`, `dining`). */
+  key: string;
+  /** Kicker azul encima del título (ej. "Duration"). */
+  kicker: string;
+  /** Título principal de la pregunta. Soporta `{client_name}`. */
+  title: string;
+  /** Subtítulo opcional debajo del título (ej. "*Select all that apply"). */
+  subtitle?: string;
+  /** Single-choice (radio) o multi-choice (checkbox). */
+  type: 'single' | 'multi';
+  /** Hero image arriba de la pregunta (path relativo o URL). */
+  hero_image: string;
+  options: AiQuestionOption[];
+}
+
+/** Configuración del subsistema AI Itinerary del módulo. */
+export interface ItineraryAiConfig {
+  /** Lista ordenada de preguntas que pasan por el wizard. */
+  questions: AiQuestion[];
+  /** Background fullscreen del loading screen mientras se "genera" el itinerario. */
+  loading_image: string;
+  /** Plantilla del título del Final Result. Soporta `{client_name}` y `{duration_label}`. */
+  default_title_template?: string;
+}
+
+/**
+ * Configuración del módulo Itinerary Builder (Fase 3.17).
+ * Recolecta los listings/events/trails que el usuario marcó con like en otros módulos
+ * y permite construir un día con stops sobre un mapa interactivo, con un flujo AI
+ * opcional que genera el itinerario completo a partir de 4 preguntas.
+ */
+export interface ItineraryConfig {
+  enabled: boolean;
+  /** Si true, el welcome popup aparece SIEMPRE al entrar al módulo (útil mientras está
+   *  en review/ajustes). Si false, persiste con sessionStorage `kiosk_itinerary_welcomed`. */
+  welcome_always_visible?: boolean;
+  /** Estado inicial del toggle "Show Driving" en la map toolbar. Default true. */
+  show_driving_default?: boolean;
+  /** Estado inicial del toggle "Hide Markers" en la map toolbar. Default false. */
+  hide_markers_default?: boolean;
+  /** Tope duro de stops en el rail manual. Default 12. */
+  max_stops?: number;
+  /** Itinerarios pre-armados curados por el cliente. Si está vacío no se muestra el tab. */
+  local_listings: LocalListingItinerary[];
+  ai: ItineraryAiConfig;
+}
+
 /** Ítem de búsqueda placeholder. Fases futuras lo reemplazan con data real. */
 export interface HomeListing {
   slug: string;
@@ -746,6 +828,8 @@ export interface KioskConfig {
       askAi?: AskAiConfig;
       /** Módulo Photo Booth (captura + editor + share). Ruta `/home/photo-booth`. */
       photoBooth?: PhotoBoothConfig;
+      /** Módulo Itinerary Builder. Ruta `/home/itinerary-builder`. */
+      itinerary?: ItineraryConfig;
     };
     /** Catálogo de ads declarativo (Fase 3.8). */
     advertisements?: AdvertisementsConfig;

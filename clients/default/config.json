@@ -188,7 +188,57 @@
     "photo_booth_experience_kicker": "Coming Soon",
     "photo_booth_experience_title": "Coming Next",
     "photo_booth_experience_body": "An immersive {client_name} experience is on the way. Stay tuned for trips, AR tours and more — right from this kiosk.",
-    "photo_booth_experience_back": "Back to Photo Booth"
+    "photo_booth_experience_back": "Back to Photo Booth",
+    "itinerary_title": "Itinerary Builder",
+    "itinerary_search_placeholder": "What are you looking for...",
+    "itinerary_welcome_kicker": "NEW · 3D TRIP PLANNER",
+    "itinerary_welcome_intro": "DISCOVER YOUR PERFECT VISIT",
+    "itinerary_welcome_title": "WELCOME TO {client_name}'S\nOFFICIAL TRIP BUILDER.",
+    "itinerary_welcome_body": "Discover the city your way curated for you or explored at your own pace.",
+    "itinerary_welcome_create_cta": "Create Itinerary",
+    "itinerary_welcome_ai_cta": "AI Itinerary",
+    "itinerary_welcome_category_things": "THINGS TO DO",
+    "itinerary_welcome_category_restaurants": "RESTAURANTS",
+    "itinerary_welcome_category_stay": "PLACES TO STAY",
+    "itinerary_welcome_category_venues": "VENUES",
+    "itinerary_local_listings_tab_label": "Local Listings",
+    "itinerary_remove_all": "Remove All",
+    "itinerary_show_driving": "Show Driving",
+    "itinerary_hide_markers": "Hide Markers",
+    "itinerary_share": "Share Itinerary",
+    "itinerary_caption_drag_more": "To add more items to your day, just drag more listings into this day",
+    "itinerary_local_use_cta": "Use this itinerary",
+    "itinerary_share_modal_title": "You made it!",
+    "itinerary_share_modal_body": "Now can either share your Itinerary via email, or you can scan the QR code to receive the Itinerary directly to your phone and start your trip.",
+    "itinerary_share_scan_label": "SCAN ME",
+    "itinerary_share_powered_by": "Powered by",
+    "itinerary_share_send_phone": "SEND TO PHONE",
+    "itinerary_share_send_email": "SEND TO EMAIL",
+    "itinerary_ai_popup_title": "AI ITINERARY BUILDER",
+    "itinerary_ai_popup_subtitle": "Our AI Itinerary Builder creates a personalized travel plan based on your preferences. Just answer a few quick questions, and let AI design the perfect adventure just for you!",
+    "itinerary_ai_card_ai_title": "AI ITINERARY",
+    "itinerary_ai_card_ai_body": "Let us craft the perfect itinerary for you! Our AI will generate a customized travel plan tailored to your preferences.",
+    "itinerary_ai_card_ai_cta": "Start",
+    "itinerary_ai_card_top_title": "TOP SUGGESTIONS",
+    "itinerary_ai_card_top_body": "Prefer to explore options yourself? Answer some questions, and we'll provide suggestions to help you build your ideal itinerary.",
+    "itinerary_ai_card_top_cta": "Let's Go",
+    "itinerary_ai_loading_title": "AI Itinerary Builder",
+    "itinerary_ai_loading_body": "We're building your perfect itinerary! This might take a few seconds…",
+    "itinerary_ai_back": "Back",
+    "itinerary_ai_next": "Next question",
+    "itinerary_ai_finish": "Finish",
+    "itinerary_ai_result_title": "Itinerary for Weekend Trip",
+    "itinerary_ai_result_tab_events": "EVENTS",
+    "itinerary_ai_result_tab_day": "DAY {n}",
+    "itinerary_ai_start_over": "Start Over",
+    "itinerary_ai_finish_cta": "Finish",
+    "itinerary_ai_leave_warning_title": "Are you sure\nyou want to leave?",
+    "itinerary_ai_leave_warning_body": "You'll lose the AI itinerary you've generated and have to answer the questions again.",
+    "itinerary_ai_leave_warning_cancel": "Cancel",
+    "itinerary_ai_leave_warning_confirm": "Leave",
+    "itinerary_finished_title": "Itinerary saved!",
+    "itinerary_finished_body": "We've added the {count} stops to your day. You can keep editing them on the map.",
+    "itinerary_disabled": "Itinerary Builder is not configured for the active client."
   },
   "navegacion": {
     "home": "/",
@@ -9373,6 +9423,75 @@
         },
         "edgeFeather": 3,
         "shareBackground": "assets/photo-booth/share/share-bg.jpg"
+      },
+      "itinerary": {
+        "enabled": true,
+        "welcome_always_visible": true,
+        "show_driving_default": true,
+        "hide_markers_default": false,
+        "max_stops": 12,
+        "local_listings": [],
+        "ai": {
+          "questions": [
+            {
+              "key": "duration",
+              "kicker": "Duration",
+              "title": "How Long will you be exploring {client_name}'s Town?",
+              "type": "single",
+              "hero_image": "assets/itinerary/ai/q-duration.jpg",
+              "options": [
+                { "value": "few-hours", "label": "A Few Hours", "days": 0 },
+                { "value": "day-trip", "label": "A Day Trip", "days": 1 },
+                { "value": "few-nights", "label": "A Few Nights", "days": 3 }
+              ]
+            },
+            {
+              "key": "travel_type",
+              "kicker": "Travel Type",
+              "title": "How Would you like to spent your time?",
+              "type": "single",
+              "hero_image": "assets/itinerary/ai/q-travel.jpg",
+              "options": [
+                { "value": "exploring", "label": "Exploring" },
+                { "value": "active", "label": "Raising my heart rate" },
+                { "value": "relaxing", "label": "Relaxing and taking it easy" },
+                { "value": "events", "label": "Local events" }
+              ]
+            },
+            {
+              "key": "activities",
+              "kicker": "Activities",
+              "title": "What type of activities interest you?",
+              "subtitle": "*Select all that apply",
+              "type": "multi",
+              "hero_image": "assets/itinerary/ai/q-activities.jpg",
+              "options": [
+                { "value": "hiking", "label": "Hiking & Off Roading" },
+                { "value": "scenic", "label": "Scenic Drives" },
+                { "value": "museums", "label": "Mines, Museums & Train Rides" },
+                { "value": "shopping", "label": "Shopping" }
+              ]
+            },
+            {
+              "key": "dining",
+              "kicker": "Dining",
+              "title": "What type of food do you like?",
+              "subtitle": "*Select all that apply",
+              "type": "multi",
+              "hero_image": "assets/itinerary/ai/q-dining.jpg",
+              "options": [
+                { "value": "breakfast", "label": "Breakfast" },
+                { "value": "pizza", "label": "Pizza" },
+                { "value": "tacos", "label": "Tacos" },
+                { "value": "mountain", "label": "Mountain Dining" },
+                { "value": "desserts", "label": "Desserts" },
+                { "value": "coffee", "label": "Coffee" }
+              ]
+            }
+          ],
+          "loading_image": "assets/itinerary/ai/loading-bg.jpg",
+          "default_title_template": "Itinerary for {duration_label}"
+        }
       }
     },
     "advertisements": {

@@ -69,15 +69,21 @@ export function ListingsColumn(props: ListingsColumnProps) {
     <div
       className="absolute z-20"
       style={{
-        left: COLUMN_LEFT,
+        left: 0,
         top: COLUMN_TOP,
-        width: COLUMN_WIDTH,
+        width: COLUMN_LEFT * 2 + COLUMN_WIDTH,
         bottom: COLUMN_BOTTOM_RESERVED,
+        backgroundColor: '#ffffff',
       }}
     >
       <div
-        className="flex h-full flex-col gap-3 overflow-y-auto pr-1"
-        style={{ scrollbarWidth: 'thin' }}
+        className="flex h-full flex-col gap-3 overflow-y-auto pr-3 [&::-webkit-scrollbar]:hidden"
+        style={{
+          scrollbarWidth: 'none',
+          paddingLeft: COLUMN_LEFT,
+          paddingTop: 12,
+          paddingBottom: 60,
+        }}
       >
         {items.length === 0 ? (
           <div className="mt-8 text-center text-[15px] text-muted-foreground">{emptyLabel}</div>
@@ -95,6 +101,16 @@ export function ListingsColumn(props: ListingsColumnProps) {
           ))
         )}
       </div>
+      {/* Gradient blanco → transparente al final para fade-out scroll */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0"
+        style={{
+          height: 90,
+          background:
+            'linear-gradient(to bottom, rgba(255,255,255,0) 0%, #ffffff 100%)',
+        }}
+      />
       {/* Collapse handle (flecha izquierda) */}
       <button
         type="button"

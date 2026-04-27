@@ -41,8 +41,17 @@ export function CategoryTabsRow({ tabs, activeSlug, onSelect }: CategoryTabsRowP
 
   return (
     <div
-      className="absolute left-0 flex items-center gap-2 overflow-x-auto"
-      style={{ top: 250, width: 1080, height: 80, paddingLeft: 20, paddingRight: 20 }}
+      className="absolute left-0 flex items-center overflow-x-auto [&::-webkit-scrollbar]:hidden"
+      style={{
+        top: 250,
+        width: 1080,
+        height: 80,
+        paddingLeft: 20,
+        paddingRight: 20,
+        gap: 20,
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+      }}
     >
       {tabs.map((tab) => {
         const isActive = tab.slug === activeSlug;

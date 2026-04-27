@@ -9461,7 +9461,7 @@
               "kicker": "Duration",
               "title": "How Long will you be exploring {client_name}'s Town?",
               "type": "single",
-              "hero_image": "assets/itinerary/ai/q-duration.jpg",
+              "hero_image": "https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?w=1080&h=760&fit=crop&q=80",
               "options": [
                 { "value": "few-hours", "label": "A Few Hours", "days": 0 },
                 { "value": "day-trip", "label": "A Day Trip", "days": 1 },
@@ -9473,7 +9473,7 @@
               "kicker": "Travel Type",
               "title": "How Would you like to spent your time?",
               "type": "single",
-              "hero_image": "assets/itinerary/ai/q-travel.jpg",
+              "hero_image": "https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?w=1080&h=760&fit=crop&q=80",
               "options": [
                 { "value": "exploring", "label": "Exploring" },
                 { "value": "active", "label": "Raising my heart rate" },
@@ -9487,7 +9487,7 @@
               "title": "What type of activities interest you?",
               "subtitle": "*Select all that apply",
               "type": "multi",
-              "hero_image": "assets/itinerary/ai/q-activities.jpg",
+              "hero_image": "https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?w=1080&h=760&fit=crop&q=80",
               "options": [
                 { "value": "hiking", "label": "Hiking & Off Roading" },
                 { "value": "scenic", "label": "Scenic Drives" },
@@ -9501,7 +9501,7 @@
               "title": "What type of food do you like?",
               "subtitle": "*Select all that apply",
               "type": "multi",
-              "hero_image": "assets/itinerary/ai/q-dining.jpg",
+              "hero_image": "https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?w=1080&h=760&fit=crop&q=80",
               "options": [
                 { "value": "breakfast", "label": "Breakfast" },
                 { "value": "pizza", "label": "Pizza" },
@@ -9512,7 +9512,7 @@
               ]
             }
           ],
-          "loading_image": "assets/itinerary/ai/loading-bg.jpg",
+          "loading_image": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1080&h=1920&fit=crop&q=80",
           "default_title_template": "Itinerary for {duration_label}"
         }
       }

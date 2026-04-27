@@ -16,6 +16,8 @@ import { useItineraryDnd } from '@/lib/use-itinerary-dnd';
 import type { WeatherData } from '@/lib/weather';
 
 import { AiItineraryFloatingCard } from './ai-floating-card';
+import { AiPopup } from './ai-popup';
+import { AiWizard, type AiAnswers } from './ai-wizard';
 import { CategoryTabsRow } from './category-tabs-row';
 import { DragGhost } from './drag-ghost';
 import {
@@ -109,6 +111,8 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
   const previewItinerary = previewSlug
     ? config.local_listings.find((it) => it.slug === previewSlug) ?? null
     : null;
+  const [aiAnswers, setAiAnswers] = useState<AiAnswers | null>(null);
+  void aiAnswers; // Sub-fase 3.17-10 lo usa para generar el itinerario.
 
   const allCatalog = useMemo(() => getItineraryCatalogAll(fullConfig), [fullConfig]);
 
@@ -311,6 +315,41 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             />
           )}
         </>
+      )}
+
+      {phase === 'ai-popup' && (
+        <AiPopup
+          textos={{
+            title: textos.itinerary_ai_popup_title ?? 'AI ITINERARY BUILDER',
+            subtitle: textos.itinerary_ai_popup_subtitle ?? '',
+            aiCardTitle: textos.itinerary_ai_card_ai_title ?? 'AI ITINERARY',
+            aiCardBody: textos.itinerary_ai_card_ai_body ?? '',
+            aiCardCta: textos.itinerary_ai_card_ai_cta ?? 'Start',
+            topCardTitle: textos.itinerary_ai_card_top_title ?? 'TOP SUGGESTIONS',
+            topCardBody: textos.itinerary_ai_card_top_body ?? '',
+            topCardCta: textos.itinerary_ai_card_top_cta ?? "Let's Go",
+          }}
+          onStart={() => setPhase('ai-wizard')}
+          onTopSuggestions={() => setPhase('ai-wizard')}
+          onClose={() => setPhase('manual')}
+        />
+      )}
+
+      {phase === 'ai-wizard' && (
+        <AiWizard
+          questions={config.ai.questions}
+          textos={{
+            back: textos.itinerary_ai_back ?? 'Back',
+            next: textos.itinerary_ai_next ?? 'Next question',
+            finish: textos.itinerary_ai_finish ?? 'Finish',
+          }}
+          logoSrc={props.logoSrc}
+          onFinish={(answers) => {
+            setAiAnswers(answers);
+            setPhase('ai-loading');
+          }}
+          onCancel={() => setPhase('manual')}
+        />
       )}
 
       {phase === 'welcome' && (

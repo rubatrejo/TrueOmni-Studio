@@ -56,7 +56,7 @@ export function WelcomePopup(props: WelcomePopupProps) {
             {textos.intro}
           </p>
           <h1
-            className="mt-5 text-center font-display text-[64px] font-bold uppercase leading-[1.05] tracking-tight"
+            className="mt-5 text-center font-display text-[44px] font-bold uppercase leading-[1.1] tracking-tight"
             style={{ color: 'hsl(var(--primary))', whiteSpace: 'pre-line' }}
           >
             {textos.title}
@@ -68,19 +68,20 @@ export function WelcomePopup(props: WelcomePopupProps) {
             {textos.body}
           </p>
 
-          <div className="mt-10 flex items-center justify-center" style={{ gap: 14 }}>
+          <div className="mt-10 flex items-center justify-center" style={{ gap: 16 }}>
             <button
               type="button"
               onClick={onCreate}
-              className="inline-flex items-center justify-center rounded-full font-display font-bold uppercase tracking-[0.06em] transition hover:opacity-90 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+              className="inline-flex items-center justify-center font-sans uppercase text-white transition hover:opacity-90 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
               style={{
                 backgroundColor: 'hsl(var(--itinerary-olive))',
-                color: 'white',
-                height: 56,
-                paddingLeft: 28,
-                paddingRight: 28,
-                fontSize: 16,
-                minWidth: 200,
+                width: 260,
+                height: 72,
+                borderRadius: 8,
+                fontSize: 24,
+                lineHeight: '24px',
+                fontWeight: 700,
+                letterSpacing: '0.06em',
               }}
             >
               {textos.createCta}
@@ -88,15 +89,16 @@ export function WelcomePopup(props: WelcomePopupProps) {
             <button
               type="button"
               onClick={onAi}
-              className="inline-flex items-center justify-center rounded-full font-display font-bold uppercase tracking-[0.06em] transition hover:opacity-90 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+              className="inline-flex items-center justify-center font-sans uppercase text-white transition hover:opacity-90 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
               style={{
                 backgroundColor: 'hsl(var(--primary))',
-                color: 'hsl(var(--primary-foreground))',
-                height: 56,
-                paddingLeft: 28,
-                paddingRight: 28,
-                fontSize: 16,
-                minWidth: 200,
+                width: 260,
+                height: 72,
+                borderRadius: 8,
+                fontSize: 24,
+                lineHeight: '24px',
+                fontWeight: 700,
+                letterSpacing: '0.06em',
               }}
             >
               {textos.aiCta}

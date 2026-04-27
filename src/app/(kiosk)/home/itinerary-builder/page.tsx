@@ -1,6 +1,7 @@
 import { ItineraryBuilderModule } from '@/components/itinerary/itinerary-builder-module';
 import { KioskCanvas } from '@/components/kiosk-canvas';
 import { getConfig } from '@/lib/config';
+import { resolveItineraryAsset } from '@/lib/itinerary-asset';
 import { fetchWeather } from '@/lib/weather';
 
 export default async function ItineraryBuilderPage() {
@@ -28,7 +29,7 @@ export default async function ItineraryBuilderPage() {
         fullConfig={config}
         client={config.client}
         textos={config.textos}
-        logoSrc={config.branding.logo.default}
+        logoSrc={resolveItineraryAsset(config.branding.logo.default)}
         logoAlt={config.branding.logo.alt ?? config.client.nombre}
         weather={weather}
         mapboxToken={config.integraciones?.mapbox_token}

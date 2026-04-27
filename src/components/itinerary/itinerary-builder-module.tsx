@@ -385,6 +385,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             finish: textos.itinerary_ai_finish ?? 'Finish',
           }}
           logoSrc={props.logoSrc}
+          templateVars={interp}
           onFinish={(answers) => {
             setAiAnswers(answers);
             setPhase('ai-loading');

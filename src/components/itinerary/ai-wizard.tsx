@@ -19,11 +19,16 @@ export interface AiWizardProps {
   textos: AiWizardTextos;
   /** Logo opcional pasado al question screen header. */
   logoSrc?: string;
+  /** Variables a interpolar en title (ej. {client_name: "Arizona"}). */
+  templateVars?: Record<string, string>;
   /** Disparado cuando el usuario completa la última pregunta. */
   onFinish: (answers: AiAnswers) => void;
   /** Disparado cuando el usuario pulsa back en la primera pregunta o cierra. */
   onCancel: () => void;
 }
+
+const interp = (tpl: string, vars: Record<string, string>) =>
+  Object.entries(vars).reduce((acc, [k, v]) => acc.replaceAll(`{${k}}`, v), tpl);
 
 /**
  * Orquestador del wizard AI. Mantiene el step actual + las respuestas
@@ -62,10 +67,16 @@ export function AiWizard(props: AiWizardProps) {
 
   if (!current) return null;
   const value = answers[current.key] ?? null;
+  const vars = props.templateVars ?? {};
+  const interpolated: AiQuestion = {
+    ...current,
+    title: interp(current.title, vars),
+    subtitle: current.subtitle ? interp(current.subtitle, vars) : current.subtitle,
+  };
 
   return (
     <AiQuestionScreen
-      question={current}
+      question={interpolated}
       value={value}
       onChange={handleChange}
       step={step}

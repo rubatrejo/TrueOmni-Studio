@@ -35,7 +35,7 @@ import {
 } from './events-week-strip';
 import { ItineraryFinishedPopup } from './itinerary-finished-popup';
 import { ItineraryHeader } from './itinerary-header';
-import { ItineraryMap, type ItineraryMapStop } from './itinerary-map';
+import { ItineraryMap } from './itinerary-map';
 import { LeaveAiWarningPopup } from './leave-ai-warning-popup';
 import { ShareItineraryModal } from './share-itinerary-modal';
 import { ListingsColumn } from './listings-column';
@@ -160,16 +160,6 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
     [client.coords],
   );
 
-  const mapStops = useMemo<ItineraryMapStop[]>(() => {
-    const out: ItineraryMapStop[] = [];
-    rail.stops.forEach((entry, i) => {
-      const item = resolveItem(entry);
-      if (!item) return;
-      out.push({ slug: entry.slug, kind: entry.kind, coords: item.coords, index: i + 1 });
-    });
-    return out;
-  }, [rail.stops, resolveItem]);
-
   const center = client.coords ?? { lat: 33.4484, lng: -112.074 };
 
   const interp = { client_name: client.nombre };
@@ -264,7 +254,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             center={center}
             zoom={11}
             catalog={allCatalog}
-            stops={mapStops}
+            stops={rail.stops}
             showRoute={showDriving}
             hideCatalogMarkers={hideMarkers}
             unavailableLabel={textos.itinerary_map_unavailable}

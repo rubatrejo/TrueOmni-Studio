@@ -1,203 +1,114 @@
 'use client';
 
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { useMemo } from 'react';
 
-import mapboxgl, { type GeoJSONSource } from 'mapbox-gl';
-import { useEffect, useRef, useState } from 'react';
-
-import type { ItineraryStopKind } from '@/lib/config';
+import { MapCanvas } from '@/components/map/map-canvas';
+import type { MapSource } from '@/lib/config';
 import type { ItineraryCatalogItem } from '@/lib/itinerary-catalog';
-
-export interface ItineraryMapStop {
-  slug: string;
-  kind: ItineraryStopKind;
-  coords: { lat: number; lng: number };
-  /** Número 1-based del stop en el rail. */
-  index: number;
-}
+import type { ItineraryRailEntry } from '@/lib/itinerary-favorites';
+import type { MapItem } from '@/lib/map-item';
 
 export interface ItineraryMapProps {
   token: string | undefined;
-  /** Centro inicial del mapa. */
   center: { lat: number; lng: number };
   zoom?: number;
-  /** Pins de catálogo a mostrar (toggleados por `Hide Markers`). */
+  /** Catálogo completo del cliente — pins por categoría con clustering. */
   catalog: ItineraryCatalogItem[];
-  /** Stops del rail (numerados, conectados con línea). */
-  stops: ItineraryMapStop[];
-  /** Mostrar la línea de ruta entre stops. */
-  showRoute: boolean;
-  /** Ocultar markers del catálogo (los stops siempre visibles). */
-  hideCatalogMarkers: boolean;
+  /** Stops del rail manual; se conectan con LineString azul. */
+  stops: ItineraryRailEntry[];
+  /** Si false, oculta los pins del catálogo (los stops mantienen su pin). */
+  hideCatalogMarkers?: boolean;
+  /** Si false, oculta la LineString de la ruta. */
+  showRoute?: boolean;
+  /** Callback cuando el usuario tap un pin. */
+  onSelect?: (slug: string) => void;
+  selectedSlug?: string | null;
   className?: string;
   style?: React.CSSProperties;
-  /** Texto mostrado cuando no hay token de Mapbox (white-label). */
   unavailableLabel?: string;
 }
 
-/** Color del pin según el kind del item — usa tokens del cliente. */
-function pinColorForKind(kind: ItineraryStopKind): string {
-  if (kind === 'event') return 'hsl(var(--itinerary-pin-event))';
-  if (kind === 'trail') return 'hsl(var(--itinerary-pin-trail))';
-  return 'hsl(var(--itinerary-pin-listing))';
+const DEFAULT_FALLBACK_STOPS: never[] = [];
+
+/**
+ * Wrapper sobre `MapCanvas` (módulo Map). Reusa los pins teardrop con icono
+ * por categoría (Eat / Play / Stay / Events) y el clustering azul oscuro
+ * existente. Mapea `ItineraryCatalogItem` → `MapItem` y `kind:'trail'` se
+ * trata como `things-to-do` (pin Play azul oscuro) para no extender
+ * `MapSource` solo por el Itinerary Builder.
+ */
+function kindToMapSource(kind: ItineraryCatalogItem['kind'], moduleSlug: string): MapSource {
+  if (kind === 'event') return 'events';
+  if (kind === 'trail') return 'things-to-do';
+  // listing — distinguir restaurants vs things-to-do vs stay según moduleSlug.
+  if (moduleSlug === 'restaurants') return 'restaurants';
+  if (moduleSlug === 'stay') return 'stay';
+  return 'things-to-do';
 }
 
-/** SVG inline de un pin teardrop con relleno por kind. */
-function pinSvg(kind: ItineraryStopKind, scale = 1) {
-  const color = pinColorForKind(kind);
-  const w = 28 * scale;
-  const h = 36 * scale;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 28 36">
-    <path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.3 21.7 0 14 0z" fill="${color}"/>
-    <circle cx="14" cy="14" r="5" fill="hsl(var(--itinerary-pin-fill))"/>
-  </svg>`;
-}
-
-/** Stop marker con número grande. */
-function stopMarkerSvg(index: number) {
-  const primary = 'hsl(var(--primary))';
-  return `<div style="position:relative;width:48px;height:60px;">
-    <svg width="48" height="60" viewBox="0 0 48 60" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;">
-      <path d="M24 0C10.7 0 0 10.7 0 24c0 17 24 36 24 36s24-19 24-36C48 10.7 37.3 0 24 0z" fill="${primary}"/>
-      <circle cx="24" cy="24" r="14" fill="hsl(var(--itinerary-pin-fill))"/>
-    </svg>
-    <div style="position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;padding-top:14px;color:${primary};font-weight:700;font-size:18px;font-family:system-ui,sans-serif;">${index}</div>
-  </div>`;
+function toMapItem(it: ItineraryCatalogItem): MapItem {
+  const source = kindToMapSource(it.kind, it.moduleSlug);
+  return {
+    source,
+    moduleSlug: it.moduleSlug,
+    slug: it.slug,
+    title: it.title,
+    subcategory: it.subcategory,
+    image: it.image,
+    coords: it.coords,
+    address: it.address,
+    features: it.features,
+    popularity: it.popularity,
+    hours: it.hours,
+    priceRange: it.priceRange,
+    priceMode: it.priceMode,
+  };
 }
 
 export function ItineraryMap(props: ItineraryMapProps) {
   const {
     token,
     center,
-    zoom = 12,
+    zoom = 11,
     catalog,
     stops,
-    showRoute,
-    hideCatalogMarkers,
+    hideCatalogMarkers = false,
+    showRoute = true,
+    onSelect,
+    selectedSlug = null,
     className,
     style,
+    unavailableLabel,
   } = props;
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const [ready, setReady] = useState(false);
-  const catalogMarkersRef = useRef<mapboxgl.Marker[]>([]);
-  const stopMarkersRef = useRef<mapboxgl.Marker[]>([]);
-
-  // Init del mapa una sola vez.
-  useEffect(() => {
-    if (!token || !containerRef.current || mapRef.current) return;
-    mapboxgl.accessToken = token;
-    const map = new mapboxgl.Map({
-      container: containerRef.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [center.lng, center.lat],
-      zoom,
-      interactive: true,
-      attributionControl: false,
-      cooperativeGestures: false,
-    });
-    mapRef.current = map;
-    map.on('load', () => {
-      map.addSource('itinerary-route', {
-        type: 'geojson',
-        data: { type: 'FeatureCollection', features: [] },
-      });
-      // Mapbox no resuelve `var(--token)`, así que leemos el HSL del CSS root
-      // en runtime para mantener la línea de ruta tokenizada por cliente.
-      const routeHsl =
-        getComputedStyle(document.documentElement)
-          .getPropertyValue('--itinerary-route-line')
-          .trim() || '201 100% 40%';
-      map.addLayer({
-        id: 'itinerary-route-line',
-        type: 'line',
-        source: 'itinerary-route',
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: {
-          'line-color': `hsl(${routeHsl})`,
-          'line-width': 5,
-          'line-opacity': 0.85,
-        },
-      });
-      setReady(true);
-    });
-    return () => {
-      map.remove();
-      mapRef.current = null;
-      setReady(false);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
-
-  // Sync markers del catálogo (visibles según hideCatalogMarkers).
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !ready) return;
-    catalogMarkersRef.current.forEach((m) => m.remove());
-    catalogMarkersRef.current = [];
-    if (hideCatalogMarkers) return;
-    const stopKey = new Set(stops.map((s) => `${s.kind}:${s.slug}`));
-    catalog.forEach((item) => {
-      // No duplicar markers de items que ya son stops (los rendero abajo grandes).
-      if (stopKey.has(`${item.kind}:${item.slug}`)) return;
-      const el = document.createElement('div');
-      el.style.cursor = 'pointer';
-      el.innerHTML = pinSvg(item.kind, 1);
-      const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
-        .setLngLat([item.coords.lng, item.coords.lat])
-        .addTo(map);
-      catalogMarkersRef.current.push(marker);
-    });
-  }, [catalog, stops, hideCatalogMarkers, ready]);
-
-  // Sync stop markers (numerados, siempre visibles).
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !ready) return;
-    stopMarkersRef.current.forEach((m) => m.remove());
-    stopMarkersRef.current = [];
-    stops.forEach((s) => {
-      const el = document.createElement('div');
-      el.innerHTML = stopMarkerSvg(s.index);
-      const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
-        .setLngLat([s.coords.lng, s.coords.lat])
-        .addTo(map);
-      stopMarkersRef.current.push(marker);
-    });
-  }, [stops, ready]);
-
-  // Sync route line.
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !ready) return;
-    const src = map.getSource('itinerary-route') as GeoJSONSource | undefined;
-    if (!src) return;
-    if (!showRoute || stops.length < 2) {
-      src.setData({ type: 'FeatureCollection', features: [] });
-      return;
+  const items = useMemo<MapItem[]>(() => {
+    if (hideCatalogMarkers) {
+      // Aún así rendrizamos los stops como pins (importante para que la línea
+      // tenga puntos visibles). Los duplicados se filtran abajo.
+      const stopSet = new Set(stops.map((s) => `${s.kind}:${s.slug}`));
+      return catalog
+        .filter((it) => stopSet.has(`${it.kind}:${it.slug}`))
+        .map(toMapItem);
     }
-    src.setData({
-      type: 'FeatureCollection',
-      features: [
-        {
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'LineString',
-            coordinates: stops.map((s) => [s.coords.lng, s.coords.lat]),
-          },
-        },
-      ],
-    });
-  }, [stops, showRoute, ready]);
+    return catalog.map(toMapItem);
+  }, [catalog, stops, hideCatalogMarkers]);
+
+  const routeStops = useMemo<{ lng: number; lat: number }[]>(() => {
+    if (!showRoute || stops.length < 2) return DEFAULT_FALLBACK_STOPS;
+    const idx = new Map(catalog.map((c) => [`${c.kind}:${c.slug}`, c]));
+    const out: { lng: number; lat: number }[] = [];
+    for (const s of stops) {
+      const item = idx.get(`${s.kind}:${s.slug}`);
+      if (item) out.push({ lng: item.coords.lng, lat: item.coords.lat });
+    }
+    return out;
+  }, [stops, showRoute, catalog]);
 
   if (!token) {
-    const label = props.unavailableLabel ?? 'Map unavailable';
     return (
       <div
         role="img"
-        aria-label={label}
+        aria-label={unavailableLabel ?? 'Map unavailable'}
         className={className}
         style={{
           display: 'flex',
@@ -205,26 +116,32 @@ export function ItineraryMap(props: ItineraryMapProps) {
           justifyContent: 'center',
           backgroundColor: 'hsl(var(--itinerary-map-fallback-bg))',
           color: 'hsl(var(--itinerary-map-fallback-fg))',
-          fontSize: '14px',
+          fontSize: 14,
           ...style,
         }}
       >
-        {label}
+        {unavailableLabel ?? 'Map unavailable'}
       </div>
     );
   }
 
-  // Wrapper absolute fuera del container de Mapbox: Mapbox GL sobrescribe
-  // `position` del container a `relative`, lo que rompe top/bottom inset; el
-  // wrapper absorbe los insets y el container interno queda 100%×100%.
+  // Wrapper externo absolute necesario porque Mapbox sobrescribe position
+  // del container a `relative`, lo que rompe top/bottom inset.
   return (
     <div className={className} style={style}>
-      <div
-        ref={containerRef}
-        role="application"
-        aria-label="Itinerary map"
+      <MapCanvas
+        token={token}
+        items={items}
+        center={center}
+        zoom={zoom}
+        selectedSlug={selectedSlug}
+        onSelect={(slug) => onSelect?.(slug)}
+        routeStops={routeStops.length >= 2 ? routeStops : undefined}
         style={{ width: '100%', height: '100%' }}
       />
     </div>
   );
 }
+
+/** Re-export para compatibilidad con el tipo previo. */
+export type { ItineraryRailEntry as ItineraryMapStop } from '@/lib/itinerary-favorites';

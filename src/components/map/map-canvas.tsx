@@ -23,6 +23,10 @@ interface MapCanvasProps {
   onSelect: (slug: string) => void;
   /** Posición del pin seleccionado en px relativos al canvas. null si no hay. */
   onSelectedPosition?: (pos: { left: number; top: number } | null) => void;
+  /** Si se pasa, dibuja una LineString conectando estos puntos (Itinerary Builder). */
+  routeStops?: readonly { lng: number; lat: number }[];
+  /** Color CSS de la línea de ruta. Default = primary del kiosk. */
+  routeColor?: string;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -42,6 +46,8 @@ export function MapCanvas({
   selectedSlug,
   onSelect,
   onSelectedPosition,
+  routeStops,
+  routeColor,
   className,
   style,
 }: MapCanvasProps) {
@@ -50,6 +56,8 @@ export function MapCanvas({
   const selectedMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const readyRef = useRef(false);
   const itemsRef = useRef<readonly MapItem[]>(items);
+  const routeStopsRef = useRef<readonly { lng: number; lat: number }[] | undefined>(routeStops);
+  routeStopsRef.current = routeStops;
 
   // Init del mapa una sola vez.
   useEffect(() => {
@@ -157,6 +165,54 @@ export function MapCanvas({
       map.on('mouseleave', 'clusters', () => (map.getCanvas().style.cursor = ''));
       map.on('mouseenter', 'unclustered-point', () => (map.getCanvas().style.cursor = 'pointer'));
       map.on('mouseleave', 'unclustered-point', () => (map.getCanvas().style.cursor = ''));
+
+      // Layer opcional de ruta del Itinerary Builder (LineString entre stops).
+      // Se añade siempre vacío; el effect setData lo llena cuando cambian.
+      const lineColor =
+        routeColor ??
+        (() => {
+          const v = getComputedStyle(document.documentElement)
+            .getPropertyValue('--primary')
+            .trim();
+          return v ? `hsl(${v})` : '#0088ce';
+        })();
+      map.addSource('route', {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+      });
+      map.addLayer(
+        {
+          id: 'route-line',
+          type: 'line',
+          source: 'route',
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          paint: {
+            'line-color': lineColor,
+            'line-width': 5,
+            'line-opacity': 0.85,
+          },
+        },
+        // Insertar la línea ANTES de los pins para que los pins queden encima.
+        'unclustered-point',
+      );
+      // Si ya teníamos stops antes del load (race), aplicar ahora.
+      const initialStops = routeStopsRef.current;
+      if (initialStops && initialStops.length >= 2) {
+        const src = map.getSource('route') as GeoJSONSource | undefined;
+        src?.setData({
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'LineString',
+                coordinates: initialStops.map((s) => [s.lng, s.lat]),
+              },
+            },
+          ],
+        });
+      }
     });
 
     return () => {
@@ -177,6 +233,31 @@ export function MapCanvas({
     const src = map.getSource('items') as GeoJSONSource | undefined;
     if (src) src.setData(toFeatureCollection(items));
   }, [items]);
+
+  // Sync de la ruta (LineString) cuando cambian los stops del rail.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !readyRef.current) return;
+    const src = map.getSource('route') as GeoJSONSource | undefined;
+    if (!src) return;
+    if (!routeStops || routeStops.length < 2) {
+      src.setData({ type: 'FeatureCollection', features: [] });
+      return;
+    }
+    src.setData({
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates: routeStops.map((s) => [s.lng, s.lat]),
+          },
+        },
+      ],
+    });
+  }, [routeStops]);
 
   // Selected pin: DOM marker + easeTo + sync de posición para la burbuja.
   useEffect(() => {

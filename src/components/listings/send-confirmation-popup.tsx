@@ -17,11 +17,17 @@ export function SendConfirmationPopup({
   kind,
   destination,
   onClose,
+  title: titleOverride,
+  body: bodyOverride,
 }: {
   open: boolean;
   kind: SendKind;
   destination: string;
   onClose: () => void;
+  /** Override del título — útil para que el popup hable del módulo activo (Photo Booth, etc.). */
+  title?: string;
+  /** Override del cuerpo — idem. */
+  body?: string;
 }) {
   const router = useRouter();
 
@@ -37,11 +43,13 @@ export function SendConfirmationPopup({
   if (!open) return null;
 
   const subject = kind === 'email' ? 'email' : 'phone';
-  const title = kind === 'email' ? "It's on its way!" : 'Sent to your phone';
-  const body =
+  const defaultTitle = kind === 'email' ? "It's on its way!" : 'Sent to your phone';
+  const defaultBody =
     kind === 'email'
       ? 'Check your inbox for your trip details. The link is ready to open on your phone.'
       : 'Check your messages. Your trip details are waiting for you.';
+  const title = titleOverride ?? defaultTitle;
+  const body = bodyOverride ?? defaultBody;
 
   return (
     <div

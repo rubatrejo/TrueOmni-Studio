@@ -1,21 +1,26 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { ItineraryConfig, KioskConfig } from '@/lib/config';
 import {
+  distanceMi,
   filterCatalogBySearch,
   getItineraryCatalogAll,
   getItineraryCatalogForModule,
   type ItineraryCatalogItem,
 } from '@/lib/itinerary-catalog';
-import { useItineraryRail } from '@/lib/itinerary-favorites';
+import { useItineraryRail, type ItineraryRailEntry } from '@/lib/itinerary-favorites';
 import { LOCAL_LISTINGS_TAB_SLUG, getItineraryTabs } from '@/lib/itinerary-tabs';
 import type { WeatherData } from '@/lib/weather';
 
+import { AiItineraryFloatingCard } from './ai-floating-card';
 import { CategoryTabsRow } from './category-tabs-row';
 import { ItineraryHeader } from './itinerary-header';
+import { ItineraryMap, type ItineraryMapStop } from './itinerary-map';
 import { ListingsColumn } from './listings-column';
+import { MapToolbar } from './map-toolbar';
+import { StopsRail } from './stops-rail';
 import { WelcomePopup } from './welcome-popup';
 
 export type ItineraryPhase =
@@ -75,22 +80,28 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
   }, [phase]);
 
   const tabs = useMemo(
-    () => getItineraryTabs(fullConfig, textos.itinerary_local_listings_tab_label ?? 'Local Listings'),
+    () =>
+      getItineraryTabs(fullConfig, textos.itinerary_local_listings_tab_label ?? 'Local Listings'),
     [fullConfig, textos.itinerary_local_listings_tab_label],
   );
   const [activeTabSlug, setActiveTabSlug] = useState<string>(() => tabs[0]?.slug ?? '');
   const [searchValue, setSearchValue] = useState('');
   const [collapsedListings, setCollapsedListings] = useState(false);
+  const [showDriving, setShowDriving] = useState(config.show_driving_default ?? true);
+  const [hideMarkers, setHideMarkers] = useState(config.hide_markers_default ?? false);
 
   const activeTab = tabs.find((t) => t.slug === activeTabSlug);
 
+  const allCatalog = useMemo(() => getItineraryCatalogAll(fullConfig), [fullConfig]);
+
+  const catalogIndex = useMemo(() => {
+    const idx = new Map<string, ItineraryCatalogItem>();
+    allCatalog.forEach((it) => idx.set(`${it.kind}:${it.slug}`, it));
+    return idx;
+  }, [allCatalog]);
+
   const items = useMemo<ItineraryCatalogItem[]>(() => {
-    if (!activeTab) return [];
-    if (!activeTab.isModule) {
-      // Tab Local Listings — no son items normales del catálogo, su preview se
-      // renderiza por separado (sub-fase 3.17-8). Aquí devolvemos []
-      return [];
-    }
+    if (!activeTab || activeTab.slug === LOCAL_LISTINGS_TAB_SLUG || !activeTab.isModule) return [];
     return getItineraryCatalogForModule(fullConfig, activeTab.slug);
   }, [activeTab, fullConfig]);
 
@@ -99,10 +110,27 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
     [items, searchValue],
   );
 
-  // Catálogo total (para el mapa, próxima sub-fase). Lo calculamos aquí para
-  // tener la lista lista cuando el mapa se monte.
-  const allCatalog = useMemo(() => getItineraryCatalogAll(fullConfig), [fullConfig]);
-  void allCatalog; // Sub-fase 3.17-5 lo consumirá.
+  const resolveItem = useCallback(
+    (entry: ItineraryRailEntry) => catalogIndex.get(`${entry.kind}:${entry.slug}`) ?? null,
+    [catalogIndex],
+  );
+
+  const computeDistance = useCallback(
+    (item: ItineraryCatalogItem) => (client.coords ? distanceMi(item.coords, client.coords) : 0),
+    [client.coords],
+  );
+
+  const mapStops = useMemo<ItineraryMapStop[]>(() => {
+    const out: ItineraryMapStop[] = [];
+    rail.stops.forEach((entry, i) => {
+      const item = resolveItem(entry);
+      if (!item) return;
+      out.push({ slug: entry.slug, kind: entry.kind, coords: item.coords, index: i + 1 });
+    });
+    return out;
+  }, [rail.stops, resolveItem]);
+
+  const center = client.coords ?? { lat: 33.4484, lng: -112.074 };
 
   const interp = { client_name: client.nombre };
 
@@ -132,25 +160,23 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             }}
           />
 
-          {/* Map area placeholder (3.17-5 lo reemplaza con MapCanvas + ruta) */}
-          <div
+          <ItineraryMap
+            token={mapboxToken}
+            center={center}
+            zoom={11}
+            catalog={allCatalog}
+            stops={mapStops}
+            showRoute={showDriving}
+            hideCatalogMarkers={hideMarkers}
             className="absolute"
-            style={{
-              left: 0,
-              top: 320,
-              right: 0,
-              bottom: 380,
-              backgroundColor: 'hsl(220 14% 92%)',
-              zIndex: 5,
-            }}
-            aria-label="Map placeholder"
-          >
-            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center text-sm text-muted-foreground">
-              Map placeholder · sub-phase 3.17-5
-            </div>
-          </div>
+            style={{ left: 0, top: 320, right: 0, bottom: 366, zIndex: 5 }}
+          />
 
-          {/* Listings column */}
+          <AiItineraryFloatingCard
+            label={textos.itinerary_ai_popup_title ?? 'AI ITINERARY'}
+            onTap={() => setPhase('ai-popup')}
+          />
+
           {activeTab?.isModule && (
             <ListingsColumn
               items={filteredItems}
@@ -167,24 +193,30 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             />
           )}
 
-          {/* Bottom bar placeholder (3.17-5 lo reemplaza con MapToolbar + StopsRail) */}
-          <div
-            className="absolute left-0 right-0 bg-zinc-100 px-6 py-4 text-sm text-muted-foreground"
-            style={{ bottom: 0, height: 380, zIndex: 30 }}
-          >
-            <p className="mb-2 font-semibold text-foreground">
-              Stops in rail: {rail.count} (drag&drop + map · sub-phase 3.17-5/6)
-            </p>
-            {phase === 'manual' && (
-              <button
-                type="button"
-                onClick={() => setPhase('welcome')}
-                className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground"
-              >
-                Re-open Welcome
-              </button>
-            )}
-          </div>
+          <MapToolbar
+            textos={{
+              removeAll: textos.itinerary_remove_all ?? 'Remove All',
+              showDriving: textos.itinerary_show_driving ?? 'Show Driving',
+              hideMarkers: textos.itinerary_hide_markers ?? 'Hide Markers',
+              share: textos.itinerary_share ?? 'Share Itinerary',
+            }}
+            showDriving={showDriving}
+            hideMarkers={hideMarkers}
+            onToggleDriving={() => setShowDriving((s) => !s)}
+            onToggleHideMarkers={() => setHideMarkers((s) => !s)}
+            onRemoveAll={() => rail.clear()}
+            onShare={() => setPhase('share')}
+            hasStops={rail.count > 0}
+          />
+
+          <StopsRail
+            stops={rail.stops}
+            resolveItem={resolveItem}
+            onRemove={(entry) => rail.remove(entry.slug, entry.kind)}
+            visibleSlots={Math.max(3, rail.stops.length + 1)}
+            caption={textos.itinerary_caption_drag_more ?? 'Drag more listings to add stops.'}
+            computeDistance={computeDistance}
+          />
         </>
       )}
 

@@ -218,7 +218,15 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
       data-itinerary-canvas
       data-phase={phase}
     >
-      {phase !== 'welcome' && phase !== 'ai-popup' && (
+      {/* La pantalla manual se renderiza SIEMPRE como base. Los modales
+          (welcome, ai-popup, share, leave-warning, finished) van encima como
+          overlays. Las pantallas full-screen (ai-wizard, ai-loading, ai-result)
+          ocultan el manual con su propio z-50. */}
+      {(phase === 'welcome' ||
+        phase === 'manual' ||
+        phase === 'local-preview' ||
+        phase === 'ai-popup' ||
+        phase === 'share') && (
         <>
           <ItineraryHeader
             weather={props.weather}
@@ -544,8 +552,6 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             categoryStay: textos.itinerary_welcome_category_stay ?? 'PLACES TO STAY',
             categoryVenues: textos.itinerary_welcome_category_venues ?? 'VENUES',
           }}
-          clientCoords={client.coords}
-          mapboxToken={mapboxToken}
           onCreate={() => setPhase('manual')}
           onAi={() => setPhase('ai-popup')}
           onClose={() => setPhase('manual')}

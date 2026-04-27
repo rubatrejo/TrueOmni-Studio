@@ -27,6 +27,8 @@ import {
 import { ItineraryHeader } from './itinerary-header';
 import { ItineraryMap, type ItineraryMapStop } from './itinerary-map';
 import { ListingsColumn } from './listings-column';
+import { LocalListingPreview } from './local-listing-preview';
+import { LocalListingsColumn } from './local-listings-column';
 import { MapToolbar } from './map-toolbar';
 import { StopsRail } from './stops-rail';
 import { WelcomePopup } from './welcome-popup';
@@ -102,6 +104,11 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
 
   const activeTab = tabs.find((t) => t.slug === activeTabSlug);
   const isEventsTab = activeTab?.moduleKind === 'events';
+  const isLocalListingsTab = activeTab?.slug === LOCAL_LISTINGS_TAB_SLUG;
+  const [previewSlug, setPreviewSlug] = useState<string | null>(null);
+  const previewItinerary = previewSlug
+    ? config.local_listings.find((it) => it.slug === previewSlug) ?? null
+    : null;
 
   const allCatalog = useMemo(() => getItineraryCatalogAll(fullConfig), [fullConfig]);
 
@@ -243,6 +250,14 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             />
           )}
 
+          {isLocalListingsTab && (
+            <LocalListingsColumn
+              items={config.local_listings}
+              onSelect={setPreviewSlug}
+              emptyLabel="No pre-built itineraries available."
+            />
+          )}
+
           <MapToolbar
             textos={{
               removeAll: textos.itinerary_remove_all ?? 'Remove All',
@@ -280,6 +295,21 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             }
           />
           <DragGhost payload={dnd.dragPayload} cursor={dnd.cursorPos} />
+
+          {previewItinerary && (
+            <LocalListingPreview
+              itinerary={previewItinerary}
+              resolveItem={(slug, kind) => catalogIndex.get(`${kind}:${slug}`) ?? null}
+              useCtaLabel={textos.itinerary_local_use_cta ?? 'Use this itinerary'}
+              closeAriaLabel="Close itinerary preview"
+              onUse={() => {
+                rail.clear();
+                previewItinerary.stops.forEach((s) => rail.add(s.slug, s.kind));
+                setPreviewSlug(null);
+              }}
+              onClose={() => setPreviewSlug(null)}
+            />
+          )}
         </>
       )}
 

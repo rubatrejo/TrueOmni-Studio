@@ -9430,7 +9430,30 @@
         "show_driving_default": true,
         "hide_markers_default": false,
         "max_stops": 12,
-        "local_listings": [],
+        "local_listings": [
+          {
+            "slug": "phoenix-foodie-trail",
+            "title": "Phoenix Foodie Trail",
+            "description": "A handpicked tour of the most iconic Phoenix dining experiences — from beloved James Beard winners to modern Sonoran cuisine. Perfect for a full day of eating your way through the city.",
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1080&h=720&fit=crop&q=80",
+            "stops": [
+              { "slug": "el-farolito", "kind": "listing", "moduleSlug": "restaurants" },
+              { "slug": "pizzeria-bianco", "kind": "listing", "moduleSlug": "restaurants" },
+              { "slug": "the-mission", "kind": "listing", "moduleSlug": "restaurants" },
+              { "slug": "fry-bread-house", "kind": "listing", "moduleSlug": "restaurants" }
+            ]
+          },
+          {
+            "slug": "downtown-day-out",
+            "title": "Downtown Day Out",
+            "description": "Spend the day exploring the heart of Phoenix: a curated mix of iconic restaurants and cultural stops, all walkable in the downtown core.",
+            "image": "https://images.unsplash.com/photo-1465778893808-9b3d1b443be4?w=1080&h=720&fit=crop&q=80",
+            "stops": [
+              { "slug": "pizzeria-bianco", "kind": "listing", "moduleSlug": "restaurants" },
+              { "slug": "the-mission", "kind": "listing", "moduleSlug": "restaurants" }
+            ]
+          }
+        ],
         "ai": {
           "questions": [
             {

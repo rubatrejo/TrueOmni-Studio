@@ -30,8 +30,10 @@ import {
   isoDate,
   shiftWeek,
 } from './events-week-strip';
+import { ItineraryFinishedPopup } from './itinerary-finished-popup';
 import { ItineraryHeader } from './itinerary-header';
 import { ItineraryMap, type ItineraryMapStop } from './itinerary-map';
+import { LeaveAiWarningPopup } from './leave-ai-warning-popup';
 import { ListingsColumn } from './listings-column';
 import { LocalListingPreview } from './local-listing-preview';
 import { LocalListingsColumn } from './local-listings-column';
@@ -117,6 +119,8 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
     : null;
   const [aiAnswers, setAiAnswers] = useState<AiAnswers | null>(null);
   const [aiResult, setAiResult] = useState<GeneratedItinerary | null>(null);
+  const [showLeaveWarning, setShowLeaveWarning] = useState(false);
+  const [showFinishedPopup, setShowFinishedPopup] = useState<{ count: number } | null>(null);
 
   const allCatalog = useMemo(() => getItineraryCatalogAll(fullConfig), [fullConfig]);
 
@@ -407,12 +411,45 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             finish: textos.itinerary_ai_finish_cta ?? 'Finish',
           }}
           logoSrc={props.logoSrc}
-          onStartOver={() => setPhase('ai-popup')}
+          onStartOver={() => setShowLeaveWarning(true)}
           onFinish={() => {
-            // Sub-fase 3.17-11 inserta merge + popup confirmación.
+            const count = aiResult.days.reduce((acc, d) => acc + d.entries.length, 0);
             aiResult.days.forEach((d) =>
               d.entries.forEach((e) => rail.add(e.slug, e.itemKind)),
             );
+            setShowFinishedPopup({ count });
+          }}
+        />
+      )}
+
+      {showLeaveWarning && (
+        <LeaveAiWarningPopup
+          title={textos.itinerary_ai_leave_warning_title ?? 'Are you sure\nyou want to leave?'}
+          body={
+            textos.itinerary_ai_leave_warning_body ??
+            "You'll lose the AI itinerary you've generated."
+          }
+          cancelLabel={textos.itinerary_ai_leave_warning_cancel ?? 'Cancel'}
+          confirmLabel={textos.itinerary_ai_leave_warning_confirm ?? 'Leave'}
+          onCancel={() => setShowLeaveWarning(false)}
+          onConfirm={() => {
+            setShowLeaveWarning(false);
+            setAiResult(null);
+            setAiAnswers(null);
+            setPhase('ai-popup');
+          }}
+        />
+      )}
+
+      {showFinishedPopup && (
+        <ItineraryFinishedPopup
+          title={textos.itinerary_finished_title ?? 'Itinerary saved!'}
+          body={(
+            textos.itinerary_finished_body ??
+            "We've added the {count} stops to your day."
+          ).replace('{count}', String(showFinishedPopup.count))}
+          onClose={() => {
+            setShowFinishedPopup(null);
             setPhase('manual');
             setAiResult(null);
             setAiAnswers(null);

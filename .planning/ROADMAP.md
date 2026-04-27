@@ -76,7 +76,7 @@ Subfases cerradas:
 - [x] 3.13 — Trails module con tabs de mapa + Considerations (2026-04-23).
 - [x] 3.14 — Guestbook module con Earth zoom + drag&drop + comments (2026-04-23).
 - [x] 3.15 — Ask AI module (avatar IA flotante + modal con typewriter + voice) (2026-04-23).
-- [x] 3.16 — Photo Booth module (green-screen MediaPipe + editor + share mock) (2026-04-24).
+- [x] 3.16 — Photo Booth module (green-screen MediaPipe + editor + share + modales reales + 8 stickers PNG 3D con drag&drop/resize/delete) — **aprobada por Rubén** (2026-04-27).
 
 Pendientes:
 

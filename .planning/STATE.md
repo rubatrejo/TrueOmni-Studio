@@ -6,11 +6,11 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Fase 3.15 (Ask AI module) **cerrada y aprobada por Rubén** tras iteración visual completa: trigger pastilla SVG, modal slide-down desde top, escalado kiosk 2.5×, X SVG nuestra top-right, fondo blanco, gap hero→body resuelto con triple-fix, subtitle/greeting interpolados con `{client_name}` (Arizona).
+**Fase activa:** Fase 3.16 (Photo Booth module) **cerrada y aprobada por Rubén** tras iteración completa: green-screen MediaPipe, editor con backgrounds/frames/filters, share screen rediseñada, modales reales Send to Email/Phone con popup confirmación, set de 8 stickers PNG 3D con drag&drop + resize + delete handles.
 
-**Última fase cerrada:** Fase 3.15 — Ask AI module + iteración visual (2026-04-23). Antes: 3.14 Guestbook, 3.13 Trails, 3.12 Deals, 3.11 Tickets.
+**Última fase cerrada:** Fase 3.16 — Photo Booth module aprobado (2026-04-27). Antes: 3.15 Ask AI, 3.14 Guestbook, 3.13 Trails.
 
-**Siguiente acción concreta:** reescribir contenido de las 8 suggested questions con lugares reales de Arizona (TODO de coherencia geográfica), o atacar Photo Booth / Itinerary Builder / Fase 4 (primer cliente real).
+**Siguiente acción concreta:** Itinerary Builder, Fase 4 (primer cliente real), o LLM real para Ask AI (Fase 5+).
 
 **Bloqueos:** ninguno. `alwaysShowWelcome={true}` del MapModule sigue hardcoded para QA — apagarlo antes de Fase 4 / producción (`[module]/page.tsx` rama `map`).
 
@@ -1054,6 +1054,48 @@ driving/walking, SEE 360 funcional, favorite toast).
 - `loadImage` tolerante a fallos.
 
 **Fase:** 3.16 Photo Booth — pulido pendiente de Fix CRÍTICO de Send to Email/Phone modal real. Resto del módulo estable y aprobado visualmente.
+
+---
+
+### Sesión 2026-04-27 — Fase 3.16 Photo Booth pulido final + módulo aprobado
+
+**Hecho (en orden lógico):**
+
+- **Fix CRÍTICO Send to Email/Phone modales reales:** quitado el overlay mock "Sent!" del Photo Booth. Cableados los 3 componentes existentes del patrón listings: `SendToEmailModal` (input + on-screen QWERTY keyboard), `SendToPhoneModal` (input + numpad + USA(+1) + cross-switch a keyboard) y `SendConfirmationPopup` (check verde olive + chip destination + barra 5s + auto-redirect a `/home`). Patrón idéntico al de listings/deals/brochure.
+- **Mensajes del popup específicos Photo Booth:** `SendConfirmationPopup` ahora acepta props opcionales `title?` / `body?` (backwards-compatible). Strings tokenizados nuevos en `config.json`: `photo_booth_sent_email_title` ("Your photo is on its way!") + `photo_booth_sent_email_body` ("Check your inbox to view and share your Photo Booth memory.") y equivalentes para phone. Quitados los obsoletos `sent_title/body`.
+- **Share screen rediseñada:** overlay negro 50% sólido sobre el background (sustituyó el gradient), eliminada la card "Follow us" con socials, dejada solo la card SCAN ME centrada con QR grande y diseño limpio.
+- **Card SCAN ME final:** ajustada a 252×252 con paddings simétricos (24px en los 4 lados). Título "Scan to Save" arriba 28px navy, QR 170×170 con corner brackets viewfinder en azul brand (5px stroke), sombra rica + ring olive sutil. Strings tokenizados (`scan_kicker`).
+- **Botón izquierdo del Share:** cambiado de home (con warning) a back con la flecha aprobada del editor (SVG verbatim de `editor-screen.tsx:239-244`). Click regresa al editor sin warning, sesión y stickers/frame/filter intactos.
+- **Set de 8 stickers PNG 3D reales:** reemplazados los SVGs por los PNGs del usuario: `rock-on`, `heart-bubble`, `fire`, `hundred`, `sunglasses`, `crown`, `heart-100`, `heart-yellow`. Antes pasamos por dos sets intermedios (geometric flat + travel SW USA con outline) que el usuario rechazó.
+- **Drag&drop estilo Guestbook:** `stickers-row.tsx` reescrito con patrón verbatim de `guestbook-pin-rail.tsx` — pointerdown empieza drag con clone visible 200×200 que sigue al cursor con drop-shadow, window-level listeners + estado en `useRef` (sin stale closures), `pointerup` reporta `(sticker, clientX, clientY)`. El `editor-screen.tsx` convierte coords viewport → coords del photo area (0..626 × 0..1114) compensando scale del kiosk-canvas via `getBoundingClientRect()`. Drop fuera del photo area → ignorado.
+- **Edit interactions completas en sticker-layer:** rediseñado `sticker-layer.tsx` con state `selectedId` y dos handles visibles cuando hay selección — botón rojo `[×]` top-right (delete con `onRemove`) y botón azul `[⤡]` bottom-right (resize manteniendo aspect-ratio, min 80px / max 600px, cálculo por distancia del centro al cursor / diagonal inicial). Tap en el body → selecciona, drag del body → mueve, tap fuera → deselecciona. Atributo `data-photo-stickers-container` en el photo div del editor para que el layer encuentre el padre y compense el scale.
+- **`onAddSticker(sticker, x, y)` en photo-booth-module:** ya no agrega al centro fijo (313, 557) sino en las coords exactas del drop. `PlacedSticker.x/y` siguen siendo el centro en photoRect coords.
+
+**Verificado:**
+
+- 14 screenshots en `.planning/verifications/3-16-fix-modals-*` y `3-16-stickers-*` cubriendo: start, editor, share rediseñada, email modal, phone modal, popup email/phone con texto Photo Booth, back-to-editor, card balanceada, set 3D dragged, set PNG con handles, sticker resized, sticker eliminado.
+- Flow end-to-end con Playwright `?mock=1`: take photo → editor → drag&drop sticker → tap select → resize handle → delete → share → SEND TO EMAIL → keyboard → SEND → popup "Your photo is on its way!" + chip → auto-redirect home.
+- Typecheck limpio en cada iteración. Lint sin errores nuevos (el de `hasTouchedBackground` es pre-existente de la sesión 2026-04-24).
+- Skills de diseño Tier 1 cargados (frontend-design + ui-ux-pro-max) en el rediseño de SCAN ME.
+
+**Pendiente / siguiente:**
+
+- **Itinerary Builder** (módulo no implementado, sub-fase candidata 3.17).
+- **Fase 4 — primer cliente real** (config + tokens + assets reales + Lighthouse en producción).
+- **LLM real Ask AI** (Fase 5+) — endpoint `/api/ai` con Anthropic Claude.
+- **Photo Booth en hardware kiosk físico** — testear con cámara real, no mock.
+- **Photo Booth Backend real para share** — hoy mocked: el QR apunta a una URL placeholder, los CTAs Email/Phone solo muestran popup mock. Fase 5+ conecta upload a S3/CDN + SMS/SMTP real.
+- **Bloque `home.photoBooth`** en `_template` y `demo-cliente-a` (ninguno tiene `features.home` configurado).
+
+**Decisiones clave:**
+
+- `SendConfirmationPopup` con props `title?`/`body?` opcionales (backwards-compatible) — patrón cleanest que duplicar el componente solo para Photo Booth.
+- Stickers PNG en lugar de SVG — el usuario aprobó las imágenes 3D reales, dos intentos previos (geometric flat + emoji 3D outline) rechazados.
+- Drag&drop window-level listeners + ref-based state (patrón Guestbook) — única forma de evitar stale closures en gestos largos.
+- Resize handles aparecen solo en selección (no permanentemente visibles) — UX más limpia, descubierta via tap.
+- Back en lugar de Home en Share screen — vuelve al editor sin perder la sesión, mejora de UX sobre el original que disparaba warning.
+
+**Fase:** 3.16 Photo Booth module **cerrada y aprobada por Rubén** (2026-04-27). Modulo completo y listo para producción cuando se conecte backend real (Fase 5+).
 
 ---
 

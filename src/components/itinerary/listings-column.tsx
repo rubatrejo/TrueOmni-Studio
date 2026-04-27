@@ -21,10 +21,14 @@ export interface ListingsColumnProps {
   ) => void;
 }
 
-const COLUMN_LEFT = 30;
+const COLUMN_LEFT_PAD = 30;
 const COLUMN_TOP = 340;
 const COLUMN_WIDTH = 400;
-const COLUMN_BOTTOM_RESERVED = 380; // toolbar 70 + rail ~310 (con caption)
+const COLUMN_TOTAL_WIDTH = COLUMN_LEFT_PAD * 2 + COLUMN_WIDTH;
+const COLUMN_BOTTOM = 310; // queda contra la base del map toolbar
+
+const TOGGLE_W = 44;
+const TOGGLE_H = 437;
 
 const haversineMi = (
   a: { lat: number; lng: number },
@@ -40,29 +44,58 @@ const haversineMi = (
   return 2 * R * Math.asin(Math.sqrt(h));
 };
 
+/** Botón close/open del sidebar — verbatim del SVG `Close-Open-Sidebar.svg`.
+ *  Tab semicircular azul claro #1796d6 con chevron blanco al centro. */
+function SidebarToggle({
+  collapsed,
+  onToggle,
+}: {
+  collapsed: boolean;
+  onToggle: () => void;
+}) {
+  // Cuando expandido (visible) → chevron LEFT (colapsa al click).
+  // Cuando colapsado → chevron RIGHT (expande al click).
+  const chevronD = collapsed
+    ? 'M3.5 0l7.5 7.32-7.5 7.43L2 13.32l5.86-6L2 1.5z' // right
+    : 'M11 14.75L3.5 7.32 11 0l1.5 1.5-5.86 5.82L12.5 13.32z'; // left
+
+  // El SVG verbatim del cliente: rect 87×437 con corners derecha rx=80,
+  // posicionado con left=-43 para que sólo se vea la mitad izquierda
+  // (44×437) que sobresale del sidebar.
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={collapsed ? 'Expand listings' : 'Collapse listings'}
+      className="absolute z-40 flex items-center justify-center text-white shadow-md transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+      style={{
+        left: collapsed ? 0 : COLUMN_TOTAL_WIDTH - 6,
+        top: 'calc(50% - ' + TOGGLE_H / 2 + 'px)',
+        width: TOGGLE_W,
+        height: TOGGLE_H,
+        backgroundColor: 'hsl(var(--itinerary-tab-active))',
+        borderTopRightRadius: 80,
+        borderBottomRightRadius: 80,
+      }}
+    >
+      <svg width="14" height="15" viewBox="0 0 14 15" fill="white" aria-hidden="true">
+        <path d={chevronD} />
+      </svg>
+    </button>
+  );
+}
+
 /**
- * Columna izquierda con cards scrollables. Cuando `collapsed=true` muestra un
- * pulpo flotante con la flecha derecha para expandir; el mapa ocupa el ancho
- * total mientras tanto.
+ * Columna izquierda con cards scrollables y tab toggle estilo SVG cliente.
+ * Fondo blanco con gradient azul oscuro (con alpha) en la base que crea
+ * fade-out de las cards al hacer scroll.
  */
 export function ListingsColumn(props: ListingsColumnProps) {
   const { items, isInRail, onToggle, collapsed, onToggleCollapsed, clientCoords, emptyLabel } =
     props;
 
   if (collapsed) {
-    return (
-      <button
-        type="button"
-        onClick={onToggleCollapsed}
-        aria-label="Expand listings"
-        className="absolute z-20 flex items-center justify-center rounded-r-full bg-primary text-white shadow-lg transition hover:opacity-90"
-        style={{ left: 0, top: 660, width: 56, height: 88 }}
-      >
-        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-        </svg>
-      </button>
-    );
+    return <SidebarToggle collapsed onToggle={onToggleCollapsed} />;
   }
 
   return (
@@ -71,8 +104,8 @@ export function ListingsColumn(props: ListingsColumnProps) {
       style={{
         left: 0,
         top: COLUMN_TOP,
-        width: COLUMN_LEFT * 2 + COLUMN_WIDTH,
-        bottom: COLUMN_BOTTOM_RESERVED,
+        width: COLUMN_TOTAL_WIDTH,
+        bottom: COLUMN_BOTTOM,
         backgroundColor: '#ffffff',
       }}
     >
@@ -80,9 +113,9 @@ export function ListingsColumn(props: ListingsColumnProps) {
         className="flex h-full flex-col gap-3 overflow-y-auto pr-3 [&::-webkit-scrollbar]:hidden"
         style={{
           scrollbarWidth: 'none',
-          paddingLeft: COLUMN_LEFT,
+          paddingLeft: COLUMN_LEFT_PAD,
           paddingTop: 12,
-          paddingBottom: 60,
+          paddingBottom: 80,
         }}
       >
         {items.length === 0 ? (
@@ -101,28 +134,17 @@ export function ListingsColumn(props: ListingsColumnProps) {
           ))
         )}
       </div>
-      {/* Gradient blanco → transparente al final para fade-out scroll */}
+      {/* Gradient azul oscuro → transparente al final (fade-out de cards). */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-0"
         style={{
-          height: 90,
+          height: 110,
           background:
-            'linear-gradient(to bottom, rgba(255,255,255,0) 0%, #ffffff 100%)',
+            'linear-gradient(to bottom, hsl(var(--itinerary-toolbar-bg) / 0) 0%, hsl(var(--itinerary-toolbar-bg) / 0.95) 100%)',
         }}
       />
-      {/* Collapse handle (flecha izquierda) */}
-      <button
-        type="button"
-        onClick={onToggleCollapsed}
-        aria-label="Collapse listings"
-        className="absolute flex items-center justify-center rounded-l-full bg-primary text-white shadow-md transition hover:opacity-90"
-        style={{ left: COLUMN_WIDTH + 4, top: 220, width: 36, height: 70 }}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-        </svg>
-      </button>
+      <SidebarToggle collapsed={false} onToggle={onToggleCollapsed} />
     </div>
   );
 }

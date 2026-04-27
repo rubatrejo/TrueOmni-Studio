@@ -77,10 +77,9 @@ Subfases cerradas:
 - [x] 3.14 — Guestbook module con Earth zoom + drag&drop + comments (2026-04-23).
 - [x] 3.15 — Ask AI module (avatar IA flotante + modal con typewriter + voice) (2026-04-23).
 - [x] 3.16 — Photo Booth module (green-screen MediaPipe + editor + share + modales reales + 8 stickers PNG 3D con drag&drop/resize/delete) — **aprobada por Rubén** (2026-04-27).
+- [x] 3.17 — Itinerary Builder (rail unificado sobre 3 buckets de favoritos + welcome popup + tabs dinámicos + mapa con ruta + drag&drop + AI wizard config-driven + share modal con QR + Send to Email/Phone) — **funcional E2E pendiente aprobación visual de Rubén** (2026-04-27).
 
 Pendientes:
-
-- [ ] Itinerary Builder (prioridad por definir).
 - [ ] Map aggregator integration para trails (follow-up de 3.13).
 - [ ] Backend real para Guestbook (Fase 5+).
 - [ ] LLM real para Ask AI (endpoint `/api/ai` con Anthropic Claude — Fase 5+).

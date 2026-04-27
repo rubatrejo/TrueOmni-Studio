@@ -1099,6 +1099,65 @@ driving/walking, SEE 360 funcional, favorite toast).
 
 ---
 
+### Sesión 2026-04-27 (tarde) — Fase 3.17 Itinerary Builder construida end-to-end (14 commits)
+
+**Hecho (en orden de sub-fases atómicas):**
+
+- **3.17-1 (`b8d515b`):** Tipos `ItineraryConfig` + `LocalListingItinerary` + `AiQuestion` + `ItineraryStopRef` en `src/lib/config.ts`. Bloque `features.home.itinerary` en `clients/default/config.json` con las 4 preguntas AI default (Duration / Travel / Activities / Dining). 51 tokens nuevos `itinerary_*` en `textos`. Ruta `/home/itinerary-builder/page.tsx` shell + `ItineraryBuilderModule` placeholder. HTTP 200.
+- **3.17-2 (`b3377a8`):** `src/lib/itinerary-favorites.ts` con `useItineraryRail()` que combina los 3 buckets de favoritos (`useFavorites` + `useEventFavorites` + `useTrailFavorites`) en lista ordenada. Persistencia de orden en `sessionStorage kiosk_itinerary_order`. API: stops, count, has, add, remove, reorder, clear. add/remove idempotentes.
+- **3.17-3 (`65e207a`):** WelcomePopup con mapa estático Mapbox + 4 pins de categoría + card central blanca (kicker / intro / título uppercase con `{client_name}` interp / body / 2 CTAs olive+azul / X close). State machine en módulo con phases `welcome → manual / ai-popup`, `welcome_always_visible` flag del config para forzar el popup en cada entrada mientras está en review. Tokens `--itinerary-*` añadidos a los 3 clientes (default, _template, demo-cliente-a).
+- **3.17-4 (`c517c93`):** ItineraryHeader (logo + weather/clock + title + searchbar). CategoryTabsRow dinámicos del config (excluye `places-to-stay`, antepone `Local Listings` cuando hay pre-built itineraries). ListingsColumn scrollable con collapse/expand handle. ItineraryListingCard horizontal 360×170 con thumbnail + título + distance + heart toggle. Helpers `src/lib/itinerary-tabs.ts` y `src/lib/itinerary-catalog.ts` (Listings + Events + Trails normalizados a `ItineraryCatalogItem`).
+- **3.17-5 (`ab55f6b`):** ItineraryMap standalone (Mapbox GL) con pins por kind + stop markers numerados grandes + GeoJSON LineString conectando stops. AiItineraryFloatingCard top-right. MapToolbar bottom bar (Remove All / Show Driving / Hide Markers / Share). StopsRail con StopSlot por slot (thumbnail + Stop N + heart rojo de delete). Bug detectado: Mapbox sobrescribe `position:absolute` a `relative` rompiendo top/bottom inset → wrapper externo con `width/height: 100%`. Bug detectado: markers no se renderizan en primer effect (load async) → convertí `readyRef` a state con dependency en effects.
+- **3.17-6 (`d0dc0b8`):** `src/lib/use-itinerary-dnd.ts` hook con state machine + listeners pointermove/pointerup registrados en window al iniciar el drag (no via useEffect, para no perder eventos entre setState y next render). Drop targets identificados con `data-itinerary-rail` y `data-itinerary-slot={index}`. Card → drop en rail = `rail.add()`. Stop → drop en otro slot = `rail.reorder(from, to)`. DragGhost en Portal al body.
+- **3.17-7 (`657db10`):** EventsWeekStrip dinámico con date range + chevrons < > + 7 chips SUN-SAT (Intl.DateTimeFormat). `getWeekStart`, `shiftWeek`, `isoDate` helpers. Filtra catálogo cuando isEventsTab por `item.date === targetIso`.
+- **3.17-8 (`87dd169`):** Tab Local Listings con LocalListingsColumn (cards de itinerarios pre-armados). LocalListingPreview bottom sheet full-height con hero + título + stops numerados + CTA "Use this itinerary" que llama `rail.clear()` + `rail.add()` por stop. 2 itinerarios demo seed: "Phoenix Foodie Trail" (4 stops) y "Downtown Day Out" (2 stops).
+- **3.17-9 (`4f60c18`):** AiPopup con 2 cards (AI ITINERARY · sparkle azul · Start / TOP SUGGESTIONS · heart olive · Let's Go). Mismo flujo, doble entrada estilística como confirmó Rubén. AiWizard config-driven que orquesta los pasos (state local de step + answers, dispara onFinish(answers) en último Next). AiQuestionScreen con hero image + kicker + título + opciones (single radio / multi checkbox), ProgressDots, footer con back+next/finish, botón floating back izquierda. Heros AI temporales con placeholders Unsplash hasta que el cliente provea.
+- **3.17-10 (`ffae546`):** `src/lib/ai-itinerary.ts` con interfaz tipada `generateItinerary(opts) → GeneratedItinerary`. v1 mockeada cliente-side con delay 2.4s. Algoritmo: days resueltos del Duration (0/1/3), slot meals breakfast/activity/lunch/event/dinner por día con scoring popularity + tag matches contra preferences, eventos top en tab EVENTS, phrasing variado. Cuando llegue Fase 5+ con LLM real, swap del archivo manteniendo la interfaz. AiLoadingScreen con background fullscreen + spinner SVG animado + título + body. AiResultScreen con header azul + título + tabs EVENTS/DAY 1/2/3 + AiResultTimeline (bullets azules + kind label + descripción) + slider mock con play button + carousel horizontal de cards + Start Over (olive) / Finish (azul).
+- **3.17-11 (`2f3818a`):** LeaveAiWarningPopup estilo Photo Booth (card 640px con título + body + Cancel/Leave). Se dispara al pulsar Start Over; al confirmar resetea aiResult/aiAnswers y vuelve a `phase=ai-popup`. ItineraryFinishedPopup estilo Survey thank-you (card 640px con check verde olive + título + body + barra de progreso del auto-close 4s). Se dispara al pulsar Finish, después de mergear las entries del aiResult al rail (`rail.add()` por cada día/entry). Al cerrar pasa a `phase=manual` con el rail pre-llenado.
+- **3.17-12 (`ce2c968`):** ShareItineraryModal pixel-close al SVG: card 760px con título "You made it!" + body + QR (qrcode.react) sobre fondo azul primary con badge SCAN ME + "Powered by [TrueOmni logo]" + 2 CTAs SEND TO PHONE (olive) / SEND TO EMAIL (azul). Wire-up con SendToEmailModal / SendToPhoneModal / SendConfirmationPopup existentes (reuso del patrón de listings/photo-booth).
+- **3.17-13 fixes (`3319e4b` + `5786ccc`):** Pulido E2E con 8 screenshots de verificación en `.planning/verifications/3-17-*`. Bugs E2E detectados y corregidos:
+  - `{client_name}` no se interpolaba en title de las preguntas AI → añadido prop `templateVars` al AiWizard.
+  - `logoSrc` llegaba sin leading slash → aplicar `resolveItineraryAsset()` en la page.
+  - Auditor white-label encontró ~30 violaciones (heart rojo `#e02020`, pin colors `#f5a623/#0e8c7e/#0088ce`, `#bdbdbd`, `#1f2227`, `#d8d8d8/#4a4a4a`, strings UI `Stop`, `Start/Stop`, `mi away`, `stops`, KIND_LABEL, DAY_LABELS, MONTHS, `Map unavailable`). Corregidos:
+    - 11 tokens nuevos `--itinerary-*` (heart, heart-empty, pin-listing/event/trail, drag-ghost-bg, map-fallback-bg/fg) en los 3 clientes.
+    - 16 strings nuevos `itinerary_*` en `textos` (stop_label, stops_count, distance_away, no_search_results, no_local_listings, map_unavailable, kind_breakfast/lunch/dinner/activity/event, ai_result_slider_start/stop, ai_day_label_template, ai_plan_label, ai_duration_fallback).
+    - DAY_LABELS y MONTHS reemplazados por `Intl.DateTimeFormat(locale)` para i18n del cliente.
+    - `MEAL_PHRASES`, `dayLabelTemplate`, `planLabel`, `durationFallback` movidos a params opcionales de `generateItinerary` con defaults.
+    - Mapbox no resuelve `var()`, así que el route-line layer lee `--itinerary-route-line` del CSS root en runtime — sigue siendo white-label.
+
+**Verificado:**
+
+- 14 commits incrementales, todos con `pnpm typecheck` limpio. `pnpm lint` sin errores nuevos del módulo.
+- 8 screenshots E2E del flujo completo: welcome → ai-popup → wizard Q1-Q4 (Arizona's Town interpolado correctamente) → loading → final result (DAY 1 + EVENTS, timeline con descripciones que mencionan listings reales del catálogo, slider mock, carousel) → finish (popup confirmación auto-cerrado 4s) → manual screen con 5 stops mergeados del AI + línea de ruta azul + 5 markers numerados grandes + thumbnails en el rail → share modal (You made it! con QR + Send to Phone/Email).
+- Drag & drop verificado E2E: dispatch sintético de pointerdown sobre primera card + pointermove + pointerup sobre rail → filledStops sube de 0 a 1.
+- Auditor white-label corrió 2 veces: la 1ra reportó ~30 violaciones, la 2da (post-fixes) limpio.
+
+**Pendiente / siguiente:**
+
+- Pixel-perfect afino fino contra los SVGs (las pantallas son cercanas pero no verbatim — alguna padding y font-size puede diferir). Decidir si hace falta otra ronda o se aprueba como está.
+- Assets reales del cliente para los heros AI (`q-duration`, `q-travel`, `q-activities`, `q-dining`) y `loading-bg`. Hoy son placeholders Unsplash.
+- LLM real para `generateItinerary` (Fase 5+) — endpoint `/api/itinerary` con Anthropic Claude.
+- Backend real para share del itinerario (QR + email + phone) — hoy mock.
+- Mapbox Directions API para "Show Driving" toggle (hoy = línea recta entre stops). Detrás de feature flag.
+- Bloque `home.itinerary` en `_template` y `demo-cliente-a` cuando estos clientes tengan `features.home` configurado.
+- Photo Booth pendientes (ver entrada anterior): backend share, hardware testing, etc.
+
+**Decisiones clave consolidadas:**
+
+- Rail unificado sobre 3 buckets de favoritos con orden persistido en sessionStorage (los Sets no preservan orden). Heart filled en card = está en el rail = mismo store que likes globales.
+- Tabs dinámicos por categoría del cliente excluyendo `places-to-stay`. Tab fijo Local Listings sólo cuando `local_listings.length > 0`.
+- Modo manual = 1 día. Modo AI = 0 (lista) / 1 / 3 días según Duration.
+- AI Popup: dos paths (Start / Let's Go) → mismo wizard → mismo Final Result. Doble entrada estilística.
+- ai-itinerary.ts: interfaz tipada que se mantiene cuando llegue LLM real (swap de implementación, no refactor de consumidores).
+- Drag & drop: listeners en window al iniciar drag (no useEffect) para no perder eventos en sintéticos. Patrón Photo Booth verbatim.
+- ItineraryMap standalone con Mapbox GL, no extiende el MapCanvas del módulo Map (evita acoplamiento). Wrapper externo absolute para no romper inset cuando Mapbox fuerza relative al container.
+- White-label estricto: 11 tokens CSS + 67 keys de textos cubren todo. Cambiar `KIOSK_CLIENT=demo-cliente-a` recolorea pins listings (naranja) y trails (menta) sin tocar `.tsx`.
+- Welcome popup: `welcome_always_visible: true` mientras está en review. Pasarlo a `false` en producción para que persista por sessionStorage (primera vez por sesión).
+
+**Fase:** 3.17 Itinerary Builder **completa y funcional E2E** (2026-04-27). Pendiente aprobación visual final de Rubén; al aprobar pasar a Fase 4 (primer cliente real).
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

@@ -18,6 +18,12 @@ import type { WeatherData } from '@/lib/weather';
 import { AiItineraryFloatingCard } from './ai-floating-card';
 import { CategoryTabsRow } from './category-tabs-row';
 import { DragGhost } from './drag-ghost';
+import {
+  EventsWeekStrip,
+  getWeekStart,
+  isoDate,
+  shiftWeek,
+} from './events-week-strip';
 import { ItineraryHeader } from './itinerary-header';
 import { ItineraryMap, type ItineraryMapStop } from './itinerary-map';
 import { ListingsColumn } from './listings-column';
@@ -91,8 +97,11 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
   const [collapsedListings, setCollapsedListings] = useState(false);
   const [showDriving, setShowDriving] = useState(config.show_driving_default ?? true);
   const [hideMarkers, setHideMarkers] = useState(config.hide_markers_default ?? false);
+  const [weekStart, setWeekStart] = useState<Date>(() => getWeekStart(new Date()));
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number>(() => new Date().getDay());
 
   const activeTab = tabs.find((t) => t.slug === activeTabSlug);
+  const isEventsTab = activeTab?.moduleKind === 'events';
 
   const allCatalog = useMemo(() => getItineraryCatalogAll(fullConfig), [fullConfig]);
 
@@ -107,10 +116,14 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
     return getItineraryCatalogForModule(fullConfig, activeTab.slug);
   }, [activeTab, fullConfig]);
 
-  const filteredItems = useMemo(
-    () => filterCatalogBySearch(items, searchValue),
-    [items, searchValue],
-  );
+  const filteredItems = useMemo(() => {
+    let out = filterCatalogBySearch(items, searchValue);
+    if (isEventsTab) {
+      const targetIso = isoDate(weekStart, selectedDayIndex);
+      out = out.filter((it) => it.date === targetIso);
+    }
+    return out;
+  }, [items, searchValue, isEventsTab, weekStart, selectedDayIndex]);
 
   const resolveItem = useCallback(
     (entry: ItineraryRailEntry) => catalogIndex.get(`${entry.kind}:${entry.slug}`) ?? null,
@@ -180,6 +193,16 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             }}
           />
 
+          {isEventsTab && (
+            <EventsWeekStrip
+              weekStart={weekStart}
+              selectedDayIndex={selectedDayIndex}
+              onDayChange={setSelectedDayIndex}
+              onPrevWeek={() => setWeekStart((w) => shiftWeek(w, -1))}
+              onNextWeek={() => setWeekStart((w) => shiftWeek(w, 1))}
+            />
+          )}
+
           <ItineraryMap
             token={mapboxToken}
             center={center}
@@ -189,7 +212,13 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             showRoute={showDriving}
             hideCatalogMarkers={hideMarkers}
             className="absolute"
-            style={{ left: 0, top: 320, right: 0, bottom: 366, zIndex: 5 }}
+            style={{
+              left: 0,
+              top: isEventsTab ? 450 : 320,
+              right: 0,
+              bottom: 366,
+              zIndex: 5,
+            }}
           />
 
           <AiItineraryFloatingCard

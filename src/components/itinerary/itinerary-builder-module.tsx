@@ -16,6 +16,9 @@ import { useItineraryDnd } from '@/lib/use-itinerary-dnd';
 import type { WeatherData } from '@/lib/weather';
 
 import { generateItinerary, type GeneratedItinerary } from '@/lib/ai-itinerary';
+import { SendConfirmationPopup } from '@/components/listings/send-confirmation-popup';
+import { SendToEmailModal } from '@/components/listings/send-to-email-modal';
+import { SendToPhoneModal } from '@/components/listings/send-to-phone-modal';
 
 import { AiItineraryFloatingCard } from './ai-floating-card';
 import { AiLoadingScreen } from './ai-loading-screen';
@@ -34,6 +37,7 @@ import { ItineraryFinishedPopup } from './itinerary-finished-popup';
 import { ItineraryHeader } from './itinerary-header';
 import { ItineraryMap, type ItineraryMapStop } from './itinerary-map';
 import { LeaveAiWarningPopup } from './leave-ai-warning-popup';
+import { ShareItineraryModal } from './share-itinerary-modal';
 import { ListingsColumn } from './listings-column';
 import { LocalListingPreview } from './local-listing-preview';
 import { LocalListingsColumn } from './local-listings-column';
@@ -121,6 +125,8 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
   const [aiResult, setAiResult] = useState<GeneratedItinerary | null>(null);
   const [showLeaveWarning, setShowLeaveWarning] = useState(false);
   const [showFinishedPopup, setShowFinishedPopup] = useState<{ count: number } | null>(null);
+  const [shareSubModal, setShareSubModal] = useState<'none' | 'email' | 'phone'>('none');
+  const [sentDest, setSentDest] = useState<{ kind: 'email' | 'phone'; value: string } | null>(null);
 
   const allCatalog = useMemo(() => getItineraryCatalogAll(fullConfig), [fullConfig]);
 
@@ -437,6 +443,55 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             setAiResult(null);
             setAiAnswers(null);
             setPhase('ai-popup');
+          }}
+        />
+      )}
+
+      {phase === 'share' && (
+        <ShareItineraryModal
+          textos={{
+            title: textos.itinerary_share_modal_title ?? 'You made it!',
+            body: textos.itinerary_share_modal_body ?? '',
+            scanLabel: textos.itinerary_share_scan_label ?? 'SCAN ME',
+            poweredBy: textos.itinerary_share_powered_by ?? 'Powered by',
+            sendPhone: textos.itinerary_share_send_phone ?? 'SEND TO PHONE',
+            sendEmail: textos.itinerary_share_send_email ?? 'SEND TO EMAIL',
+          }}
+          qrUrl={`https://share.${client.slug}.kiosk.example/itinerary/preview`}
+          poweredByLogo={props.logoSrc}
+          onSendPhone={() => setShareSubModal('phone')}
+          onSendEmail={() => setShareSubModal('email')}
+          onClose={() => setPhase('manual')}
+        />
+      )}
+
+      <SendToEmailModal
+        open={shareSubModal === 'email'}
+        listingTitle={textos.itinerary_title ?? 'Itinerary'}
+        onCancel={() => setShareSubModal('none')}
+        onSent={(email) => {
+          setShareSubModal('none');
+          setSentDest({ kind: 'email', value: email });
+        }}
+      />
+      <SendToPhoneModal
+        open={shareSubModal === 'phone'}
+        listingTitle={textos.itinerary_title ?? 'Itinerary'}
+        onCancel={() => setShareSubModal('none')}
+        onSent={(phone) => {
+          setShareSubModal('none');
+          setSentDest({ kind: 'phone', value: phone });
+        }}
+        onSwitchToKeyboard={() => setShareSubModal('email')}
+      />
+      {sentDest && (
+        <SendConfirmationPopup
+          open
+          kind={sentDest.kind}
+          destination={sentDest.value}
+          onClose={() => {
+            setSentDest(null);
+            setPhase('manual');
           }}
         />
       )}

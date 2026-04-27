@@ -23,7 +23,7 @@ export interface ListingsColumnProps {
 
 const COLUMN_LEFT_PAD = 30;
 const COLUMN_TOP = 340;
-const COLUMN_WIDTH = 400;
+const COLUMN_WIDTH = 360;
 const COLUMN_TOTAL_WIDTH = COLUMN_LEFT_PAD * 2 + COLUMN_WIDTH;
 const COLUMN_BOTTOM = 310; // queda contra la base del map toolbar
 
@@ -67,7 +67,7 @@ function SidebarToggle({
       type="button"
       onClick={onToggle}
       aria-label={collapsed ? 'Expand listings' : 'Collapse listings'}
-      className="absolute z-40 flex items-center justify-center text-white shadow-md transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+      className="absolute z-50 flex items-center justify-center text-white shadow-md transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
       style={{
         left: collapsed ? 0 : COLUMN_TOTAL_WIDTH - 6,
         top: 'calc(50% - ' + TOGGLE_H / 2 + 'px)',
@@ -110,10 +110,11 @@ export function ListingsColumn(props: ListingsColumnProps) {
       }}
     >
       <div
-        className="flex h-full flex-col gap-3 overflow-y-auto pr-3 [&::-webkit-scrollbar]:hidden"
+        className="flex h-full flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden"
         style={{
           scrollbarWidth: 'none',
           paddingLeft: COLUMN_LEFT_PAD,
+          paddingRight: COLUMN_LEFT_PAD,
           paddingTop: 12,
           paddingBottom: 80,
         }}

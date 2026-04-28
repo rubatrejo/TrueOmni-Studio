@@ -69,5 +69,21 @@
   "ai_loading_label": "Pensando...",
   "ai_aria_open": "Abrir asistente de IA",
   "ai_aria_close": "Cerrar IA",
-  "ai_aria_mic": "Activar entrada de voz"
+  "ai_aria_mic": "Activar entrada de voz",
+  "billboard_touch_to_start": "Toque para\ncomeçar",
+  "billboard_touch_here": "TOQUE\nAQUI",
+  "billboard_powered_by": "Desenvolvido por",
+  "ai_greeting": "Oi! Sou seu guia para {client_name}. Pergunte-me qualquer coisa sobre restaurantes, eventos, atividades ou como se locomover pela região.",
+  "ai_suggested_q_restaurants_text": "Melhores restaurantes por perto?",
+  "ai_suggested_q_events_text": "Eventos de hoje?",
+  "ai_suggested_q_itinerary_text": "Monte um itinerário para mim",
+  "ai_suggested_q_getting-around_text": "Como me locomover?",
+  "ai_suggested_q_waterfront_text": "O que fazer perto da orla?",
+  "ai_suggested_q_weather_text": "Como está o tempo?",
+  "ai_suggested_q_nightlife_text": "Onde está a vida noturna?",
+  "ai_suggested_q_coffee_text": "Melhores cafés?",
+  "idle_warning_title": "Ainda está aí?",
+  "idle_warning_body": "Toque na tela para continuar sua sessão.",
+  "idle_warning_continue": "Sim, estou aqui",
+  "idle_warning_countdown": "Voltando ao início em {seconds}s…"
 }

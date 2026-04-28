@@ -18,6 +18,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const nextConfig = {
   reactStrictMode: true,
   outputFileTracingRoot: __dirname,
+  // Mueve el dev indicator al borde inferior izquierdo (donde no estorba al
+  // preview del kiosk dentro del iframe del Studio). Cuando se carga el
+  // kiosk embebido, además ocultamos completamente el indicador con CSS
+  // (ver `<StudioBridge />`).
+  devIndicators: {
+    position: 'bottom-left',
+  },
   // pdfjs-dist declara `canvas` como dep opcional (native Node canvas). En
   // browser no se usa pero webpack intenta resolverlo igual y explota con
   // "Can't resolve '../build/Release/canvas.node'". Lo aliaseamos a `false`.

@@ -69,5 +69,21 @@
   "ai_loading_label": "Pensando...",
   "ai_aria_open": "Abrir asistente de IA",
   "ai_aria_close": "Cerrar IA",
-  "ai_aria_mic": "Activar entrada de voz"
+  "ai_aria_mic": "Activar entrada de voz",
+  "billboard_touch_to_start": "Touchez\npour démarrer",
+  "billboard_touch_here": "TOUCHEZ\nICI",
+  "billboard_powered_by": "Propulsé par",
+  "ai_greeting": "Salut ! Je suis votre guide de {client_name}. Demandez-moi tout ce que vous voulez sur les restaurants, événements, activités ou les déplacements dans la région.",
+  "ai_suggested_q_restaurants_text": "Meilleurs restaurants à proximité ?",
+  "ai_suggested_q_events_text": "Événements d'aujourd'hui ?",
+  "ai_suggested_q_itinerary_text": "Créez-moi un itinéraire",
+  "ai_suggested_q_getting-around_text": "Comment se déplacer ?",
+  "ai_suggested_q_waterfront_text": "Que faire près du front de mer ?",
+  "ai_suggested_q_weather_text": "Quel temps fait-il ?",
+  "ai_suggested_q_nightlife_text": "Où sortir le soir ?",
+  "ai_suggested_q_coffee_text": "Meilleurs cafés ?",
+  "idle_warning_title": "Êtes-vous toujours là ?",
+  "idle_warning_body": "Touchez l'écran pour continuer votre session.",
+  "idle_warning_continue": "Oui, je suis là",
+  "idle_warning_countdown": "Retour à l'accueil dans {seconds}s…"
 }

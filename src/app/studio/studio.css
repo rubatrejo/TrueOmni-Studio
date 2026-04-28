@@ -1,0 +1,81 @@
+/*
+ * studio.css — estilos scoped al Studio.
+ *
+ * El Studio NO usa los tokens del kiosk (los tokens del cliente activo
+ * se siguen inyectando por el RootLayout, pero no los consume nadie
+ * dentro de .studio-root). El Studio define su propia paleta dark
+ * profesional, independiente del tema del kiosk renderizado.
+ */
+
+.studio-root {
+  /*
+   * Override de las font-size del kiosk dentro del Studio.
+   * El kiosk usa escalas grandes (14/18/22/28/36/48/64/96) pensadas para
+   * leerse a distancia en una pantalla retrato 1080×1920. El Studio es
+   * una app desktop y necesita escala "web" tradicional.
+   *
+   * Tailwind del proyecto resuelve text-xs/sm/base/etc. a estas variables,
+   * así que con redefinirlas dentro de .studio-root recalibramos toda la
+   * jerarquía sin tocar las clases en TSX.
+   */
+  --font-xs: 11px;
+  --font-sm: 12px;
+  --font-base: 14px;
+  --font-lg: 16px;
+  --font-xl: 20px;
+  --font-2xl: 24px;
+  --font-3xl: 32px;
+  --font-4xl: 48px;
+
+  --studio-bg: #0a0a0c; /* zinc-950 ligeramente más profundo */
+  --studio-bg-elevated: #111114; /* zinc-900 elevation 1 */
+  --studio-bg-overlay: #18181b; /* zinc-900 elevation 2 */
+  --studio-bg-panel: #1a1a1d;
+
+  --studio-border: #27272a; /* zinc-800 */
+  --studio-border-strong: #3f3f46; /* zinc-700 */
+
+  --studio-text: #fafafa; /* zinc-50 */
+  --studio-text-muted: #a1a1aa; /* zinc-400 */
+  --studio-text-dim: #71717a; /* zinc-500 */
+
+  --studio-accent: #0088ce; /* TrueOmni blue secondary */
+  --studio-accent-hover: #0076b4;
+  --studio-accent-soft: rgba(0, 136, 206, 0.12);
+
+  --studio-success: #22c55e;
+  --studio-warning: #f59e0b;
+  --studio-danger: #ef4444;
+
+  --studio-shadow-soft:
+    0 1px 2px 0 rgb(0 0 0 / 0.3), 0 1px 1px -1px rgb(0 0 0 / 0.2);
+  --studio-shadow-elevated:
+    0 4px 12px -2px rgb(0 0 0 / 0.5), 0 2px 6px -2px rgb(0 0 0 / 0.3);
+
+  /* Layout */
+  --studio-sidebar-w: 240px;
+  --studio-topbar-h: 56px;
+}
+
+/* Scrollbar discreta dentro del Studio (no aplica al iframe del preview). */
+.studio-root *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.studio-root *::-webkit-scrollbar-track {
+  background: transparent;
+}
+.studio-root *::-webkit-scrollbar-thumb {
+  background: var(--studio-border);
+  border-radius: 6px;
+  border: 2px solid var(--studio-bg);
+}
+.studio-root *::-webkit-scrollbar-thumb:hover {
+  background: var(--studio-border-strong);
+}
+
+/* Selección de texto. */
+.studio-root ::selection {
+  background: var(--studio-accent-soft);
+  color: var(--studio-text);
+}

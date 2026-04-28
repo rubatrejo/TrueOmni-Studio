@@ -1,6 +1,8 @@
-import { ChevronUp, Globe } from 'lucide-react';
+'use client';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
+import { LanguageDropdown } from '@/components/home/language-dropdown';
+import { useTextosMap } from '@/components/i18n-provider';
 
 /**
  * Billboard 0 — variante "Dark Hero".
@@ -20,6 +22,7 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
  *   · Powered by + mini logo @ relativo (851, 132).
  */
 export function Billboard0() {
+  const t = useTextosMap();
   return (
     <div
       data-billboard="0"
@@ -53,37 +56,24 @@ export function Billboard0() {
         }}
       >
         <p
-          className="text-center font-sans font-bold text-white"
-          style={{ fontSize: '90px', lineHeight: '110px' }}
+          className="text-center font-sans font-bold uppercase text-white"
+          style={{ fontSize: '90px', lineHeight: '110px', whiteSpace: 'pre-line' }}
         >
-          TOUCH
-          <br />
-          HERE
+          {t.billboard_touch_here ?? 'Touch\nHere'}
         </p>
       </div>
 
-      {/* Botón ENGLISH decorativo (244×80 @ x=418 y=1565, rx=8, fill #b4bd01). */}
+      {/* Botón Languages funcional (244×80 @ x=418 y=1565). Abre dropdown
+          con idiomas del cliente activo y cambia el locale globalmente.
+          `data-billboard-no-link` evita que el click navegue al Dashboard
+          (el `<BillboardLink>` que envuelve el Billboard hace preventDefault
+          cuando detecta este atributo en el subtree). */}
       <div
-        className="absolute flex items-center"
-        style={{
-          left: '418px',
-          top: '1565px',
-          width: '244px',
-          height: '80px',
-          backgroundColor: '#b4bd01',
-          borderRadius: '8px',
-          paddingLeft: '16px',
-          paddingRight: '16px',
-        }}
+        data-billboard-no-link
+        className="absolute"
+        style={{ left: '418px', top: '1565px' }}
       >
-        <Globe className="h-8 w-8 text-white" strokeWidth={2.5} />
-        <span
-          className="ml-3 font-sans font-bold uppercase text-white"
-          style={{ fontSize: '24px', letterSpacing: '0.02em' }}
-        >
-          English
-        </span>
-        <ChevronUp className="ml-auto h-6 w-6 text-white" strokeWidth={3} />
+        <LanguageDropdown />
       </div>
 
       {/* Footer 1080×218 @ y=1702 con split diagonal (Back_Tab + Front_Tab). */}
@@ -95,19 +85,19 @@ export function Billboard0() {
           width: '1080px',
         }}
       >
-        {/* Back_Tab lighter blue (trapezoide con top-left recortado). */}
+        {/* Back_Tab brand-secondary (trapezoide con top-left recortado). */}
         <div
           className="absolute inset-0"
           style={{
-            backgroundColor: '#1796d6',
+            backgroundColor: 'hsl(var(--brand-secondary))',
             clipPath: 'polygon(1080px 0, 0 83.636px, 0 218px, 1080px 218px)',
           }}
         />
-        {/* Front_Tab dark blue (trapezoide con top-right recortado). */}
+        {/* Front_Tab brand-primary (trapezoide con top-right recortado). */}
         <div
           className="absolute inset-0"
           style={{
-            backgroundColor: '#004f8b',
+            backgroundColor: 'hsl(var(--brand-primary))',
             clipPath: 'polygon(0 0, 1080px 83.636px, 1080px 218px, 0 218px)',
           }}
         />
@@ -140,7 +130,7 @@ export function Billboard0() {
             className="block font-display italic text-white"
             style={{ fontSize: '20px', fontWeight: 500, letterSpacing: '0.01em', lineHeight: '1' }}
           >
-            Powered by
+            {t.billboard_powered_by ?? 'Powered by'}
           </span>
           <TrueOmniLogo className="mt-[6px] h-[32px] w-auto text-white" />
         </div>

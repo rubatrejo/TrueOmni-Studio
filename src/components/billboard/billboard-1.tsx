@@ -1,4 +1,7 @@
+'use client';
+
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
+import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon, EnglishButton } from './billboard-footer-parts';
 
@@ -22,6 +25,7 @@ import { AccessibilityIcon, EnglishButton } from './billboard-footer-parts';
  * pixel-perfect paso 2). Icono click-2384 copiado 1:1 sin lucide.
  */
 export function Billboard1() {
+  const t = useTextosMap();
   return (
     <div
       data-billboard="1"
@@ -242,14 +246,12 @@ export function Billboard1() {
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(17,16,13,0.352)' }} />
-        {/* TOUCH TO START text @ (804, 898) absolute → relative to card (804-555, 898-370) = (249, 528) */}
+        {/* TOUCH TO START text @ (804, 898) absolute → relative to card. */}
         <div
           className="absolute text-center font-display font-bold uppercase leading-[1.2] text-white"
-          style={{ left: '0', right: '0', top: '500px', fontSize: '70px' }}
+          style={{ left: '0', right: '0', top: '500px', fontSize: '70px', whiteSpace: 'pre-line' }}
         >
-          Touch
-          <br />
-          to Start
+          {t.billboard_touch_to_start ?? 'Touch\nto Start'}
         </div>
         {/* Click icon (hand with radiating lines) @ (684.773, 1205) absolute → (129, 835) relative */}
         <svg

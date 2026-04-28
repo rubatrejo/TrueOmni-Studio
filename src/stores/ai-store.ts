@@ -33,10 +33,15 @@ export const useAiStore = create<AiStore>((set, get) => ({
   greeting: '',
   suggestedQuestions: [],
   hydrate: ({ greeting, suggestedQuestions }) => {
-    const { greeting: prevGreeting } = get();
+    const { greeting: prevGreeting, displayedText, messages, isTyping } = get();
     set({ greeting, suggestedQuestions });
-    // Si el modal aún no se abrió, alinea displayedText con el greeting hidratado.
-    if (!prevGreeting) set({ displayedText: greeting });
+    // Re-alinea displayedText con el greeting cuando NO hay conversación en curso
+    // (cubre el cambio de locale: greeting nuevo se ve sin esperar al siguiente
+    // open/close del modal).
+    const showingGreeting = !messages.length && !isTyping;
+    if (showingGreeting && (displayedText === prevGreeting || !displayedText)) {
+      set({ displayedText: greeting });
+    }
   },
 
   isOpen: false,

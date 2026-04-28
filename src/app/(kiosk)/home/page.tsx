@@ -70,6 +70,7 @@ export default async function HomePage() {
             heroVideoSrc={resolveAiAssetPath(askAi.heroVideo)}
             greeting={askAiGreeting}
             suggestedQuestions={askAi.suggestedQuestions}
+            clientName={config.client.nombre}
             textos={askAiTextos}
           />
         </>

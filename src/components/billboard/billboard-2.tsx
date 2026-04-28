@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
+import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon, EnglishButton } from './billboard-footer-parts';
 
@@ -38,6 +39,7 @@ const CARDS: readonly CardData[] = [
 ];
 
 export function Billboard2() {
+  const t = useTextosMap();
   const [active, setActive] = useState(0);
   const n = CARDS.length;
 
@@ -163,9 +165,9 @@ export function Billboard2() {
       >
         <span
           className="font-display font-bold uppercase text-white"
-          style={{ fontSize: '60px', letterSpacing: '0.02em' }}
+          style={{ fontSize: '60px', letterSpacing: '0.02em', whiteSpace: 'pre-line' }}
         >
-          Touch to start
+          {(t.billboard_touch_to_start ?? 'Touch to start').replace(/\n/g, ' ')}
         </span>
         <svg
           xmlns="http://www.w3.org/2000/svg"

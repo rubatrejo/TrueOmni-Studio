@@ -1219,6 +1219,212 @@ driving/walking, SEE 360 funcional, favorite toast).
 
 ---
 
+### Sesión 2026-04-28 — Multi-idioma 6 idiomas + teclado iOS + seed data refresh (commit `b201a51`)
+
+> **Nota:** Itinerary Builder 3.17 **aprobado por Rubén** (confirmado 2026-04-28 al iniciar esta sesión). Fase 3 cerrada en su totalidad.
+
+**Hecho (commit `b201a51`):**
+
+- **Infraestructura i18n completa** (anticipa lo que era Fase 6 v2; entra ya en v1 como pre-requisito de Fase 4):
+  - `src/lib/i18n.ts` (client-safe) y `src/lib/i18n-server.ts` (loader fs).
+  - `src/stores/locale-store.ts` con zustand sessionStorage (`kiosk_active_locale`).
+  - `src/components/i18n-provider.tsx` con Context + hooks `useTextos`, `useTextosMap`, `useCurrentLocale`, `useAvailableLocales`, `useModuleLabel`, `useSubcategoryLabel`.
+  - `src/app/(kiosk)/layout.tsx`: pre-load server-side de TODOS los locales para evitar flash al cambiar idioma.
+  - `LanguageDropdown` reescrito con label nativo (incluye 日本語).
+  - Noto Sans JP via `next/font/google` + fallback en `--font-sans`/`--font-display` para soportar japonés sin romper el resto.
+- **6 idiomas activos:** `en` (canónico), `es`, `fr`, `de`, `pt`, `ja`. Schema `features.languages { enabled, available[], default }` en los 3 clientes. Eliminado `idioma_secundario` legacy.
+- **Archivos i18n por cliente:** `clients/{slug}/i18n/{en,es,fr,de,pt,ja}.json` con ~330 keys (252 UI base + 16 `tile_label_*` + 12 `module_label_*` + 24 `subcategory_*` + 11 `filters_*` + `events_get_tickets` + 27 `ai_question_*` + extras). en/es manuales, fr/de/pt/ja con contexto Arizona/tourism. Script `scripts/translate-i18n.mjs` para regenerar.
+- **Refactor masivo de consumers (~30+ archivos):** prop `textos: Record<string,string>` reemplazada por `useTextosMap()` en TODOS los modules (Listings/Events/Tickets/Passes/Deals/Trails/Guestbook/Itinerary/Survey/Brochures/Map/PhotoBooth/AskAI). `CategoryTile`, `ListingCard`, `ListingDetail`, `MapTopCard`, `MapPinBubble` migran a hooks reactivos. Filter overlays leen `filters_*` desde `useTextos`. AI wizard usa `<QField>` para resolver kicker/title/subtitle/options dinámicamente con fallback al config.
+- **Teclado iOS-style + Drag&Drop:**
+  - `OnScreenKeyboard` reescrito en 3 capas (letters/numbers/symbols) tipo iOS. Toggles `123`/`ABC`/`#+=` internos. Shift internalizado.
+  - API limpia: solo `BACKSPACE`/`ENTER`/`SPACE`/string. Eliminadas `SYMBOLS`/`AT`/`DOT_COM`/`CLOSE`/`SHIFT` del consumer.
+  - `DraggableKeyboard` wrapper con botón redondo flotante (lucide `Move`) en esquina superior derecha. Bounded al canvas, persistido en sessionStorage, doble-click resetea.
+  - Aplicado en search-overlay, itinerary, survey, brochures-search, send-to-email/phone, qr-purchase, guestbook-form/pin (vía `send-modal-chrome` con `keyboardWidth/Height/storageKey`).
+  - Tokens nuevos: `--keyboard-bg`, `--keyboard-key-bg`, `--keyboard-key-special`, `--keyboard-submit-bg`, `--keyboard-handle-bg/fg` en los 3 `tokens.css`.
+- **Seed data refresh:**
+  - `scripts/shift-event-dates.mjs`: +18d para que los 69 events partan de hoy.
+  - `scripts/seed-tickets-today.mjs`: 9 events ticketables en today.
+  - `scripts/replace-lorem-descriptions.mjs`: 90 descripciones Lorem Ipsum reemplazadas con texto contextual por subcategoría.
+  - 3 ads reubicados: lolas-lunch (popup) `/home`, history-of-art (hero) `/home/restaurants`, uber-eats-nfl (bottom) `/home/things-to-do`.
+
+**Verificado:**
+
+- 87 archivos tocados, +9.915 / -1.896 líneas. `pnpm typecheck` limpio.
+- Switch de idioma funciona en runtime sin reload (zustand sessionStorage + Context).
+- Pre-load server-side de los 6 locales evita flash al cambiar.
+- Noto Sans JP renderiza japonés sin romper el resto de tipografías.
+- White-label intacto: 5 tokens nuevos de teclado en los 3 clientes; seed data en `clients/default/config.json` solamente.
+
+**Pendiente / siguiente:**
+
+- **Fase 4 (primer cliente real):** crear `clients/{cliente-real}/` con tokens + config + assets reales + Lighthouse > 95.
+- **Aprobación visual** del teclado iOS y del flujo de cambio de idioma en hardware kiosk físico (en runtime parece OK).
+- Listings (Gallo Blanco, Welcome Diner, etc.) quedan en inglés por decisión de Rubén — no se traducen sus nombres ni pies de menú.
+- AI modal subtitle conserva interpolación SSR de `{client_name}` (no migrado al hook).
+- Photo Booth: 24 textos override vía `useTextosMap`; `experienceTeaserBody` conserva interpolación SSR.
+
+**Decisiones clave:**
+
+- **Multi-idioma adelantado de Fase 6 (v2) a v1**: Rubén lo necesita disponible antes del primer cliente real, así que entra como pre-requisito de Fase 4.
+- **Pre-load de TODOS los locales server-side** (no lazy) para que el switch sea instantáneo. Costo aceptable: ~6 × 330 keys ≈ ~2KB gzip por cliente.
+- **`useTextosMap()` como sustituto de `prop textos`** para que los componentes sean reactivos al cambio de idioma sin re-renderizar el árbol entero desde el host.
+- **Teclado iOS de 3 capas** (no QWERTY plano) para soportar números/símbolos sin overlay extra; coincide con expectativa móvil del usuario tocando una pantalla retrato.
+- **`DraggableKeyboard` con sessionStorage + doble-click reset**: el usuario puede recolocarlo si tapa el input, pero no se persiste entre sesiones (cada visita arranca posición default).
+- **`module_label_restaurants` = "Restaurants"** (no "Food & Drink") para que tile y label del módulo sean idénticos.
+- **Listings en inglés**: nombres propios (Gallo Blanco, Welcome Diner, etc.) NO se traducen — se mantienen verbatim como marca; subcategorías + descripciones SÍ siguen el sistema i18n.
+
+**Fase:** Fase 3 **cerrada en su totalidad** (3.1–3.17 aprobadas). Multi-idioma + teclado iOS + seed refresh entregados como pre-requisitos de Fase 4. **Siguiente: Fase 4 — primer cliente real** (`clients/{cliente-real}/` + Lighthouse + handoff).
+
+---
+
+### Sesión 2026-04-28 (tarde) — Arranque del Kiosk Studio + Fase S1 Branding (live preview funcional)
+
+**Hecho:**
+
+- **Brainstorming + plan aprobado** (`/Users/rubenramirez/.claude/plans/wild-weaving-key.md`): Studio = subruta `/studio` en mismo repo, storage híbrido (Upstash KV en runtime + publish a `clients/<slug>/`), arrancar local sin auth → Vercel + Google OAuth + GitHub PR-publish con approval gate de `ruben@trueomni.com`, versionado completo + changelog, 7 fases (S0-S7).
+- **Documentación**: `.planning/STUDIO-PROJECT.md` (visión) + `.planning/STUDIO-ROADMAP.md` (fases formales) + entrada en `.planning/ROADMAP.md` con la milestone Studio.
+- **Mockup visual completo del Studio (`/studio` + `/studio/[slug]`)**: shell con TopBar + SidebarTabs (8 secciones) + EditorPanel + LivePreview iframe + SaveBar; tema dark+light con toggle persistente (`StudioThemeProvider`); animaciones con framer-motion (active tab con `layoutId`, fade tabs); logo TrueOmni real reusado del kiosk; cards de clientes en grid con gradient hero + logo centrado.
+- **Live preview funcional E2E** (Fase S1 mínima cerrada):
+  - `usePreviewBridge` host-side: iframeRef + state global del brand + postMessage debounced 120 ms + listener `studio:ready` con resend del state al handshake.
+  - `<StudioBridge />` montado en `src/app/(kiosk)/layout.tsx`: escucha mensajes y aplica `document.documentElement.style.setProperty('--brand-*', value, 'important')` al recibir `studio:brand-update`. Anuncia `studio:ready` con retry (0/50/250/800ms) para cubrir race host-iframe.
+  - `hexToHsl` utility (`src/lib/studio/hex-to-hsl.ts`) convierte `#RRGGBB` → `H S% L%` (formato del kiosk).
+  - **Refactor de Billboard 0**: 3 colores hardcoded (`#b4bd01`, `#1796d6`, `#004f8b`) → `hsl(var(--brand-tertiary/secondary/primary))`. Viola la regla "cero hardcoded" si no se hace.
+  - **`KioskCanvas` detecta iframe** (lazy init useState con `window.parent !== window`): en modo embedded renderea kiosk a 1080×1920 reales sin padding/scale/shadow del dev-view. Sin doble escala.
+  - **Persistencia local**: `useBrandStorage(slug, initial)` guarda en `localStorage["studio-brand:<slug>"]`. Save real con UX completa (dirty / saving / saved / error states), Discard descarta cambios sin guardar.
+- **`tailwind.config.ts`**: cambio `darkMode: ['selector', '[data-contrast="high"]']` → `'class'` (estándar). Las variantes `dark:` solo se activaban con `[data-contrast="high"]` antes (selector custom no documentado mal). El kiosk usa `[data-contrast="high"]` solo en `tokens.css` para CSS vars, no para Tailwind variants, así que no afecta.
+- **`StudioThemeProvider` anidado en 2 divs**: el ancestor solo aplica clase `dark`, el inner aplica las clases con `dark:` variants. Tailwind con `darkMode: 'class'` requiere `.dark` como ANCESTOR (no en el mismo elemento). Antes light mode quedaba bien pero dark "se veía raro" porque las dark: variants del wrapper no aplicaban.
+
+**Verificado (manual, sin tests automáticos):**
+
+- `pnpm typecheck` limpio en cada iteración.
+- `/studio` lista cliente "TrueOmni Default" con card de gradient + logo TrueOmni centrado + 3 brand swatches.
+- `/studio/default`: editor con Branding tab abierto. Mover Secondary → Billboard idle del iframe se recolorea (botón ENGLISH olive + Back_Tab azul medio + Front_Tab azul oscuro).
+- Aplicar preset "Sunset" → los 3 colores cambian de golpe → Billboard se recolorea entero.
+- Save → reload `/studio/default` → brand persistido aparece (no el del mock).
+- Toggle dark/light desde topbar funciona en homepage + editor. localStorage `studio-theme`.
+- Toggle Kiosk ↔ Landscape (1080×1920 ↔ 1920×1080): el iframe re-monta con dimensiones correctas y el handshake reenvía el state actual.
+
+**Pendiente / siguiente:**
+
+- **Fase S0 cloud (bloqueado por credenciales Upstash):** `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` para arrancar `@upstash/redis` + API routes `/api/studio/configs/*` + schema zod + create/clone/delete real + ruta `/preview/[slug]` (hoy el iframe apunta a `/` directo del runtime).
+- **Fase S1 completa:** logos upload real (placeholder hoy), font selector real, react-colorful (color picker más pro que `<input type="color">`), audit/tokenize de Billboards 1-4 si otros clientes los usan.
+- **Fase S7 (Vercel + Auth):** NextAuth + Google OAuth + dominio whitelist `@trueomni.com` + GitHub App para PRs automáticos + approval queue para `ruben@trueomni.com` + Resend para notificaciones de approval. Bloqueado por: cuenta Vercel + Google OAuth client ID/secret + GitHub App credentials.
+- **Fases S2-S6**: Modules, Content/Data, i18n, Ads, Integrations. Cada una ~1-2 semanas.
+
+**Decisiones clave:**
+
+- **Storage híbrido D1**: KV durante edición (live preview con postMessage) + "publish" exporta a `clients/<slug>/` files. Production runtime sigue leyendo filesystem (igual que hoy, sin refactor). Mientras llega Upstash, persistencia es localStorage.
+- **`darkMode: 'class'` standard**: la sintaxis array `['selector', custom]` no genera selectores válidos para múltiples activaciones. Cambiar a 'class' (default `.dark`) garantiza que las variantes funcionen. El `[data-contrast="high"]` del kiosk es independiente porque solo afecta CSS variables, no clases Tailwind.
+- **`KioskCanvas` con detección de iframe**: sin esta detección, el canvas aplica padding 80+64+180 + scale interno → doble escala (canvas + iframe Studio) → margen gris alrededor del frame. Detectar iframe + render a tamaño real elimina el problema sin tocar el dev-view.
+- **`<StudioBridge />` con re-anuncio múltiple del `studio:ready`**: race condition entre host (que monta listener tras hidratar Shell) y iframe (que monta StudioBridge tras hidratar layout `(kiosk)`). Re-anunciamos a 0/50/250/800ms para cubrir cualquier orden de mounting.
+- **Refactor de Billboard 0 antes de S1 funcional**: el bridge no podía mostrar nada visual mientras Billboard 0 tuviera `#004f8b` etc. hardcoded. Tokenizarlo desbloqueó la demo del live preview.
+
+**Fase:** Studio Fase S1 **funcional E2E con persistencia local** (2026-04-28). Bloqueado para Fase S0 cloud → necesito credenciales Upstash de Rubén para continuar.
+
+---
+
+### Sesión 2026-04-28 (noche-extra) — Studio S0 cloud + S1 Branding completa + i18n masivo + idle timeout
+
+**Hecho:**
+
+- **Vercel KV (Upstash) integrado.** Credenciales en `.env.local` (`KV_REST_API_URL`, `KV_REST_API_TOKEN`, etc.). Cuenta `unified-bengal-108723` región Washington D.C., plan free.
+- **Studio Fase S0 cloud cerrada:**
+  - `src/lib/studio/kv.ts` — wrapper sobre `@vercel/kv` con auto-detect + fallback in-memory para dev sin credenciales. Schema de claves `cfg:<slug>`, `cfg:<slug>:meta`, `clients:list`, `pub:queue`, `changelog:<slug>`.
+  - `src/lib/studio/schema.ts` — schemas zod (`KioskConfigSchema`, `BrandingSchema`, `ConfigMetaSchema`) + `STUDIO_GOOGLE_FONTS` (12 Google Fonts curadas).
+  - **API routes** validadas con zod:
+    - `GET/POST /api/studio/configs` — listar + crear cliente nuevo.
+    - `GET/PATCH/DELETE /api/studio/configs/[slug]` — leer / actualizar branding / borrar.
+    - `POST /api/studio/configs/[slug]/clone` — clonar cliente existente.
+    - `POST /api/studio/seed` — crea `default` (TrueOmni) idempotente al primer arranque.
+  - `src/app/studio/_lib/api-client.ts` — cliente HTTP centralizado.
+  - **Editor `/studio/[slug]`** ahora server component que carga config + meta del KV directamente (sin HTTP roundtrip server→server). 404 si el slug no existe.
+  - **Modal "New kiosk"** funcional con validación slug + auto-suggest desde Name + AnimatePresence focus trap.
+  - **Botón delete flotante** (on-hover, excepto `default`) con confirm.
+  - **Skeleton loading states** mientras llega el list().
+  - **Auto-seed** del `default` en el primer load si KV está vacío.
+- **Studio Fase S1 completa (Branding):**
+  - 3 brand colors con color picker + 6 presets + live preview <120 ms (tokens en CSS).
+  - **Logo + Favicon upload real** (`ImageField` con drag&drop, file picker, auto-compresión Canvas 200KB/100KB, SVG verbatim, preview thumbnail, botón X). Persistido como data URL en KV.
+  - **Font selector real** (`FontSelector`) con dropdown de 12 Google Fonts. Cada opción se previsualiza en su tipografía. Display + Body separados.
+  - **Live preview de fonts**: `<StudioBridge>` inyecta `<link>` Google Fonts + override `--font-display` / `--font-sans` con `!important`. Live preview de favicon: actualiza `<link rel="icon">`.
+  - Bridge expandido a `studio:branding-update` (compat legacy `studio:brand-update` solo-colores). `pushBranding(branding)` debounced 120 ms.
+  - **Save real al API** con `PATCH /api/studio/configs/<slug>` (body: `branding`). Dirty tracking comparando `current` vs `savedSnapshot`. Cmd+S keyboard shortcut.
+  - **Idle timeout overlay** (`src/hooks/use-idle-reset.ts` + `src/components/home/idle-timeout-overlay.tsx`):
+    - Lee `config.features.inactividad_reset_seg` (60s default).
+    - Tras 60s sin interacción → modal con countdown ring 10s + 4 keys i18n (`idle_warning_*`).
+    - Cualquier toque → dismiss + reinicia timer.
+    - Si countdown llega a 0 → `sessionStorage.clear()` + `setLocale(defaultLocale)` + `router.push('/')`.
+    - Montado en `(kiosk)/home/layout.tsx` para todas las pantallas dentro de /home.
+- **Refactor masivo de dark mode del Studio:**
+  - `tailwind.config.ts`: `darkMode: ['selector', '[data-contrast="high"]']` (sintaxis no estándar) → `darkMode: 'class'`. Las dark: variants ahora se generan correctamente con selector `.dark`.
+  - `StudioThemeProvider` anidado en 2 divs (ancestor con `.dark`, inner con `bg-zinc-50 dark:bg-zinc-950`). Tailwind requiere `.dark` ANCESTOR, no en el mismo elemento.
+  - Toggle dark/light en homepage + topbar del editor con `<ThemeToggle />` + sun/moon icons + AnimatePresence.
+  - Persistencia en `localStorage["studio-theme"]`.
+- **Mockup visual final del Studio:**
+  - Logo TrueOmni real reusado del kiosk en homepage + editor breadcrumb.
+  - Cards de clientes en grid con hero gradient + logo centrado + 3 brand swatches + slug pill + skeleton.
+  - "+ New kiosk" card con misma altura que ClientCard (h-40 hero + p-5 footer) con grid pattern de fondo.
+  - Sidebar tabs con active layoutId animado spring + footer "Live preview connected".
+  - SaveBar con dirty / saving / saved / error states + Discard.
+  - PreviewPanel con auto-fit del 1080×1920 + toggle Kiosk/Landscape (1080×1920 ↔ 1920×1080) + zoom controls.
+  - Headers de sections con `01 · Phase S1` en bold.
+  - "01 · Phase Sx" labels en bold (era light).
+- **Iframe del live preview (`PreviewPanel`):**
+  - Apunta a `/` (Billboard idle del kiosk runtime).
+  - Sandbox quitado (interfería con event.source en cross-frame).
+  - `KioskCanvas` detecta iframe (lazy init `useState`) y renderea kiosk a 1080×1920 reales sin chrome (sin padding 64+180+80, sin scale interno, sin shadow). Sin doble escala = sin marco gris.
+  - Refactor de Billboard 0: 3 colores hardcoded (`#b4bd01`, `#1796d6`, `#004f8b`) → `hsl(var(--brand-tertiary/secondary/primary))`. Cumple regla "cero hardcoded".
+- **i18n masivo del kiosk:**
+  - Billboard 0/1/2/3 convertidos a `'use client'` + `useTextosMap`. Strings hardcoded "TOUCH HERE" / "Touch to start" / "Powered by" → keys `billboard_touch_here`, `billboard_touch_to_start`, `billboard_powered_by` (3 keys × 6 idiomas × 3 clientes = 54 entradas).
+  - **AI Avatar** (Ask Anything) i18n completo:
+    - `ai_subtitle` ahora es reactivo al locale: `AiModalHost` recibe `clientName` separado y la interpolación `{client_name}` se hace cliente-side sobre `t('ai_subtitle')`.
+    - `ai_greeting` con interpolación cliente-side.
+    - **8 suggested questions** traducidas por id (`ai_suggested_q_<id>_text`) en EN/ES/FR/DE/PT/JA — 48 keys nuevas. Responses dejan fallback al config (contenido editorial del cliente, no UI).
+    - `useAiStore.hydrate` actualiza `displayedText` cuando NO hay conversación en curso, así el greeting cambia al instante con el locale.
+  - `LanguageDropdown` con `e.preventDefault()` + `e.stopPropagation()` en click + mousedown del wrapper, trigger button e items. Causa raíz: `<Link href="/home">` envuelve todo el Billboard y la navegación nativa del `<a>` requería `preventDefault`, no solo `stopPropagation`. También `aria-label` traducido.
+  - `BillboardLink` (nuevo client component) envuelve Billboard con `onClick` que `preventDefault` cuando el click viene de elementos con `data-billboard-no-link`.
+- **Studio en inglés:** traducidas las 8 descriptions de `STUDIO_SECTIONS` y la metadata del layout.
+
+**Verificado:**
+
+- `pnpm typecheck` limpio en cada iteración (50+ ediciones esta sesión).
+- `pnpm lint` solo errores pre-existentes del kiosk (photo-booth-module, directions-modal); archivos del Studio limpios después de fix de import-order.
+- E2E manual:
+  - `/studio` → auto-seedea `default`, lista carga del KV → card visible.
+  - Crear "test-1" desde modal → POST /api/studio/configs → aparece nueva card.
+  - Editar branding → live preview <200 ms → Save → reload → persiste.
+  - Cambiar font Display a Playfair Display → kiosk re-renderiza con la nueva tipografía.
+  - Subir logo SVG → preview se ve en el ImageField.
+  - Toggle dark/light en homepage Y editor — funciona en ambos.
+  - Cambiar idioma en Billboard idle → "TOUCH HERE" → "TOCA AQUÍ" → entras al Home → modal IA con greeting + chips traducidos.
+  - Sin actividad 60s en /home → popup countdown 10s → si dejas pasar → vuelve a Billboard en inglés.
+
+**Pendiente / siguiente:**
+
+- **Fase S2 — Modules tab:** toggle on/off de los 13 módulos + reorder Home tiles + edit labels. Bridge mensaje `studio:modules-update`.
+- **Fase S3 — Content/Data:** CRUD masivo de listings/events/tickets/passes/deals/trails/brochures.
+- **Fase S4 — i18n editor:** side-by-side de los 6 idiomas + detección keys faltantes + AI translate (Anthropic SDK).
+- **Fase S5 — Ads system:** subir, calendarizar, emplazar.
+- **Fase S6 — Integrations:** weather, Mapbox, Analytics.
+- **Fase S7 — Auth + Vercel + GitHub PR-publish:** NextAuth + Google OAuth + Octokit + approval queue (`ruben@trueomni.com`) + Resend notifications.
+- **Cosas menores aplazadas:** color picker pro (react-colorful en lugar de native), audit/tokenize de Billboards 1-4, font upload custom (.woff2 además de Google Fonts).
+- **Vercel Blob para uploads** (cuando los data URLs en KV crezcan o haya muchos clientes con assets pesados).
+
+**Decisiones clave:**
+
+- **Vercel KV elegido sobre Upstash directo**: misma tecnología (Vercel KV es Upstash internamente) pero credenciales centralizadas en cuenta Vercel para el deploy futuro.
+- **Logos/favicons como data URLs en KV**: pragmático para MVP. Cuando crezca, migrar a Vercel Blob (`@vercel/blob`).
+- **Fonts via Google Fonts dynamic loading**: `<link>` injection desde `<StudioBridge>`. No requiere subir archivos. Custom .woff2 queda como follow-up.
+- **`darkMode: 'class'` standard**: la sintaxis `['selector', custom]` no genera selectores CSS válidos para múltiples activaciones. El `[data-contrast="high"]` del kiosk es independiente porque solo afecta CSS variables en `tokens.css`, no clases Tailwind `dark:`.
+- **`KioskCanvas` con detección de iframe**: sin esta detección, doble escala (canvas + iframe) → margen gris. Detectar iframe + render a tamaño real elimina el problema sin tocar el dev-view standalone.
+- **Idle timeout en `(kiosk)/home/layout.tsx`** (no en cada page): un solo timer global cubre TODAS las rutas dentro de /home. Si cambias de /home a /home/restaurants, el timer NO se reinicia (correcto: actividad ya hubo).
+- **AI greeting + suggested questions como i18n con fallback al config**: backwards compat con clientes que no traduzcan, y deja la opción de agregar keys más tarde sin tocar código (Fase S4 i18n editor).
+- **`<a>` navigation: preventDefault, no stopPropagation**: la navegación nativa del browser para `<a href>` requiere preventDefault explícito. stopPropagation solo detiene event bubble, no comportamiento default. Lección general que aplica a otros nested-link cases.
+
+**Fase:** Studio S0 cloud + S1 completa (2026-04-28). Siguiente arranque debe ser **Fase S2 (Modules tab)**.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

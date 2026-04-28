@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { I18nProvider } from '@/components/i18n-provider';
+import { StudioBridge } from '@/components/studio-bridge';
 import { getClientSlug } from '@/lib/client-env';
 import { getConfig } from '@/lib/config';
 import { loadAllLocales } from '@/lib/i18n-server';
@@ -21,6 +22,7 @@ export default async function KioskLayout({ children }: { children: ReactNode })
 
   return (
     <I18nProvider localesMap={localesMap} defaultLocale={defaultLocale} available={available}>
+      <StudioBridge />
       {children}
     </I18nProvider>
   );

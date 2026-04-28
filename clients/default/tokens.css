@@ -10,12 +10,20 @@
  */
 
 :root {
+  /* ====================================================================== */
+  /*  PALETA DE MARCA — LOS 3 COLORES DEL CLIENTE                           */
+  /*                                                                        */
+  /*  Cambia estos 3 valores y TODO el kiosk se recolorea solo.             */
+  /*  El resto de tokens del archivo derivan de estos vía var(--brand-*).   */
+  /* ====================================================================== */
+  --brand-primary: 206 100% 27%; /* #004F8B — Azul oscuro: headers, toolbars, teclado */
+  --brand-secondary: 201 100% 40%; /* #0088CE — Azul medio: CTAs, links, pins, ring */
+  --brand-tertiary: 62 53% 48%; /* #B9BD39 — Olive: highlights, CTA destacado, countdown */
+
   /* ---------------------------------------------------------------------- */
-  /*  PALETA DE MARCA TRUEOMNI                                              */
+  /*  NEUTRALES (no son brand del cliente — fondo y texto base del kiosk)   */
   /* ---------------------------------------------------------------------- */
-  --brand-primary: 201 100% 40%; /* #0088CE Tech Blue (TrueOmni primary) */
   --brand-neutral: 0 0% 7%; /* #131313 Black Tetramine */
-  --brand-accent: 172 82% 30%; /* #0E8C7E Teal */
 
   /* ---------------------------------------------------------------------- */
   /*  TOKENS SEMÁNTICOS (consumidos por Tailwind y componentes)             */
@@ -23,13 +31,13 @@
   --background: 0 0% 100%; /* fondo base del kiosk */
   --foreground: var(--brand-neutral); /* texto principal */
 
-  --primary: var(--brand-primary);
+  --primary: var(--brand-secondary); /* shadcn primary = azul medio (acción/interacción) */
   --primary-foreground: 0 0% 100%;
 
   --secondary: 210 40% 96%; /* fondo de chips, tarjetas suaves */
   --secondary-foreground: var(--brand-neutral);
 
-  --accent: var(--brand-accent);
+  --accent: var(--brand-tertiary); /* accent = olive (highlight) */
   --accent-foreground: 0 0% 100%;
 
   --muted: 210 40% 96%;
@@ -37,7 +45,7 @@
 
   --border: 214 32% 91%;
   --input: 214 32% 91%;
-  --ring: var(--brand-primary);
+  --ring: var(--brand-secondary);
 
   /* Requeridos por shadcn/ui: card (tarjetas) y popover (overlays/menus).
      Por defecto replican background/foreground; cada cliente puede
@@ -73,10 +81,10 @@
   /*  Compartido entre OnScreenKeyboard y NumericKeypad.                    */
   /* ---------------------------------------------------------------------- */
   --keyboard-bg: 0 0% 100%; /* fondo del canvas del teclado (blanco) */
-  --keyboard-key-bg: 206 100% 27%; /* #004f8b — tecla normal */
-  --keyboard-key-special: 201 80% 47%; /* #1796d6 — shift / backspace / 123 / ABC */
-  --keyboard-submit-bg: 206 100% 27%; /* botón Enter (submit) */
-  --keyboard-handle-bg: 206 100% 27%; /* botón flotante drag handle */
+  --keyboard-key-bg: var(--brand-primary); /* tecla normal (azul oscuro) */
+  --keyboard-key-special: var(--brand-secondary); /* shift / backspace / 123 / ABC (azul medio) */
+  --keyboard-submit-bg: var(--brand-primary); /* botón Enter (submit) */
+  --keyboard-handle-bg: var(--brand-primary); /* botón flotante drag handle */
   --keyboard-handle-fg: 0 0% 100%; /* color del icono del handle */
 
   /* ---------------------------------------------------------------------- */
@@ -85,44 +93,44 @@
   /* ---------------------------------------------------------------------- */
   --photo-bg: 0 0% 100%; /* fondo general del editor */
   --photo-text: 218 35% 14%; /* texto principal */
-  --photo-tabs-bg: 206 100% 27%; /* #004f8b — barra del editor (azul oscuro) */
+  --photo-tabs-bg: var(--brand-primary); /* barra del editor (azul oscuro) */
   --photo-tab-active: 0 0% 100%; /* tab seleccionado */
-  --photo-tab-inactive: 206 100% 27%; /* tab no seleccionado */
+  --photo-tab-inactive: var(--brand-primary); /* tab no seleccionado */
   --photo-tab-text-active: 218 35% 14%; /* texto tab activo */
   --photo-tab-text-inactive: 0 0% 100%; /* texto tab inactivo */
-  --photo-sidebar-bg: 201 100% 40%; /* barra lateral derecha */
+  --photo-sidebar-bg: var(--brand-secondary); /* barra lateral derecha (azul medio) */
   --photo-sidebar-icon: 0 0% 100%; /* flechas + icono QR */
   --photo-countdown-bg: 0 0% 0%; /* overlay 3-2-1 (aplicar con /alpha) */
   --photo-countdown-number: 0 0% 100%; /* número 3/2/1 */
-  --photo-countdown-ring: 62 53% 48%; /* #b9bd39 — olive verde del send-to-phone */
+  --photo-countdown-ring: var(--brand-tertiary); /* olive del countdown */
   --photo-share-bg: 0 0% 0%; /* fondo negro pantalla Share */
   --photo-share-title: 0 0% 100%; /* SHARE YOUR MEMORIES */
   --photo-cta-border: 0 0% 100%; /* borde botones EMAIL / TEXT */
   --photo-cta-text: 0 0% 100%; /* texto botones EMAIL / TEXT */
-  --photo-accent-from: 201 95% 46%; /* gradient mic / loader */
-  --photo-accent-to: 173 81% 30%; /* gradient mic / loader */
+  --photo-accent-from: 201 95% 46%; /* #079EE2 — gradient mic / loader (identidad módulo) */
+  --photo-accent-to: 173 81% 30%; /* #0E8C7E — gradient mic / loader (identidad módulo) */
   --photo-sticker-shadow: 218 35% 14%; /* sombra sutil de stickers */
-  --photo-home-btn-bg: 206 100% 27%; /* #004f8b — semicircle home button */
+  --photo-home-btn-bg: var(--brand-primary); /* semicircle home button (azul oscuro) */
   --photo-header-fg: 0 0% 100%; /* fg del header (divider + fallback) */
 
   /* ---------------------------------------------------------------------- */
   /*  ITINERARY BUILDER MODULE (Fase 3.17)                                  */
   /* ---------------------------------------------------------------------- */
-  --itinerary-olive: 62 53% 48%; /* #b9bd39 — CTA Create Itinerary / Send to Phone / progress slider */
-  --itinerary-toolbar-bg: 206 100% 27%; /* #004f8b — header banda azul + bottom map toolbar (azul oscuro) */
+  --itinerary-olive: var(--brand-tertiary); /* CTA Create Itinerary / Send to Phone / progress slider */
+  --itinerary-toolbar-bg: var(--brand-primary); /* header banda + bottom map toolbar (azul oscuro) */
   --itinerary-rail-bg: 220 14% 96%; /* gris claro del rail inferior */
-  --itinerary-tab-active: 201 80% 47%; /* #1796d6 — tab activo (azul medio Eat) verbatim del SVG */
+  --itinerary-tab-active: var(--brand-secondary); /* tab activo (azul medio) */
   --itinerary-tab-inactive: 0 0% 64%; /* #a3a3a3 — gris medio del SVG inactive */
   --itinerary-tab-text-active: 0 0% 100%;
   --itinerary-tab-text-inactive: 0 0% 100%; /* blanco también en inactive (matching SVG) */
-  --itinerary-route-line: 201 100% 40%; /* línea azul de ruta sobre el mapa */
+  --itinerary-route-line: var(--brand-secondary); /* línea de ruta sobre el mapa */
   --itinerary-card-shadow: 218 35% 14%; /* sombra de cards de listings */
   --itinerary-pin-fill: 0 0% 100%; /* punto blanco interior del pin */
-  --itinerary-heart: 0 78% 50%; /* #e02020 — rojo del heart "in itinerary" */
+  --itinerary-heart: 0 78% 50%; /* #e02020 — rojo del heart "in itinerary" (funcional) */
   --itinerary-heart-empty: 0 0% 74%; /* #bdbdbd — heart placeholder gris */
-  --itinerary-pin-listing: 201 100% 40%; /* azul listings en mapa */
-  --itinerary-pin-event: 36 91% 55%; /* #f5a623 naranja eventos */
-  --itinerary-pin-trail: 172 82% 30%; /* #0e8c7e teal trails */
+  --itinerary-pin-listing: var(--brand-secondary); /* pin listings en mapa */
+  --itinerary-pin-event: 36 91% 55%; /* #f5a623 naranja eventos (funcional) */
+  --itinerary-pin-trail: 172 82% 30%; /* #0e8c7e teal trails (funcional) */
   --itinerary-drag-ghost-bg: 220 7% 14%; /* #1f2227 fondo del clone del drag */
   --itinerary-map-fallback-bg: 0 0% 85%; /* #d8d8d8 fondo "Map unavailable" */
   --itinerary-map-fallback-fg: 0 0% 29%; /* #4a4a4a texto "Map unavailable" */

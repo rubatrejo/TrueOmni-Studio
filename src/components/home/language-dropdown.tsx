@@ -34,17 +34,40 @@ export function LanguageDropdown() {
   const currentLabel = (LOCALE_LABELS[current] ?? current).toUpperCase();
 
   return (
-    <div ref={wrapperRef} className="relative inline-block">
+    // El dropdown puede vivir dentro de un `<Link href="/home">` (Billboard
+    // idle). `e.preventDefault()` en cada handler interno detiene la
+    // navegación nativa del `<a>` ancestor; `stopPropagation` adicional
+    // evita que onClick handlers de ancestors se disparen.
+    <div
+      ref={wrapperRef}
+      className="relative inline-block"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+    >
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-label="Cambiar idioma"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        aria-label="Change language"
         aria-expanded={open}
         className="flex items-center font-sans font-bold uppercase text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
         style={{
           width: '244px',
           height: '80px',
-          backgroundColor: '#b9bd39',
+          backgroundColor: 'hsl(var(--brand-tertiary))',
           borderRadius: '8px',
           paddingLeft: '16px',
           paddingRight: '16px',
@@ -83,7 +106,7 @@ export function LanguageDropdown() {
       {open ? (
         <ul
           role="menu"
-          aria-label="Lista de idiomas"
+          aria-label="Available languages"
           className="absolute z-50 overflow-hidden bg-white shadow-2xl"
           style={{
             bottom: '100%',
@@ -101,9 +124,15 @@ export function LanguageDropdown() {
                 <button
                   role="menuitem"
                   type="button"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     setLocale(locale);
                     setOpen(false);
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                   }}
                   className="flex w-full items-center text-left font-sans font-bold text-gray-800 hover:bg-gray-50 focus:bg-gray-100 focus:outline-none"
                   style={{

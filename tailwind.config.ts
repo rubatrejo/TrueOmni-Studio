@@ -6,11 +6,14 @@ import animate from 'tailwindcss-animate';
  * Todos los colores se expresan como hsl(var(--token)) — cero hardcoded.
  * Los valores reales viven en tokens.css y pueden cambiar por cliente.
  *
- * darkMode: ['selector', '[data-contrast="high"]'] respeta el modo alto
- * contraste ya presente en el template (tokens.css).
+ * darkMode: 'class' → las variantes `dark:` se activan cuando algún ancestor
+ * tiene la clase `.dark`. El Studio aplica esa clase desde StudioThemeProvider.
+ *
+ * El kiosk usa `[data-contrast="high"]` para sobreescribir variables CSS en
+ * tokens.css (modo alto contraste accesible), independiente de Tailwind.
  */
 const config: Config = {
-  darkMode: ['selector', '[data-contrast="high"]'],
+  darkMode: 'class',
   content: ['./src/**/*.{ts,tsx,mdx}'],
   theme: {
     extend: {

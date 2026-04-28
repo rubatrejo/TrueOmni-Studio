@@ -1,4 +1,7 @@
+'use client';
+
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
+import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon, EnglishButton } from './billboard-footer-parts';
 
@@ -14,6 +17,7 @@ import { AccessibilityIcon, EnglishButton } from './billboard-footer-parts';
  * - Footer (y=1720..1920): #004f8b con TrueOmni + accesibilidad + ENGLISH.
  */
 export function Billboard3() {
+  const t = useTextosMap();
   const cardBase = 'absolute overflow-hidden';
   const topRowSize = { width: '540px', height: '475px' } as const;
   const bottomRowSize = { width: '540px', height: '475px' } as const;
@@ -66,9 +70,9 @@ export function Billboard3() {
           <div className="flex items-center gap-10">
             <span
               className="font-display font-bold uppercase text-white"
-              style={{ fontSize: '72px', letterSpacing: '0.02em' }}
+              style={{ fontSize: '72px', letterSpacing: '0.02em', whiteSpace: 'pre-line' }}
             >
-              Touch to start
+              {(t.billboard_touch_to_start ?? 'Touch to start').replace(/\n/g, ' ')}
             </span>
             <svg
               xmlns="http://www.w3.org/2000/svg"

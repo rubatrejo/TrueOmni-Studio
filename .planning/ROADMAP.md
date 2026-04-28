@@ -77,7 +77,8 @@ Subfases cerradas:
 - [x] 3.14 — Guestbook module con Earth zoom + drag&drop + comments (2026-04-23).
 - [x] 3.15 — Ask AI module (avatar IA flotante + modal con typewriter + voice) (2026-04-23).
 - [x] 3.16 — Photo Booth module (green-screen MediaPipe + editor + share + modales reales + 8 stickers PNG 3D con drag&drop/resize/delete) — **aprobada por Rubén** (2026-04-27).
-- [x] 3.17 — Itinerary Builder (rail unificado sobre 3 buckets de favoritos + welcome popup + tabs dinámicos + mapa con ruta + drag&drop + AI wizard config-driven + share modal con QR + Send to Email/Phone) — **funcional E2E pendiente aprobación visual de Rubén** (2026-04-27).
+- [x] 3.17 — Itinerary Builder (rail unificado sobre 3 buckets de favoritos + welcome popup + tabs dinámicos + mapa con ruta + drag&drop + AI wizard config-driven + share modal con QR + Send to Email/Phone) — **aprobado por Rubén** (2026-04-28).
+- [x] 3.18 — Multi-idioma (6 idiomas: en/es/fr/de/pt/ja) + teclado iOS-style + DraggableKeyboard + seed data refresh — adelantado desde Fase 6 (v2) como pre-requisito de Fase 4 (commit `b201a51`, 2026-04-28).
 
 Pendientes:
 - [ ] Map aggregator integration para trails (follow-up de 3.13).
@@ -120,9 +121,31 @@ Cada sub-fase cumple:
 
 ---
 
+---
+
+## Milestone Studio — Plataforma de gestión de kiosks (Kiosk Studio)
+
+> Detalles completos en `.planning/STUDIO-PROJECT.md` y `.planning/STUDIO-ROADMAP.md`.
+> Plan brainstormeado y aprobado: `/Users/rubenramirez/.claude/plans/wild-weaving-key.md`.
+
+Editor visual white-label para crear y mantener kiosks sin tocar código. Vive como subruta `/studio` en el mismo repo. Live preview siempre visible vía iframe + postMessage. Storage híbrido: Upstash KV durante edición + "publish" exporta a `clients/<slug>/`.
+
+Fases:
+
+- [ ] **S0** — Shell + clientes + preview + persistencia (MVP).
+- [ ] **S1** — Branding tab (3 brand tokens + logos + fonts).
+- [ ] **S2** — Módulos tab (toggle + reorder + labels).
+- [ ] **S3** — Contenido / Data (CRUD listings/events/passes/deals/trails/brochures).
+- [ ] **S4** — i18n editor (6 locales, AI translation).
+- [ ] **S5** — Ads system (subir, calendarizar, emplazar).
+- [ ] **S6** — Integraciones (clima, APIs, Mapbox, Analytics).
+- [ ] **S7** — Auth + Vercel + GitHub PR-publish con approval gate (`ruben@trueomni.com`).
+
+---
+
 ## v2 (después del shipping de v1)
 
-- Fase 6 — Multi-idioma (R9).
+- ~~Fase 6 — Multi-idioma (R9).~~ ✅ adelantado a v1 como sub-fase 3.18 (2026-04-28).
 - Fase 7 — Editor visual de tokens (R10).
 - Fase 8 — Integración APIs externas (R11).
 - Fase 9 — Temas adicionales (R12).

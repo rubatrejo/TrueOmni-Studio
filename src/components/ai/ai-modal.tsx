@@ -22,6 +22,8 @@ interface AiModalTextos {
 interface AiModalProps {
   heroVideoSrc: string;
   textos: AiModalTextos;
+  /** Nombre del cliente — se inyecta en `ai_subtitle` reemplazando `{client_name}`. */
+  clientName?: string;
 }
 
 type SpeechRecognitionAlt = 'SpeechRecognition' | 'webkitSpeechRecognition';
@@ -61,16 +63,19 @@ type SpeechRecognitionCtor = new () => SpeechRecognitionInstance;
  *     diseño mobile original para garantizar legibilidad y target táctil
  *     adecuados a un kiosk retrato 1080×1920.
  */
-export function AiModal({ heroVideoSrc, textos: incomingTextos }: AiModalProps) {
+export function AiModal({ heroVideoSrc, textos: incomingTextos, clientName }: AiModalProps) {
   const t = useTextos();
   const pick = (key: string, fallback: string) => {
     const r = t(key);
     return r === key ? fallback : r;
   };
-  // subtitle se queda con la prop original (ya tiene `{client_name}` interpolado server-side).
+  const subtitleRaw = pick('ai_subtitle', incomingTextos.subtitle);
+  const subtitle = clientName
+    ? subtitleRaw.replaceAll('{client_name}', clientName)
+    : subtitleRaw;
   const textos: AiModalTextos = {
     title: pick('ai_title', incomingTextos.title),
-    subtitle: incomingTextos.subtitle,
+    subtitle,
     inputPlaceholder: pick('ai_input_placeholder', incomingTextos.inputPlaceholder),
     ariaClose: pick('ai_aria_close', incomingTextos.ariaClose),
     ariaMic: pick('ai_aria_mic', incomingTextos.ariaMic),

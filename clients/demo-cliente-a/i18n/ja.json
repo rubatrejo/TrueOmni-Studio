@@ -69,5 +69,21 @@
   "ai_loading_label": "Pensando...",
   "ai_aria_open": "Abrir asistente de IA",
   "ai_aria_close": "Cerrar IA",
-  "ai_aria_mic": "Activar entrada de voz"
+  "ai_aria_mic": "Activar entrada de voz",
+  "billboard_touch_to_start": "タッチして\nスタート",
+  "billboard_touch_here": "タッチ",
+  "billboard_powered_by": "提供",
+  "ai_greeting": "こんにちは！{client_name}のガイドです。レストラン、イベント、アクティビティ、地域の移動について何でも聞いてください。",
+  "ai_suggested_q_restaurants_text": "近くのおすすめレストラン？",
+  "ai_suggested_q_events_text": "今日のイベントは？",
+  "ai_suggested_q_itinerary_text": "旅程を作って",
+  "ai_suggested_q_getting-around_text": "移動方法は？",
+  "ai_suggested_q_waterfront_text": "ウォーターフロントの楽しみ方は？",
+  "ai_suggested_q_weather_text": "天気はどう？",
+  "ai_suggested_q_nightlife_text": "ナイトライフは？",
+  "ai_suggested_q_coffee_text": "おすすめのカフェは？",
+  "idle_warning_title": "まだいますか？",
+  "idle_warning_body": "画面をタッチしてセッションを続けてください。",
+  "idle_warning_continue": "はい、います",
+  "idle_warning_countdown": "{seconds}秒後にホームに戻ります…"
 }

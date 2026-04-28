@@ -101,5 +101,21 @@
   "ai_loading_label": "Thinking...",
   "ai_aria_open": "Open Ask AI assistant",
   "ai_aria_close": "Close Ask AI",
-  "ai_aria_mic": "Toggle voice input"
+  "ai_aria_mic": "Toggle voice input",
+  "billboard_touch_to_start": "Touch\nto Start",
+  "billboard_touch_here": "TOUCH\nHERE",
+  "billboard_powered_by": "Powered by",
+  "ai_greeting": "Hi! I'm your guide to {client_name}. Ask me anything about restaurants, events, activities, or getting around the area.",
+  "ai_suggested_q_restaurants_text": "Best restaurants nearby?",
+  "ai_suggested_q_events_text": "Events happening today?",
+  "ai_suggested_q_itinerary_text": "Build me an itinerary",
+  "ai_suggested_q_getting-around_text": "How do I get around?",
+  "ai_suggested_q_waterfront_text": "Things to do near the waterfront?",
+  "ai_suggested_q_weather_text": "What's the weather like?",
+  "ai_suggested_q_nightlife_text": "Where's the nightlife?",
+  "ai_suggested_q_coffee_text": "Best coffee shops?",
+  "idle_warning_title": "Are you still there?",
+  "idle_warning_body": "Touch the screen to continue your session.",
+  "idle_warning_continue": "Yes, I'm here",
+  "idle_warning_countdown": "Returning home in {seconds}s…"
 }

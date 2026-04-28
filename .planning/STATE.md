@@ -1158,6 +1158,67 @@ driving/walking, SEE 360 funcional, favorite toast).
 
 ---
 
+### Sesión 2026-04-27 (noche) — Fase 3.17 pulido masivo (~25 rondas feedback) + 2 result screens nuevas
+
+**Hecho (commit `eac9273`):**
+
+- **AI Result Screen** rehecho pixel-close al SVG `Finish AI Itinerary`: header estándar kiosk (TrueOmniLogo + WeatherClock + gradient), título 44px, tabs EVENTS·DAY1·DAY2·DAY3 (h:64 px:8 font:22), timeline con 5 entries por día (Breakfast/Activity/Lunch/Event/Dinner) con bullets primary y descripciones (24/18→29/23 +5pt), pills row Start/Stop N alineados con cards 290×163 (16:9), connector lines pill-to-pill, scroll horizontal sincronizado pills+cards, scrollbar oculto, floating BackButton aprobado.
+- **TopSuggestionsScreen** (NUEVO `top-suggestions-screen.tsx`) pixel-close al SVG `Top Suggestions`: header igual + título 51px + subtítulo 28px + QR 124px + scan label 28px + tabs underline-style (Things to do · Events · Restaurants) + grid 2-cols con cards estilo `ListingCard` aprobado (image+footer dark, subcategory+title+distance+open hours, heart top-right) + click → `ListingDetail` in-place.
+- **Routing por aiPath**: state `aiPath: 'ai' | 'top-suggestions'` en módulo. AiPopup.onStart → 'ai', onTopSuggestions → 'top-suggestions'. Render condicional en phase 'ai-result'.
+- **Auto-like** en TopSuggestions: useEffect añade todos los items curados al rail al entrar al screen. Heart toggle quita el like.
+- **AI Question Screen** con header estándar kiosk (TrueOmniLogo + WeatherClock + gradient azul 397px), body max-w-720 centrado, options h:78 22px, footer Back+Next `rounded-xl` h:76 px:14 22px, **floating BackButton SIEMPRE dispara LeaveAiWarningPopup** → confirma → main dashboard. Backbutton del footer (sin icono) solo retrocede pregunta.
+- **AI Loading Screen**: TrueOmniLogo inline + spinner 140×140 + título 78px + body 34px con `\n` para 2 líneas.
+- **AiPopup**: card 880, título 40px, path cards bigger (icons 80×80), CTAs 22px h:68.
+- **ShareItineraryModal**: card 820, título 52px, body 22px más conciso, TrueOmniLogo SVG inline h-38 primary blue (reemplaza Image broken), botones h:64 mt-12.
+- **Smart Route** (nuevo): nearest-neighbor TSP greedy en módulo. Botón en `MapToolbar` h:86 (antes 56) con todos los controles agrandados (pills h:12 px:6 16px, toggles 28×50 22×22 16px). Si la ruta ya está óptima → popup verde olive "You already have the best route!" con `\n` en body.
+- **Bubble switch limpio**: MapCanvas attach `move/zoom/resize` listeners DESPUÉS de `moveend`, `flyToPadding` memoizado, ease 450ms cubic-bezier ease-out. Sin flashes ni pin-chasing. `setSelectedSlug` wrapper que limpia `pinPos` en el mismo tick.
+- **ListingDetail z-60 wrapper**: detail + backdrop encima de toda la pantalla del Itinerary (bypass FloatingHomeButton z-30, MapToolbar z-25, etc).
+- **OnScreenKeyboard**: tap en search bar abre QWERTY al fondo del canvas con backdrop oscuro.
+- **EmptySearchState** (nuevo): cuando search no encuentra resultados, render del icono folder rojo + "Ooops! Try again" + body 4 líneas, pixel-close al SVG.
+- **Drag&drop con threshold 6px** en `use-itinerary-dnd.ts`: tap vs drag distintos, scroll del sidebar funciona normal, drop reorder de stops entre slots, Photo Booth pattern verbatim.
+- **Map fitBounds** cuando rail tiene ≥2 stops para encuadrar la ruta completa con padding configurable.
+- **Events tab**: listings cargan con fallback (todos los eventos si no hay del día), week strip estilo módulo Events (`#1e88c6`, height 180, 7 pills 118×64 verbatim `WeekPicker`), strip movido a top:350 (gap con tabs en y=330), sidebar/AI button bajan a y=540 cuando events activo.
+- **AI generation bumped**: few-hours=3 days, day-trip=4, few-nights=6. Event garantizado en cada día (no solo el primero).
+- **Tabs labels** del Itinerary heredan de `features.home.tiles[].label` para consistencia con dashboard (con `\n`→space para una línea).
+- **Mapbox HSL parser fix**: `hsl(H S% L%)` → `hsl(H, S%, L%)` con comas (`map-canvas.tsx`).
+- **Toolbar chevron eliminado** (a la derecha del Share Itinerary).
+- **Sidebar listings**: COLUMN_WIDTH 400→360, padding 30/30 simétrico (paddingRight reemplaza pr-3), gradient azul oscuro→transparente bottom-up tokenizado, limited al ancho de las cards.
+- **Sub-modal share fix**: ShareItineraryModal se desmonta cuando shareSubModal!='none' o sentDest activo (evita amontonamiento).
+
+**White-label:**
+
+- 8 tokens nuevos `--itinerary-slot-*` (border, connector, pill bg/text/circle, helper text, empty circle, empty icon) en 3 clients.
+- Strings nuevos: `itinerary_slot_start_label/stop_word/remove_aria`, `itinerary_top_*` (8 keys), `itinerary_smart_route_*` (4 keys), `itinerary_empty_search_*` (2 keys), reformateo de `itinerary_caption_drag_more` con `\n`.
+
+**Verificado:**
+
+- 14+ screenshots en `.planning/verifications/3-17-iter*` cubriendo cada ronda de feedback.
+- Drag&drop E2E con dispatch sintético de pointerdown/move/up: card → rail = filled.
+- Bubble switch E2E sin flash visual.
+- Smart Route reordena stops correctamente y dispara popup cuando ya óptima.
+- pnpm typecheck limpio en cada iteración.
+
+**Pendiente / siguiente:**
+
+- Aprobación visual final de Rubén sobre las 2 result screens y el Smart Route popup.
+- Validar el flujo completo en hardware kiosk físico.
+- Conectar `/api/itinerary` con LLM real (Anthropic) cuando llegue Fase 5+.
+- Backend real de share del itinerario (QR + email + phone) y Mapbox Directions API para "Show Driving" (Fase 5+).
+
+**Decisiones clave:**
+
+- Tabs del Itinerary heredan de `features.home.tiles[].label` (no `mod.label` que usa labels marketing largos) para consistencia con el dashboard.
+- Smart Route con nearest-neighbor en client-side (no Mapbox Directions optimization API) — suficiente para v1 y sin dependencia externa.
+- TopSuggestionsScreen como componente NUEVO en lugar de variante de AiResultScreen — el layout es muy diferente (grid 2-cols vs timeline+slider+carousel) y separar es más mantenible.
+- `setSelectedSlug` wrapper que limpia `pinPos` en mismo tick (React 18 batching) — única forma de eliminar el "flash" de bubble con contenido nuevo en posición vieja.
+- `MapCanvas` listeners `move/zoom/resize` se attachan AFTER `moveend` (no al inicio) para que el bubble no se anime ni persiga el pin durante el ease programático. Pans manuales del usuario después del settle siguen funcionando porque los listeners ya quedaron attachados.
+- Floating BackButton del wizard SIEMPRE dispara warning (no toggle entre back/cancel según step) — UX más predecible.
+- Auto-like en TopSuggestions porque la pantalla es "esto te recomendamos, ya lo guardamos al rail; quita lo que no te gusta" — UX inversa al manual.
+
+**Fase:** 3.17 Itinerary Builder **pulido pixel-perfect intensivo cerrado** (2026-04-27 noche, ~25 rondas de feedback en una misma sesión). Listo para aprobación final de Rubén → Fase 4 (primer cliente real).
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

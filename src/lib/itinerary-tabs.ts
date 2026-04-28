@@ -47,6 +47,11 @@ function isItineraryEligible(slug: string, mod: HomeModuleVariant): boolean {
  * - Los tabs de módulo van primero (orden = orden de `features.home.modules`).
  * - El tab fijo `Local Listings` se añade al FINAL solo si el cliente declaró
  *   `local_listings.length > 0`.
+ *
+ * Los labels de los tabs salen del **tile del Home** (`features.home.tiles`)
+ * para mantener consistencia con el dashboard. El `\n` del tile se convierte
+ * a espacio para que el tab quede en una sola línea. Si el módulo no tiene
+ * tile equivalente (caso raro), cae al `mod.label` del propio módulo.
  */
 export function getItineraryTabs(
   config: KioskConfig,
@@ -55,6 +60,13 @@ export function getItineraryTabs(
   const tabs: ItineraryTab[] = [];
 
   const modules = config.features?.home?.modules ?? {};
+  const tilesByKey = new Map(
+    (config.features?.home?.tiles ?? []).map((t) => [t.key, t.label]),
+  );
+  const tabLabelFor = (slug: string, fallback: string): string => {
+    const tileLabel = tilesByKey.get(slug);
+    return tileLabel ? tileLabel.replace(/\s*\n\s*/g, ' ') : fallback;
+  };
   // Orden preferido: things-to-do primero (default tab), luego el resto del
   // config. Mantenemos el orden interno del cliente para los demás slugs.
   const moduleEntries = Object.entries(modules).filter(([slug, mod]) =>
@@ -69,7 +81,7 @@ export function getItineraryTabs(
     const moduleKind = (mod.kind ?? 'listings') as 'listings' | 'events' | 'trails';
     tabs.push({
       slug,
-      label: mod.label,
+      label: tabLabelFor(slug, mod.label),
       isModule: true,
       kind: moduleToKind(moduleKind),
       moduleKind,

@@ -3,6 +3,8 @@
 export interface AiItineraryFloatingCardProps {
   label: string;
   onTap: () => void;
+  /** Y absoluto en el canvas. Default 360. En Events tab subir a ~510. */
+  topY?: number;
 }
 
 /**
@@ -10,7 +12,7 @@ export interface AiItineraryFloatingCardProps {
  * AiPopup. Background gradient azul oscuro → azul claro con icono y texto
  * blancos.
  */
-export function AiItineraryFloatingCard({ label, onTap }: AiItineraryFloatingCardProps) {
+export function AiItineraryFloatingCard({ label, onTap, topY }: AiItineraryFloatingCardProps) {
   return (
     <button
       type="button"
@@ -19,7 +21,7 @@ export function AiItineraryFloatingCard({ label, onTap }: AiItineraryFloatingCar
       className="absolute z-30 flex items-center rounded-md shadow-lg transition hover:opacity-95"
       style={{
         right: 24,
-        top: 360,
+        top: topY ?? 360,
         height: 68,
         gap: 11,
         paddingLeft: 21,

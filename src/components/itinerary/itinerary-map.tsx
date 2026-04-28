@@ -23,6 +23,13 @@ export interface ItineraryMapProps {
   /** Callback cuando el usuario tap un pin. */
   onSelect?: (slug: string) => void;
   selectedSlug?: string | null;
+  /** Posición proyectada del pin seleccionado, para anchor del bubble overlay. */
+  onSelectedPosition?: (pos: { left: number; top: number } | null) => void;
+  /** Padding pasado al easeTo del pin seleccionado (compensa sidebar/overlay). */
+  flyToPadding?: { top?: number; bottom?: number; left?: number; right?: number };
+  /** Si true, cuando cambian los stops del rail (≥2), el mapa hace fitBounds
+   *  para que toda la ruta se vea encuadrada. */
+  fitRouteBounds?: boolean;
   className?: string;
   style?: React.CSSProperties;
   unavailableLabel?: string;
@@ -76,6 +83,9 @@ export function ItineraryMap(props: ItineraryMapProps) {
     showRoute = true,
     onSelect,
     selectedSlug = null,
+    onSelectedPosition,
+    flyToPadding,
+    fitRouteBounds,
     className,
     style,
     unavailableLabel,
@@ -136,6 +146,9 @@ export function ItineraryMap(props: ItineraryMapProps) {
         zoom={zoom}
         selectedSlug={selectedSlug}
         onSelect={(slug) => onSelect?.(slug)}
+        onSelectedPosition={onSelectedPosition}
+        flyToPadding={flyToPadding}
+        fitRouteBounds={fitRouteBounds}
         routeStops={routeStops.length >= 2 ? routeStops : undefined}
         style={{ width: '100%', height: '100%' }}
       />

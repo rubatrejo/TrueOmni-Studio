@@ -114,6 +114,15 @@
   --itinerary-drag-ghost-bg: 220 7% 14%;
   --itinerary-map-fallback-bg: 0 0% 85%;
   --itinerary-map-fallback-fg: 0 0% 29%;
+  --itinerary-slot-border: 0 0% 81%;
+  --itinerary-slot-connector: 0 0% 78%;
+  --itinerary-slot-pill-bg: 0 0% 100%;
+  --itinerary-slot-pill-text: 0 0% 44%;
+  --itinerary-slot-pill-circle: 0 0% 44%;
+  --itinerary-slot-pill-circle-text: 0 0% 100%;
+  --itinerary-slot-helper-text: 0 0% 0%;
+  --itinerary-slot-empty-circle: 0 0% 81%;
+  --itinerary-empty-icon: 0 78% 50%;
 
   /* ---------------------------------------------------------------------- */
   /*  TIPOGRAFÍA                                                            */

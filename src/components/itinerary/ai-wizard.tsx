@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 
 import type { AiQuestion } from '@/lib/config';
+import type { WeatherData } from '@/lib/weather';
 
 import { AiQuestionScreen } from './ai-question-screen';
 
@@ -17,14 +18,17 @@ export interface AiWizardTextos {
 export interface AiWizardProps {
   questions: AiQuestion[];
   textos: AiWizardTextos;
-  /** Logo opcional pasado al question screen header. */
-  logoSrc?: string;
   /** Variables a interpolar en title (ej. {client_name: "Arizona"}). */
   templateVars?: Record<string, string>;
+  /** Weather + locale + tz para el WeatherClock del header de cada pregunta. */
+  weather?: WeatherData | null;
+  locale?: string;
+  timezone?: string;
   /** Disparado cuando el usuario completa la última pregunta. */
   onFinish: (answers: AiAnswers) => void;
-  /** Disparado cuando el usuario pulsa back en la primera pregunta o cierra. */
-  onCancel: () => void;
+  /** Disparado cuando el usuario pulsa el floating back button → mostrar
+   *  warning de "perderías el progreso". El parent decide si confirmar o no. */
+  onRequestLeave: () => void;
 }
 
 const interp = (tpl: string, vars: Record<string, string>) =>
@@ -35,7 +39,7 @@ const interp = (tpl: string, vars: Record<string, string>) =>
  * acumuladas. Pasa cada pregunta al QuestionScreen con back/next handlers.
  */
 export function AiWizard(props: AiWizardProps) {
-  const { questions, textos, onFinish, onCancel } = props;
+  const { questions, textos, onFinish } = props;
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<AiAnswers>({});
 
@@ -58,12 +62,8 @@ export function AiWizard(props: AiWizardProps) {
   }, [step, questions.length, answers, onFinish]);
 
   const handleBack = useCallback(() => {
-    if (step <= 0) {
-      onCancel();
-    } else {
-      setStep((s) => s - 1);
-    }
-  }, [step, onCancel]);
+    if (step > 0) setStep((s) => s - 1);
+  }, [step]);
 
   if (!current) return null;
   const value = answers[current.key] ?? null;
@@ -88,8 +88,10 @@ export function AiWizard(props: AiWizardProps) {
       finishLabel={textos.finish}
       onBack={handleBack}
       onNext={handleNext}
-      onClose={onCancel}
-      logoSrc={props.logoSrc}
+      onRequestLeave={props.onRequestLeave}
+      weather={props.weather}
+      locale={props.locale}
+      timezone={props.timezone}
     />
   );
 }

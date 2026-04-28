@@ -115,6 +115,15 @@
   --itinerary-drag-ghost-bg: 220 7% 14%; /* #1f2227 fondo del clone del drag */
   --itinerary-map-fallback-bg: 0 0% 85%; /* #d8d8d8 fondo "Map unavailable" */
   --itinerary-map-fallback-fg: 0 0% 29%; /* #4a4a4a texto "Map unavailable" */
+  --itinerary-slot-border: 0 0% 81%; /* #cecece — borde de slot vacío */
+  --itinerary-slot-connector: 0 0% 78%; /* #c8c8c8 — línea connector entre pills */
+  --itinerary-slot-pill-bg: 0 0% 100%; /* fondo blanco de pill Start/Stop */
+  --itinerary-slot-pill-text: 0 0% 44%; /* #707070 — texto del pill */
+  --itinerary-slot-pill-circle: 0 0% 44%; /* #707070 — círculo derecho con número/flag */
+  --itinerary-slot-pill-circle-text: 0 0% 100%; /* texto blanco dentro del círculo */
+  --itinerary-slot-helper-text: 0 0% 0%; /* base negro; usar /0.47 para alpha */
+  --itinerary-slot-empty-circle: 0 0% 81%; /* #cecece para el círculo del placeholder */
+  --itinerary-empty-icon: 0 78% 50%; /* #e02020 — icono Ooops! Try again */
 
   /* ---------------------------------------------------------------------- */
   /*  TIPOGRAFÍA                                                            */

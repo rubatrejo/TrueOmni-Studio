@@ -6,12 +6,16 @@ import type { ItineraryStopKind } from './config';
 import type { ItineraryCatalogItem } from './itinerary-catalog';
 
 /**
- * Estado del drag & drop del Itinerary Builder (Fase 3.17).
+ * Drag & drop del Itinerary Builder con threshold de movimiento.
  *
- * Patrón verbatim de Photo Booth (`stickers-row.tsx` + `sticker-layer.tsx`):
- * los listeners pointermove/pointerup se registran en window al iniciar el
- * drag (no via useEffect, para no perder eventos entre el setState y el
- * próximo render). Estado en `useRef` para evitar stale closures.
+ * El drag NO se activa visualmente al pointerdown — solo se arma. Si el
+ * pointer se mueve más de `MOVE_THRESHOLD` px, se activa el drag (drag-ghost
+ * aparece, el flag `isDragging` pasa a true). Esto permite que clicks/taps y
+ * scroll del sidebar de listings convivan con el drag sin conflictos.
+ *
+ * Patrón: listeners en window al primer pointerdown (no via useEffect, para
+ * no perder eventos entre setState y next render). Estado activo en `useRef`
+ * para evitar stale closures durante el gesto.
  */
 
 export type DragPayload =
@@ -26,9 +30,7 @@ export type DragPayload =
     };
 
 export interface DropTargetInfo {
-  /** Si el pointer está sobre el rail. */
   overRail: boolean;
-  /** Index del slot del rail bajo el pointer (0-based). null si no está sobre un slot. */
   slotIndex: number | null;
 }
 
@@ -49,6 +51,7 @@ export interface UseItineraryDndOptions {
 
 const RAIL_DATA_ATTR = 'data-itinerary-rail';
 const SLOT_DATA_ATTR = 'data-itinerary-slot';
+const MOVE_THRESHOLD = 6;
 
 const detectDropTarget = (clientX: number, clientY: number): DropTargetInfo => {
   const els = document.elementsFromPoint(clientX, clientY);
@@ -79,7 +82,9 @@ export function useItineraryDnd(options: UseItineraryDndOptions): UseItineraryDn
   const [dragPayload, setDragPayload] = useState<DragPayload | null>(null);
 
   const dragPayloadRef = useRef<DragPayload | null>(null);
-  // Listeners registrados, para poder removerlos en cleanup.
+  const startPosRef = useRef<{ x: number; y: number } | null>(null);
+  const armedRef = useRef(false);
+  const activeRef = useRef(false);
   const listenersRef = useRef<{
     move: (ev: PointerEvent) => void;
     up: (ev: PointerEvent) => void;
@@ -97,24 +102,43 @@ export function useItineraryDnd(options: UseItineraryDndOptions): UseItineraryDn
     setCursorPos(null);
     setDragPayload(null);
     dragPayloadRef.current = null;
+    startPosRef.current = null;
+    armedRef.current = false;
+    activeRef.current = false;
   }, []);
 
-  const startCommon = useCallback(
+  const arm = useCallback(
     (payload: DragPayload, x: number, y: number) => {
       dragPayloadRef.current = payload;
-      setDragPayload(payload);
-      setCursorPos({ x, y });
-      setIsDragging(true);
+      startPosRef.current = { x, y };
+      armedRef.current = true;
+      activeRef.current = false;
 
       const move = (ev: PointerEvent) => {
-        setCursorPos({ x: ev.clientX, y: ev.clientY });
+        const p = dragPayloadRef.current;
+        const start = startPosRef.current;
+        if (!p || !start) return;
+        // Activación tras superar el threshold.
+        if (!activeRef.current) {
+          const dx = ev.clientX - start.x;
+          const dy = ev.clientY - start.y;
+          if (Math.hypot(dx, dy) >= MOVE_THRESHOLD) {
+            activeRef.current = true;
+            setIsDragging(true);
+            setDragPayload(p);
+          }
+        }
+        if (activeRef.current) {
+          setCursorPos({ x: ev.clientX, y: ev.clientY });
+        }
       };
       const up = (ev: PointerEvent) => {
         const p = dragPayloadRef.current;
-        if (p) {
+        if (p && activeRef.current) {
           const target = detectDropTarget(ev.clientX, ev.clientY);
           onDropRef.current(p, target);
         }
+        // Si nunca activó (movement < threshold) → fue tap, no drop.
         cleanup();
       };
       const cancel = () => cleanup();
@@ -127,7 +151,6 @@ export function useItineraryDnd(options: UseItineraryDndOptions): UseItineraryDn
     [cleanup],
   );
 
-  // Cleanup al unmount.
   useEffect(() => {
     return () => cleanup();
   }, [cleanup]);
@@ -135,9 +158,9 @@ export function useItineraryDnd(options: UseItineraryDndOptions): UseItineraryDn
   const startDragCard = useCallback(
     (item: ItineraryCatalogItem, ev: React.PointerEvent) => {
       if (ev.button !== 0 && ev.pointerType === 'mouse') return;
-      startCommon({ type: 'card', item }, ev.clientX, ev.clientY);
+      arm({ type: 'card', item }, ev.clientX, ev.clientY);
     },
-    [startCommon],
+    [arm],
   );
 
   const startDragStop = useCallback(
@@ -146,9 +169,9 @@ export function useItineraryDnd(options: UseItineraryDndOptions): UseItineraryDn
       ev: React.PointerEvent,
     ) => {
       if (ev.button !== 0 && ev.pointerType === 'mouse') return;
-      startCommon({ type: 'stop', ...payload }, ev.clientX, ev.clientY);
+      arm({ type: 'stop', ...payload }, ev.clientX, ev.clientY);
     },
-    [startCommon],
+    [arm],
   );
 
   return { isDragging, cursorPos, dragPayload, startDragCard, startDragStop };

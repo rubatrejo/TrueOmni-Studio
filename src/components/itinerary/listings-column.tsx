@@ -2,6 +2,7 @@
 
 import type { ItineraryCatalogItem } from '@/lib/itinerary-catalog';
 
+import { EmptySearchState } from './empty-search-state';
 import { ItineraryListingCard } from './itinerary-listing-card';
 
 export interface ListingsColumnProps {
@@ -13,17 +14,26 @@ export interface ListingsColumnProps {
   /** Coords del cliente para calcular distancias. */
   clientCoords?: { lat: number; lng: number };
   emptyLabel: string;
+  /** Si la búsqueda está activa y no hay resultados, mostrar empty state visual. */
+  isSearching?: boolean;
+  emptySearchTitle?: string;
+  emptySearchBody?: string;
   /** Plantilla del label de distancia, ej. "{n} mi away". */
   distanceTemplate: string;
   onCardDragStart?: (
     item: ItineraryCatalogItem,
     ev: React.PointerEvent<HTMLDivElement>,
   ) => void;
+  /** Tap en card → abre bubble del mapa en su coord. */
+  onCardTap?: (item: ItineraryCatalogItem) => void;
+  /** Y inicial del sidebar (default 340). En tab Events se baja a 470 para
+   *  que la week strip no se solape con el sidebar. */
+  topY?: number;
 }
 
 const COLUMN_LEFT_PAD = 30;
 const COLUMN_TOP = 340;
-const COLUMN_WIDTH = 400;
+const COLUMN_WIDTH = 360; // ancho del card (ItineraryListingCard) — calza exacto con padding 30/30
 const COLUMN_TOTAL_WIDTH = COLUMN_LEFT_PAD * 2 + COLUMN_WIDTH;
 const COLUMN_BOTTOM = 310; // queda contra la base del map toolbar
 
@@ -103,23 +113,33 @@ export function ListingsColumn(props: ListingsColumnProps) {
       className="absolute z-20"
       style={{
         left: 0,
-        top: COLUMN_TOP,
+        top: props.topY ?? COLUMN_TOP,
         width: COLUMN_TOTAL_WIDTH,
         bottom: COLUMN_BOTTOM,
         backgroundColor: '#ffffff',
       }}
     >
       <div
-        className="flex h-full flex-col gap-3 overflow-y-auto pr-3 [&::-webkit-scrollbar]:hidden"
+        className="flex h-full flex-col gap-3 overflow-y-auto [&::-webkit-scrollbar]:hidden"
         style={{
           scrollbarWidth: 'none',
           paddingLeft: COLUMN_LEFT_PAD,
+          paddingRight: COLUMN_LEFT_PAD,
           paddingTop: 12,
           paddingBottom: 80,
         }}
       >
         {items.length === 0 ? (
-          <div className="mt-8 text-center text-[15px] text-muted-foreground">{emptyLabel}</div>
+          props.isSearching && props.emptySearchTitle && props.emptySearchBody ? (
+            <EmptySearchState
+              title={props.emptySearchTitle}
+              body={props.emptySearchBody}
+            />
+          ) : (
+            <div className="mt-8 text-center text-[15px] text-muted-foreground">
+              {emptyLabel}
+            </div>
+          )
         ) : (
           items.map((item) => (
             <ItineraryListingCard
@@ -130,18 +150,23 @@ export function ListingsColumn(props: ListingsColumnProps) {
               distanceMi={clientCoords ? haversineMi(item.coords, clientCoords) : undefined}
               distanceTemplate={props.distanceTemplate}
               onDragStart={props.onCardDragStart}
+              onTap={props.onCardTap}
             />
           ))
         )}
       </div>
-      {/* Gradient azul oscuro → transparente al final (fade-out de cards). */}
+      {/* Gradient azul oscuro → transparente al final (fade-out de cards).
+       *  Limitado al ancho de las cards (left=right=COLUMN_LEFT_PAD) para no
+       *  cubrir el padding laterial blanco del sidebar. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0"
+        className="pointer-events-none absolute bottom-0"
         style={{
-          height: 110,
+          left: COLUMN_LEFT_PAD,
+          right: COLUMN_LEFT_PAD,
+          height: 160,
           background:
-            'linear-gradient(to bottom, hsl(var(--itinerary-toolbar-bg) / 0) 0%, hsl(var(--itinerary-toolbar-bg) / 0.95) 100%)',
+            'linear-gradient(to top, hsl(var(--itinerary-toolbar-bg) / 0.95) 0%, hsl(var(--itinerary-toolbar-bg) / 0) 100%)',
         }}
       />
       <SidebarToggle collapsed={false} onToggle={onToggleCollapsed} />

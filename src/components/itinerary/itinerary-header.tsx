@@ -12,6 +12,8 @@ export interface ItineraryHeaderProps {
   searchPlaceholder: string;
   searchValue: string;
   onSearchChange: (v: string) => void;
+  /** Tap en la barra de búsqueda → abre el on-screen keyboard. */
+  onSearchFocus?: () => void;
 }
 
 /**
@@ -24,8 +26,16 @@ export interface ItineraryHeaderProps {
  * perfect se aplica en sub-fase 3.17-13.
  */
 export function ItineraryHeader(props: ItineraryHeaderProps) {
-  const { weather, locale, timezone, title, searchPlaceholder, searchValue, onSearchChange } =
-    props;
+  const {
+    weather,
+    locale,
+    timezone,
+    title,
+    searchPlaceholder,
+    searchValue,
+    onSearchChange,
+    onSearchFocus,
+  } = props;
 
   return (
     <div
@@ -73,9 +83,12 @@ export function ItineraryHeader(props: ItineraryHeaderProps) {
             type="text"
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}
+            onFocus={onSearchFocus}
+            onClick={onSearchFocus}
             placeholder={searchPlaceholder}
             aria-label={searchPlaceholder}
-            className="flex-1 bg-transparent text-[18px] text-foreground placeholder:text-zinc-400 focus:outline-none"
+            readOnly={!!onSearchFocus}
+            className="flex-1 cursor-pointer bg-transparent text-[18px] text-foreground placeholder:text-zinc-400 focus:outline-none"
           />
         </div>
       </div>

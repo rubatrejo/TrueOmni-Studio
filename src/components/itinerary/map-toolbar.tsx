@@ -5,6 +5,7 @@ export interface MapToolbarTextos {
   showDriving: string;
   hideMarkers: string;
   share: string;
+  smartRoute: string;
 }
 
 export interface MapToolbarProps {
@@ -15,6 +16,7 @@ export interface MapToolbarProps {
   onToggleHideMarkers: () => void;
   onRemoveAll: () => void;
   onShare: () => void;
+  onSmartRoute: () => void;
   /** Si false, "Remove All" y "Share" se muestran disabled (rail vacío). */
   hasStops: boolean;
 }
@@ -35,7 +37,7 @@ function Pill({
       type="button"
       onClick={onTap}
       disabled={disabled}
-      className="flex h-9 items-center justify-center rounded-full px-4 text-[13px] font-semibold transition disabled:cursor-not-allowed disabled:opacity-50"
+      className="flex h-12 items-center justify-center rounded-full px-6 text-[16px] font-semibold transition disabled:cursor-not-allowed disabled:opacity-50"
       style={
         variant === 'solid'
           ? {
@@ -45,7 +47,7 @@ function Pill({
           : {
               backgroundColor: 'transparent',
               color: 'white',
-              border: '1px solid rgba(255,255,255,0.7)',
+              border: '1.5px solid rgba(255,255,255,0.75)',
             }
       }
     >
@@ -68,16 +70,16 @@ function Toggle({
       type="button"
       onClick={onChange}
       aria-pressed={on}
-      className="flex items-center gap-2 text-[13px] font-medium text-white"
+      className="flex items-center gap-3 text-[16px] font-medium text-white"
     >
       <span
-        className="relative h-[22px] w-[40px] rounded-full transition"
+        className="relative h-[28px] w-[50px] rounded-full transition"
         style={{ backgroundColor: on ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.35)' }}
       >
         <span
-          className="absolute top-[2px] h-[18px] w-[18px] rounded-full transition"
+          className="absolute top-[3px] h-[22px] w-[22px] rounded-full transition"
           style={{
-            left: on ? 20 : 2,
+            left: on ? 25 : 3,
             backgroundColor: on ? 'hsl(var(--itinerary-toolbar-bg))' : 'white',
           }}
         />
@@ -88,17 +90,18 @@ function Toggle({
 }
 
 /**
- * Bottom bar azul con: Remove All · Show Driving toggle · Hide Markers toggle ·
- * Share Itinerary. Renderizada encima del mapa, justo debajo del map area.
+ * Bottom bar azul con: Remove All · Show Driving · Hide Markers · Smart Route
+ * · Share Itinerary. Smart Route reordena los stops del rail con
+ * nearest-neighbor (TSP greedy) para minimizar la distancia total recorrida.
  */
 export function MapToolbar(props: MapToolbarProps) {
   const { textos, showDriving, hideMarkers } = props;
   return (
     <div
-      className="absolute left-0 right-0 flex items-center gap-4 px-5 text-white"
+      className="absolute left-0 right-0 flex items-center gap-5 px-6 text-white"
       style={{
         bottom: 310,
-        height: 56,
+        height: 86,
         backgroundColor: 'hsl(var(--itinerary-toolbar-bg))',
         zIndex: 25,
       }}
@@ -111,22 +114,19 @@ export function MapToolbar(props: MapToolbarProps) {
       />
       <Toggle label={textos.showDriving} on={showDriving} onChange={props.onToggleDriving} />
       <Toggle label={textos.hideMarkers} on={hideMarkers} onChange={props.onToggleHideMarkers} />
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-3">
+        <Pill
+          label={textos.smartRoute}
+          variant="outline"
+          onTap={props.onSmartRoute}
+          disabled={!props.hasStops}
+        />
         <Pill
           label={textos.share}
           variant="solid"
           onTap={props.onShare}
           disabled={!props.hasStops}
         />
-        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M6 9l6 6 6-6"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            fill="none"
-            strokeLinecap="round"
-          />
-        </svg>
       </div>
     </div>
   );

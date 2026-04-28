@@ -27,6 +27,12 @@ interface MapCanvasProps {
   routeStops?: readonly { lng: number; lat: number }[];
   /** Color CSS de la línea de ruta. Default = primary del kiosk. */
   routeColor?: string;
+  /** Padding (px) aplicado en el easeTo del pin seleccionado para
+   *  desplazar el centro visible. Útil cuando hay sidebar/overlay sobre el mapa. */
+  flyToPadding?: { top?: number; bottom?: number; left?: number; right?: number };
+  /** Si true, cuando cambian los `routeStops` y hay ≥2, el mapa hace
+   *  `fitBounds` para encuadrar todos los stops + ruta dentro del viewport. */
+  fitRouteBounds?: boolean;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -48,6 +54,8 @@ export function MapCanvas({
   onSelectedPosition,
   routeStops,
   routeColor,
+  flyToPadding,
+  fitRouteBounds,
   className,
   style,
 }: MapCanvasProps) {
@@ -174,7 +182,9 @@ export function MapCanvas({
           const v = getComputedStyle(document.documentElement)
             .getPropertyValue('--primary')
             .trim();
-          return v ? `hsl(${v})` : '#0088ce';
+          // Mapbox no acepta el formato moderno `hsl(H S% L%)` (sin comas);
+          // convertir a `hsl(H, S%, L%)` para que la librería lo parsee.
+          return v ? `hsl(${v.split(/\s+/).join(', ')})` : '#0088ce';
         })();
       map.addSource('route', {
         type: 'geojson',
@@ -257,7 +267,24 @@ export function MapCanvas({
         },
       ],
     });
-  }, [routeStops]);
+
+    // Fit bounds para que todos los stops queden visibles.
+    if (fitRouteBounds && routeStops.length >= 2) {
+      const bounds = new mapboxgl.LngLatBounds();
+      routeStops.forEach((s) => bounds.extend([s.lng, s.lat]));
+      const pad = flyToPadding ?? {};
+      map.fitBounds(bounds, {
+        padding: {
+          top: (pad.top ?? 0) + 80,
+          bottom: (pad.bottom ?? 0) + 80,
+          left: (pad.left ?? 0) + 80,
+          right: (pad.right ?? 0) + 80,
+        },
+        duration: 600,
+        maxZoom: 14,
+      });
+    }
+  }, [routeStops, fitRouteBounds, flyToPadding]);
 
   // Selected pin: DOM marker + easeTo + sync de posición para la burbuja.
   useEffect(() => {
@@ -294,24 +321,46 @@ export function MapCanvas({
       const { x, y } = mapRef.current.project([item.coords.lng, item.coords.lat]);
       onSelectedPosition({ left: x, top: y });
     };
-    project();
 
-    map.on('move', project);
-    map.on('zoom', project);
-    map.on('resize', project);
+    // Bubble se oculta durante el ease programático y aparece (con pin debajo)
+    // recién al moveend. Después del moveend, attachamos los listeners de
+    // 'move'/'zoom'/'resize' para que el bubble siga al pin si el usuario pana
+    // manualmente el mapa.
+    onSelectedPosition?.(null);
+
+    let manualListenersAttached = false;
+    const attachManualListeners = () => {
+      if (manualListenersAttached) return;
+      manualListenersAttached = true;
+      map.on('move', project);
+      map.on('zoom', project);
+      map.on('resize', project);
+    };
+
+    const handleMoveEnd = () => {
+      project();
+      attachManualListeners();
+      map.off('moveend', handleMoveEnd);
+    };
+    map.on('moveend', handleMoveEnd);
 
     map.easeTo({
       center: [item.coords.lng, item.coords.lat],
       zoom: Math.max(14, map.getZoom()),
-      duration: 600,
+      duration: 450,
+      easing: (t) => 1 - Math.pow(1 - t, 3),
+      padding: flyToPadding,
     });
 
     return () => {
-      map.off('move', project);
-      map.off('zoom', project);
-      map.off('resize', project);
+      if (manualListenersAttached) {
+        map.off('move', project);
+        map.off('zoom', project);
+        map.off('resize', project);
+      }
+      map.off('moveend', handleMoveEnd);
     };
-  }, [selectedSlug, items, onSelectedPosition]);
+  }, [selectedSlug, items, onSelectedPosition, flyToPadding]);
 
   if (!token) {
     return (

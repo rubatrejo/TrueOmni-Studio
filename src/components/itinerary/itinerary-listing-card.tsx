@@ -14,6 +14,8 @@ export interface ItineraryListingCardProps {
   distanceTemplate?: string;
   /** Si está dentro del drag&drop, callback invocado al pointerdown. */
   onDragStart?: (item: ItineraryCatalogItem, ev: React.PointerEvent<HTMLDivElement>) => void;
+  /** Tap en la card (sin drag) → callback con el item para abrir el bubble en el mapa. */
+  onTap?: (item: ItineraryCatalogItem) => void;
 }
 
 /**
@@ -27,17 +29,38 @@ export interface ItineraryListingCardProps {
  * Coords aproximadas del SVG; pulido pixel-perfect en 3.17-13.
  */
 export function ItineraryListingCard(props: ItineraryListingCardProps) {
-  const { item, isInRail, onToggle, distanceMi, distanceTemplate, onDragStart } = props;
+  const { item, isInRail, onToggle, distanceMi, distanceTemplate, onDragStart, onTap } = props;
   const distanceLabel =
     distanceMi != null && distanceTemplate
       ? distanceTemplate.replace('{n}', distanceMi.toFixed(1))
       : null;
 
+  // Detectar tap vs drag: si el pointer no se mueve más de un threshold, es tap.
+  const handlePointerDown = (ev: React.PointerEvent<HTMLDivElement>) => {
+    onDragStart?.(item, ev);
+    if (!onTap) return;
+    const startX = ev.clientX;
+    const startY = ev.clientY;
+    let moved = false;
+    const onMove = (e: PointerEvent) => {
+      if (Math.hypot(e.clientX - startX, e.clientY - startY) > 6) moved = true;
+    };
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+      if (!moved) onTap(item);
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+  };
+
   return (
     <div
       data-itinerary-card={item.slug}
-      onPointerDown={(ev) => onDragStart?.(item, ev)}
-      className="relative flex-shrink-0 overflow-hidden rounded-[10px] bg-zinc-900 shadow-md"
+      onPointerDown={handlePointerDown}
+      className="relative flex-shrink-0 cursor-pointer overflow-hidden rounded-[10px] bg-zinc-900 shadow-md"
       style={{ width: 360, height: 170 }}
     >
       {item.image ? (

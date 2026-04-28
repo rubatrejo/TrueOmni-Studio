@@ -229,7 +229,7 @@ export async function generateItinerary(
         entries.push(entryFor('lunch', lunch, d, mealPhrases));
       }
       const eventsPick = takeNext(events);
-      if (eventsPick && (preferences['travel_type'] === 'events' || d === 0)) {
+      if (eventsPick) {
         used.add(`${eventsPick.kind}:${eventsPick.slug}`);
         entries.push(entryFor('event', eventsPick, d, mealPhrases));
       }

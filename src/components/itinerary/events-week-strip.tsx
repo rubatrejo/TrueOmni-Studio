@@ -18,11 +18,10 @@ const formatRange = (weekStart: Date, locale: string) => {
   const monthFmt = new Intl.DateTimeFormat(locale, { month: 'long' });
   const startMonth = monthFmt.format(weekStart).toUpperCase();
   const endMonth = monthFmt.format(end).toUpperCase();
-  return `${startMonth} ${weekStart.getDate()} - ${endMonth} ${end.getDate()}`;
+  return `${startMonth} ${weekStart.getDate()} – ${endMonth} ${end.getDate()}`;
 };
 
 const buildDayLabels = (locale: string): string[] => {
-  // Genera labels SUN-SAT con Intl. Usamos un domingo conocido (2024-01-07).
   const sunday = new Date(Date.UTC(2024, 0, 7));
   const fmt = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' });
   return Array.from({ length: 7 }, (_, i) => {
@@ -32,6 +31,14 @@ const buildDayLabels = (locale: string): string[] => {
   });
 };
 
+/**
+ * Week strip del Itinerary Builder en tab Events. Pixel-close al `WeekPicker`
+ * del módulo Events (verbatim SVG `Events.svg`):
+ *   - 180px alto · bg `#1e88c6` (azul medio Eat).
+ *   - Row 1 (78px): chevron + uppercase 34px bold + chevron.
+ *   - Row 2 (102px): 7 pills SUN..SAT 118×64, rounded-md, white border 1.6px,
+ *     active = white fill + text `#004f8b`.
+ */
 export function EventsWeekStrip(props: EventsWeekStripProps) {
   const { weekStart, selectedDayIndex, onDayChange, onPrevWeek, onNextWeek } = props;
   const locale = props.locale ?? 'en-US';
@@ -39,53 +46,57 @@ export function EventsWeekStrip(props: EventsWeekStripProps) {
 
   return (
     <div
-      className="absolute left-0 flex flex-col items-center gap-3 px-6 text-white"
+      className="absolute left-0 text-white"
       style={{
-        top: 320,
+        top: 350,
         width: 1080,
-        height: 130,
-        backgroundColor: 'hsl(var(--itinerary-toolbar-bg))',
+        height: 180,
+        backgroundColor: '#1e88c6',
         zIndex: 9,
       }}
     >
-      <div className="flex w-full items-center justify-center pt-3">
+      {/* Row 1 — chevron + label + chevron */}
+      <div
+        className="flex items-center justify-center"
+        style={{ height: 78, paddingTop: 14 }}
+      >
         <button
           type="button"
           onClick={onPrevWeek}
           aria-label="Previous week"
-          className="flex h-9 w-9 items-center justify-center text-white"
+          className="flex items-center justify-center text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+          style={{ width: 56, height: 56 }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M15 6l-6 6 6 6"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              fill="none"
-              strokeLinecap="round"
-            />
-          </svg>
+          <Chevron direction="left" />
         </button>
-        <span className="mx-4 text-[20px] font-semibold tracking-wider">
+        <span
+          className="font-sans uppercase text-white"
+          style={{
+            fontSize: 34,
+            lineHeight: '34px',
+            fontWeight: 800,
+            letterSpacing: '0.06em',
+            padding: '0 32px',
+          }}
+        >
           {formatRange(weekStart, locale)}
         </span>
         <button
           type="button"
           onClick={onNextWeek}
           aria-label="Next week"
-          className="flex h-9 w-9 items-center justify-center text-white"
+          className="flex items-center justify-center text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+          style={{ width: 56, height: 56 }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M9 6l6 6-6 6"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              fill="none"
-              strokeLinecap="round"
-            />
-          </svg>
+          <Chevron direction="right" />
         </button>
       </div>
-      <div className="flex w-full items-center justify-between gap-2">
+
+      {/* Row 2 — 7 pills */}
+      <div
+        className="flex w-full items-center justify-center"
+        style={{ paddingTop: 4, columnGap: 14 }}
+      >
         {dayLabels.map((label, i) => {
           const isActive = i === selectedDayIndex;
           return (
@@ -94,11 +105,18 @@ export function EventsWeekStrip(props: EventsWeekStripProps) {
               type="button"
               onClick={() => onDayChange(i)}
               aria-pressed={isActive}
-              className="flex h-[44px] flex-1 items-center justify-center rounded-md text-[14px] font-bold transition"
+              className="font-sans uppercase focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
               style={{
-                backgroundColor: isActive ? 'white' : 'transparent',
-                color: isActive ? 'hsl(var(--itinerary-toolbar-bg))' : 'white',
-                border: '1px solid rgba(255,255,255,0.5)',
+                width: 118,
+                height: 64,
+                borderRadius: 8,
+                border: '1.6px solid #ffffff',
+                backgroundColor: isActive ? '#ffffff' : 'transparent',
+                color: isActive ? '#004f8b' : '#ffffff',
+                fontSize: 20,
+                lineHeight: '20px',
+                fontWeight: isActive ? 700 : 600,
+                letterSpacing: '0.06em',
               }}
             >
               {label}
@@ -107,6 +125,22 @@ export function EventsWeekStrip(props: EventsWeekStripProps) {
         })}
       </div>
     </div>
+  );
+}
+
+function Chevron({ direction }: { direction: 'left' | 'right' }) {
+  const d = direction === 'left' ? 'M18 6l-10 10 10 10' : 'M14 6l10 10-10 10';
+  return (
+    <svg width="40" height="40" viewBox="0 0 32 32" aria-hidden>
+      <path
+        d={d}
+        fill="none"
+        stroke="#ffffff"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 

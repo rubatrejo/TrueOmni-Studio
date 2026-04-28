@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 
 import { WeekPicker } from '@/components/events/week-picker';
 import { SearchOverlay } from '@/components/home/search-overlay';
+import { useModuleLabel, useTextosMap } from '@/components/i18n-provider';
 import { FavoriteAddedToast } from '@/components/listings/favorite-added-toast';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { ListingsToolbar } from '@/components/listings/listings-toolbar';
@@ -38,7 +39,6 @@ export function TicketsModule({
   allEvents,
   clientCoords,
   clientTimezone,
-  textos,
   header,
 }: {
   moduleKey: string;
@@ -47,9 +47,10 @@ export function TicketsModule({
   allEvents: readonly EventItem[];
   clientCoords?: { lat: number; lng: number };
   clientTimezone?: string;
-  textos: Record<string, string>;
   header: ReactNode;
 }) {
+  const textos = useTextosMap();
+  const moduleLabel = useModuleLabel(moduleKey, mod.label);
   const today = useMemo(() => todayISO(clientTimezone), [clientTimezone]);
 
   const [selectedDate, setSelectedDate] = useState<string>(today);
@@ -116,7 +117,7 @@ export function TicketsModule({
       {header}
 
       <ListingsToolbar
-        label={mod.label}
+        label={moduleLabel}
         onSearch={() => setSearchOpen(true)}
         onSort={() => setSortOpen(true)}
         onFilter={() => setFilterOpen(true)}

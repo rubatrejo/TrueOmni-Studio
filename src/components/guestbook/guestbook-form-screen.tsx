@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { OnScreenKeyboard, type KeyboardKey } from '@/components/home/on-screen-keyboard';
+import { DraggableKeyboard } from '@/components/keyboard/draggable-keyboard';
 import { NumericKeypad, type NumericKey } from '@/components/listings/numeric-keypad';
 import type { GuestbookCountry } from '@/lib/config';
 
@@ -70,7 +71,6 @@ export function GuestbookFormScreen({
   const [wantUpdates, setWantUpdates] = useState(false);
 
   const [focused, setFocused] = useState<GuestbookField | 'country' | null>('name');
-  const [shift, setShift] = useState(false);
   const [countryOpen, setCountryOpen] = useState(false);
 
   // TODO Fase 3.14 QA: validación completa (Name+Email+Zip+Privacy).
@@ -80,19 +80,11 @@ export function GuestbookFormScreen({
   void email;
   void acceptPrivacy;
 
-  // Auto-cerrar el shift tras un keypress en caps-once mode sería más UX-rich
-  // pero para v1 dejamos el toggle manual.
-  void setShift;
-
   const handleQwerty = (k: KeyboardKey) => {
     if (focused === 'name' || focused === 'email' || focused === 'phone') {
       const setter = focused === 'name' ? setName : focused === 'email' ? setEmail : setPhone;
       if (k === 'BACKSPACE') {
         setter((v) => v.slice(0, -1));
-        return;
-      }
-      if (k === 'SHIFT') {
-        setShift((s) => !s);
         return;
       }
       if (k === 'SPACE') {
@@ -107,18 +99,8 @@ export function GuestbookFormScreen({
         if (next) setFocused(next);
         return;
       }
-      if (k === 'AT') {
-        setter((v) => v + '@');
-        return;
-      }
-      if (k === 'DOT_COM') {
-        setter((v) => v + '.com');
-        return;
-      }
-      if (k === 'CLOSE' || k === 'SYMBOLS') return;
-      if (typeof k === 'string' && k.length === 1) {
+      if (typeof k === 'string') {
         setter((v) => v + k);
-        if (shift) setShift(false);
       }
     }
   };
@@ -152,11 +134,6 @@ export function GuestbookFormScreen({
       wantUpdates,
     });
   };
-
-  useEffect(() => {
-    // Reset shift al cambiar de campo
-    setShift(false);
-  }, [focused]);
 
   return (
     <div className="relative flex h-full w-full flex-col">
@@ -287,40 +264,46 @@ export function GuestbookFormScreen({
         }}
       />
 
-      {/* Teclado pegado al bottom, condicional por campo */}
-      <div
-        className="absolute inset-x-0"
-        style={{
-          bottom: 0,
-          backgroundColor: '#ffffff',
-          boxShadow: '0 -8px 20px rgba(0,0,0,0.12)',
-        }}
-      >
-        {focused === 'zip' ? (
-          <div className="flex w-full justify-center" style={{ padding: '22px 0 28px 0' }}>
-            <div className="flex flex-col items-center" style={{ rowGap: '14px' }}>
-              <button
-                type="button"
-                onClick={onZipDelete}
-                disabled={zip.length === 0}
-                className="font-sans focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
-                style={{
-                  fontSize: '14px',
-                  color: zip.length > 0 ? '#1796d6' : '#b9c4cd',
-                  padding: '4px 12px',
-                  letterSpacing: '0.06em',
-                  fontWeight: 700,
-                }}
-              >
-                ⌫ DELETE LAST DIGIT
-              </button>
-              <NumericKeypad onKey={handleNumeric} />
-            </div>
+      {/* Teclado draggable, condicional por campo */}
+      {focused === 'zip' ? (
+        <DraggableKeyboard
+          width={389}
+          height={440}
+          storageKey="kiosk_keyboard_pos:guestbook-form-numeric"
+        >
+          <div
+            className="flex flex-col items-center"
+            style={{
+              rowGap: '14px',
+              padding: '22px 26px 28px 26px',
+              backgroundColor: '#ffffff',
+              borderRadius: '12px 12px 0 0',
+              boxShadow: '0 -8px 20px rgba(0,0,0,0.12)',
+            }}
+          >
+            <button
+              type="button"
+              onClick={onZipDelete}
+              disabled={zip.length === 0}
+              className="font-sans focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
+              style={{
+                fontSize: '14px',
+                color: zip.length > 0 ? '#1796d6' : '#b9c4cd',
+                padding: '4px 12px',
+                letterSpacing: '0.06em',
+                fontWeight: 700,
+              }}
+            >
+              ⌫ DELETE LAST DIGIT
+            </button>
+            <NumericKeypad onKey={handleNumeric} />
           </div>
-        ) : focused === 'name' || focused === 'email' || focused === 'phone' ? (
-          <OnScreenKeyboard shift={shift} onKey={handleQwerty} />
-        ) : null}
-      </div>
+        </DraggableKeyboard>
+      ) : focused === 'name' || focused === 'email' || focused === 'phone' ? (
+        <DraggableKeyboard storageKey="kiosk_keyboard_pos:guestbook-form">
+          <OnScreenKeyboard onKey={handleQwerty} />
+        </DraggableKeyboard>
+      ) : null}
 
       <GuestbookFloatingBackButton onBack={onBack} />
 

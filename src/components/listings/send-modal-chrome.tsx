@@ -2,6 +2,8 @@
 
 import type { ReactNode } from 'react';
 
+import { DraggableKeyboard } from '@/components/keyboard/draggable-keyboard';
+
 import { useEscapeToClose } from './use-escape-to-close';
 
 /**
@@ -9,7 +11,7 @@ import { useEscapeToClose } from './use-escape-to-close';
  *   - Overlay `rgba(85,85,85,0.8)` inset-0.
  *   - Card blanca 640×480 centrada horizontalmente, top=460.
  *   - Slot `children` para el contenido (label + input + terms + buttons).
- *   - Slot `footer` para el teclado/numpad (bottom=0 dentro del canvas).
+ *   - Slot `footer` para el teclado/numpad — envuelto en `DraggableKeyboard`.
  */
 export function SendModalChrome({
   open,
@@ -17,12 +19,21 @@ export function SendModalChrome({
   title,
   children,
   footer,
+  keyboardWidth,
+  keyboardHeight,
+  keyboardStorageKey,
 }: {
   open: boolean;
   onCancel: () => void;
   title: string;
   children: ReactNode;
   footer: ReactNode;
+  /** Default 1080 (QWERTY). NumericKeypad pasa 337. */
+  keyboardWidth?: number;
+  /** Default 398 (QWERTY). NumericKeypad pasa 345. */
+  keyboardHeight?: number;
+  /** Clave sessionStorage para persistir la posición del keyboard. */
+  keyboardStorageKey?: string;
 }) {
   useEscapeToClose(open, onCancel);
   if (!open) return null;
@@ -64,10 +75,14 @@ export function SendModalChrome({
         {children}
       </div>
 
-      {/* Footer (keyboard/numpad) */}
-      <div className="absolute inset-x-0" style={{ bottom: 0 }}>
+      {/* Footer (keyboard/numpad) — draggable */}
+      <DraggableKeyboard
+        width={keyboardWidth}
+        height={keyboardHeight}
+        storageKey={keyboardStorageKey}
+      >
         {footer}
-      </div>
+      </DraggableKeyboard>
     </div>
   );
 }

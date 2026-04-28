@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { SearchOverlay } from '@/components/home/search-overlay';
+import { useModuleLabel, useTextosMap } from '@/components/i18n-provider';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { ListingsToolbar } from '@/components/listings/listings-toolbar';
 import { SortOverlay } from '@/components/listings/sort-overlay';
@@ -36,14 +37,14 @@ import { DealsGrid } from './deals-grid';
 export function DealsModule({
   moduleKey,
   module: mod,
-  textos,
   header,
 }: {
   moduleKey: string;
   module: HomeDealsModule;
-  textos: Record<string, string>;
   header: ReactNode;
 }) {
+  const textos = useTextosMap();
+  const moduleLabel = useModuleLabel(moduleKey, mod.label);
   const [filter, setFilter] = useState<DealsFilterState>(EMPTY_DEALS_FILTER);
   const [sort, setSort] = useState<DealSortOrder>('expiring-soon');
   const [query, setQuery] = useState<string>('');
@@ -100,7 +101,7 @@ export function DealsModule({
       {header}
 
       <ListingsToolbar
-        label={textos.deals_label ?? mod.label}
+        label={moduleLabel}
         onSearch={() => setSearchOpen(true)}
         onSort={() => setSortOpen(true)}
         onFilter={() => setFilterOpen(true)}
@@ -167,7 +168,7 @@ export function DealsModule({
         />
       ) : null}
 
-      <DealRedeemHost deals={activeDeals} qrLogo={mod.qrLogo} textos={textos} />
+      <DealRedeemHost deals={activeDeals} qrLogo={mod.qrLogo} />
     </div>
   );
 }

@@ -6,8 +6,14 @@ import { useMemo, useState } from 'react';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { WeatherClock } from '@/components/home/weather-clock';
+import { useSubcategoryLabel } from '@/components/i18n-provider';
 import type { ItineraryCatalogItem } from '@/lib/itinerary-catalog';
 import type { WeatherData } from '@/lib/weather';
+
+function SubcategoryText({ subcategory }: { subcategory: string }) {
+  const label = useSubcategoryLabel(subcategory);
+  return <>{label}</>;
+}
 
 export interface TopSuggestionsScreenTextos {
   title: string;
@@ -279,7 +285,7 @@ export function TopSuggestionsScreen(props: TopSuggestionsScreenProps) {
                         textOverflow: 'ellipsis',
                       }}
                     >
-                      {item.subcategory}
+                      <SubcategoryText subcategory={item.subcategory} />
                     </span>
                     <span
                       className="absolute font-sans text-white"
@@ -332,7 +338,7 @@ export function TopSuggestionsScreen(props: TopSuggestionsScreenProps) {
                           textOverflow: 'ellipsis',
                         }}
                       >
-                        Open until {openUntil}
+                        {textos.openUntilPrefix ?? 'Open until'} {openUntil}
                       </span>
                     ) : null}
                   </div>

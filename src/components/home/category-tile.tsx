@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 
+import { useTextos } from '@/components/i18n-provider';
 import type { HomeTile } from '@/lib/config';
 
 interface Props {
@@ -14,8 +15,16 @@ interface Props {
  * Tile 460×460 rx=9 verbatim del SVG Dashboard. Foto + overlay #11100d al
  * 35.2% + label centrado. Click navega a /home/{key} por default, o dispara
  * onClick si se provee (patrón para overlays como Survey).
+ *
+ * El label viene del idioma activo via la key i18n `tile_label_${key}`
+ * (con `-` reemplazado por `_`); si no existe, fallback al `tile.label`
+ * literal del config.
  */
 export function CategoryTile({ tile, onClick }: Props) {
+  const t = useTextos();
+  const i18nKey = `tile_label_${tile.key.replace(/-/g, '_')}`;
+  const resolved = t(i18nKey);
+  const label = resolved === i18nKey ? tile.label : resolved;
   const content = (
     <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -33,7 +42,7 @@ export function CategoryTile({ tile, onClick }: Props) {
           whiteSpace: 'pre-line',
         }}
       >
-        {tile.label.toUpperCase()}
+        {label.toUpperCase()}
       </span>
     </>
   );

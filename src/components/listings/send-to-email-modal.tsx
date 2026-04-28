@@ -20,14 +20,12 @@ export function SendToEmailModal({
   onSent: (email: string) => void;
 }) {
   const [value, setValue] = useState('');
-  const [shift, setShift] = useState(false);
   const [accepted, setAccepted] = useState(true);
 
   // Reset al abrir
   useEffect(() => {
     if (open) {
       setValue('');
-      setShift(false);
       setAccepted(true);
     }
   }, [open]);
@@ -37,23 +35,12 @@ export function SendToEmailModal({
   const handleKey = (k: KeyboardKey) => {
     if (k === 'BACKSPACE') {
       setValue((v) => v.slice(0, -1));
-    } else if (k === 'SHIFT') {
-      setShift((s) => !s);
     } else if (k === 'SPACE') {
       setValue((v) => v + ' ');
     } else if (k === 'ENTER') {
       if (valid) handleSend();
-    } else if (k === 'AT') {
-      setValue((v) => v + '@');
-    } else if (k === 'DOT_COM') {
-      setValue((v) => v + '.com');
-    } else if (k === 'SYMBOLS' || k === 'CLOSE') {
-      // No-op en v1 — se abren submenus de símbolos o cierra teclado.
-      // v1: CLOSE cancela el modal.
-      if (k === 'CLOSE') onCancel();
-    } else if (typeof k === 'string' && k.length === 1) {
+    } else if (typeof k === 'string') {
       setValue((v) => v + k);
-      if (shift) setShift(false);
     }
   };
 
@@ -69,7 +56,8 @@ export function SendToEmailModal({
       open={open}
       onCancel={onCancel}
       title="Send to e-mail"
-      footer={<OnScreenKeyboard shift={shift} onKey={handleKey} />}
+      footer={<OnScreenKeyboard onKey={handleKey} />}
+      keyboardStorageKey="kiosk_keyboard_pos:send-email"
     >
       <div
         className="font-sans text-black"

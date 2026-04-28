@@ -1,5 +1,6 @@
 'use client';
 
+import { useTextosMap } from '@/components/i18n-provider';
 import { ListingDetail } from '@/components/listings/listing-detail';
 import type { EventMeta } from '@/components/listings/listing-detail';
 import type { Listing } from '@/lib/config';
@@ -12,7 +13,6 @@ interface Props {
   category: string;
   durationLabel: string;
   priceDisplay: string;
-  textos: Record<string, string>;
   mapboxToken?: string;
   clientCoords?: { lat: number; lng: number };
 }
@@ -30,10 +30,10 @@ export function TicketDetailWithBuy({
   category,
   durationLabel,
   priceDisplay,
-  textos,
   mapboxToken,
   clientCoords,
 }: Props) {
+  const textos = useTextosMap();
   return (
     <ListingDetail
       moduleKey={moduleKey}

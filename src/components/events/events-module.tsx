@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { SearchOverlay } from '@/components/home/search-overlay';
+import { useModuleLabel } from '@/components/i18n-provider';
 import { FavoriteAddedToast } from '@/components/listings/favorite-added-toast';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { ListingsToolbar } from '@/components/listings/listings-toolbar';
@@ -40,6 +41,7 @@ export function EventsModule({
   clientTimezone?: string;
   header: ReactNode;
 }) {
+  const moduleLabel = useModuleLabel(moduleKey, mod.label);
   const today = useMemo(() => todayISO(clientTimezone), [clientTimezone]);
 
   const [selectedDate, setSelectedDate] = useState<string>(today);
@@ -94,7 +96,7 @@ export function EventsModule({
       {header}
 
       <ListingsToolbar
-        label={mod.label}
+        label={moduleLabel}
         onSearch={() => setSearchOpen(true)}
         onSort={() => setSortOpen(true)}
         onFilter={() => setFilterOpen(true)}

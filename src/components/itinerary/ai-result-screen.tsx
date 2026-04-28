@@ -5,9 +5,15 @@ import { useMemo, useState } from 'react';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { WeatherClock } from '@/components/home/weather-clock';
+import { useSubcategoryLabel } from '@/components/i18n-provider';
 import type { GeneratedItinerary } from '@/lib/ai-itinerary';
 import type { ItineraryCatalogItem } from '@/lib/itinerary-catalog';
 import type { WeatherData } from '@/lib/weather';
+
+function SubcategoryText({ subcategory }: { subcategory: string }) {
+  const label = useSubcategoryLabel(subcategory);
+  return <>{label}</>;
+}
 
 import { AiResultTimeline } from './ai-result-timeline';
 
@@ -271,7 +277,7 @@ export function AiResultScreen(props: AiResultScreenProps) {
                     />
                     <div className="absolute inset-x-4 bottom-3 text-white">
                       <p className="text-[13px] font-semibold uppercase tracking-[0.18em] opacity-85">
-                        {item.subcategory}
+                        <SubcategoryText subcategory={item.subcategory} />
                       </p>
                       <p className="mt-1 text-[22px] font-bold leading-tight">{item.title}</p>
                       {dist ? (

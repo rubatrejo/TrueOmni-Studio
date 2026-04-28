@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { useSubcategoryLabel } from '@/components/i18n-provider';
 import { useEventFavorites, useFavorites } from '@/lib/favorites';
 import type { MapItem } from '@/lib/map-item';
 
@@ -30,6 +31,7 @@ const ACTIVE_SCALE = 1.18;
 const ACTIVE_LIFT = 10; // px que se eleva la card activa para destacarla
 
 export function MapTopCard({ item, active, distanceMi, onClick }: MapTopCardProps) {
+  const subcategoryLabel = useSubcategoryLabel(item.subcategory);
   // Cuando está activa crece 18% en ancho Y alto, se eleva 10px y gana un
   // borde azul + shadow más intenso para que se note inequívocamente cuál
   // está seleccionada en el mapa.
@@ -124,7 +126,7 @@ export function MapTopCard({ item, active, distanceMi, onClick }: MapTopCardProp
             letterSpacing: '0.04em',
           }}
         >
-          {item.subcategory}
+          {subcategoryLabel}
         </span>
         <span
           className="absolute font-sans text-white"

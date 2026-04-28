@@ -2,20 +2,24 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+import { useAvailableLocales, useCurrentLocale } from '@/components/i18n-provider';
+import { LOCALE_LABELS } from '@/lib/i18n';
+import { useLocaleStore } from '@/stores/locale-store';
+
 /**
- * Botón de idiomas 244×80 olive + dropdown que ABRE HACIA ARRIBA (5 idiomas).
- * Dropdown positioned absolute relative to button wrapper, bottom anchored.
- * Se renderiza dentro del canvas (sin portal) — el transform: scale del canvas
- * sirve de containing block, el modal queda limitado al frame del kiosk.
+ * Botón de idiomas 244×80 olive + dropdown que ABRE HACIA ARRIBA.
+ * Idiomas vienen del config del cliente (`features.languages.available`).
+ * Click en un item cambia el idioma activo (sessionStorage + re-render del provider).
  */
-
-const LANGUAGES = ['English', 'Español', 'Français', 'Deutsche', 'Português'] as const;
-
 export function LanguageDropdown() {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Cierra si se toca fuera del wrapper (sin mousedown en el botón).
+  const available = useAvailableLocales();
+  const current = useCurrentLocale();
+  const setLocale = useLocaleStore((s) => s.setLocale);
+
+  // Cierra si se toca fuera del wrapper.
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -26,6 +30,8 @@ export function LanguageDropdown() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
+
+  const currentLabel = (LOCALE_LABELS[current] ?? current).toUpperCase();
 
   return (
     <div ref={wrapperRef} className="relative inline-block">
@@ -59,9 +65,8 @@ export function LanguageDropdown() {
           <circle cx="16" cy="16" r="14" />
           <path d="M2 16h28M16 2c5 4 5 24 0 28M16 2c-5 4-5 24 0 28" />
         </svg>
-        <span style={{ marginLeft: '14px', letterSpacing: '0.02em' }}>ENGLISH</span>
-        {/* Chevron up (apunta arriba — indica que abre hacia arriba).
-            Path verbatim del SVG Billboard 1; y negativos → viewBox incluye y=-12..0 */}
+        <span style={{ marginLeft: '14px', letterSpacing: '0.02em' }}>{currentLabel}</span>
+        {/* Chevron up */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -88,26 +93,34 @@ export function LanguageDropdown() {
             borderRadius: '8px',
           }}
         >
-          {LANGUAGES.map((lang, i) => (
-            <li key={lang} role="none">
-              <button
-                role="menuitem"
-                type="button"
-                onClick={() => setOpen(false)}
-                className="flex w-full items-center text-left font-sans font-bold text-gray-800 hover:bg-gray-50 focus:bg-gray-100 focus:outline-none"
-                style={{
-                  fontSize: '22px',
-                  paddingLeft: '24px',
-                  paddingRight: '24px',
-                  height: '64px',
-                  borderBottom: i < LANGUAGES.length - 1 ? '1px solid #e5e7eb' : 'none',
-                }}
-                aria-current={i === 0 ? 'true' : undefined}
-              >
-                {lang}
-              </button>
-            </li>
-          ))}
+          {available.map((locale, i) => {
+            const label = LOCALE_LABELS[locale] ?? locale;
+            const isCurrent = locale === current;
+            return (
+              <li key={locale} role="none">
+                <button
+                  role="menuitem"
+                  type="button"
+                  onClick={() => {
+                    setLocale(locale);
+                    setOpen(false);
+                  }}
+                  className="flex w-full items-center text-left font-sans font-bold text-gray-800 hover:bg-gray-50 focus:bg-gray-100 focus:outline-none"
+                  style={{
+                    fontSize: '22px',
+                    paddingLeft: '24px',
+                    paddingRight: '24px',
+                    height: '64px',
+                    borderBottom: i < available.length - 1 ? '1px solid #e5e7eb' : 'none',
+                    backgroundColor: isCurrent ? '#f3f4f6' : 'transparent',
+                  }}
+                  aria-current={isCurrent ? 'true' : undefined}
+                >
+                  {label}
+                </button>
+              </li>
+            );
+          })}
         </ul>
       ) : null}
     </div>

@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { OnScreenKeyboard, type KeyboardKey } from '@/components/home/on-screen-keyboard';
+import { useTextosMap } from '@/components/i18n-provider';
+import { DraggableKeyboard } from '@/components/keyboard/draggable-keyboard';
 import type { SurveyConfig, SurveyQuestion } from '@/lib/config';
 import {
   buildResult,
@@ -26,7 +28,6 @@ import { SurveyThankYou } from './survey-thank-you';
 interface Props {
   config: SurveyConfig;
   client: { slug: string };
-  textos: Record<string, string>;
   onClose: () => void;
 }
 
@@ -35,14 +36,14 @@ interface Props {
  * el OnScreenKeyboard se monta FUERA del card, pegado al bottom del canvas
  * (mismo patrón visual que SearchOverlay y SendToEmailModal).
  */
-export function SurveyOverlay({ config, client, textos, onClose }: Props) {
+export function SurveyOverlay({ config, client, onClose }: Props) {
+  const textos = useTextosMap();
   const total = totalSteps(config);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, SurveyAnswer>>({});
   const [contact, setContact] = useState<{ email?: string; phone?: string }>({});
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [shift, setShift] = useState(false);
 
   const isContactStep = config.contactCapture?.enabled === true && step === config.questions.length;
   const isLastStep = step === total - 1;
@@ -70,11 +71,6 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [handleCloseRequest]);
-
-  // Reset shift al cambiar de paso
-  useEffect(() => {
-    setShift(false);
-  }, [step]);
 
   const handleExitConfirmed = useCallback(() => {
     setShowExitConfirm(false);
@@ -105,18 +101,11 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
       const append = (s: string) => setAnswer(currentQuestion.id, (cur + s).slice(0, maxLength));
 
       if (k === 'BACKSPACE') return setAnswer(currentQuestion.id, cur.slice(0, -1));
-      if (k === 'SHIFT') return setShift((s) => !s);
       if (k === 'SPACE') return append(' ');
       if (k === 'ENTER') return append('\n');
-      if (k === 'AT') return append('@');
-      if (k === 'DOT_COM') return append('.com');
-      if (k === 'CLOSE' || k === 'SYMBOLS') return;
-      if (typeof k === 'string' && k.length === 1) {
-        append(k);
-        if (shift) setShift(false);
-      }
+      if (typeof k === 'string') append(k);
     },
-    [answers, currentQuestion, setAnswer, shift],
+    [answers, currentQuestion, setAnswer],
   );
 
   const nextDisabled = (() => {
@@ -247,11 +236,11 @@ export function SurveyOverlay({ config, client, textos, onClose }: Props) {
         </SurveyCard>
       </div>
 
-      {/* OnScreenKeyboard al bottom del canvas, fuera del card — sólo en text step */}
+      {/* OnScreenKeyboard draggable, anclado al bottom del canvas — sólo en text step */}
       {isTextStep && !submitted ? (
-        <div className="absolute bottom-0 left-0 right-0 z-[71]">
-          <OnScreenKeyboard shift={shift} onKey={handleTextKey} />
-        </div>
+        <DraggableKeyboard storageKey="kiosk_keyboard_pos:survey" zIndex={71}>
+          <OnScreenKeyboard onKey={handleTextKey} />
+        </DraggableKeyboard>
       ) : null}
 
       {showExitConfirm ? (

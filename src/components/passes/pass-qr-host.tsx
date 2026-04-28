@@ -1,5 +1,6 @@
 'use client';
 
+import { useTextosMap } from '@/components/i18n-provider';
 import { QrPurchaseHost } from '@/components/shared/qr-purchase-host';
 import type { PassItem } from '@/lib/config';
 import { buildShareResult, dispatchShareResult } from '@/lib/passes';
@@ -7,7 +8,6 @@ import { buildShareResult, dispatchShareResult } from '@/lib/passes';
 interface Props {
   clientSlug: string;
   pass: PassItem;
-  textos: Record<string, string>;
   qrLogo?: string;
 }
 
@@ -18,7 +18,8 @@ interface Props {
  *
  * Vive aquí (no en shared/) porque importa lógica de `@/lib/passes`.
  */
-export function PassQrHost({ clientSlug, pass, textos, qrLogo }: Props) {
+export function PassQrHost({ clientSlug, pass, qrLogo }: Props) {
+  const textos = useTextosMap();
   return (
     <QrPurchaseHost
       eventName="kiosk:pass-share-open"

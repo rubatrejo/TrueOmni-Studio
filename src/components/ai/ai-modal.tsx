@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { SuggestedQuestions } from '@/components/ai/suggested-questions';
 import { OnScreenKeyboard, type KeyboardKey } from '@/components/home/on-screen-keyboard';
+import { useTextos } from '@/components/i18n-provider';
 import { useAiStore } from '@/stores/ai-store';
 
 interface AiModalTextos {
@@ -60,7 +61,20 @@ type SpeechRecognitionCtor = new () => SpeechRecognitionInstance;
  *     diseño mobile original para garantizar legibilidad y target táctil
  *     adecuados a un kiosk retrato 1080×1920.
  */
-export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
+export function AiModal({ heroVideoSrc, textos: incomingTextos }: AiModalProps) {
+  const t = useTextos();
+  const pick = (key: string, fallback: string) => {
+    const r = t(key);
+    return r === key ? fallback : r;
+  };
+  // subtitle se queda con la prop original (ya tiene `{client_name}` interpolado server-side).
+  const textos: AiModalTextos = {
+    title: pick('ai_title', incomingTextos.title),
+    subtitle: incomingTextos.subtitle,
+    inputPlaceholder: pick('ai_input_placeholder', incomingTextos.inputPlaceholder),
+    ariaClose: pick('ai_aria_close', incomingTextos.ariaClose),
+    ariaMic: pick('ai_aria_mic', incomingTextos.ariaMic),
+  };
   const isOpen = useAiStore((s) => s.isOpen);
   const close = useAiStore((s) => s.close);
   const displayedText = useAiStore((s) => s.displayedText);
@@ -68,7 +82,6 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
   const askQuestion = useAiStore((s) => s.askQuestion);
 
   const [inputFocused, setInputFocused] = useState(false);
-  const [shift, setShift] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -146,17 +159,8 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
       setInputValue((v) => v + ' ');
     } else if (key === 'ENTER') {
       handleSend();
-    } else if (key === 'CLOSE') {
-      setInputFocused(false);
-    } else if (key === 'SHIFT') {
-      setShift((s) => !s);
-    } else if (key === 'AT') {
-      setInputValue((v) => v + '@');
-    } else if (key === 'DOT_COM') {
-      setInputValue((v) => v + '.com');
     } else if (typeof key === 'string') {
-      setInputValue((v) => v + (shift ? key.toUpperCase() : key.toLowerCase()));
-      if (shift) setShift(false);
+      setInputValue((v) => v + key);
     }
   }
 
@@ -523,7 +527,7 @@ export function AiModal({ heroVideoSrc, textos }: AiModalProps) {
                   className="flex-shrink-0"
                   style={{ touchAction: 'none' }}
                 >
-                  <OnScreenKeyboard shift={shift} onKey={handleKey} />
+                  <OnScreenKeyboard onKey={handleKey} />
                 </motion.div>
               )}
             </div>

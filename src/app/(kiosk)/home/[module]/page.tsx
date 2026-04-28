@@ -132,7 +132,6 @@ export default async function ModulePage({ params }: PageProps) {
         <PassesModule
           moduleKey={module}
           module={mod}
-          textos={config.textos ?? {}}
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
         />
         <AdsSlot ads={ads} />
@@ -150,7 +149,6 @@ export default async function ModulePage({ params }: PageProps) {
           allEvents={allEvents}
           clientCoords={config.client.coords}
           clientTimezone={config.client.timezone}
-          textos={config.textos ?? {}}
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
         />
         <AdsSlot ads={ads} />
@@ -163,7 +161,6 @@ export default async function ModulePage({ params }: PageProps) {
         <DealsModule
           moduleKey={module}
           module={mod}
-          textos={config.textos ?? {}}
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
         />
         <AdsSlot ads={ads} />
@@ -177,7 +174,6 @@ export default async function ModulePage({ params }: PageProps) {
           moduleKey={module}
           module={mod}
           clientCoords={config.client.coords}
-          textos={config.textos ?? {}}
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
         />
         <AdsSlot ads={ads} />
@@ -190,7 +186,6 @@ export default async function ModulePage({ params }: PageProps) {
         <GuestbookModule
           module={mod}
           mapboxToken={config.integraciones?.mapbox_token}
-          textos={config.textos ?? {}}
           clientFallbackCoords={config.client.coords}
           startHeader={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
           formHeader={

@@ -28,7 +28,6 @@ export default async function ItineraryBuilderPage() {
         config={itinerary}
         fullConfig={config}
         client={config.client}
-        textos={config.textos}
         logoSrc={resolveItineraryAsset(config.branding.logo.default)}
         logoAlt={config.branding.logo.alt ?? config.client.nombre}
         weather={weather}

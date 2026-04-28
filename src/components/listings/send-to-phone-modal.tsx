@@ -60,19 +60,19 @@ export function SendToPhoneModal({
       open={open}
       onCancel={onCancel}
       title="Send to phone"
+      keyboardWidth={389}
+      keyboardHeight={403}
+      keyboardStorageKey="kiosk_keyboard_pos:send-phone"
       footer={
-        <div className="flex w-full justify-center">
-          <div
-            style={{
-              display: 'inline-flex',
-              padding: '26px 26px 32px 26px',
-              backgroundColor: '#ffffff',
-              borderRadius: '12px 12px 0 0',
-              boxShadow: '0 -8px 20px rgba(0,0,0,0.15)',
-            }}
-          >
-            <NumericKeypad onKey={handleKey} />
-          </div>
+        <div
+          style={{
+            padding: '26px 26px 32px 26px',
+            backgroundColor: '#ffffff',
+            borderRadius: '12px 12px 0 0',
+            boxShadow: '0 -8px 20px rgba(0,0,0,0.15)',
+          }}
+        >
+          <NumericKeypad onKey={handleKey} />
         </div>
       }
     >

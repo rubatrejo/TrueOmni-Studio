@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import { OnScreenKeyboard, type KeyboardKey } from '@/components/home/on-screen-keyboard';
+import { DraggableKeyboard } from '@/components/keyboard/draggable-keyboard';
 import { useEscapeToClose } from '@/components/listings/use-escape-to-close';
 
 /**
@@ -38,12 +39,10 @@ export function GuestbookPinCommentModal({
   onCancel: () => void;
 }) {
   const [comment, setComment] = useState(initialComment);
-  const [shift, setShift] = useState(false);
 
   useEffect(() => {
     if (open) {
       setComment(initialComment);
-      setShift(false);
     }
   }, [open, initialComment]);
 
@@ -56,10 +55,6 @@ export function GuestbookPinCommentModal({
       setComment((v) => v.slice(0, -1));
       return;
     }
-    if (k === 'SHIFT') {
-      setShift((s) => !s);
-      return;
-    }
     if (k === 'SPACE') {
       setComment((v) => v + ' ');
       return;
@@ -68,18 +63,8 @@ export function GuestbookPinCommentModal({
       setComment((v) => v + '\n');
       return;
     }
-    if (k === 'AT') {
-      setComment((v) => v + '@');
-      return;
-    }
-    if (k === 'DOT_COM') {
-      setComment((v) => v + '.com');
-      return;
-    }
-    if (k === 'CLOSE' || k === 'SYMBOLS') return;
-    if (typeof k === 'string' && k.length === 1) {
+    if (typeof k === 'string') {
       setComment((v) => (v + k).slice(0, 240));
-      if (shift) setShift(false);
     }
   };
 
@@ -259,16 +244,9 @@ export function GuestbookPinCommentModal({
       </div>
 
       {!readonly ? (
-        <div
-          className="absolute inset-x-0"
-          style={{
-            bottom: 0,
-            backgroundColor: '#ffffff',
-            boxShadow: '0 -8px 20px rgba(0,0,0,0.12)',
-          }}
-        >
-          <OnScreenKeyboard shift={shift} onKey={handleKey} />
-        </div>
+        <DraggableKeyboard storageKey="kiosk_keyboard_pos:guestbook-pin">
+          <OnScreenKeyboard onKey={handleKey} />
+        </DraggableKeyboard>
       ) : null}
     </div>
   );

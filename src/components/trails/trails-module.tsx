@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { SearchOverlay } from '@/components/home/search-overlay';
+import { useModuleLabel, useTextosMap } from '@/components/i18n-provider';
 import { FavoriteAddedToast } from '@/components/listings/favorite-added-toast';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { ListingsGrid } from '@/components/listings/listings-grid';
@@ -36,15 +37,15 @@ export function TrailsModule({
   moduleKey,
   module: mod,
   clientCoords,
-  textos,
   header,
 }: {
   moduleKey: string;
   module: HomeTrailsModule;
   clientCoords?: { lat: number; lng: number };
-  textos: Record<string, string>;
   header: ReactNode;
 }) {
+  const textos = useTextosMap();
+  const moduleLabel = useModuleLabel(moduleKey, mod.label);
   const [filter, setFilter] = useState<TrailFilterState>(EMPTY_TRAILS_FILTER);
   const [sort, setSort] = useState<SortOrder>('popularity');
   const [query, setQuery] = useState('');
@@ -92,7 +93,7 @@ export function TrailsModule({
       {header}
 
       <ListingsToolbar
-        label={textos.trails_label ?? mod.label}
+        label={moduleLabel}
         onSearch={() => setSearchOpen(true)}
         onSort={() => setSortOpen(true)}
         onFilter={() => setFilterOpen(true)}

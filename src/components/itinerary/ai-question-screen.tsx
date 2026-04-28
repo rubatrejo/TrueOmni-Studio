@@ -4,9 +4,29 @@ import Image from 'next/image';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { WeatherClock } from '@/components/home/weather-clock';
+import { useTextos } from '@/components/i18n-provider';
 import type { AiQuestion } from '@/lib/config';
 import { resolveItineraryAsset } from '@/lib/itinerary-asset';
 import type { WeatherData } from '@/lib/weather';
+
+/**
+ * Componente helper que resuelve un campo de pregunta AI vía i18n con fallback
+ * al literal del config. Convención: `ai_question_${qkey}_${field}`.
+ */
+function QField({
+  qkey,
+  field,
+  fallback,
+}: {
+  qkey: string;
+  field: string;
+  fallback: string;
+}) {
+  const t = useTextos();
+  const k = `ai_question_${qkey}_${field}`;
+  const r = t(k);
+  return <>{r === k ? fallback : r}</>;
+}
 
 export interface AiQuestionScreenProps {
   question: AiQuestion;
@@ -131,20 +151,20 @@ export function AiQuestionScreen(props: AiQuestionScreenProps) {
             className="text-center text-[28px] font-bold tracking-wide"
             style={{ color: 'hsl(var(--primary))' }}
           >
-            {question.kicker}
+            <QField qkey={question.key} field="kicker" fallback={question.kicker} />
           </p>
           <h2
             className="mt-4 text-center text-[42px] font-bold leading-tight text-foreground"
             style={{ whiteSpace: 'pre-line' }}
           >
-            {question.title}
+            <QField qkey={question.key} field="title" fallback={question.title} />
           </h2>
           {question.subtitle ? (
             <p
               className="mt-3 text-center text-[20px] font-semibold"
               style={{ color: 'hsl(var(--primary))' }}
             >
-              {question.subtitle}
+              <QField qkey={question.key} field="subtitle" fallback={question.subtitle} />
             </p>
           ) : null}
 
@@ -185,7 +205,13 @@ export function AiQuestionScreen(props: AiQuestionScreenProps) {
                       </svg>
                     ) : null}
                   </span>
-                  <span>{opt.label}</span>
+                  <span>
+                    <QField
+                      qkey={question.key}
+                      field={`option_${opt.value.replace(/-/g, '_')}`}
+                      fallback={opt.label}
+                    />
+                  </span>
                 </button>
               );
             })}

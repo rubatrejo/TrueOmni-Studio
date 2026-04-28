@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { useTextosMap } from '@/components/i18n-provider';
 import { SendConfirmationPopup } from '@/components/listings/send-confirmation-popup';
 import { SendToEmailModal } from '@/components/listings/send-to-email-modal';
 import { SendToPhoneModal } from '@/components/listings/send-to-phone-modal';
@@ -25,12 +26,11 @@ type HostState =
 export function DealRedeemHost({
   deals,
   qrLogo,
-  textos,
 }: {
   deals: readonly Deal[];
   qrLogo?: string;
-  textos: Record<string, string>;
 }) {
+  const textos = useTextosMap();
   const [state, setState] = useState<HostState>({ stage: 'closed' });
 
   useEffect(() => {
@@ -54,7 +54,6 @@ export function DealRedeemHost({
         open={state.stage === 'redeem'}
         deal={state.stage === 'redeem' ? state.deal : null}
         qrLogo={qrLogo}
-        textos={textos}
         onCancel={close}
         onSendPhone={() => {
           if (state.stage === 'redeem') setState({ stage: 'send-phone', deal: state.deal });

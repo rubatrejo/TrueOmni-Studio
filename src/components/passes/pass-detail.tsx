@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { useTextosMap } from '@/components/i18n-provider';
 import { BackButton } from '@/components/listings/back-button';
 import type { PassItem } from '@/lib/config';
 
@@ -10,11 +11,11 @@ import { ActivityRow } from './activity-row';
 interface Props {
   moduleKey: string;
   pass: PassItem;
-  textos: Record<string, string>;
   onShareOpen: () => void;
 }
 
-export function PassDetail({ moduleKey, pass, textos, onShareOpen }: Props) {
+export function PassDetail({ moduleKey, pass, onShareOpen }: Props) {
+  const textos = useTextosMap();
   const [heroError, setHeroError] = useState(false);
   return (
     <div

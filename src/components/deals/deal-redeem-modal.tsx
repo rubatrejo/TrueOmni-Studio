@@ -3,6 +3,7 @@
 import { QRCodeSVG } from 'qrcode.react';
 import { useState } from 'react';
 
+import { useTextosMap } from '@/components/i18n-provider';
 import { useEscapeToClose } from '@/components/listings/use-escape-to-close';
 import type { Deal } from '@/lib/config';
 import { formatDealExpiry } from '@/lib/deals';
@@ -23,7 +24,6 @@ export function DealRedeemModal({
   open,
   deal,
   qrLogo,
-  textos,
   onCancel,
   onSendPhone,
   onSendEmail,
@@ -31,11 +31,11 @@ export function DealRedeemModal({
   open: boolean;
   deal: Deal | null;
   qrLogo?: string;
-  textos: Record<string, string>;
   onCancel: () => void;
   onSendPhone: () => void;
   onSendEmail: () => void;
 }) {
+  const textos = useTextosMap();
   useEscapeToClose(open, onCancel);
   if (!open || !deal) return null;
 

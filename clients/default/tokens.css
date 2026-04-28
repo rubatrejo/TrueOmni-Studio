@@ -69,6 +69,17 @@
   --ai-input-bg: 0 0% 100%; /* fondo del input al focusear (blanco) */
 
   /* ---------------------------------------------------------------------- */
+  /*  ON-SCREEN KEYBOARD (QWERTY + numeric keypad)                          */
+  /*  Compartido entre OnScreenKeyboard y NumericKeypad.                    */
+  /* ---------------------------------------------------------------------- */
+  --keyboard-bg: 0 0% 100%; /* fondo del canvas del teclado (blanco) */
+  --keyboard-key-bg: 206 100% 27%; /* #004f8b — tecla normal */
+  --keyboard-key-special: 201 80% 47%; /* #1796d6 — shift / backspace / 123 / ABC */
+  --keyboard-submit-bg: 206 100% 27%; /* botón Enter (submit) */
+  --keyboard-handle-bg: 206 100% 27%; /* botón flotante drag handle */
+  --keyboard-handle-fg: 0 0% 100%; /* color del icono del handle */
+
+  /* ---------------------------------------------------------------------- */
   /*  PHOTO BOOTH MODULE (Fase 3.16)                                        */
   /*  Tokens del módulo Photo Booth (captura + editor + share).             */
   /* ---------------------------------------------------------------------- */
@@ -133,8 +144,10 @@
      Las variables --font-montserrat y --font-open-sans las inyecta
      next/font en <html> desde src/app/layout.tsx. */
   --font-display:
-    var(--font-montserrat, 'Montserrat'), system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-sans: var(--font-open-sans, 'Open Sans'), system-ui, -apple-system, 'Segoe UI', sans-serif;
+    var(--font-montserrat, 'Montserrat'), var(--font-noto-jp, 'Noto Sans JP'), system-ui,
+    -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: var(--font-open-sans, 'Open Sans'), var(--font-noto-jp, 'Noto Sans JP'), system-ui,
+    -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* Escala de tamaños (kiosk retrato 1080×1920 → escalas grandes para lectura de lejos) */

@@ -55,7 +55,6 @@ export default async function DetailPage({ params }: PageProps) {
           moduleKey={module}
           module={mod}
           clientCoords={config.client.coords}
-          textos={config.textos ?? {}}
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
         />
         <TrailDetail
@@ -63,7 +62,6 @@ export default async function DetailPage({ params }: PageProps) {
           trail={trail}
           mapboxToken={mapboxToken}
           clientCoords={config.client.coords}
-          textos={config.textos ?? {}}
         />
         <AdsSlot ads={ads} />
       </KioskCanvas>
@@ -103,7 +101,6 @@ export default async function DetailPage({ params }: PageProps) {
             category={event.category}
             durationLabel={formatDuration(event.startTime, event.endTime)}
             priceDisplay={event.ticket.priceDisplay}
-            textos={textos}
             mapboxToken={mapboxToken}
             clientCoords={config.client.coords}
           />
@@ -116,7 +113,12 @@ export default async function DetailPage({ params }: PageProps) {
             eventMeta={eventMeta}
             secondaryCta={
               event.ticketsUrl
-                ? { label: 'GET TICKETS', href: event.ticketsUrl, color: 'blue' }
+                ? {
+                    label: 'GET TICKETS',
+                    labelKey: 'events_get_tickets',
+                    href: event.ticketsUrl,
+                    color: 'blue',
+                  }
                 : undefined
             }
             favoritesKind="event"
@@ -179,16 +181,10 @@ export default async function DetailPage({ params }: PageProps) {
         <PassesModule
           moduleKey={module}
           module={mod}
-          textos={config.textos ?? {}}
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
         />
-        <PassDetailWithShare moduleKey={module} pass={pass} textos={config.textos ?? {}} />
-        <PassQrHost
-          clientSlug={config.client.slug}
-          pass={pass}
-          textos={config.textos ?? {}}
-          qrLogo={mod.qrLogo}
-        />
+        <PassDetailWithShare moduleKey={module} pass={pass} />
+        <PassQrHost clientSlug={config.client.slug} pass={pass} qrLogo={mod.qrLogo} />
         <AdsSlot ads={ads} />
       </KioskCanvas>
     );
@@ -218,7 +214,6 @@ export default async function DetailPage({ params }: PageProps) {
           allEvents={allEvents}
           clientCoords={config.client.coords}
           clientTimezone={config.client.timezone}
-          textos={textos}
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
         />
         <TicketDetailWithBuy
@@ -229,7 +224,6 @@ export default async function DetailPage({ params }: PageProps) {
           category={event.category}
           durationLabel={formatDuration(event.startTime, event.endTime)}
           priceDisplay={event.ticket.priceDisplay}
-          textos={textos}
           mapboxToken={mapboxToken}
           clientCoords={config.client.coords}
         />

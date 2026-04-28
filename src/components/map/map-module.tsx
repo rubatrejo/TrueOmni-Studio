@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { SearchOverlay } from '@/components/home/search-overlay';
+import { useTextosMap } from '@/components/i18n-provider';
 import { FavoriteAddedToast } from '@/components/listings/favorite-added-toast';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { ListingDetail } from '@/components/listings/listing-detail';
@@ -85,6 +86,24 @@ export function MapModule({
   header: ReactNode;
 }) {
   void moduleKey;
+
+  // Override textos pre-renderizados por el caller con el idioma activo.
+  const liveTextos = useTextosMap();
+  const incomingTextos = textos;
+  textos = {
+    seeMoreInfo: liveTextos.map_see_more_info ?? incomingTextos.seeMoreInfo,
+    addToItinerary: liveTextos.map_add_to_itinerary ?? incomingTextos.addToItinerary,
+    addedToItinerary: liveTextos.map_added_to_itinerary ?? incomingTextos.addedToItinerary,
+    miAwaySuffix: liveTextos.map_mi_away_suffix ?? incomingTextos.miAwaySuffix,
+    minWalkingSuffix: liveTextos.map_min_walking_suffix ?? incomingTextos.minWalkingSuffix,
+    filtersTitle: liveTextos.filters_title ?? incomingTextos.filtersTitle,
+    clearAll: liveTextos.filters_clear_all ?? incomingTextos.clearAll,
+    apply: liveTextos.filters_apply ?? incomingTextos.apply,
+    featuresLabel: liveTextos.filters_features ?? incomingTextos.featuresLabel,
+    subcategoriesLabel: liveTextos.filters_category ?? incomingTextos.subcategoriesLabel,
+    selectAll: liveTextos.map_select_all ?? incomingTextos.selectAll,
+    exploreTitle: incomingTextos.exploreTitle,
+  };
 
   const [filter, setFilter] = useState<MapFilterState>(EMPTY_MAP_FILTER);
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);

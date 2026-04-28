@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { useTextos } from '@/components/i18n-provider';
 import type { HomeModule } from '@/lib/config';
 import type { FilterState } from '@/lib/listings-filter';
 import { EMPTY_FILTER } from '@/lib/listings-filter';
@@ -38,6 +39,7 @@ export function FilterOverlay({
   }, [open, initial]);
 
   useEscapeToClose(open, onCancel);
+  const t = useTextos();
 
   if (!open) return null;
 
@@ -123,14 +125,14 @@ export function FilterOverlay({
             flexShrink: 0,
           }}
         >
-          FILTERS
+          {t("filters_title")}
         </h2>
 
         <div
           className="scrollbar-hide flex flex-col items-center overflow-y-auto"
           style={{ width: '960px', rowGap: '28px', flexShrink: 0 }}
         >
-          <Section title="Features">
+          <Section title={t("filters_features")}>
             <div
               className="flex flex-wrap items-center justify-center"
               style={{ columnGap: '16px', rowGap: '16px' }}
@@ -147,7 +149,7 @@ export function FilterOverlay({
           </Section>
 
           {mod.subcategories.length > 0 ? (
-            <Section title="Category">
+            <Section title={t("filters_category")}>
               <div
                 className="flex flex-wrap items-center justify-center"
                 style={{ columnGap: '16px', rowGap: '16px' }}
@@ -164,7 +166,7 @@ export function FilterOverlay({
             </Section>
           ) : null}
 
-          <Section title="Price Range">
+          <Section title={t("filters_price_range")}>
             <div className="flex items-center justify-center" style={{ columnGap: '16px' }}>
               {([1, 2, 3, 4] as const).map((p) => (
                 <Pill
@@ -178,9 +180,9 @@ export function FilterOverlay({
             </div>
           </Section>
 
-          <Section title="Availability">
+          <Section title={t("filters_availability")}>
             <Pill
-              label={draft.openNow ? 'Open now' : 'Open now'}
+              label={t('filters_open_now')}
               active={draft.openNow}
               onClick={toggleOpenNow}
               minWidth="200px"
@@ -211,7 +213,7 @@ export function FilterOverlay({
               letterSpacing: '0.06em',
             }}
           >
-            CLEAR ALL
+            {t("filters_clear_all")}
           </button>
           <button
             type="button"
@@ -228,7 +230,7 @@ export function FilterOverlay({
               letterSpacing: '0.06em',
             }}
           >
-            APPLY
+            {t("filters_apply")}
           </button>
         </div>
       </div>

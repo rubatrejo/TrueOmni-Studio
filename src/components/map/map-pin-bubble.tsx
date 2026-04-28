@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 
+import { useSubcategoryLabel } from '@/components/i18n-provider';
 import { useEventFavorites, useFavorites } from '@/lib/favorites';
 import type { MapItem } from '@/lib/map-item';
 import { formatMiAway, walkingEta } from '@/lib/map-walking-eta';
@@ -46,6 +47,7 @@ export function MapPinBubble({
   onSeeMore,
   onClose,
 }: MapPinBubbleProps) {
+  const subcategoryLabel = useSubcategoryLabel(item.subcategory);
   const listingsFavs = useFavorites();
   const eventsFavs = useEventFavorites();
   const isEvent = item.source === 'events';
@@ -157,7 +159,7 @@ export function MapPinBubble({
               textTransform: 'uppercase',
             }}
           >
-            {item.subcategory}
+            {subcategoryLabel}
           </span>
           <h3
             style={{

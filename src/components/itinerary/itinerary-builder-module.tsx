@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useTextosMap } from '@/components/i18n-provider';
 import type { ItineraryConfig, KioskConfig, MapSource } from '@/lib/config';
 import type { MapItem } from '@/lib/map-item';
 import {
@@ -19,6 +20,7 @@ import type { WeatherData } from '@/lib/weather';
 import { generateItinerary, type GeneratedItinerary } from '@/lib/ai-itinerary';
 import { MapPinBubble } from '@/components/map/map-pin-bubble';
 import { OnScreenKeyboard, type KeyboardKey } from '@/components/home/on-screen-keyboard';
+import { DraggableKeyboard } from '@/components/keyboard/draggable-keyboard';
 import { ListingDetail } from '@/components/listings/listing-detail';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { buildItineraryDetailLookup } from '@/lib/itinerary-detail-lookup';
@@ -66,7 +68,6 @@ export interface ItineraryBuilderModuleProps {
   config: ItineraryConfig;
   fullConfig: KioskConfig;
   client: KioskConfig['client'];
-  textos: Record<string, string>;
   logoSrc: string;
   logoAlt: string;
   weather: WeatherData | null;
@@ -83,7 +84,8 @@ function fmt(template: string, vars: Record<string, string>) {
 }
 
 export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
-  const { config, fullConfig, client, textos, mapboxToken } = props;
+  const { config, fullConfig, client, mapboxToken } = props;
+  const textos = useTextosMap();
   const rail = useItineraryRail();
 
   const initialPhase: ItineraryPhase = config.welcome_always_visible
@@ -150,7 +152,6 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
     setPinPos(null);
   }, []);
   const [showKeyboard, setShowKeyboard] = useState(false);
-  const [shiftKey, setShiftKey] = useState(false);
   const [detailKey, setDetailKey] = useState<string | null>(null);
   const detailLookup = useMemo(() => buildItineraryDetailLookup(fullConfig), [fullConfig]);
   // Memoizado para no recrear el objeto en cada render del módulo (re-runs del
@@ -160,41 +161,23 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
     [collapsedListings],
   );
 
-  const handleKeyboardKey = useCallback(
-    (k: KeyboardKey) => {
-      if (k === 'BACKSPACE') {
-        setSearchValue((q) => q.slice(0, -1));
-        return;
-      }
-      if (k === 'SPACE') {
-        setSearchValue((q) => q + ' ');
-        setShiftKey(false);
-        return;
-      }
-      if (k === 'SHIFT') {
-        setShiftKey((s) => !s);
-        return;
-      }
-      if (k === 'AT') {
-        setSearchValue((q) => q + '@');
-        return;
-      }
-      if (k === 'DOT_COM') {
-        setSearchValue((q) => q + '.com');
-        return;
-      }
-      if (k === 'CLOSE' || k === 'ENTER') {
-        setShowKeyboard(false);
-        return;
-      }
-      if (k === 'SYMBOLS') return;
-      if (typeof k === 'string' && k.length === 1) {
-        setSearchValue((q) => q + k);
-        setShiftKey(false);
-      }
-    },
-    [],
-  );
+  const handleKeyboardKey = useCallback((k: KeyboardKey) => {
+    if (k === 'BACKSPACE') {
+      setSearchValue((q) => q.slice(0, -1));
+      return;
+    }
+    if (k === 'SPACE') {
+      setSearchValue((q) => q + ' ');
+      return;
+    }
+    if (k === 'ENTER') {
+      setShowKeyboard(false);
+      return;
+    }
+    if (typeof k === 'string') {
+      setSearchValue((q) => q + k);
+    }
+  }, []);
 
   const allCatalog = useMemo(() => getItineraryCatalogAll(fullConfig), [fullConfig]);
 
@@ -732,6 +715,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
               startOver: textos.itinerary_ai_start_over ?? 'Start Over',
               finish: textos.itinerary_ai_finish_cta ?? 'Finish',
               distanceTemplate: textos.itinerary_distance_away ?? '{n} mi away',
+              openUntilPrefix: textos.map_open_until_prefix ?? 'Open until',
             }}
             weather={props.weather}
             locale={client.locale ?? 'en-US'}
@@ -920,12 +904,9 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             className="absolute inset-0 h-full w-full cursor-default focus:outline-none"
             style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
           />
-          <div
-            className="absolute left-0 right-0"
-            style={{ bottom: 0, height: 398, backgroundColor: '#fff' }}
-          >
-            <OnScreenKeyboard shift={shiftKey} onKey={handleKeyboardKey} />
-          </div>
+          <DraggableKeyboard storageKey="kiosk_keyboard_pos:itinerary">
+            <OnScreenKeyboard onKey={handleKeyboardKey} />
+          </DraggableKeyboard>
         </div>
       )}
 

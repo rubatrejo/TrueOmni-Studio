@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
+import { useTextosMap } from '@/components/i18n-provider';
 import { SendConfirmationPopup } from '@/components/listings/send-confirmation-popup';
 import { SendToEmailModal } from '@/components/listings/send-to-email-modal';
 import { SendToPhoneModal } from '@/components/listings/send-to-phone-modal';
@@ -102,13 +103,59 @@ export function PhotoBoothModule({
   filters,
   mockImageSrc,
   shareBackgroundSrc,
-  textos,
+  textos: incomingTextos,
   logoSrc,
   logoAlt,
   weather,
   locale,
   timezone,
 }: PhotoBoothModuleProps) {
+  const live = useTextosMap();
+  const pickPB = (key: string, fb: string) => live[key] ?? fb;
+  const textos: PhotoBoothTextos = {
+    timerOn: pickPB('photo_booth_timer_on', incomingTextos.timerOn),
+    timerOff: pickPB('photo_booth_timer_off', incomingTextos.timerOff),
+    experienceLabel: pickPB('photo_booth_start_cta', incomingTextos.experienceLabel),
+    startLabel: pickPB('photo_booth_start_label', incomingTextos.startLabel),
+    processing: pickPB('photo_booth_processing', incomingTextos.processing),
+    permissionTitle: pickPB('photo_booth_permission_title', incomingTextos.permissionTitle),
+    permissionBody: pickPB('photo_booth_permission_body', incomingTextos.permissionBody),
+    permissionRetry: pickPB('photo_booth_permission_retry', incomingTextos.permissionRetry),
+    ariaShutter: pickPB('photo_booth_aria_shutter', incomingTextos.ariaShutter),
+    ariaHome: pickPB('photo_booth_aria_home', incomingTextos.ariaHome),
+    ariaBack: pickPB('photo_booth_aria_back', incomingTextos.ariaBack),
+    ariaClose: pickPB('photo_booth_aria_close', incomingTextos.ariaClose),
+    ariaShare: pickPB('photo_booth_aria_share', incomingTextos.ariaShare),
+    tabBackgrounds: pickPB('photo_booth_tab_backgrounds', incomingTextos.tabBackgrounds),
+    tabFrames: pickPB('photo_booth_tab_frames', incomingTextos.tabFrames),
+    tabFilters: pickPB('photo_booth_tab_filters', incomingTextos.tabFilters),
+    shareTitle: pickPB('photo_booth_share_title', incomingTextos.shareTitle),
+    shareEmailCta: pickPB('photo_booth_share_email_cta', incomingTextos.shareEmailCta),
+    shareTextCta: pickPB('photo_booth_share_text_cta', incomingTextos.shareTextCta),
+    shareScanKicker: pickPB('photo_booth_share_scan_kicker', incomingTextos.shareScanKicker),
+    sentEmailTitle: pickPB('photo_booth_sent_email_title', incomingTextos.sentEmailTitle),
+    sentEmailBody: pickPB('photo_booth_sent_email_body', incomingTextos.sentEmailBody),
+    sentPhoneTitle: pickPB('photo_booth_sent_phone_title', incomingTextos.sentPhoneTitle),
+    sentPhoneBody: pickPB('photo_booth_sent_phone_body', incomingTextos.sentPhoneBody),
+    exitTitle: pickPB('photo_booth_exit_title', incomingTextos.exitTitle),
+    exitMessage: pickPB('photo_booth_exit_message', incomingTextos.exitMessage),
+    exitCancel: pickPB('photo_booth_exit_cancel', incomingTextos.exitCancel),
+    exitConfirm: pickPB('photo_booth_exit_confirm', incomingTextos.exitConfirm),
+    // experience teaser body tiene `{client_name}` interpolado en SSR — usar incoming
+    experienceTeaserKicker: pickPB(
+      'photo_booth_experience_kicker',
+      incomingTextos.experienceTeaserKicker,
+    ),
+    experienceTeaserTitle: pickPB(
+      'photo_booth_experience_title',
+      incomingTextos.experienceTeaserTitle,
+    ),
+    experienceTeaserBody: incomingTextos.experienceTeaserBody,
+    experienceTeaserBack: pickPB(
+      'photo_booth_experience_back',
+      incomingTextos.experienceTeaserBack,
+    ),
+  };
   const router = useRouter();
   const camera = useCamera();
   const countdown = useCountdown();

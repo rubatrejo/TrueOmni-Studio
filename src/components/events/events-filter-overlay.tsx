@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { useTextos } from '@/components/i18n-provider';
 import { useEscapeToClose } from '@/components/listings/use-escape-to-close';
 import type { HomeEventsModule } from '@/lib/config';
 import { EMPTY_EVENTS_FILTER, type EventsFilterState } from '@/lib/events-filter';
@@ -36,6 +37,7 @@ export function EventsFilterOverlay({
   }, [open, initial]);
 
   useEscapeToClose(open, onCancel);
+  const t = useTextos();
   if (!open) return null;
 
   const toggleFeature = (f: string) =>
@@ -61,7 +63,8 @@ export function EventsFilterOverlay({
       prices: d.prices.includes(p) ? d.prices.filter((x) => x !== p) : [...d.prices, p],
     }));
 
-  const priceLabel = (p: 'free' | 1 | 2 | 3 | 4) => (p === 'free' ? 'Free' : '$'.repeat(p));
+  const priceLabel = (p: 'free' | 1 | 2 | 3 | 4) =>
+    p === 'free' ? t('filters_price_free') : '$'.repeat(p);
 
   return (
     <div
@@ -119,14 +122,14 @@ export function EventsFilterOverlay({
             flexShrink: 0,
           }}
         >
-          FILTERS
+          {t('filters_title')}
         </h2>
 
         <div
           className="scrollbar-hide flex flex-col items-center overflow-y-auto"
           style={{ width: '960px', rowGap: '24px', flexShrink: 0 }}
         >
-          <Section title="Features">
+          <Section title={t('filters_features')}>
             <PillRow>
               {mod.features.map((f) => (
                 <Pill
@@ -139,7 +142,7 @@ export function EventsFilterOverlay({
             </PillRow>
           </Section>
 
-          <Section title="Category">
+          <Section title={t('filters_category')}>
             <PillRow>
               {mod.categories.map((c) => (
                 <Pill
@@ -152,7 +155,7 @@ export function EventsFilterOverlay({
             </PillRow>
           </Section>
 
-          <Section title="Venue">
+          <Section title={t('filters_venue')}>
             <PillRow>
               {mod.venues.map((v) => (
                 <Pill
@@ -165,7 +168,7 @@ export function EventsFilterOverlay({
             </PillRow>
           </Section>
 
-          <Section title="Price">
+          <Section title={t('filters_price')}>
             <PillRow>
               {(['free', 1, 2, 3, 4] as const).map((p) => (
                 <Pill
@@ -203,7 +206,7 @@ export function EventsFilterOverlay({
               letterSpacing: '0.06em',
             }}
           >
-            CLEAR ALL
+            {t('filters_clear_all')}
           </button>
           <button
             type="button"
@@ -220,7 +223,7 @@ export function EventsFilterOverlay({
               letterSpacing: '0.06em',
             }}
           >
-            APPLY
+            {t('filters_apply')}
           </button>
         </div>
       </div>

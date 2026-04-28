@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { useTextosMap } from '@/components/i18n-provider';
 import type { HomeGuestbookModule } from '@/lib/config';
 import { filterPinsByProximity } from '@/lib/guestbook-bbox';
 import { geocodeZip } from '@/lib/guestbook-geo';
@@ -55,7 +56,6 @@ const GLOBE_DECORATIVE_COORDS: ReadonlyArray<{ lat: number; lng: number }> = [
 export function GuestbookModule({
   module: mod,
   mapboxToken,
-  textos,
   clientFallbackCoords,
   startHeader,
   formHeader,
@@ -63,13 +63,13 @@ export function GuestbookModule({
 }: {
   module: HomeGuestbookModule;
   mapboxToken: string | undefined;
-  textos: Record<string, string>;
   /** Coord de fallback si el geocoding falla. */
   clientFallbackCoords?: { lat: number; lng: number };
   startHeader: ReactNode;
   formHeader: ReactNode;
   mapHeader: ReactNode;
 }) {
+  const textos = useTextosMap();
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>('start');
   const [userData, setUserData] = useState<GuestbookFormData | null>(null);

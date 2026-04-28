@@ -2,8 +2,14 @@
 
 import Image from 'next/image';
 
+import { useSubcategoryLabel } from '@/components/i18n-provider';
 import type { LocalListingItinerary } from '@/lib/config';
 import type { ItineraryCatalogItem } from '@/lib/itinerary-catalog';
+
+function SubcategoryText({ subcategory }: { subcategory: string }) {
+  const label = useSubcategoryLabel(subcategory);
+  return <>{label}</>;
+}
 
 export interface LocalListingPreviewProps {
   itinerary: LocalListingItinerary;
@@ -105,7 +111,7 @@ export function LocalListingPreview(props: LocalListingPreviewProps) {
                     </p>
                     {item ? (
                       <p className="text-[12px] uppercase tracking-wider text-muted-foreground">
-                        {item.subcategory}
+                        <SubcategoryText subcategory={item.subcategory} />
                       </p>
                     ) : null}
                   </div>

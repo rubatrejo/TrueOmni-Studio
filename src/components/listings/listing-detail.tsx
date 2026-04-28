@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
+import { useSubcategoryLabel, useTextos } from '@/components/i18n-provider';
 import type { Listing } from '@/lib/config';
 import { useEventFavorites, useFavorites, useTrailFavorites } from '@/lib/favorites';
 
@@ -36,6 +37,8 @@ export interface EventMeta {
 
 export interface SecondaryCta {
   label: string;
+  /** Si se da, el detail resuelve esta key via i18n y la usa en lugar de `label`. */
+  labelKey?: string;
   /** URL externa (apertura en tab nueva). Mutuamente exclusivo con onClick. */
   href?: string;
   /** Callback sincrónico. Mutuamente exclusivo con href. */
@@ -293,6 +296,7 @@ function DetailHeader({
   listing: Listing;
   onClose?: () => void;
 }) {
+  const subcategoryLabel = useSubcategoryLabel(listing.subcategory);
   return (
     <>
       {/* Fondo azul 899×312 */}
@@ -324,7 +328,7 @@ function DetailHeader({
           display: 'block',
         }}
       >
-        {listing.subcategory}
+        {subcategoryLabel}
       </span>
 
       {/* TITLE @ (48, 81), Helvetica 60, white, baseline y=46.
@@ -635,6 +639,9 @@ function SecondaryCtaButton({
   leftOverride?: number;
   topOverride?: number;
 }) {
+  const t = useTextos();
+  const resolvedLabel = cta.labelKey ? t(cta.labelKey) : cta.label;
+  const label = cta.labelKey && resolvedLabel === cta.labelKey ? cta.label : resolvedLabel;
   const color = cta.color ?? 'blue';
   const bg = color === 'olive' ? '#b9bd39' : '#1796d6';
   const isOutlineRed = color === 'outline-red';
@@ -659,7 +666,7 @@ function SecondaryCtaButton({
   if (cta.onClick) {
     return (
       <button type="button" onClick={cta.onClick} className={className} style={sharedStyle}>
-        {cta.label}
+        {label}
       </button>
     );
   }
@@ -671,7 +678,7 @@ function SecondaryCtaButton({
       className={className}
       style={sharedStyle}
     >
-      {cta.label}
+      {label}
     </a>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTextosMap } from '@/components/i18n-provider';
 import { ListingDetail } from '@/components/listings/listing-detail';
 import type { Trail } from '@/lib/config';
 import { trailToListing } from '@/lib/trails';
@@ -18,14 +19,13 @@ export function TrailDetail({
   trail,
   mapboxToken,
   clientCoords,
-  textos,
 }: {
   moduleKey: string;
   trail: Trail;
   mapboxToken: string | undefined;
   clientCoords?: { lat: number; lng: number };
-  textos: Record<string, string>;
 }) {
+  const textos = useTextosMap();
   const listing = trailToListing(trail);
   // GET DIRECTIONS del `TrailMapTabs` dispara el Directions modal del
   // `ListingDetail` vía un evento global. Para evitar acoplar, delegamos a

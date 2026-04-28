@@ -779,6 +779,17 @@ export interface AdvertisementsConfig {
 }
 
 /**
+ * Configuración multi-idioma del cliente. Las traducciones viven en
+ * `clients/{slug}/i18n/{locale}.json` (uno por idioma, mismo schema flat).
+ * El idioma activo se persiste en sessionStorage; default es `default`.
+ */
+export interface LanguagesConfig {
+  enabled: boolean;
+  available: string[];
+  default: string;
+}
+
+/**
  * Configuración tipada de un cliente del kiosk.
  * Refleja `clients/_template/config.schema.json`. La validación runtime
  * llegará en Fase 5 (zod/valibot). En Fase 2 confiamos en el schema +
@@ -805,7 +816,9 @@ export interface KioskConfig {
   navegacion?: Record<string, string>;
   assets?: Record<string, string>;
   features?: {
-    idioma_secundario?: boolean;
+    /** Configuración multi-idioma. Si `enabled=false` el LanguageDropdown se
+     *  oculta y el kiosk queda fijo en `default`. */
+    languages?: LanguagesConfig;
     mostrar_reloj?: boolean;
     inactividad_reset_seg?: number;
     permitir_compartir_qr?: boolean;

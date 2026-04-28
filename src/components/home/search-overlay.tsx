@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
+import { DraggableKeyboard } from '@/components/keyboard/draggable-keyboard';
 import type { HomeListing } from '@/lib/config';
 import { filterListings } from '@/lib/listings';
 
@@ -18,7 +19,7 @@ import { OnScreenKeyboard, type KeyboardKey } from './on-screen-keyboard';
  *   - Opacity overlay negro 75% sobre el Home visible debajo.
  *   - Search tab en y=620: mismo azul + input + botón SEARCH.
  *   - Search_Result card blanco en (48, 726): 988 wide.
- *   - Keyboard en y=1521: 1080×398 blanco con teclas azules.
+ *   - Keyboard anclado al bottom: 1080×486 blanco con teclas azules + fila de números.
  */
 export function SearchOverlay({
   listings,
@@ -28,44 +29,25 @@ export function SearchOverlay({
   onClose: () => void;
 }) {
   const [query, setQuery] = useState('');
-  const [shift, setShift] = useState(false);
   const results = useMemo(() => filterListings(listings, query), [listings, query]);
 
   const handleKey = (k: KeyboardKey) => {
-    switch (k) {
-      case 'BACKSPACE':
-        setQuery((q) => q.slice(0, -1));
-        return;
-      case 'ENTER':
-        return;
-      case 'SPACE':
-        setQuery((q) => q + ' ');
-        setShift(false);
-        return;
-      case 'SHIFT':
-        setShift((s) => !s);
-        return;
-      case 'AT':
-        setQuery((q) => q + '@');
-        return;
-      case 'DOT_COM':
-        setQuery((q) => q + '.com');
-        return;
-      case 'CLOSE':
-        onClose();
-        return;
-      case 'SYMBOLS':
-        return;
-      default:
-        if (k.length === 1) {
-          setQuery((q) => q + k);
-          setShift(false);
-        }
+    if (k === 'BACKSPACE') {
+      setQuery((q) => q.slice(0, -1));
+      return;
+    }
+    if (k === 'ENTER') return;
+    if (k === 'SPACE') {
+      setQuery((q) => q + ' ');
+      return;
+    }
+    if (typeof k === 'string') {
+      setQuery((q) => q + k);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-40">
+    <div className="fixed inset-0 z-50">
       {/* Overlay negro 75% (clic cierra) */}
       <button
         type="button"
@@ -179,13 +161,10 @@ export function SearchOverlay({
         </div>
       ) : null}
 
-      {/* Keyboard @ y=1521 */}
-      <div
-        className="absolute left-0 right-0"
-        style={{ top: '1521px', height: '399px', backgroundColor: '#fff' }}
-      >
-        <OnScreenKeyboard shift={shift} onKey={handleKey} />
-      </div>
+      {/* Keyboard draggable, anclado por defecto al bottom */}
+      <DraggableKeyboard storageKey="kiosk_keyboard_pos:search">
+        <OnScreenKeyboard onKey={handleKey} />
+      </DraggableKeyboard>
     </div>
   );
 }

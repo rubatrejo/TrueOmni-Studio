@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 import { OnScreenKeyboard, type KeyboardKey } from '@/components/home/on-screen-keyboard';
+import { DraggableKeyboard } from '@/components/keyboard/draggable-keyboard';
 import { useEscapeToClose } from '@/components/listings/use-escape-to-close';
 import { filterBrochures } from '@/lib/brochures-filter';
 import type { BrochureItem } from '@/lib/config';
@@ -24,7 +25,6 @@ export function BrochuresSearchOverlay({
   onClose: () => void;
 }) {
   const [value, setValue] = useState('');
-  const [shift, setShift] = useState(false);
 
   useEscapeToClose(open, onClose);
 
@@ -37,15 +37,9 @@ export function BrochuresSearchOverlay({
 
   const handleKey = (k: KeyboardKey) => {
     if (k === 'BACKSPACE') setValue((v) => v.slice(0, -1));
-    else if (k === 'SHIFT') setShift((s) => !s);
     else if (k === 'SPACE') setValue((v) => v + ' ');
-    else if (k === 'ENTER' || k === 'CLOSE') onClose();
-    else if (k === 'AT') setValue((v) => v + '@');
-    else if (k === 'DOT_COM') setValue((v) => v + '.com');
-    else if (typeof k === 'string' && k.length === 1) {
-      setValue((v) => v + k);
-      if (shift) setShift(false);
-    }
+    else if (k === 'ENTER') onClose();
+    else if (typeof k === 'string') setValue((v) => v + k);
   };
 
   return (
@@ -182,10 +176,10 @@ export function BrochuresSearchOverlay({
         </div>
       ) : null}
 
-      {/* Keyboard */}
-      <div className="absolute inset-x-0" style={{ bottom: 0 }}>
-        <OnScreenKeyboard shift={shift} onKey={handleKey} />
-      </div>
+      {/* Keyboard draggable */}
+      <DraggableKeyboard storageKey="kiosk_keyboard_pos:brochures">
+        <OnScreenKeyboard onKey={handleKey} />
+      </DraggableKeyboard>
     </div>
   );
 }

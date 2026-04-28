@@ -32,7 +32,6 @@ export function QuestionContact({
 }: Props) {
   const initialFocus: Focus = email ? 'email' : 'phone';
   const [focus, setFocus] = useState<Focus>(initialFocus);
-  const [shift, setShift] = useState(false);
 
   const currentEmail = value.email ?? '';
   const currentPhone = value.phone ?? '';
@@ -42,23 +41,10 @@ export function QuestionContact({
       onChange({ ...value, email: currentEmail.slice(0, -1) });
       return;
     }
-    if (k === 'SHIFT') {
-      setShift((s) => !s);
-      return;
-    }
     if (k === 'SPACE') return; // email no space
-    if (k === 'AT') {
-      onChange({ ...value, email: currentEmail + '@' });
-      return;
-    }
-    if (k === 'DOT_COM') {
-      onChange({ ...value, email: currentEmail + '.com' });
-      return;
-    }
-    if (k === 'ENTER' || k === 'CLOSE' || k === 'SYMBOLS') return;
-    if (typeof k === 'string' && k.length === 1) {
+    if (k === 'ENTER') return;
+    if (typeof k === 'string') {
       onChange({ ...value, email: currentEmail + k });
-      if (shift) setShift(false);
     }
   };
 
@@ -154,7 +140,7 @@ export function QuestionContact({
         <div
           style={{ transform: 'scale(0.78)', transformOrigin: 'top center', marginBottom: '-44px' }}
         >
-          <OnScreenKeyboard shift={shift} onKey={handleEmailKey} />
+          <OnScreenKeyboard onKey={handleEmailKey} />
         </div>
       ) : null}
       {focus === 'phone' && phone ? (

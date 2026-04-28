@@ -52,11 +52,7 @@ export default async function HomePage() {
         survey={home.survey}
       />
       <AdsSlot ads={ads} />
-      <SurveyHost
-        survey={home.survey}
-        client={{ slug: config.client.slug }}
-        textos={config.textos}
-      />
+      <SurveyHost survey={home.survey} client={{ slug: config.client.slug }} />
       {askAi && askAiTextos && (
         <>
           <AskAiTrigger

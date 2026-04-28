@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
+import { useSubcategoryLabel, useTextos } from '@/components/i18n-provider';
 import type { Listing } from '@/lib/config';
 
 /**
@@ -28,6 +29,9 @@ export function ListingCard({
   onToggleFavorite?: (slug: string) => void;
   distanceMi?: number;
 }) {
+  const subcategoryLabel = useSubcategoryLabel(listing.subcategory);
+  const t = useTextos();
+  const openUntilPrefix = t('map_open_until_prefix');
   const city = listing.address.split(',').slice(-2, -1)[0]?.trim() ?? '';
   const stateFromAddr = listing.address.match(/,\s*([A-Z]{2})\s/)?.[1] ?? '';
   const distance = distanceMi != null ? `${distanceMi.toFixed(1)} mi · ` : '';
@@ -99,7 +103,7 @@ export function ListingCard({
             textOverflow: 'ellipsis',
           }}
         >
-          {listing.subcategory}
+          {subcategoryLabel}
         </span>
         <span
           className="absolute font-sans text-white"
@@ -150,7 +154,7 @@ export function ListingCard({
             textOverflow: 'ellipsis',
           }}
         >
-          Open until {openUntil}
+          {openUntilPrefix} {openUntil}
         </span>
       </div>
     </Link>

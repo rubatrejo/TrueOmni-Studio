@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { SearchOverlay } from '@/components/home/search-overlay';
+import { useModuleLabel } from '@/components/i18n-provider';
 import type { HomeListing, HomeModule, Listing } from '@/lib/config';
 import { useFavorites } from '@/lib/favorites';
 import type { FilterState } from '@/lib/listings-filter';
@@ -40,6 +41,8 @@ export function ListingsModule({
   /** Hero + header server-rendered (pasado por la page). */
   header: ReactNode;
 }) {
+  const moduleLabel = useModuleLabel(moduleKey, mod.label);
+
   const [filter, setFilter] = useState<FilterState>(EMPTY_FILTER);
   const [sort, setSort] = useState<SortOrder>('popularity');
 
@@ -84,7 +87,7 @@ export function ListingsModule({
 
       {/* Toolbar */}
       <ListingsToolbar
-        label={mod.label}
+        label={moduleLabel}
         onSearch={() => setSearchOpen(true)}
         onSort={() => setSortOpen(true)}
         onFilter={() => setFilterOpen(true)}

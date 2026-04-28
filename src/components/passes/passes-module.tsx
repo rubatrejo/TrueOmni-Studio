@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 
 import { SearchOverlay } from '@/components/home/search-overlay';
+import { useModuleLabel, useTextosMap } from '@/components/i18n-provider';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import type { HomeListing, HomePassesModule } from '@/lib/config';
 
@@ -13,11 +14,12 @@ import { PassesToolbar } from './passes-toolbar';
 interface Props {
   moduleKey: string;
   module: HomePassesModule;
-  textos: Record<string, string>;
   header: ReactNode;
 }
 
-export function PassesModule({ moduleKey, module: mod, textos, header }: Props) {
+export function PassesModule({ moduleKey, module: mod, header }: Props) {
+  const textos = useTextosMap();
+  const moduleLabel = useModuleLabel(moduleKey, mod.label);
   const [searchOpen, setSearchOpen] = useState(false);
 
   const searchPool: HomeListing[] = useMemo(
@@ -35,7 +37,7 @@ export function PassesModule({ moduleKey, module: mod, textos, header }: Props) 
     <div className="relative flex h-full w-full flex-col overflow-hidden bg-white">
       {header}
       <PassesToolbar
-        label={mod.label}
+        label={moduleLabel}
         onSearchOpen={() => setSearchOpen(true)}
         searchAriaLabel={textos.passes_label ?? 'Passes'}
       />

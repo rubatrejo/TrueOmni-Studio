@@ -13,11 +13,9 @@ import type { SurveyConfig } from '@/lib/config';
 export function SurveyHost({
   survey,
   client,
-  textos,
 }: {
   survey?: SurveyConfig;
   client: { slug: string };
-  textos: Record<string, string>;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -29,7 +27,5 @@ export function SurveyHost({
 
   if (!survey?.enabled || !open) return null;
 
-  return (
-    <SurveyOverlay config={survey} client={client} textos={textos} onClose={() => setOpen(false)} />
-  );
+  return <SurveyOverlay config={survey} client={client} onClose={() => setOpen(false)} />;
 }

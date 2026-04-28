@@ -1,5 +1,7 @@
 'use client';
 
+import { useTextos } from '@/components/i18n-provider';
+
 /**
  * Search tab verbatim del SVG Dashboard (y=620..726, 1080×106 #004f8b).
  *   - Input white 940×58 rx=8 @ (55, 24).
@@ -8,8 +10,11 @@
  *   - Label SEARCH 26px Helvetica-Bold white.
  * Al tocar input o botón se dispara `onOpen` para mostrar el overlay
  * de búsqueda encima del Home (modal dentro del frame del kiosk).
+ *
+ * Strings reactivos al idioma activo via `useTextos()`.
  */
 export function SearchBar({ onOpen }: { onOpen: () => void }) {
+  const t = useTextos();
   return (
     <div
       className="relative"
@@ -30,7 +35,7 @@ export function SearchBar({ onOpen }: { onOpen: () => void }) {
         }}
       >
         <span className="font-sans" style={{ fontSize: '24px', color: '#707070' }}>
-          What are you looking for?
+          {t('home_search_placeholder')}
         </span>
       </button>
       <button
@@ -49,7 +54,7 @@ export function SearchBar({ onOpen }: { onOpen: () => void }) {
           letterSpacing: '0.02em',
         }}
       >
-        Search
+        {t('home_search_button')}
       </button>
     </div>
   );

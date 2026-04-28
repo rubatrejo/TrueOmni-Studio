@@ -3,6 +3,7 @@
 import { QRCodeSVG } from 'qrcode.react';
 import { useEffect, useState } from 'react';
 
+import { DraggableKeyboard } from '@/components/keyboard/draggable-keyboard';
 import { NumericKeypad, type NumericKey } from '@/components/listings/numeric-keypad';
 import { TermsCheckbox } from '@/components/listings/send-modal-chrome';
 import { useEscapeToClose } from '@/components/listings/use-escape-to-close';
@@ -259,21 +260,22 @@ export function QrPurchaseModal({
         </div>
       </div>
 
-      <div className="absolute inset-x-0" style={{ bottom: 0 }}>
-        <div className="flex w-full justify-center">
-          <div
-            style={{
-              display: 'inline-flex',
-              padding: '26px 26px 32px 26px',
-              backgroundColor: '#ffffff',
-              borderRadius: '12px 12px 0 0',
-              boxShadow: '0 -8px 20px rgba(0,0,0,0.15)',
-            }}
-          >
-            <NumericKeypad onKey={handleKey} />
-          </div>
+      <DraggableKeyboard
+        width={389}
+        height={403}
+        storageKey="kiosk_keyboard_pos:qr-purchase"
+      >
+        <div
+          style={{
+            padding: '26px 26px 32px 26px',
+            backgroundColor: '#ffffff',
+            borderRadius: '12px 12px 0 0',
+            boxShadow: '0 -8px 20px rgba(0,0,0,0.15)',
+          }}
+        >
+          <NumericKeypad onKey={handleKey} />
         </div>
-      </div>
+      </DraggableKeyboard>
     </div>
   );
 }

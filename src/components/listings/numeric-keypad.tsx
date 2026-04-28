@@ -34,8 +34,8 @@ interface KeySpec {
 const KEY_W = 73;
 const KEY_H = 75;
 const GAP = 15;
-const BG = '#004f8b';
-const BG_SPECIAL = '#1796d6';
+const BG = 'hsl(var(--keyboard-key-bg))';
+const BG_SPECIAL = 'hsl(var(--keyboard-key-special))';
 
 function buildLayout(): KeySpec[] {
   const cell = (col: number, row: number) => ({

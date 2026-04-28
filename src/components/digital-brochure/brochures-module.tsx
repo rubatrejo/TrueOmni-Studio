@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { useModuleLabel } from '@/components/i18n-provider';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { filterBrochures } from '@/lib/brochures-filter';
 import type { HomeDigitalBrochureModule } from '@/lib/config';
@@ -21,6 +22,7 @@ export function BrochuresModule({
   module: HomeDigitalBrochureModule;
   header: ReactNode;
 }) {
+  const moduleLabel = useModuleLabel(moduleKey, mod.label);
   const [activeCategory, setActiveCategory] = useState<string | 'all'>('all');
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -35,7 +37,7 @@ export function BrochuresModule({
       style={{ backgroundColor: '#ffffff' }}
     >
       {header}
-      <BrochuresHeader label={mod.label} onSearch={() => setSearchOpen(true)} />
+      <BrochuresHeader label={moduleLabel} onSearch={() => setSearchOpen(true)} />
       <BrochuresTabs
         categories={mod.categories}
         active={activeCategory}

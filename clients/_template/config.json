@@ -129,7 +129,11 @@
     "poster_atraccion": "assets/poster.jpg"
   },
   "features": {
-    "idioma_secundario": false,
+    "languages": {
+      "enabled": true,
+      "available": ["en", "es", "fr", "de", "pt", "ja"],
+      "default": "en"
+    },
     "mostrar_reloj": true,
     "inactividad_reset_seg": 90,
     "permitir_compartir_qr": false,

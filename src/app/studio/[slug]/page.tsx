@@ -11,7 +11,12 @@ import {
   DEFAULT_SOCIAL_WALL,
   DEFAULT_SURVEY,
   DEFAULT_SYSTEM_MODULES,
+  defaultEvents,
+  defaultListings,
   defaultModules,
+  defaultPasses,
+  defaultTickets,
+  defaultTrails,
   type ConfigMeta,
   type KioskConfig,
 } from '@/lib/studio/schema';
@@ -43,6 +48,11 @@ export default async function StudioEditorPage({
     brochures: raw.brochures ?? structuredClone(DEFAULT_BROCHURES),
     socialWall: raw.socialWall ?? structuredClone(DEFAULT_SOCIAL_WALL),
     guestbook: raw.guestbook ?? structuredClone(DEFAULT_GUESTBOOK),
+    listings: raw.listings ?? defaultListings(),
+    events: raw.events ?? defaultEvents(),
+    tickets: raw.tickets ?? defaultTickets(),
+    passes: raw.passes ?? defaultPasses(),
+    trails: raw.trails ?? defaultTrails(),
   };
   const meta = await kv.get<ConfigMeta>(kvKeys.cfgMeta(slug));
 

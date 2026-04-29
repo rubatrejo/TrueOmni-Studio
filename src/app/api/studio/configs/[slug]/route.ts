@@ -16,16 +16,29 @@ import {
   DEFAULT_SURVEY,
   DEFAULT_SYSTEM_MODULES,
   DealsModuleSchema,
+  EventsModuleSchema,
   GuestbookSchema,
   KioskConfigSchema,
+  ListingsModuleSchema,
   ModulesSchema,
+  PassesModuleSchema,
   PhotoBoothSchema,
   SocialWallSchema,
   SurveySchema,
+  TicketsModuleSchema,
+  TrailsModuleSchema,
+  defaultEvents,
+  defaultListings,
   defaultModules,
+  defaultPasses,
+  defaultTickets,
+  defaultTrails,
   type ConfigMeta,
   type KioskConfig,
 } from '@/lib/studio/schema';
+
+/** Hard cap to keep KV values comfortably under the 512 KB Upstash limit. */
+const KV_VALUE_BYTE_CAP = 480_000;
 
 /**
  * `/api/studio/configs/[slug]`
@@ -77,6 +90,11 @@ function hydrateConfig(cfg: KioskConfig): KioskConfig {
     brochures: cfg.brochures ?? structuredClone(DEFAULT_BROCHURES),
     socialWall: cfg.socialWall ?? structuredClone(DEFAULT_SOCIAL_WALL),
     guestbook: cfg.guestbook ?? structuredClone(DEFAULT_GUESTBOOK),
+    listings: cfg.listings ?? defaultListings(),
+    events: cfg.events ?? defaultEvents(),
+    tickets: cfg.tickets ?? defaultTickets(),
+    passes: cfg.passes ?? defaultPasses(),
+    trails: cfg.trails ?? defaultTrails(),
   };
 }
 
@@ -97,6 +115,11 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       brochures?: unknown;
       socialWall?: unknown;
       guestbook?: unknown;
+      listings?: unknown;
+      events?: unknown;
+      tickets?: unknown;
+      passes?: unknown;
+      trails?: unknown;
     };
 
     let next: KioskConfig = cfg;
@@ -305,12 +328,75 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       }
       next = { ...next, guestbook: parsed.data };
     }
+    if (body.listings !== undefined) {
+      const parsed = ListingsModuleSchema.safeParse(body.listings);
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: 'Invalid listings', issues: parsed.error.issues },
+          { status: 400 },
+        );
+      }
+      next = { ...next, listings: parsed.data };
+    }
+    if (body.events !== undefined) {
+      const parsed = EventsModuleSchema.safeParse(body.events);
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: 'Invalid events', issues: parsed.error.issues },
+          { status: 400 },
+        );
+      }
+      next = { ...next, events: parsed.data };
+    }
+    if (body.tickets !== undefined) {
+      const parsed = TicketsModuleSchema.safeParse(body.tickets);
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: 'Invalid tickets', issues: parsed.error.issues },
+          { status: 400 },
+        );
+      }
+      next = { ...next, tickets: parsed.data };
+    }
+    if (body.passes !== undefined) {
+      const parsed = PassesModuleSchema.safeParse(body.passes);
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: 'Invalid passes', issues: parsed.error.issues },
+          { status: 400 },
+        );
+      }
+      next = { ...next, passes: parsed.data };
+    }
+    if (body.trails !== undefined) {
+      const parsed = TrailsModuleSchema.safeParse(body.trails);
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: 'Invalid trails', issues: parsed.error.issues },
+          { status: 400 },
+        );
+      }
+      next = { ...next, trails: parsed.data };
+    }
 
     const validated = KioskConfigSchema.safeParse(next);
     if (!validated.success) {
       return NextResponse.json(
         { error: 'Invalid config after patch', issues: validated.error.issues },
         { status: 400 },
+      );
+    }
+
+    const serialized = JSON.stringify(validated.data);
+    if (serialized.length > KV_VALUE_BYTE_CAP) {
+      return NextResponse.json(
+        {
+          error:
+            'Config too large for KV (cap 512 KB). Reduce image sizes or use external URLs.',
+          size: serialized.length,
+          cap: KV_VALUE_BYTE_CAP,
+        },
+        { status: 413 },
       );
     }
 

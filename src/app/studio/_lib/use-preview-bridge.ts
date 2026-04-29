@@ -8,11 +8,16 @@ import type {
   BillboardConfig,
   BrochuresModuleConfig,
   DealsModuleConfig,
+  EventsModule,
   GuestbookConfig,
+  ListingsModule,
   ModulesConfig,
+  PassesModule,
   PhotoBoothConfig,
   SocialWallConfig,
   SurveyConfig,
+  TicketsModule,
+  TrailsModule,
 } from '@/lib/studio/schema';
 
 /**
@@ -72,6 +77,11 @@ export function usePreviewBridge() {
   const lastBrochuresRef = useRef<BrochuresModuleConfig | null>(null);
   const lastSocialWallRef = useRef<SocialWallConfig | null>(null);
   const lastGuestbookRef = useRef<GuestbookConfig | null>(null);
+  const lastListingsRef = useRef<ListingsModule | null>(null);
+  const lastEventsRef = useRef<EventsModule | null>(null);
+  const lastTicketsRef = useRef<TicketsModule | null>(null);
+  const lastPassesRef = useRef<PassesModule | null>(null);
+  const lastTrailsRef = useRef<TrailsModule | null>(null);
   const brandingDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const modulesDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const billboardDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -82,6 +92,11 @@ export function usePreviewBridge() {
   const brochuresDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const socialWallDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const guestbookDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const listingsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const eventsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ticketsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const passesDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const trailsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isReady, setIsReady] = useState(false);
 
   const sendBrandingNow = useCallback((branding: BrandingPatch) => {
@@ -243,6 +258,46 @@ export function usePreviewBridge() {
     } catch {}
   }, []);
 
+  const sendListingsNow = useCallback((listings: ListingsModule) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:listings-update', listings }, '*');
+    } catch {}
+  }, []);
+
+  const sendEventsNow = useCallback((events: EventsModule) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:events-update', events }, '*');
+    } catch {}
+  }, []);
+
+  const sendTicketsNow = useCallback((tickets: TicketsModule) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:tickets-update', tickets }, '*');
+    } catch {}
+  }, []);
+
+  const sendPassesNow = useCallback((passes: PassesModule) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:passes-update', passes }, '*');
+    } catch {}
+  }, []);
+
+  const sendTrailsNow = useCallback((trails: TrailsModule) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:trails-update', trails }, '*');
+    } catch {}
+  }, []);
+
   // Listener del handshake studio:ready desde el iframe.
   useEffect(() => {
     const handler = (event: MessageEvent) => {
@@ -259,6 +314,11 @@ export function usePreviewBridge() {
       if (lastBrochuresRef.current) sendBrochuresNow(lastBrochuresRef.current);
       if (lastSocialWallRef.current) sendSocialWallNow(lastSocialWallRef.current);
       if (lastGuestbookRef.current) sendGuestbookNow(lastGuestbookRef.current);
+      if (lastListingsRef.current) sendListingsNow(lastListingsRef.current);
+      if (lastEventsRef.current) sendEventsNow(lastEventsRef.current);
+      if (lastTicketsRef.current) sendTicketsNow(lastTicketsRef.current);
+      if (lastPassesRef.current) sendPassesNow(lastPassesRef.current);
+      if (lastTrailsRef.current) sendTrailsNow(lastTrailsRef.current);
     };
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
@@ -273,6 +333,11 @@ export function usePreviewBridge() {
     sendBrochuresNow,
     sendSocialWallNow,
     sendGuestbookNow,
+    sendListingsNow,
+    sendEventsNow,
+    sendTicketsNow,
+    sendPassesNow,
+    sendTrailsNow,
   ]);
 
   const pushBranding = useCallback(
@@ -365,6 +430,51 @@ export function usePreviewBridge() {
     [sendGuestbookNow],
   );
 
+  const pushListings = useCallback(
+    (listings: ListingsModule) => {
+      lastListingsRef.current = listings;
+      if (listingsDebounceRef.current) clearTimeout(listingsDebounceRef.current);
+      listingsDebounceRef.current = setTimeout(() => sendListingsNow(listings), 150);
+    },
+    [sendListingsNow],
+  );
+
+  const pushEvents = useCallback(
+    (events: EventsModule) => {
+      lastEventsRef.current = events;
+      if (eventsDebounceRef.current) clearTimeout(eventsDebounceRef.current);
+      eventsDebounceRef.current = setTimeout(() => sendEventsNow(events), 150);
+    },
+    [sendEventsNow],
+  );
+
+  const pushTickets = useCallback(
+    (tickets: TicketsModule) => {
+      lastTicketsRef.current = tickets;
+      if (ticketsDebounceRef.current) clearTimeout(ticketsDebounceRef.current);
+      ticketsDebounceRef.current = setTimeout(() => sendTicketsNow(tickets), 120);
+    },
+    [sendTicketsNow],
+  );
+
+  const pushPasses = useCallback(
+    (passes: PassesModule) => {
+      lastPassesRef.current = passes;
+      if (passesDebounceRef.current) clearTimeout(passesDebounceRef.current);
+      passesDebounceRef.current = setTimeout(() => sendPassesNow(passes), 150);
+    },
+    [sendPassesNow],
+  );
+
+  const pushTrails = useCallback(
+    (trails: TrailsModule) => {
+      lastTrailsRef.current = trails;
+      if (trailsDebounceRef.current) clearTimeout(trailsDebounceRef.current);
+      trailsDebounceRef.current = setTimeout(() => sendTrailsNow(trails), 150);
+    },
+    [sendTrailsNow],
+  );
+
   // Cuando el iframe re-monta, resetea ready para forzar un nuevo handshake.
   const onIframeLoad = useCallback(() => {
     setIsReady(false);
@@ -388,6 +498,11 @@ export function usePreviewBridge() {
     openSocialWallPreview,
     pushGuestbook,
     openGuestbookPreview,
+    pushListings,
+    pushEvents,
+    pushTickets,
+    pushPasses,
+    pushTrails,
     isReady,
     onIframeLoad,
   };

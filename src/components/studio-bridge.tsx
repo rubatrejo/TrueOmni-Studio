@@ -76,6 +76,11 @@ export function StudioBridge() {
             brochures?: unknown;
             socialWall?: unknown;
             guestbook?: unknown;
+            listings?: unknown;
+            events?: unknown;
+            tickets?: unknown;
+            passes?: unknown;
+            trails?: unknown;
           }
         | null;
       if (!data || typeof data !== 'object' || !data.type) return;
@@ -153,6 +158,21 @@ export function StudioBridge() {
               window.location.assign('/home/guestbook');
             }
           } catch {}
+          break;
+        case 'studio:listings-update':
+          if (data.listings) applyListingsOverride(data.listings);
+          break;
+        case 'studio:events-update':
+          if (data.events) applyEventsOverride(data.events);
+          break;
+        case 'studio:tickets-update':
+          if (data.tickets) applyTicketsOverride(data.tickets);
+          break;
+        case 'studio:passes-update':
+          if (data.passes) applyPassesOverride(data.passes);
+          break;
+        case 'studio:trails-update':
+          if (data.trails) applyTrailsOverride(data.trails);
           break;
         default:
           break;
@@ -240,6 +260,11 @@ export const KIOSK_PHOTO_BOOTH_OVERRIDE_EVENT = 'kiosk:photo-booth-override';
 export const KIOSK_BROCHURES_OVERRIDE_EVENT = 'kiosk:brochures-override';
 export const KIOSK_SOCIAL_WALL_OVERRIDE_EVENT = 'kiosk:social-wall-override';
 export const KIOSK_GUESTBOOK_OVERRIDE_EVENT = 'kiosk:guestbook-override';
+export const KIOSK_LISTINGS_OVERRIDE_EVENT = 'kiosk:listings-override';
+export const KIOSK_EVENTS_OVERRIDE_EVENT = 'kiosk:events-override';
+export const KIOSK_TICKETS_OVERRIDE_EVENT = 'kiosk:tickets-override';
+export const KIOSK_PASSES_OVERRIDE_EVENT = 'kiosk:passes-override';
+export const KIOSK_TRAILS_OVERRIDE_EVENT = 'kiosk:trails-override';
 
 function applyModulesOverride(modules: ModulesPatch) {
   if (typeof window === 'undefined') return;
@@ -293,6 +318,31 @@ function applySocialWallOverride(socialWall: unknown) {
 function applyGuestbookOverride(guestbook: unknown) {
   if (typeof window === 'undefined') return;
   window.dispatchEvent(new CustomEvent(KIOSK_GUESTBOOK_OVERRIDE_EVENT, { detail: guestbook }));
+}
+
+function applyListingsOverride(listings: unknown) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(KIOSK_LISTINGS_OVERRIDE_EVENT, { detail: listings }));
+}
+
+function applyEventsOverride(events: unknown) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(KIOSK_EVENTS_OVERRIDE_EVENT, { detail: events }));
+}
+
+function applyTicketsOverride(tickets: unknown) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(KIOSK_TICKETS_OVERRIDE_EVENT, { detail: tickets }));
+}
+
+function applyPassesOverride(passes: unknown) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(KIOSK_PASSES_OVERRIDE_EVENT, { detail: passes }));
+}
+
+function applyTrailsOverride(trails: unknown) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(KIOSK_TRAILS_OVERRIDE_EVENT, { detail: trails }));
 }
 
 const injectedFontLinks = new Set<string>();

@@ -98,10 +98,8 @@ Sub-fases entregadas:
 
 ## Fase S4 — i18n editor
 
-- [ ] Editor side-by-side de los 6 archivos `i18n/{locale}.json`.
-- [ ] Detección automática de keys faltantes vs `en` (canónico).
-- [ ] Botón "translate with AI" por key faltante (`@anthropic-ai/sdk`).
-- [ ] Filtro por sección.
+- [x] **S4 base** ✅ cerrada 2026-04-29 — editor side-by-side de los 6 locales (en/es/fr/de/pt/ja), detección automática de keys faltantes vs `en` canónico (banner ámbar con counter por locale), filtro por sección (prefijo de la key) + search global, edit inline con autosave, "Add key" prompt. Storage en KV separado (`i18n:<slug>`) con bootstrap defensivo desde `clients/<slug>/i18n/*.json` y fallback a `_template`. Endpoint GET/PATCH con cap 480KB.
+- [ ] **S4.1 — AI translate** (pendiente). `pnpm add @anthropic-ai/sdk` + `ANTHROPIC_API_KEY` + endpoint `/api/studio/i18n/translate` con `claude-haiku-4-5` y prompt caching + botón ✨ por celda missing.
 
 ---
 

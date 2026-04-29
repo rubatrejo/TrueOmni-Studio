@@ -1626,6 +1626,46 @@ Para cada uno se entregó:
 
 ---
 
+### Sesión 2026-04-29 (cont. 2) — Studio S4 base cerrada — i18n editor side-by-side
+
+**Hecho:**
+
+- **Spec + plan S4** — `docs/superpowers/specs/2026-04-29-studio-s4-i18n-design.md` + `.planning/S4-PLAN.md` con 3 tareas atómicas. AI translate explícitamente fuera de scope → S4.1 en sesión nueva (requiere `pnpm add @anthropic-ai/sdk` + `ANTHROPIC_API_KEY`).
+- **T1 — Schema + endpoint i18n** — añadidos a `src/lib/studio/schema.ts`: `LOCALES = ['en','es','fr','de','pt','ja']`, `Locale`, `LocaleStrings`, `I18nBundleSchema`, `defaultI18nBundle()`. Nueva `kvKeys.i18n(slug)` en `kv.ts`. Endpoint `/api/studio/i18n/[slug]/route.ts` con GET (con bootstrap desde filesystem usando `loadLocale` + fallback a `_template`) y PATCH (acepta `{bundle}` o `{patch}` con merge profundo, valida zod, cap 480KB).
+- **T2 — `I18nEditor.tsx`** — toolbar (search + filtro de secciones derivadas del prefijo antes del primer `_` con count + Add key), banner de missing translations por locale (verde si todo OK / ámbar con counters por columna si hay missing), tabla con header sticky de 7 columnas (Key + 6 locales), `I18nRow` por key con `I18nCell` por locale. La celda es un textarea controlado con draft local que solo commitea en blur (evita firefox-de-renders mientras el usuario escribe). EN marcada con estrella (⭐ canónico). Celdas faltantes con borde ámbar + placeholder "missing". Auto-grow rows entre 1-6.
+- **T3 — Wiring + smoke** — `api-client.ts` con `getI18n(slug)` + `patchI18n(slug, bundle)`. `Shell.tsx` añade state `i18nBundle`/`savedI18nBundle`/`i18nLoaded`, useEffect inicial que carga vía `getI18n` (no bloquea UI; default vacío hasta que llega), `i18nDirty` solo cuenta si `i18nLoaded`, `handleSave` despacha `patchI18n` en paralelo con `patchConfig` (Promise.all), `handleDiscard` resetea bundle al saved. `EditorPanel.tsx` añade props `i18nBundle`/`onI18nBundleChange` + branch para `sectionKey === 'i18n'` → `<I18nEditor />`. La tab Languages (key `i18n`, sección 17) ya estaba registrada en `sections.ts`.
+
+**Verificado:**
+
+- `pnpm typecheck` y `pnpm lint` limpios (sólo warnings preexistentes de `react-hooks/exhaustive-deps` en kiosk).
+- E2E con Playwright en `localhost:3001/studio/default`:
+  - Click Languages → tabla con **361 keys** y **24 secciones** detectadas (`ai (44)`, `billboard (3)`, `cta (2)`, `deals (15)`, etc.).
+  - Search "tile_label_restaurants" filtra a 1 fila.
+  - Editar celda ES → "Restaurantes (test S4)", blur → SaveBar pasa de "Saved" → "Save" → Cmd+S → "Saving…" → 200 OK.
+  - GET `/api/studio/i18n/default` confirma `bundle.es.tile_label_restaurants === "Restaurantes (test S4)"`.
+  - Reload página + navegar a Languages → valor persiste tras refresh.
+  - Restaurado a "Restaurantes" via PATCH `{patch: {es: {tile_label_restaurants: "Restaurantes"}}}` → 200 OK.
+
+**Pendiente / siguiente:**
+
+- **S4.1 — AI translate** (siguiente sub-fase): instalar `@anthropic-ai/sdk`, añadir `ANTHROPIC_API_KEY` a `.env.local`, endpoint `POST /api/studio/i18n/translate` con `claude-haiku-4-5` y prompt caching, botón ✨ en cada celda missing.
+- **Build SSG `/404`** sigue pendiente (gated por aprobación explícita de `pnpm build`).
+- **S5 Ads system**, **S6 Integraciones**, **S7 Auth + Publish** (siguientes fases del Studio).
+- **Galería de imágenes por cliente** (bloqueado por Vercel Blob → S5/S6).
+
+**Decisiones:**
+
+- **Storage separado en KV (`i18n:<slug>`)** en vez de meterlo en `KioskConfig`: evita inflar el JSON principal, mantiene los PATCH bajo el cap 480KB, y simplifica el bridge (no re-bota todo el config cada vez que cambia una traducción). El bundle pesa ~65KB con 363 keys × 6 locales.
+- **Bootstrap defensivo desde filesystem**: GET sin valor en KV lee `clients/<slug>/i18n/*.json` y fallback a `clients/_template/i18n/*.json`. Idempotente; cliente legacy ve sus traducciones desde el primer fetch sin perder data.
+- **PATCH acepta full `bundle` o `patch` parcial**: API flexible — el editor manda el bundle entero (simple), pero el patch parcial está disponible para futuro AI translate (1 celda) o restore (como hicimos en el smoke).
+- **Draft local en `I18nCell` con commit en blur**: textareas controladas con re-render por celda × 6 columnas × 360 filas serían lentas en cada keystroke. Draft local + commit on blur mantiene el editor responsive.
+- **No live-preview kiosk override por evento**: scope reducido. El kiosk runtime hoy lee i18n del filesystem en SSR; el live preview de cambios desde el Studio queda como mejora opcional (S4.2 si pide). El editor funciona perfectamente sin ello para el caso real (editar → save → preview iframe se refresca al "publish" del flow normal).
+- **AI translate fuera de scope**: requiere instalar SDK + secret en .env. Decisión consciente para mantener S4 base entregable en una sesión sin pausas.
+
+**Fase:** Studio S4 base cerrada (2026-04-29). Siguiente arranque: **S4.1 AI translate** o **S5 Ads system**.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

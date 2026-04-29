@@ -42,7 +42,7 @@ const DEFAULT_FALLBACK_STOPS: never[] = [];
  * por categoría (Eat / Play / Stay / Events) y el clustering azul oscuro
  * existente. Mapea `ItineraryCatalogItem` → `MapItem` y `kind:'trail'` se
  * trata como `things-to-do` (pin Play azul oscuro) para no extender
- * `MapSource` solo por el Itinerary Builder.
+ * `MapSource` solo por el Trip Planner.
  */
 function kindToMapSource(kind: ItineraryCatalogItem['kind'], moduleSlug: string): MapSource {
   if (kind === 'event') return 'events';

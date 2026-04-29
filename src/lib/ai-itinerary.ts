@@ -2,7 +2,7 @@ import type { AiQuestion, ItineraryStopKind } from './config';
 import type { ItineraryCatalogItem } from './itinerary-catalog';
 
 /**
- * Generador del AI Itinerary Builder (Fase 3.17).
+ * Generador del AI Trip Planner (Fase 3.17).
  *
  * v1: mockeado en cliente. Para Fase 5+ reemplazar la implementación de
  * `generateItinerary` por una llamada real a un endpoint LLM (`/api/itinerary`)

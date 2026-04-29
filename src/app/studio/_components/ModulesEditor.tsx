@@ -218,7 +218,7 @@ const CATALOG_SYSTEM_MODULE_LIST: Array<{ key: keyof SystemModules; tileKey: str
 ];
 
 const HOME_MODULE_LIST: Array<{ key: keyof SystemModules; tileKey: string; label: string; subtitle: string }> = [
-  { key: 'itineraryBuilder', tileKey: 'itinerary-builder', label: 'Itinerary Builder', subtitle: 'AI-assisted trip planner' },
+  { key: 'itineraryBuilder', tileKey: 'itinerary-builder', label: 'Trip Planner', subtitle: 'AI-assisted trip planner' },
   { key: 'guestbook', tileKey: 'guestbook', label: 'Guestbook', subtitle: 'Visitor pins on the map' },
   { key: 'socialWall', tileKey: 'social-wall', label: 'Social Wall', subtitle: 'Curated social feed' },
   { key: 'digitalBrochure', tileKey: 'digital-brochure', label: 'Digital Brochure', subtitle: 'Flippable brochures' },

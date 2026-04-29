@@ -9,7 +9,7 @@ import type {
 import { isEventsModule, isListingsModule, isTrailsModule } from './itinerary-tabs';
 
 /**
- * Item normalizado del catálogo del Itinerary Builder. Sirve para renderizar
+ * Item normalizado del catálogo del Trip Planner. Sirve para renderizar
  * tanto las cards de la columna izquierda como los pins del mapa.
  *
  * Une Listings + Events + Trails en una shape común. Para datos específicos

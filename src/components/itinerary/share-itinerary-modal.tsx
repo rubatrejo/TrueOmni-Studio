@@ -24,9 +24,9 @@ export interface ShareItineraryModalProps {
 }
 
 /**
- * Modal "You made it!" del Itinerary Builder. Card centrada con título + body
+ * Modal "You made it!" del Trip Planner. Card centrada con título + body
  * + QR + "Powered by TrueOmni" + 2 CTAs (Send to Phone olive, Send to Email
- * azul). Pixel-close al SVG `Itinerary Builder - Share_Itinerary.svg`.
+ * azul). Pixel-close al SVG `Trip Planner - Share_Itinerary.svg`.
  */
 export function ShareItineraryModal(props: ShareItineraryModalProps) {
   const { textos, qrUrl, onSendPhone, onSendEmail, onClose } = props;

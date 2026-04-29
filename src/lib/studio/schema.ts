@@ -215,7 +215,7 @@ export const MODULE_KEY_TO_SYSTEM_FIELD: Record<string, keyof SystemModules> = {
 export const KIOSK_MODULES: readonly ModuleEntry[] = [
   { key: 'restaurants', label: 'Restaurants', enabled: true },
   { key: 'things-to-do', label: 'Things\nto Do', enabled: true },
-  { key: 'itinerary-builder', label: 'Itinerary Builder', enabled: true },
+  { key: 'itinerary-builder', label: 'Trip Planner', enabled: true },
   { key: 'events', label: 'Events', enabled: true },
   { key: 'passes', label: 'Passes', enabled: true },
   { key: 'tickets', label: 'Tickets', enabled: true },

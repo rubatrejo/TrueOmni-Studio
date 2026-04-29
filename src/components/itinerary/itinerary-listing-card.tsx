@@ -19,7 +19,7 @@ export interface ItineraryListingCardProps {
 }
 
 /**
- * Card horizontal del catálogo del Itinerary Builder.
+ * Card horizontal del catálogo del Trip Planner.
  * Layout:
  *   - Wrapper 360×170 oscuro (#1f2227) con esquinas levemente redondeadas.
  *   - Imagen full bleed con gradient bottom para legibilidad.

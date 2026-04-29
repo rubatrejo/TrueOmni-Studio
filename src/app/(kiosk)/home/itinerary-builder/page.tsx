@@ -13,7 +13,7 @@ export default async function ItineraryBuilderPage() {
       <KioskCanvas>
         <div className="absolute inset-0 flex items-center justify-center p-12 text-center text-xl font-semibold text-muted-foreground">
           {config.textos.itinerary_disabled ??
-            'Itinerary Builder is not configured for the active client.'}
+            'Trip Planner is not configured for the active client.'}
         </div>
       </KioskCanvas>
     );

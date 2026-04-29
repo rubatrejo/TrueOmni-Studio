@@ -12,7 +12,7 @@ export interface AiLoadingScreenProps {
 }
 
 /**
- * Pantalla de loading del AI Itinerary Builder. Background fullscreen con
+ * Pantalla de loading del AI Trip Planner. Background fullscreen con
  * gradient azul oscuro encima para legibilidad. Spinner circular azul + copy
  * centrado. Mientras `generateItinerary` resuelve.
  */

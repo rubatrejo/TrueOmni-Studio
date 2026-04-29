@@ -16,7 +16,7 @@ export interface WelcomePopupProps {
 }
 
 /**
- * Welcome popup overlay del Itinerary Builder. Modal centrado al medio del
+ * Welcome popup overlay del Trip Planner. Modal centrado al medio del
  * canvas con backdrop negro 50% sobre la pantalla manual de fondo.
  */
 export function WelcomePopup(props: WelcomePopupProps) {

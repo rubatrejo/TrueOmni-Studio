@@ -1420,6 +1420,62 @@ export function makeBlankTrail(): TrailItem {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
+/*  Ads (advertisements — popups, hero banners, bottom strips)               */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export const AD_KINDS = ['popup', 'hero', 'bottom'] as const;
+export type AdKind = (typeof AD_KINDS)[number];
+
+export const AD_THEMES = ['dark', 'light'] as const;
+export type AdTheme = (typeof AD_THEMES)[number];
+
+export const AdSchema = z.object({
+  id: SlugStringSchema,
+  kind: z.enum(AD_KINDS),
+  image: z.string().max(2048).default(''),
+  alt: z.string().max(280).optional(),
+  routes: z.array(z.string().min(1).max(280)).default([]),
+  enabled: z.boolean().default(true),
+  theme: z.enum(AD_THEMES).default('dark'),
+});
+export type Ad = z.infer<typeof AdSchema>;
+
+function uniqueById<T extends { id: string }>(arr: T[], ctx: z.RefinementCtx) {
+  const seen = new Set<string>();
+  arr.forEach((item, idx) => {
+    if (seen.has(item.id)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [idx, 'id'],
+        message: `duplicate id "${item.id}" — must be unique.`,
+      });
+    }
+    seen.add(item.id);
+  });
+}
+
+export const AdsModuleSchema = z.object({
+  ads: z.array(AdSchema).superRefine(uniqueById).default([]),
+});
+export type AdsModule = z.infer<typeof AdsModuleSchema>;
+
+export function defaultAds(): AdsModule {
+  return { ads: [] };
+}
+
+export function makeBlankAd(kind: AdKind = 'popup'): Ad {
+  return {
+    id: `ad-${Date.now()}`,
+    kind,
+    image: '',
+    alt: '',
+    routes: [],
+    enabled: true,
+    theme: 'dark',
+  };
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
 /*  i18n bundle (vive en KV bajo `i18n:<slug>`, separado del KioskConfig)    */
 /* ────────────────────────────────────────────────────────────────────────── */
 
@@ -1487,6 +1543,8 @@ export const KioskConfigSchema = z.object({
   passes: PassesModuleSchema.optional(),
   /** Módulo Trails — subcategorías, difficulties, trailTypes, trails. */
   trails: TrailsModuleSchema.optional(),
+  /** Sistema de ads (popups, hero banners, bottom strips) por ruta. */
+  ads: AdsModuleSchema.optional(),
   /** Versión actual publicada (incrementa en cada publish aprobado). */
   currentVersion: z.number().int().nonnegative().default(0),
 });
@@ -1536,6 +1594,7 @@ export function makeBlankConfig(slug: string, nombre: string): KioskConfig {
     tickets: defaultTickets(),
     passes: defaultPasses(),
     trails: defaultTrails(),
+    ads: defaultAds(),
     currentVersion: 0,
   };
 }

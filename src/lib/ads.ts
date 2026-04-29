@@ -33,6 +33,7 @@ export function getAdsForRoute(ads: readonly Ad[], path: string): Record<AdKind,
   };
   for (const ad of ads) {
     if (ad.enabled === false) continue;
+    if (!ad.image) continue; // incomplete ad — no asset, never render
     if (out[ad.kind] !== null) continue;
     if (!ad.routes.some((r) => matchesRoute(r, path))) continue;
     out[ad.kind] = ad;

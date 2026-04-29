@@ -5,6 +5,7 @@ import { Sparkles } from 'lucide-react';
 import { useState } from 'react';
 
 import type {
+  AdsModule,
   AiAvatarConfig,
   BillboardConfig,
   Branding,
@@ -26,6 +27,7 @@ import type {
 import { extractPaletteFromImage } from '../_lib/palette-from-image';
 import { STUDIO_SECTIONS, VERSIONS_SECTION, type StudioSectionKey } from '../_lib/sections';
 
+import { AdsEditor } from './AdsEditor';
 import { AiAvatarEditor } from './AiAvatarEditor';
 import { BillboardEditor } from './BillboardEditor';
 import { BrochuresEditor } from './BrochuresEditor';
@@ -85,6 +87,8 @@ export function EditorPanel({
   onTrailsChange,
   i18nBundle,
   onI18nBundleChange,
+  ads,
+  onAdsChange,
 }: {
   sectionKey: StudioSectionKey;
   branding: Branding;
@@ -125,6 +129,8 @@ export function EditorPanel({
   onTrailsChange: (next: TrailsModule) => void;
   i18nBundle: I18nBundle;
   onI18nBundleChange: (next: I18nBundle) => void;
+  ads: AdsModule;
+  onAdsChange: (next: AdsModule) => void;
 }) {
   const section =
     sectionKey === 'versions'
@@ -147,7 +153,8 @@ export function EditorPanel({
     sectionKey === 'tickets' ||
     sectionKey === 'passes' ||
     sectionKey === 'trails' ||
-    sectionKey === 'i18n';
+    sectionKey === 'i18n' ||
+    sectionKey === 'ads';
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-white dark:bg-zinc-950">
@@ -247,6 +254,9 @@ export function EditorPanel({
         )}
         {sectionKey === 'i18n' && (
           <I18nEditor value={i18nBundle} onChange={onI18nBundleChange} />
+        )}
+        {sectionKey === 'ads' && (
+          <AdsEditor value={ads} onChange={onAdsChange} />
         )}
         {!isImplemented && <ComingSoon section={section} />}
       </div>

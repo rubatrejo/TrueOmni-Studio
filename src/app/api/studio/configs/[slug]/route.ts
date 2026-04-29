@@ -26,7 +26,9 @@ import {
   SocialWallSchema,
   SurveySchema,
   TicketsModuleSchema,
+  AdsModuleSchema,
   TrailsModuleSchema,
+  defaultAds,
   defaultEvents,
   defaultListings,
   defaultModules,
@@ -96,6 +98,7 @@ function hydrateConfig(cfg: KioskConfig): KioskConfig {
     tickets: cfg.tickets ?? defaultTickets(),
     passes: cfg.passes ?? defaultPasses(),
     trails: cfg.trails ?? defaultTrails(),
+    ads: cfg.ads ?? defaultAds(),
   };
 }
 
@@ -121,6 +124,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       tickets?: unknown;
       passes?: unknown;
       trails?: unknown;
+      ads?: unknown;
     };
 
     let next: KioskConfig = cfg;
@@ -378,6 +382,16 @@ export async function PATCH(req: Request, { params }: RouteParams) {
         );
       }
       next = { ...next, trails: parsed.data };
+    }
+    if (body.ads !== undefined) {
+      const parsed = AdsModuleSchema.safeParse(body.ads);
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: 'Invalid ads', issues: parsed.error.issues },
+          { status: 400 },
+        );
+      }
+      next = { ...next, ads: parsed.data };
     }
 
     const validated = KioskConfigSchema.safeParse(next);

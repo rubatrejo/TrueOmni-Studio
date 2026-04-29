@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type {
+  AdsModule,
   AiAvatarConfig,
   BillboardConfig,
   Branding,
@@ -33,6 +34,7 @@ import {
   DEFAULT_SOCIAL_WALL,
   DEFAULT_SURVEY,
   DEFAULT_SYSTEM_MODULES,
+  defaultAds,
   defaultEvents,
   defaultI18nBundle,
   defaultListings,
@@ -126,6 +128,10 @@ export function Shell({
   const initialTrails = initialConfig.trails ?? defaultTrails();
   const [savedTrails, setSavedTrails] = useState<TrailsModule>(initialTrails);
   const [trails, setTrails] = useState<TrailsModule>(initialTrails);
+
+  const initialAds = initialConfig.ads ?? defaultAds();
+  const [savedAds, setSavedAds] = useState<AdsModule>(initialAds);
+  const [ads, setAds] = useState<AdsModule>(initialAds);
 
   const [savedI18nBundle, setSavedI18nBundle] = useState<I18nBundle>(defaultI18nBundle());
   const [i18nBundle, setI18nBundle] = useState<I18nBundle>(savedI18nBundle);
@@ -315,6 +321,10 @@ export function Shell({
     () => JSON.stringify(trails) !== JSON.stringify(savedTrails),
     [trails, savedTrails],
   );
+  const adsDirty = useMemo(
+    () => JSON.stringify(ads) !== JSON.stringify(savedAds),
+    [ads, savedAds],
+  );
   const i18nDirty = useMemo(
     () => i18nLoaded && JSON.stringify(i18nBundle) !== JSON.stringify(savedI18nBundle),
     [i18nBundle, savedI18nBundle, i18nLoaded],
@@ -335,6 +345,7 @@ export function Shell({
     ticketsDirty ||
     passesDirty ||
     trailsDirty ||
+    adsDirty ||
     i18nDirty;
 
   const effectiveSaveState =
@@ -365,6 +376,7 @@ export function Shell({
         tickets?: TicketsModule;
         passes?: PassesModule;
         trails?: TrailsModule;
+        ads?: AdsModule;
       } = {};
       if (brandingDirty) payload.branding = branding;
       if (modulesDirty) payload.modules = modules;
@@ -381,6 +393,7 @@ export function Shell({
       if (ticketsDirty) payload.tickets = tickets;
       if (passesDirty) payload.passes = passes;
       if (trailsDirty) payload.trails = trails;
+      if (adsDirty) payload.ads = ads;
       const tasks: Array<Promise<unknown>> = [];
       if (Object.keys(payload).length > 0) {
         tasks.push(patchConfig(initialConfig.slug, payload));
@@ -404,6 +417,7 @@ export function Shell({
       if (ticketsDirty) setSavedTickets(tickets);
       if (passesDirty) setSavedPasses(passes);
       if (trailsDirty) setSavedTrails(trails);
+      if (adsDirty) setSavedAds(ads);
       if (i18nDirty) setSavedI18nBundle(i18nBundle);
       setSaveState('saved');
       setTimeout(() => setSaveState('idle'), 1500);
@@ -428,6 +442,7 @@ export function Shell({
     tickets,
     passes,
     trails,
+    ads,
     i18nBundle,
     brandingDirty,
     modulesDirty,
@@ -444,6 +459,7 @@ export function Shell({
     ticketsDirty,
     passesDirty,
     trailsDirty,
+    adsDirty,
     i18nDirty,
     isDirty,
     initialConfig.slug,
@@ -465,6 +481,7 @@ export function Shell({
     setTickets(savedTickets);
     setPasses(savedPasses);
     setTrails(savedTrails);
+    setAds(savedAds);
     setI18nBundle(savedI18nBundle);
     setSaveState('idle');
     setErrorMsg(null);
@@ -485,6 +502,7 @@ export function Shell({
     savedTickets,
     savedPasses,
     savedTrails,
+    savedAds,
     savedI18nBundle,
   ]);
 
@@ -576,6 +594,8 @@ export function Shell({
                   onTrailsChange={setTrails}
                   i18nBundle={i18nBundle}
                   onI18nBundleChange={setI18nBundle}
+                  ads={ads}
+                  onAdsChange={setAds}
                 />
               </motion.div>
             </AnimatePresence>

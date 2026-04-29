@@ -105,7 +105,6 @@ export default async function ModulePage({ params }: PageProps) {
           mapboxToken={config.integraciones?.mapbox_token}
           items={items}
           detailLookup={detailLookup}
-          alwaysShowWelcome
           textos={{
             seeMoreInfo: t.map_see_more_info ?? 'SEE MORE INFO',
             addToItinerary: t.map_add_to_itinerary ?? 'ADD TO ITINERARY',

@@ -1790,6 +1790,49 @@ Para cada uno se entregó:
 
 ---
 
+### Sesión 2026-04-29 (cont. 6) — Studio S7.0 cerrada — Local publish skeleton (i18n)
+
+**Hecho:**
+
+- **Endpoint `POST /api/studio/publish/[slug]?dryRun=1`** (`src/app/api/studio/publish/[slug]/route.ts`). Lee el i18n bundle del KV (`kvKeys.i18n(slug)`), valida con `I18nBundleSchema`, computa diff por archivo contra `clients/<slug>/i18n/<locale>.json` actual (action `create|update|unchanged` + sizeBefore/sizeAfter). En modo `dryRun` solo devuelve el diff; en modo real escribe los archivos changed con `fs.writeFile`. Validación de slug regex + verificación de que `clients/<slug>/` existe (evita crear clientes nuevos accidentalmente). Mantiene orden de inserción del bundle (no sortea alfabéticamente — sortear generaría ruido masivo en git diff vs los archivos existentes).
+- **`api-client.publishToFilesystem(slug, {dryRun?})`** + tipos `PublishFileChange`/`PublishResult`.
+- **`PublishModal.tsx`** con phases preview-loading/preview/publishing/done/error: loading spinner → resumen 3 tone (sky create/amber update/muted unchanged) + lista por archivo (path acortado a partir de `clients/`, action badge, size diff) + botón "Publish N files" deshabilitado si nothing-to-publish. Tras éxito: banner verde con "N files written successfully" + botón Close. Esc cierra. `<details>` colapsable para ver "X unchanged files".
+- **TopBar**: botón "Request publish" placeholder reescrito a "Publish" con prop `onPublish`. Mantiene el icono Send y el style.
+- **Shell**: state `publishOpen` + render del `<PublishModal>` sibling al `<TopBar>` cuya prop `onPublish={() => setPublishOpen(true)}`.
+
+**Verificado:**
+
+- `pnpm typecheck` y `pnpm lint` limpios.
+- E2E con Playwright en `localhost:3001/studio/default`:
+  - Click "Publish" en TopBar → modal abre con title "Publish to filesystem".
+  - DryRun computed automáticamente: 0 create / 1 update / 5 unchanged.
+  - 6 archivos en lista (en/es/fr/de/pt/ja). Solo `es.json` marcado update (cambios menores de smokes anteriores, mismo size 18760 → 18760B).
+  - Click "Publish 1 file" → "1 file written successfully".
+  - `git status` confirma `M clients/default/i18n/es.json`.
+  - `git diff` muestra solo reordenamiento de la key `tile_label_restaurants` (mismo valor "Restaurantes"). Diff mínimo ✓.
+  - `git checkout clients/default/i18n/es.json` revierte sin pérdida.
+
+**Pendiente / siguiente:**
+
+- **S7.1 — Publish del config.json completo** (mucho más complejo: requiere reconciliar secciones del Studio con el shape legacy de `clients/<slug>/config.json` que tiene `features.advertisements.ads`, `features.integraciones`, `textos`, `navegacion`, `features.home.modules`, etc.). El Studio NO conoce todos esos campos legacy, así que el merge tiene que ser defensivo: leer config.json actual, sustituir solo las secciones gestionadas por el Studio, escribir back. Sesión dedicada.
+- **S7.2 — GitHub PR-publish con approval gate**: wrap S7.0+S7.1 en `gh api` o `@octokit/rest` para crear branch + commit + PR. Requiere GitHub OAuth app o PAT en `.env.local`.
+- **S7.3 — NextAuth + admin gate** (`ruben@trueomni.com`). Requiere infra OAuth.
+- **S7.4 — Vercel deploy** preview/production. Requiere proyecto Vercel + GitHub integration.
+- **Build SSG `/404`** sigue gated por aprobación de `pnpm build`.
+
+**Decisiones:**
+
+- **Sub-fase S7.0 antes de S7 completo**: el publish flow tiene 3 capas independientes (escritura local, GitHub PR, auth/deploy). Hacer S7.0 entrega el roundtrip Studio→repo en local + permite que las siguientes capas (PR + auth) lo envuelvan sin reescribirlo. Cada una se puede iterar por separado.
+- **Solo i18n en S7.0**: el config.json publish tiene reconciliación legacy compleja que merece sesión dedicada. i18n es 1:1 con archivos (6 locales → 6 archivos), trivial de mappear.
+- **`dryRun` como query param**: estándar HTTP. El modal siempre llama dryRun primero para mostrar el diff, luego un POST real al confirmar. Patrón `preview → commit` clásico.
+- **No sortear keys alfabéticamente al escribir**: aunque sería técnicamente "limpio" (deterministic order), generaría un commit gigante reordenando 360 keys × 6 archivos en el primer publish. Mantener insertion order del bundle (que viene del filesystem en bootstrap) garantiza diffs mínimos.
+- **Verificar que `clients/<slug>/` existe** antes de escribir: el publish flow no debe crear clientes nuevos accidentalmente (eso es responsabilidad del flujo de creación, no de publish).
+- **Reescribí "Request publish" → "Publish"**: el placeholder anterior implicaba un approval gate que sigue pendiente para S7.2. Mantener nombre simple ahora; cuando se añada el gate se renombrará a "Request publish" o similar.
+
+**Fase:** Studio S7.0 cerrada (2026-04-29). Siguiente arranque: **S7.1 config publish** o **S7.2 GitHub PR** (necesita PAT) o **S7.3 NextAuth** (necesita OAuth app).
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

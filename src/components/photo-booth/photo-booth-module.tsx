@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useTextosMap } from '@/components/i18n-provider';
 import { SendConfirmationPopup } from '@/components/listings/send-confirmation-popup';
@@ -11,6 +11,7 @@ import { useCamera } from '@/hooks/use-camera';
 import { useCountdown } from '@/hooks/use-countdown';
 import { usePhotoSession } from '@/hooks/use-photo-session';
 import type { PhotoBoothConfig, PhotoBoothSticker } from '@/lib/config';
+import { resolvePhotoBoothAsset } from '@/lib/photo-booth';
 import { composeFinal, type StickerPlacement } from '@/lib/photo-booth-compose';
 import { segmentSelfie, warmupSegmenter } from '@/lib/photo-booth-segment';
 import type { WeatherData } from '@/lib/weather';
@@ -96,11 +97,11 @@ function loadImage(src: string): Promise<HTMLImageElement | null> {
 }
 
 export function PhotoBoothModule({
-  config,
-  resolvedBackgrounds,
-  resolvedFrames,
-  resolvedStickers,
-  filters,
+  config: incomingConfig,
+  resolvedBackgrounds: incomingBackgrounds,
+  resolvedFrames: incomingFrames,
+  resolvedStickers: incomingStickers,
+  filters: incomingFilters,
   mockImageSrc,
   shareBackgroundSrc,
   textos: incomingTextos,
@@ -110,6 +111,51 @@ export function PhotoBoothModule({
   locale,
   timezone,
 }: PhotoBoothModuleProps) {
+  // Live override desde el Studio (S3.3). Si llega payload por postMessage,
+  // re-componemos las listas resueltas con `resolvePhotoBoothAsset` (que ya
+  // pasa-thru data: URLs sin tocar).
+  const [override, setOverride] = useState<PhotoBoothConfig | null>(null);
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<PhotoBoothConfig>).detail;
+      if (
+        detail &&
+        Array.isArray(detail.backgrounds) &&
+        Array.isArray(detail.filters)
+      ) {
+        setOverride(detail);
+      }
+    };
+    window.addEventListener('kiosk:photo-booth-override', handler);
+    return () => window.removeEventListener('kiosk:photo-booth-override', handler);
+  }, []);
+
+  const config = override ?? incomingConfig;
+  const resolvedBackgrounds = useMemo(() => {
+    if (!override) return incomingBackgrounds;
+    return override.backgrounds.map((b) => ({
+      ...b,
+      resolvedImage: resolvePhotoBoothAsset(b.image),
+    }));
+  }, [override, incomingBackgrounds]);
+  const resolvedFrames = useMemo(() => {
+    if (!override) return incomingFrames;
+    return override.frames.map((f) => ({
+      ...f,
+      resolvedImage: resolvePhotoBoothAsset(f.image),
+      resolvedThumbnail: f.thumbnail
+        ? resolvePhotoBoothAsset(f.thumbnail)
+        : resolvePhotoBoothAsset(f.image),
+    }));
+  }, [override, incomingFrames]);
+  const resolvedStickers = useMemo(() => {
+    if (!override) return incomingStickers;
+    return override.stickers.map((s) => ({
+      ...s,
+      resolvedImage: resolvePhotoBoothAsset(s.image),
+    }));
+  }, [override, incomingStickers]);
+  const filters = override ? override.filters : incomingFilters;
   const live = useTextosMap();
   const pickPB = (key: string, fb: string) => live[key] ?? fb;
   const textos: PhotoBoothTextos = {

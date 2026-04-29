@@ -13,6 +13,7 @@ import { useLocaleStore } from '@/stores/locale-store';
  */
 export function LanguageDropdown() {
   const [open, setOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const available = useAvailableLocales();
@@ -30,6 +31,19 @@ export function LanguageDropdown() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
+
+  // Override del Studio (system modules toggle).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onSys = (e: Event) => {
+      const detail = (e as CustomEvent<{ languages?: boolean }>).detail;
+      if (typeof detail?.languages === 'boolean') setHidden(!detail.languages);
+    };
+    window.addEventListener('kiosk:system-modules-override', onSys);
+    return () => window.removeEventListener('kiosk:system-modules-override', onSys);
+  }, []);
+
+  if (hidden) return null;
 
   const currentLabel = (LOCALE_LABELS[current] ?? current).toUpperCase();
 

@@ -1,6 +1,7 @@
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
+import { LanguageDropdown } from '@/components/home/language-dropdown';
 
-import { AccessibilityIcon, EnglishButton } from './billboard-footer-parts';
+import { AccessibilityIcon } from './billboard-footer-parts';
 
 /**
  * Billboard 4 — variante "Bandas horizontales + sidebars verticales".
@@ -27,7 +28,7 @@ export function Billboard4() {
         className="absolute inset-x-0 flex items-center justify-center"
         style={{ top: '0', height: '330px', backgroundColor: '#004f8b' }}
       >
-        <TrueOmniLogo className="h-[128px] w-auto text-white" />
+        <TrueOmniLogo slot="idle" className="h-[128px] w-auto text-white" />
       </div>
 
       {/* Banda 2 (y=330..830) fireworks */}
@@ -87,9 +88,11 @@ export function Billboard4() {
           paddingRight: '59px',
         }}
       >
-        <TrueOmniLogo className="h-[65px] w-auto text-white" />
+        <TrueOmniLogo slot="footer" className="h-[65px] w-auto text-white" />
         <AccessibilityIcon size={80} color="#fff" />
-        <EnglishButton width={244} height={80} fontSize={26} />
+        <div data-billboard-no-link>
+          <LanguageDropdown />
+        </div>
       </div>
 
       {/* Sidebar EVENTS — left, sobre banda 2 (y=330..830) */}

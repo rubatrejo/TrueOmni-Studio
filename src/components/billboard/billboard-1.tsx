@@ -1,9 +1,10 @@
 'use client';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
+import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
-import { AccessibilityIcon, EnglishButton } from './billboard-footer-parts';
+import { AccessibilityIcon } from './billboard-footer-parts';
 
 /**
  * Billboard 1 — variante "Grid + Clock + Weather".
@@ -303,9 +304,11 @@ export function Billboard1() {
           paddingRight: '59px',
         }}
       >
-        <TrueOmniLogo className="h-[65px] w-auto text-white" />
+        <TrueOmniLogo slot="footer" className="h-[65px] w-auto text-white" />
         <AccessibilityIcon size={80} color="#fff" />
-        <EnglishButton width={244} height={80} fontSize={26} />
+        <div data-billboard-no-link>
+          <LanguageDropdown />
+        </div>
       </div>
     </div>
   );

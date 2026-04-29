@@ -76,9 +76,9 @@ export async function HomeHeader({
         }}
       />
 
-      {/* TrueOmni logo @ (65, 44.4) */}
-      <div className="absolute" style={{ left: '65px', top: '44.4px' }}>
-        <TrueOmniLogo className="h-[70px] w-auto text-white" />
+      {/* TrueOmni logo @ (65, 44.4) — slot="default" (logo principal del cliente). */}
+      <div className="absolute" style={{ left: '65px', top: '44.4px', height: '70px' }}>
+        <TrueOmniLogo slot="default" className="h-[70px] w-auto text-white" />
       </div>
 
       {/* Weather + clock widget @ (744, 40.5) */}

@@ -63,7 +63,7 @@ export function FontSelector({
         <ul
           role="listbox"
           aria-label={`${kind} font`}
-          className="absolute left-0 right-0 top-full z-50 mt-1 max-h-[280px] overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
+          className="absolute bottom-full left-0 right-0 z-50 mb-1 max-h-[280px] overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
         >
           {STUDIO_GOOGLE_FONTS.map((font) => {
             const selected = font === value;

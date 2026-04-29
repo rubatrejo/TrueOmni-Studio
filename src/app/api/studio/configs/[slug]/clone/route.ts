@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { kv, kvKeys } from '@/lib/studio/kv';
 import {
   KioskConfigSchema,
+  defaultModules,
   type ConfigMeta,
   type KioskConfig,
 } from '@/lib/studio/schema';
@@ -49,6 +50,7 @@ export async function POST(req: Request, { params }: RouteParams) {
       ...sourceCfg,
       slug: body.newSlug,
       nombre: body.newNombre,
+      modules: sourceCfg.modules ?? defaultModules(),
       currentVersion: 0,
     };
     const validated = KioskConfigSchema.safeParse(cloned);

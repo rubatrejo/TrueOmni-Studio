@@ -6,9 +6,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import type { ConfigMeta, KioskConfig } from '@/lib/studio/schema';
 
+import { NewClientModal } from './_components/NewClientModal';
 import { StudioBrand } from './_components/StudioBrand';
 import { ThemeToggle } from './_components/ThemeToggle';
-import { NewClientModal } from './_components/NewClientModal';
 import {
   type ConfigEntry,
   createConfig,

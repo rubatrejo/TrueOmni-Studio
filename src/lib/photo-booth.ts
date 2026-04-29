@@ -21,6 +21,13 @@ export async function getPhotoBoothConfig(): Promise<PhotoBoothConfig | null> {
  * Mismo patrón que `resolveAiAssetPath`.
  */
 export function resolvePhotoBoothAsset(raw: string): string {
-  if (raw.startsWith('http') || raw.startsWith('/')) return raw;
+  if (
+    raw.startsWith('http') ||
+    raw.startsWith('/') ||
+    raw.startsWith('data:') ||
+    raw.startsWith('blob:')
+  ) {
+    return raw;
+  }
   return `/${raw}`;
 }

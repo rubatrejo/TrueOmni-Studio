@@ -6,11 +6,11 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Fase 3.16 (Photo Booth module) **cerrada y aprobada por Rubén** tras iteración completa: green-screen MediaPipe, editor con backgrounds/frames/filters, share screen rediseñada, modales reales Send to Email/Phone con popup confirmación, set de 8 stickers PNG 3D con drag&drop + resize + delete handles.
+**Fase activa:** Milestone Studio — **S3.1–S3.6 cerradas** (2026-04-29). Los 6 editores de módulo entregados: Survey, Deals, Photo Booth, Digital Brochure, Social Wall, Guestbook. Cada uno con schema zod + API PATCH + backfill defensivo + bridge debounced + override en vivo en kiosk runtime.
 
-**Última fase cerrada:** Fase 3.16 — Photo Booth module aprobado (2026-04-27). Antes: 3.15 Ask AI, 3.14 Guestbook, 3.13 Trails.
+**Última fase cerrada:** Studio S3.6 Guestbook (2026-04-29). Antes: S3.5 Social Wall, S3.4 Digital Brochure, S3.3 Photo Booth, S3.2 Deals, S3.1 Survey, S2 (todos en 2026-04-29). S1 Branding y S0 cloud en 2026-04-28.
 
-**Siguiente acción concreta:** Itinerary Builder, Fase 4 (primer cliente real), o LLM real para Ask AI (Fase 5+).
+**Siguiente acción concreta:** Studio S3.7 — CRUD masivo del Content tab para listings/events/tickets/passes/trails (los 5 módulos del kiosk con catálogos grandes que aún no tienen editor). El patrón "editor con live preview" ya está establecido y reutilizable.
 
 **Bloqueos:** ninguno. `alwaysShowWelcome={true}` del MapModule sigue hardcoded para QA — apagarlo antes de Fase 4 / producción (`[module]/page.tsx` rama `map`).
 
@@ -1422,6 +1422,120 @@ driving/walking, SEE 360 funcional, favorite toast).
 - **`<a>` navigation: preventDefault, no stopPropagation**: la navegación nativa del browser para `<a href>` requiere preventDefault explícito. stopPropagation solo detiene event bubble, no comportamiento default. Lección general que aplica a otros nested-link cases.
 
 **Fase:** Studio S0 cloud + S1 completa (2026-04-28). Siguiente arranque debe ser **Fase S2 (Modules tab)**.
+
+---
+
+### Sesión 2026-04-29 — Studio S2 cerrada
+
+**Hecho:**
+
+- **Sidebar restructurado** (17 secciones): Branding · Modules · Billboard · Home Dashboard · AI Avatar · Survey · Deals · Photo Booth · Digital Brochure · Social Wall · Guestbook · Content · Languages · Ads · Integrations · Versions · Publish.
+- **Modules tab** con 19 master switches (16 home tiles + Ads + Languages + AI Avatar). Iconos Lucide consistentes.
+- **Billboard tab**: variant selector visual (4 cards con preview gradient + check) + slider idle timeout 15-300s.
+- **Home Dashboard tab**: drag&drop framer Reorder + toggle visibility + rename inline. Filtra por toggles activos en Modules.
+- **AI Avatar tab**: avatar/heroVideo upload, greeting con `{client_name}`, suggested questions add/remove, modelo Anthropic + API key (server-side only).
+- **Branding tab**: 4 ImageField compact (Default/Idle/Footer/Favicon), CustomFontField drag&drop `.woff2/.woff/.ttf/.otf` con `@font-face` runtime injection, botón "Suggest a palette from a logo" funcional con histograma RGB cuantizado en buckets de 32 niveles.
+- **TrueOmniLogo**: `slot="default"|"idle"|"footer"|"brand"` con cache global `window.__kioskLogos` para sobrevivir re-mounts en cambios de ruta del iframe.
+- **BillboardLiveSwitcher**: client wrapper que cambia el variant en vivo desde el editor sin recargar.
+- **Disabled state en sidebar**: si toggle de Module está OFF → tab gris con Lock icon, no clickable, salto auto a Modules si la activa se desactiva.
+- **Backfill defensivo**: GET /api/studio/configs/[slug] y página server-side rellenan billboard/aiAvatar/modules con defaults para clientes pre-S2 + merge de systemModules legacy.
+- **Bridge ampliado**: `studio:branding-update` (logos/fonts/custom) + `studio:modules-update` (tiles + systemModules) + `studio:billboard-update` + `studio:ai-avatar-update`. Re-emit en handshake `studio:ready`.
+- **Fixes runtime**: idle popup ahora con grid centering (evita conflicto translate%+motion+iframe-scale), Touch Here del Billboard 0 con `font-display`, Billboards 1-4 con `LanguageDropdown` funcional (antes `EnglishButton` decorativo).
+- **API PATCH `[slug]`** acepta `branding | modules | billboard | aiAvatar` independientes con validación zod por sección.
+
+**Verificado:**
+
+- `pnpm typecheck` limpio.
+- `pnpm lint` solo errores pre-existentes del kiosk (photo-booth, itinerary, language-dropdown, directions-modal). Cero errores en archivos del Studio S2.
+- E2E manual:
+  - Cambiar variant 0→3 en Billboard → iframe cambia layout en <300ms.
+  - Toggle Survey OFF en Modules → tab Survey del sidebar gris + Home Dashboard ya no muestra Survey + grid del Home iframe oculta el tile.
+  - Subir logo PNG en Idle/Billboard → centro del Billboard renderiza la imagen.
+  - Custom font `.woff2` drag&drop en Display → kiosk re-renderiza tipografía.
+  - Cmd+S → PATCH manda solo secciones sucias → reload conserva.
+  - Cliente nuevo → seed completo con defaults.
+
+**Pendiente / siguiente:**
+
+- **Fase S3 — Content/Data por módulo:** S3.1 Survey editor → S3.2 Deals → S3.3 Photo Booth → S3.4 Digital Brochure → S3.5 Social Wall → S3.6 Guestbook → S3.7 Listings/Events/Tickets/Passes/Trails.
+- **Color picker pro** (`react-colorful`) en lugar de `<input type="color">` nativo.
+- **Vercel Blob** cuando logos/fonts data URLs crezcan (cap KV ~512KB/value, custom font puede ocupar 600KB).
+- **StudioBridge `getCachedLogoOverride`** ahora soporta 3 slots; verificar sin regresiones cuando se persistan custom fonts en KV con clientes que tengan ambos slots.
+
+**Decisiones:**
+
+- **TrueOmniLogo client + slot prop**: convertir el SVG inline en client component permite escuchar `kiosk:logo-override` y reemplazar por `<img>` cuando hay override. `slot="brand"` queda inmutable (Powered by TrueOmni — marca propia). Cache global `window.__kioskLogos` resuelve race conditions en re-mounts.
+- **systemModules con shape extendido (19 fields)**: master switches por cada módulo. El Home Dashboard filtra por estos toggles antes de mostrar. Doble nivel: Module enabled (vendido al cliente) + Tile enabled (visible en grid). Backfill mergea shapes legacy.
+- **BillboardLiveSwitcher**: el page idle es server component pero se delega el switching a un client wrapper que escucha el override sin recargar. Mantiene KioskCanvas a tamaño real dentro del iframe.
+- **Logos diferenciados (default/idle/footer)**: cliente real necesita 3 versiones del logo (header pequeño, idle grande centrado, footer pequeño en la banda). Antes era 1 solo, ahora son 3 separados con slot prop.
+- **CustomFont @font-face runtime**: drag&drop genera data URL → bridge inyecta `<style>` con `@font-face` en el iframe. CSS vars `--font-display`/`--font-sans` apuntan al custom name. Persistencia en KV (provisional hasta migrar a Vercel Blob).
+- **Sidebar disabled = gris + Lock + no clickable**: comunicar visualmente "este módulo no está vendido al cliente". Click muestra tooltip "Turn X on in the Modules tab to edit it". Si la tab activa se desactiva, salto auto a Modules.
+
+**Fase:** Studio S2 cerrada (2026-04-29). Siguiente arranque: **S3.1 Survey editor**.
+
+---
+
+### Sesión 2026-04-29 (cont.) — Studio S3.1–S3.6 cerradas (6 editores de módulo)
+
+**Hecho — patrón uniforme aplicado a 6 módulos** (Survey · Deals · Photo Booth · Digital Brochure · Social Wall · Guestbook):
+
+Para cada uno se entregó:
+
+1. **Schema zod completo** en `src/lib/studio/schema.ts` (replica fiel del schema del kiosk, con discriminated unions donde aplica, IDs únicos, refinamientos por sub-tipo).
+2. **API PATCH** acepta el sub-key con validación zod + checks de unicidad de IDs/slugs + checks cruzados (ej. `survey.questions[].id` único, `deals[].slug` único, `brochures[].category ∈ categories`, `photoBooth.timer.default ∈ timer.options`, `guestbook` IDs únicos por sub-lista, `country.code` únicos).
+3. **Backfill defensivo** en `GET /api/studio/configs/[slug]` y en la página server-side `studio/[slug]/page.tsx`: clientes pre-S3 reciben defaults para cada nuevo sub-key.
+4. **Bridge ampliado** en `use-preview-bridge.ts`: `pushX` debounced 120-200 ms + `openXPreview` que navega el iframe a `/home/<modulo>` + re-emit en handshake `studio:ready`.
+5. **StudioBridge kiosk** (`studio-bridge.tsx`) escucha `studio:<modulo>-update` y `studio:<modulo>-open-preview`, dispatcha `kiosk:<modulo>-override` event, navega cuando es preview.
+6. **Module kiosk runtime** (cada uno: `survey-host.tsx`, `deals-module.tsx`, `photo-booth-module.tsx`, `brochures-module.tsx`, `social-wall-module.tsx`, `guestbook-module.tsx`) con override en vivo via `useState<X | null>` + `useEffect` listener. Reemplaza props originales sin recargar. Casos especiales:
+   - **SurveyHost**: re-monta el overlay con `key` cuando cambia el set de preguntas.
+   - **DealsModule**: filtra activos por expiración (filterActiveDeals) sigue funcionando.
+   - **PhotoBoothModule**: re-genera `resolvedBackgrounds/Frames/Stickers` con `useMemo` aplicando `resolvePhotoBoothAsset` (que ahora también pasa-thru `data:`/`blob:` URLs).
+   - **BrochuresModule**: si la categoría activa se borra del catálogo, fallback a 'all'.
+   - **SocialWallModule**: si la source activa pierde su handle, fallback a 'all'.
+7. **Editor UI** completo en `src/app/studio/_components/<X>Editor.tsx` con drag&drop framer Reorder, accordion expandible, asset uploads (compact ImageField), botón "Preview" en cabecera, dirty tracking.
+8. **Shell** acumula state `<x>`/`saved<X>`/`<x>Dirty` + push debounced + save independiente que solo manda secciones sucias en un PATCH.
+
+**Componentes nuevos en `src/app/studio/_components/`:**
+
+- `SurveyEditor.tsx` — discriminated union 5 tipos (nps/rating/single-choice/multi-choice/text), add/remove options inline, contact capture, thank-you.
+- `DealsEditor.tsx` — list drag&drop, expira con badge rojo "Expired Xd ago", clone, FeatureChips multi-select, TagsEditor del catalog.
+- `PhotoBoothEditor.tsx` — 5 sub-tabs (Settings · Backgrounds · Frames · Filters · Stickers), Filter presets visuales con CSS filter live preview ("Aa"), TimerOptionsEditor con default marker.
+- `BrochuresEditor.tsx` — categories chips drag&drop horizontal con re-asignación automática de orphans, list de brochures con PdfField.
+- `PdfField.tsx` (nuevo helper) — drag&drop `.pdf` max 8MB, **auto-detecta page count** parseando `/Type /Page` en binario.
+- `SocialWallEditor.tsx` — 6 sources (X/Instagram/Pinterest/YouTube/Facebook/TikTok), handles connector con icono iluminado, highlights drag&drop, posts con campos type-specific (image/video/text/gallery), add post buttons solo para sources con handle.
+- `GuestbookEditor.tsx` — 4 sub-tabs (Module · Pin catalog · Seed pins · Countries), earthStart center+zoom, drag&drop reorder, validación de country codes ISO.
+
+**Schemas/defaults en `schema.ts`:**
+
+- `SurveySchema`, `DealSchema` + `DealsModuleSchema`, `PhotoBoothSchema` + 5 sub-schemas, `BrochureItemSchema` + `BrochuresModuleSchema`, `SocialPostSchema` + `SocialWallSchema`, `GuestbookSchema` + sub-schemas.
+- `DEFAULT_SURVEY` (3 questions seed), `DEFAULT_DEALS` (vacío con 4 categorías), `DEFAULT_PHOTO_BOOTH` (1 background, 3 filtros, timer 5s), `DEFAULT_BROCHURES` (4 categorías), `DEFAULT_SOCIAL_WALL` (vacío), `DEFAULT_GUESTBOOK` (1 pin + 10 countries comunes + earth view).
+- Helpers `newSurveyQuestionId`, `newDealSlug`/`makeBlankDeal`, `newPhotoBoothId`, `newBrochureSlug`/`makeBlankBrochure`, `newSocialId`/`makeBlankSocialPost`, `newGuestbookId`/`makeBlankSeedPin`/`makeBlankPinOption`.
+
+**Verificado:**
+
+- `pnpm typecheck` limpio en cada iteración (~80 ediciones).
+- E2E manual de cada módulo: editar → live preview <300 ms → save → reload → cambios persisten.
+
+**Pendiente / siguiente:**
+
+- **S3.7 — Content tab**: CRUD masivo de listings/events/tickets/passes/trails (los 5 módulos con catálogos grandes que aún no tienen editor). Reusa el patrón establecido en S3.1–S3.6.
+- **S4 — i18n editor** side-by-side de los 6 idiomas + AI translate.
+- **S5 — Ads system** (subir + calendarizar + emplazar).
+- **S6 — Integraciones** (weather + Mapbox + Analytics).
+- **S7 — Auth + Vercel + GitHub PR-publish** con approval gate.
+- **Vercel Blob** cuando los uploads pesados (PDFs 8MB, fonts 600KB, fotos) crezcan en KV.
+
+**Decisiones:**
+
+- **Bridge debounced por sub-key**: cada módulo tiene su propio debounce timer (80–200 ms según peso del payload). Re-emit en `studio:ready` cubre re-mounts del iframe sin perder state.
+- **Override por evento window CustomEvent**: en lugar de un context provider global, cada módulo client del kiosk se suscribe a su evento (`kiosk:<module>-override`) y mantiene state local con `useState<X | null>`. El override SUSTITUYE props originales (no merge), simple y predecible.
+- **JSON.stringify para deep equality del dirty tracking**: simpler que escribir comparadores estructurales para 6 schemas distintos. El cost es aceptable porque solo corre en useMemo con dependencies.
+- **Auto page count del PDF**: heurística parseando `/Type /Page` en el binario evita dependencia de `pdf.js` en el Studio. Funciona para >95% de PDFs no-encriptados.
+- **PhotoBooth `resolvePhotoBoothAsset` ampliado** con `data:` y `blob:` pass-thru: las imágenes subidas al Studio entran como data URLs y deben funcionar tanto en preview como en futuro publish.
+- **Brochures categories drag&drop con re-asignación de orphans**: si borras una categoría, las brochures con esa categoría se re-asignan auto a la primera disponible. Evita estados inválidos sin requerir confirmación del usuario.
+- **Social handles habilitan tabs**: solo aparecen botones "Add post" para sources con handle conectado. Si no hay handles, warning amber.
+
+**Fase:** Studio S3.6 Guestbook cerrada (2026-04-29). Siguiente arranque: **S3.7 Content (Listings/Events/Tickets/Passes/Trails)**.
 
 ---
 

@@ -3,9 +3,10 @@
 import { useState } from 'react';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
+import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
-import { AccessibilityIcon, EnglishButton } from './billboard-footer-parts';
+import { AccessibilityIcon } from './billboard-footer-parts';
 
 /**
  * Billboard 2 — "Hero full-bleed + carousel de cards".
@@ -69,9 +70,9 @@ export function Billboard2() {
         }}
       />
 
-      {/* Logo TrueOmni blanco centrado */}
+      {/* Logo TrueOmni blanco centrado — slot="idle" (logo del Billboard). */}
       <div className="absolute flex justify-center" style={{ left: '0', right: '0', top: '120px' }}>
-        <TrueOmniLogo className="h-[100px] w-auto text-white" />
+        <TrueOmniLogo slot="idle" className="h-[100px] w-auto text-white" />
       </div>
 
       {/* Peek izquierda — más chica y en Y más alto (retranqueada) */}
@@ -158,14 +159,15 @@ export function Billboard2() {
         </span>
       </button>
 
-      {/* TOUCH TO START + arrow circle */}
+      {/* TOUCH TO START + arrow circle — single-line, alineado verticalmente
+          al centro de la flecha. Tamaño 60px coincide con el círculo (110px). */}
       <div
         className="absolute flex items-center gap-10"
-        style={{ left: '50%', top: '1410px', transform: 'translateX(-50%)', whiteSpace: 'nowrap' }}
+        style={{ left: '50%', top: '1410px', transform: 'translateX(-50%)' }}
       >
         <span
-          className="font-display font-bold uppercase text-white"
-          style={{ fontSize: '60px', letterSpacing: '0.02em', whiteSpace: 'pre-line' }}
+          className="font-display font-bold uppercase leading-none text-white"
+          style={{ fontSize: '60px', letterSpacing: '0.02em', whiteSpace: 'nowrap' }}
         >
           {(t.billboard_touch_to_start ?? 'Touch to start').replace(/\n/g, ' ')}
         </span>
@@ -179,6 +181,7 @@ export function Billboard2() {
           strokeWidth="9"
           strokeLinecap="round"
           strokeLinejoin="round"
+          className="shrink-0"
         >
           <path d="M46.023,72.912,67.534,51.4m0,0L46.023,29.889M67.534,51.4H3m8.15,26.889a48.4,48.4,0,1,0,0-53.778" />
         </svg>
@@ -196,7 +199,9 @@ export function Billboard2() {
           10:37 a.m.
         </span>
         <AccessibilityIcon size={80} color="#fff" />
-        <EnglishButton width={244} height={80} fontSize={26} />
+        <div data-billboard-no-link>
+          <LanguageDropdown />
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,5 @@
 import { AdsSlot } from '@/components/ads/ads-slot';
-import { AiModalHost } from '@/components/ai/ai-modal-host';
-import { AskAiTrigger } from '@/components/ai/ask-ai-trigger';
+import { AskAiHost } from '@/components/ai/ask-ai-host';
 import { HomeHeader } from '@/components/home/header';
 import { HomeShell } from '@/components/home/home-shell';
 import { SurveyHost } from '@/components/home/survey-host';
@@ -22,12 +21,15 @@ export default async function HomePage() {
     );
   }
   const ads = getAdsFromConfig(config);
-  const tiles: HomeTile[] = home.tiles.filter((t) => t.enabled);
-  if (home.wayfinding?.enabled) {
-    tiles.push({
+  // Pasamos TODOS los tiles del cliente (incluyendo deshabilitados) + wayfinding
+  // como un tile más al final. HomeShell filtra por `enabled` en cliente y
+  // permite override desde el Studio (postMessage → kiosk:modules-override).
+  const allTiles: HomeTile[] = [...home.tiles];
+  if (home.wayfinding) {
+    allTiles.push({
       key: 'wayfinding',
       label: home.wayfinding.label,
-      enabled: true,
+      enabled: home.wayfinding.enabled,
       image: home.wayfinding.image,
     });
   }
@@ -48,32 +50,30 @@ export default async function HomePage() {
       <HomeShell
         header={<HomeHeader />}
         listings={home.listings}
-        tiles={tiles}
+        allTiles={allTiles}
         survey={home.survey}
       />
       <AdsSlot ads={ads} />
       <SurveyHost survey={home.survey} client={{ slug: config.client.slug }} />
       {askAi && askAiTextos && (
-        <>
-          <AskAiTrigger
-            avatarSrc={resolveAiAssetPath(askAi.avatar)}
-            ariaLabel={config.textos.ai_aria_open ?? 'Open Ask AI'}
-            size={askAi.position?.size ?? 82}
-            width={askAi.position?.width}
-            height={askAi.position?.height}
-            position={{
-              right: askAi.position?.right ?? 24,
-              bottom: askAi.position?.bottom ?? 24,
-            }}
-          />
-          <AiModalHost
-            heroVideoSrc={resolveAiAssetPath(askAi.heroVideo)}
-            greeting={askAiGreeting}
-            suggestedQuestions={askAi.suggestedQuestions}
-            clientName={config.client.nombre}
-            textos={askAiTextos}
-          />
-        </>
+        <AskAiHost
+          enabled
+          ariaLabel={config.textos.ai_aria_open ?? 'Open Ask AI'}
+          avatarSrc={resolveAiAssetPath(askAi.avatar)}
+          heroVideoSrc={resolveAiAssetPath(askAi.heroVideo)}
+          greeting={askAiGreeting}
+          subtitle={askAiTextos.subtitle}
+          suggestedQuestions={askAi.suggestedQuestions}
+          clientName={config.client.nombre}
+          textos={askAiTextos}
+          position={{
+            right: askAi.position?.right ?? 24,
+            bottom: askAi.position?.bottom ?? 24,
+            size: askAi.position?.size ?? 82,
+            width: askAi.position?.width,
+            height: askAi.position?.height,
+          }}
+        />
       )}
     </KioskCanvas>
   );

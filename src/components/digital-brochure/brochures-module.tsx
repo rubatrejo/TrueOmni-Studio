@@ -1,12 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { useModuleLabel } from '@/components/i18n-provider';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { filterBrochures } from '@/lib/brochures-filter';
-import type { HomeDigitalBrochureModule } from '@/lib/config';
+import type { BrochureItem, HomeDigitalBrochureModule } from '@/lib/config';
 
 import { BrochuresHeader } from './brochures-header';
 import { BrochuresList } from './brochures-list';
@@ -26,9 +26,44 @@ export function BrochuresModule({
   const [activeCategory, setActiveCategory] = useState<string | 'all'>('all');
   const [searchOpen, setSearchOpen] = useState(false);
 
+  // Live override desde el Studio (S3.4).
+  const [override, setOverride] = useState<HomeDigitalBrochureModule | null>(null);
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{
+        label?: string;
+        heroImage?: string;
+        categories?: string[];
+        brochures?: BrochureItem[];
+      }>).detail;
+      if (!detail || !Array.isArray(detail.brochures)) return;
+      setOverride({
+        kind: 'digital-brochure',
+        label: detail.label ?? mod.label,
+        heroImage: detail.heroImage ?? mod.heroImage,
+        categories: detail.categories ?? mod.categories,
+        brochures: detail.brochures,
+      });
+    };
+    window.addEventListener('kiosk:brochures-override', handler);
+    return () => window.removeEventListener('kiosk:brochures-override', handler);
+  }, [mod.label, mod.heroImage, mod.categories]);
+
+  const effective = override ?? mod;
+
+  // Si la categoría activa ya no existe en el override, vuelve a "all".
+  useEffect(() => {
+    if (
+      activeCategory !== 'all' &&
+      !effective.categories.includes(activeCategory as string)
+    ) {
+      setActiveCategory('all');
+    }
+  }, [effective.categories, activeCategory]);
+
   const visible = useMemo(
-    () => filterBrochures(mod.brochures, { category: activeCategory }),
-    [mod.brochures, activeCategory],
+    () => filterBrochures(effective.brochures, { category: activeCategory }),
+    [effective.brochures, activeCategory],
   );
 
   return (
@@ -39,7 +74,7 @@ export function BrochuresModule({
       {header}
       <BrochuresHeader label={moduleLabel} onSearch={() => setSearchOpen(true)} />
       <BrochuresTabs
-        categories={mod.categories}
+        categories={effective.categories}
         active={activeCategory}
         onSelect={setActiveCategory}
       />
@@ -64,7 +99,7 @@ export function BrochuresModule({
       <BrochuresSearchOverlay
         open={searchOpen}
         moduleKey={moduleKey}
-        brochures={mod.brochures}
+        brochures={effective.brochures}
         onClose={() => setSearchOpen(false)}
       />
     </div>

@@ -36,9 +36,18 @@ export function Billboard0() {
         className="absolute inset-0 h-full w-full object-cover"
       />
 
-      {/* Logo grande TrueOmni encima del botón (193, 371), ~704×128px. */}
-      <div className="absolute" style={{ left: '193px', top: '371px' }}>
-        <TrueOmniLogo className="h-[128px] w-auto text-white" />
+      {/* Logo grande TrueOmni encima del botón (193, 371), ~704×128px.
+          `slot="idle"` para que use el logo subido en `branding.idleLogo`.
+          `width: 694px + flex center` mantiene el logo centrado aunque
+          el aspect ratio del logo subido sea distinto al SVG original. */}
+      <div
+        className="absolute flex items-center justify-center"
+        style={{ left: '193px', top: '371px', width: '694px', height: '128px' }}
+      >
+        <TrueOmniLogo
+          slot="idle"
+          className="h-[128px] max-w-full w-auto text-white"
+        />
       </div>
 
       {/* Botón central TOUCH HERE (548×342 @ x=281 y=776, rx=20) con ring
@@ -56,7 +65,7 @@ export function Billboard0() {
         }}
       >
         <p
-          className="text-center font-sans font-bold uppercase text-white"
+          className="text-center font-display font-bold uppercase text-white"
           style={{ fontSize: '90px', lineHeight: '110px', whiteSpace: 'pre-line' }}
         >
           {t.billboard_touch_here ?? 'Touch\nHere'}
@@ -102,9 +111,14 @@ export function Billboard0() {
           }}
         />
 
-        {/* Logo TrueOmni footer @ relativo (60, 103), ~353.7×65.4. */}
-        <div className="absolute" style={{ left: '60px', top: '103px' }}>
-          <TrueOmniLogo className="h-[65px] w-auto text-white" />
+        {/* Logo TrueOmni footer @ relativo (60, 103), ~353.7×65.4.
+            `slot="footer"` — logo del footer del Billboard, distinto al
+            del header del Home (`default`) y del centro del idle (`idle`). */}
+        <div
+          className="absolute flex items-center"
+          style={{ left: '60px', top: '103px', height: '65px', width: '360px' }}
+        >
+          <TrueOmniLogo slot="footer" className="h-[65px] max-w-full w-auto text-white" />
         </div>
 
         {/* Wheelchair icon — path exacto del SVG @ relativo (540, 114.357). */}
@@ -132,7 +146,7 @@ export function Billboard0() {
           >
             {t.billboard_powered_by ?? 'Powered by'}
           </span>
-          <TrueOmniLogo className="mt-[6px] h-[32px] w-auto text-white" />
+          <TrueOmniLogo slot="brand" className="mt-[6px] h-[32px] w-auto text-white" />
         </div>
       </div>
     </div>

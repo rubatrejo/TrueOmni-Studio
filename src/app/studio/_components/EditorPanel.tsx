@@ -2,24 +2,107 @@
 
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
+import { useState } from 'react';
 
-import type { Branding } from '@/lib/studio/schema';
+import type {
+  AiAvatarConfig,
+  BillboardConfig,
+  Branding,
+  BrochuresModuleConfig,
+  DealsModuleConfig,
+  GuestbookConfig,
+  ModulesConfig,
+  PhotoBoothConfig,
+  SocialWallConfig,
+  SurveyConfig,
+} from '@/lib/studio/schema';
 
+import { extractPaletteFromImage } from '../_lib/palette-from-image';
 import { STUDIO_SECTIONS, type StudioSectionKey } from '../_lib/sections';
 
+import { AiAvatarEditor } from './AiAvatarEditor';
+import { BillboardEditor } from './BillboardEditor';
+import { BrochuresEditor } from './BrochuresEditor';
+import { CustomFontField } from './CustomFontField';
+import { DealsEditor } from './DealsEditor';
 import { FontSelector } from './FontSelector';
+import { GuestbookEditor } from './GuestbookEditor';
 import { ImageField } from './ImageField';
+import { HomeDashboardEditor, SystemModulesEditor } from './ModulesEditor';
+import { PhotoBoothEditor } from './PhotoBoothEditor';
+import { SocialWallEditor } from './SocialWallEditor';
+import { SurveyEditor } from './SurveyEditor';
 
 export function EditorPanel({
   sectionKey,
   branding,
   onBrandingChange,
+  modules,
+  onModulesChange,
+  billboard,
+  onBillboardChange,
+  aiAvatar,
+  onAiAvatarChange,
+  survey,
+  onSurveyChange,
+  onSurveyPreview,
+  deals,
+  onDealsChange,
+  onDealsPreview,
+  photoBooth,
+  onPhotoBoothChange,
+  onPhotoBoothPreview,
+  brochures,
+  onBrochuresChange,
+  onBrochuresPreview,
+  socialWall,
+  onSocialWallChange,
+  onSocialWallPreview,
+  guestbook,
+  onGuestbookChange,
+  onGuestbookPreview,
 }: {
   sectionKey: StudioSectionKey;
   branding: Branding;
   onBrandingChange: (next: Branding) => void;
+  modules: ModulesConfig;
+  onModulesChange: (next: ModulesConfig) => void;
+  billboard: BillboardConfig;
+  onBillboardChange: (next: BillboardConfig) => void;
+  aiAvatar: AiAvatarConfig;
+  onAiAvatarChange: (next: AiAvatarConfig) => void;
+  survey: SurveyConfig;
+  onSurveyChange: (next: SurveyConfig) => void;
+  onSurveyPreview: () => void;
+  deals: DealsModuleConfig;
+  onDealsChange: (next: DealsModuleConfig) => void;
+  onDealsPreview: () => void;
+  photoBooth: PhotoBoothConfig;
+  onPhotoBoothChange: (next: PhotoBoothConfig) => void;
+  onPhotoBoothPreview: () => void;
+  brochures: BrochuresModuleConfig;
+  onBrochuresChange: (next: BrochuresModuleConfig) => void;
+  onBrochuresPreview: () => void;
+  socialWall: SocialWallConfig;
+  onSocialWallChange: (next: SocialWallConfig) => void;
+  onSocialWallPreview: () => void;
+  guestbook: GuestbookConfig;
+  onGuestbookChange: (next: GuestbookConfig) => void;
+  onGuestbookPreview: () => void;
 }) {
   const section = STUDIO_SECTIONS.find((s) => s.key === sectionKey)!;
+  const isImplemented =
+    sectionKey === 'branding' ||
+    sectionKey === 'home-dashboard' ||
+    sectionKey === 'modules' ||
+    sectionKey === 'billboard' ||
+    sectionKey === 'ai-avatar' ||
+    sectionKey === 'survey' ||
+    sectionKey === 'deals' ||
+    sectionKey === 'photo-booth' ||
+    sectionKey === 'digital-brochure' ||
+    sectionKey === 'social-wall' ||
+    sectionKey === 'guestbook';
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-white dark:bg-zinc-950">
@@ -39,7 +122,61 @@ export function EditorPanel({
         {sectionKey === 'branding' && (
           <BrandingEditor branding={branding} onChange={onBrandingChange} />
         )}
-        {sectionKey !== 'branding' && <ComingSoon section={section} />}
+        {sectionKey === 'home-dashboard' && (
+          <HomeDashboardEditor modules={modules} onChange={onModulesChange} />
+        )}
+        {sectionKey === 'modules' && (
+          <SystemModulesEditor modules={modules} onChange={onModulesChange} />
+        )}
+        {sectionKey === 'billboard' && (
+          <BillboardEditor billboard={billboard} onChange={onBillboardChange} />
+        )}
+        {sectionKey === 'ai-avatar' && (
+          <AiAvatarEditor aiAvatar={aiAvatar} onChange={onAiAvatarChange} />
+        )}
+        {sectionKey === 'survey' && (
+          <SurveyEditor
+            survey={survey}
+            onChange={onSurveyChange}
+            onPreview={onSurveyPreview}
+          />
+        )}
+        {sectionKey === 'deals' && (
+          <DealsEditor
+            deals={deals}
+            onChange={onDealsChange}
+            onPreview={onDealsPreview}
+          />
+        )}
+        {sectionKey === 'photo-booth' && (
+          <PhotoBoothEditor
+            photoBooth={photoBooth}
+            onChange={onPhotoBoothChange}
+            onPreview={onPhotoBoothPreview}
+          />
+        )}
+        {sectionKey === 'digital-brochure' && (
+          <BrochuresEditor
+            brochures={brochures}
+            onChange={onBrochuresChange}
+            onPreview={onBrochuresPreview}
+          />
+        )}
+        {sectionKey === 'social-wall' && (
+          <SocialWallEditor
+            socialWall={socialWall}
+            onChange={onSocialWallChange}
+            onPreview={onSocialWallPreview}
+          />
+        )}
+        {sectionKey === 'guestbook' && (
+          <GuestbookEditor
+            guestbook={guestbook}
+            onChange={onGuestbookChange}
+            onPreview={onGuestbookPreview}
+          />
+        )}
+        {!isImplemented && <ComingSoon section={section} />}
       </div>
     </div>
   );
@@ -61,6 +198,32 @@ function BrandingEditor({
 
   const setFont = (slot: 'display' | 'body', font: string) =>
     onChange({ ...branding, fonts: { ...branding.fonts, [slot]: font } });
+
+  const [suggestState, setSuggestState] = useState<'idle' | 'extracting' | 'error'>('idle');
+
+  const handleSuggestPalette = async () => {
+    const source = branding.logo ?? branding.idleLogo ?? branding.footerLogo;
+    if (!source) {
+      setSuggestState('error');
+      setTimeout(() => setSuggestState('idle'), 2000);
+      return;
+    }
+    setSuggestState('extracting');
+    try {
+      const palette = await extractPaletteFromImage(source);
+      onChange({
+        ...branding,
+        primary: palette.primary,
+        secondary: palette.secondary,
+        tertiary: palette.tertiary,
+      });
+      setSuggestState('idle');
+    } catch (err) {
+      console.error('[Suggest palette]', err);
+      setSuggestState('error');
+      setTimeout(() => setSuggestState('idle'), 2000);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -89,10 +252,21 @@ function BrandingEditor({
 
         <button
           type="button"
-          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-[12.5px] text-zinc-600 transition hover:border-sky-500/30 hover:bg-sky-500/5 hover:text-sky-700 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400 dark:hover:bg-sky-500/5 dark:hover:text-sky-300"
+          onClick={handleSuggestPalette}
+          disabled={suggestState === 'extracting'}
+          className={
+            'mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2 text-[12.5px] transition disabled:cursor-wait ' +
+            (suggestState === 'error'
+              ? 'border-red-300 bg-red-50 text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300'
+              : 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:border-sky-500/30 hover:bg-sky-500/5 hover:text-sky-700 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400 dark:hover:bg-sky-500/5 dark:hover:text-sky-300')
+          }
         >
           <Sparkles className="h-3.5 w-3.5" />
-          Suggest a palette from a logo
+          {suggestState === 'extracting'
+            ? 'Extracting palette…'
+            : suggestState === 'error'
+              ? 'Upload a logo first'
+              : 'Suggest a palette from a logo'}
         </button>
       </Group>
 
@@ -129,14 +303,30 @@ function BrandingEditor({
 
       {/* Logos */}
       <Group title="Logos" hint="SVG preferred. PNG fallback supported.">
-        <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-1.5">
           <ImageField
+            layout="compact"
             label="Default logo"
-            hint="SVG · PNG (transparent)"
+            hint="Header & module screens · SVG · PNG"
             value={branding.logo}
             onChange={(v) => setField('logo', v)}
           />
           <ImageField
+            layout="compact"
+            label="Idle / Billboard logo"
+            hint="Big logo on the idle screen · SVG · PNG"
+            value={branding.idleLogo}
+            onChange={(v) => setField('idleLogo', v)}
+          />
+          <ImageField
+            layout="compact"
+            label="Idle footer logo"
+            hint="Bottom band of the idle screen · SVG · PNG"
+            value={branding.footerLogo}
+            onChange={(v) => setField('footerLogo', v)}
+          />
+          <ImageField
+            layout="compact"
             label="Favicon"
             hint="SVG · PNG · ICO · 32×32+"
             value={branding.favicon}
@@ -148,16 +338,37 @@ function BrandingEditor({
       </Group>
 
       {/* Fonts */}
-      <Group title="Typography" hint="Headings + body fonts (Google Fonts curated).">
+      <Group title="Typography" hint="Headings + body fonts. Google Fonts curated, or upload your own.">
         <FontSelector
           kind="Display"
           value={branding.fonts?.display ?? 'Montserrat'}
           onChange={(v) => setFont('display', v)}
         />
+        <CustomFontField
+          slot="display"
+          value={branding.fonts?.displayCustom}
+          onChange={(v) =>
+            onChange({
+              ...branding,
+              fonts: { ...(branding.fonts ?? {}), displayCustom: v ?? undefined },
+            })
+          }
+        />
+        <div className="my-3 h-px bg-zinc-100 dark:bg-zinc-900" />
         <FontSelector
           kind="Body"
           value={branding.fonts?.body ?? 'Open Sans'}
           onChange={(v) => setFont('body', v)}
+        />
+        <CustomFontField
+          slot="body"
+          value={branding.fonts?.bodyCustom}
+          onChange={(v) =>
+            onChange({
+              ...branding,
+              fonts: { ...(branding.fonts ?? {}), bodyCustom: v ?? undefined },
+            })
+          }
         />
       </Group>
     </div>

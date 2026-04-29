@@ -1,6 +1,19 @@
 'use client';
 
-import type { Branding, ConfigMeta, KioskConfig } from '@/lib/studio/schema';
+import type {
+  AiAvatarConfig,
+  BillboardConfig,
+  Branding,
+  BrochuresModuleConfig,
+  ConfigMeta,
+  DealsModuleConfig,
+  GuestbookConfig,
+  KioskConfig,
+  ModulesConfig,
+  PhotoBoothConfig,
+  SocialWallConfig,
+  SurveyConfig,
+} from '@/lib/studio/schema';
 
 /**
  * Cliente HTTP del Studio frontend → API routes server-side.
@@ -61,6 +74,40 @@ export async function patchBranding(slug: string, branding: Branding): Promise<K
   const data = await http<{ config: KioskConfig }>(`/api/studio/configs/${slug}`, {
     method: 'PATCH',
     body: { branding },
+  });
+  return data.config;
+}
+
+export async function patchModules(
+  slug: string,
+  modules: ModulesConfig,
+): Promise<KioskConfig> {
+  const data = await http<{ config: KioskConfig }>(`/api/studio/configs/${slug}`, {
+    method: 'PATCH',
+    body: { modules },
+  });
+  return data.config;
+}
+
+/** Combinar varias secciones en un solo PATCH. */
+export async function patchConfig(
+  slug: string,
+  payload: {
+    branding?: Branding;
+    modules?: ModulesConfig;
+    billboard?: BillboardConfig;
+    aiAvatar?: AiAvatarConfig;
+    survey?: SurveyConfig;
+    deals?: DealsModuleConfig;
+    photoBooth?: PhotoBoothConfig;
+    brochures?: BrochuresModuleConfig;
+    socialWall?: SocialWallConfig;
+    guestbook?: GuestbookConfig;
+  },
+): Promise<KioskConfig> {
+  const data = await http<{ config: KioskConfig }>(`/api/studio/configs/${slug}`, {
+    method: 'PATCH',
+    body: payload,
   });
   return data.config;
 }

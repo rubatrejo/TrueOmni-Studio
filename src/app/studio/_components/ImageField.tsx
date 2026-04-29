@@ -15,6 +15,8 @@ interface ImageFieldProps {
   /** Data URL o path actual. */
   value?: string;
   onChange: (next: string | undefined) => void;
+  /** `compact`: layout horizontal pequeño (logos múltiples). `square`: aspect 1:1 (default). */
+  layout?: 'compact' | 'square';
 }
 
 /**
@@ -33,6 +35,7 @@ export function ImageField({
   maxBytes = 500 * 1024,
   value,
   onChange,
+  layout = 'square',
 }: ImageFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -51,6 +54,89 @@ export function ImageField({
       setBusy(false);
     }
   };
+
+  if (layout === 'compact') {
+    return (
+      <div
+        className={`relative flex items-center gap-2.5 rounded-lg border border-dashed bg-zinc-50/50 p-2 transition ${
+          hover
+            ? 'border-sky-500/50 bg-sky-500/5'
+            : 'border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900/20'
+        }`}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setHover(true);
+        }}
+        onDragLeave={() => setHover(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setHover(false);
+          const file = e.dataTransfer.files[0];
+          if (file) void pickFile(file);
+        }}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) void pickFile(file);
+          }}
+        />
+
+        {/* Thumbnail / drop zone */}
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={busy}
+          className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-md bg-white ring-1 ring-zinc-200 transition hover:ring-sky-500/40 dark:bg-zinc-900 dark:ring-zinc-800"
+          aria-label={value ? `Change ${label}` : `Upload ${label}`}
+        >
+          {value ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={value}
+              alt={label}
+              className="block h-full w-full object-contain p-1"
+            />
+          ) : (
+            <Upload className="h-3.5 w-3.5 text-zinc-400" />
+          )}
+        </button>
+
+        <div className="min-w-0 flex-1">
+          <div className="text-[12px] font-medium text-zinc-700 dark:text-zinc-200">
+            {label}
+          </div>
+          <div className="mt-0.5 truncate text-[10.5px] text-zinc-500 dark:text-zinc-500">
+            {error ? <span className="text-red-600">{error}</span> : busy ? 'Reading…' : hint}
+          </div>
+        </div>
+
+        {value ? (
+          <button
+            type="button"
+            onClick={() => onChange(undefined)}
+            aria-label={`Remove ${label}`}
+            className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-zinc-400 transition hover:bg-red-500/10 hover:text-red-500"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={busy}
+            className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-[10.5px] font-medium text-zinc-600 transition hover:border-sky-500/30 hover:bg-sky-500/5 hover:text-sky-700 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-400 dark:hover:bg-sky-500/5 dark:hover:text-sky-300"
+          >
+            Upload
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div

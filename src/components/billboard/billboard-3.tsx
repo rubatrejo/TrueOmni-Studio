@@ -1,9 +1,10 @@
 'use client';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
+import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
-import { AccessibilityIcon, EnglishButton } from './billboard-footer-parts';
+import { AccessibilityIcon } from './billboard-footer-parts';
 
 /**
  * Billboard 3 — variante "2 cards arriba + banner central + 2 cards abajo".
@@ -66,7 +67,7 @@ export function Billboard3() {
         />
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,79,139,0.6)' }} />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-16">
-          <TrueOmniLogo className="h-[110px] w-auto text-white" />
+          <TrueOmniLogo slot="idle" className="h-[110px] w-auto text-white" />
           <div className="flex items-center gap-10">
             <span
               className="font-display font-bold uppercase text-white"
@@ -130,9 +131,11 @@ export function Billboard3() {
           paddingRight: '59px',
         }}
       >
-        <TrueOmniLogo className="h-[65px] w-auto text-white" />
+        <TrueOmniLogo slot="footer" className="h-[65px] w-auto text-white" />
         <AccessibilityIcon size={80} color="#fff" />
-        <EnglishButton width={244} height={80} fontSize={26} />
+        <div data-billboard-no-link>
+          <LanguageDropdown />
+        </div>
       </div>
     </div>
   );

@@ -11,16 +11,67 @@
  *
  * viewBox: 353.697 × 65.369 (Rectangle_37 del SVG, bounding box natural).
  * Ajusta tamaño vía `className` (ej. `h-16 w-auto`).
+ *
+ * Es un Client Component porque escucha `kiosk:logo-override` (emitido por
+ * StudioBridge cuando el editor del Studio sube un nuevo logo). Si hay
+ * override, se renderea como `<img>` en lugar del SVG inline.
  */
+'use client';
+
+import { useEffect, useState } from 'react';
+
+import { getCachedLogoOverride } from '@/components/studio-bridge';
 
 interface TrueOmniLogoProps {
   /** Clase Tailwind para controlar tamaño/color. Ej: `h-16 w-auto text-white`. */
   className?: string;
   /** Etiqueta a11y. Por defecto "TrueOmni". */
   title?: string;
+  /**
+   * Qué override del Studio escucha:
+   *   - `default` (default): logo principal (header del Home, módulos).
+   *   - `idle`: logo grande del Billboard idle (centro de pantalla).
+   *   - `footer`: logo del footer del Billboard idle (banda inferior).
+   *   - `brand`: NUNCA se sobrescribe (Powered by TrueOmni — marca propia).
+   */
+  slot?: 'default' | 'idle' | 'footer' | 'brand';
 }
 
-export function TrueOmniLogo({ className, title = 'TrueOmni' }: TrueOmniLogoProps) {
+export function TrueOmniLogo({
+  className,
+  title = 'TrueOmni',
+  slot = 'default',
+}: TrueOmniLogoProps) {
+  const [override, setOverride] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (slot === 'brand') return; // Powered by TrueOmni nunca cambia.
+    // Lee la cache global por si el bridge ya despachó antes de este mount
+    // (caso típico: cambio de ruta dentro del iframe del Studio).
+    const cached = getCachedLogoOverride(slot as 'default' | 'idle' | 'footer');
+    if (cached) setOverride(cached);
+
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ slot?: string; logo?: string }>).detail;
+      // Ignorar overrides de otro slot.
+      const evtSlot = detail?.slot ?? 'default';
+      if (evtSlot !== slot) return;
+      const next = detail?.logo;
+      setOverride(next && next.length > 0 ? next : null);
+    };
+    window.addEventListener('kiosk:logo-override', handler);
+    return () => window.removeEventListener('kiosk:logo-override', handler);
+  }, [slot]);
+
+  if (override) {
+    // El logo subido por el usuario suele ser un raster con aspect ratio propio.
+    // `object-contain` + `block` evita stretching y mantiene centrado dentro
+    // del bounding box que dicta `className` (h-X w-auto).
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={override} alt={title} className={`${className ?? ''} block object-contain`} />;
+  }
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

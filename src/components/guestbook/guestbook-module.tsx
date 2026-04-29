@@ -72,6 +72,19 @@ export function GuestbookModule({
   const textos = useTextosMap();
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>('start');
+
+  // Live override desde el Studio (S3.6).
+  const [override, setOverride] = useState<HomeGuestbookModule | null>(null);
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<HomeGuestbookModule>).detail;
+      if (!detail || !Array.isArray(detail.pinCatalog)) return;
+      setOverride({ ...detail, kind: 'guestbook' });
+    };
+    window.addEventListener('kiosk:guestbook-override', handler);
+    return () => window.removeEventListener('kiosk:guestbook-override', handler);
+  }, []);
+  const effective = override ?? mod;
   const [userData, setUserData] = useState<GuestbookFormData | null>(null);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [userAddress, setUserAddress] = useState<string>('');
@@ -92,8 +105,8 @@ export function GuestbookModule({
       address: p.address ?? '',
       comment: p.comment,
     }));
-    return [...mod.seedPins, ...fromStore];
-  }, [mod.seedPins, userPins, textos.guestbook_pin_today]);
+    return [...effective.seedPins, ...fromStore];
+  }, [effective.seedPins, userPins, textos.guestbook_pin_today]);
 
   const visibleSeedPins = useMemo(() => {
     if (!userCoords) return seedPinsEnriched.slice(0, 6);
@@ -184,7 +197,7 @@ export function GuestbookModule({
   // sobre el zoom base del config (earthStart.zoom) para acercar el
   // planeta justo antes del flyTo al zip.
   useEffect(() => {
-    const baseZoom = mod.earthStart?.zoom ?? 2.55;
+    const baseZoom = effective.earthStart?.zoom ?? 2.55;
     // Form hace +5% zoom sobre el start (pedido del usuario tras
     // reducir 10% del 15% inicial).
     const target = phase === 'form' ? baseZoom * 1.05 : baseZoom;
@@ -193,7 +206,7 @@ export function GuestbookModule({
     if (phase === 'start' || phase === 'form') {
       map.easeTo({ zoom: target, duration: 900, essential: true });
     }
-  }, [phase, mod.earthStart?.zoom]);
+  }, [phase, effective.earthStart?.zoom]);
 
   // Layout: globo siempre presente. Las pantallas Start/Form se montan
   // encima durante esas phases. En transition/map el globo pasa a
@@ -236,7 +249,7 @@ export function GuestbookModule({
       <GuestbookGlobeCanvas
         ref={globeRef}
         token={mapboxToken}
-        earthStart={mod.earthStart}
+        earthStart={effective.earthStart}
         overlayPins={
           phase === 'start' || phase === 'form'
             ? // Distribución decorativa global para que al girar el globo
@@ -244,7 +257,7 @@ export function GuestbookModule({
               GLOBE_DECORATIVE_COORDS.map((coords, i) => ({
                 id: `globe-${i}`,
                 coords,
-                image: mod.pinCatalog[i % mod.pinCatalog.length]?.image ?? '',
+                image: effective.pinCatalog[i % effective.pinCatalog.length]?.image ?? '',
               }))
             : undefined
         }
@@ -282,7 +295,7 @@ export function GuestbookModule({
               termsPrivacy: textos.guestbook_terms_privacy ?? 'Accept our Privacy policy',
               termsUpdates: textos.guestbook_terms_updates ?? 'Receive Destination Email Updates',
             }}
-            countries={mod.countries}
+            countries={effective.countries}
             countrySelectTitle={textos.guestbook_country_select_title ?? 'Select Country'}
             ctaLabel={textos.guestbook_next_cta ?? 'NEXT'}
             onSubmit={handleFormSubmit}
@@ -328,7 +341,7 @@ export function GuestbookModule({
           onBack={() => setShowExitConfirm(true)}
           getMap={getGlobeMap}
           seedPins={visibleSeedPins}
-          pinCatalog={mod.pinCatalog}
+          pinCatalog={effective.pinCatalog}
           authorName={userData?.name ?? ''}
           userAddress={userAddress}
           texts={{

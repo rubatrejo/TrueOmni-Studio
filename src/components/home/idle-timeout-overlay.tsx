@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useTextos } from '@/components/i18n-provider';
 import { useIdleReset } from '@/hooks/use-idle-reset';
@@ -38,6 +38,20 @@ export function IdleTimeoutOverlay({
   const router = useRouter();
   const setLocale = useLocaleStore((s) => s.setLocale);
   const initFromSession = useLocaleStore((s) => s.initFromSession);
+  const [overrideIdle, setOverrideIdle] = useState<number | null>(null);
+
+  // Override del idle timeout desde el Studio (Billboard tab).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ idleTimeoutSec?: number }>).detail;
+      if (typeof detail?.idleTimeoutSec === 'number' && detail.idleTimeoutSec >= 5) {
+        setOverrideIdle(detail.idleTimeoutSec);
+      }
+    };
+    window.addEventListener('kiosk:billboard-override', handler);
+    return () => window.removeEventListener('kiosk:billboard-override', handler);
+  }, []);
 
   const handleTimeout = useCallback(() => {
     // Resetear locale al default e ir al idle.
@@ -51,7 +65,7 @@ export function IdleTimeoutOverlay({
   }, [defaultLocale, availableLocales, setLocale, initFromSession, router]);
 
   const { showWarning, secondsLeft, dismiss } = useIdleReset({
-    idleSeconds,
+    idleSeconds: overrideIdle ?? idleSeconds,
     warningSeconds,
     onTimeout: handleTimeout,
   });
@@ -78,27 +92,31 @@ export function IdleTimeoutOverlay({
             aria-hidden="true"
           />
 
-          {/* Modal centrado */}
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="idle-warning-title"
-            initial={{ opacity: 0, y: 20, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 12, scale: 0.96 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed left-1/2 top-1/2 flex flex-col items-center text-center"
-            style={{
-              zIndex: 201,
-              width: '760px',
-              transform: 'translate(-50%, -50%)',
-              padding: '64px 48px',
-              borderRadius: '32px',
-              background: '#fff',
-              boxShadow: '0 30px 80px -20px rgba(0,0,0,0.5)',
-            }}
-            onClick={(e) => e.stopPropagation()}
+          {/* Wrapper full-canvas con grid centering — evita combinar
+              translate(-50%,-50%) con la animación de framer-motion (rompe
+              el centrado dentro del iframe escalado del Studio). */}
+          <div
+            className="pointer-events-none fixed inset-0 grid place-items-center"
+            style={{ zIndex: 201 }}
           >
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="idle-warning-title"
+              initial={{ opacity: 0, y: 20, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.96 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="pointer-events-auto flex flex-col items-center text-center"
+              style={{
+                width: '760px',
+                padding: '64px 48px',
+                borderRadius: '32px',
+                background: '#fff',
+                boxShadow: '0 30px 80px -20px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
             {/* Countdown ring */}
             <CountdownRing total={warningSeconds} value={secondsLeft} />
 
@@ -139,7 +157,8 @@ export function IdleTimeoutOverlay({
             >
               {continueLabel}
             </button>
-          </motion.div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>

@@ -3,6 +3,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { hexToHsl } from '@/lib/studio/hex-to-hsl';
+import type {
+  AiAvatarConfig,
+  BillboardConfig,
+  BrochuresModuleConfig,
+  DealsModuleConfig,
+  GuestbookConfig,
+  ModulesConfig,
+  PhotoBoothConfig,
+  SocialWallConfig,
+  SurveyConfig,
+} from '@/lib/studio/schema';
 
 /**
  * Hook que coordina el bridge Studio → kiosk-iframe.
@@ -27,22 +38,53 @@ export type BrandHex = {
   tertiary: string;
 };
 
+export type CustomFontPatch = {
+  name: string;
+  dataUrl: string;
+  format: 'woff2' | 'woff' | 'ttf' | 'otf';
+};
+
 export type BrandingPatch = {
   primary: string;
   secondary: string;
   tertiary: string;
   logo?: string;
+  idleLogo?: string;
+  footerLogo?: string;
   favicon?: string;
-  fonts?: { display?: string; body?: string };
+  fonts?: {
+    display?: string;
+    body?: string;
+    displayCustom?: CustomFontPatch;
+    bodyCustom?: CustomFontPatch;
+  };
 };
 
 export function usePreviewBridge() {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const lastBrandingRef = useRef<BrandingPatch | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastModulesRef = useRef<ModulesConfig | null>(null);
+  const lastBillboardRef = useRef<BillboardConfig | null>(null);
+  const lastAiRef = useRef<AiAvatarConfig | null>(null);
+  const lastSurveyRef = useRef<SurveyConfig | null>(null);
+  const lastDealsRef = useRef<DealsModuleConfig | null>(null);
+  const lastPhotoBoothRef = useRef<PhotoBoothConfig | null>(null);
+  const lastBrochuresRef = useRef<BrochuresModuleConfig | null>(null);
+  const lastSocialWallRef = useRef<SocialWallConfig | null>(null);
+  const lastGuestbookRef = useRef<GuestbookConfig | null>(null);
+  const brandingDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const modulesDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const billboardDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const aiDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const surveyDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dealsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const photoBoothDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const brochuresDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const socialWallDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const guestbookDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isReady, setIsReady] = useState(false);
 
-  const sendNow = useCallback((branding: BrandingPatch) => {
+  const sendBrandingNow = useCallback((branding: BrandingPatch) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
@@ -54,6 +96,8 @@ export function usePreviewBridge() {
             secondary: hexToHsl(branding.secondary),
             tertiary: hexToHsl(branding.tertiary),
             logo: branding.logo,
+            idleLogo: branding.idleLogo,
+            footerLogo: branding.footerLogo,
             favicon: branding.favicon,
             fonts: branding.fonts,
           },
@@ -63,25 +107,262 @@ export function usePreviewBridge() {
     } catch {}
   }, []);
 
+  const sendModulesNow = useCallback((modules: ModulesConfig) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:modules-update', modules }, '*');
+    } catch {}
+  }, []);
+
+  const sendBillboardNow = useCallback((billboard: BillboardConfig) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:billboard-update', billboard }, '*');
+    } catch {}
+  }, []);
+
+  const sendAiNow = useCallback((aiAvatar: AiAvatarConfig) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      // Solo mandamos al kiosk los campos visualmente relevantes — apiKey nunca
+      // sale del Studio, lo guardará el server.
+      const safe = {
+        avatar: aiAvatar.avatar,
+        heroVideo: aiAvatar.heroVideo,
+        greeting: aiAvatar.greeting,
+        suggestedQuestions: aiAvatar.suggestedQuestions,
+      };
+      win.postMessage({ type: 'studio:ai-avatar-update', aiAvatar: safe }, '*');
+    } catch {}
+  }, []);
+
+  const sendSurveyNow = useCallback((survey: SurveyConfig) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:survey-update', survey }, '*');
+    } catch {}
+  }, []);
+
+  /**
+   * Abrir el survey overlay en el iframe sin esperar a que el usuario tape el
+   * tile. Útil para que el editor del Studio muestre el flow al editar.
+   */
+  const openSurveyPreview = useCallback(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:survey-open-preview' }, '*');
+    } catch {}
+  }, []);
+
+  const sendDealsNow = useCallback((deals: DealsModuleConfig) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:deals-update', deals }, '*');
+    } catch {}
+  }, []);
+
+  /**
+   * Navegar al módulo Deals en el iframe sin tocar tiles. Útil para previsualizar
+   * el grid de cupones desde el editor del Studio.
+   */
+  const openDealsPreview = useCallback(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:deals-open-preview' }, '*');
+    } catch {}
+  }, []);
+
+  const sendPhotoBoothNow = useCallback((photoBooth: PhotoBoothConfig) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:photo-booth-update', photoBooth }, '*');
+    } catch {}
+  }, []);
+
+  const openPhotoBoothPreview = useCallback(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:photo-booth-open-preview' }, '*');
+    } catch {}
+  }, []);
+
+  const sendBrochuresNow = useCallback((brochures: BrochuresModuleConfig) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:brochures-update', brochures }, '*');
+    } catch {}
+  }, []);
+
+  const openBrochuresPreview = useCallback(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:brochures-open-preview' }, '*');
+    } catch {}
+  }, []);
+
+  const sendSocialWallNow = useCallback((socialWall: SocialWallConfig) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:social-wall-update', socialWall }, '*');
+    } catch {}
+  }, []);
+
+  const openSocialWallPreview = useCallback(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:social-wall-open-preview' }, '*');
+    } catch {}
+  }, []);
+
+  const sendGuestbookNow = useCallback((guestbook: GuestbookConfig) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:guestbook-update', guestbook }, '*');
+    } catch {}
+  }, []);
+
+  const openGuestbookPreview = useCallback(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:guestbook-open-preview' }, '*');
+    } catch {}
+  }, []);
+
   // Listener del handshake studio:ready desde el iframe.
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       const data = event.data as { type?: string } | null;
       if (!data || data.type !== 'studio:ready') return;
       setIsReady(true);
-      if (lastBrandingRef.current) sendNow(lastBrandingRef.current);
+      if (lastBrandingRef.current) sendBrandingNow(lastBrandingRef.current);
+      if (lastModulesRef.current) sendModulesNow(lastModulesRef.current);
+      if (lastBillboardRef.current) sendBillboardNow(lastBillboardRef.current);
+      if (lastAiRef.current) sendAiNow(lastAiRef.current);
+      if (lastSurveyRef.current) sendSurveyNow(lastSurveyRef.current);
+      if (lastDealsRef.current) sendDealsNow(lastDealsRef.current);
+      if (lastPhotoBoothRef.current) sendPhotoBoothNow(lastPhotoBoothRef.current);
+      if (lastBrochuresRef.current) sendBrochuresNow(lastBrochuresRef.current);
+      if (lastSocialWallRef.current) sendSocialWallNow(lastSocialWallRef.current);
+      if (lastGuestbookRef.current) sendGuestbookNow(lastGuestbookRef.current);
     };
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
-  }, [sendNow]);
+  }, [
+    sendBrandingNow,
+    sendModulesNow,
+    sendBillboardNow,
+    sendAiNow,
+    sendSurveyNow,
+    sendDealsNow,
+    sendPhotoBoothNow,
+    sendBrochuresNow,
+    sendSocialWallNow,
+    sendGuestbookNow,
+  ]);
 
   const pushBranding = useCallback(
     (branding: BrandingPatch) => {
       lastBrandingRef.current = branding;
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => sendNow(branding), 120);
+      if (brandingDebounceRef.current) clearTimeout(brandingDebounceRef.current);
+      brandingDebounceRef.current = setTimeout(() => sendBrandingNow(branding), 120);
     },
-    [sendNow],
+    [sendBrandingNow],
+  );
+
+  const pushModules = useCallback(
+    (modules: ModulesConfig) => {
+      lastModulesRef.current = modules;
+      if (modulesDebounceRef.current) clearTimeout(modulesDebounceRef.current);
+      modulesDebounceRef.current = setTimeout(() => sendModulesNow(modules), 80);
+    },
+    [sendModulesNow],
+  );
+
+  const pushBillboard = useCallback(
+    (billboard: BillboardConfig) => {
+      lastBillboardRef.current = billboard;
+      if (billboardDebounceRef.current) clearTimeout(billboardDebounceRef.current);
+      billboardDebounceRef.current = setTimeout(() => sendBillboardNow(billboard), 80);
+    },
+    [sendBillboardNow],
+  );
+
+  const pushAiAvatar = useCallback(
+    (ai: AiAvatarConfig) => {
+      lastAiRef.current = ai;
+      if (aiDebounceRef.current) clearTimeout(aiDebounceRef.current);
+      aiDebounceRef.current = setTimeout(() => sendAiNow(ai), 120);
+    },
+    [sendAiNow],
+  );
+
+  const pushSurvey = useCallback(
+    (survey: SurveyConfig) => {
+      lastSurveyRef.current = survey;
+      if (surveyDebounceRef.current) clearTimeout(surveyDebounceRef.current);
+      surveyDebounceRef.current = setTimeout(() => sendSurveyNow(survey), 120);
+    },
+    [sendSurveyNow],
+  );
+
+  const pushDeals = useCallback(
+    (deals: DealsModuleConfig) => {
+      lastDealsRef.current = deals;
+      if (dealsDebounceRef.current) clearTimeout(dealsDebounceRef.current);
+      dealsDebounceRef.current = setTimeout(() => sendDealsNow(deals), 150);
+    },
+    [sendDealsNow],
+  );
+
+  const pushPhotoBooth = useCallback(
+    (pb: PhotoBoothConfig) => {
+      lastPhotoBoothRef.current = pb;
+      if (photoBoothDebounceRef.current) clearTimeout(photoBoothDebounceRef.current);
+      photoBoothDebounceRef.current = setTimeout(() => sendPhotoBoothNow(pb), 200);
+    },
+    [sendPhotoBoothNow],
+  );
+
+  const pushBrochures = useCallback(
+    (b: BrochuresModuleConfig) => {
+      lastBrochuresRef.current = b;
+      if (brochuresDebounceRef.current) clearTimeout(brochuresDebounceRef.current);
+      brochuresDebounceRef.current = setTimeout(() => sendBrochuresNow(b), 150);
+    },
+    [sendBrochuresNow],
+  );
+
+  const pushSocialWall = useCallback(
+    (sw: SocialWallConfig) => {
+      lastSocialWallRef.current = sw;
+      if (socialWallDebounceRef.current) clearTimeout(socialWallDebounceRef.current);
+      socialWallDebounceRef.current = setTimeout(() => sendSocialWallNow(sw), 150);
+    },
+    [sendSocialWallNow],
+  );
+
+  const pushGuestbook = useCallback(
+    (gb: GuestbookConfig) => {
+      lastGuestbookRef.current = gb;
+      if (guestbookDebounceRef.current) clearTimeout(guestbookDebounceRef.current);
+      guestbookDebounceRef.current = setTimeout(() => sendGuestbookNow(gb), 150);
+    },
+    [sendGuestbookNow],
   );
 
   // Cuando el iframe re-monta, resetea ready para forzar un nuevo handshake.
@@ -89,5 +370,25 @@ export function usePreviewBridge() {
     setIsReady(false);
   }, []);
 
-  return { iframeRef, pushBranding, isReady, onIframeLoad };
+  return {
+    iframeRef,
+    pushBranding,
+    pushModules,
+    pushBillboard,
+    pushAiAvatar,
+    pushSurvey,
+    openSurveyPreview,
+    pushDeals,
+    openDealsPreview,
+    pushPhotoBooth,
+    openPhotoBoothPreview,
+    pushBrochures,
+    openBrochuresPreview,
+    pushSocialWall,
+    openSocialWallPreview,
+    pushGuestbook,
+    openGuestbookPreview,
+    isReady,
+    onIframeLoad,
+  };
 }

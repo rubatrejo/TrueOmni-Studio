@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { SearchOverlay } from '@/components/home/search-overlay';
@@ -53,11 +53,41 @@ export function DealsModule({
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
 
-  const activeDeals = useMemo(() => filterActiveDeals(mod.deals), [mod.deals]);
+  // Override del Studio (live preview): reemplaza `mod` cuando llega un payload
+  // por postMessage. En runtime normal queda en null y se usa `mod` directo.
+  const [override, setOverride] = useState<HomeDealsModule | null>(null);
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{
+        label?: string;
+        heroImage?: string;
+        featureCatalog?: string[];
+        deals?: Deal[];
+        qrLogo?: string;
+      }>).detail;
+      if (!detail || !Array.isArray(detail.deals)) return;
+      setOverride({
+        kind: 'deals',
+        label: detail.label ?? mod.label,
+        heroImage: detail.heroImage ?? mod.heroImage,
+        featureCatalog: detail.featureCatalog ?? mod.featureCatalog,
+        deals: detail.deals,
+        qrLogo: detail.qrLogo,
+      });
+    };
+    window.addEventListener('kiosk:deals-override', handler);
+    return () => window.removeEventListener('kiosk:deals-override', handler);
+  }, [mod.label, mod.heroImage, mod.featureCatalog]);
+
+  const effective = override ?? mod;
+  const activeDeals = useMemo(() => filterActiveDeals(effective.deals), [effective.deals]);
 
   const featureCatalog = useMemo(
-    () => (mod.featureCatalog.length > 0 ? mod.featureCatalog : deriveDealFeatures(activeDeals)),
-    [mod.featureCatalog, activeDeals],
+    () =>
+      effective.featureCatalog.length > 0
+        ? effective.featureCatalog
+        : deriveDealFeatures(activeDeals),
+    [effective.featureCatalog, activeDeals],
   );
 
   const visibleDeals = useMemo<Deal[]>(() => {
@@ -168,7 +198,7 @@ export function DealsModule({
         />
       ) : null}
 
-      <DealRedeemHost deals={activeDeals} qrLogo={mod.qrLogo} />
+      <DealRedeemHost deals={activeDeals} qrLogo={effective.qrLogo} />
     </div>
   );
 }

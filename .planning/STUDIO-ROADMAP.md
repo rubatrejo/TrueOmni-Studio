@@ -50,16 +50,39 @@ Plan de referencia completo en `wild-weaving-key.md` (`/Users/rubenramirez/.clau
 
 ---
 
-## Fase S2 — Módulos tab
+## Fase S2 — Módulos + Billboard + AI Avatar + scaffolding S3 ✅ cerrada (2026-04-29)
 
-**Cubre:** activación + orden + labels.
+**Cubre:** activación + orden + labels + Billboard + AI Avatar + branding completo.
 
-- [ ] Toggle on/off por cada uno de los 13 módulos.
-- [ ] Reordenar tiles del Home (drag&drop con framer-motion `Reorder`).
-- [ ] Editar `tile_label_*` por módulo desde la misma vista (input inline).
-- [ ] Conditional tabs en el shell: si "Survey" off → tab "Survey content" oculta.
+Sub-fases entregadas:
 
-**Verificación:** desactivar Photo Booth → tile desaparece del Home en preview; reordenar listings/events → orden persiste.
+- [x] **02 Modules tab** (master switches): 19 toggles — 16 home tiles + Ads + Languages + AI Avatar. Iconos Lucide consistentes con resto del Studio.
+- [x] **03 Billboard tab**: selector visual de los 4 variants + slider del idle timeout. Live switch del variant en el iframe vía `BillboardLiveSwitcher` (sin recargar).
+- [x] **04 Home Dashboard tab**: drag&drop Reorder, toggle visibility, rename inline. Filtra por toggles activos en Modules (los OFF se ocultan).
+- [x] **05 AI Avatar tab**: avatar upload, hero video, greeting con `{client_name}`, suggested questions add/remove, modelo Anthropic + API key (placeholder hasta S6).
+- [x] **06–11 secciones** del sidebar con scaffolding (Survey · Deals · Photo Booth · Digital Brochure · Social Wall · Guestbook). Editores reales en S3.
+- [x] **Branding completo**: 4 logos diferenciados (default / idle / footer / favicon) con `slot=*` propagado por TrueOmniLogo + cache global window para sobrevivir re-mounts. Custom font drag&drop con `@font-face` runtime injection. Botón "Suggest a palette from a logo" funcional con histograma RGB cuantizado.
+- [x] **Bridge ampliado**: `studio:branding-update`, `studio:modules-update`, `studio:billboard-update`, `studio:ai-avatar-update`. Cada uno debounced 80–120 ms con re-emit en handshake `studio:ready`.
+- [x] **Disabled state en sidebar**: si Module OFF → tab gris + Lock icon + no clickable. Si la tab activa se desactiva, salto auto a Modules.
+- [x] **Backfill defensivo** en GET y en la página server-side: clientes pre-S2 reciben defaults para `billboard`, `aiAvatar`, `modules`, y merge de `systemModules` con shape antiguo (3 fields → 19 fields).
+- [x] **Idle popup centrado** dentro del iframe (grid centering reemplaza translate% que peleaba con framer-motion + iframe scale).
+- [x] **Touch Here del Billboard 0** ahora `font-display`. Variants 1-4 con LanguageDropdown funcional (antes `EnglishButton` decorativo).
+- [x] **API PATCH** acepta `branding | modules | billboard | aiAvatar` en un solo body. Validación zod por sección. Save dispatcha solo lo dirty.
+
+**Verificación E2E:**
+
+- ✅ Cambiar variant 0→3 en Billboard tab → iframe cambia de layout en <300 ms.
+- ✅ Toggle Survey OFF en Modules → tab "Survey" del sidebar gris + Home Dashboard ya no muestra Survey + grid del Home iframe oculta el tile.
+- ✅ Subir logo PNG en "Idle / Billboard logo" → centro del Billboard renderiza la imagen en lugar del SVG TrueOmni.
+- ✅ Custom font `.woff2` drag&drop en Display → kiosk re-renderiza tipografía en <500 ms.
+- ✅ Cmd+S → PATCH manda solo secciones sucias → reload conserva cambios.
+- ✅ Cliente nuevo → seed completo de billboard/aiAvatar/modules con defaults.
+
+**Pendiente para S3+:**
+
+- Editores reales para Survey/Deals/Photo Booth/Digital Brochure/Social Wall/Guestbook (hoy son placeholders).
+- Color picker pro (`react-colorful`) en lugar del native `<input type="color">`.
+- Migrar logos/fonts data URLs a Vercel Blob cuando crezca el catálogo (cap KV ~512KB/value).
 
 ---
 

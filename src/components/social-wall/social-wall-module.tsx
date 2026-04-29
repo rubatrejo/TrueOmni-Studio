@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
@@ -36,16 +36,37 @@ export function SocialWallModule({
   const [activeSource, setActiveSource] = useState<SocialSource | 'all'>('all');
   const [selected, setSelected] = useState<SocialPost | null>(null);
 
+  // Live override desde el Studio (S3.5).
+  const [override, setOverride] = useState<HomeSocialWallModule | null>(null);
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<HomeSocialWallModule>).detail;
+      if (!detail || !Array.isArray(detail.posts)) return;
+      setOverride({ ...detail, kind: 'social-wall' });
+    };
+    window.addEventListener('kiosk:social-wall-override', handler);
+    return () => window.removeEventListener('kiosk:social-wall-override', handler);
+  }, []);
+
+  const effective = override ?? mod;
+
   // Sources disponibles: las keys de `handles` presentes.
   const sources = useMemo<SocialSource[]>(() => {
-    const handles = mod.handles ?? {};
+    const handles = effective.handles ?? {};
     const order: SocialSource[] = ['x', 'instagram', 'pinterest', 'youtube', 'facebook', 'tiktok'];
     return order.filter((s) => Boolean(handles[s]));
-  }, [mod.handles]);
+  }, [effective.handles]);
+
+  // Si el source activo deja de tener handle, vuelve a 'all'.
+  useEffect(() => {
+    if (activeSource !== 'all' && !sources.includes(activeSource)) {
+      setActiveSource('all');
+    }
+  }, [sources, activeSource]);
 
   const visiblePosts = useMemo(
-    () => filterPosts(mod.posts, activeSource),
-    [mod.posts, activeSource],
+    () => filterPosts(effective.posts, activeSource),
+    [effective.posts, activeSource],
   );
 
   return (
@@ -56,7 +77,7 @@ export function SocialWallModule({
       {/* Hero + banner sobre el hero */}
       <div className="relative" style={{ flexShrink: 0 }}>
         {header}
-        <SocialWallBanner highlights={mod.highlights} hashtag={mod.hashtag} />
+        <SocialWallBanner highlights={effective.highlights} hashtag={effective.hashtag} />
       </div>
 
       {/* Tabs (sticky debajo del hero) */}

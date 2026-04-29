@@ -174,18 +174,26 @@ export function HomeDashboardEditor({
 /* languages, ai avatar).                                                      */
 /* ────────────────────────────────────────────────────────────────────────── */
 
-const HOME_MODULE_LIST: Array<{ key: keyof SystemModules; tileKey: string; label: string; subtitle: string }> = [
+/**
+ * Módulos "tipo listing" — tienen catálogos grandes (items con imágenes,
+ * subcategorías, features). Restaurants / Things to Do / Stay / Events
+ * comparten el patrón ListingsModule del kiosk runtime.
+ */
+const LISTING_MODULE_LIST: Array<{ key: keyof SystemModules; tileKey: string; label: string; subtitle: string }> = [
   { key: 'restaurants', tileKey: 'restaurants', label: 'Restaurants', subtitle: 'Food & Drink listings' },
   { key: 'thingsToDo', tileKey: 'things-to-do', label: 'Things to Do', subtitle: 'Activities & attractions' },
-  { key: 'itineraryBuilder', tileKey: 'itinerary-builder', label: 'Itinerary Builder', subtitle: 'AI-assisted trip planner' },
+  { key: 'stay', tileKey: 'stay', label: 'Stay', subtitle: 'Hotels & lodging' },
   { key: 'events', tileKey: 'events', label: 'Events', subtitle: 'Calendar of events' },
+];
+
+const HOME_MODULE_LIST: Array<{ key: keyof SystemModules; tileKey: string; label: string; subtitle: string }> = [
+  { key: 'itineraryBuilder', tileKey: 'itinerary-builder', label: 'Itinerary Builder', subtitle: 'AI-assisted trip planner' },
   { key: 'passes', tileKey: 'passes', label: 'Passes', subtitle: 'Multi-attraction passes' },
   { key: 'tickets', tileKey: 'tickets', label: 'Tickets', subtitle: 'Single-attraction tickets' },
   { key: 'guestbook', tileKey: 'guestbook', label: 'Guestbook', subtitle: 'Visitor pins on the map' },
   { key: 'socialWall', tileKey: 'social-wall', label: 'Social Wall', subtitle: 'Curated social feed' },
   { key: 'digitalBrochure', tileKey: 'digital-brochure', label: 'Digital Brochure', subtitle: 'Flippable brochures' },
   { key: 'map', tileKey: 'map', label: 'Map', subtitle: 'Interactive POI map' },
-  { key: 'stay', tileKey: 'stay', label: 'Stay', subtitle: 'Hotels & lodging' },
   { key: 'survey', tileKey: 'survey', label: 'Survey', subtitle: 'NPS / feedback overlay' },
   { key: 'deals', tileKey: 'deals', label: 'Deals', subtitle: 'Promotions & discounts' },
   { key: 'photoBooth', tileKey: 'photo-booth', label: 'Photo Booth', subtitle: 'Green-screen capture' },
@@ -207,7 +215,11 @@ export function SystemModulesEditor({
   onChange: (next: ModulesConfig) => void;
 }) {
   const sys: SystemModules = modules.systemModules ?? DEFAULT_SYSTEM_MODULES;
-  const allKeys = [...HOME_MODULE_LIST.map((m) => m.key), ...GLOBAL_MODULE_LIST.map((m) => m.key)];
+  const allKeys = [
+    ...LISTING_MODULE_LIST.map((m) => m.key),
+    ...HOME_MODULE_LIST.map((m) => m.key),
+    ...GLOBAL_MODULE_LIST.map((m) => m.key),
+  ];
   const enabledCount = allKeys.filter((k) => sys[k]).length;
   const totalCount = allKeys.length;
 
@@ -223,10 +235,10 @@ export function SystemModulesEditor({
         <header className="mb-3 flex items-end justify-between gap-3">
           <div className="min-w-0">
             <h3 className="font-display text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500 dark:text-zinc-400">
-              Home modules
+              Listing modules
             </h3>
             <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
-              Master switches. Whatever is OFF here disappears across the kiosk.
+              Catalog-style modules with item lists, subcategories and filters.
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -242,6 +254,33 @@ export function SystemModulesEditor({
               Reset
             </button>
           </div>
+        </header>
+
+        <div className="flex flex-col gap-1.5">
+          {LISTING_MODULE_LIST.map((m) => {
+            const Icon = MODULE_ICONS[m.tileKey] ?? Sparkles;
+            return (
+              <SystemRow
+                key={m.key}
+                icon={<Icon className="h-4 w-4" />}
+                title={m.label}
+                subtitle={m.subtitle}
+                enabled={sys[m.key]}
+                onToggle={() => setSystem(m.key)}
+              />
+            );
+          })}
+        </div>
+      </section>
+
+      <section>
+        <header className="mb-3">
+          <h3 className="font-display text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500 dark:text-zinc-400">
+            Home modules
+          </h3>
+          <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
+            Other tiles in the Home grid. Toggle off to hide them across the kiosk.
+          </p>
         </header>
 
         <div className="flex flex-col gap-1.5">

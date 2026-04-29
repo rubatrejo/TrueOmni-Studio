@@ -1666,6 +1666,48 @@ Para cada uno se entregó:
 
 ---
 
+### Sesión 2026-04-29 (cont. 3) — Studio S4.1 cerrada — AI translate con Anthropic SDK
+
+**Hecho:**
+
+- **`pnpm add @anthropic-ai/sdk@0.91.1`** — SDK oficial añadido a dependencies.
+- **Endpoint `POST /api/studio/i18n/translate`** — usa `claude-haiku-4-5` (modelo más rápido + barato para traducción UI), `max_tokens: 256`. System prompt cacheado con `cache_control: { type: 'ephemeral' }` (cuts costo en >90% tras la 2ª llamada). Reglas explícitas en el prompt: solo output, conserva `{placeholders}` y `\n`, tono UI conciso, polite-modern para JA, formal Sie/vous para DE/FR. Guard claro: si falta `ANTHROPIC_API_KEY`, responde 503 con mensaje "Add it to .env.local and restart…". Validación de `fromLocale`/`toLocale` ∈ LOCALES; si son iguales, devuelve el texto sin llamar al modelo.
+- **`api-client.translateI18nText(input)`** — wrapper de fetch.
+- **Botón ✨ en `I18nCell`** — Sparkles icon (Lucide) en absolute top-1 right-1 dentro de un `<div relative>` que envuelve el textarea. Aparece SOLO si la celda es missing y existe `enValue` para esa key. Loading spinner (Loader2 animate-spin) durante el request. Tras éxito, `setDraft(translation)` + `onCommit(translation)`. Disabled mientras traduce.
+- **Banner de error** en el editor — `role="alert"` rojo con mensaje del backend ("Translate failed: …") + botón "Dismiss". Se setea desde el cell vía prop `onTranslateError`.
+- **`.env.example`** — añadida sección documentando `ANTHROPIC_API_KEY` (comentado por defecto).
+
+**Verificado:**
+
+- `pnpm typecheck` y `pnpm lint` limpios.
+- E2E con Playwright sin API key configurada:
+  - Borrar valor ES de `tile_label_restaurants` desde la UI (focus → blur con value vacío).
+  - Botón ✨ con `aria-label="Translate to es with AI"` aparece tras commit.
+  - Click → endpoint responde **503** con mensaje "ANTHROPIC_API_KEY not set. Add it to .env.local and restart the dev server to enable AI translate."
+  - Banner rojo "Translate failed: 503 Service Unavailable — …" visible con Dismiss.
+- El path feliz (con API key real) NO se ejecutó porque la key no está en `.env.local`. La verificación queda al usuario tras añadirla. El comportamiento del modelo y el prompt están definidos arriba.
+
+**Pendiente / siguiente:**
+
+- **Verificar el path feliz** cuando Rubén añada `ANTHROPIC_API_KEY` a `.env.local` y reinicie. La vuelta a `.env.local` no requiere cambios de código.
+- **S5 Ads system** (siguiente fase).
+- **S6 Integraciones**, **S7 Auth + Publish**.
+- **Build SSG `/404`** (gated por `pnpm build` aprobación).
+- **Galería de imágenes por cliente** (bloqueado por Vercel Blob → S5/S6).
+
+**Decisiones:**
+
+- **`claude-haiku-4-5` en vez de Sonnet/Opus**: traducción UI de 1-3 palabras es trivial, Haiku es ~3x más rápido y >5x más barato. Si Rubén nota calidad insuficiente, switch trivial al modelo en el endpoint (1 string).
+- **Prompt caching del system prompt**: el system prompt es ~700 tokens y se reutiliza en cada llamada → con `cache_control: ephemeral` se beneficia del cache de 5 min de Anthropic. Si un usuario traduce 30 celdas seguidas, el costo se desploma desde la 2ª.
+- **Endpoint server-side, no SDK en el cliente**: la API key es secret. Nunca tocar Anthropic SDK desde Client Components.
+- **503 vs 500 si falta key**: 503 (Service Unavailable) es semánticamente correcto — el servicio existe pero no está configurado. Permite al frontend distinguir "config issue" de "real error".
+- **Botón en celda missing solo (no en celdas con valor)**: evita destruir traducciones humanas existentes. Si quieres re-traducir algo, vacía la celda primero.
+- **Commit automático tras éxito** (no espera blur del usuario): la traducción es la respuesta autoritativa del modelo; persistirla inmediatamente reduce fricción.
+
+**Fase:** Studio S4.1 cerrada (2026-04-29). Siguiente arranque: **S5 Ads system** (o validar path feliz S4.1 cuando Rubén añada la key).
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

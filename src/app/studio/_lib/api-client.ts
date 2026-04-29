@@ -8,6 +8,7 @@ import type {
   ConfigMeta,
   DealsModuleConfig,
   GuestbookConfig,
+  I18nBundle,
   KioskConfig,
   ModulesConfig,
   PhotoBoothConfig,
@@ -131,4 +132,21 @@ export async function deleteConfig(slug: string): Promise<void> {
 
 export async function seedDefault(): Promise<void> {
   await http<{ seeded: boolean }>('/api/studio/seed', { method: 'POST' });
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  i18n API                                                                 */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export async function getI18n(slug: string): Promise<I18nBundle> {
+  const data = await http<{ bundle: I18nBundle }>(`/api/studio/i18n/${slug}`);
+  return data.bundle;
+}
+
+export async function patchI18n(slug: string, bundle: I18nBundle): Promise<I18nBundle> {
+  const data = await http<{ bundle: I18nBundle }>(`/api/studio/i18n/${slug}`, {
+    method: 'PATCH',
+    body: { bundle },
+  });
+  return data.bundle;
 }

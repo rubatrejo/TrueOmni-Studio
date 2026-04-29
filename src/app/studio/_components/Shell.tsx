@@ -12,6 +12,7 @@ import type {
   DealsModuleConfig,
   EventsModule,
   GuestbookConfig,
+  I18nBundle,
   KioskConfig,
   ListingsModule,
   ModulesConfig,
@@ -33,6 +34,7 @@ import {
   DEFAULT_SURVEY,
   DEFAULT_SYSTEM_MODULES,
   defaultEvents,
+  defaultI18nBundle,
   defaultListings,
   defaultModules,
   defaultPasses,
@@ -40,7 +42,7 @@ import {
   defaultTrails,
 } from '@/lib/studio/schema';
 
-import { patchConfig } from '../_lib/api-client';
+import { getI18n, patchConfig, patchI18n } from '../_lib/api-client';
 import { STUDIO_SECTIONS, type StudioSectionKey } from '../_lib/sections';
 import { usePreviewBridge } from '../_lib/use-preview-bridge';
 
@@ -124,6 +126,28 @@ export function Shell({
   const initialTrails = initialConfig.trails ?? defaultTrails();
   const [savedTrails, setSavedTrails] = useState<TrailsModule>(initialTrails);
   const [trails, setTrails] = useState<TrailsModule>(initialTrails);
+
+  const [savedI18nBundle, setSavedI18nBundle] = useState<I18nBundle>(defaultI18nBundle());
+  const [i18nBundle, setI18nBundle] = useState<I18nBundle>(savedI18nBundle);
+  const [i18nLoaded, setI18nLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getI18n(initialConfig.slug)
+      .then((bundle) => {
+        if (cancelled) return;
+        setSavedI18nBundle(bundle);
+        setI18nBundle(bundle);
+        setI18nLoaded(true);
+      })
+      .catch((err) => {
+        console.error('[Studio i18n load]', err);
+        setI18nLoaded(true); // siguen los defaults; permite editar
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [initialConfig.slug]);
 
   const {
     iframeRef,
@@ -291,6 +315,10 @@ export function Shell({
     () => JSON.stringify(trails) !== JSON.stringify(savedTrails),
     [trails, savedTrails],
   );
+  const i18nDirty = useMemo(
+    () => i18nLoaded && JSON.stringify(i18nBundle) !== JSON.stringify(savedI18nBundle),
+    [i18nBundle, savedI18nBundle, i18nLoaded],
+  );
   const isDirty =
     brandingDirty ||
     modulesDirty ||
@@ -306,7 +334,8 @@ export function Shell({
     eventsDirty ||
     ticketsDirty ||
     passesDirty ||
-    trailsDirty;
+    trailsDirty ||
+    i18nDirty;
 
   const effectiveSaveState =
     saveState === 'saving' || saveState === 'error'
@@ -352,7 +381,14 @@ export function Shell({
       if (ticketsDirty) payload.tickets = tickets;
       if (passesDirty) payload.passes = passes;
       if (trailsDirty) payload.trails = trails;
-      await patchConfig(initialConfig.slug, payload);
+      const tasks: Array<Promise<unknown>> = [];
+      if (Object.keys(payload).length > 0) {
+        tasks.push(patchConfig(initialConfig.slug, payload));
+      }
+      if (i18nDirty) {
+        tasks.push(patchI18n(initialConfig.slug, i18nBundle));
+      }
+      await Promise.all(tasks);
       if (brandingDirty) setSavedBranding(branding);
       if (modulesDirty) setSavedModules(modules);
       if (billboardDirty) setSavedBillboard(billboard);
@@ -368,6 +404,7 @@ export function Shell({
       if (ticketsDirty) setSavedTickets(tickets);
       if (passesDirty) setSavedPasses(passes);
       if (trailsDirty) setSavedTrails(trails);
+      if (i18nDirty) setSavedI18nBundle(i18nBundle);
       setSaveState('saved');
       setTimeout(() => setSaveState('idle'), 1500);
     } catch (err) {
@@ -391,6 +428,7 @@ export function Shell({
     tickets,
     passes,
     trails,
+    i18nBundle,
     brandingDirty,
     modulesDirty,
     billboardDirty,
@@ -406,6 +444,7 @@ export function Shell({
     ticketsDirty,
     passesDirty,
     trailsDirty,
+    i18nDirty,
     isDirty,
     initialConfig.slug,
   ]);
@@ -426,6 +465,7 @@ export function Shell({
     setTickets(savedTickets);
     setPasses(savedPasses);
     setTrails(savedTrails);
+    setI18nBundle(savedI18nBundle);
     setSaveState('idle');
     setErrorMsg(null);
     setPreviewKey((k) => k + 1);
@@ -445,6 +485,7 @@ export function Shell({
     savedTickets,
     savedPasses,
     savedTrails,
+    savedI18nBundle,
   ]);
 
   useEffect(() => {
@@ -533,6 +574,8 @@ export function Shell({
                   onPassesChange={setPasses}
                   trails={trails}
                   onTrailsChange={setTrails}
+                  i18nBundle={i18nBundle}
+                  onI18nBundleChange={setI18nBundle}
                 />
               </motion.div>
             </AnimatePresence>

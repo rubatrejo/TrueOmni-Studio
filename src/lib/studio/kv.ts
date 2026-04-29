@@ -113,6 +113,7 @@ export const kvKeys = {
   cfg: (slug: string) => `cfg:${slug}`,
   cfgMeta: (slug: string) => `cfg:${slug}:meta`,
   cfgVersion: (slug: string, version: number) => `cfg:${slug}:v${version}`,
+  i18n: (slug: string) => `i18n:${slug}`,
   clientsList: 'clients:list',
   pubRequest: (slug: string, reqId: string) => `pub:${slug}:${reqId}`,
   pubQueue: 'pub:queue',

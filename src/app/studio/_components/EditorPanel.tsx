@@ -12,6 +12,7 @@ import type {
   DealsModuleConfig,
   EventsModule,
   GuestbookConfig,
+  I18nBundle,
   ListingsModule,
   ModulesConfig,
   PassesModule,
@@ -33,6 +34,7 @@ import { DealsEditor } from './DealsEditor';
 import { EventsEditor } from './EventsEditor';
 import { FontSelector } from './FontSelector';
 import { GuestbookEditor } from './GuestbookEditor';
+import { I18nEditor } from './I18nEditor';
 import { ImageField } from './ImageField';
 import { ListingsEditor } from './ListingsEditor';
 import { HomeDashboardEditor, SystemModulesEditor } from './ModulesEditor';
@@ -81,6 +83,8 @@ export function EditorPanel({
   onPassesChange,
   trails,
   onTrailsChange,
+  i18nBundle,
+  onI18nBundleChange,
 }: {
   sectionKey: StudioSectionKey;
   branding: Branding;
@@ -119,6 +123,8 @@ export function EditorPanel({
   onPassesChange: (next: PassesModule) => void;
   trails: TrailsModule;
   onTrailsChange: (next: TrailsModule) => void;
+  i18nBundle: I18nBundle;
+  onI18nBundleChange: (next: I18nBundle) => void;
 }) {
   const section =
     sectionKey === 'versions'
@@ -140,7 +146,8 @@ export function EditorPanel({
     sectionKey === 'events' ||
     sectionKey === 'tickets' ||
     sectionKey === 'passes' ||
-    sectionKey === 'trails';
+    sectionKey === 'trails' ||
+    sectionKey === 'i18n';
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-white dark:bg-zinc-950">
@@ -237,6 +244,9 @@ export function EditorPanel({
         )}
         {sectionKey === 'trails' && (
           <TrailsEditor value={trails} onChange={onTrailsChange} />
+        )}
+        {sectionKey === 'i18n' && (
+          <I18nEditor value={i18nBundle} onChange={onI18nBundleChange} />
         )}
         {!isImplemented && <ComingSoon section={section} />}
       </div>

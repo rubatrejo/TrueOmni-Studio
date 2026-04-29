@@ -1420,6 +1420,30 @@ export function makeBlankTrail(): TrailItem {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
+/*  i18n bundle (vive en KV bajo `i18n:<slug>`, separado del KioskConfig)    */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export const LOCALES = ['en', 'es', 'fr', 'de', 'pt', 'ja'] as const;
+export type Locale = (typeof LOCALES)[number];
+
+const LocaleStringsSchema = z.record(z.string(), z.string().max(2000));
+export type LocaleStrings = z.infer<typeof LocaleStringsSchema>;
+
+export const I18nBundleSchema = z.object({
+  en: LocaleStringsSchema.default({}),
+  es: LocaleStringsSchema.default({}),
+  fr: LocaleStringsSchema.default({}),
+  de: LocaleStringsSchema.default({}),
+  pt: LocaleStringsSchema.default({}),
+  ja: LocaleStringsSchema.default({}),
+});
+export type I18nBundle = z.infer<typeof I18nBundleSchema>;
+
+export function defaultI18nBundle(): I18nBundle {
+  return { en: {}, es: {}, fr: {}, de: {}, pt: {}, ja: {} };
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
 /*  KioskConfig                                                              */
 /* ────────────────────────────────────────────────────────────────────────── */
 

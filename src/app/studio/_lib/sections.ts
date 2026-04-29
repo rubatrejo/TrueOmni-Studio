@@ -96,8 +96,8 @@ export const STUDIO_SECTIONS: StudioSection[] = [
   {
     key: 'billboard',
     num: '03',
-    label: 'Billboard',
-    title: 'Billboard / Idle Screen',
+    label: 'Idle / Billboard',
+    title: 'Idle / Billboard',
     description:
       'Pick one of the 4 idle layouts and configure the inactivity timeout that returns visitors to it.',
     icon: 'MonitorPlay',

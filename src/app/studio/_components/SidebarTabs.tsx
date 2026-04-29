@@ -123,7 +123,7 @@ export function SidebarTabs({
                 <Icon className="h-[15px] w-[15px]" strokeWidth={1.75} />
               </span>
               <span
-                className={`relative flex flex-1 flex-col leading-tight ${
+                className={`relative flex flex-1 leading-tight ${
                   disabled
                     ? 'text-zinc-400 dark:text-zinc-600'
                     : isActive
@@ -132,9 +132,6 @@ export function SidebarTabs({
                 }`}
               >
                 <span className="font-medium">{section.label}</span>
-                <span className="mt-0.5 text-[10.5px] font-bold uppercase tracking-[0.14em] text-zinc-400 dark:text-zinc-600">
-                  {section.num} · {section.phase}
-                </span>
               </span>
               {disabled && (
                 <Lock

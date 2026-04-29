@@ -168,6 +168,10 @@ export async function translateI18nText(input: {
   });
 }
 
+export async function getTranslateStatus(): Promise<{ available: boolean }> {
+  return http<{ available: boolean }>('/api/studio/i18n/translate');
+}
+
 /* ────────────────────────────────────────────────────────────────────────── */
 /*  Integrations health check                                                */
 /* ────────────────────────────────────────────────────────────────────────── */

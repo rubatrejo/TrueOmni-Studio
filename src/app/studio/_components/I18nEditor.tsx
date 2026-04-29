@@ -1,7 +1,7 @@
 'use client';
 
 import { Loader2, Plus, Search, Sparkles, Star } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { LOCALE_LABELS } from '@/lib/i18n';
 import {
@@ -11,7 +11,7 @@ import {
   type LocaleStrings,
 } from '@/lib/studio/schema';
 
-import { translateI18nText } from '../_lib/api-client';
+import { getTranslateStatus, translateI18nText } from '../_lib/api-client';
 
 interface I18nEditorProps {
   value: I18nBundle;
@@ -24,6 +24,21 @@ export function I18nEditor({ value, onChange }: I18nEditorProps) {
   const [section, setSection] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [translateError, setTranslateError] = useState<string | null>(null);
+  const [aiAvailable, setAiAvailable] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getTranslateStatus()
+      .then((s) => {
+        if (!cancelled) setAiAvailable(s.available);
+      })
+      .catch(() => {
+        if (!cancelled) setAiAvailable(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const allKeys = useMemo(() => {
     const set = new Set<string>();
@@ -206,6 +221,7 @@ export function I18nEditor({ value, onChange }: I18nEditorProps) {
                   bundle={value}
                   onChangeCell={updateCell}
                   onTranslateError={setTranslateError}
+                  aiAvailable={aiAvailable}
                 />
               ))
             )}
@@ -249,11 +265,13 @@ function I18nRow({
   bundle,
   onChangeCell,
   onTranslateError,
+  aiAvailable,
 }: {
   k: string;
   bundle: I18nBundle;
   onChangeCell: (locale: Locale, key: string, next: string) => void;
   onTranslateError: (msg: string) => void;
+  aiAvailable: boolean;
 }) {
   const enValue = bundle.en[k] ?? '';
   return (
@@ -273,7 +291,7 @@ function I18nRow({
               (!bundle[loc][k] || bundle[loc][k].trim() === '')
             }
             translateInput={
-              loc !== 'en' && enValue
+              aiAvailable && loc !== 'en' && enValue
                 ? { sourceText: enValue, fromLocale: 'en', toLocale: loc, key: k }
                 : null
             }

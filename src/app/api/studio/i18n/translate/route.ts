@@ -5,14 +5,21 @@ import { LOCALE_LABELS } from '@/lib/i18n';
 import { LOCALES, type Locale } from '@/lib/studio/schema';
 
 /**
- * `POST /api/studio/i18n/translate`
+ * `GET  /api/studio/i18n/translate`  → `{ available: boolean }` para que el
+ *                                       editor sepa si mostrar el botón ✨.
+ * `POST /api/studio/i18n/translate`  → traduce un string.
  *
- * Body: `{ text: string, fromLocale: Locale, toLocale: Locale, context?: string, key?: string }`.
+ * Body POST: `{ text: string, fromLocale: Locale, toLocale: Locale, context?: string, key?: string }`.
  * Devuelve: `{ translation: string, model: string }`.
  *
  * Usa Anthropic claude-haiku-4-5 con prompt caching del system prompt.
- * Si `ANTHROPIC_API_KEY` no está configurado, devuelve 503 con mensaje claro.
+ * Si `ANTHROPIC_API_KEY` no está configurado, GET devuelve `{available:false}`
+ * y POST devuelve 503 con mensaje claro.
  */
+
+export async function GET() {
+  return NextResponse.json({ available: !!process.env.ANTHROPIC_API_KEY });
+}
 
 const MODEL = 'claude-haiku-4-5';
 const MAX_TOKENS = 256;

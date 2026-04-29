@@ -277,18 +277,8 @@ export const STUDIO_SECTIONS: StudioSection[] = [
     phase: 'S6',
   },
   {
-    key: 'versions',
-    num: '20',
-    label: 'Versions',
-    title: 'Versions & Changelog',
-    description:
-      'Immutable history of publishes, diffs between versions and auto-generated changelog entries.',
-    icon: 'History',
-    phase: 'S0',
-  },
-  {
     key: 'publish',
-    num: '21',
+    num: '20',
     label: 'Publish',
     title: 'Publish & Approvals',
     description:
@@ -297,3 +287,18 @@ export const STUDIO_SECTIONS: StudioSection[] = [
     phase: 'S7',
   },
 ];
+
+/**
+ * Versions vive aparte del sidebar — accesible desde el TopBar como acción
+ * global (no es una sección de edición; es un cross-cutting view del histórico).
+ */
+export const VERSIONS_SECTION: StudioSection = {
+  key: 'versions',
+  num: '—',
+  label: 'Versions',
+  title: 'Versions & Changelog',
+  description:
+    'Immutable history of publishes, diffs between versions and auto-generated changelog entries.',
+  icon: 'History',
+  phase: 'S0',
+};

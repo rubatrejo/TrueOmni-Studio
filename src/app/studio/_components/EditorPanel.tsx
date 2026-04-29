@@ -23,7 +23,7 @@ import type {
 } from '@/lib/studio/schema';
 
 import { extractPaletteFromImage } from '../_lib/palette-from-image';
-import { STUDIO_SECTIONS, type StudioSectionKey } from '../_lib/sections';
+import { STUDIO_SECTIONS, VERSIONS_SECTION, type StudioSectionKey } from '../_lib/sections';
 
 import { AiAvatarEditor } from './AiAvatarEditor';
 import { BillboardEditor } from './BillboardEditor';
@@ -120,7 +120,10 @@ export function EditorPanel({
   trails: TrailsModule;
   onTrailsChange: (next: TrailsModule) => void;
 }) {
-  const section = STUDIO_SECTIONS.find((s) => s.key === sectionKey)!;
+  const section =
+    sectionKey === 'versions'
+      ? VERSIONS_SECTION
+      : STUDIO_SECTIONS.find((s) => s.key === sectionKey)!;
   const isImplemented =
     sectionKey === 'branding' ||
     sectionKey === 'home-dashboard' ||

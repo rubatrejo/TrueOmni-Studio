@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, Eye, Send, Undo2, Redo2 } from 'lucide-react';
+import { ChevronRight, Eye, History, Send, Undo2, Redo2 } from 'lucide-react';
 import Link from 'next/link';
 
 import { StudioBrand } from './StudioBrand';
@@ -12,12 +12,16 @@ export function TopBar({
   currentVersion,
   saveState,
   isDirty,
+  onOpenVersions,
+  versionsActive,
 }: {
   slug: string;
   nombre: string;
   currentVersion: number;
   saveState: 'idle' | 'saving' | 'saved' | 'error';
   isDirty: boolean;
+  onOpenVersions?: () => void;
+  versionsActive?: boolean;
 }) {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-5 dark:border-zinc-900 dark:bg-zinc-950">
@@ -37,6 +41,23 @@ export function TopBar({
       </div>
 
       <div className="flex items-center gap-2">
+        {onOpenVersions ? (
+          <button
+            type="button"
+            onClick={onOpenVersions}
+            aria-label="Versions & Changelog"
+            aria-pressed={versionsActive}
+            title="Versions & Changelog"
+            className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1.5 text-[12px] font-medium transition ${
+              versionsActive
+                ? 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300'
+                : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200'
+            }`}
+          >
+            <History className="h-3.5 w-3.5" />
+            Versions
+          </button>
+        ) : null}
         <SaveStatusPill state={saveState} isDirty={isDirty} />
         <span className="mx-1 block h-5 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden="true" />
 

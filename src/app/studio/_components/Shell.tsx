@@ -466,6 +466,8 @@ export function Shell({
         currentVersion={initialConfig.currentVersion}
         saveState={effectiveSaveState}
         isDirty={isDirty}
+        onOpenVersions={() => setActiveTab('versions')}
+        versionsActive={activeTab === 'versions'}
       />
 
       {errorMsg && (

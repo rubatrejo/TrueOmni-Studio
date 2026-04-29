@@ -1,0 +1,319 @@
+'use client';
+
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  AlertCircle,
+  CheckCircle2,
+  FileText,
+  Loader2,
+  Upload,
+  X,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+import { publishToFilesystem, type PublishFileChange } from '../_lib/api-client';
+
+interface PublishModalProps {
+  open: boolean;
+  slug: string;
+  onClose: () => void;
+}
+
+type Phase = 'preview' | 'preview-loading' | 'publishing' | 'done' | 'error';
+
+export function PublishModal({ open, slug, onClose }: PublishModalProps) {
+  const [phase, setPhase] = useState<Phase>('preview-loading');
+  const [files, setFiles] = useState<PublishFileChange[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [written, setWritten] = useState(0);
+
+  useEffect(() => {
+    if (!open) return;
+    setPhase('preview-loading');
+    setError(null);
+    setWritten(0);
+    publishToFilesystem(slug, { dryRun: true })
+      .then((res) => {
+        setFiles(res.files);
+        setPhase('preview');
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : 'Failed to compute diff');
+        setPhase('error');
+      });
+  }, [open, slug]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  const changes = files.filter((f) => f.action !== 'unchanged');
+  const unchanged = files.filter((f) => f.action === 'unchanged');
+
+  const handleConfirm = async () => {
+    setPhase('publishing');
+    setError(null);
+    try {
+      const res = await publishToFilesystem(slug, { dryRun: false });
+      setFiles(res.files);
+      setWritten(res.written);
+      setPhase('done');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Publish failed');
+      setPhase('error');
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            key="backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            onClick={onClose}
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+          />
+          <motion.div
+            key="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="publish-modal-title"
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-x-0 top-[10vh] z-50 mx-auto flex max-h-[80vh] w-[600px] max-w-[94vw] flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
+          >
+            <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5 dark:border-zinc-800">
+              <div>
+                <h2
+                  id="publish-modal-title"
+                  className="font-display text-[15px] font-semibold text-zinc-900 dark:text-white"
+                >
+                  Publish to filesystem
+                </h2>
+                <p className="mt-0.5 text-[11px] text-zinc-500">
+                  Writes the i18n bundle from KV to{' '}
+                  <span className="font-mono">clients/{slug}/i18n/*.json</span>.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close"
+                className="grid h-8 w-8 place-items-center rounded-md text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
+              {phase === 'preview-loading' ? (
+                <div className="flex items-center justify-center gap-2 py-12 text-[12px] text-zinc-500">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Computing diff…
+                </div>
+              ) : null}
+
+              {phase === 'error' && error ? (
+                <div
+                  role="alert"
+                  className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50/70 px-3 py-2 text-[12px] text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200"
+                >
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              ) : null}
+
+              {(phase === 'preview' || phase === 'publishing' || phase === 'done') && (
+                <>
+                  <SummaryRow files={files} written={phase === 'done' ? written : undefined} />
+                  {changes.length === 0 && phase === 'preview' ? (
+                    <div className="flex items-center gap-2 rounded-md border border-zinc-200 bg-zinc-50/70 px-3 py-3 text-[12px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-400">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                      Filesystem is already up-to-date with KV. Nothing to publish.
+                    </div>
+                  ) : null}
+                  {changes.length > 0 ? (
+                    <FileList title="Changes" files={changes} />
+                  ) : null}
+                  {unchanged.length > 0 ? (
+                    <details className="text-[11.5px]">
+                      <summary className="cursor-pointer text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
+                        {unchanged.length} unchanged file
+                        {unchanged.length === 1 ? '' : 's'}
+                      </summary>
+                      <div className="mt-2">
+                        <FileList title="" files={unchanged} compact />
+                      </div>
+                    </details>
+                  ) : null}
+                </>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 border-t border-zinc-100 px-5 py-3 dark:border-zinc-800">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-[12.5px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+              >
+                {phase === 'done' ? 'Close' : 'Cancel'}
+              </button>
+              {phase !== 'done' ? (
+                <button
+                  type="button"
+                  onClick={handleConfirm}
+                  disabled={
+                    phase === 'preview-loading' ||
+                    phase === 'publishing' ||
+                    phase === 'error' ||
+                    changes.length === 0
+                  }
+                  className="inline-flex items-center gap-1.5 rounded-md bg-sky-600 px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition hover:bg-sky-500 disabled:opacity-40 dark:bg-sky-500 dark:hover:bg-sky-400"
+                >
+                  {phase === 'publishing' ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Publishing…
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-3.5 w-3.5" />
+                      {changes.length > 0
+                        ? `Publish ${changes.length} file${changes.length === 1 ? '' : 's'}`
+                        : 'Nothing to publish'}
+                    </>
+                  )}
+                </button>
+              ) : null}
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function SummaryRow({
+  files,
+  written,
+}: {
+  files: PublishFileChange[];
+  written?: number;
+}) {
+  const created = files.filter((f) => f.action === 'create').length;
+  const updated = files.filter((f) => f.action === 'update').length;
+  const unchanged = files.filter((f) => f.action === 'unchanged').length;
+
+  if (written !== undefined) {
+    return (
+      <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-[12px] text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">
+        <CheckCircle2 className="h-4 w-4" />
+        <span>
+          <strong>{written}</strong> file{written === 1 ? '' : 's'} written successfully.
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      <Stat label="Create" value={created} tone={created > 0 ? 'sky' : 'muted'} />
+      <Stat label="Update" value={updated} tone={updated > 0 ? 'amber' : 'muted'} />
+      <Stat label="Unchanged" value={unchanged} tone="muted" />
+    </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: 'sky' | 'amber' | 'muted';
+}) {
+  const cls = {
+    sky: 'border-sky-200 bg-sky-50/60 text-sky-900 dark:border-sky-900/40 dark:bg-sky-950/30 dark:text-sky-200',
+    amber:
+      'border-amber-200 bg-amber-50/60 text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200',
+    muted:
+      'border-zinc-200 bg-zinc-50 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-400',
+  }[tone];
+  return (
+    <div className={`flex flex-col gap-0.5 rounded-md border px-2.5 py-2 ${cls}`}>
+      <span className="text-[10.5px] font-medium uppercase tracking-wide">{label}</span>
+      <span className="font-display text-[18px] font-semibold">{value}</span>
+    </div>
+  );
+}
+
+function FileList({
+  title,
+  files,
+  compact,
+}: {
+  title: string;
+  files: PublishFileChange[];
+  compact?: boolean;
+}) {
+  return (
+    <div className="space-y-1">
+      {title ? (
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+          {title}
+        </p>
+      ) : null}
+      <ul className="space-y-0.5">
+        {files.map((f) => (
+          <li
+            key={f.path}
+            className={`flex items-center gap-2 rounded px-2 py-1 ${
+              compact
+                ? 'text-zinc-500'
+                : f.action === 'create'
+                  ? 'bg-sky-50 text-sky-900 dark:bg-sky-950/30 dark:text-sky-200'
+                  : f.action === 'update'
+                    ? 'bg-amber-50 text-amber-900 dark:bg-amber-950/30 dark:text-amber-200'
+                    : 'text-zinc-500'
+            }`}
+          >
+            <FileText className="h-3 w-3 shrink-0" />
+            <span className="flex-1 truncate font-mono text-[10.5px]">
+              {shortenPath(f.path)}
+            </span>
+            <span className="shrink-0 font-mono text-[10px] uppercase">
+              {f.action}
+            </span>
+            {f.action === 'update' && f.sizeBefore !== undefined ? (
+              <span className="shrink-0 font-mono text-[10px] text-zinc-500">
+                {f.sizeBefore} → {f.sizeAfter}B
+              </span>
+            ) : (
+              <span className="shrink-0 font-mono text-[10px] text-zinc-500">
+                {f.sizeAfter}B
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function shortenPath(full: string): string {
+  // muestra solo desde "clients/" en adelante
+  const idx = full.indexOf('clients/');
+  return idx >= 0 ? full.slice(idx) : full;
+}

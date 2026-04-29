@@ -191,3 +191,29 @@ export async function checkIntegration(
     body: input,
   });
 }
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Publish (KV → filesystem)                                                */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export interface PublishFileChange {
+  path: string;
+  action: 'create' | 'update' | 'unchanged';
+  sizeBefore?: number;
+  sizeAfter: number;
+}
+
+export interface PublishResult {
+  slug: string;
+  dryRun: boolean;
+  written: number;
+  files: PublishFileChange[];
+}
+
+export async function publishToFilesystem(
+  slug: string,
+  options: { dryRun?: boolean } = {},
+): Promise<PublishResult> {
+  const qs = options.dryRun ? '?dryRun=1' : '';
+  return http<PublishResult>(`/api/studio/publish/${slug}${qs}`, { method: 'POST' });
+}

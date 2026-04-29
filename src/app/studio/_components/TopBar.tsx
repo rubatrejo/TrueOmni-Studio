@@ -14,6 +14,7 @@ export function TopBar({
   isDirty,
   onOpenVersions,
   versionsActive,
+  onPublish,
 }: {
   slug: string;
   nombre: string;
@@ -22,6 +23,7 @@ export function TopBar({
   isDirty: boolean;
   onOpenVersions?: () => void;
   versionsActive?: boolean;
+  onPublish?: () => void;
 }) {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-5 dark:border-zinc-900 dark:bg-zinc-950">
@@ -92,10 +94,13 @@ export function TopBar({
 
         <button
           type="button"
-          className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm transition hover:bg-zinc-700 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+          onClick={onPublish}
+          disabled={!onPublish}
+          title={isDirty ? 'Save changes first to include them in publish' : 'Publish to filesystem'}
+          className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
         >
           <Send className="h-3.5 w-3.5" />
-          Request publish
+          Publish
         </button>
       </div>
     </header>

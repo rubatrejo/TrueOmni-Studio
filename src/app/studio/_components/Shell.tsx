@@ -52,6 +52,7 @@ import { usePreviewBridge } from '../_lib/use-preview-bridge';
 
 import { EditorPanel } from './EditorPanel';
 import { PreviewPanel } from './PreviewPanel';
+import { PublishModal } from './PublishModal';
 import { SaveBar } from './SaveBar';
 import { SidebarTabs } from './SidebarTabs';
 import { TopBar } from './TopBar';
@@ -67,6 +68,7 @@ export function Shell({
   const [previewKey, setPreviewKey] = useState(0);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [publishOpen, setPublishOpen] = useState(false);
 
   const [savedBranding, setSavedBranding] = useState<Branding>(initialConfig.branding);
   const [branding, setBranding] = useState<Branding>(savedBranding);
@@ -546,6 +548,7 @@ export function Shell({
         isDirty={isDirty}
         onOpenVersions={() => setActiveTab('versions')}
         versionsActive={activeTab === 'versions'}
+        onPublish={() => setPublishOpen(true)}
       />
 
       {errorMsg && (
@@ -654,6 +657,12 @@ export function Shell({
       <span hidden suppressHydrationWarning>
         {initialMeta?.lastEditedAt ?? ''}
       </span>
+
+      <PublishModal
+        open={publishOpen}
+        slug={initialConfig.slug}
+        onClose={() => setPublishOpen(false)}
+      />
     </div>
   );
 }

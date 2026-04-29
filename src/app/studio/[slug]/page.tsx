@@ -17,6 +17,7 @@ import {
   defaultPasses,
   defaultTickets,
   defaultTrails,
+  migrateListings,
   type ConfigMeta,
   type KioskConfig,
 } from '@/lib/studio/schema';
@@ -48,7 +49,7 @@ export default async function StudioEditorPage({
     brochures: raw.brochures ?? structuredClone(DEFAULT_BROCHURES),
     socialWall: raw.socialWall ?? structuredClone(DEFAULT_SOCIAL_WALL),
     guestbook: raw.guestbook ?? structuredClone(DEFAULT_GUESTBOOK),
-    listings: raw.listings ?? defaultListings(),
+    listings: migrateListings(raw.listings ?? defaultListings()),
     events: raw.events ?? defaultEvents(),
     tickets: raw.tickets ?? defaultTickets(),
     passes: raw.passes ?? defaultPasses(),

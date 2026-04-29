@@ -935,7 +935,6 @@ export const ListingItemSchema = z.object({
 export type ListingItem = z.infer<typeof ListingItemSchema>;
 
 export const ListingsCatalogSchema = z.object({
-  label: z.string().min(1).max(64),
   heroImage: z.string().default(''),
   subcategories: z.array(z.string().max(64)).default([]),
   features: z.array(z.string().max(64)).default([]),
@@ -944,38 +943,118 @@ export const ListingsCatalogSchema = z.object({
 
 export type ListingsCatalog = z.infer<typeof ListingsCatalogSchema>;
 
-export const ListingsModuleSchema = z.object({
-  restaurants: ListingsCatalogSchema,
-  thingsToDo: ListingsCatalogSchema,
-  stay: ListingsCatalogSchema,
+/**
+ * Una entrada del módulo Listings — un catálogo "tipo restaurants" con su
+ * propio key/label/icono. Los catálogos son dinámicos: el operador puede
+ * duplicar, borrar o crear nuevos (Shopping, Beaches, etc.).
+ */
+export const ListingsCatalogEntrySchema = z.object({
+  /** URL slug del módulo (`restaurants`, `things-to-do`, `shopping`). Único. */
+  key: z
+    .string()
+    .min(1)
+    .max(64)
+    .regex(/^[a-z0-9][a-z0-9-]*$/, {
+      message: 'listing module key must be lowercase, hyphens, no leading dash.',
+    }),
+  /** Label visible en el sidebar y en el tile del Home. */
+  label: z.string().min(1).max(64),
+  /** Nombre del icono Lucide (string para ser serializable). */
+  iconKey: z.string().min(1).max(64).default('UtensilsCrossed'),
+  /** Master toggle de visibilidad del módulo. */
+  enabled: z.boolean().default(true),
+  /** Heroimage + taxonomies + items. */
+  catalog: ListingsCatalogSchema,
 });
+
+export type ListingsCatalogEntry = z.infer<typeof ListingsCatalogEntrySchema>;
+
+export const ListingsModuleSchema = z
+  .array(ListingsCatalogEntrySchema)
+  .superRefine((arr, ctx) => {
+    const seen = new Set<string>();
+    arr.forEach((entry, idx) => {
+      if (seen.has(entry.key)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [idx, 'key'],
+          message: `duplicate listing module key "${entry.key}"`,
+        });
+      }
+      seen.add(entry.key);
+    });
+  });
 
 export type ListingsModule = z.infer<typeof ListingsModuleSchema>;
 
+const EMPTY_LISTINGS_CATALOG: ListingsCatalog = {
+  heroImage: '',
+  subcategories: [],
+  features: [],
+  listings: [],
+};
+
+/**
+ * Defaults canónicos del template — 3 listing modules: Restaurants, Things to Do, Stay.
+ */
 export function defaultListings(): ListingsModule {
-  return {
-    restaurants: {
+  return [
+    {
+      key: 'restaurants',
       label: 'Restaurants',
-      heroImage: '',
-      subcategories: [],
-      features: [],
-      listings: [],
+      iconKey: 'UtensilsCrossed',
+      enabled: true,
+      catalog: { ...EMPTY_LISTINGS_CATALOG },
     },
-    thingsToDo: {
+    {
+      key: 'things-to-do',
       label: 'Things to Do',
-      heroImage: '',
-      subcategories: [],
-      features: [],
-      listings: [],
+      iconKey: 'Sparkles',
+      enabled: true,
+      catalog: { ...EMPTY_LISTINGS_CATALOG },
     },
-    stay: {
+    {
+      key: 'stay',
       label: 'Stay',
-      heroImage: '',
-      subcategories: [],
-      features: [],
-      listings: [],
+      iconKey: 'BedDouble',
+      enabled: true,
+      catalog: { ...EMPTY_LISTINGS_CATALOG },
     },
-  };
+  ];
+}
+
+/**
+ * Migra el shape antiguo `{restaurants, thingsToDo, stay}` al array dinámico.
+ * Idempotente: si ya es array, lo devuelve tal cual.
+ */
+export function migrateListings(raw: unknown): ListingsModule {
+  if (Array.isArray(raw)) {
+    const parsed = ListingsModuleSchema.safeParse(raw);
+    if (parsed.success) return parsed.data;
+    return defaultListings();
+  }
+  if (raw && typeof raw === 'object') {
+    const old = raw as Record<string, unknown>;
+    const grab = (key: string): ListingsCatalog => {
+      const v = old[key];
+      if (v && typeof v === 'object') {
+        const c = v as Record<string, unknown>;
+        return {
+          heroImage: typeof c.heroImage === 'string' ? c.heroImage : '',
+          subcategories: Array.isArray(c.subcategories) ? (c.subcategories as string[]) : [],
+          features: Array.isArray(c.features) ? (c.features as string[]) : [],
+          listings: Array.isArray(c.listings) ? (c.listings as ListingItem[]) : [],
+        };
+      }
+      return { ...EMPTY_LISTINGS_CATALOG };
+    };
+    return [
+      { key: 'restaurants', label: 'Restaurants', iconKey: 'UtensilsCrossed', enabled: true, catalog: grab('restaurants') },
+      { key: 'things-to-do', label: 'Things to Do', iconKey: 'Sparkles', enabled: true, catalog: grab('thingsToDo') },
+      { key: 'stay', label: 'Stay', iconKey: 'BedDouble', enabled: true, catalog: grab('stay') },
+    ];
+  }
+  return defaultListings();
 }
 
 export function makeBlankListing(): ListingItem {
@@ -994,6 +1073,65 @@ export function makeBlankListing(): ListingItem {
     website: '',
     description: '',
     directions: [],
+  };
+}
+
+/**
+ * Genera una key única para un listing module nuevo o duplicado.
+ * Si `base` es 'restaurants' y ya existe, devuelve 'restaurants-2', '...-3', etc.
+ */
+export function uniqueListingKey(existing: ListingsModule, base: string): string {
+  const taken = new Set(existing.map((e) => e.key));
+  const slug = base
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'module';
+  if (!taken.has(slug)) return slug;
+  let i = 2;
+  while (taken.has(`${slug}-${i}`)) i++;
+  return `${slug}-${i}`;
+}
+
+/**
+ * Duplica un listing entry — clona schema (label, subcategories, features) +
+ * limpia los listings (los items NO se duplican: el operador empieza limpio).
+ */
+export function duplicateListingEntry(
+  source: ListingsCatalogEntry,
+  existing: ListingsModule,
+): ListingsCatalogEntry {
+  const newKey = uniqueListingKey(existing, `${source.key}`);
+  return {
+    key: newKey,
+    label: `${source.label} (Copy)`,
+    iconKey: source.iconKey,
+    enabled: true,
+    catalog: {
+      heroImage: source.catalog.heroImage,
+      subcategories: [...source.catalog.subcategories],
+      features: [...source.catalog.features],
+      listings: [],
+    },
+  };
+}
+
+/**
+ * Crea un listing entry vacío con label dado por el usuario. La key se deriva
+ * del label en kebab-case y se hace único.
+ */
+export function makeBlankListingEntry(
+  label: string,
+  existing: ListingsModule,
+  iconKey = 'UtensilsCrossed',
+): ListingsCatalogEntry {
+  const trimmed = label.trim() || 'New module';
+  return {
+    key: uniqueListingKey(existing, trimmed),
+    label: trimmed,
+    iconKey,
+    enabled: true,
+    catalog: { ...EMPTY_LISTINGS_CATALOG },
   };
 }
 

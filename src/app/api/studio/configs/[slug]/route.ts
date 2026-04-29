@@ -33,6 +33,7 @@ import {
   defaultPasses,
   defaultTickets,
   defaultTrails,
+  migrateListings,
   type ConfigMeta,
   type KioskConfig,
 } from '@/lib/studio/schema';
@@ -90,7 +91,7 @@ function hydrateConfig(cfg: KioskConfig): KioskConfig {
     brochures: cfg.brochures ?? structuredClone(DEFAULT_BROCHURES),
     socialWall: cfg.socialWall ?? structuredClone(DEFAULT_SOCIAL_WALL),
     guestbook: cfg.guestbook ?? structuredClone(DEFAULT_GUESTBOOK),
-    listings: cfg.listings ?? defaultListings(),
+    listings: migrateListings(cfg.listings ?? defaultListings()),
     events: cfg.events ?? defaultEvents(),
     tickets: cfg.tickets ?? defaultTickets(),
     passes: cfg.passes ?? defaultPasses(),

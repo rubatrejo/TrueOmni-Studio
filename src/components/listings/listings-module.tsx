@@ -41,29 +41,26 @@ export function ListingsModule({
   /** Hero + header server-rendered (pasado por la page). */
   header: ReactNode;
 }) {
-  const moduleLabel = useModuleLabel(moduleKey, mod.label);
-
-  // Live preview override del Studio (S3.7). El Studio dispatcha
-  // kiosk:listings-override con shape { restaurants, thingsToDo, stay };
-  // cada ListingsModule monta una instancia distinta y picka su sub-catálogo
-  // según moduleKey.
+  // Live preview override del Studio (S3.7 dynamic). El Studio dispatcha
+  // kiosk:listings-override con un array de entries (cada entry = un listing
+  // module dinámico). Buscamos por `key === moduleKey`.
   const [override, setOverride] = useState<HomeModule | null>(null);
   const effective: HomeModule = override ?? mod;
 
   useEffect(() => {
-    const catalogKey = MODULE_KEY_TO_LISTINGS_CATALOG[moduleKey];
-    if (!catalogKey) return;
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent<{
-        restaurants?: ListingsCatalogPatch;
-        thingsToDo?: ListingsCatalogPatch;
-        stay?: ListingsCatalogPatch;
-      }>).detail;
-      const sub = detail?.[catalogKey];
+      const detail = (e as CustomEvent<unknown>).detail;
+      if (!Array.isArray(detail)) return;
+      const entry = detail.find(
+        (en): en is ListingsEntryPatch =>
+          !!en && typeof en === 'object' && (en as ListingsEntryPatch).key === moduleKey,
+      );
+      if (!entry) return;
+      const sub = entry.catalog;
       if (!sub) return;
       setOverride({
         kind: 'listings',
-        label: sub.label ?? mod.label,
+        label: entry.label ?? mod.label,
         heroImage: sub.heroImage ?? mod.heroImage,
         subcategories: sub.subcategories ?? mod.subcategories,
         features: sub.features ?? mod.features,
@@ -73,6 +70,8 @@ export function ListingsModule({
     window.addEventListener('kiosk:listings-override', handler);
     return () => window.removeEventListener('kiosk:listings-override', handler);
   }, [moduleKey, mod.label, mod.heroImage, mod.subcategories, mod.features, mod.listings]);
+
+  const moduleLabel = useModuleLabel(moduleKey, effective.label);
 
   const [filter, setFilter] = useState<FilterState>(EMPTY_FILTER);
   const [sort, setSort] = useState<SortOrder>('popularity');
@@ -185,18 +184,16 @@ export function ListingsModule({
   );
 }
 
-/** Patch shape recibido del Studio dentro de `kiosk:listings-override`. */
-type ListingsCatalogPatch = {
+/** Shape de cada entry recibida en `kiosk:listings-override` (array). */
+type ListingsEntryPatch = {
+  key: string;
   label?: string;
-  heroImage?: string;
-  subcategories?: string[];
-  features?: string[];
-  listings?: Listing[];
-};
-
-/** Mapeo del moduleKey de la URL al catálogo del Studio. */
-const MODULE_KEY_TO_LISTINGS_CATALOG: Record<string, 'restaurants' | 'thingsToDo' | 'stay'> = {
-  restaurants: 'restaurants',
-  'things-to-do': 'thingsToDo',
-  stay: 'stay',
+  iconKey?: string;
+  enabled?: boolean;
+  catalog?: {
+    heroImage?: string;
+    subcategories?: string[];
+    features?: string[];
+    listings?: Listing[];
+  };
 };

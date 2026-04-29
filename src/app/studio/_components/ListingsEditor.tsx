@@ -1,10 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   type ListingItem,
   type ListingsCatalog,
+  type ListingsCatalogEntry,
   type ListingsModule,
   makeBlankListing,
 } from '@/lib/studio/schema';
@@ -16,23 +17,55 @@ import { CatalogToolbar } from './catalog/CatalogToolbar';
 import { ImageUrlField } from './catalog/ImageUrlField';
 import { TaxonomyEditor } from './catalog/TaxonomyEditor';
 
-const TABS: { key: keyof ListingsModule; label: string }[] = [
-  { key: 'restaurants', label: 'Restaurants' },
-  { key: 'thingsToDo', label: 'Things to Do' },
-  { key: 'stay', label: 'Stay' },
-];
-
 interface ListingsEditorProps {
   value: ListingsModule;
   onChange: (next: ListingsModule) => void;
 }
 
+/**
+ * Editor del módulo Listings — sub-tabs dinámicos uno por entry del array.
+ * Las entries se pueden duplicar / borrar / añadir desde la tab Modules.
+ */
 export function ListingsEditor({ value, onChange }: ListingsEditorProps) {
-  const [tab, setTab] = useState<keyof ListingsModule>('restaurants');
-  const catalog = value[tab];
+  const [activeKey, setActiveKey] = useState<string>(value[0]?.key ?? '');
+
+  // Si el active key se borra desde Modules, saltamos al primero disponible.
+  useEffect(() => {
+    if (!value.find((e) => e.key === activeKey) && value.length > 0) {
+      setActiveKey(value[0].key);
+    }
+  }, [value, activeKey]);
+
+  if (value.length === 0) {
+    return (
+      <div className="space-y-4">
+        <header className="space-y-1">
+          <h2 className="font-display text-[20px] font-semibold text-zinc-900 dark:text-zinc-100">
+            Listings
+          </h2>
+          <p className="text-[12px] text-zinc-500">
+            No listing modules yet. Add one from the <strong>Modules</strong> tab
+            (Listing modules section) to start filling its catalog.
+          </p>
+        </header>
+      </div>
+    );
+  }
+
+  const activeIdx = Math.max(
+    0,
+    value.findIndex((e) => e.key === activeKey),
+  );
+  const activeEntry = value[activeIdx];
+
+  const updateEntry = (patch: Partial<ListingsCatalogEntry>) => {
+    onChange(
+      value.map((e, i) => (i === activeIdx ? { ...e, ...patch } : e)),
+    );
+  };
 
   const updateCatalog = (patch: Partial<ListingsCatalog>) => {
-    onChange({ ...value, [tab]: { ...catalog, ...patch } });
+    updateEntry({ catalog: { ...activeEntry.catalog, ...patch } });
   };
 
   return (
@@ -42,26 +75,28 @@ export function ListingsEditor({ value, onChange }: ListingsEditorProps) {
           Listings
         </h2>
         <p className="text-[12px] text-zinc-500">
-          Three catalogs under one home tile group: places to eat, things to do, and stays.
+          Catalog-style modules. Manage their toggles / duplicate / delete from
+          the <strong>Modules</strong> tab.
         </p>
       </header>
 
-      <div className="flex gap-1 rounded-md border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-800 dark:bg-zinc-900/40">
-        {TABS.map(({ key, label }) => {
-          const active = tab === key;
-          const count = value[key]?.listings.length ?? 0;
+      <div className="flex flex-wrap gap-1 rounded-md border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-800 dark:bg-zinc-900/40">
+        {value.map((entry) => {
+          const active = entry.key === activeKey;
+          const count = entry.catalog.listings.length;
           return (
             <button
-              key={key}
+              key={entry.key}
               type="button"
-              onClick={() => setTab(key)}
-              className={`flex-1 rounded px-2 py-1.5 text-[12px] font-medium transition ${
+              onClick={() => setActiveKey(entry.key)}
+              className={`flex-1 min-w-fit rounded px-2 py-1.5 text-[12px] font-medium transition ${
                 active
                   ? 'bg-sky-500/20 text-sky-700 dark:text-sky-200'
                   : 'text-zinc-600 hover:bg-zinc-200/60 hover:text-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-200'
-              }`}
+              } ${entry.enabled ? '' : 'opacity-50'}`}
+              title={entry.enabled ? entry.label : `${entry.label} (disabled)`}
             >
-              {label}
+              {entry.label}
               <span className="ml-1.5 font-mono text-[10px] text-zinc-500">{count}</span>
             </button>
           );
@@ -69,21 +104,25 @@ export function ListingsEditor({ value, onChange }: ListingsEditorProps) {
       </div>
 
       <ListingsCatalogEditor
-        key={tab as string}
-        catalog={catalog}
-        onChange={updateCatalog}
+        key={activeEntry.key}
+        entry={activeEntry}
+        onEntryChange={updateEntry}
+        onCatalogChange={updateCatalog}
       />
     </div>
   );
 }
 
 function ListingsCatalogEditor({
-  catalog,
-  onChange,
+  entry,
+  onEntryChange,
+  onCatalogChange,
 }: {
-  catalog: ListingsCatalog;
-  onChange: (patch: Partial<ListingsCatalog>) => void;
+  entry: ListingsCatalogEntry;
+  onEntryChange: (patch: Partial<ListingsCatalogEntry>) => void;
+  onCatalogChange: (patch: Partial<ListingsCatalog>) => void;
 }) {
+  const catalog = entry.catalog;
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
@@ -109,25 +148,25 @@ function ListingsCatalogEditor({
 
   const handleAdd = () => {
     const item = makeBlankListing();
-    onChange({ listings: [item, ...catalog.listings] });
+    onCatalogChange({ listings: [item, ...catalog.listings] });
     setEditingSlug(item.slug);
   };
 
   const handleReorder = (next: ListingItem[]) => {
     const visibleSet = new Set(next.map((i) => i.slug));
     const hidden = catalog.listings.filter((i) => !visibleSet.has(i.slug));
-    onChange({ listings: [...next, ...hidden] });
+    onCatalogChange({ listings: [...next, ...hidden] });
   };
 
   const handleItemChange = (slug: string, patch: Partial<ListingItem>) =>
-    onChange({
+    onCatalogChange({
       listings: catalog.listings.map((l) =>
         l.slug === slug ? { ...l, ...patch } : l,
       ),
     });
 
   const handleItemDelete = (slug: string) => {
-    onChange({ listings: catalog.listings.filter((l) => l.slug !== slug) });
+    onCatalogChange({ listings: catalog.listings.filter((l) => l.slug !== slug) });
     if (editingSlug === slug) setEditingSlug(null);
   };
 
@@ -142,10 +181,9 @@ function ListingsCatalogEditor({
     const idx = catalog.listings.findIndex((l) => l.slug === slug);
     const next = catalog.listings.slice();
     next.splice(idx + 1, 0, dup);
-    onChange({ listings: next });
+    onCatalogChange({ listings: next });
   };
 
-  // Edit-mode (full-screen takeover dentro del editor pane).
   if (editingItem) {
     const fields: FieldConfig<ListingItem>[] = [
       { kind: 'text', key: 'title', label: 'Title' },
@@ -207,13 +245,24 @@ function ListingsCatalogEditor({
     );
   }
 
-  // List-mode (default).
   return (
     <section className="space-y-4">
+      <label className="block space-y-1">
+        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
+          Module label
+        </span>
+        <input
+          type="text"
+          value={entry.label}
+          onChange={(e) => onEntryChange({ label: e.target.value })}
+          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100"
+        />
+      </label>
+
       <ImageUrlField
         label="Hero image"
         value={catalog.heroImage}
-        onChange={(next) => onChange({ heroImage: next ?? '' })}
+        onChange={(next) => onCatalogChange({ heroImage: next ?? '' })}
         helpText="Top hero shown above the listings grid."
       />
 
@@ -221,7 +270,7 @@ function ListingsCatalogEditor({
         <TaxonomyEditor
           label="Subcategories"
           items={catalog.subcategories}
-          onChange={(next) => onChange({ subcategories: next })}
+          onChange={(next) => onCatalogChange({ subcategories: next })}
           getUsage={(item) =>
             catalog.listings.filter((l) => l.subcategory === item).length
           }
@@ -229,7 +278,7 @@ function ListingsCatalogEditor({
         <TaxonomyEditor
           label="Features"
           items={catalog.features}
-          onChange={(next) => onChange({ features: next })}
+          onChange={(next) => onCatalogChange({ features: next })}
           getUsage={(item) =>
             catalog.listings.filter((l) => l.features.includes(item)).length
           }

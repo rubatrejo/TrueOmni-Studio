@@ -1708,6 +1708,47 @@ Para cada uno se entregó:
 
 ---
 
+### Sesión 2026-04-29 (cont. 4) — Studio S5 base cerrada — Ads system editor
+
+**Hecho:**
+
+- **Plan S5** — `.planning/S5-PLAN.md` con 3 tareas atómicas. Bulk import + bridge live preview explícitamente fuera de S5 (S5.1 si se pide).
+- **T1 — Schema + endpoint** — añadidos a `src/lib/studio/schema.ts`: `AD_KINDS = ['popup','hero','bottom']`, `AD_THEMES`, `AdSchema`, `AdsModuleSchema` (con `uniqueById` superRefine), `defaultAds()`, `makeBlankAd(kind?)`. `KioskConfigSchema` ahora tiene `ads: AdsModuleSchema.optional()`. `makeBlankConfig` incluye `ads: defaultAds()`. Endpoint `/api/studio/configs/[slug]/route.ts` actualiza `hydrateConfig` con `cfg.ads ?? defaultAds()`, body schema gana `ads?`, branch PATCH valida con `AdsModuleSchema.safeParse`.
+- **T2 — `AdsEditor.tsx`** — toolbar (search por id/alt/route + filtro por kind con counts + Add ad), lista con thumbnail 48×48 contain, KindBadge color-coded (popup amber, hero sky, bottom emerald), iconos hover por fila (toggle eye/Eye, duplicate, delete), per-item edit panel con campos: ID (kebab editable), Kind (select), Image (ImageUrlField), Alt text, Routes (textarea multi-line con hint sobre `/home/*` prefix matching), Theme (select dark/light), Enabled (checkbox). Empty state con icono Megaphone.
+- **T3 — Wiring + smoke** — `Shell` añade state `ads`/`savedAds`/`adsDirty`, payload save, discard, deps. `EditorPanel` añade props + branch `sectionKey === 'ads'` → `<AdsEditor />`. La tab Ads (key `ads`, sección 18) ya estaba registrada.
+- **`image` opcional** + filter en `getAdsForRoute` — `AdSchema.image` cambió de `z.string().min(1)` a `z.string().max(2048).default('')`. `src/lib/ads.ts` `getAdsForRoute` ahora filtra `if (!ad.image) continue;` para que ads incompletos NO renderen un `<img src="">` roto. Permite el flow real: crear ad → configurar routes/theme → subir imagen al final.
+
+**Verificado:**
+
+- `pnpm typecheck` y `pnpm lint` limpios.
+- E2E con Playwright en `localhost:3001/studio/default`:
+  - Tab Ads aparece en sidebar.
+  - Lista vacía con empty state "No ads yet" (cliente legacy sin `ads` en KV).
+  - Click "Add ad" → entra al edit panel con ID auto-generado (`ad-{Date.now()}`).
+  - Rellenar routes (`/home`, `/home/restaurants/*`).
+  - Cmd+S → SaveBar pasa a "Saved" → API responde 200.
+  - GET `/api/studio/configs/default` confirma el ad en `config.ads.ads[0]` con shape correcto.
+  - Cleanup tras smoke: PATCH `{ads: {ads: []}}` deja el cliente limpio.
+
+**Pendiente / siguiente:**
+
+- **S5.1 — bridge live preview de ads** (override por `kiosk:ads-override` event en `useAds`).
+- **S5.2 — bulk import CSV/JSON** (reusa el patrón S3.8 — crear AdSchema en csvSpecs + wirear ImportModal).
+- **Migración legacy `config.features.advertisements.ads` → `config.ads`**: clientes existentes con ads en filesystem necesitarán que el publish flow (S7) escriba al nuevo path. Por ahora ambos coexisten — el kiosk lee `config.features.advertisements.ads` (legacy), el Studio edita `config.ads`. La conciliación va en S7.
+- **S6 Integraciones** y **S7 Auth + Publish** (siguientes fases).
+
+**Decisiones:**
+
+- **`ads` en KioskConfig al mismo nivel que events/listings**, no en `features.advertisements`: el Studio modela los ads como un módulo CRUD igual que el resto. Mantiene el editor consistente. La traducción a `features.advertisements.ads` (donde el kiosk runtime lo lee) la hará el publish flow en S7.
+- **`image` opcional en schema + filter en runtime**: balance UX vs strictness. El operador puede crear el ad y configurar todo antes de subir el asset; el kiosk runtime lo omite si está incompleto (no rompe). Coherente con cómo se manejan items incompletos en otros catálogos.
+- **`uniqueById` en lugar de `uniqueBySlug`**: ads usan `id` no `slug` (decisión heredada de `Ad` en `src/lib/config.ts` que ya estaba estandarizada en el codebase).
+- **No drag&drop reorder en MVP**: ads son pocos por cliente típicamente; un orden visual suficiente con la lista vertical. Si crece la cantidad, S5.1 puede añadir reorder igual que otros catálogos.
+- **Color por kind**: popup amber, hero sky, bottom emerald. Coherente con el resto del Studio (sky para acción primaria, amber para warnings/missing) y diferenciable de un vistazo en la lista.
+
+**Fase:** Studio S5 base cerrada (2026-04-29). Siguiente arranque: **S6 Integraciones** o **S5.1 bridge** o **S5.2 bulk import**.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

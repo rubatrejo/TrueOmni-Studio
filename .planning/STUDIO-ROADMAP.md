@@ -105,9 +105,9 @@ Sub-fases entregadas:
 
 ## Fase S5 — Ads system
 
-- [ ] Lista de ads con preview thumbnail.
-- [ ] Por ad: imagen + tipo (`hero` / `bottom` / `popup`) + paths + ventana de tiempo.
-- [ ] Reordenar por path con rotation: `first` / `random` / `weighted`.
+- [x] **S5 base** ✅ cerrada 2026-04-29 — `AdSchema` + `AdsModuleSchema` añadidos al KioskConfig (al lado de events/listings/etc), endpoint `[slug]/route.ts` PATCH soporta `ads` con backfill defensivo en `hydrateConfig`. `AdsEditor` con search + filtro por kind (popup/hero/bottom) + Add/Toggle/Duplicate/Delete inline + per-item edit panel (id, kind, image, alt, routes multi-line, theme, enabled). `getAdsForRoute` filtra ads sin imagen para evitar render incompleto. `image` opcional en schema (permite crear ad → completar después). Wiring completo en Shell/EditorPanel; verificado E2E con persistencia tras Cmd+S.
+- [ ] **S5.1 — Bridge live preview** + bulk import CSV/JSON (futuro).
+- [ ] **S5.2 — Rotación weighted/random por path** (v2, no MVP).
 
 ---
 

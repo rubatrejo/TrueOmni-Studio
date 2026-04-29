@@ -99,8 +99,13 @@ export function HomeShell({
       if (!entry.enabled) continue;
       if (!isCoreEnabled(entry.key)) continue;
       const base = tilesByKey.get(entry.key);
-      if (!base) continue;
-      out.push({ ...base, label: entry.label });
+      if (base) {
+        out.push({ ...base, label: entry.label });
+      } else {
+        // Tile dinámico que el server no conoce (ej. listing module nuevo
+        // duplicado en el Studio). Renderizamos con placeholder de imagen.
+        out.push({ key: entry.key, label: entry.label, enabled: true, image: '' });
+      }
     }
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps

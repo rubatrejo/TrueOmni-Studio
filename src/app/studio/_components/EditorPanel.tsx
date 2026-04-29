@@ -164,7 +164,12 @@ export function EditorPanel({
           <HomeDashboardEditor modules={modules} onChange={onModulesChange} />
         )}
         {sectionKey === 'modules' && (
-          <SystemModulesEditor modules={modules} onChange={onModulesChange} />
+          <SystemModulesEditor
+            modules={modules}
+            onChange={onModulesChange}
+            listings={listings}
+            onListingsChange={onListingsChange}
+          />
         )}
         {sectionKey === 'billboard' && (
           <BillboardEditor billboard={billboard} onChange={onBillboardChange} />

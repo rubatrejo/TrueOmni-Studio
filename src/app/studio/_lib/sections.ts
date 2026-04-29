@@ -194,9 +194,9 @@ export const STUDIO_SECTIONS: StudioSection[] = [
     key: 'listings',
     num: '12',
     label: 'Listings',
-    title: 'Listings (Restaurants / Things to Do / Stay)',
+    title: 'Listings',
     description:
-      'Bulk CRUD for the three listing catalogs: places to eat, things to do and stays.',
+      'Bulk CRUD for catalog-style modules. Add, duplicate or delete modules from the Modules tab.',
     icon: 'UtensilsCrossed',
     phase: 'S3',
   },

@@ -2,11 +2,13 @@
 
 import { Reorder, useDragControls } from 'framer-motion';
 import {
+  BedDouble,
   BookOpen,
   Calendar,
   Camera,
   ClipboardList,
   Compass,
+  Copy,
   Eye,
   EyeOff,
   Footprints,
@@ -18,12 +20,14 @@ import {
   MapPin,
   Megaphone,
   PenSquare,
+  Plus,
   RotateCcw,
   Share2,
   Sparkles,
   Tag,
   Ticket,
   TicketCheck,
+  Trash2,
   UtensilsCrossed,
   type LucideIcon,
 } from 'lucide-react';
@@ -33,6 +37,10 @@ import {
   DEFAULT_SYSTEM_MODULES,
   MODULE_KEY_TO_SYSTEM_FIELD,
   defaultModules,
+  duplicateListingEntry,
+  makeBlankListingEntry,
+  type ListingsCatalogEntry,
+  type ListingsModule,
   type ModuleEntry,
   type ModulesConfig,
   type SystemModules,
@@ -41,6 +49,28 @@ import {
 /* ────────────────────────────────────────────────────────────────────────── */
 /* Iconos Lucide por module key — reemplazan los emojis del primer iter.      */
 /* ────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Catálogo de iconos Lucide disponibles para listing modules.
+ * Las keys son los nombres tal cual los serializa el schema (ListingsCatalogEntry.iconKey).
+ */
+const LISTING_ICONS: Record<string, LucideIcon> = {
+  UtensilsCrossed,
+  MapPin,
+  BedDouble,
+  Sparkles,
+  Compass,
+  ListChecks,
+  Footprints,
+  Hotel,
+  BookOpen,
+  Tag,
+  Camera,
+  PenSquare,
+  Share2,
+  ClipboardList,
+  Map,
+};
 
 const MODULE_ICONS: Record<string, LucideIcon> = {
   restaurants: UtensilsCrossed,
@@ -174,19 +204,8 @@ export function HomeDashboardEditor({
 /* languages, ai avatar).                                                      */
 /* ────────────────────────────────────────────────────────────────────────── */
 
-/**
- * Módulos "tipo listing" — tienen catálogos grandes (items con imágenes,
- * subcategorías, features). Restaurants / Things to Do / Stay / Events
- * comparten el patrón ListingsModule del kiosk runtime.
- */
-const LISTING_MODULE_LIST: Array<{ key: keyof SystemModules; tileKey: string; label: string; subtitle: string }> = [
-  { key: 'restaurants', tileKey: 'restaurants', label: 'Restaurants', subtitle: 'Food & Drink listings' },
-  { key: 'thingsToDo', tileKey: 'things-to-do', label: 'Things to Do', subtitle: 'Activities & attractions' },
-  { key: 'stay', tileKey: 'stay', label: 'Stay', subtitle: 'Hotels & lodging' },
-  { key: 'events', tileKey: 'events', label: 'Events', subtitle: 'Calendar of events' },
-];
-
 const HOME_MODULE_LIST: Array<{ key: keyof SystemModules; tileKey: string; label: string; subtitle: string }> = [
+  { key: 'events', tileKey: 'events', label: 'Events', subtitle: 'Calendar of events' },
   { key: 'itineraryBuilder', tileKey: 'itinerary-builder', label: 'Itinerary Builder', subtitle: 'AI-assisted trip planner' },
   { key: 'passes', tileKey: 'passes', label: 'Passes', subtitle: 'Multi-attraction passes' },
   { key: 'tickets', tileKey: 'tickets', label: 'Tickets', subtitle: 'Single-attraction tickets' },
@@ -210,24 +229,98 @@ const GLOBAL_MODULE_LIST: Array<{ key: keyof SystemModules; icon: LucideIcon; la
 export function SystemModulesEditor({
   modules,
   onChange,
+  listings,
+  onListingsChange,
 }: {
   modules: ModulesConfig;
   onChange: (next: ModulesConfig) => void;
+  listings: ListingsModule;
+  onListingsChange: (next: ListingsModule) => void;
 }) {
   const sys: SystemModules = modules.systemModules ?? DEFAULT_SYSTEM_MODULES;
-  const allKeys = [
-    ...LISTING_MODULE_LIST.map((m) => m.key),
-    ...HOME_MODULE_LIST.map((m) => m.key),
-    ...GLOBAL_MODULE_LIST.map((m) => m.key),
-  ];
-  const enabledCount = allKeys.filter((k) => sys[k]).length;
-  const totalCount = allKeys.length;
+  const homeKeys = HOME_MODULE_LIST.map((m) => m.key);
+  const globalKeys = GLOBAL_MODULE_LIST.map((m) => m.key);
+  const enabledCount =
+    homeKeys.filter((k) => sys[k]).length +
+    globalKeys.filter((k) => sys[k]).length +
+    listings.filter((e) => e.enabled).length;
+  const totalCount = homeKeys.length + globalKeys.length + listings.length;
 
   const setSystem = (k: keyof SystemModules) =>
     onChange({ ...modules, systemModules: { ...sys, [k]: !sys[k] } });
 
   const handleReset = () =>
     onChange({ ...modules, systemModules: { ...DEFAULT_SYSTEM_MODULES } });
+
+  /* ---------------- Listing modules CRUD (sync con tiles) ----------------- */
+
+  const updateListingsAndTiles = (
+    nextListings: ListingsModule,
+    transformTiles?: (tiles: ModuleEntry[]) => ModuleEntry[],
+  ) => {
+    onListingsChange(nextListings);
+    if (transformTiles) {
+      onChange({ ...modules, tiles: transformTiles(modules.tiles) });
+    }
+  };
+
+  const handleListingToggle = (key: string) => {
+    const entry = listings.find((e) => e.key === key);
+    if (!entry) return;
+    const nextEnabled = !entry.enabled;
+    updateListingsAndTiles(
+      listings.map((e) => (e.key === key ? { ...e, enabled: nextEnabled } : e)),
+      (tiles) =>
+        tiles.map((t) => (t.key === key ? { ...t, enabled: nextEnabled } : t)),
+    );
+  };
+
+  const handleListingRename = (key: string, label: string) => {
+    updateListingsAndTiles(
+      listings.map((e) => (e.key === key ? { ...e, label } : e)),
+      (tiles) => tiles.map((t) => (t.key === key ? { ...t, label } : t)),
+    );
+  };
+
+  const handleListingDuplicate = (key: string) => {
+    const source = listings.find((e) => e.key === key);
+    if (!source) return;
+    const dup = duplicateListingEntry(source, listings);
+    updateListingsAndTiles([...listings, dup], (tiles) => {
+      // Inserta el tile nuevo justo después del source si existe; si no, al final.
+      const idx = tiles.findIndex((t) => t.key === source.key);
+      const newTile: ModuleEntry = { key: dup.key, label: dup.label, enabled: dup.enabled };
+      if (idx === -1) return [...tiles, newTile];
+      const next = tiles.slice();
+      next.splice(idx + 1, 0, newTile);
+      return next;
+    });
+  };
+
+  const [confirmDelete, setConfirmDelete] = useState<{ key: string; label: string } | null>(null);
+
+  const handleListingDelete = (key: string) => {
+    updateListingsAndTiles(
+      listings.filter((e) => e.key !== key),
+      (tiles) => tiles.filter((t) => t.key !== key),
+    );
+    setConfirmDelete(null);
+  };
+
+  const [showAdd, setShowAdd] = useState(false);
+  const [draftLabel, setDraftLabel] = useState('');
+
+  const handleListingAdd = () => {
+    const label = draftLabel.trim();
+    if (!label) return;
+    const entry = makeBlankListingEntry(label, listings);
+    updateListingsAndTiles([...listings, entry], (tiles) => [
+      ...tiles,
+      { key: entry.key, label: entry.label, enabled: true },
+    ]);
+    setDraftLabel('');
+    setShowAdd(false);
+  };
 
   return (
     <div className="space-y-7">
@@ -238,7 +331,7 @@ export function SystemModulesEditor({
               Listing modules
             </h3>
             <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
-              Catalog-style modules with item lists, subcategories and filters.
+              Catalog-style modules. Duplicate, rename or delete to fit each client.
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -257,20 +350,90 @@ export function SystemModulesEditor({
         </header>
 
         <div className="flex flex-col gap-1.5">
-          {LISTING_MODULE_LIST.map((m) => {
-            const Icon = MODULE_ICONS[m.tileKey] ?? Sparkles;
-            return (
-              <SystemRow
-                key={m.key}
-                icon={<Icon className="h-4 w-4" />}
-                title={m.label}
-                subtitle={m.subtitle}
-                enabled={sys[m.key]}
-                onToggle={() => setSystem(m.key)}
+          {listings.length === 0 ? (
+            <div className="rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-4 py-6 text-center dark:border-zinc-800 dark:bg-zinc-900/20">
+              <p className="text-[11.5px] italic text-zinc-500">
+                No listing modules. Add one below to start a fresh catalog.
+              </p>
+            </div>
+          ) : (
+            listings.map((entry) => {
+              const Icon = LISTING_ICONS[entry.iconKey] ?? UtensilsCrossed;
+              const itemCount = entry.catalog.listings.length;
+              return (
+                <ListingModuleRow
+                  key={entry.key}
+                  icon={<Icon className="h-4 w-4" />}
+                  entry={entry}
+                  itemCount={itemCount}
+                  onToggle={() => handleListingToggle(entry.key)}
+                  onRename={(label) => handleListingRename(entry.key, label)}
+                  onDuplicate={() => handleListingDuplicate(entry.key)}
+                  onDelete={() => setConfirmDelete({ key: entry.key, label: entry.label })}
+                />
+              );
+            })
+          )}
+
+          {showAdd ? (
+            <div className="flex items-center gap-2 rounded-md border border-sky-500/40 bg-sky-500/5 p-2">
+              <input
+                type="text"
+                value={draftLabel}
+                onChange={(e) => setDraftLabel(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleListingAdd();
+                  if (e.key === 'Escape') {
+                    setDraftLabel('');
+                    setShowAdd(false);
+                  }
+                }}
+                placeholder="Module name (e.g. Shopping)"
+                // eslint-disable-next-line jsx-a11y/no-autofocus
+                autoFocus
+                className="flex-1 rounded border border-zinc-200 bg-white px-2 py-1 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-600"
               />
-            );
-          })}
+              <button
+                type="button"
+                onClick={handleListingAdd}
+                disabled={!draftLabel.trim()}
+                className="rounded-md bg-sky-500/20 px-2.5 py-1 text-[11.5px] font-medium text-sky-700 transition hover:bg-sky-500/30 disabled:opacity-40 dark:text-sky-200"
+              >
+                Add
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDraftLabel('');
+                  setShowAdd(false);
+                }}
+                className="rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[11.5px] font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowAdd(true)}
+              className="flex items-center justify-center gap-1.5 rounded-md border border-dashed border-zinc-300 bg-white px-3 py-2 text-[12px] font-medium text-zinc-600 transition hover:border-sky-500/40 hover:bg-sky-500/5 hover:text-sky-700 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-400 dark:hover:text-sky-300"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add listing module
+            </button>
+          )}
         </div>
+
+        {confirmDelete ? (
+          <DeleteConfirm
+            label={confirmDelete.label}
+            itemCount={
+              listings.find((e) => e.key === confirmDelete.key)?.catalog.listings.length ?? 0
+            }
+            onCancel={() => setConfirmDelete(null)}
+            onConfirm={() => handleListingDelete(confirmDelete.key)}
+          />
+        ) : null}
       </section>
 
       <section>
@@ -516,5 +679,162 @@ function ToggleSwitch({
         )}
       </span>
     </button>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* ListingModuleRow — fila de un Listing module dinámico con CRUD inline      */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function ListingModuleRow({
+  icon,
+  entry,
+  itemCount,
+  onToggle,
+  onRename,
+  onDuplicate,
+  onDelete,
+}: {
+  icon: React.ReactNode;
+  entry: ListingsCatalogEntry;
+  itemCount: number;
+  onToggle: () => void;
+  onRename: (label: string) => void;
+  onDuplicate: () => void;
+  onDelete: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(entry.label);
+  useEffect(() => setDraft(entry.label), [entry.label]);
+
+  const commit = () => {
+    const next = draft.trim();
+    if (next && next !== entry.label) onRename(next);
+    setEditing(false);
+  };
+
+  return (
+    <div className="flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-2.5 py-2 transition hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900/40 dark:hover:border-zinc-700">
+      <span
+        className={`grid h-7 w-7 shrink-0 place-items-center rounded-md ring-1 transition ${
+          entry.enabled
+            ? 'bg-sky-500/15 text-sky-600 ring-sky-500/30 dark:text-sky-300'
+            : 'bg-zinc-100 text-zinc-400 ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-600 dark:ring-zinc-700'
+        }`}
+      >
+        {icon}
+      </span>
+
+      <div className="min-w-0 flex-1">
+        {editing ? (
+          <input
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus
+            type="text"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commit}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') commit();
+              if (e.key === 'Escape') {
+                setDraft(entry.label);
+                setEditing(false);
+              }
+            }}
+            className="w-full rounded border border-sky-500/40 bg-white px-1.5 py-0.5 text-[12.5px] font-medium text-zinc-900 focus:outline-none dark:bg-zinc-900 dark:text-zinc-100"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className="block w-full truncate text-left text-[12.5px] font-medium text-zinc-800 hover:text-sky-600 dark:text-zinc-200 dark:hover:text-sky-300"
+          >
+            {entry.label}
+          </button>
+        )}
+        <div className="truncate text-[10.5px] text-zinc-500">
+          <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono text-[10px] text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
+            /{entry.key}
+          </code>{' '}
+          · {itemCount} {itemCount === 1 ? 'item' : 'items'}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={onDuplicate}
+        aria-label={`Duplicate ${entry.label}`}
+        title="Duplicate"
+        className="grid h-7 w-7 place-items-center rounded text-zinc-400 transition hover:bg-sky-500/10 hover:text-sky-600 dark:text-zinc-500 dark:hover:text-sky-300"
+      >
+        <Copy className="h-3.5 w-3.5" />
+      </button>
+
+      <button
+        type="button"
+        onClick={onDelete}
+        aria-label={`Delete ${entry.label}`}
+        title="Delete"
+        className="grid h-7 w-7 place-items-center rounded text-zinc-400 transition hover:bg-red-500/10 hover:text-red-500 dark:text-zinc-500 dark:hover:text-red-400"
+      >
+        <Trash2 className="h-3.5 w-3.5" />
+      </button>
+
+      <ToggleSwitch enabled={entry.enabled} onChange={onToggle} label={entry.label} />
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* DeleteConfirm — modal inline para borrar un listing module                 */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function DeleteConfirm({
+  label,
+  itemCount,
+  onCancel,
+  onConfirm,
+}: {
+  label: string;
+  itemCount: number;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div
+      role="alertdialog"
+      aria-labelledby="listing-module-delete"
+      className="mt-3 rounded-md border border-red-500/30 bg-red-500/5 p-3"
+    >
+      <p
+        id="listing-module-delete"
+        className="text-[12.5px] font-medium text-red-700 dark:text-red-200"
+      >
+        Delete &quot;{label}&quot;?
+      </p>
+      <p className="mt-1 text-[11.5px] text-red-600/80 dark:text-red-300/80">
+        {itemCount === 0
+          ? 'The module is empty — safe to delete.'
+          : `This will remove ${itemCount} listing${
+              itemCount === 1 ? '' : 's'
+            }, plus its subcategories and features. This cannot be undone.`}
+      </p>
+      <div className="mt-2 flex justify-end gap-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[11.5px] font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={onConfirm}
+          className="rounded-md bg-red-500/20 px-2.5 py-1 text-[11.5px] font-medium text-red-700 transition hover:bg-red-500/30 dark:text-red-200"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
   );
 }

@@ -11,7 +11,7 @@ import { useCamera } from '@/hooks/use-camera';
 import { useCountdown } from '@/hooks/use-countdown';
 import { usePhotoSession } from '@/hooks/use-photo-session';
 import type { PhotoBoothConfig, PhotoBoothSticker } from '@/lib/config';
-import { resolvePhotoBoothAsset } from '@/lib/photo-booth';
+import { resolvePhotoBoothAsset } from '@/lib/photo-booth-asset';
 import { composeFinal, type StickerPlacement } from '@/lib/photo-booth-compose';
 import { segmentSelfie, warmupSegmenter } from '@/lib/photo-booth-segment';
 import type { WeatherData } from '@/lib/weather';
@@ -220,7 +220,7 @@ export function PhotoBoothModule({
   const [selectedBackgroundId, setSelectedBackgroundId] = useState<string | null>(
     resolvedBackgrounds.find((b) => b.id === 'none')?.id ?? resolvedBackgrounds[0]?.id ?? null,
   );
-  const [hasTouchedBackground, setHasTouchedBackground] = useState(false);
+  const [, setHasTouchedBackground] = useState(false);
   const [selectedFrameId, setSelectedFrameId] = useState<string | null>(
     resolvedFrames[0]?.id ?? null,
   );

@@ -28,6 +28,12 @@ const notoSansJP = Noto_Sans_JP({
   display: 'swap',
 });
 
+// El kiosk lee config en runtime (filesystem por KIOSK_CLIENT). Marcar el
+// layout como dynamic evita que Next intente prerender /404 con un getConfig
+// que no tiene client válido en build, lo que arrastraba el error de
+// `<Html> outside pages/_document`.
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getConfig();
   return {

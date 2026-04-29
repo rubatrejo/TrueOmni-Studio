@@ -54,11 +54,13 @@ export function LanguageDropdown() {
     // evita que onClick handlers de ancestors se disparen.
     <div
       ref={wrapperRef}
+      role="presentation"
       className="relative inline-block"
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
       }}
+      onKeyDown={(e) => e.stopPropagation()}
       onMouseDown={(e) => {
         e.preventDefault();
         e.stopPropagation();

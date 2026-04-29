@@ -20,7 +20,6 @@ import { GuestbookFormFields, type GuestbookField } from './guestbook-form-field
  *   - zip → NumericKeypad.
  *   - country → overlay dropdown.
  */
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const ZIP_RE = /^[0-9A-Za-z -]{3,10}$/;
 
 export interface GuestbookFormData {
@@ -177,7 +176,11 @@ export function GuestbookFormScreen({
           {subtitle}
         </p>
 
-        <div onClick={(e) => e.stopPropagation()}>
+        <div
+          role="presentation"
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
           <GuestbookFormFields
             values={{
               name,

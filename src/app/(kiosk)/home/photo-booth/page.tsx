@@ -1,7 +1,7 @@
 import { KioskCanvas } from '@/components/kiosk-canvas';
 import { PhotoBoothModule } from '@/components/photo-booth/photo-booth-module';
 import { getConfig } from '@/lib/config';
-import { resolvePhotoBoothAsset } from '@/lib/photo-booth';
+import { resolvePhotoBoothAsset } from '@/lib/photo-booth-asset';
 import { fetchWeather } from '@/lib/weather';
 
 export default async function PhotoBoothPage() {

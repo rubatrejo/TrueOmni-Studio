@@ -13,21 +13,6 @@ export async function getPhotoBoothConfig(): Promise<PhotoBoothConfig | null> {
   return photoBooth;
 }
 
-/**
- * Normaliza un path relativo de asset (`assets/photo-booth/frames/frame-0.png`)
- * a la URL absoluta servida por el route handler `/assets/[...path]/route.ts`.
- * Si el path ya es absoluto (HTTP o leading slash) se devuelve sin cambios.
- *
- * Mismo patrón que `resolveAiAssetPath`.
- */
-export function resolvePhotoBoothAsset(raw: string): string {
-  if (
-    raw.startsWith('http') ||
-    raw.startsWith('/') ||
-    raw.startsWith('data:') ||
-    raw.startsWith('blob:')
-  ) {
-    return raw;
-  }
-  return `/${raw}`;
-}
+// Helper puro `resolvePhotoBoothAsset` movido a `photo-booth-asset.ts`
+// para que pueda ser consumido desde client components sin disparar el
+// guard de `server-only`.

@@ -2,9 +2,17 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { OnScreenKeyboard, type KeyboardKey } from '@/components/home/on-screen-keyboard';
 import { useTextosMap } from '@/components/i18n-provider';
+import { DraggableKeyboard } from '@/components/keyboard/draggable-keyboard';
+import { FloatingHomeButton } from '@/components/listings/floating-home-button';
+import { ListingDetail } from '@/components/listings/listing-detail';
+import { SendConfirmationPopup } from '@/components/listings/send-confirmation-popup';
+import { SendToEmailModal } from '@/components/listings/send-to-email-modal';
+import { SendToPhoneModal } from '@/components/listings/send-to-phone-modal';
+import { MapPinBubble } from '@/components/map/map-pin-bubble';
+import { generateItinerary, type GeneratedItinerary } from '@/lib/ai-itinerary';
 import type { ItineraryConfig, KioskConfig, MapSource } from '@/lib/config';
-import type { MapItem } from '@/lib/map-item';
 import {
   distanceMi,
   filterCatalogBySearch,
@@ -12,27 +20,17 @@ import {
   getItineraryCatalogForModule,
   type ItineraryCatalogItem,
 } from '@/lib/itinerary-catalog';
+import { buildItineraryDetailLookup } from '@/lib/itinerary-detail-lookup';
 import { useItineraryRail, type ItineraryRailEntry } from '@/lib/itinerary-favorites';
 import { LOCAL_LISTINGS_TAB_SLUG, getItineraryTabs } from '@/lib/itinerary-tabs';
+import type { MapItem } from '@/lib/map-item';
 import { useItineraryDnd } from '@/lib/use-itinerary-dnd';
 import type { WeatherData } from '@/lib/weather';
-
-import { generateItinerary, type GeneratedItinerary } from '@/lib/ai-itinerary';
-import { MapPinBubble } from '@/components/map/map-pin-bubble';
-import { OnScreenKeyboard, type KeyboardKey } from '@/components/home/on-screen-keyboard';
-import { DraggableKeyboard } from '@/components/keyboard/draggable-keyboard';
-import { ListingDetail } from '@/components/listings/listing-detail';
-import { FloatingHomeButton } from '@/components/listings/floating-home-button';
-import { buildItineraryDetailLookup } from '@/lib/itinerary-detail-lookup';
-import { SendConfirmationPopup } from '@/components/listings/send-confirmation-popup';
-import { SendToEmailModal } from '@/components/listings/send-to-email-modal';
-import { SendToPhoneModal } from '@/components/listings/send-to-phone-modal';
 
 import { AiItineraryFloatingCard } from './ai-floating-card';
 import { AiLoadingScreen } from './ai-loading-screen';
 import { AiPopup } from './ai-popup';
 import { AiResultScreen } from './ai-result-screen';
-import { TopSuggestionsScreen } from './top-suggestions-screen';
 import { AiWizard, type AiAnswers } from './ai-wizard';
 import { CategoryTabsRow } from './category-tabs-row';
 import { DragGhost } from './drag-ghost';
@@ -46,12 +44,13 @@ import { ItineraryFinishedPopup } from './itinerary-finished-popup';
 import { ItineraryHeader } from './itinerary-header';
 import { ItineraryMap } from './itinerary-map';
 import { LeaveAiWarningPopup } from './leave-ai-warning-popup';
-import { ShareItineraryModal } from './share-itinerary-modal';
 import { ListingsColumn } from './listings-column';
 import { LocalListingPreview } from './local-listing-preview';
 import { LocalListingsColumn } from './local-listings-column';
 import { MapToolbar } from './map-toolbar';
+import { ShareItineraryModal } from './share-itinerary-modal';
 import { StopsRail } from './stops-rail';
+import { TopSuggestionsScreen } from './top-suggestions-screen';
 import { WelcomePopup } from './welcome-popup';
 
 export type ItineraryPhase =

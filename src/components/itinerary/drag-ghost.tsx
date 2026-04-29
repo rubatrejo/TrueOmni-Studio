@@ -1,8 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { createPortal } from 'react-dom';
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import type { DragPayload } from '@/lib/use-itinerary-dnd';
 

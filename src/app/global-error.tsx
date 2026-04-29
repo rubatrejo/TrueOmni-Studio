@@ -4,6 +4,8 @@
 // el build SSG intente prerender /404 a través del shell legacy de pages/_document
 // (que arrastra <Html>, incompatible fuera de pages/).
 
+export const dynamic = 'force-dynamic';
+
 export default function GlobalError({
   reset,
 }: {

@@ -91,7 +91,7 @@ Sub-fases entregadas:
 - [x] **S3.1–S3.6** — Editores de Survey, Deals, Photo Booth, Digital Brochure, Social Wall, Guestbook (cerradas 2026-04-29).
 - [x] **S3.7 — Content tab CRUD masivo** (cerrada 2026-04-29). Editores para los 5 catálogos (Listings, Events, Tickets wrapper, Passes, Trails) con 7 catalog primitives compartidos + bridge debounced + listeners decentralizados en kiosk runtime + 5 tabs nuevas en sidebar.
 - [x] **UX iteraciones masivas** (2026-04-29): light mode, per-item edit panel, Versions al TopBar, Modules tab con 3 secciones, Listing modules **dinámicos** (add/duplicate/delete con sync de tiles[]), schema migration defensiva, "Itinerary Builder" → "Trip Planner".
-- [ ] **S3.8 — Bulk import desde CSV/JSON** (diseño aprobado 2026-04-29, plan listo, no empezado por límite de contexto). 3 tareas atómicas planeadas.
+- [x] **S3.8 — Bulk import desde CSV/JSON** ✅ cerrada 2026-04-29 — `import-helpers.ts` (CSV parser RFC 4180 + 4 specs + serialize), `ImportModal` con drop zone + preview + stats + merge/replace, props `onImport`/`onExport` en `CatalogToolbar`, `ImportToast` con autodescarte 4s, `export-utils` para descarga CSV/JSON. Wireado en Listings/Events/Passes/Trails. JSON roundtrip verificado E2E.
 - [ ] Asignación de imágenes desde galería del cliente.
 
 ---

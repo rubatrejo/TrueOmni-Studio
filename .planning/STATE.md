@@ -1584,6 +1584,48 @@ Para cada uno se entregó:
 
 ---
 
+### Sesión 2026-04-29 (cont.) — Studio S3.8 cerrada — Bulk import CSV/JSON con export roundtrip y toast
+
+**Hecho:**
+
+- **Spec + plan S3.8** — `docs/superpowers/specs/2026-04-29-studio-s3-8-bulk-import-design.md` + `.planning/S3-8-PLAN.md` con 3 tareas atómicas (importar 4 catálogos: Listings/Events/Passes/Trails; Tickets queda fuera por ser derivado).
+- **T1 — `src/app/studio/_lib/import-helpers.ts`**: parser CSV RFC 4180 (quoted fields, `\r\n`, double-quote escape), 4 specs por kind (`listings`/`events`/`passes`/`trails`) con coercers `string|number|bool|array|coords`, auto-slug desde title, dedupe por slug, `normalizeImport()` con stats `{added,updated,skipped,errors,total}`, `detectFormat()` por extensión + content sniff. Tipos `ImportKind`/`ImportMode`/`ImportItem<K>`/`ImportResult<K>`/`ImportRowError`/`ImportStats` exportados.
+- **T2 — `ImportModal.tsx`**: drop zone full-screen con drag&drop + click, preview de hasta 10 filas, stats con tone (valid/added·updated/errors), errores por fila colapsables (5 + "show more"), modo radio merge/replace, descarga template CSV. Esc cierra. Cambio `onImport` para pasar también `stats`. `CatalogToolbar` gana props opcionales `onImport`/`onExport`/`exportEnabled`.
+- **T3 — Wiring en 4 editores** (`Events|Passes|Trails|ListingsEditor`): state `importOpen` + `lastImport` por editor, `handleImport(items, mode, stats)` con upsert por slug en merge / replace clean, `mergeTaxonomy()` recolecta tags/categories/venues/subcategories vacíos desde los items importados (max 100 entries de 64 chars), `handleExport(format)` que descarga `<entry|kind>-YYYY-MM-DD.{csv,json}`. ListingsEditor opera sobre la entry activa (`catalog.listings`).
+- **Pulido S3.8.1** — `import-helpers.ts` ganó `serializeCsv`/`serializeJson`/`serializeCatalog` (RFC4180 escape, columnas idénticas a las del import → roundtrip simétrico). Nuevos: `ImportToast.tsx` (banner verde con `role=status`, autodescarte 4s, framer-motion fade), `export-utils.ts` (`downloadCatalog()` genera blob + dispara click). `CatalogToolbar` ganó `ExportButton` con dropdown CSV/JSON cerrable por click-fuera y Esc.
+- **Helpers compartidos** — `import-utils.ts` con `upsertBySlug<T>` (mantiene orden de existentes, appendea nuevos al final) + `mergeTaxonomy()` que solo recolecta si `current` está vacío.
+
+**Verificado:**
+
+- `pnpm typecheck` y `pnpm lint` limpios (sólo warnings preexistentes de `react-hooks/exhaustive-deps` en kiosk).
+- E2E completo con Playwright en `localhost:3001/studio/default`:
+  - Tab Events → click Import → drop CSV con 3 filas (2 válidas + 1 con `bad-date`) → modal muestra "VALID 2 · ADDED·UPDATED 2·0 · ERRORS 1" + "row 4: date must be YYYY-MM-DD" en lista de errores → preview 2 filas → click "Import 2 events" → modal cierra, items "Luna Festival"/"Downtown Art Walk" aparecen en CatalogList.
+  - Toast verde "2 events imported (2 added · 0 updated)" con `role=status`.
+  - Botón Export aparece habilitado tras tener items.
+  - **Roundtrip JSON**: click Export → Download JSON → blob capturado vía override de `URL.createObjectURL` → JSON parseado correctamente con shape `{events: [...]}`. Re-importar ese JSON en modo `replace` → toast "2 events imported (0 added · 2 updated)" → titles iguales.
+  - Listings/Passes/Trails muestran botón Import. Tickets no (correcto — derivado).
+
+**Pendiente / siguiente:**
+
+- **`pnpm build` SSG `/404`** — bloqueante para Vercel/S7. Requiere aprobación explícita para correr build (CLAUDE.md). Sesión dedicada.
+- **S4 — i18n editor side-by-side** con AI translate (`@anthropic-ai/sdk`). Siguiente fase del roadmap. Sesión fresca.
+- **Galería de imágenes por cliente** — complemento natural del Bulk Import; bloqueado por Vercel Blob (S5/S6).
+- **TODOs colaterales sin tocar**: LLM real Ask AI, voice lang dinámico, Map aggregator para trails.
+
+**Decisiones:**
+
+- **Un único commit `feat` para S3.8 + S3.8.1** en lugar de splittear: ambos son la misma sub-fase y los cambios en editores/toolbar están intermezclados; CLAUDE.md prohíbe mezclar **fases** (no subfases). Se mantiene atomicidad real.
+- **Export columnas idénticas a las de Import** (mismo `csvSpecs` por kind): roundtrip simétrico garantizado. Para JSON el shape `{[kind]: [...]}` admite también arrays sueltos `[...]` y `{items: [...]}` en `extractJsonArray()`.
+- **Override de `onImport` con stats** (en vez de prop `onComplete` separada): un solo punto de entrada al editor, simpler. El editor decide qué hacer con los stats (toast ahora, log futuro).
+- **Tickets fuera del bulk import**: es wrapper derivado de Events sin catálogo propio. Re-derivación automática vía postMessage del listener kiosk sigue funcionando tras cada import a Events.
+- **mergeTaxonomy idempotente sólo si current vacío**: evita pisar configuraciones del operador. Si quieren rebuild full, primero limpian taxonomies y luego re-importan.
+- **Auto-slug desde title** en CSV cuando falta `slug` (kebab-case + recorte 64): permite hojas Excel sin columna slug, requisito común de clientes reales.
+- **Descarga blob roundtrip** preservó el `URL.createObjectURL` y `a.click()` reales: la única manera fiable de iniciar una descarga desde el cliente sin librerías.
+
+**Fase:** Studio S3.8 cerrada (2026-04-29). Siguiente arranque candidatos: **build SSG fix** (corto, bloqueante deploy) o **S4 i18n editor** (siguiente fase del roadmap).
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

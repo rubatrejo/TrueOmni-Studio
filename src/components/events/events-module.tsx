@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { SearchOverlay } from '@/components/home/search-overlay';
@@ -44,6 +44,34 @@ export function EventsModule({
   const moduleLabel = useModuleLabel(moduleKey, mod.label);
   const today = useMemo(() => todayISO(clientTimezone), [clientTimezone]);
 
+  // Live preview override del Studio (S3.7).
+  const [override, setOverride] = useState<HomeEventsModule | null>(null);
+  const effective: HomeEventsModule = override ?? mod;
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{
+        label?: string;
+        heroImage?: string;
+        categories?: string[];
+        venues?: string[];
+        features?: string[];
+        events?: EventItem[];
+      }>).detail;
+      if (!detail || !Array.isArray(detail.events)) return;
+      setOverride({
+        kind: 'events',
+        label: detail.label ?? mod.label,
+        heroImage: detail.heroImage ?? mod.heroImage,
+        categories: detail.categories ?? mod.categories,
+        venues: detail.venues ?? mod.venues,
+        features: detail.features ?? mod.features,
+        events: detail.events,
+      });
+    };
+    window.addEventListener('kiosk:events-override', handler);
+    return () => window.removeEventListener('kiosk:events-override', handler);
+  }, [mod.label, mod.heroImage, mod.categories, mod.venues, mod.features]);
+
   const [selectedDate, setSelectedDate] = useState<string>(today);
   const [filter, setFilter] = useState<EventsFilterState>(EMPTY_EVENTS_FILTER);
   const [sort, setSort] = useState<EventsSortOrder>('date');
@@ -54,20 +82,20 @@ export function EventsModule({
 
   // Eventos del día seleccionado → filter → sort.
   const visibleEvents = useMemo<EventItem[]>(() => {
-    const byDay = mod.events.filter((e) => e.date === selectedDate);
+    const byDay = effective.events.filter((e) => e.date === selectedDate);
     return sortEvents(applyEventsFilters(byDay, filter), sort, clientCoords);
-  }, [mod.events, selectedDate, filter, sort, clientCoords]);
+  }, [effective.events, selectedDate, filter, sort, clientCoords]);
 
   // Adapter para el SearchOverlay existente (espera HomeListing[]).
   const searchItems: HomeListing[] = useMemo(
     () =>
-      mod.events.map((e) => ({
+      effective.events.map((e) => ({
         slug: e.slug,
         title: e.title,
         category: moduleKey,
         image: e.image,
       })),
-    [mod.events, moduleKey],
+    [effective.events, moduleKey],
   );
 
   const shiftWeek = useCallback((delta: number) => {
@@ -129,7 +157,7 @@ export function EventsModule({
 
       <EventsFilterOverlay
         open={filterOpen}
-        mod={mod}
+        mod={effective}
         initial={filter}
         onCancel={() => setFilterOpen(false)}
         onApply={(next) => {

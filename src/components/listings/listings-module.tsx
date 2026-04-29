@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { SearchOverlay } from '@/components/home/search-overlay';
@@ -43,6 +43,37 @@ export function ListingsModule({
 }) {
   const moduleLabel = useModuleLabel(moduleKey, mod.label);
 
+  // Live preview override del Studio (S3.7). El Studio dispatcha
+  // kiosk:listings-override con shape { restaurants, thingsToDo, stay };
+  // cada ListingsModule monta una instancia distinta y picka su sub-catálogo
+  // según moduleKey.
+  const [override, setOverride] = useState<HomeModule | null>(null);
+  const effective: HomeModule = override ?? mod;
+
+  useEffect(() => {
+    const catalogKey = MODULE_KEY_TO_LISTINGS_CATALOG[moduleKey];
+    if (!catalogKey) return;
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{
+        restaurants?: ListingsCatalogPatch;
+        thingsToDo?: ListingsCatalogPatch;
+        stay?: ListingsCatalogPatch;
+      }>).detail;
+      const sub = detail?.[catalogKey];
+      if (!sub) return;
+      setOverride({
+        kind: 'listings',
+        label: sub.label ?? mod.label,
+        heroImage: sub.heroImage ?? mod.heroImage,
+        subcategories: sub.subcategories ?? mod.subcategories,
+        features: sub.features ?? mod.features,
+        listings: (sub.listings ?? mod.listings) as Listing[],
+      });
+    };
+    window.addEventListener('kiosk:listings-override', handler);
+    return () => window.removeEventListener('kiosk:listings-override', handler);
+  }, [moduleKey, mod.label, mod.heroImage, mod.subcategories, mod.features, mod.listings]);
+
   const [filter, setFilter] = useState<FilterState>(EMPTY_FILTER);
   const [sort, setSort] = useState<SortOrder>('popularity');
 
@@ -53,8 +84,8 @@ export function ListingsModule({
   const { isFavorited, toggle: toggleFavorite } = useFavorites();
 
   const visible = useMemo(
-    () => sortListings(applyFilters(mod.listings, filter), sort, clientCoords),
-    [mod.listings, filter, sort, clientCoords],
+    () => sortListings(applyFilters(effective.listings, filter), sort, clientCoords),
+    [effective.listings, filter, sort, clientCoords],
   );
 
   const computeDistanceMi = useCallback(
@@ -65,13 +96,13 @@ export function ListingsModule({
   // Mapeo del shape Listing → HomeListing para el SearchOverlay existente.
   const searchListings: HomeListing[] = useMemo(
     () =>
-      mod.listings.map((l) => ({
+      effective.listings.map((l) => ({
         slug: l.slug,
         title: l.title,
         category: moduleKey,
         image: l.image,
       })),
-    [mod.listings, moduleKey],
+    [effective.listings, moduleKey],
   );
 
   const filterActive = !isFilterEmpty(filter);
@@ -122,7 +153,7 @@ export function ListingsModule({
       {/* Overlays dentro del canvas */}
       <FilterOverlay
         open={filterOpen}
-        mod={mod}
+        mod={effective}
         initial={filter}
         onCancel={() => setFilterOpen(false)}
         onApply={(next) => {
@@ -153,3 +184,19 @@ export function ListingsModule({
     </div>
   );
 }
+
+/** Patch shape recibido del Studio dentro de `kiosk:listings-override`. */
+type ListingsCatalogPatch = {
+  label?: string;
+  heroImage?: string;
+  subcategories?: string[];
+  features?: string[];
+  listings?: Listing[];
+};
+
+/** Mapeo del moduleKey de la URL al catálogo del Studio. */
+const MODULE_KEY_TO_LISTINGS_CATALOG: Record<string, 'restaurants' | 'thingsToDo' | 'stay'> = {
+  restaurants: 'restaurants',
+  'things-to-do': 'thingsToDo',
+  stay: 'stay',
+};

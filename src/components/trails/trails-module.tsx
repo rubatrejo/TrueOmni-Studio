@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { SearchOverlay } from '@/components/home/search-overlay';
@@ -10,7 +10,7 @@ import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { ListingsGrid } from '@/components/listings/listings-grid';
 import { ListingsToolbar } from '@/components/listings/listings-toolbar';
 import { SortOverlay } from '@/components/listings/sort-overlay';
-import type { HomeListing, HomeTrailsModule, Listing } from '@/lib/config';
+import type { HomeListing, HomeTrailsModule, Listing, Trail } from '@/lib/config';
 import { useTrailFavorites } from '@/lib/favorites';
 import type { SortOrder } from '@/lib/listings-sort';
 import { haversineMi, SORT_OPTIONS, sortListings } from '@/lib/listings-sort';
@@ -45,7 +45,45 @@ export function TrailsModule({
   header: ReactNode;
 }) {
   const textos = useTextosMap();
-  const moduleLabel = useModuleLabel(moduleKey, mod.label);
+
+  // Live preview override del Studio (S3.7).
+  const [override, setOverride] = useState<HomeTrailsModule | null>(null);
+  const effective: HomeTrailsModule = override ?? mod;
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{
+        label?: string;
+        heroImage?: string;
+        subcategories?: string[];
+        features?: string[];
+        difficulties?: HomeTrailsModule['difficulties'];
+        trailTypes?: HomeTrailsModule['trailTypes'];
+        trails?: Trail[];
+      }>).detail;
+      if (!detail || !Array.isArray(detail.trails)) return;
+      setOverride({
+        kind: 'trails',
+        label: detail.label ?? mod.label,
+        heroImage: detail.heroImage ?? mod.heroImage,
+        subcategories: detail.subcategories ?? mod.subcategories,
+        features: detail.features ?? mod.features,
+        difficulties: detail.difficulties ?? mod.difficulties,
+        trailTypes: detail.trailTypes ?? mod.trailTypes,
+        trails: detail.trails,
+      });
+    };
+    window.addEventListener('kiosk:trails-override', handler);
+    return () => window.removeEventListener('kiosk:trails-override', handler);
+  }, [
+    mod.label,
+    mod.heroImage,
+    mod.subcategories,
+    mod.features,
+    mod.difficulties,
+    mod.trailTypes,
+  ]);
+
+  const moduleLabel = useModuleLabel(moduleKey, effective.label);
   const [filter, setFilter] = useState<TrailFilterState>(EMPTY_TRAILS_FILTER);
   const [sort, setSort] = useState<SortOrder>('popularity');
   const [query, setQuery] = useState('');
@@ -58,11 +96,11 @@ export function TrailsModule({
 
   // Pipeline: filter → search → to-listing → sort.
   const visibleListings = useMemo<Listing[]>(() => {
-    const filtered = applyTrailsFilter(mod.trails, filter);
+    const filtered = applyTrailsFilter(effective.trails, filter);
     const searched = searchTrails(filtered, query);
     const asListings = searched.map(trailToListing);
     return sortListings(asListings, sort, clientCoords);
-  }, [mod.trails, filter, query, sort, clientCoords]);
+  }, [effective.trails, filter, query, sort, clientCoords]);
 
   const computeDistanceMi = useCallback(
     (listing: Listing) => (clientCoords ? haversineMi(clientCoords, listing.coords) : undefined),
@@ -71,13 +109,13 @@ export function TrailsModule({
 
   const searchItems: HomeListing[] = useMemo(
     () =>
-      mod.trails.map((t) => ({
+      effective.trails.map((t) => ({
         slug: t.slug,
         title: t.title,
         category: moduleKey,
         image: t.image,
       })),
-    [mod.trails, moduleKey],
+    [effective.trails, moduleKey],
   );
 
   const filterActive =
@@ -124,9 +162,9 @@ export function TrailsModule({
 
       <TrailsFilterOverlay
         open={filterOpen}
-        featureCatalog={mod.features}
-        difficulties={mod.difficulties}
-        trailTypes={mod.trailTypes}
+        featureCatalog={effective.features}
+        difficulties={effective.difficulties}
+        trailTypes={effective.trailTypes}
         initial={filter}
         title={textos.trails_filters_title ?? 'FILTERS'}
         featuresLabel={textos.trails_filter_features ?? 'Features'}

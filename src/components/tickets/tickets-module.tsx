@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { WeekPicker } from '@/components/events/week-picker';
@@ -50,7 +50,42 @@ export function TicketsModule({
   header: ReactNode;
 }) {
   const textos = useTextosMap();
-  const moduleLabel = useModuleLabel(moduleKey, mod.label);
+
+  // Live preview override del Studio (S3.7). Tickets re-deriva sobre el pool
+  // de events vigente: si llega kiosk:events-override, sustituye allEvents;
+  // si llega kiosk:tickets-override, sustituye el wrapper.
+  const [moduleOverride, setModuleOverride] = useState<HomeTicketsModule | null>(null);
+  const [eventsOverride, setEventsOverride] = useState<readonly EventItem[] | null>(null);
+  const effective: HomeTicketsModule = moduleOverride ?? mod;
+  const effectiveAllEvents: readonly EventItem[] = eventsOverride ?? allEvents;
+
+  useEffect(() => {
+    const onTickets = (e: Event) => {
+      const detail = (e as CustomEvent<Partial<HomeTicketsModule>>).detail;
+      if (!detail) return;
+      setModuleOverride({
+        kind: 'tickets',
+        label: detail.label ?? mod.label,
+        heroImage: detail.heroImage ?? mod.heroImage,
+        categories: detail.categories ?? mod.categories,
+        venues: detail.venues ?? mod.venues,
+        features: detail.features ?? mod.features,
+      });
+    };
+    const onEvents = (e: Event) => {
+      const detail = (e as CustomEvent<{ events?: EventItem[] }>).detail;
+      if (!detail || !Array.isArray(detail.events)) return;
+      setEventsOverride(detail.events);
+    };
+    window.addEventListener('kiosk:tickets-override', onTickets);
+    window.addEventListener('kiosk:events-override', onEvents);
+    return () => {
+      window.removeEventListener('kiosk:tickets-override', onTickets);
+      window.removeEventListener('kiosk:events-override', onEvents);
+    };
+  }, [mod.label, mod.heroImage, mod.categories, mod.venues, mod.features]);
+
+  const moduleLabel = useModuleLabel(moduleKey, effective.label);
   const today = useMemo(() => todayISO(clientTimezone), [clientTimezone]);
 
   const [selectedDate, setSelectedDate] = useState<string>(today);
@@ -62,17 +97,17 @@ export function TicketsModule({
   const [sortOpen, setSortOpen] = useState(false);
 
   const allTickets = useMemo<TicketableEvent[]>(
-    () => filterTicketableEvents(allEvents),
-    [allEvents],
+    () => filterTicketableEvents(effectiveAllEvents),
+    [effectiveAllEvents],
   );
 
   const catalogue = useMemo(
     () => ({
-      categories: mod.categories ?? deriveTicketCategories(allTickets),
-      venues: mod.venues ?? deriveTicketVenues(allTickets),
-      features: mod.features ?? deriveTicketFeatures(allTickets),
+      categories: effective.categories ?? deriveTicketCategories(allTickets),
+      venues: effective.venues ?? deriveTicketVenues(allTickets),
+      features: effective.features ?? deriveTicketFeatures(allTickets),
     }),
-    [mod.categories, mod.venues, mod.features, allTickets],
+    [effective.categories, effective.venues, effective.features, allTickets],
   );
 
   const visibleTickets = useMemo<TicketableEvent[]>(() => {

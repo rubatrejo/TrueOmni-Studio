@@ -14,6 +14,7 @@ import type {
   EventsModule,
   GuestbookConfig,
   I18nBundle,
+  IntegrationsConfig,
   ListingsModule,
   ModulesConfig,
   PassesModule,
@@ -38,6 +39,7 @@ import { FontSelector } from './FontSelector';
 import { GuestbookEditor } from './GuestbookEditor';
 import { I18nEditor } from './I18nEditor';
 import { ImageField } from './ImageField';
+import { IntegrationsEditor } from './IntegrationsEditor';
 import { ListingsEditor } from './ListingsEditor';
 import { HomeDashboardEditor, SystemModulesEditor } from './ModulesEditor';
 import { PassesEditor } from './PassesEditor';
@@ -89,6 +91,8 @@ export function EditorPanel({
   onI18nBundleChange,
   ads,
   onAdsChange,
+  integrations,
+  onIntegrationsChange,
 }: {
   sectionKey: StudioSectionKey;
   branding: Branding;
@@ -131,6 +135,8 @@ export function EditorPanel({
   onI18nBundleChange: (next: I18nBundle) => void;
   ads: AdsModule;
   onAdsChange: (next: AdsModule) => void;
+  integrations: IntegrationsConfig;
+  onIntegrationsChange: (next: IntegrationsConfig) => void;
 }) {
   const section =
     sectionKey === 'versions'
@@ -154,7 +160,8 @@ export function EditorPanel({
     sectionKey === 'passes' ||
     sectionKey === 'trails' ||
     sectionKey === 'i18n' ||
-    sectionKey === 'ads';
+    sectionKey === 'ads' ||
+    sectionKey === 'integrations';
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-white dark:bg-zinc-950">
@@ -257,6 +264,9 @@ export function EditorPanel({
         )}
         {sectionKey === 'ads' && (
           <AdsEditor value={ads} onChange={onAdsChange} />
+        )}
+        {sectionKey === 'integrations' && (
+          <IntegrationsEditor value={integrations} onChange={onIntegrationsChange} />
         )}
         {!isImplemented && <ComingSoon section={section} />}
       </div>

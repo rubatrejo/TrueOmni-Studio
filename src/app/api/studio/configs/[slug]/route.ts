@@ -27,9 +27,11 @@ import {
   SurveySchema,
   TicketsModuleSchema,
   AdsModuleSchema,
+  IntegrationsConfigSchema,
   TrailsModuleSchema,
   defaultAds,
   defaultEvents,
+  defaultIntegrations,
   defaultListings,
   defaultModules,
   defaultPasses,
@@ -99,6 +101,7 @@ function hydrateConfig(cfg: KioskConfig): KioskConfig {
     passes: cfg.passes ?? defaultPasses(),
     trails: cfg.trails ?? defaultTrails(),
     ads: cfg.ads ?? defaultAds(),
+    integrations: cfg.integrations ?? defaultIntegrations(),
   };
 }
 
@@ -125,6 +128,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       passes?: unknown;
       trails?: unknown;
       ads?: unknown;
+      integrations?: unknown;
     };
 
     let next: KioskConfig = cfg;
@@ -392,6 +396,16 @@ export async function PATCH(req: Request, { params }: RouteParams) {
         );
       }
       next = { ...next, ads: parsed.data };
+    }
+    if (body.integrations !== undefined) {
+      const parsed = IntegrationsConfigSchema.safeParse(body.integrations);
+      if (!parsed.success) {
+        return NextResponse.json(
+          { error: 'Invalid integrations', issues: parsed.error.issues },
+          { status: 400 },
+        );
+      }
+      next = { ...next, integrations: parsed.data };
     }
 
     const validated = KioskConfigSchema.safeParse(next);

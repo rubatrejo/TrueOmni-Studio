@@ -1,6 +1,7 @@
 'use client';
 
 import type {
+  AdsModule,
   AiAvatarConfig,
   BillboardConfig,
   Branding,
@@ -9,6 +10,7 @@ import type {
   DealsModuleConfig,
   GuestbookConfig,
   I18nBundle,
+  IntegrationsConfig,
   KioskConfig,
   ModulesConfig,
   PhotoBoothConfig,
@@ -104,6 +106,8 @@ export async function patchConfig(
     brochures?: BrochuresModuleConfig;
     socialWall?: SocialWallConfig;
     guestbook?: GuestbookConfig;
+    ads?: AdsModule;
+    integrations?: IntegrationsConfig;
   },
 ): Promise<KioskConfig> {
   const data = await http<{ config: KioskConfig }>(`/api/studio/configs/${slug}`, {
@@ -159,6 +163,30 @@ export async function translateI18nText(input: {
   key?: string;
 }): Promise<{ translation: string; model: string }> {
   return http<{ translation: string; model: string }>('/api/studio/i18n/translate', {
+    method: 'POST',
+    body: input,
+  });
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Integrations health check                                                */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export type IntegrationCheckInput =
+  | { kind: 'mapbox'; token: string }
+  | { kind: 'api'; baseUrl: string }
+  | { kind: 'analytics'; gaId: string }
+  | {
+      kind: 'openweather';
+      apiKey: string;
+      city: string;
+      units: 'metric' | 'imperial';
+    };
+
+export async function checkIntegration(
+  input: IntegrationCheckInput,
+): Promise<{ ok: boolean; message: string }> {
+  return http<{ ok: boolean; message: string }>('/api/studio/integrations/check', {
     method: 'POST',
     body: input,
   });

@@ -14,6 +14,7 @@ import type {
   EventsModule,
   GuestbookConfig,
   I18nBundle,
+  IntegrationsConfig,
   KioskConfig,
   ListingsModule,
   ModulesConfig,
@@ -37,6 +38,7 @@ import {
   defaultAds,
   defaultEvents,
   defaultI18nBundle,
+  defaultIntegrations,
   defaultListings,
   defaultModules,
   defaultPasses,
@@ -132,6 +134,11 @@ export function Shell({
   const initialAds = initialConfig.ads ?? defaultAds();
   const [savedAds, setSavedAds] = useState<AdsModule>(initialAds);
   const [ads, setAds] = useState<AdsModule>(initialAds);
+
+  const initialIntegrations = initialConfig.integrations ?? defaultIntegrations();
+  const [savedIntegrations, setSavedIntegrations] =
+    useState<IntegrationsConfig>(initialIntegrations);
+  const [integrations, setIntegrations] = useState<IntegrationsConfig>(initialIntegrations);
 
   const [savedI18nBundle, setSavedI18nBundle] = useState<I18nBundle>(defaultI18nBundle());
   const [i18nBundle, setI18nBundle] = useState<I18nBundle>(savedI18nBundle);
@@ -325,6 +332,10 @@ export function Shell({
     () => JSON.stringify(ads) !== JSON.stringify(savedAds),
     [ads, savedAds],
   );
+  const integrationsDirty = useMemo(
+    () => JSON.stringify(integrations) !== JSON.stringify(savedIntegrations),
+    [integrations, savedIntegrations],
+  );
   const i18nDirty = useMemo(
     () => i18nLoaded && JSON.stringify(i18nBundle) !== JSON.stringify(savedI18nBundle),
     [i18nBundle, savedI18nBundle, i18nLoaded],
@@ -346,6 +357,7 @@ export function Shell({
     passesDirty ||
     trailsDirty ||
     adsDirty ||
+    integrationsDirty ||
     i18nDirty;
 
   const effectiveSaveState =
@@ -377,6 +389,7 @@ export function Shell({
         passes?: PassesModule;
         trails?: TrailsModule;
         ads?: AdsModule;
+        integrations?: IntegrationsConfig;
       } = {};
       if (brandingDirty) payload.branding = branding;
       if (modulesDirty) payload.modules = modules;
@@ -394,6 +407,7 @@ export function Shell({
       if (passesDirty) payload.passes = passes;
       if (trailsDirty) payload.trails = trails;
       if (adsDirty) payload.ads = ads;
+      if (integrationsDirty) payload.integrations = integrations;
       const tasks: Array<Promise<unknown>> = [];
       if (Object.keys(payload).length > 0) {
         tasks.push(patchConfig(initialConfig.slug, payload));
@@ -418,6 +432,7 @@ export function Shell({
       if (passesDirty) setSavedPasses(passes);
       if (trailsDirty) setSavedTrails(trails);
       if (adsDirty) setSavedAds(ads);
+      if (integrationsDirty) setSavedIntegrations(integrations);
       if (i18nDirty) setSavedI18nBundle(i18nBundle);
       setSaveState('saved');
       setTimeout(() => setSaveState('idle'), 1500);
@@ -443,6 +458,7 @@ export function Shell({
     passes,
     trails,
     ads,
+    integrations,
     i18nBundle,
     brandingDirty,
     modulesDirty,
@@ -460,6 +476,7 @@ export function Shell({
     passesDirty,
     trailsDirty,
     adsDirty,
+    integrationsDirty,
     i18nDirty,
     isDirty,
     initialConfig.slug,
@@ -482,6 +499,7 @@ export function Shell({
     setPasses(savedPasses);
     setTrails(savedTrails);
     setAds(savedAds);
+    setIntegrations(savedIntegrations);
     setI18nBundle(savedI18nBundle);
     setSaveState('idle');
     setErrorMsg(null);
@@ -503,6 +521,7 @@ export function Shell({
     savedPasses,
     savedTrails,
     savedAds,
+    savedIntegrations,
     savedI18nBundle,
   ]);
 
@@ -596,6 +615,8 @@ export function Shell({
                   onI18nBundleChange={setI18nBundle}
                   ads={ads}
                   onAdsChange={setAds}
+                  integrations={integrations}
+                  onIntegrationsChange={setIntegrations}
                 />
               </motion.div>
             </AnimatePresence>

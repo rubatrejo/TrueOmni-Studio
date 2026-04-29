@@ -1420,6 +1420,52 @@ export function makeBlankTrail(): TrailItem {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
+/*  Integrations (weather, mapbox, analytics, external API)                  */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export const WEATHER_PROVIDERS = ['open-meteo', 'openweather'] as const;
+export type WeatherProvider = (typeof WEATHER_PROVIDERS)[number];
+
+export const WEATHER_UNITS = ['metric', 'imperial'] as const;
+export type WeatherUnits = (typeof WEATHER_UNITS)[number];
+
+export const IntegrationsConfigSchema = z.object({
+  api: z
+    .object({
+      baseUrl: z.string().max(2048).default(''),
+    })
+    .default({ baseUrl: '' }),
+  mapbox: z
+    .object({
+      token: z.string().max(2048).default(''),
+    })
+    .default({ token: '' }),
+  analytics: z
+    .object({
+      gaId: z.string().max(64).default(''),
+    })
+    .default({ gaId: '' }),
+  weather: z
+    .object({
+      provider: z.enum(WEATHER_PROVIDERS).default('open-meteo'),
+      apiKey: z.string().max(256).default(''),
+      city: z.string().max(120).default(''),
+      units: z.enum(WEATHER_UNITS).default('metric'),
+    })
+    .default({ provider: 'open-meteo', apiKey: '', city: '', units: 'metric' }),
+});
+export type IntegrationsConfig = z.infer<typeof IntegrationsConfigSchema>;
+
+export function defaultIntegrations(): IntegrationsConfig {
+  return {
+    api: { baseUrl: '' },
+    mapbox: { token: '' },
+    analytics: { gaId: '' },
+    weather: { provider: 'open-meteo', apiKey: '', city: '', units: 'metric' },
+  };
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
 /*  Ads (advertisements — popups, hero banners, bottom strips)               */
 /* ────────────────────────────────────────────────────────────────────────── */
 
@@ -1545,6 +1591,8 @@ export const KioskConfigSchema = z.object({
   trails: TrailsModuleSchema.optional(),
   /** Sistema de ads (popups, hero banners, bottom strips) por ruta. */
   ads: AdsModuleSchema.optional(),
+  /** Integraciones (weather, mapbox, analytics, external API). */
+  integrations: IntegrationsConfigSchema.optional(),
   /** Versión actual publicada (incrementa en cada publish aprobado). */
   currentVersion: z.number().int().nonnegative().default(0),
 });
@@ -1595,6 +1643,7 @@ export function makeBlankConfig(slug: string, nombre: string): KioskConfig {
     passes: defaultPasses(),
     trails: defaultTrails(),
     ads: defaultAds(),
+    integrations: defaultIntegrations(),
     currentVersion: 0,
   };
 }

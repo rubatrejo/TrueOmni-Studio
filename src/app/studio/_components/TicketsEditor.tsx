@@ -53,16 +53,15 @@ export function TicketsEditor({ value, eventsValue, onChange }: TicketsEditorPro
         </p>
       </header>
 
-      {/* Label */}
-      <div className="space-y-1">
-        <label className="block text-[12px] font-medium text-zinc-300">Module label</label>
+      <label className="block space-y-1">
+        <span className="block text-[12px] font-medium text-zinc-300">Module label</span>
         <input
           type="text"
           value={value.label}
           onChange={(e) => update({ label: e.target.value })}
           className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 focus:border-sky-500/60 focus:outline-none"
         />
-      </div>
+      </label>
 
       <ImageUrlField
         label="Hero image"
@@ -77,10 +76,8 @@ export function TicketsEditor({ value, eventsValue, onChange }: TicketsEditorPro
         helpText="Used in detail pages of paid events that don't define their own image."
       />
 
-      <div className="space-y-1">
-        <label className="block text-[12px] font-medium text-zinc-300">
-          Module copy
-        </label>
+      <label className="block space-y-1">
+        <span className="block text-[12px] font-medium text-zinc-300">Module copy</span>
         <textarea
           rows={3}
           value={value.copy}
@@ -88,7 +85,7 @@ export function TicketsEditor({ value, eventsValue, onChange }: TicketsEditorPro
           placeholder="Optional intro copy shown above the tickets list."
           className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:border-sky-500/60 focus:outline-none"
         />
-      </div>
+      </label>
 
       <TaxonomyEditor
         label="Visible categories"

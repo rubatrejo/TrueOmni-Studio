@@ -231,21 +231,17 @@ function PassActivitiesEditor({
                 value={a.image}
                 onChange={(next) => handleChange(a.slug, { image: next ?? '' })}
               />
-              <div className="space-y-1">
-                <label className="block text-[11.5px] font-medium text-zinc-300">
-                  Description
-                </label>
+              <label className="block space-y-1">
+                <span className="block text-[11.5px] font-medium text-zinc-300">Description</span>
                 <textarea
                   rows={2}
                   value={a.description}
                   onChange={(e) => handleChange(a.slug, { description: e.target.value })}
                   className="w-full rounded-md border border-zinc-800 bg-zinc-950 px-2 py-1 text-[12px] text-zinc-100 focus:border-sky-500/60 focus:outline-none"
                 />
-              </div>
-              <div className="space-y-1">
-                <label className="block text-[11.5px] font-medium text-zinc-300">
-                  Website
-                </label>
+              </label>
+              <label className="block space-y-1">
+                <span className="block text-[11.5px] font-medium text-zinc-300">Website</span>
                 <input
                   type="text"
                   value={a.website}
@@ -253,7 +249,7 @@ function PassActivitiesEditor({
                   placeholder="https://…"
                   className="w-full rounded-md border border-zinc-800 bg-zinc-950 px-2 py-1 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:border-sky-500/60 focus:outline-none"
                 />
-              </div>
+              </label>
             </li>
           ))}
         </ul>

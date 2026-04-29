@@ -283,8 +283,8 @@ function ConsiderationsEditor({
       </h5>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <label className="block text-[12px] font-medium text-zinc-300">Distance</label>
+        <label className="block space-y-1">
+          <span className="block text-[12px] font-medium text-zinc-300">Distance</span>
           <input
             type="text"
             value={considerations.distance}
@@ -292,9 +292,9 @@ function ConsiderationsEditor({
             placeholder="e.g. 5.2 mi"
             className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:border-sky-500/60 focus:outline-none"
           />
-        </div>
-        <div className="space-y-1">
-          <label className="block text-[12px] font-medium text-zinc-300">Difficulty</label>
+        </label>
+        <label className="block space-y-1">
+          <span className="block text-[12px] font-medium text-zinc-300">Difficulty</span>
           <select
             value={considerations.difficulty}
             onChange={(e) => update('difficulty', e.target.value as TrailDifficulty)}
@@ -306,11 +306,9 @@ function ConsiderationsEditor({
               </option>
             ))}
           </select>
-        </div>
-        <div className="space-y-1">
-          <label className="block text-[12px] font-medium text-zinc-300">
-            Duration (optional)
-          </label>
+        </label>
+        <label className="block space-y-1">
+          <span className="block text-[12px] font-medium text-zinc-300">Duration (optional)</span>
           <input
             type="text"
             value={considerations.duration ?? ''}
@@ -318,11 +316,9 @@ function ConsiderationsEditor({
             placeholder="e.g. 2-3 hours"
             className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:border-sky-500/60 focus:outline-none"
           />
-        </div>
-        <div className="space-y-1">
-          <label className="block text-[12px] font-medium text-zinc-300">
-            Elevation gain (optional)
-          </label>
+        </label>
+        <label className="block space-y-1">
+          <span className="block text-[12px] font-medium text-zinc-300">Elevation gain (optional)</span>
           <input
             type="text"
             value={considerations.elevationGain ?? ''}
@@ -330,11 +326,9 @@ function ConsiderationsEditor({
             placeholder="e.g. 1,280 ft"
             className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:border-sky-500/60 focus:outline-none"
           />
-        </div>
-        <div className="space-y-1">
-          <label className="block text-[12px] font-medium text-zinc-300">
-            Trail type (optional)
-          </label>
+        </label>
+        <label className="block space-y-1">
+          <span className="block text-[12px] font-medium text-zinc-300">Trail type (optional)</span>
           <select
             value={considerations.trailType ?? ''}
             onChange={(e) =>
@@ -349,7 +343,7 @@ function ConsiderationsEditor({
               </option>
             ))}
           </select>
-        </div>
+        </label>
         <label className="flex items-center gap-2 text-[12px] text-zinc-200">
           <input
             type="checkbox"
@@ -402,10 +396,10 @@ function TrailMapEditor({
         Trail map (GeoJSON)
       </h5>
 
-      <div className="space-y-1">
-        <label className="block text-[12px] font-medium text-zinc-300">
+      <label className="block space-y-1">
+        <span className="block text-[12px] font-medium text-zinc-300">
           Coordinates ([lng, lat] tuples)
-        </label>
+        </span>
         <textarea
           rows={4}
           value={text}
@@ -423,7 +417,7 @@ function TrailMapEditor({
             {trailMap.geojson.coordinates.length} points.
           </p>
         )}
-      </div>
+      </label>
     </div>
   );
 }

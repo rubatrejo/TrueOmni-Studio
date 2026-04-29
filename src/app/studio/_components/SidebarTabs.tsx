@@ -3,9 +3,11 @@
 import { motion } from 'framer-motion';
 import {
   BookOpen,
+  Calendar,
   Camera,
   ClipboardList,
   Database,
+  Footprints,
   History,
   Languages,
   LayoutGrid,
@@ -19,7 +21,10 @@ import {
   Share2,
   Sparkles,
   Tag,
+  Ticket,
+  TicketCheck,
   ToggleRight,
+  UtensilsCrossed,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -29,9 +34,11 @@ import type { StudioSection, StudioSectionKey } from '../_lib/sections';
 
 const ICONS: Record<string, LucideIcon> = {
   BookOpen,
+  Calendar,
   Camera,
   ClipboardList,
   Database,
+  Footprints,
   History,
   Languages,
   LayoutGrid,
@@ -44,7 +51,10 @@ const ICONS: Record<string, LucideIcon> = {
   Share2,
   Sparkles,
   Tag,
+  Ticket,
+  TicketCheck,
   ToggleRight,
+  UtensilsCrossed,
 };
 
 export function SidebarTabs({

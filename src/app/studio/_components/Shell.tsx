@@ -10,12 +10,17 @@ import type {
   BrochuresModuleConfig,
   ConfigMeta,
   DealsModuleConfig,
+  EventsModule,
   GuestbookConfig,
   KioskConfig,
+  ListingsModule,
   ModulesConfig,
+  PassesModule,
   PhotoBoothConfig,
   SocialWallConfig,
   SurveyConfig,
+  TicketsModule,
+  TrailsModule,
 } from '@/lib/studio/schema';
 import {
   DEFAULT_AI_AVATAR,
@@ -27,7 +32,12 @@ import {
   DEFAULT_SOCIAL_WALL,
   DEFAULT_SURVEY,
   DEFAULT_SYSTEM_MODULES,
+  defaultEvents,
+  defaultListings,
   defaultModules,
+  defaultPasses,
+  defaultTickets,
+  defaultTrails,
 } from '@/lib/studio/schema';
 
 import { patchConfig } from '../_lib/api-client';
@@ -95,6 +105,26 @@ export function Shell({
     useState<GuestbookConfig>(initialGuestbook);
   const [guestbook, setGuestbook] = useState<GuestbookConfig>(initialGuestbook);
 
+  const initialListings = initialConfig.listings ?? defaultListings();
+  const [savedListings, setSavedListings] = useState<ListingsModule>(initialListings);
+  const [listings, setListings] = useState<ListingsModule>(initialListings);
+
+  const initialEvents = initialConfig.events ?? defaultEvents();
+  const [savedEvents, setSavedEvents] = useState<EventsModule>(initialEvents);
+  const [events, setEvents] = useState<EventsModule>(initialEvents);
+
+  const initialTickets = initialConfig.tickets ?? defaultTickets();
+  const [savedTickets, setSavedTickets] = useState<TicketsModule>(initialTickets);
+  const [tickets, setTickets] = useState<TicketsModule>(initialTickets);
+
+  const initialPasses = initialConfig.passes ?? defaultPasses();
+  const [savedPasses, setSavedPasses] = useState<PassesModule>(initialPasses);
+  const [passes, setPasses] = useState<PassesModule>(initialPasses);
+
+  const initialTrails = initialConfig.trails ?? defaultTrails();
+  const [savedTrails, setSavedTrails] = useState<TrailsModule>(initialTrails);
+  const [trails, setTrails] = useState<TrailsModule>(initialTrails);
+
   const {
     iframeRef,
     pushBranding,
@@ -113,6 +143,11 @@ export function Shell({
     openSocialWallPreview,
     pushGuestbook,
     openGuestbookPreview,
+    pushListings,
+    pushEvents,
+    pushTickets,
+    pushPasses,
+    pushTrails,
     onIframeLoad,
   } = usePreviewBridge();
 
@@ -176,6 +211,26 @@ export function Shell({
     pushGuestbook(guestbook);
   }, [guestbook, pushGuestbook]);
 
+  useEffect(() => {
+    pushListings(listings);
+  }, [listings, pushListings]);
+
+  useEffect(() => {
+    pushEvents(events);
+  }, [events, pushEvents]);
+
+  useEffect(() => {
+    pushTickets(tickets);
+  }, [tickets, pushTickets]);
+
+  useEffect(() => {
+    pushPasses(passes);
+  }, [passes, pushPasses]);
+
+  useEffect(() => {
+    pushTrails(trails);
+  }, [trails, pushTrails]);
+
   const brandingDirty = useMemo(
     () => !shallowEqualBranding(branding, savedBranding),
     [branding, savedBranding],
@@ -216,6 +271,26 @@ export function Shell({
     () => JSON.stringify(guestbook) !== JSON.stringify(savedGuestbook),
     [guestbook, savedGuestbook],
   );
+  const listingsDirty = useMemo(
+    () => JSON.stringify(listings) !== JSON.stringify(savedListings),
+    [listings, savedListings],
+  );
+  const eventsDirty = useMemo(
+    () => JSON.stringify(events) !== JSON.stringify(savedEvents),
+    [events, savedEvents],
+  );
+  const ticketsDirty = useMemo(
+    () => JSON.stringify(tickets) !== JSON.stringify(savedTickets),
+    [tickets, savedTickets],
+  );
+  const passesDirty = useMemo(
+    () => JSON.stringify(passes) !== JSON.stringify(savedPasses),
+    [passes, savedPasses],
+  );
+  const trailsDirty = useMemo(
+    () => JSON.stringify(trails) !== JSON.stringify(savedTrails),
+    [trails, savedTrails],
+  );
   const isDirty =
     brandingDirty ||
     modulesDirty ||
@@ -226,7 +301,12 @@ export function Shell({
     photoBoothDirty ||
     brochuresDirty ||
     socialWallDirty ||
-    guestbookDirty;
+    guestbookDirty ||
+    listingsDirty ||
+    eventsDirty ||
+    ticketsDirty ||
+    passesDirty ||
+    trailsDirty;
 
   const effectiveSaveState =
     saveState === 'saving' || saveState === 'error'
@@ -251,6 +331,11 @@ export function Shell({
         brochures?: BrochuresModuleConfig;
         socialWall?: SocialWallConfig;
         guestbook?: GuestbookConfig;
+        listings?: ListingsModule;
+        events?: EventsModule;
+        tickets?: TicketsModule;
+        passes?: PassesModule;
+        trails?: TrailsModule;
       } = {};
       if (brandingDirty) payload.branding = branding;
       if (modulesDirty) payload.modules = modules;
@@ -262,6 +347,11 @@ export function Shell({
       if (brochuresDirty) payload.brochures = brochures;
       if (socialWallDirty) payload.socialWall = socialWall;
       if (guestbookDirty) payload.guestbook = guestbook;
+      if (listingsDirty) payload.listings = listings;
+      if (eventsDirty) payload.events = events;
+      if (ticketsDirty) payload.tickets = tickets;
+      if (passesDirty) payload.passes = passes;
+      if (trailsDirty) payload.trails = trails;
       await patchConfig(initialConfig.slug, payload);
       if (brandingDirty) setSavedBranding(branding);
       if (modulesDirty) setSavedModules(modules);
@@ -273,6 +363,11 @@ export function Shell({
       if (brochuresDirty) setSavedBrochures(brochures);
       if (socialWallDirty) setSavedSocialWall(socialWall);
       if (guestbookDirty) setSavedGuestbook(guestbook);
+      if (listingsDirty) setSavedListings(listings);
+      if (eventsDirty) setSavedEvents(events);
+      if (ticketsDirty) setSavedTickets(tickets);
+      if (passesDirty) setSavedPasses(passes);
+      if (trailsDirty) setSavedTrails(trails);
       setSaveState('saved');
       setTimeout(() => setSaveState('idle'), 1500);
     } catch (err) {
@@ -291,6 +386,11 @@ export function Shell({
     brochures,
     socialWall,
     guestbook,
+    listings,
+    events,
+    tickets,
+    passes,
+    trails,
     brandingDirty,
     modulesDirty,
     billboardDirty,
@@ -301,6 +401,11 @@ export function Shell({
     brochuresDirty,
     socialWallDirty,
     guestbookDirty,
+    listingsDirty,
+    eventsDirty,
+    ticketsDirty,
+    passesDirty,
+    trailsDirty,
     isDirty,
     initialConfig.slug,
   ]);
@@ -316,6 +421,11 @@ export function Shell({
     setBrochures(savedBrochures);
     setSocialWall(savedSocialWall);
     setGuestbook(savedGuestbook);
+    setListings(savedListings);
+    setEvents(savedEvents);
+    setTickets(savedTickets);
+    setPasses(savedPasses);
+    setTrails(savedTrails);
     setSaveState('idle');
     setErrorMsg(null);
     setPreviewKey((k) => k + 1);
@@ -330,6 +440,11 @@ export function Shell({
     savedBrochures,
     savedSocialWall,
     savedGuestbook,
+    savedListings,
+    savedEvents,
+    savedTickets,
+    savedPasses,
+    savedTrails,
   ]);
 
   useEffect(() => {
@@ -406,6 +521,16 @@ export function Shell({
                   guestbook={guestbook}
                   onGuestbookChange={setGuestbook}
                   onGuestbookPreview={openGuestbookPreview}
+                  listings={listings}
+                  onListingsChange={setListings}
+                  events={events}
+                  onEventsChange={setEvents}
+                  tickets={tickets}
+                  onTicketsChange={setTickets}
+                  passes={passes}
+                  onPassesChange={setPasses}
+                  trails={trails}
+                  onTrailsChange={setTrails}
                 />
               </motion.div>
             </AnimatePresence>

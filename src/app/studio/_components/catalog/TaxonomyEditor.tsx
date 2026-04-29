@@ -148,6 +148,7 @@ export function TaxonomyEditor({
                 </div>
                 {isEditing ? (
                   <input
+                    // eslint-disable-next-line jsx-a11y/no-autofocus
                     autoFocus
                     type="text"
                     value={editingValue}

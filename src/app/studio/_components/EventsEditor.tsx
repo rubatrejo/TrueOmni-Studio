@@ -234,8 +234,8 @@ function PricePaidFields({
         </h5>
       </div>
 
-      <div className="space-y-1">
-        <label className="block text-[12px] font-medium text-zinc-300">Price band</label>
+      <label className="block space-y-1">
+        <span className="block text-[12px] font-medium text-zinc-300">Price band</span>
         <select
           value={item.priceBand?.toString() ?? ''}
           onChange={(e) => {
@@ -252,12 +252,10 @@ function PricePaidFields({
           <option value="3">$$$</option>
           <option value="4">$$$$</option>
         </select>
-      </div>
+      </label>
 
-      <div className="space-y-1">
-        <label className="block text-[12px] font-medium text-zinc-300">
-          Price display
-        </label>
+      <label className="block space-y-1">
+        <span className="block text-[12px] font-medium text-zinc-300">Price display</span>
         <input
           type="text"
           value={ticket.priceDisplay}
@@ -265,10 +263,10 @@ function PricePaidFields({
           onChange={(e) => onChange({ ticket: { ...ticket, priceDisplay: e.target.value } })}
           className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:border-sky-500/60 focus:outline-none"
         />
-      </div>
+      </label>
 
-      <div className="space-y-1">
-        <label className="block text-[12px] font-medium text-zinc-300">Purchase URL</label>
+      <label className="block space-y-1">
+        <span className="block text-[12px] font-medium text-zinc-300">Purchase URL</span>
         <input
           type="text"
           value={ticket.purchaseUrl}
@@ -276,7 +274,7 @@ function PricePaidFields({
           onChange={(e) => onChange({ ticket: { ...ticket, purchaseUrl: e.target.value } })}
           className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:border-sky-500/60 focus:outline-none"
         />
-      </div>
+      </label>
     </div>
   );
 }

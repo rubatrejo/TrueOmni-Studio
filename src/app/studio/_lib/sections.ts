@@ -24,7 +24,11 @@ export type StudioSectionKey =
   | 'digital-brochure'
   | 'social-wall'
   | 'guestbook'
-  | 'content'
+  | 'listings'
+  | 'events'
+  | 'tickets'
+  | 'passes'
+  | 'trails'
   | 'i18n'
   | 'ads'
   | 'integrations'
@@ -187,18 +191,62 @@ export const STUDIO_SECTIONS: StudioSection[] = [
     phase: 'S3',
   },
   {
-    key: 'content',
+    key: 'listings',
     num: '12',
-    label: 'Content',
-    title: 'Content & Data',
+    label: 'Listings',
+    title: 'Listings (Restaurants / Things to Do / Stay)',
     description:
-      'Catalogs for listings, events, tickets, passes, deals, trails and brochures with bulk CRUD.',
-    icon: 'Database',
+      'Bulk CRUD for the three listing catalogs: places to eat, things to do and stays.',
+    icon: 'UtensilsCrossed',
+    phase: 'S3',
+  },
+  {
+    key: 'events',
+    num: '13',
+    label: 'Events',
+    title: 'Events',
+    description:
+      'Calendar-based events with date, time, venue, ticket info and filters.',
+    icon: 'Calendar',
+    systemModuleKey: 'events',
+    phase: 'S3',
+  },
+  {
+    key: 'tickets',
+    num: '14',
+    label: 'Tickets',
+    title: 'Tickets',
+    description:
+      'Wrapper derived from paid events. Configure visible categories, hero and copy.',
+    icon: 'Ticket',
+    systemModuleKey: 'tickets',
+    phase: 'S3',
+  },
+  {
+    key: 'passes',
+    num: '15',
+    label: 'Passes',
+    title: 'Passes',
+    description:
+      'Bundles of activities sold via Bandwango. CRUD with cover, tagline and inline activities.',
+    icon: 'TicketCheck',
+    systemModuleKey: 'passes',
+    phase: 'S3',
+  },
+  {
+    key: 'trails',
+    num: '16',
+    label: 'Trails',
+    title: 'Trails',
+    description:
+      'Hiking trails with considerations panel, GeoJSON path and difficulty/type filters.',
+    icon: 'Footprints',
+    systemModuleKey: 'trails',
     phase: 'S3',
   },
   {
     key: 'i18n',
-    num: '13',
+    num: '17',
     label: 'Languages',
     title: 'Languages & Translations',
     description:
@@ -209,7 +257,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
   },
   {
     key: 'ads',
-    num: '14',
+    num: '18',
     label: 'Ads',
     title: 'Advertisements',
     description:
@@ -220,7 +268,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
   },
   {
     key: 'integrations',
-    num: '15',
+    num: '19',
     label: 'Integrations',
     title: 'Integrations & APIs',
     description:
@@ -230,7 +278,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
   },
   {
     key: 'versions',
-    num: '16',
+    num: '20',
     label: 'Versions',
     title: 'Versions & Changelog',
     description:
@@ -240,7 +288,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
   },
   {
     key: 'publish',
-    num: '17',
+    num: '21',
     label: 'Publish',
     title: 'Publish & Approvals',
     description:

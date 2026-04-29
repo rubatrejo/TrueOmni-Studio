@@ -10,11 +10,16 @@ import type {
   Branding,
   BrochuresModuleConfig,
   DealsModuleConfig,
+  EventsModule,
   GuestbookConfig,
+  ListingsModule,
   ModulesConfig,
+  PassesModule,
   PhotoBoothConfig,
   SocialWallConfig,
   SurveyConfig,
+  TicketsModule,
+  TrailsModule,
 } from '@/lib/studio/schema';
 
 import { extractPaletteFromImage } from '../_lib/palette-from-image';
@@ -25,13 +30,18 @@ import { BillboardEditor } from './BillboardEditor';
 import { BrochuresEditor } from './BrochuresEditor';
 import { CustomFontField } from './CustomFontField';
 import { DealsEditor } from './DealsEditor';
+import { EventsEditor } from './EventsEditor';
 import { FontSelector } from './FontSelector';
 import { GuestbookEditor } from './GuestbookEditor';
 import { ImageField } from './ImageField';
+import { ListingsEditor } from './ListingsEditor';
 import { HomeDashboardEditor, SystemModulesEditor } from './ModulesEditor';
+import { PassesEditor } from './PassesEditor';
 import { PhotoBoothEditor } from './PhotoBoothEditor';
 import { SocialWallEditor } from './SocialWallEditor';
 import { SurveyEditor } from './SurveyEditor';
+import { TicketsEditor } from './TicketsEditor';
+import { TrailsEditor } from './TrailsEditor';
 
 export function EditorPanel({
   sectionKey,
@@ -61,6 +71,16 @@ export function EditorPanel({
   guestbook,
   onGuestbookChange,
   onGuestbookPreview,
+  listings,
+  onListingsChange,
+  events,
+  onEventsChange,
+  tickets,
+  onTicketsChange,
+  passes,
+  onPassesChange,
+  trails,
+  onTrailsChange,
 }: {
   sectionKey: StudioSectionKey;
   branding: Branding;
@@ -89,6 +109,16 @@ export function EditorPanel({
   guestbook: GuestbookConfig;
   onGuestbookChange: (next: GuestbookConfig) => void;
   onGuestbookPreview: () => void;
+  listings: ListingsModule;
+  onListingsChange: (next: ListingsModule) => void;
+  events: EventsModule;
+  onEventsChange: (next: EventsModule) => void;
+  tickets: TicketsModule;
+  onTicketsChange: (next: TicketsModule) => void;
+  passes: PassesModule;
+  onPassesChange: (next: PassesModule) => void;
+  trails: TrailsModule;
+  onTrailsChange: (next: TrailsModule) => void;
 }) {
   const section = STUDIO_SECTIONS.find((s) => s.key === sectionKey)!;
   const isImplemented =
@@ -102,7 +132,12 @@ export function EditorPanel({
     sectionKey === 'photo-booth' ||
     sectionKey === 'digital-brochure' ||
     sectionKey === 'social-wall' ||
-    sectionKey === 'guestbook';
+    sectionKey === 'guestbook' ||
+    sectionKey === 'listings' ||
+    sectionKey === 'events' ||
+    sectionKey === 'tickets' ||
+    sectionKey === 'passes' ||
+    sectionKey === 'trails';
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-white dark:bg-zinc-950">
@@ -175,6 +210,25 @@ export function EditorPanel({
             onChange={onGuestbookChange}
             onPreview={onGuestbookPreview}
           />
+        )}
+        {sectionKey === 'listings' && (
+          <ListingsEditor value={listings} onChange={onListingsChange} />
+        )}
+        {sectionKey === 'events' && (
+          <EventsEditor value={events} onChange={onEventsChange} />
+        )}
+        {sectionKey === 'tickets' && (
+          <TicketsEditor
+            value={tickets}
+            eventsValue={events}
+            onChange={onTicketsChange}
+          />
+        )}
+        {sectionKey === 'passes' && (
+          <PassesEditor value={passes} onChange={onPassesChange} />
+        )}
+        {sectionKey === 'trails' && (
+          <TrailsEditor value={trails} onChange={onTrailsChange} />
         )}
         {!isImplemented && <ComingSoon section={section} />}
       </div>

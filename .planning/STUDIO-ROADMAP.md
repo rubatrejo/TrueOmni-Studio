@@ -120,7 +120,8 @@ Sub-fases entregadas:
 ## Fase S7 — Auth + Vercel + GitHub publish (cierre)
 
 - [x] **S7.0 — Local publish skeleton** ✅ cerrada 2026-04-29 — endpoint `POST /api/studio/publish/[slug]?dryRun=1` que escribe el bundle i18n del KV a `clients/<slug>/i18n/<locale>.json`. Mantiene orden de inserción del bundle (no sortea keys → diff git mínimo). `PublishModal` con stats create/update/unchanged + diff por archivo (size before/after) + 2 fases (preview dryRun → confirmación → done). Botón "Publish" en TopBar lo dispara. Verificado E2E: 6 archivos detectados, 1 update real (key reordenada en smokes anteriores), publish real escribe correctamente, file revertido tras smoke.
-- [ ] **S7.1 — Publish del config.json completo** (módulos editables del Studio + reconciliación con secciones legacy `features.advertisements.ads`, `features.integraciones`, etc).
+- [x] **S7.1 narrow — Bootstrap defensivo de ads/integrations desde filesystem** ✅ cerrada 2026-04-29 — `hydrateConfig` ahora es async y, si KV no tiene `cfg.ads` o `cfg.integrations` (cliente legacy pre-S5/S6), lee `clients/<slug>/config.json` y bootstrappea desde `features.advertisements.ads` y `integraciones` (mapeando los nombres legacy en español a los del Studio en inglés). Mismo patrón que el bootstrap de i18n. Validación zod defensiva (returns null si shape no encaja → cae a defaults).
+- [ ] **S7.1 wide — Publish del config.json completo** (escribir secciones del Studio al filesystem `config.json` + `tokens.css`. Requiere mapping shape Studio↔filesystem para branding, ads, integrations, modules, etc).
 - [ ] **S7.2 — GitHub PR-publish con approval gate** (envuelve S7.0+S7.1 en commit + PR via GitHub API).
 - [ ] **S7.3 — NextAuth + admin gate** por `ruben@trueomni.com`.
 - [ ] **S7.4 — Vercel deploy** (preview por PR + production por merge).

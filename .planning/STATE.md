@@ -1833,6 +1833,47 @@ Para cada uno se entregó:
 
 ---
 
+### Sesión 2026-04-29 (cont. 7) — S7.1 narrow — Bootstrap defensivo ads/integrations desde filesystem
+
+**Hecho:**
+
+- **Bootstrap defensivo en `hydrateConfig`** del endpoint `/api/studio/configs/[slug]`:
+  - La función ahora es async y recibe el slug como argumento.
+  - Si `cfg.ads === undefined` o `cfg.integrations === undefined`, lee `clients/<slug>/config.json` del filesystem.
+  - `bootstrapAdsFromFs(fsConfig)` mapea `features.advertisements.ads` → Studio `AdsModule` (validado con `AdsModuleSchema.safeParse`).
+  - `bootstrapIntegrationsFromFs(fsConfig)` mapea `integraciones` legacy en español → Studio `IntegrationsConfig` en inglés:
+    - `api_base_url` → `api.baseUrl`
+    - `analytics_id` → `analytics.gaId`
+    - `mapbox_token` → `mapbox.token`
+    - `weather` se inicializa con defaults (no existe en legacy).
+  - Si zod parse falla → fallback a `defaultAds()` / `defaultIntegrations()`.
+
+**Verificado:**
+
+- `pnpm typecheck` limpio.
+- E2E con cliente `default` (que ya tiene ads/integrations en KV de smokes anteriores): GET 200, no se dispara el bootstrap (cfg.ads existe). Confirmado que la nueva lógica no rompe el path normal.
+- El path real del bootstrap NO se puede smokear sin manipular el KV directamente (cliente legacy con cfg pero sin ads/integrations). La lógica está aislada y typecheck garantiza el flow. Se activará en clientes futuros que vienen de versiones pre-S5/S6.
+
+**Pendiente / siguiente:**
+
+- **S7.1 wide — Publish del config.json completo**: escribir desde Studio al filesystem `clients/<slug>/config.json` + posiblemente `tokens.css`. Requiere mapping shape Studio↔filesystem para `branding` (Studio: primary/secondary/tertiary/fonts/logos; filesystem: logo.default + favicon en JSON, colors en `tokens.css`), `ads` → `features.advertisements.ads`, `integrations` → `integraciones` (con nombres legacy). Es trabajo de UX + arquitectura, sesión dedicada.
+- **S7.2 — GitHub PR-publish**: necesita GitHub PAT en `.env.local`.
+- **S7.3 — NextAuth + admin gate**: necesita OAuth app.
+- **S7.4 — Vercel deploy**: necesita proyecto Vercel.
+- **Build SSG `/404`**: gated por `pnpm build`.
+
+**Decisiones:**
+
+- **Bootstrap solo de ads + integrations** (no de otros módulos): son las dos secciones donde el shape filesystem legacy NO encaja con el Studio shape. El resto (events, listings, photoBooth, etc.) son nuevas en S3+ y nunca tuvieron equivalente legacy en `config.json`.
+- **`hydrateConfig` async** con slug parameter: necesario para hacer fs.readFile. Cambio quirúrgico — solo el GET handler lo llama.
+- **Fallback a defaults si parse falla**: una entrada `integraciones` corrupta no rompe el GET; solo no aporta data al Studio. Robusto.
+- **NO smoke del path bootstrap real**: requeriría manipular el KV directamente (eliminar ads/integrations de un cfg existente). El typecheck + lógica simple bastan; el escenario real (cliente que viene de filesystem y nunca tocó Studio) se activa en producción cuando alguien abra ese cliente por primera vez.
+- **No escribimos a filesystem aún en este step**: solo lectura para hidratar Studio. La escritura (publish wide) es S7.1 wide, sesión dedicada.
+
+**Fase:** Studio S7.1 narrow cerrada (2026-04-29). Siguiente arranque: **S7.1 wide config publish** (sesión dedicada con mapping work) o S7.2/3/4 (necesitan infra externa).
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

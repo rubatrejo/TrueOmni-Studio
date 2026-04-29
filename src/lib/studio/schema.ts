@@ -857,6 +857,427 @@ export function makeBlankPinOption(): GuestbookPinOption {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
+/*  Catalog primitives compartidos                                           */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+const ItemSlugSchema = z
+  .string()
+  .min(1)
+  .max(96)
+  .regex(/^[a-z0-9][a-z0-9-]*$/, {
+    message: 'item slug must be lowercase letters, digits and hyphens.',
+  });
+
+const DirectionStepSchema = z.object({
+  icon: z.string().max(32),
+  distance: z.string().max(64),
+  instruction: z.string().max(280),
+});
+
+const PriceRangeSchema = z.union([
+  z.literal(1),
+  z.literal(2),
+  z.literal(3),
+  z.literal(4),
+]);
+
+/** Ensure all `slug` values inside an array are unique. */
+function uniqueBySlug<T extends { slug: string }>(arr: T[], ctx: z.RefinementCtx) {
+  const seen = new Set<string>();
+  arr.forEach((item, idx) => {
+    if (seen.has(item.slug)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [idx, 'slug'],
+        message: `duplicate slug "${item.slug}" — must be unique within the catalog.`,
+      });
+    }
+    seen.add(item.slug);
+  });
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Listings (Restaurants / Things to Do / Stay)                             */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+const DayOpenSchema = z.tuple([z.number(), z.number()]);
+
+export const ListingItemSchema = z.object({
+  slug: ItemSlugSchema,
+  title: z.string().min(1).max(160),
+  subcategory: z.string().max(64).default(''),
+  image: z.string().default(''),
+  hours: z.string().max(64).default(''),
+  openHours: z
+    .object({
+      mon: DayOpenSchema,
+      tue: DayOpenSchema,
+      wed: DayOpenSchema,
+      thu: DayOpenSchema,
+      fri: DayOpenSchema,
+      sat: DayOpenSchema,
+      sun: DayOpenSchema,
+    })
+    .optional(),
+  priceRange: PriceRangeSchema.default(2),
+  features: z.array(z.string().max(64)).default([]),
+  popularity: z.number().min(0).max(100).default(50),
+  address: z.string().max(280).default(''),
+  phone: z.string().max(64).default(''),
+  coords: CoordsSchema.default({ lat: 0, lng: 0 }),
+  website: z.string().max(2048).default(''),
+  reserveUrl: z.string().max(2048).optional(),
+  threshold360Url: z.string().max(2048).optional(),
+  description: z.string().max(4000).default(''),
+  directions: z.array(DirectionStepSchema).default([]),
+});
+
+export type ListingItem = z.infer<typeof ListingItemSchema>;
+
+export const ListingsCatalogSchema = z.object({
+  label: z.string().min(1).max(64),
+  heroImage: z.string().default(''),
+  subcategories: z.array(z.string().max(64)).default([]),
+  features: z.array(z.string().max(64)).default([]),
+  listings: z.array(ListingItemSchema).superRefine(uniqueBySlug).default([]),
+});
+
+export type ListingsCatalog = z.infer<typeof ListingsCatalogSchema>;
+
+export const ListingsModuleSchema = z.object({
+  restaurants: ListingsCatalogSchema,
+  thingsToDo: ListingsCatalogSchema,
+  stay: ListingsCatalogSchema,
+});
+
+export type ListingsModule = z.infer<typeof ListingsModuleSchema>;
+
+export function defaultListings(): ListingsModule {
+  return {
+    restaurants: {
+      label: 'Restaurants',
+      heroImage: '',
+      subcategories: [],
+      features: [],
+      listings: [],
+    },
+    thingsToDo: {
+      label: 'Things to Do',
+      heroImage: '',
+      subcategories: [],
+      features: [],
+      listings: [],
+    },
+    stay: {
+      label: 'Stay',
+      heroImage: '',
+      subcategories: [],
+      features: [],
+      listings: [],
+    },
+  };
+}
+
+export function makeBlankListing(): ListingItem {
+  return {
+    slug: `listing-${Date.now()}`,
+    title: 'Untitled',
+    subcategory: '',
+    image: '',
+    hours: '',
+    priceRange: 2,
+    features: [],
+    popularity: 50,
+    address: '',
+    phone: '',
+    coords: { lat: 0, lng: 0 },
+    website: '',
+    description: '',
+    directions: [],
+  };
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Events                                                                   */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+const DateIsoSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'date must be YYYY-MM-DD.' });
+
+const TimeHmSchema = z
+  .string()
+  .regex(/^\d{2}:\d{2}$/, { message: 'time must be HH:MM (24h).' });
+
+const PriceBandSchema = z.union([
+  z.literal(1),
+  z.literal(2),
+  z.literal(3),
+  z.literal(4),
+]);
+
+export const EventTicketSchema = z.object({
+  priceDisplay: z.string().min(1).max(64),
+  purchaseUrl: z.string().max(2048),
+});
+
+export const EventItemSchema = z.object({
+  slug: ItemSlugSchema,
+  title: z.string().min(1).max(160),
+  category: z.string().max(64).default(''),
+  image: z.string().default(''),
+  date: DateIsoSchema,
+  startTime: TimeHmSchema,
+  endTime: TimeHmSchema,
+  venue: z.string().max(120).default(''),
+  priceMode: z.enum(['free', 'paid']).default('free'),
+  priceBand: PriceBandSchema.optional(),
+  features: z.array(z.string().max(64)).default([]),
+  popularity: z.number().min(0).max(100).default(50),
+  address: z.string().max(280).default(''),
+  phone: z.string().max(64).default(''),
+  coords: CoordsSchema.default({ lat: 0, lng: 0 }),
+  website: z.string().max(2048).default(''),
+  ticketsUrl: z.string().max(2048).optional(),
+  description: z.string().max(4000).default(''),
+  directions: z.array(DirectionStepSchema).default([]),
+  ticket: EventTicketSchema.optional(),
+});
+
+export type EventItem = z.infer<typeof EventItemSchema>;
+
+export const EventsModuleSchema = z.object({
+  label: z.string().min(1).max(64),
+  heroImage: z.string().default(''),
+  categories: z.array(z.string().max(64)).default([]),
+  venues: z.array(z.string().max(120)).default([]),
+  features: z.array(z.string().max(64)).default([]),
+  events: z.array(EventItemSchema).superRefine(uniqueBySlug).default([]),
+});
+
+export type EventsModule = z.infer<typeof EventsModuleSchema>;
+
+export function defaultEvents(): EventsModule {
+  return {
+    label: 'Events',
+    heroImage: '',
+    categories: [],
+    venues: [],
+    features: [],
+    events: [],
+  };
+}
+
+export function makeBlankEvent(): EventItem {
+  const today = new Date();
+  const iso = today.toISOString().slice(0, 10);
+  return {
+    slug: `event-${Date.now()}`,
+    title: 'Untitled event',
+    category: '',
+    image: '',
+    date: iso,
+    startTime: '18:00',
+    endTime: '20:00',
+    venue: '',
+    priceMode: 'free',
+    features: [],
+    popularity: 50,
+    address: '',
+    phone: '',
+    coords: { lat: 0, lng: 0 },
+    website: '',
+    description: '',
+    directions: [],
+  };
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Tickets (wrapper derivado de events)                                     */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export const TicketsModuleSchema = z.object({
+  label: z.string().min(1).max(64),
+  heroImage: z.string().default(''),
+  /** Subset of `events.categories` that should appear as ticket tabs. */
+  categories: z.array(z.string().max(64)).default([]),
+  venues: z.array(z.string().max(120)).default([]),
+  features: z.array(z.string().max(64)).default([]),
+  fallbackHero: z.string().default(''),
+  copy: z.string().max(2000).default(''),
+});
+
+export type TicketsModule = z.infer<typeof TicketsModuleSchema>;
+
+export function defaultTickets(): TicketsModule {
+  return {
+    label: 'Tickets',
+    heroImage: '',
+    categories: [],
+    venues: [],
+    features: [],
+    fallbackHero: '',
+    copy: '',
+  };
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Passes                                                                   */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export const PassActivitySchema = z.object({
+  slug: ItemSlugSchema,
+  title: z.string().min(1).max(160),
+  image: z.string().default(''),
+  description: z.string().max(2000).default(''),
+  website: z.string().max(2048).default(''),
+});
+
+export type PassActivity = z.infer<typeof PassActivitySchema>;
+
+export const PassItemSchema = z.object({
+  slug: ItemSlugSchema,
+  title: z.string().min(1).max(160),
+  cover: z.string().default(''),
+  bandwangoUrl: z.string().max(2048).default(''),
+  tagline: z.string().max(280).optional(),
+  activities: z.array(PassActivitySchema).superRefine(uniqueBySlug).default([]),
+});
+
+export type PassItem = z.infer<typeof PassItemSchema>;
+
+export const PassesModuleSchema = z.object({
+  label: z.string().min(1).max(64),
+  heroImage: z.string().default(''),
+  passes: z.array(PassItemSchema).superRefine(uniqueBySlug).default([]),
+  qrLogo: z.string().optional(),
+});
+
+export type PassesModule = z.infer<typeof PassesModuleSchema>;
+
+export function defaultPasses(): PassesModule {
+  return {
+    label: 'Passes',
+    heroImage: '',
+    passes: [],
+  };
+}
+
+export function makeBlankPass(): PassItem {
+  return {
+    slug: `pass-${Date.now()}`,
+    title: 'Untitled pass',
+    cover: '',
+    bandwangoUrl: '',
+    activities: [],
+  };
+}
+
+export function makeBlankPassActivity(): PassActivity {
+  return {
+    slug: `activity-${Date.now()}`,
+    title: 'New activity',
+    image: '',
+    description: '',
+    website: '',
+  };
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Trails                                                                   */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export const TrailDifficultySchema = z.enum(['Easy', 'Moderate', 'Hard']);
+export type TrailDifficulty = z.infer<typeof TrailDifficultySchema>;
+
+export const TrailTypeSchema = z.enum(['Loop', 'Out & Back', 'Point to Point']);
+export type TrailType = z.infer<typeof TrailTypeSchema>;
+
+export const TrailConsiderationsSchema = z.object({
+  distance: z.string().max(64).default(''),
+  difficulty: TrailDifficultySchema.default('Easy'),
+  duration: z.string().max(64).optional(),
+  elevationGain: z.string().max(64).optional(),
+  trailType: TrailTypeSchema.optional(),
+  dogFriendly: z.boolean().optional(),
+});
+
+export const TrailMapSchema = z.object({
+  geojson: z.object({
+    type: z.literal('LineString'),
+    coordinates: z.array(z.tuple([z.number(), z.number()])),
+  }),
+  defaultCenter: CoordsSchema.optional(),
+  defaultZoom: z.number().min(0).max(22).optional(),
+});
+
+export const TrailItemSchema = z.object({
+  slug: ItemSlugSchema,
+  title: z.string().min(1).max(160),
+  subcategory: z.string().max(64).default(''),
+  image: z.string().default(''),
+  hours: z.string().max(64).default(''),
+  features: z.array(z.string().max(64)).default([]),
+  popularity: z.number().min(0).max(100).default(50),
+  address: z.string().max(280).default(''),
+  phone: z.string().max(64).default(''),
+  coords: CoordsSchema.default({ lat: 0, lng: 0 }),
+  website: z.string().max(2048).default(''),
+  description: z.string().max(4000).default(''),
+  directions: z.array(DirectionStepSchema).default([]),
+  considerations: TrailConsiderationsSchema,
+  trailMap: TrailMapSchema,
+});
+
+export type TrailItem = z.infer<typeof TrailItemSchema>;
+
+export const TrailsModuleSchema = z.object({
+  label: z.string().min(1).max(64),
+  heroImage: z.string().default(''),
+  subcategories: z.array(z.string().max(64)).default([]),
+  features: z.array(z.string().max(64)).default([]),
+  difficulties: z.array(TrailDifficultySchema).default(['Easy', 'Moderate', 'Hard']),
+  trailTypes: z
+    .array(TrailTypeSchema)
+    .default(['Loop', 'Out & Back', 'Point to Point']),
+  trails: z.array(TrailItemSchema).superRefine(uniqueBySlug).default([]),
+});
+
+export type TrailsModule = z.infer<typeof TrailsModuleSchema>;
+
+export function defaultTrails(): TrailsModule {
+  return {
+    label: 'Trails',
+    heroImage: '',
+    subcategories: [],
+    features: [],
+    difficulties: ['Easy', 'Moderate', 'Hard'],
+    trailTypes: ['Loop', 'Out & Back', 'Point to Point'],
+    trails: [],
+  };
+}
+
+export function makeBlankTrail(): TrailItem {
+  return {
+    slug: `trail-${Date.now()}`,
+    title: 'Untitled trail',
+    subcategory: '',
+    image: '',
+    hours: '',
+    features: [],
+    popularity: 50,
+    address: '',
+    phone: '',
+    coords: { lat: 0, lng: 0 },
+    website: '',
+    description: '',
+    directions: [],
+    considerations: { distance: '', difficulty: 'Easy' },
+    trailMap: { geojson: { type: 'LineString', coordinates: [] } },
+  };
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
 /*  KioskConfig                                                              */
 /* ────────────────────────────────────────────────────────────────────────── */
 
@@ -890,6 +1311,16 @@ export const KioskConfigSchema = z.object({
   socialWall: SocialWallSchema.optional(),
   /** Módulo Guestbook — pin catalog, countries, seed pins. */
   guestbook: GuestbookSchema.optional(),
+  /** Módulos Listings (Restaurants / Things to Do / Stay) — catálogo completo. */
+  listings: ListingsModuleSchema.optional(),
+  /** Módulo Events — categories, venues, lista de eventos. */
+  events: EventsModuleSchema.optional(),
+  /** Módulo Tickets — wrapper derivado de events ticketables. */
+  tickets: TicketsModuleSchema.optional(),
+  /** Módulo Passes — lista de passes con activities. */
+  passes: PassesModuleSchema.optional(),
+  /** Módulo Trails — subcategorías, difficulties, trailTypes, trails. */
+  trails: TrailsModuleSchema.optional(),
   /** Versión actual publicada (incrementa en cada publish aprobado). */
   currentVersion: z.number().int().nonnegative().default(0),
 });
@@ -934,6 +1365,11 @@ export function makeBlankConfig(slug: string, nombre: string): KioskConfig {
     brochures: structuredClone(DEFAULT_BROCHURES),
     socialWall: structuredClone(DEFAULT_SOCIAL_WALL),
     guestbook: structuredClone(DEFAULT_GUESTBOOK),
+    listings: defaultListings(),
+    events: defaultEvents(),
+    tickets: defaultTickets(),
+    passes: defaultPasses(),
+    trails: defaultTrails(),
     currentVersion: 0,
   };
 }

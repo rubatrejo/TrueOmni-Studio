@@ -114,7 +114,7 @@ function FieldRenderer<T>({
             value={value}
             placeholder={field.placeholder}
             onChange={(e) => onChange({ [field.key]: e.target.value } as Partial<T>)}
-            className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:border-sky-500/60 focus:outline-none"
+            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100 dark:placeholder:text-zinc-600"
           />
         </Labeled>
       );
@@ -128,7 +128,7 @@ function FieldRenderer<T>({
             value={value}
             rows={field.rows ?? 3}
             onChange={(e) => onChange({ [field.key]: e.target.value } as Partial<T>)}
-            className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:border-sky-500/60 focus:outline-none"
+            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100 dark:placeholder:text-zinc-600"
           />
         </Labeled>
       );
@@ -148,7 +148,7 @@ function FieldRenderer<T>({
               const next = parseFloat(e.target.value);
               onChange({ [field.key]: Number.isFinite(next) ? next : 0 } as Partial<T>);
             }}
-            className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 focus:border-sky-500/60 focus:outline-none"
+            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100"
           />
         </Labeled>
       );
@@ -187,7 +187,7 @@ function FieldRenderer<T>({
           <select
             value={value}
             onChange={(e) => onChange({ [field.key]: e.target.value } as Partial<T>)}
-            className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 focus:border-sky-500/60 focus:outline-none"
+            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100"
           >
             <option value="">—</option>
             {field.options.map((opt) => (
@@ -226,7 +226,7 @@ function FieldRenderer<T>({
                       className={`rounded-full border px-2 py-0.5 text-[11px] transition ${
                         active
                           ? 'border-sky-500/40 bg-sky-500/15 text-sky-300'
-                          : 'border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                          : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-800 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-400 dark:hover:border-zinc-700 dark:hover:text-zinc-200'
                       }`}
                     >
                       {opt}
@@ -244,7 +244,7 @@ function FieldRenderer<T>({
           <select
             value={value}
             onChange={(e) => onChange({ [field.key]: e.target.value } as Partial<T>)}
-            className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 focus:border-sky-500/60 focus:outline-none"
+            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100"
           >
             <option value="">—</option>
             {field.options.map((opt) => (
@@ -260,12 +260,12 @@ function FieldRenderer<T>({
     case 'checkbox': {
       const value = Boolean(raw);
       return (
-        <label className="flex items-center gap-2 text-[12px] text-zinc-200">
+        <label className="flex items-center gap-2 text-[12px] text-zinc-700 dark:text-zinc-200">
           <input
             type="checkbox"
             checked={value}
             onChange={(e) => onChange({ [field.key]: e.target.checked } as Partial<T>)}
-            className="h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-900 text-sky-500 focus:ring-sky-500/40"
+            className="h-3.5 w-3.5 rounded border-zinc-300 bg-white text-sky-500 focus:ring-sky-500/40 dark:border-zinc-700 dark:bg-zinc-900"
           />
           <span>{field.label}</span>
           {field.helpText ? (
@@ -288,7 +288,7 @@ function Labeled({
 }) {
   return (
     <div className="space-y-1">
-      <label className="block text-[12px] font-medium text-zinc-300">{label}</label>
+      <label className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">{label}</label>
       {children}
       {helpText ? <p className="text-[11px] text-zinc-500">{helpText}</p> : null}
     </div>

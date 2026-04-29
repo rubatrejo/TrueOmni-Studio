@@ -57,10 +57,12 @@ export function ImageUrlField({
 
   return (
     <div className="space-y-1.5">
-      <label className="block text-[12px] font-medium text-zinc-300">{label}</label>
+      <label className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">{label}</label>
       <div
-        className={`flex items-stretch gap-2 rounded-md border bg-zinc-900/40 p-1.5 transition ${
-          hover ? 'border-sky-500/60 bg-sky-500/5' : 'border-zinc-800'
+        className={`flex items-stretch gap-2 rounded-md border bg-zinc-50 p-1.5 transition dark:bg-zinc-900/40 ${
+          hover
+            ? 'border-sky-500/60 bg-sky-500/5 dark:bg-sky-500/5'
+            : 'border-zinc-200 dark:border-zinc-800'
         }`}
         onDragOver={(e) => {
           e.preventDefault();
@@ -79,7 +81,7 @@ export function ImageUrlField({
           onClick={() => inputRef.current?.click()}
           disabled={busy}
           aria-label={value ? `Change ${label}` : `Upload ${label}`}
-          className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-md bg-zinc-950 ring-1 ring-zinc-800 transition hover:ring-sky-500/40"
+          className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-md bg-white ring-1 ring-zinc-200 transition hover:ring-sky-500/40 dark:bg-zinc-950 dark:ring-zinc-800"
         >
           {value ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -112,7 +114,7 @@ export function ImageUrlField({
           value={value ?? ''}
           onChange={(ev) => onChange(ev.target.value || undefined)}
           placeholder="https://… or /assets/…"
-          className="flex-1 bg-transparent px-2 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:outline-none"
+          className="flex-1 bg-transparent px-2 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:text-zinc-100 dark:placeholder:text-zinc-600"
         />
 
         <button

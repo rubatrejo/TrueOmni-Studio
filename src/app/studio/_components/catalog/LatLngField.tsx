@@ -32,7 +32,7 @@ export function LatLngField({ label = 'Coordinates', value, onChange }: LatLngFi
 
   return (
     <div className="space-y-1.5">
-      <label className="block text-[12px] font-medium text-zinc-300">{label}</label>
+      <label className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">{label}</label>
       <div className="flex items-center gap-2">
         <input
           type="number"
@@ -43,7 +43,7 @@ export function LatLngField({ label = 'Coordinates', value, onChange }: LatLngFi
           onChange={(e) => setLat(parseFloat(e.target.value) || 0)}
           aria-label="Latitude"
           placeholder="Latitude"
-          className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:border-sky-500/60 focus:outline-none"
+          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100 dark:placeholder:text-zinc-600"
         />
         <input
           type="number"
@@ -54,13 +54,13 @@ export function LatLngField({ label = 'Coordinates', value, onChange }: LatLngFi
           onChange={(e) => setLng(parseFloat(e.target.value) || 0)}
           aria-label="Longitude"
           placeholder="Longitude"
-          className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:border-sky-500/60 focus:outline-none"
+          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100 dark:placeholder:text-zinc-600"
         />
         <button
           type="button"
           onClick={openInMaps}
           disabled={!valid}
-          className="flex shrink-0 items-center gap-1 rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[11px] text-zinc-300 transition hover:border-sky-500/40 hover:text-sky-300 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex shrink-0 items-center gap-1 rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[11px] text-zinc-700 transition hover:border-sky-500/40 hover:text-sky-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-300 dark:hover:text-sky-300"
           title="Open in Google Maps to verify"
         >
           <ExternalLink className="h-3 w-3" />

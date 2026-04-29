@@ -106,9 +106,9 @@ export function TaxonomyEditor({
   };
 
   return (
-    <div className="space-y-2 rounded-md border border-zinc-800 bg-zinc-900/30 p-3">
+    <div className="space-y-2 rounded-md border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900/30">
       <div className="flex items-center justify-between">
-        <h4 className="text-[12px] font-semibold uppercase tracking-wider text-zinc-300">
+        <h4 className="text-[12px] font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
           {label}
         </h4>
         <span className="text-[10.5px] text-zinc-500">{items.length}</span>
@@ -124,7 +124,7 @@ export function TaxonomyEditor({
             return (
               <li
                 key={`${item}-${idx}`}
-                className="group flex items-center gap-1 rounded-md border border-zinc-800/60 bg-zinc-950/40 px-2 py-1"
+                className="group flex items-center gap-1 rounded-md border border-zinc-200 bg-white px-2 py-1 dark:border-zinc-800/60 dark:bg-zinc-950/40"
               >
                 <div className="flex flex-col">
                   <button
@@ -158,13 +158,13 @@ export function TaxonomyEditor({
                       if (e.key === 'Enter') commitEdit();
                       if (e.key === 'Escape') setEditingIdx(null);
                     }}
-                    className="flex-1 rounded border border-sky-500/40 bg-zinc-900 px-1.5 py-0.5 text-[12px] text-zinc-100 focus:outline-none"
+                    className="flex-1 rounded border border-sky-500/40 bg-white px-1.5 py-0.5 text-[12px] text-zinc-900 focus:outline-none dark:bg-zinc-900 dark:text-zinc-100"
                   />
                 ) : (
                   <button
                     type="button"
                     onClick={() => startEdit(idx)}
-                    className="flex-1 truncate text-left text-[12px] text-zinc-200 hover:text-sky-300"
+                    className="flex-1 truncate text-left text-[12px] text-zinc-700 hover:text-sky-600 dark:text-zinc-200 dark:hover:text-sky-300"
                   >
                     {item}
                   </button>
@@ -200,7 +200,7 @@ export function TaxonomyEditor({
             onChange={(e) => {
               if (e.target.value) addItem(e.target.value);
             }}
-            className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-200 focus:border-sky-500/60 focus:outline-none"
+            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-700 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-200"
           >
             <option value="">+ Add from available…</option>
             {remainingOptions.map((opt) => (
@@ -223,7 +223,7 @@ export function TaxonomyEditor({
               }
             }}
             placeholder="New item…"
-            className="flex-1 rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:border-sky-500/60 focus:outline-none"
+            className="flex-1 rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100 dark:placeholder:text-zinc-600"
           />
           <button
             type="button"
@@ -261,7 +261,7 @@ export function TaxonomyEditor({
             <button
               type="button"
               onClick={() => setConfirmDelete(null)}
-              className="rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1 text-[11px] text-zinc-200 transition hover:bg-zinc-800"
+              className="rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[11px] text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
             >
               Cancel
             </button>

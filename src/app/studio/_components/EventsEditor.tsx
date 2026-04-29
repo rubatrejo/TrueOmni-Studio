@@ -9,6 +9,7 @@ import {
 } from '@/lib/studio/schema';
 
 import { CatalogItemForm, type FieldConfig } from './catalog/CatalogItemForm';
+import { CatalogItemPanel } from './catalog/CatalogItemPanel';
 import { CatalogList } from './catalog/CatalogList';
 import { CatalogToolbar } from './catalog/CatalogToolbar';
 import { ImageUrlField } from './catalog/ImageUrlField';
@@ -19,13 +20,16 @@ interface EventsEditorProps {
   onChange: (next: EventsModule) => void;
 }
 
-/**
- * Editor del módulo Events. Hero + 2 taxonomies (categories, venues) +
- * lista de eventos con form completo (date, startTime, endTime, etc.).
- */
 export function EventsEditor({ value, onChange }: EventsEditorProps) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
+  const [editingSlug, setEditingSlug] = useState<string | null>(null);
+
+  const editingItem = useMemo(
+    () =>
+      editingSlug ? value.events.find((e) => e.slug === editingSlug) ?? null : null,
+    [editingSlug, value.events],
+  );
 
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -45,6 +49,7 @@ export function EventsEditor({ value, onChange }: EventsEditorProps) {
   const handleAdd = () => {
     const item = makeBlankEvent();
     update({ events: [item, ...value.events] });
+    setEditingSlug(item.slug);
   };
 
   const handleReorder = (next: EventItem[]) => {
@@ -58,8 +63,10 @@ export function EventsEditor({ value, onChange }: EventsEditorProps) {
       events: value.events.map((e) => (e.slug === slug ? { ...e, ...patch } : e)),
     });
 
-  const handleItemDelete = (slug: string) =>
+  const handleItemDelete = (slug: string) => {
     update({ events: value.events.filter((e) => e.slug !== slug) });
+    if (editingSlug === slug) setEditingSlug(null);
+  };
 
   const handleItemDuplicate = (slug: string) => {
     const original = value.events.find((e) => e.slug === slug);
@@ -75,59 +82,85 @@ export function EventsEditor({ value, onChange }: EventsEditorProps) {
     update({ events: next });
   };
 
-  const baseFields: FieldConfig<EventItem>[] = [
-    { kind: 'text', key: 'title', label: 'Title' },
-    { kind: 'text', key: 'slug', label: 'Slug', helpText: 'Lowercase, hyphens.' },
-    { kind: 'image', key: 'image', label: 'Cover image' },
-    {
-      kind: 'taxonomy-pick',
-      key: 'category',
-      label: 'Category',
-      options: value.categories,
-    },
-    { kind: 'text', key: 'date', label: 'Date', helpText: 'YYYY-MM-DD' },
-    { kind: 'text', key: 'startTime', label: 'Start time', helpText: 'HH:MM (24h)' },
-    { kind: 'text', key: 'endTime', label: 'End time', helpText: 'HH:MM (24h)' },
-    {
-      kind: 'taxonomy-pick',
-      key: 'venue',
-      label: 'Venue',
-      options: value.venues,
-    },
-    {
-      kind: 'select',
-      key: 'priceMode',
-      label: 'Price mode',
-      options: [
-        { value: 'free', label: 'Free' },
-        { value: 'paid', label: 'Paid' },
-      ],
-    },
-    {
-      kind: 'taxonomy-pick',
-      key: 'features',
-      label: 'Features',
-      options: value.features,
-      multiple: true,
-    },
-    { kind: 'textarea', key: 'description', label: 'Description', rows: 4 },
-    { kind: 'text', key: 'address', label: 'Address' },
-    { kind: 'text', key: 'phone', label: 'Phone' },
-    { kind: 'text', key: 'website', label: 'Website' },
-    {
-      kind: 'text',
-      key: 'ticketsUrl',
-      label: 'Tickets URL',
-      helpText: 'Optional — used by the "GET TICKETS" CTA.',
-    },
-    { kind: 'number', key: 'popularity', label: 'Popularity (0-100)', min: 0, max: 100 },
-    { kind: 'latlng', key: 'coords', label: 'Coordinates' },
-  ];
+  if (editingItem) {
+    const baseFields: FieldConfig<EventItem>[] = [
+      { kind: 'text', key: 'title', label: 'Title' },
+      { kind: 'text', key: 'slug', label: 'Slug', helpText: 'Lowercase, hyphens.' },
+      { kind: 'image', key: 'image', label: 'Cover image' },
+      {
+        kind: 'taxonomy-pick',
+        key: 'category',
+        label: 'Category',
+        options: value.categories,
+      },
+      { kind: 'text', key: 'date', label: 'Date', helpText: 'YYYY-MM-DD' },
+      { kind: 'text', key: 'startTime', label: 'Start time', helpText: 'HH:MM (24h)' },
+      { kind: 'text', key: 'endTime', label: 'End time', helpText: 'HH:MM (24h)' },
+      {
+        kind: 'taxonomy-pick',
+        key: 'venue',
+        label: 'Venue',
+        options: value.venues,
+      },
+      {
+        kind: 'select',
+        key: 'priceMode',
+        label: 'Price mode',
+        options: [
+          { value: 'free', label: 'Free' },
+          { value: 'paid', label: 'Paid' },
+        ],
+      },
+      {
+        kind: 'taxonomy-pick',
+        key: 'features',
+        label: 'Features',
+        options: value.features,
+        multiple: true,
+      },
+      { kind: 'textarea', key: 'description', label: 'Description', rows: 4 },
+      { kind: 'text', key: 'address', label: 'Address' },
+      { kind: 'text', key: 'phone', label: 'Phone' },
+      { kind: 'text', key: 'website', label: 'Website' },
+      {
+        kind: 'text',
+        key: 'ticketsUrl',
+        label: 'Tickets URL',
+        helpText: 'Optional — used by the "GET TICKETS" CTA.',
+      },
+      { kind: 'number', key: 'popularity', label: 'Popularity (0-100)', min: 0, max: 100 },
+      { kind: 'latlng', key: 'coords', label: 'Coordinates' },
+    ];
+    return (
+      <CatalogItemPanel
+        title={editingItem.title}
+        subtitle={`${editingItem.date} · ${editingItem.startTime}–${editingItem.endTime}`}
+        onBack={() => setEditingSlug(null)}
+        onDelete={() => handleItemDelete(editingItem.slug)}
+      >
+        <CatalogItemForm<EventItem>
+          item={editingItem}
+          fields={baseFields}
+          onChange={(patch) => handleItemChange(editingItem.slug, patch)}
+          footer={
+            editingItem.priceMode === 'paid' ? (
+              <PricePaidFields
+                item={editingItem}
+                onChange={(patch) => handleItemChange(editingItem.slug, patch)}
+              />
+            ) : null
+          }
+        />
+      </CatalogItemPanel>
+    );
+  }
 
   return (
     <div className="space-y-4">
       <header className="space-y-1">
-        <h2 className="font-display text-[20px] font-semibold text-zinc-100">Events</h2>
+        <h2 className="font-display text-[20px] font-semibold text-zinc-900 dark:text-zinc-100">
+          Events
+        </h2>
         <p className="text-[12px] text-zinc-500">
           Calendar-based events with date, time, venue, and optional ticket info.
         </p>
@@ -175,9 +208,9 @@ export function EventsEditor({ value, onChange }: EventsEditorProps) {
       <CatalogList<EventItem>
         items={visible}
         onReorder={handleReorder}
-        onItemChange={handleItemChange}
         onItemDelete={handleItemDelete}
         onItemDuplicate={handleItemDuplicate}
+        onItemSelect={setEditingSlug}
         renderRow={(item) => (
           <div className="flex items-center gap-2">
             {item.image ? (
@@ -185,13 +218,13 @@ export function EventsEditor({ value, onChange }: EventsEditorProps) {
               <img
                 src={item.image}
                 alt=""
-                className="h-10 w-10 shrink-0 rounded object-cover ring-1 ring-zinc-800"
+                className="h-10 w-10 shrink-0 rounded object-cover ring-1 ring-zinc-200 dark:ring-zinc-800"
               />
             ) : (
-              <div className="h-10 w-10 shrink-0 rounded bg-zinc-800 ring-1 ring-zinc-700" />
+              <div className="h-10 w-10 shrink-0 rounded bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700" />
             )}
             <div className="min-w-0 flex-1">
-              <div className="truncate text-[12.5px] font-medium text-zinc-200">
+              <div className="truncate text-[12.5px] font-medium text-zinc-800 dark:text-zinc-200">
                 {item.title || <span className="italic text-zinc-500">Untitled</span>}
               </div>
               <div className="truncate text-[10.5px] text-zinc-500">
@@ -200,18 +233,6 @@ export function EventsEditor({ value, onChange }: EventsEditorProps) {
               </div>
             </div>
           </div>
-        )}
-        renderForm={(item, onChangeItem) => (
-          <CatalogItemForm<EventItem>
-            item={item}
-            fields={baseFields}
-            onChange={onChangeItem}
-            footer={
-              item.priceMode === 'paid' ? (
-                <PricePaidFields item={item} onChange={onChangeItem} />
-              ) : null
-            }
-          />
         )}
       />
     </div>
@@ -228,14 +249,12 @@ function PricePaidFields({
   const ticket = item.ticket ?? { priceDisplay: '', purchaseUrl: '' };
   return (
     <div className="space-y-3 rounded-md border border-amber-500/20 bg-amber-500/5 p-3">
-      <div className="flex items-center justify-between">
-        <h5 className="text-[11.5px] font-semibold uppercase tracking-wider text-amber-300">
-          Ticket info (paid only)
-        </h5>
-      </div>
+      <h5 className="text-[11.5px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-300">
+        Ticket info (paid only)
+      </h5>
 
       <label className="block space-y-1">
-        <span className="block text-[12px] font-medium text-zinc-300">Price band</span>
+        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">Price band</span>
         <select
           value={item.priceBand?.toString() ?? ''}
           onChange={(e) => {
@@ -244,7 +263,7 @@ function PricePaidFields({
               priceBand: raw ? (Number(raw) as 1 | 2 | 3 | 4) : undefined,
             });
           }}
-          className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 focus:border-sky-500/60 focus:outline-none"
+          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100"
         >
           <option value="">—</option>
           <option value="1">$</option>
@@ -255,24 +274,24 @@ function PricePaidFields({
       </label>
 
       <label className="block space-y-1">
-        <span className="block text-[12px] font-medium text-zinc-300">Price display</span>
+        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">Price display</span>
         <input
           type="text"
           value={ticket.priceDisplay}
           placeholder="e.g. $25 or $15–30"
           onChange={(e) => onChange({ ticket: { ...ticket, priceDisplay: e.target.value } })}
-          className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:border-sky-500/60 focus:outline-none"
+          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100 dark:placeholder:text-zinc-600"
         />
       </label>
 
       <label className="block space-y-1">
-        <span className="block text-[12px] font-medium text-zinc-300">Purchase URL</span>
+        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">Purchase URL</span>
         <input
           type="text"
           value={ticket.purchaseUrl}
           placeholder="https://…"
           onChange={(e) => onChange({ ticket: { ...ticket, purchaseUrl: e.target.value } })}
-          className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:border-sky-500/60 focus:outline-none"
+          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100 dark:placeholder:text-zinc-600"
         />
       </label>
     </div>

@@ -45,21 +45,23 @@ export function TicketsEditor({ value, eventsValue, onChange }: TicketsEditorPro
   return (
     <div className="space-y-4">
       <header className="space-y-1">
-        <h2 className="font-display text-[20px] font-semibold text-zinc-100">Tickets</h2>
+        <h2 className="font-display text-[20px] font-semibold text-zinc-900 dark:text-zinc-100">
+          Tickets
+        </h2>
         <p className="text-[12px] text-zinc-500">
           Wrapper derived from events. The Tickets module shows events with{' '}
-          <code className="text-amber-300">priceMode = paid</code> filtered by the
+          <code className="text-amber-600 dark:text-amber-300">priceMode = paid</code> filtered by the
           categories you select below.
         </p>
       </header>
 
       <label className="block space-y-1">
-        <span className="block text-[12px] font-medium text-zinc-300">Module label</span>
+        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">Module label</span>
         <input
           type="text"
           value={value.label}
           onChange={(e) => update({ label: e.target.value })}
-          className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 focus:border-sky-500/60 focus:outline-none"
+          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100"
         />
       </label>
 
@@ -77,13 +79,13 @@ export function TicketsEditor({ value, eventsValue, onChange }: TicketsEditorPro
       />
 
       <label className="block space-y-1">
-        <span className="block text-[12px] font-medium text-zinc-300">Module copy</span>
+        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">Module copy</span>
         <textarea
           rows={3}
           value={value.copy}
           onChange={(e) => update({ copy: e.target.value })}
           placeholder="Optional intro copy shown above the tickets list."
-          className="w-full rounded-md border border-zinc-800 bg-zinc-900/40 px-2 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:border-sky-500/60 focus:outline-none"
+          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100 dark:placeholder:text-zinc-600"
         />
       </label>
 
@@ -111,11 +113,11 @@ export function TicketsEditor({ value, eventsValue, onChange }: TicketsEditorPro
         helpText="Optional. Empty = derive features from the visible ticket pool."
       />
 
-      <div className="rounded-md border border-sky-500/20 bg-sky-500/5 px-3 py-2 text-[12px] text-sky-200">
+      <div className="rounded-md border border-sky-500/20 bg-sky-500/5 px-3 py-2 text-[12px] text-sky-700 dark:text-sky-200">
         {visibleTicketsCount === 0 ? (
           <>
             No paid events match the current selection.{' '}
-            <span className="text-sky-300/70">
+            <span className="text-sky-600/70 dark:text-sky-300/70">
               Add paid events with these categories on the Events tab.
             </span>
           </>

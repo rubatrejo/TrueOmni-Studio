@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus, Search, Star } from 'lucide-react';
+import { Loader2, Plus, Search, Sparkles, Star } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 
 import { LOCALE_LABELS } from '@/lib/i18n';
@@ -10,6 +10,8 @@ import {
   type Locale,
   type LocaleStrings,
 } from '@/lib/studio/schema';
+
+import { translateI18nText } from '../_lib/api-client';
 
 interface I18nEditorProps {
   value: I18nBundle;
@@ -21,6 +23,7 @@ const SECTION_FALLBACK = 'misc';
 export function I18nEditor({ value, onChange }: I18nEditorProps) {
   const [section, setSection] = useState<string>('all');
   const [search, setSearch] = useState('');
+  const [translateError, setTranslateError] = useState<string | null>(null);
 
   const allKeys = useMemo(() => {
     const set = new Set<string>();
@@ -143,6 +146,25 @@ export function I18nEditor({ value, onChange }: I18nEditorProps) {
 
       <MissingSummary missing={missingByLocale} />
 
+      {translateError ? (
+        <div
+          role="alert"
+          className="flex items-start justify-between gap-3 rounded-md border border-red-200 bg-red-50/70 px-3 py-2 text-[11.5px] text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200"
+        >
+          <span>
+            <strong>Translate failed:</strong> {translateError}
+          </span>
+          <button
+            type="button"
+            onClick={() => setTranslateError(null)}
+            aria-label="Dismiss"
+            className="font-medium text-red-700 underline-offset-2 hover:underline dark:text-red-300"
+          >
+            Dismiss
+          </button>
+        </div>
+      ) : null}
+
       <div className="overflow-auto rounded-md border border-zinc-200 dark:border-zinc-800">
         <table className="w-full table-fixed text-left text-[12px]">
           <thead className="sticky top-0 z-10 bg-zinc-50 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">
@@ -183,6 +205,7 @@ export function I18nEditor({ value, onChange }: I18nEditorProps) {
                   k={key}
                   bundle={value}
                   onChangeCell={updateCell}
+                  onTranslateError={setTranslateError}
                 />
               ))
             )}
@@ -225,11 +248,14 @@ function I18nRow({
   k,
   bundle,
   onChangeCell,
+  onTranslateError,
 }: {
   k: string;
   bundle: I18nBundle;
   onChangeCell: (locale: Locale, key: string, next: string) => void;
+  onTranslateError: (msg: string) => void;
 }) {
+  const enValue = bundle.en[k] ?? '';
   return (
     <tr className="align-top">
       <td className="px-2 py-1.5 font-mono text-[11px] text-zinc-700 dark:text-zinc-300">
@@ -243,9 +269,15 @@ function I18nRow({
             ariaLabel={`${k} in ${loc}`}
             missing={
               loc !== 'en' &&
-              !!bundle.en[k] &&
+              !!enValue &&
               (!bundle[loc][k] || bundle[loc][k].trim() === '')
             }
+            translateInput={
+              loc !== 'en' && enValue
+                ? { sourceText: enValue, fromLocale: 'en', toLocale: loc, key: k }
+                : null
+            }
+            onTranslateError={onTranslateError}
           />
         </td>
       ))}
@@ -253,23 +285,33 @@ function I18nRow({
   );
 }
 
+interface TranslateInput {
+  sourceText: string;
+  fromLocale: Locale;
+  toLocale: Locale;
+  key: string;
+}
+
 function I18nCell({
   value,
   onCommit,
   ariaLabel,
   missing,
+  translateInput,
+  onTranslateError,
 }: {
   value: string;
   onCommit: (next: string) => void;
   ariaLabel: string;
   missing: boolean;
+  translateInput: TranslateInput | null;
+  onTranslateError: (msg: string) => void;
 }) {
   const [draft, setDraft] = useState(value);
+  const [translating, setTranslating] = useState(false);
   const ref = useRef<HTMLTextAreaElement>(null);
 
-  // sincroniza draft cuando el valor externo cambia (e.g. fresh load)
   if (value !== draft && document.activeElement !== ref.current) {
-    // sólo sincroniza si el textarea no tiene foco — evita pisar typing
     setDraft(value);
   }
 
@@ -277,32 +319,68 @@ function I18nCell({
     if (draft !== value) onCommit(draft);
   };
 
+  const handleTranslate = async () => {
+    if (!translateInput || translating) return;
+    setTranslating(true);
+    try {
+      const { translation } = await translateI18nText({
+        text: translateInput.sourceText,
+        fromLocale: translateInput.fromLocale,
+        toLocale: translateInput.toLocale,
+        key: translateInput.key,
+      });
+      setDraft(translation);
+      onCommit(translation);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Translate failed';
+      onTranslateError(msg);
+    } finally {
+      setTranslating(false);
+    }
+  };
+
   const baseClass =
-    'w-full resize-none rounded border bg-white px-1.5 py-1 font-mono text-[11.5px] text-zinc-800 outline-none transition focus:border-sky-500/60 focus:ring-1 focus:ring-sky-500/30 dark:bg-zinc-950 dark:text-zinc-200';
+    'w-full resize-none rounded border bg-white px-1.5 py-1 pr-6 font-mono text-[11.5px] text-zinc-800 outline-none transition focus:border-sky-500/60 focus:ring-1 focus:ring-sky-500/30 dark:bg-zinc-950 dark:text-zinc-200';
   const stateClass = missing
     ? 'border-amber-300 placeholder:text-amber-600 dark:border-amber-700/60 dark:placeholder:text-amber-400'
     : 'border-zinc-200 dark:border-zinc-800';
 
   return (
-    <textarea
-      ref={ref}
-      value={draft}
-      onChange={(e) => setDraft(e.target.value)}
-      onBlur={handleBlur}
-      placeholder={missing ? 'missing' : ''}
-      aria-label={ariaLabel}
-      rows={1}
-      className={`${baseClass} ${stateClass} focus:rows-4`}
-      style={{ minHeight: '1.6rem' }}
-      onFocus={(e) => {
-        // expand on focus
-        e.currentTarget.rows = Math.max(3, Math.min(6, draft.split('\n').length + 1));
-      }}
-      onInput={(e) => {
-        // auto-grow mientras escribe
-        const ta = e.currentTarget;
-        ta.rows = Math.max(1, Math.min(6, ta.value.split('\n').length));
-      }}
-    />
+    <div className="relative">
+      <textarea
+        ref={ref}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={handleBlur}
+        placeholder={missing ? 'missing' : ''}
+        aria-label={ariaLabel}
+        rows={1}
+        className={`${baseClass} ${stateClass}`}
+        style={{ minHeight: '1.6rem' }}
+        onFocus={(e) => {
+          e.currentTarget.rows = Math.max(3, Math.min(6, draft.split('\n').length + 1));
+        }}
+        onInput={(e) => {
+          const ta = e.currentTarget;
+          ta.rows = Math.max(1, Math.min(6, ta.value.split('\n').length));
+        }}
+      />
+      {missing && translateInput ? (
+        <button
+          type="button"
+          onClick={handleTranslate}
+          disabled={translating}
+          aria-label={`Translate to ${translateInput.toLocale} with AI`}
+          title="Translate with AI"
+          className="absolute right-1 top-1 grid h-4 w-4 place-items-center rounded text-amber-600 transition hover:bg-amber-100 hover:text-amber-800 disabled:opacity-50 dark:text-amber-400 dark:hover:bg-amber-900/40 dark:hover:text-amber-200"
+        >
+          {translating ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            <Sparkles className="h-3 w-3" />
+          )}
+        </button>
+      ) : null}
+    </div>
   );
 }

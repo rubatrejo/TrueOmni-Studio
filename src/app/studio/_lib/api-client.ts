@@ -150,3 +150,16 @@ export async function patchI18n(slug: string, bundle: I18nBundle): Promise<I18nB
   });
   return data.bundle;
 }
+
+export async function translateI18nText(input: {
+  text: string;
+  fromLocale: string;
+  toLocale: string;
+  context?: string;
+  key?: string;
+}): Promise<{ translation: string; model: string }> {
+  return http<{ translation: string; model: string }>('/api/studio/i18n/translate', {
+    method: 'POST',
+    body: input,
+  });
+}

@@ -1,3 +1,6 @@
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+
 import { NextResponse } from 'next/server';
 
 import { kv, kvKeys } from '@/lib/studio/kv';
@@ -68,7 +71,7 @@ export async function GET(_req: Request, { params }: RouteParams) {
     const meta = await kv.get<ConfigMeta>(kvKeys.cfgMeta(slug));
     // Backfill defensivo: clientes legacy / pre-S2 pueden no tener algunos campos
     // o tener `systemModules` con shape antiguo (solo {ads,languages,aiAvatar}).
-    const hydrated = hydrateConfig(cfg);
+    const hydrated = await hydrateConfig(slug, cfg);
     return NextResponse.json({ config: hydrated, meta });
   } catch (error) {
     console.error('[api/studio/configs/[slug] GET]', error);
@@ -77,13 +80,21 @@ export async function GET(_req: Request, { params }: RouteParams) {
 }
 
 /** Backfill defensivo de un KioskConfig leído del KV. */
-function hydrateConfig(cfg: KioskConfig): KioskConfig {
+async function hydrateConfig(slug: string, cfg: KioskConfig): Promise<KioskConfig> {
   const baseModules = cfg.modules ?? defaultModules();
   // Merge de systemModules: legacy clients pueden tener solo 3 campos.
   const mergedSystemModules = {
     ...DEFAULT_SYSTEM_MODULES,
     ...(baseModules.systemModules ?? {}),
   };
+
+  // Bootstrap defensivo de ads e integrations desde filesystem para clientes
+  // legacy que tienen data en `clients/<slug>/config.json` pero no en KV.
+  const fsConfig =
+    cfg.ads === undefined || cfg.integrations === undefined
+      ? await readClientConfigFromFs(slug)
+      : null;
+
   return {
     ...cfg,
     modules: { ...baseModules, systemModules: mergedSystemModules },
@@ -100,9 +111,56 @@ function hydrateConfig(cfg: KioskConfig): KioskConfig {
     tickets: cfg.tickets ?? defaultTickets(),
     passes: cfg.passes ?? defaultPasses(),
     trails: cfg.trails ?? defaultTrails(),
-    ads: cfg.ads ?? defaultAds(),
-    integrations: cfg.integrations ?? defaultIntegrations(),
+    ads: cfg.ads ?? bootstrapAdsFromFs(fsConfig) ?? defaultAds(),
+    integrations:
+      cfg.integrations ?? bootstrapIntegrationsFromFs(fsConfig) ?? defaultIntegrations(),
   };
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/*  Bootstrap helpers                                                       */
+/* ──────────────────────────────────────────────────────────────────────── */
+
+interface LegacyConfigSubset {
+  features?: {
+    advertisements?: { ads?: unknown };
+  };
+  integraciones?: {
+    api_base_url?: unknown;
+    analytics_id?: unknown;
+    mapbox_token?: unknown;
+  };
+}
+
+async function readClientConfigFromFs(slug: string): Promise<LegacyConfigSubset | null> {
+  const filePath = path.join(process.cwd(), 'clients', slug, 'config.json');
+  try {
+    const raw = await fs.readFile(filePath, 'utf8');
+    return JSON.parse(raw) as LegacyConfigSubset;
+  } catch {
+    return null;
+  }
+}
+
+function bootstrapAdsFromFs(fsConfig: LegacyConfigSubset | null) {
+  if (!fsConfig) return null;
+  const legacyAds = fsConfig.features?.advertisements?.ads;
+  if (!Array.isArray(legacyAds)) return null;
+  const parsed = AdsModuleSchema.safeParse({ ads: legacyAds });
+  return parsed.success ? parsed.data : null;
+}
+
+function bootstrapIntegrationsFromFs(fsConfig: LegacyConfigSubset | null) {
+  if (!fsConfig?.integraciones) return null;
+  const legacy = fsConfig.integraciones;
+  const candidate = {
+    api: { baseUrl: typeof legacy.api_base_url === 'string' ? legacy.api_base_url : '' },
+    mapbox: { token: typeof legacy.mapbox_token === 'string' ? legacy.mapbox_token : '' },
+    analytics: { gaId: typeof legacy.analytics_id === 'string' ? legacy.analytics_id : '' },
+    weather: { provider: 'open-meteo' as const, apiKey: '', city: '', units: 'metric' as const },
+  };
+  const parsed = IntegrationsConfigSchema.safeParse(candidate);
+  return parsed.success ? parsed.data : null;
 }
 
 export async function PATCH(req: Request, { params }: RouteParams) {

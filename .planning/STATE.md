@@ -1749,6 +1749,47 @@ Para cada uno se entregó:
 
 ---
 
+### Sesión 2026-04-29 (cont. 5) — Studio S6 cerrada — Integraciones editor + health checks
+
+**Hecho:**
+
+- **Plan S6** — `.planning/S6-PLAN.md` con 3 tareas atómicas.
+- **T1 — Schema + endpoint** — `IntegrationsConfigSchema` con sub-objetos `api`/`mapbox`/`analytics`/`weather` (provider radio open-meteo|openweather + apiKey + city + units metric|imperial). `defaultIntegrations()`. Integrado en `KioskConfigSchema` y `makeBlankConfig`. Endpoint `[slug]/route.ts` con backfill defensivo + branch PATCH `body.integrations`. Endpoint dedicado `POST /api/studio/integrations/check` con discriminated union por kind (`mapbox`/`api`/`analytics`/`openweather`), timeout 5s vía AbortController. Mapbox check vía `https://api.mapbox.com/styles/v1/mapbox/streets-v12?access_token=…` → 200 ok / 401 invalid. API check fetch al baseUrl. Analytics solo regex `^(G-[A-Z0-9]+|UA-\d+-\d+)$`. OpenWeather GET con city+key+units → respuesta incluye `name` + `temp` para feedback informativo.
+- **T2 — `IntegrationsEditor.tsx`** — 4 cards apiladas con icono lucide en chip sky-tinted: CloudSun/Globe/Map/BarChart3. Cada card con `<Field>` primitive + `TestRow` que renderiza botón Test (disabled hasta que value no está vacío) + status inline verde/rojo con icono Check/AlertCircle. `SecretInput` para tokens (mapbox + openweather apiKey) con toggle Eye/EyeOff. `ProviderRadio` para weather provider y units. Open-Meteo no muestra Test ni campos adicionales (vive de `cliente.coords`).
+- **T3 — Wiring** — `api-client` con `checkIntegration(input)` discriminated. `Shell` añade state integrations + dirty + payload save + discard. `EditorPanel` con prop `integrations`/`onIntegrationsChange` y branch `sectionKey === 'integrations'` → `<IntegrationsEditor />`. La tab Integrations (key `integrations`, sección 19) ya estaba en `sections.ts`.
+
+**Verificado:**
+
+- `pnpm typecheck` y `pnpm lint` limpios.
+- E2E con Playwright en `localhost:3001/studio/default`:
+  - Tab Integrations → 4 cards visibles con titles `Weather/External API/Mapbox/Google Analytics`.
+  - Llenar GA ID `G-ABC123XYZ` → click Test → "Format valid (GA4)." (verde).
+  - Cmd+S → API responde 200, `config.integrations.analytics.gaId === "G-ABC123XYZ"` en el GET.
+  - Llenar Mapbox token bogus `pk.invalidtoken123` → click Test → "Invalid token (401 from Mapbox)." (rojo) — confirma que el call real a Mapbox API funciona.
+  - Cleanup: PATCH dejando integrations en defaults vacíos.
+
+**Pendiente / siguiente:**
+
+- **S7 — Auth + Vercel + GitHub PR-publish** (cierre del milestone Studio): NextAuth con admin gate por `ruben@trueomni.com`, deploy a Vercel, publish flow que escribe `clients/<slug>/` desde KV. Es la fase grande pendiente.
+- **Build SSG `/404`** (gated por aprobación de `pnpm build`).
+- **S5.1 bridge live preview ads** + **S5.2 bulk import ads** (opcionales).
+- **S4.1 path feliz** (validar cuando se añada `ANTHROPIC_API_KEY`).
+- **Migración legacy `features.advertisements.ads` y `integraciones` → publish flow S7**.
+
+**Decisiones:**
+
+- **Endpoint dedicado `/api/studio/integrations/check`** en lugar de delegar al cliente: la API key de OpenWeather y el secret token Mapbox NO deben tocar el browser. Server-side mantiene los secrets seguros y permite reutilizar el endpoint para futuro health-check periódico.
+- **Discriminated union por `kind`** en lugar de 4 endpoints separados: simplifica el routing y la TS de api-client. El switch interno mantiene cada check aislado.
+- **Timeout 5s con AbortController**: protección contra integraciones colgadas (Mapbox down, custom API muy lenta) sin congelar el editor.
+- **Open-Meteo sin test button**: no hay key que validar; el provider se prueba en runtime cuando el widget pide datos.
+- **Analytics check solo regex (no red call)**: validar un GA ID requiere autenticarse con la API de Google Analytics 4, demasiado costoso. La regex captura ~99% de typos.
+- **`integrations` separado de `features.integraciones`** legacy: el config.json filesystem existente sigue usando el path en español. La conciliación va al publish flow (S7).
+- **`SecretInput` con toggle Eye/EyeOff** para tokens: estándar UX de campos sensibles. Mapbox tokens públicos (`pk.eyJ`) técnicamente no son secret-secret, pero seguimos el patrón por consistencia.
+
+**Fase:** Studio S6 cerrada (2026-04-29). Siguiente arranque: **S7 Auth + Publish** (cierre del milestone Studio) o consolidar follow-ups.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

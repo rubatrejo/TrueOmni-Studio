@@ -113,9 +113,7 @@ Sub-fases entregadas:
 
 ## Fase S6 — Integraciones
 
-- [ ] Widget clima (OpenWeather API key + ciudad + units).
-- [ ] API base URL + Mapbox token + Google Analytics ID.
-- [ ] Health-check button por integración.
+- [x] **S6** ✅ cerrada 2026-04-29 — `IntegrationsConfigSchema` con 4 sub-objetos (api/mapbox/analytics/weather) integrado en KioskConfig. `IntegrationsEditor` con 4 cards (Weather con provider open-meteo/openweather, External API, Mapbox con secret toggle, Google Analytics) y botón "Test" por card. Endpoint dedicado `POST /api/studio/integrations/check` ejecuta health checks server-side con timeout 5s: mapbox (200/401 → ok/invalid), api (HTTP reachability), analytics (regex GA4/UA), openweather (200 con `data.name + temp`). Status verde/rojo inline con autodescarte 8s.
 
 ---
 

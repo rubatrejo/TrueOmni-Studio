@@ -2,6 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
+import type {
+  ImportMode,
+  ImportStats,
+} from '@/app/studio/_lib/import-helpers';
 import {
   type ListingItem,
   type ListingsCatalog,
@@ -14,7 +18,11 @@ import { CatalogItemForm, type FieldConfig } from './catalog/CatalogItemForm';
 import { CatalogItemPanel } from './catalog/CatalogItemPanel';
 import { CatalogList } from './catalog/CatalogList';
 import { CatalogToolbar } from './catalog/CatalogToolbar';
+import { downloadCatalog } from './catalog/export-utils';
 import { ImageUrlField } from './catalog/ImageUrlField';
+import { mergeTaxonomy, upsertBySlug } from './catalog/import-utils';
+import { ImportModal } from './catalog/ImportModal';
+import { ImportToast } from './catalog/ImportToast';
 import { TaxonomyEditor } from './catalog/TaxonomyEditor';
 
 interface ListingsEditorProps {
@@ -111,6 +119,27 @@ function ListingsCatalogEditor({
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const [lastImport, setLastImport] = useState<ImportStats | null>(null);
+
+  const handleImport = (
+    items: ListingItem[],
+    mode: ImportMode,
+    stats: ImportStats,
+  ) => {
+    const nextListings =
+      mode === 'replace' ? items : upsertBySlug(catalog.listings, items);
+    onCatalogChange({
+      listings: nextListings,
+      subcategories: mergeTaxonomy(catalog.subcategories, items, (i) => i.subcategory),
+      features: mergeTaxonomy(catalog.features, items, (i) => i.features),
+    });
+    setLastImport(stats);
+  };
+
+  const handleExport = (format: 'csv' | 'json') => {
+    downloadCatalog('listings', catalog.listings, format, entry.key);
+  };
 
   const editingItem = useMemo(
     () =>
@@ -275,11 +304,28 @@ function ListingsCatalogEditor({
         onSearchChange={setSearch}
         onAdd={handleAdd}
         addLabel="Add listing"
+        onImport={() => setImportOpen(true)}
+        onExport={handleExport}
+        exportEnabled={catalog.listings.length > 0}
         filter={filter}
         onFilterChange={setFilter}
         filterOptions={catalog.subcategories.map((s) => ({ value: s, label: s }))}
         filterPlaceholder="All subcategories"
         count={catalog.listings.length}
+      />
+
+      <ImportToast
+        stats={lastImport}
+        noun={lastImport && lastImport.total === 1 ? 'listing' : 'listings'}
+        onDismiss={() => setLastImport(null)}
+      />
+
+      <ImportModal
+        open={importOpen}
+        kind="listings"
+        existingItems={catalog.listings}
+        onClose={() => setImportOpen(false)}
+        onImport={handleImport}
       />
 
       <CatalogList<ListingItem>

@@ -2,6 +2,10 @@
 
 import { useMemo, useState } from 'react';
 
+import type {
+  ImportMode,
+  ImportStats,
+} from '@/app/studio/_lib/import-helpers';
 import {
   type EventItem,
   type EventsModule,
@@ -12,7 +16,11 @@ import { CatalogItemForm, type FieldConfig } from './catalog/CatalogItemForm';
 import { CatalogItemPanel } from './catalog/CatalogItemPanel';
 import { CatalogList } from './catalog/CatalogList';
 import { CatalogToolbar } from './catalog/CatalogToolbar';
+import { downloadCatalog } from './catalog/export-utils';
 import { ImageUrlField } from './catalog/ImageUrlField';
+import { mergeTaxonomy, upsertBySlug } from './catalog/import-utils';
+import { ImportModal } from './catalog/ImportModal';
+import { ImportToast } from './catalog/ImportToast';
 import { TaxonomyEditor } from './catalog/TaxonomyEditor';
 
 interface EventsEditorProps {
@@ -24,6 +32,24 @@ export function EventsEditor({ value, onChange }: EventsEditorProps) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const [lastImport, setLastImport] = useState<ImportStats | null>(null);
+
+  const handleImport = (items: EventItem[], mode: ImportMode, stats: ImportStats) => {
+    const nextEvents = mode === 'replace' ? items : upsertBySlug(value.events, items);
+    onChange({
+      ...value,
+      events: nextEvents,
+      categories: mergeTaxonomy(value.categories, items, (i) => i.category),
+      venues: mergeTaxonomy(value.venues, items, (i) => i.venue),
+      features: mergeTaxonomy(value.features, items, (i) => i.features),
+    });
+    setLastImport(stats);
+  };
+
+  const handleExport = (format: 'csv' | 'json') => {
+    downloadCatalog('events', value.events, format, 'events');
+  };
 
   const editingItem = useMemo(
     () =>
@@ -189,11 +215,28 @@ export function EventsEditor({ value, onChange }: EventsEditorProps) {
         onSearchChange={setSearch}
         onAdd={handleAdd}
         addLabel="Add event"
+        onImport={() => setImportOpen(true)}
+        onExport={handleExport}
+        exportEnabled={value.events.length > 0}
         filter={filter}
         onFilterChange={setFilter}
         filterOptions={value.categories.map((c) => ({ value: c, label: c }))}
         filterPlaceholder="All categories"
         count={value.events.length}
+      />
+
+      <ImportToast
+        stats={lastImport}
+        noun={lastImport && lastImport.total === 1 ? 'event' : 'events'}
+        onDismiss={() => setLastImport(null)}
+      />
+
+      <ImportModal
+        open={importOpen}
+        kind="events"
+        existingItems={value.events}
+        onClose={() => setImportOpen(false)}
+        onImport={handleImport}
       />
 
       <CatalogList<EventItem>

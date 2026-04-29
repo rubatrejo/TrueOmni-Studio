@@ -2,6 +2,10 @@
 
 import { useMemo, useState } from 'react';
 
+import type {
+  ImportMode,
+  ImportStats,
+} from '@/app/studio/_lib/import-helpers';
 import {
   makeBlankTrail,
   type TrailDifficulty,
@@ -14,7 +18,11 @@ import { CatalogItemForm, type FieldConfig } from './catalog/CatalogItemForm';
 import { CatalogItemPanel } from './catalog/CatalogItemPanel';
 import { CatalogList } from './catalog/CatalogList';
 import { CatalogToolbar } from './catalog/CatalogToolbar';
+import { downloadCatalog } from './catalog/export-utils';
 import { ImageUrlField } from './catalog/ImageUrlField';
+import { mergeTaxonomy, upsertBySlug } from './catalog/import-utils';
+import { ImportModal } from './catalog/ImportModal';
+import { ImportToast } from './catalog/ImportToast';
 import { TaxonomyEditor } from './catalog/TaxonomyEditor';
 
 const DIFFICULTY_OPTIONS: TrailDifficulty[] = ['Easy', 'Moderate', 'Hard'];
@@ -29,6 +37,23 @@ export function TrailsEditor({ value, onChange }: TrailsEditorProps) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const [lastImport, setLastImport] = useState<ImportStats | null>(null);
+
+  const handleImport = (items: TrailItem[], mode: ImportMode, stats: ImportStats) => {
+    const nextTrails = mode === 'replace' ? items : upsertBySlug(value.trails, items);
+    onChange({
+      ...value,
+      trails: nextTrails,
+      subcategories: mergeTaxonomy(value.subcategories, items, (i) => i.subcategory),
+      features: mergeTaxonomy(value.features, items, (i) => i.features),
+    });
+    setLastImport(stats);
+  };
+
+  const handleExport = (format: 'csv' | 'json') => {
+    downloadCatalog('trails', value.trails, format, 'trails');
+  };
 
   const editingItem = useMemo(
     () =>
@@ -192,11 +217,28 @@ export function TrailsEditor({ value, onChange }: TrailsEditorProps) {
         onSearchChange={setSearch}
         onAdd={handleAdd}
         addLabel="Add trail"
+        onImport={() => setImportOpen(true)}
+        onExport={handleExport}
+        exportEnabled={value.trails.length > 0}
         filter={filter}
         onFilterChange={setFilter}
         filterOptions={DIFFICULTY_OPTIONS.map((d) => ({ value: d, label: d }))}
         filterPlaceholder="Any difficulty"
         count={value.trails.length}
+      />
+
+      <ImportToast
+        stats={lastImport}
+        noun={lastImport && lastImport.total === 1 ? 'trail' : 'trails'}
+        onDismiss={() => setLastImport(null)}
+      />
+
+      <ImportModal
+        open={importOpen}
+        kind="trails"
+        existingItems={value.trails}
+        onClose={() => setImportOpen(false)}
+        onImport={handleImport}
       />
 
       <CatalogList<TrailItem>

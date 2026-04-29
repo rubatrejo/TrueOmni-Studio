@@ -1,6 +1,7 @@
 'use client';
 
-import { Plus, Search } from 'lucide-react';
+import { Download, Plus, Search, Upload } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 interface FilterOption {
   value: string;
@@ -12,6 +13,13 @@ interface CatalogToolbarProps {
   onSearchChange: (next: string) => void;
   onAdd: () => void;
   addLabel?: string;
+  /** Si está presente, muestra botón "Import" antes del Add. */
+  onImport?: () => void;
+  importLabel?: string;
+  /** Si está presente, muestra dropdown "Export" (CSV/JSON) antes del Import. */
+  onExport?: (format: 'csv' | 'json') => void;
+  /** Disabled when there's nothing to export. Defaults true. */
+  exportEnabled?: boolean;
   /** Si está presente, muestra dropdown de filtro a la derecha. */
   filter?: string;
   onFilterChange?: (next: string) => void;
@@ -29,6 +37,10 @@ export function CatalogToolbar({
   onSearchChange,
   onAdd,
   addLabel = 'Add',
+  onImport,
+  importLabel = 'Import',
+  onExport,
+  exportEnabled = true,
   filter,
   onFilterChange,
   filterOptions,
@@ -67,6 +79,21 @@ export function CatalogToolbar({
         </select>
       ) : null}
 
+      {onExport ? (
+        <ExportButton onExport={onExport} disabled={!exportEnabled} />
+      ) : null}
+
+      {onImport ? (
+        <button
+          type="button"
+          onClick={onImport}
+          className="flex items-center gap-1 rounded-md border border-zinc-200 bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+        >
+          <Upload className="h-3.5 w-3.5" />
+          {importLabel}
+        </button>
+      ) : null}
+
       <button
         type="button"
         onClick={onAdd}
@@ -75,6 +102,70 @@ export function CatalogToolbar({
         <Plus className="h-3.5 w-3.5" />
         {addLabel}
       </button>
+    </div>
+  );
+}
+
+function ExportButton({
+  onExport,
+  disabled,
+}: {
+  onExport: (format: 'csv' | 'json') => void;
+  disabled: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('mousedown', onClick);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('mousedown', onClick);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const choose = (format: 'csv' | 'json') => {
+    setOpen(false);
+    onExport(format);
+  };
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1 rounded-md border border-zinc-200 bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 disabled:opacity-40 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+      >
+        <Download className="h-3.5 w-3.5" />
+        Export
+      </button>
+      {open && !disabled ? (
+        <div className="absolute right-0 z-30 mt-1 min-w-[140px] overflow-hidden rounded-md border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+          <button
+            type="button"
+            onClick={() => choose('csv')}
+            className="block w-full px-3 py-1.5 text-left text-[11.5px] text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          >
+            Download CSV
+          </button>
+          <button
+            type="button"
+            onClick={() => choose('json')}
+            className="block w-full px-3 py-1.5 text-left text-[11.5px] text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          >
+            Download JSON
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

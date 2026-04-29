@@ -3,6 +3,10 @@
 import { Plus, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import type {
+  ImportMode,
+  ImportStats,
+} from '@/app/studio/_lib/import-helpers';
 import {
   makeBlankPass,
   makeBlankPassActivity,
@@ -15,7 +19,11 @@ import { CatalogItemForm, type FieldConfig } from './catalog/CatalogItemForm';
 import { CatalogItemPanel } from './catalog/CatalogItemPanel';
 import { CatalogList } from './catalog/CatalogList';
 import { CatalogToolbar } from './catalog/CatalogToolbar';
+import { downloadCatalog } from './catalog/export-utils';
 import { ImageUrlField } from './catalog/ImageUrlField';
+import { upsertBySlug } from './catalog/import-utils';
+import { ImportModal } from './catalog/ImportModal';
+import { ImportToast } from './catalog/ImportToast';
 
 interface PassesEditorProps {
   value: PassesModule;
@@ -25,6 +33,18 @@ interface PassesEditorProps {
 export function PassesEditor({ value, onChange }: PassesEditorProps) {
   const [search, setSearch] = useState('');
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const [lastImport, setLastImport] = useState<ImportStats | null>(null);
+
+  const handleImport = (items: PassItem[], mode: ImportMode, stats: ImportStats) => {
+    const nextPasses = mode === 'replace' ? items : upsertBySlug(value.passes, items);
+    onChange({ ...value, passes: nextPasses });
+    setLastImport(stats);
+  };
+
+  const handleExport = (format: 'csv' | 'json') => {
+    downloadCatalog('passes', value.passes, format, 'passes');
+  };
 
   const editingItem = useMemo(
     () =>
@@ -136,7 +156,24 @@ export function PassesEditor({ value, onChange }: PassesEditorProps) {
         onSearchChange={setSearch}
         onAdd={handleAdd}
         addLabel="Add pass"
+        onImport={() => setImportOpen(true)}
+        onExport={handleExport}
+        exportEnabled={value.passes.length > 0}
         count={value.passes.length}
+      />
+
+      <ImportToast
+        stats={lastImport}
+        noun={lastImport && lastImport.total === 1 ? 'pass' : 'passes'}
+        onDismiss={() => setLastImport(null)}
+      />
+
+      <ImportModal
+        open={importOpen}
+        kind="passes"
+        existingItems={value.passes}
+        onClose={() => setImportOpen(false)}
+        onImport={handleImport}
       />
 
       <CatalogList<PassItem>

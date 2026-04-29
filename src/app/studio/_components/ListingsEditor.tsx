@@ -38,16 +38,11 @@ export function ListingsEditor({ value, onChange }: ListingsEditorProps) {
 
   if (value.length === 0) {
     return (
-      <div className="space-y-4">
-        <header className="space-y-1">
-          <h2 className="font-display text-[20px] font-semibold text-zinc-900 dark:text-zinc-100">
-            Listings
-          </h2>
-          <p className="text-[12px] text-zinc-500">
-            No listing modules yet. Add one from the <strong>Modules</strong> tab
-            (Listing modules section) to start filling its catalog.
-          </p>
-        </header>
+      <div className="rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-4 py-10 text-center dark:border-zinc-800 dark:bg-zinc-900/20">
+        <p className="text-[12px] italic text-zinc-500">
+          No listing modules yet. Add one from the <strong>Modules</strong> tab
+          (Listing modules section) to start filling its catalog.
+        </p>
       </div>
     );
   }
@@ -70,16 +65,6 @@ export function ListingsEditor({ value, onChange }: ListingsEditorProps) {
 
   return (
     <div className="space-y-4">
-      <header className="space-y-1">
-        <h2 className="font-display text-[20px] font-semibold text-zinc-900 dark:text-zinc-100">
-          Listings
-        </h2>
-        <p className="text-[12px] text-zinc-500">
-          Catalog-style modules. Manage their toggles / duplicate / delete from
-          the <strong>Modules</strong> tab.
-        </p>
-      </header>
-
       <div className="flex flex-wrap gap-1 rounded-md border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-800 dark:bg-zinc-900/40">
         {value.map((entry) => {
           const active = entry.key === activeKey;

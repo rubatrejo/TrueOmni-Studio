@@ -204,11 +204,21 @@ export function HomeDashboardEditor({
 /* languages, ai avatar).                                                      */
 /* ────────────────────────────────────────────────────────────────────────── */
 
-const HOME_MODULE_LIST: Array<{ key: keyof SystemModules; tileKey: string; label: string; subtitle: string }> = [
+/**
+ * "Catalog-style" system modules — datos vienen de un catálogo dedicado.
+ * Comparten la sección "Listing modules" con los listings dinámicos del
+ * usuario, aunque su schema sea propio (Events, Trails) y no se puedan
+ * duplicar/borrar.
+ */
+const CATALOG_SYSTEM_MODULE_LIST: Array<{ key: keyof SystemModules; tileKey: string; label: string; subtitle: string }> = [
   { key: 'events', tileKey: 'events', label: 'Events', subtitle: 'Calendar of events' },
-  { key: 'itineraryBuilder', tileKey: 'itinerary-builder', label: 'Itinerary Builder', subtitle: 'AI-assisted trip planner' },
+  { key: 'tickets', tileKey: 'tickets', label: 'Tickets', subtitle: 'Single-attraction tickets (derived)' },
   { key: 'passes', tileKey: 'passes', label: 'Passes', subtitle: 'Multi-attraction passes' },
-  { key: 'tickets', tileKey: 'tickets', label: 'Tickets', subtitle: 'Single-attraction tickets' },
+  { key: 'trails', tileKey: 'trails', label: 'Trails', subtitle: 'Hiking / walking trails' },
+];
+
+const HOME_MODULE_LIST: Array<{ key: keyof SystemModules; tileKey: string; label: string; subtitle: string }> = [
+  { key: 'itineraryBuilder', tileKey: 'itinerary-builder', label: 'Itinerary Builder', subtitle: 'AI-assisted trip planner' },
   { key: 'guestbook', tileKey: 'guestbook', label: 'Guestbook', subtitle: 'Visitor pins on the map' },
   { key: 'socialWall', tileKey: 'social-wall', label: 'Social Wall', subtitle: 'Curated social feed' },
   { key: 'digitalBrochure', tileKey: 'digital-brochure', label: 'Digital Brochure', subtitle: 'Flippable brochures' },
@@ -216,7 +226,6 @@ const HOME_MODULE_LIST: Array<{ key: keyof SystemModules; tileKey: string; label
   { key: 'survey', tileKey: 'survey', label: 'Survey', subtitle: 'NPS / feedback overlay' },
   { key: 'deals', tileKey: 'deals', label: 'Deals', subtitle: 'Promotions & discounts' },
   { key: 'photoBooth', tileKey: 'photo-booth', label: 'Photo Booth', subtitle: 'Green-screen capture' },
-  { key: 'trails', tileKey: 'trails', label: 'Trails', subtitle: 'Hiking / walking trails' },
   { key: 'wayfinding', tileKey: 'wayfinding', label: 'Wayfinding', subtitle: 'On-property navigation' },
 ];
 
@@ -238,13 +247,16 @@ export function SystemModulesEditor({
   onListingsChange: (next: ListingsModule) => void;
 }) {
   const sys: SystemModules = modules.systemModules ?? DEFAULT_SYSTEM_MODULES;
+  const catalogSysKeys = CATALOG_SYSTEM_MODULE_LIST.map((m) => m.key);
   const homeKeys = HOME_MODULE_LIST.map((m) => m.key);
   const globalKeys = GLOBAL_MODULE_LIST.map((m) => m.key);
   const enabledCount =
+    catalogSysKeys.filter((k) => sys[k]).length +
     homeKeys.filter((k) => sys[k]).length +
     globalKeys.filter((k) => sys[k]).length +
     listings.filter((e) => e.enabled).length;
-  const totalCount = homeKeys.length + globalKeys.length + listings.length;
+  const totalCount =
+    catalogSysKeys.length + homeKeys.length + globalKeys.length + listings.length;
 
   const setSystem = (k: keyof SystemModules) =>
     onChange({ ...modules, systemModules: { ...sys, [k]: !sys[k] } });
@@ -374,6 +386,22 @@ export function SystemModulesEditor({
               );
             })
           )}
+
+          {/* System catalog modules (Events, Tickets, Passes, Trails) — same
+              "data-driven" category but not duplicatable. */}
+          {CATALOG_SYSTEM_MODULE_LIST.map((m) => {
+            const Icon = MODULE_ICONS[m.tileKey] ?? Sparkles;
+            return (
+              <SystemRow
+                key={m.key}
+                icon={<Icon className="h-4 w-4" />}
+                title={m.label}
+                subtitle={m.subtitle}
+                enabled={sys[m.key]}
+                onToggle={() => setSystem(m.key)}
+              />
+            );
+          })}
 
           {showAdd ? (
             <div className="flex items-center gap-2 rounded-md border border-sky-500/40 bg-sky-500/5 p-2">

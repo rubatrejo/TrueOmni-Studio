@@ -157,22 +157,13 @@ export function EventsEditor({ value, onChange }: EventsEditorProps) {
 
   return (
     <div className="space-y-4">
-      <header className="space-y-1">
-        <h2 className="font-display text-[20px] font-semibold text-zinc-900 dark:text-zinc-100">
-          Events
-        </h2>
-        <p className="text-[12px] text-zinc-500">
-          Calendar-based events with date, time, venue, and optional ticket info.
-        </p>
-      </header>
-
       <ImageUrlField
         label="Hero image"
         value={value.heroImage}
         onChange={(next) => update({ heroImage: next ?? '' })}
       />
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <TaxonomyEditor
           label="Categories"
           items={value.categories}

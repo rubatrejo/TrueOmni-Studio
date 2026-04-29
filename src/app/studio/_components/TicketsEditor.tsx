@@ -44,16 +44,11 @@ export function TicketsEditor({ value, eventsValue, onChange }: TicketsEditorPro
 
   return (
     <div className="space-y-4">
-      <header className="space-y-1">
-        <h2 className="font-display text-[20px] font-semibold text-zinc-900 dark:text-zinc-100">
-          Tickets
-        </h2>
-        <p className="text-[12px] text-zinc-500">
-          Wrapper derived from events. The Tickets module shows events with{' '}
-          <code className="text-amber-600 dark:text-amber-300">priceMode = paid</code> filtered by the
-          categories you select below.
-        </p>
-      </header>
+      <p className="rounded-md border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-[11.5px] text-amber-700 dark:text-amber-200">
+        Wrapper derived from events. Shows events with{' '}
+        <code className="text-amber-600 dark:text-amber-300">priceMode = paid</code> filtered by the
+        categories you select below.
+      </p>
 
       <label className="block space-y-1">
         <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">Module label</span>

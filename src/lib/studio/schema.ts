@@ -759,8 +759,12 @@ const CoordsSchema = z.object({
 
 export const GuestbookPinOptionSchema = z.object({
   id: ShortIdSchema,
-  /** Imagen completa del pin (círculo + pointer). */
-  image: z.string().min(1),
+  /**
+   * Imagen completa del pin (círculo + pointer). Empty string permitido
+   * para clientes nuevos que aún no han subido assets — el runtime kiosk
+   * usa un fallback en ese caso.
+   */
+  image: z.string(),
   /** Versión solo-círculo (sin pointer) para el popup. */
   circleImage: z.string().optional(),
   label: z.string().min(1).max(64),

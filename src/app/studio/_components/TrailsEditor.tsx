@@ -147,15 +147,6 @@ export function TrailsEditor({ value, onChange }: TrailsEditorProps) {
 
   return (
     <div className="space-y-4">
-      <header className="space-y-1">
-        <h2 className="font-display text-[20px] font-semibold text-zinc-900 dark:text-zinc-100">
-          Trails
-        </h2>
-        <p className="text-[12px] text-zinc-500">
-          Hiking trails with considerations panel + GeoJSON path for the map tab.
-        </p>
-      </header>
-
       <ImageUrlField
         label="Hero image"
         value={value.heroImage}

@@ -118,16 +118,6 @@ export function PassesEditor({ value, onChange }: PassesEditorProps) {
 
   return (
     <div className="space-y-4">
-      <header className="space-y-1">
-        <h2 className="font-display text-[20px] font-semibold text-zinc-900 dark:text-zinc-100">
-          Passes
-        </h2>
-        <p className="text-[12px] text-zinc-500">
-          Curated bundles of activities. The QR on the pass detail uses the
-          Bandwango URL.
-        </p>
-      </header>
-
       <ImageUrlField
         label="Hero image"
         value={value.heroImage}

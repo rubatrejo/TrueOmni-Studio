@@ -6,13 +6,15 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Milestone Studio — **S3.1–S3.6 cerradas** (2026-04-29). Los 6 editores de módulo entregados: Survey, Deals, Photo Booth, Digital Brochure, Social Wall, Guestbook. Cada uno con schema zod + API PATCH + backfill defensivo + bridge debounced + override en vivo en kiosk runtime.
+**Fase activa:** Milestone Studio — **S3.7 cerrada + UX-1..5 + 3 fixes + rename Trip Planner** (2026-04-29). Content tab CRUD masivo entregado para los 5 catálogos (Listings, Events, Tickets, Passes, Trails) más Listing modules **dinámicos** (add/duplicate/delete/rename/toggle desde tab Modules) con sync bidireccional con `modules.tiles[]`.
 
-**Última fase cerrada:** Studio S3.6 Guestbook (2026-04-29). Antes: S3.5 Social Wall, S3.4 Digital Brochure, S3.3 Photo Booth, S3.2 Deals, S3.1 Survey, S2 (todos en 2026-04-29). S1 Branding y S0 cloud en 2026-04-28.
+**Última fase cerrada:** Studio S3.7 + iteraciones UX (2026-04-29). Antes: S3.1–S3.6 (2026-04-29). S1/S2 (2026-04-28). S0 cloud (2026-04-28).
 
-**Siguiente acción concreta:** Studio S3.7 — CRUD masivo del Content tab para listings/events/tickets/passes/trails (los 5 módulos del kiosk con catálogos grandes que aún no tienen editor). El patrón "editor con live preview" ya está establecido y reutilizable.
+**Siguiente acción concreta:** **Studio S3.8 — Bulk import CSV/JSON** (diseño aprobado por Rubén el 2026-04-29). 3 tareas atómicas planeadas: (1) `import-helpers.ts` core con parseJson/parseCsv/diff/apply, (2) `ImportModal.tsx` UI + `CatalogToolbar` prop `onImport?`, (3) wire en 4 editores (ListingsEditor por entry activo, EventsEditor, PassesEditor, TrailsEditor) + smoke E2E. Tickets queda fuera (derivado).
 
-**Bloqueos:** ninguno. `alwaysShowWelcome={true}` del MapModule sigue hardcoded para QA — apagarlo antes de Fase 4 / producción (`[module]/page.tsx` rama `map`).
+**Bloqueos:**
+- **`pnpm build` falla en SSG `/404`** con `<Html> outside pages/_document` — issue interno de Next 15 inalcanzable desde repo. Bloqueante para Vercel deploy (S7); no bloquea desarrollo. Fixes intentados sin éxito: `not-found.tsx` + `global-error.tsx` + `force-dynamic` en root layout. Issue rastreable como TODO independiente, ver commit `36093fa` para detalles.
+- `alwaysShowWelcome={true}` del MapModule **resuelto** (commit `1ad640e`).
 
 **TODO de QA pendiente:**
 
@@ -1536,6 +1538,49 @@ Para cada uno se entregó:
 - **Social handles habilitan tabs**: solo aparecen botones "Add post" para sources con handle conectado. Si no hay handles, warning amber.
 
 **Fase:** Studio S3.6 Guestbook cerrada (2026-04-29). Siguiente arranque: **S3.7 Content (Listings/Events/Tickets/Passes/Trails)**.
+
+---
+
+### Sesión 2026-04-29 — S3.7 Content tab + UX masivo + Listing modules dinámicos
+
+**Hecho:**
+
+- **Spec + plan S3.7** (`44f125e`, `1168398`) — `docs/superpowers/specs/2026-04-29-studio-s3-7-content-tab-design.md` + `.planning/S3-7-PLAN.md` con 12 tareas atómicas.
+- **S3.7 tasks 1-12** (`7e27a6b`..`a151ce7`): schemas zod 5 catálogos, API PATCH/GET + backfill + cap 480KB, bridge con 5 message types, listeners decentralizados en 5 módulos kiosk, 7 catalog primitives (CatalogList/Toolbar/ItemForm/ItemPanel/TaxonomyEditor/ImageUrlField/LatLngField), 5 editores (Listings 3 sub-tabs, Events con PricePaidFields, Tickets wrapper derivado, Passes con activities, Trails con considerations + GeoJSON), 5 tabs nuevas en sidebar + wiring Shell.
+- **Build fixes** (`36093fa`, `1ad640e`): extraído `photo-booth-asset.ts` puro fuera de server-only + 7 lint errors pre-existing limpiados + `not-found.tsx` + `global-error.tsx` + `force-dynamic` en root layout + `alwaysShowWelcome={true}` hardcoded eliminado.
+- **UX-1**: sidebar sin "01·S1" labels + "Billboard" → "Idle / Billboard" (`2466ed2`).
+- **UX-2**: Versions movido del sidebar al TopBar como botón con icono History (`7423ccd`).
+- **UX-3**: Modules tab con 3 secciones (Listing/Home/Global) — Trails movido a Listing modules como system catalog (`06d1137` + `4dcc0e6`).
+- **UX-4**: light mode pass en 7 catalog primitives + per-item edit panel (full-screen takeover dentro del editor pane, reemplaza inline accordion). Add item → entra a edit directo (`d06b0e8`).
+- **UX-5a/b/c**: **Listing modules dinámicos**. Schema cambió de `{restaurants, thingsToDo, stay}` fijo a `array` de `ListingsCatalogEntry` con `key/label/iconKey/enabled/catalog`. `migrateListings()` defensiva para clientes pre-cambio. ModulesEditor con Add/Duplicate/Delete/Toggle/Rename + sync bidireccional con `modules.tiles[]`. ListingsEditor sub-tabs dinámicos. Kiosk ListingsModule consume payload array (`6ebc4d2` + `de4bfb2`).
+- **3 fixes UX**: headers duplicados quitados de los 5 editores, EventsEditor 3-col→2-col, Trails reubicado en Listing modules section, GuestbookPinOptionSchema.image relax `min(1)` → resuelve "Invalid config" 400 al crear cliente nuevo (`4dcc0e6`).
+- **Rename Trip Planner**: 25 archivos, 42 líneas — todas las ocurrencias de "Itinerary Builder" → "Trip Planner". Slugs internos (URL `itinerary-builder`, schema key `itineraryBuilder`) **conservados** (`ab67200`).
+
+**Verificado:**
+
+- `pnpm typecheck` y `pnpm lint` limpios después de cada commit.
+- Smoke E2E con Playwright: `/studio/default` carga 200, las 21 tabs del sidebar visibles, navegación a Listings carga editor, "Add listing" entra a edit panel, light/dark mode con buen contraste, Modules tab muestra Listing modules section con Add/Duplicate/Delete/Toggle, "Add Shopping" crea entry + sub-tab + tile sincronizado, POST `/api/studio/configs` para crear cliente nuevo responde 201.
+- `pnpm kiosk:dev` arranca en `localhost:3000` sin errores.
+- ⚠️ `pnpm build` falla en SSG `/404` con error interno Next 15 (pre-existing, no introducido en sesión).
+
+**Pendiente / siguiente:**
+
+- **Arrancar S3.8 — Bulk import CSV/JSON** (diseño aprobado, plan listo, no empezado por límite de contexto). 3 tareas: (1) `import-helpers.ts` core, (2) `ImportModal.tsx` + `CatalogToolbar` prop, (3) wire en 4 editores + smoke E2E. Estimado 1 sesión.
+- **Galería de imágenes por cliente** (S3 también, complementa al Bulk import).
+- **Build SSG `/404`** debugging dedicado — bloqueante para Vercel deploy en S7.
+- **TODOs colaterales**: LLM real Ask AI (`/api/ai` con Anthropic SDK), voice lang dinámico, Map aggregator para trails source.
+- **Fases siguientes**: S4 i18n editor → S5 Ads → S6 Integraciones → S7 Auth + Publish.
+
+**Decisiones:**
+
+- **Schema dinámico de Listings via array de entries** (en lugar de keys fijos camelCase) — permite Shopping/Beaches/etc. sin tocar runtime. La migración `migrateListings(raw)` detecta el shape viejo y convierte idempotente. El kiosk runtime busca por `entry.key === moduleKey` en lugar del mapping `MODULE_KEY_TO_LISTINGS_CATALOG` viejo.
+- **Sync bidireccional Listing modules ↔ tiles[]**: cuando se crea/borra/renombra/togglea un listing module, también se actualiza el tile correspondiente en `modules.tiles[]`. Single source of truth implícito (listings array es fuente para listing-style; tiles[] mantiene orden general del Home grid).
+- **HomeShell del kiosk acepta tiles override que no existen en server**: si llega un tile via `kiosk:modules-override` con key desconocido (módulo nuevo del Studio), renderiza con HomeTile placeholder. Permite preview live de modules dinámicos.
+- **Per-item edit es full-screen takeover dentro del editor pane** (no modal ni split). Mantiene live preview iframe visible a la derecha mientras editás.
+- **CSV import será secundario a JSON**: JSON es export → re-import roundtrip perfecto; CSV soportará campos top-level con `;`-separated arrays + `lat,lng` coords. Subobjetos complejos (event.ticket, trail.considerations) skip en CSV → quedan defaults.
+- **Slugs internos `itinerary-builder` y `itineraryBuilder` conservados** al renombrar visible a "Trip Planner" — cambiar la URL rompería favoritos guardados con slug viejo + redirects + tile keys del schema.
+
+**Fase:** Studio S3.7 cerrada + iteraciones UX masivas (2026-04-29). Siguiente arranque: **S3.8 Bulk import CSV/JSON**.
 
 ---
 

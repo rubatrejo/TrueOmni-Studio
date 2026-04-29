@@ -88,10 +88,10 @@ Sub-fases entregadas:
 
 ## Fase S3 — Contenido / Data
 
-- [ ] Editor de listings (CRUD masivo, filtros, subcategorías).
-- [ ] Editor de events (week strip, ticketables).
-- [ ] Editor de passes / deals / trails / brochures.
-- [ ] Bulk import desde CSV/JSON.
+- [x] **S3.1–S3.6** — Editores de Survey, Deals, Photo Booth, Digital Brochure, Social Wall, Guestbook (cerradas 2026-04-29).
+- [x] **S3.7 — Content tab CRUD masivo** (cerrada 2026-04-29). Editores para los 5 catálogos (Listings, Events, Tickets wrapper, Passes, Trails) con 7 catalog primitives compartidos + bridge debounced + listeners decentralizados en kiosk runtime + 5 tabs nuevas en sidebar.
+- [x] **UX iteraciones masivas** (2026-04-29): light mode, per-item edit panel, Versions al TopBar, Modules tab con 3 secciones, Listing modules **dinámicos** (add/duplicate/delete con sync de tiles[]), schema migration defensiva, "Itinerary Builder" → "Trip Planner".
+- [ ] **S3.8 — Bulk import desde CSV/JSON** (diseño aprobado 2026-04-29, plan listo, no empezado por límite de contexto). 3 tareas atómicas planeadas.
 - [ ] Asignación de imágenes desde galería del cliente.
 
 ---

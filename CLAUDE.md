@@ -197,6 +197,7 @@ El subagent `auditor-white-label` fuerza estas reglas antes de cada commit.
 - ❌ Inventar fechas; obtenerlas con `date +%F`.
 - ❌ Usar la keyword `transparent` en CSS gradients que terminan en color sólido. `transparent` es `rgba(0,0,0,0)` (negro transparente) → blendea por grises muddy. Usar `hsl(var(--token) / 0)` para fade limpio a un color sólido tokenizado.
 - ❌ Hardcodear nombres geográficos (ciudades, lugares, regiones) en `config.textos.*` o en seed data (`home.modules.*`). El auditor solo detecta strings en JSX, no contenido. Usar templates `{client_name}` interpolados con `config.client.nombre` para todo lo que dependa del cliente activo.
+- ❌ Committear un fix de build sin verificar antes que `pnpm kiosk:dev` sigue funcionando. Lección 2026-04-29: añadí `src/pages/_document.tsx` para arreglar SSG `/404` en `pnpm build`, pero rompió el dev con `ENOENT: open .next/server/pages/_document.js` (Next dev no precompila Pages Router al inicio). Tuve que revertir. Trade-off correcto: dev > deploy futuro. **Regla:** todo fix de build se valida primero con `pnpm kiosk:dev` arrancando limpio antes del commit.
 
 ---
 

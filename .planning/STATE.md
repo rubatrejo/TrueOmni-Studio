@@ -6,14 +6,16 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Milestone Studio — **S3.7 cerrada + UX-1..5 + 3 fixes + rename Trip Planner** (2026-04-29). Content tab CRUD masivo entregado para los 5 catálogos (Listings, Events, Tickets, Passes, Trails) más Listing modules **dinámicos** (add/duplicate/delete/rename/toggle desde tab Modules) con sync bidireccional con `modules.tiles[]`.
+**Fase activa:** Milestone Studio — **completo en funcionalidad editable + bridge live preview** (2026-04-29). Cerradas en esta sesión: S3.8 (bulk import CSV/JSON), S4 base (i18n editor side-by-side) + S4.1 (AI translate con Anthropic SDK + feature flag), S5 base (ads system editor) + S5.1 (bridge live preview ads) + S5.2 (bulk import ads), S6 (integrations + health checks), S7.0 (local publish skeleton i18n), S7.1 narrow (bootstrap defensivo ads/integrations desde filesystem). 21 commits hoy.
 
-**Última fase cerrada:** Studio S3.7 + iteraciones UX (2026-04-29). Antes: S3.1–S3.6 (2026-04-29). S1/S2 (2026-04-28). S0 cloud (2026-04-28).
+**Última fase cerrada:** Studio S5.1 — bridge live preview ads (2026-04-29). El milestone Studio queda completo salvo el publish flow completo y la infraestructura de deploy.
 
-**Siguiente acción concreta:** **Studio S3.8 — Bulk import CSV/JSON** (diseño aprobado por Rubén el 2026-04-29). 3 tareas atómicas planeadas: (1) `import-helpers.ts` core con parseJson/parseCsv/diff/apply, (2) `ImportModal.tsx` UI + `CatalogToolbar` prop `onImport?`, (3) wire en 4 editores (ListingsEditor por entry activo, EventsEditor, PassesEditor, TrailsEditor) + smoke E2E. Tickets queda fuera (derivado).
+**Siguiente acción concreta:** **S7.1 wide — config publish completo**. Bloqueado por 3 decisiones de diseño que necesita Rubén: (1) ¿branding colors al `tokens.css` o JSON?, (2) ¿módulos editables al `config.json`?, (3) ¿filesystem queda como source of truth runtime, KV solo working copy? Sesión dedicada con esas decisiones tomadas.
 
 **Bloqueos:**
-- **`pnpm build` falla en SSG `/404`** con `<Html> outside pages/_document` — issue interno de Next 15 inalcanzable desde repo. Bloqueante para Vercel deploy (S7); no bloquea desarrollo. Fixes intentados sin éxito: `not-found.tsx` + `global-error.tsx` + `force-dynamic` en root layout. Issue rastreable como TODO independiente, ver commit `36093fa` para detalles.
+- **`pnpm build` falla en SSG `/404`** con `<Html> outside pages/_document` — Next 15 auto-genera fallbacks legacy del Pages Router que importan `<Html>`. Workaround intentado en `af4713f` (añadir `src/pages/_document.tsx` + `_error.tsx`) **revertido en `a212ce8`** porque rompía dev (`ENOENT: open .next/server/pages/_document.js` cuando Next dev no precompila Pages Router al inicio). Bloqueante para Vercel deploy (S7.4), NO bloquea desarrollo. Pendiente: workaround dev-friendly (probablemente `output: 'standalone'` o plugin webpack que inyecte `_document` lazy). Sesión exploratoria.
+- **S7.2/3/4 bloqueados por infra externa** — necesitan: GitHub PAT (S7.2), OAuth provider + credentials (S7.3 NextAuth), proyecto Vercel + env vars en dashboard (S7.4).
+- **AI translate path feliz no validado** — Rubén decidió no usar AI por costo. El feature flag oculta el botón ✨ cuando `ANTHROPIC_API_KEY` no está. Si en el futuro se añade la key, el botón aparece automáticamente sin tocar código.
 - `alwaysShowWelcome={true}` del MapModule **resuelto** (commit `1ad640e`).
 
 **TODO de QA pendiente:**

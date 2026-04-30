@@ -1,11 +1,13 @@
 'use client';
 
+import Link from 'next/link';
+
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon } from './billboard-footer-parts';
-import { resolveSlotLabel } from './module-info';
+import { resolveSlotHref, resolveSlotImage, resolveSlotLabel } from './module-info';
 import { useBillboardOverride } from './use-billboard-override';
 
 /**
@@ -109,13 +111,15 @@ export function Billboard1() {
         </div>
       </div>
 
-      {/* THINGS TO DO card (495×410 @ 30, 374) */}
-      <div
-        className="absolute overflow-hidden"
+      {/* Slot 0 — original SVG: THINGS TO DO (495×410 @ 30, 374) */}
+      <Link
+        href={resolveSlotHref(modules?.[0])}
+        className="absolute block overflow-hidden"
         style={{ left: '30px', top: '374px', width: '495px', height: '410px', borderRadius: '9px' }}
+        aria-label={`${slot0.label} ${slot0.labelLine2 ?? ''}`.trim()}
       >
         <img
-          src="/assets/billboard-1/things-to-do.png"
+          src={resolveSlotImage(modules?.[0], '/assets/billboard-1/things-to-do.png')}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
@@ -132,15 +136,17 @@ export function Billboard1() {
             </>
           ) : null}
         </span>
-      </div>
+      </Link>
 
-      {/* EVENTS card (495×410 @ 30, 810) */}
-      <div
-        className="absolute overflow-hidden"
+      {/* Slot 1 — original SVG: EVENTS (495×410 @ 30, 810) */}
+      <Link
+        href={resolveSlotHref(modules?.[1])}
+        className="absolute block overflow-hidden"
         style={{ left: '30px', top: '810px', width: '495px', height: '410px', borderRadius: '9px' }}
+        aria-label={`${slot1.label} ${slot1.labelLine2 ?? ''}`.trim()}
       >
         <img
-          src="/assets/billboard-1/events.jpg"
+          src={resolveSlotImage(modules?.[1], '/assets/billboard-1/events.jpg')}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
@@ -157,10 +163,11 @@ export function Billboard1() {
             </>
           ) : null}
         </span>
-      </div>
+      </Link>
 
-      {/* ITINERARY BUILDER card (495×208 @ 30, 1250) olive #b9bd39 */}
-      <div
+      {/* Slot 2 — original SVG: ITINERARY BUILDER (495×208 @ 30, 1250) olive #b9bd39 */}
+      <Link
+        href={resolveSlotHref(modules?.[2])}
         className="absolute flex items-center overflow-hidden"
         style={{
           left: '30px',
@@ -172,6 +179,7 @@ export function Billboard1() {
           paddingLeft: '36px',
           paddingRight: '36px',
         }}
+        aria-label={`${slot2.label} ${slot2.labelLine2 ?? ''}`.trim()}
       >
         <div
           className="font-display font-bold uppercase leading-[1.05] text-white"
@@ -211,10 +219,11 @@ export function Billboard1() {
             />
           </g>
         </svg>
-      </div>
+      </Link>
 
-      {/* PHOTO BOOTH card (495×208 @ 30, 1488) blue #1796d6 */}
-      <div
+      {/* Slot 3 — original SVG: PHOTO BOOTH (495×208 @ 30, 1488) blue #1796d6 */}
+      <Link
+        href={resolveSlotHref(modules?.[3])}
         className="absolute flex items-center overflow-hidden"
         style={{
           left: '30px',
@@ -226,6 +235,7 @@ export function Billboard1() {
           paddingLeft: '36px',
           paddingRight: '36px',
         }}
+        aria-label={`${slot3.label} ${slot3.labelLine2 ?? ''}`.trim()}
       >
         {/* Camera icon — verbatim de designs/TNT/Billboard/Photo_Booth-Icon.svg */}
         <svg
@@ -258,7 +268,7 @@ export function Billboard1() {
             </>
           ) : null}
         </div>
-      </div>
+      </Link>
 
       {/* Right big card (valentino hero + TOUCH TO START + click icon) @ (555, 370) */}
       <div

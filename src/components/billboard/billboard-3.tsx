@@ -1,11 +1,13 @@
 'use client';
 
+import Link from 'next/link';
+
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon } from './billboard-footer-parts';
-import { resolveSlotLabel } from './module-info';
+import { resolveSlotHref, resolveSlotImage, resolveSlotLabel } from './module-info';
 import { useBillboardLogoHeight, useBillboardOverride } from './use-billboard-override';
 
 /**
@@ -42,10 +44,15 @@ export function Billboard3() {
       className="relative h-full w-full overflow-hidden"
       style={{ backgroundColor: '#004f8b' }}
     >
-      {/* Fila 1: FOOD & DRINK + EVENTS (y=0..450) */}
-      <div className={cardBase} style={{ ...topRowSize, left: '0', top: '0' }}>
+      {/* Fila 1 — slots 0 (top-left) y 1 (top-right). y=0..450 */}
+      <Link
+        href={resolveSlotHref(modules?.[0])}
+        className={`${cardBase} block`}
+        style={{ ...topRowSize, left: '0', top: '0' }}
+        aria-label={`${slot0.label} ${slot0.labelLine2 ?? ''}`.trim()}
+      >
         <img
-          src="/assets/billboard-3/eat.jpg"
+          src={resolveSlotImage(modules?.[0], '/assets/billboard-3/eat.jpg')}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
@@ -59,10 +66,15 @@ export function Billboard3() {
             </>
           ) : null}
         </span>
-      </div>
-      <div className={cardBase} style={{ ...topRowSize, left: '540px', top: '0' }}>
+      </Link>
+      <Link
+        href={resolveSlotHref(modules?.[1])}
+        className={`${cardBase} block`}
+        style={{ ...topRowSize, left: '540px', top: '0' }}
+        aria-label={`${slot1.label} ${slot1.labelLine2 ?? ''}`.trim()}
+      >
         <img
-          src="/assets/billboard-3/events.jpg"
+          src={resolveSlotImage(modules?.[1], '/assets/billboard-3/events.jpg')}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
@@ -76,7 +88,7 @@ export function Billboard3() {
             </>
           ) : null}
         </span>
-      </div>
+      </Link>
 
       {/* Banner central (y=475..1245): grass/city + logo + TOUCH TO START */}
       <div className="absolute inset-x-0 overflow-hidden" style={{ top: '475px', height: '770px' }}>
@@ -116,10 +128,15 @@ export function Billboard3() {
         </div>
       </div>
 
-      {/* Fila 2: THINGS TO DO + ITINERARY BUILDER (y=1230..1720) */}
-      <div className={cardBase} style={{ ...bottomRowSize, left: '0', top: '1245px' }}>
+      {/* Fila 2 — slots 2 (bottom-left) y 3 (bottom-right). y=1245..1720 */}
+      <Link
+        href={resolveSlotHref(modules?.[2])}
+        className={`${cardBase} block`}
+        style={{ ...bottomRowSize, left: '0', top: '1245px' }}
+        aria-label={`${slot2.label} ${slot2.labelLine2 ?? ''}`.trim()}
+      >
         <img
-          src="/assets/billboard-3/play.jpg"
+          src={resolveSlotImage(modules?.[2], '/assets/billboard-3/play.jpg')}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
@@ -133,10 +150,15 @@ export function Billboard3() {
             </>
           ) : null}
         </span>
-      </div>
-      <div className={cardBase} style={{ ...bottomRowSize, left: '540px', top: '1245px' }}>
+      </Link>
+      <Link
+        href={resolveSlotHref(modules?.[3])}
+        className={`${cardBase} block`}
+        style={{ ...bottomRowSize, left: '540px', top: '1245px' }}
+        aria-label={`${slot3.label} ${slot3.labelLine2 ?? ''}`.trim()}
+      >
         <img
-          src="/assets/billboard-3/things-to-do.jpg"
+          src={resolveSlotImage(modules?.[3], '/assets/billboard-3/things-to-do.jpg')}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
@@ -150,7 +172,7 @@ export function Billboard3() {
             </>
           ) : null}
         </span>
-      </div>
+      </Link>
 
       {/* Footer (y=1720..1920): #004f8b con TrueOmni + accesibilidad + ENGLISH */}
       <div

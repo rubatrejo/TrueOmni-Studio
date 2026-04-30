@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
@@ -7,7 +8,7 @@ import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon } from './billboard-footer-parts';
-import { MODULE_BILLBOARD_INFO } from './module-info';
+import { MODULE_BILLBOARD_INFO, resolveSlotHref } from './module-info';
 import { useBillboardLogoHeight, useBillboardOverride } from './use-billboard-override';
 
 /**
@@ -146,12 +147,13 @@ export function Billboard2() {
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} />
       </button>
 
-      {/* Card central — más grande (800×960) — click avanza */}
-      <button
-        type="button"
-        onClick={advance}
-        aria-label={`${current.label}: activar`}
-        className="absolute overflow-hidden shadow-2xl focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+      {/* Card central — más grande (800×960) — click navega al módulo del slot
+          activo. Antes hacía advance() del carousel; ahora los peeks laterales
+          son la única forma de avanzar/retroceder y la card central es el CTA. */}
+      <Link
+        href={resolveSlotHref(current.key)}
+        aria-label={`${current.label}: abrir`}
+        className="absolute block overflow-hidden shadow-2xl focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
         style={{
           left: '140px',
           top: '340px',
@@ -188,12 +190,13 @@ export function Billboard2() {
             </>
           ) : null}
         </span>
-      </button>
+      </Link>
 
-      {/* TOUCH TO START + arrow circle — single-line, alineado verticalmente
-          al centro de la flecha. Tamaño 60px coincide con el círculo (110px). */}
-      <div
-        className="absolute flex items-center gap-10"
+      {/* TOUCH TO START + arrow — Link que navega al módulo del slot activo. */}
+      <Link
+        href={resolveSlotHref(current.key)}
+        aria-label={`${current.label}: abrir`}
+        className="absolute flex items-center gap-10 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/50"
         style={{ left: '50%', top: '1410px', transform: 'translateX(-50%)' }}
       >
         <span
@@ -216,7 +219,7 @@ export function Billboard2() {
         >
           <path d="M46.023,72.912,67.534,51.4m0,0L46.023,29.889M67.534,51.4H3m8.15,26.889a48.4,48.4,0,1,0,0-53.778" />
         </svg>
-      </div>
+      </Link>
 
       {/* Footer: clock + accesibilidad + ENGLISH */}
       <div

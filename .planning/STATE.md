@@ -6,14 +6,13 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Milestone Studio — **completo en funcionalidad editable + bridge live preview** (2026-04-29). Cerradas en esta sesión: S3.8 (bulk import CSV/JSON), S4 base (i18n editor side-by-side) + S4.1 (AI translate con Anthropic SDK + feature flag), S5 base (ads system editor) + S5.1 (bridge live preview ads) + S5.2 (bulk import ads), S6 (integrations + health checks), S7.0 (local publish skeleton i18n), S7.1 narrow (bootstrap defensivo ads/integrations desde filesystem). 21 commits hoy.
+**Fase activa:** Milestone Studio — **ciclo Studio↔filesystem cerrado end-to-end** (2026-04-29 sesión 2). Cerradas hoy en sesión 2: build SSG `/404` dev-friendly fix (script wrapper con shim transitorio), S7.1 wide (config publish completo + tokens.css surgical edit con guards defensivos), bootstrap filesystem→Studio (mapper inverso para que el Studio refleje los datos reales del filesystem al cargar).
 
-**Última fase cerrada:** Studio S5.1 — bridge live preview ads (2026-04-29). El milestone Studio queda completo salvo el publish flow completo y la infraestructura de deploy.
+**Última fase cerrada:** Studio S7.1 wide + bootstrap fs→Studio (2026-04-29 sesión 2). Loop completo: open → bootstrap from fs → edit → publish (con guards) → roundtrip identity.
 
-**Siguiente acción concreta:** **S7.1 wide — config publish completo**. Bloqueado por 3 decisiones de diseño que necesita Rubén: (1) ¿branding colors al `tokens.css` o JSON?, (2) ¿módulos editables al `config.json`?, (3) ¿filesystem queda como source of truth runtime, KV solo working copy? Sesión dedicada con esas decisiones tomadas.
+**Siguiente acción concreta:** **S7.2 — GitHub PR-publish**. Wrap del publish actual en `gh` API o `@octokit/rest` para crear branch + commit + PR con approval gate. **Necesita de Rubén: GitHub PAT (`GH_TOKEN`) en `.env.local` con scopes `repo`**.
 
 **Bloqueos:**
-- **`pnpm build` falla en SSG `/404`** con `<Html> outside pages/_document` — Next 15 auto-genera fallbacks legacy del Pages Router que importan `<Html>`. Workaround intentado en `af4713f` (añadir `src/pages/_document.tsx` + `_error.tsx`) **revertido en `a212ce8`** porque rompía dev (`ENOENT: open .next/server/pages/_document.js` cuando Next dev no precompila Pages Router al inicio). Bloqueante para Vercel deploy (S7.4), NO bloquea desarrollo. Pendiente: workaround dev-friendly (probablemente `output: 'standalone'` o plugin webpack que inyecte `_document` lazy). Sesión exploratoria.
 - **S7.2/3/4 bloqueados por infra externa** — necesitan: GitHub PAT (S7.2), OAuth provider + credentials (S7.3 NextAuth), proyecto Vercel + env vars en dashboard (S7.4).
 - **AI translate path feliz no validado** — Rubén decidió no usar AI por costo. El feature flag oculta el botón ✨ cuando `ANTHROPIC_API_KEY` no está. Si en el futuro se añade la key, el botón aparece automáticamente sin tocar código.
 - `alwaysShowWelcome={true}` del MapModule **resuelto** (commit `1ad640e`).
@@ -1962,6 +1961,46 @@ Para cada uno se entregó:
 - **No smoke E2E nuevo**: el patrón es idéntico a los 13 módulos previos (todos validados). El typecheck garantiza el wiring.
 
 **Fase:** Studio S5.1 cerrada (2026-04-29). Milestone Studio queda **completo en funcionalidad editable + bridge live preview**. Solo queda el publish flow (S7.1 wide + S7.2/3/4) que necesita decisiones / infra externa.
+
+---
+
+### Sesión 2026-04-29 (sesión 2) — Build SSG fix dev-friendly + S7.1 wide + bootstrap fs→Studio
+
+**Hecho:**
+
+- **Build SSG `/404` fix dev-friendly**: nuevo `scripts/build-with-pages-shim.mjs` que crea `src/pages/_document.tsx` + `_error.tsx` minimales **solo durante `pnpm build`** y los borra atómicamente con `try/finally` + handlers SIGINT/SIGTERM/SIGHUP. `package.json` apunta `"build"` al wrapper. Dev jamás ve `src/pages/` → no se reproduce el `ENOENT` que mató `af4713f`. Sanity check defensivo: el script falla si encuentra `src/pages/` pre-existente (evita pisar Pages Router legítimo futuro).
+- **S7.1 wide — config publish completo**: nuevo `src/lib/studio/publish-merger.ts` (~280 líneas) con `buildFilesystemConfig(studio, currentFs)` + `buildTokensCss(studio, currentCss)`. Endpoint `POST /api/studio/publish/[slug]` extendido a config.json + tokens.css además de i18n. Decisiones aprobadas por Rubén: P1 surgical edit de tokens.css (3 brand HSL), P2 preservar `textos` legacy, P3 `systemModules` a flags dispersos, P4 `idleLogo`/`footerLogo` top-level en branding, P5 skip custom fonts (data URLs).
+- **Guards defensivos en el merger** (descubierto en E2E al ver el primer publish borrar 4 ads + mapbox token + nombre "Arizona"): sentinel `nombre === "TrueOmni Default"` no sobreescribe; empty-string skip para `integrations.{api.baseUrl, mapbox.token, analytics.gaId}`; empty-array skip para `ads.ads`; comparación estructural `JSON.stringify` contra factory default para events/deals/passes/tickets/trails/socialWall/brochures/guestbook/photoBooth/survey/listings → si Studio === default, NO sobreescribe.
+- **Surgical edit con comment hex update**: el regex de `replaceBrandToken` actualiza también el comentario lateral `/* #XXXXXX — descripción */` para que el hex visible en el archivo siga sincronizado con el HSL.
+- **Bootstrap filesystem→Studio** (cierre del desfase visual): nuevo `src/lib/studio/bootstrap-from-fs.ts` (~330 líneas) con `readClientFs()` + `bootstrapStudioFromFs()`. Mappers inversos para nombre, branding (logo/favicon/idleLogo/footerLogo), branding colors via tokens.css → hex (helper nuevo `hslToHex` en `hex-to-hsl.ts`), billboard, ads, integrations, modules tiles enabled, listings (entries dinámicos sin `kind`), modules con `kind` (events/deals/passes/tickets/trails/socialWall/brochures/guestbook), photoBooth/survey/aiAvatar.
+- **Refactor de `hydrateConfig`** en `/api/studio/configs/[slug]/route.ts`: aplica defaults primero y luego invoca `bootstrapStudioFromFs`. Borrados los helpers `readClientConfigFromFs`/`bootstrapAdsFromFs`/`bootstrapIntegrationsFromFs` (substituidos por el módulo nuevo).
+
+**Verificado:**
+
+- `pnpm build` completa con todas las rutas Dynamic ƒ. `pnpm kiosk:dev` arranca limpio en 1020ms (sin `ENOENT`). `src/pages/` borrado tras build (cleanup atómico). `pnpm typecheck` y `pnpm lint` limpios.
+- E2E publish round-trip identity: `/studio/default` → publish dryRun → `config.json` **unchanged** (483853 bytes), `tokens.css` cambia 2 dígitos HSL inocuos (round-trip hex→hsl), 4 i18n unchanged + es.json artefacto pre-existente.
+- E2E edit explícito: PATCH `branding.primary` `#004F8B` → `#FF0000` → publish → solo tokens.css modificado, comentario hex auto-actualizado a `#FF0000`. Resto de archivos unchanged.
+- E2E bootstrap fs→Studio: GET `/api/studio/configs/default` con cfg "fresh-from-template" hidrata correctamente: nombre `"Arizona"`, branding `#004E8A/#0085CC/#B7BB3A` (round-trip de tokens.css), 4 ads, 69 events, 20 deals, 6 passes, 3 listings (restaurants/things-to-do/stay), mapbox token real, 22 social posts, 4 brochures, 6 photoBooth backgrounds, 5 survey questions.
+
+**Pendiente / siguiente:**
+
+- **S7.2 — GitHub PR-publish**: necesita PAT con scope `repo` en `.env.local` (`GH_TOKEN`). Wrap del publish wide actual con `@octokit/rest` o `gh api` para abrir PR con diff + approval gate.
+- **S7.3 — NextAuth + admin gate (`ruben@trueomni.com`)**: necesita OAuth app (Google o GitHub).
+- **S7.4 — Vercel deploy**: necesita proyecto Vercel + env vars en dashboard. Build SSG ya desbloqueado.
+- **Round-trip HSL micro-pérdida**: filesystem `--brand-primary: 206 100% 27%` → bootstrap a hex `#004E8A` (no `#004F8B`). El comentario lateral del CSS sigue diciendo `#004F8B` (deuda histórica del archivo). Si el operador no toca el color, el publish-merger lo deja igual; si lo toca, el hex y el comentario se sincronizan. Aceptable.
+- **Filesystem→Studio bootstrap NO se aplica si el Studio ya tiene contenido editado**: la heurística estructural (`JSON.stringify` contra factory default) protege ediciones. Trade-off conocido: si el operador edita y revierte exactamente al default, se vuelve hidratable de nuevo. Poco probable en práctica.
+
+**Decisiones:**
+
+- **Wrapper en lugar de commit de `src/pages/`**: aprendizaje de `af4713f` → `a212ce8` (commit + revert). Dev > deploy futuro. El shim transitorio es idempotent y atomic, sin contamination del repo.
+- **Guards estructurales en el publish-merger**: descubrí en el primer smoke E2E que el publish "ciego" borraba 1165 bytes del config.json (4 ads, mapbox token, nombre "Arizona"). La causa raíz era el bootstrap parcial del GET (solo ads/integrations). Ataque dual: (1) merger defensivo que no sobreescribe defaults factory, (2) bootstrap completo que rellena el Studio desde fs la primera vez. Ambas defensas se complementan: el bootstrap previene que el Studio "muestre vacío", el merger previene que un publish accidental borre contenido aunque el bootstrap falle.
+- **Sentinel `"TrueOmni Default"` para nombre**: el seed endpoint usa ese literal hardcoded en `src/app/api/studio/seed/route.ts:28`. Tratamos coincidencia exacta como "no editado por operador". Frágil si alguien quiere llamar al cliente exactamente "TrueOmni Default", pero improbable.
+- **`takeFsIfDefault(studioValue, factoryDefault, fromFs)`**: helper reusable que captura el patrón "preserve studio si fue editado, sino hidratar de fs". Comparación estructural por JSON-equality.
+- **`hslToHex` helper en lugar de regex**: hace round-trip exacto y maneja edge cases (saturation=0, hue wrap, NaN). Reusable en cualquier futuro mapper inverso.
+- **No actualizar el comentario lateral del CSS por reescritura del archivo entero**: surgical edit preserva la descripción semántica del comentario ("Azul oscuro: headers, toolbars, teclado") aunque el color ya no sea azul. El operador puede actualizar la descripción manualmente si quiere — no es trabajo del Studio.
+- **No proponer commit a media sesión**: feedback memory guardado (`feedback_no_commit_premature.md`). Con contexto libre se sigue trabajando, el commit lo dispara `/terminar`.
+
+**Fase:** Milestone Studio — ciclo Studio↔filesystem cerrado end-to-end (2026-04-29 sesión 2). Siguiente arranque: **S7.2 GitHub PR-publish** (necesita PAT) o paramos.
 
 ---
 

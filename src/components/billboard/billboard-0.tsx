@@ -141,8 +141,17 @@ export function Billboard0() {
             ~66px tall (2.5x mayor, proporción preservada). */}
         <div className="absolute" style={{ left: '851px', top: '132px' }}>
           <span
-            className="block font-display italic text-white"
-            style={{ fontSize: '20px', fontWeight: 500, letterSpacing: '0.01em', lineHeight: '1' }}
+            className="block italic text-white"
+            style={{
+              // Brand mark: NO usa `font-display` (bound a `var(--font-display)`
+              // que cambia con el font del cliente). Bloqueado a Open Sans /
+              // system-ui para mantener consistencia con el SVG del logo.
+              fontFamily: '"Open Sans", system-ui, sans-serif',
+              fontSize: '20px',
+              fontWeight: 500,
+              letterSpacing: '0.01em',
+              lineHeight: '1',
+            }}
           >
             {t.billboard_powered_by ?? 'Powered by'}
           </span>

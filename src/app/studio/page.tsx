@@ -77,12 +77,12 @@ export default function StudioHome() {
       <header className="mb-16 flex items-center justify-between">
         <StudioBrand />
         <div className="flex items-center gap-3">
-          <button
-            type="button"
+          <Link
+            href="/studio/docs"
             className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/80"
           >
             Documentation
-          </button>
+          </Link>
           <ThemeToggle />
           <div className="flex h-9 items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 dark:border-zinc-800 dark:bg-zinc-900">
             <div className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-sky-500 to-cyan-400 text-[11px] font-semibold text-zinc-900">

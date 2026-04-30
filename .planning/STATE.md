@@ -6,11 +6,14 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Milestone Studio — **ciclo Studio↔filesystem cerrado end-to-end** (2026-04-29 sesión 2). Cerradas hoy en sesión 2: build SSG `/404` dev-friendly fix (script wrapper con shim transitorio), S7.1 wide (config publish completo + tokens.css surgical edit con guards defensivos), bootstrap filesystem→Studio (mapper inverso para que el Studio refleje los datos reales del filesystem al cargar).
+**Fase activa:** Milestone Studio — **iteración masiva UX/funcional 2026-04-30** (Studio docs, Versions tab, Integrations Satisfi/Tavus/Bandwango/CrowdRiff/Viator, Tavus AI Avatar end-to-end, Photo Booth fix, fonts custom fix, Full screen preview, orientation, scroll fix).
 
-**Última fase cerrada:** Studio S7.1 wide + bootstrap fs→Studio (2026-04-29 sesión 2). Loop completo: open → bootstrap from fs → edit → publish (con guards) → roundtrip identity.
+**Última fase cerrada:** Tavus AI Avatar live + Studio polish session 2026-04-30.
 
-**Siguiente acción concreta:** **S7.2 — GitHub PR-publish**. Wrap del publish actual en `gh` API o `@octokit/rest` para crear branch + commit + PR con approval gate. **Necesita de Rubén: GitHub PAT (`GH_TOKEN`) en `.env.local` con scopes `repo`**.
+**Siguiente acción concreta:** **Idle/Billboard editor v2** — reemplazar gradients de las miniaturas de layout por **wireframes neutros** (4 SVGs simples por variant 0/1/2/3, solo cajas/divisores), y añadir **edición de contenido por layout** (logo size slider/presets, módulos visibles, custom CTA). Requiere: extender schema `billboard` con campos por-variant, sub-sección de controles que cambia según variant, bridge wiring para overrides en tiempo real, y que `billboard-0/1/2/3.tsx` lean los overrides. Pieza grande — arrancar fresca con esto al inicio de la próxima sesión.
+
+**Pendiente de la sesión 2026-04-30 (cosas pequeñas):**
+- **Favicon visibility** — el favicon subido en Studio se aplica vía `studio-bridge.tsx:setFavicon()` al `<link rel="icon">` del iframe (visible en pestaña del browser cuando el kiosk corre como URL pública). NO se refleja todavía en la card de `/studio` ni en el TopBar del editor. Rubén preguntó dónde se ve — pendiente decidir si también debe aparecer en esos sitios del Studio mismo.
 
 **Bloqueos:**
 - **S7.2/3/4 bloqueados por infra externa** — necesitan: GitHub PAT (S7.2), OAuth provider + credentials (S7.3 NextAuth), proyecto Vercel + env vars en dashboard (S7.4).
@@ -19,6 +22,7 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 **TODO de QA pendiente:**
 
+- **Studio docs changelog — automatizar al cerrar S7.2.** Hoy los entries del changelog en `src/app/studio/docs/page.tsx` están hardcoded inline. Decisión tomada (2026-04-30): cuando S7.2 (GitHub PR-publish) esté operativo, sustituir por fetch a GitHub Releases API en build time, filtrando releases con prefijo `studio-`. Plan completo en `~/.claude/projects/-Users-rubenramirez-Documents-Claude-Code-Kiosk-Portrait-Old/memory/project_studio_docs_changelog_automation.md`. Mientras tanto, mantener entries a mano en cada milestone del Studio.
 - Fase 3.15 Ask AI: **LLM real** (Fase 5+) — reemplazar typewriter mock por endpoint `/api/ai` con Anthropic Claude usando `clients/{slug}/config.json` como system prompt.
 - Fase 3.15 Ask AI: **voice lang dinámico** — `recognition.lang = 'en-US'` hardcoded en `ai-modal.tsx:87`; debería leer de `config.client.locale` o `askAi.voiceLang`.
 - Fase 3.15 Ask AI: **fallback response configurable** — string `'I can help with that!...'` en `ai-store.ts:56` mover a `config.textos.ai_fallback_response`.
@@ -2001,6 +2005,54 @@ Para cada uno se entregó:
 - **No proponer commit a media sesión**: feedback memory guardado (`feedback_no_commit_premature.md`). Con contexto libre se sigue trabajando, el commit lo dispara `/terminar`.
 
 **Fase:** Milestone Studio — ciclo Studio↔filesystem cerrado end-to-end (2026-04-29 sesión 2). Siguiente arranque: **S7.2 GitHub PR-publish** (necesita PAT) o paramos.
+
+---
+
+### Sesión 2026-04-30 — Studio polish + Tavus AI Avatar live + integraciones nuevas
+
+**Hecho:**
+
+- **Docs page** `/studio/docs` — server component nuevo con 9 secciones (overview, quick start, editing, preview, publishing, versioning, best practices, troubleshooting, changelog) y timeline visual del changelog. Botón "Documentation" del Studio home ahora lleva ahí.
+- **Versions tab** — empty state diseñado con pill "Current version v0/Draft" + last published, copy explicativo, lista de features futuras (audit trail, diff, rollback, pinning) y botón Publish que dispara el modal. Plan documentado en memory para auto-source desde GitHub Releases cuando S7.2 esté listo.
+- **CTA "Open <screen>" en cabecera del editor** — bridge nuevo `/api/studio/clients/<slug>/[...]` para que el iframe del Studio cargue assets per-cliente sin depender de KIOSK_CLIENT global. CTAs agregados a 13 secciones (Billboard, Home Dashboard, AI Avatar, Survey, Deals, Photo Booth, Brochures, Social Wall, Guestbook, Events, Tickets, Passes, Trails). Botones inline duplicados removidos de los 6 editores que ya los tenían.
+- **Photo Booth fix crítico** — el editor mostraba 0 frames/0 backgrounds porque `[slug]/page.tsx` leía KV directo sin pasar por `bootstrapStudioFromFs()`. Fix: añadido bootstrap inverso en SSR del editor. Resultado: 6 frames + 6 backgrounds + 8 stickers visibles. Asset path resolver `resolveStudioAsset()` + `StudioSlugProvider` context para que ImageField muestre los thumbnails.
+- **Integraciones nuevas** — Satisfi Labs (chatbot, sin UI), Tavus (avatar AI), Bandwango (data feed), CrowdRiff (Social Wall), Viator (tickets). Schema + bootstrap-from-fs + publish-merger + check route + 5 cards en IntegrationsEditor.
+- **Tavus AI Avatar live** — endpoint `/api/ai-avatar/start` + `/end/[id]` que crea conversación CVI server-side con creds via env (`TAVUS_API_KEY` etc.) o per-cliente. Modal usa `@daily-co/daily-js` createCallObject (headless, sin Daily Prebuilt UI ni prejoin lobby). Tracks audio+video del avatar van al mismo `<video>` propio. Greeting fix: leer de `i18n/<locale>.json:ai_greeting` (estaba leyendo key inexistente `textos.ai_greeting`). Push-to-talk via `setLocalAudio()`. Pre-warm en `AskAiHost` mount + touch del trigger para reducir latencia. Closed Captions vía `transcription-message` + `app-message` events. `updateReceiveSettings({ video: { layer: 2 } })` para max calidad.
+- **New kiosk modal — orientation selector** — Portrait/Landscape toggle con SVG glyphs. Schema `KioskConfig.orientation` extendido. PreviewPanel arranca con `initialOrientation` del config.
+- **Landscape Coming Soon** — placeholder full-bleed 1920×1080 con gradient + grid + spotlight reemplaza al iframe en orientation landscape. Hardcoded "TrueOmni" (no client name).
+- **Zoom controls** — flechas +/- step 10%, default 40% fijo (no auto-fit), reset auto-fit con floor 40%.
+- **Full screen preview** — overlay full-window con CTA "← Back to editor", soporte ESC, respeta dark/light theme del Studio.
+- **Default kiosk renombrado** — "Arizona" → "TrueOmni" en KV (PATCH endpoint extendido para aceptar `nombre`).
+- **Custom fonts fix** — `format()` en `@font-face` ahora mapea `ttf→truetype` y `otf→opentype` (antes pasaba la extensión cruda → browsers descartaban silenciosamente). Cache idempotente con `data-font-hash` para que reemplazos del mismo nombre se reinyecten.
+- **Powered by no se afecta por font del cliente** — billboard-0.tsx el span de "Powered by" tenía `font-display`, ahora hardcoded a `Open Sans, system-ui`.
+- **Scroll fantasma fix** — `studio.css` añade `html:has(.studio-root), body:has(.studio-root) { overflow: hidden }` para eliminar el scrollbar fantasma causado por iframes con transform:scale (bounding box nativa 1080×1920) y secciones largas del editor. También añadido `min-h-0` a la chain flex del editor (motion.div + EditorPanel + body) para que scrolleen internamente.
+- **Misc** — Quitada la línea "08 · Phase S3" del header de cada sección del editor. Bug fix integrations: clientes pre-S6.X que no tenían satisfi/tavus/bandwango/etc. en el config rompían el editor con "Cannot read 'apiKey' of undefined" — fix con merge profundo en `[slug]/page.tsx`.
+
+**Verificado:**
+
+- `pnpm typecheck` y `pnpm lint` limpios al final.
+- Tavus end-to-end via Playwright: createCallObject mounted, tracks audio+video attached al `<video>` con `srcObject = MediaStream`, `videoOpacities: ["1", "0"]` (avatar visible, placeholder fade-out), `iframeCount: 0` (no Daily Prebuilt = no prejoin).
+- `POST /api/ai-avatar/start` → conversation creada en Tavus, `greeting_chars: 113` (antes era 0).
+- Photo Booth tabs: `Backgrounds6 / Frames6 / Filters8 / Stickers8` (antes 1/0/3/0).
+- Integraciones: 9 cards en orden (Weather, External API, Mapbox, Google Analytics, Satisfi Labs, Tavus, Bandwango, CrowdRiff, Viator).
+- Studio breadcrumb ahora muestra `Kiosks > TrueOmni v0`.
+
+**Pendiente / siguiente:**
+
+- **Idle/Billboard editor v2** — reemplazar gradients de los previews por wireframes neutros (4 SVGs por variant) + editor de contenido por-layout (logo size, módulos visibles, custom CTA). Pieza grande — arrancar con esto la próxima sesión, fresca.
+- **Favicon visibility en Studio** — Rubén preguntó dónde se refleja. Hoy solo se aplica al `<link rel="icon">` del iframe del kiosk. Decidir si también debe aparecer en la card del kiosk en `/studio` y/o en el TopBar del editor.
+- **Studio docs Changelog automation** — diferido a S7.2 GitHub PR-publish (memory: `project_studio_docs_changelog_automation.md`).
+- **TODO Tavus** — el `audio.play()` puede bloquearse por autoplay-policy en ciertos browsers a pesar del pre-arme con user gesture. Si el usuario reporta sin audio en producción, fallback a botón "Tap to enable audio".
+
+**Decisiones:**
+
+- **Tavus opción A** — guardrails/knowledgeBase/objectives viven en la persona de Tavus (configurada en su dashboard). El kiosk solo pasa replicaId/personaId/customGreeting/audioOnly. Si en v2 necesitamos dinamizar, migramos a opción B (backend orquesta la persona via system_prompt).
+- **Daily SDK headless con createCallObject** — descartado Daily Prebuilt porque su prejoin lobby no se puede skipear via Tavus API (`enable_prejoin_ui` rechazado). Modo headless renderiza tracks en `<video>` propio = control total UI + cero chrome de Daily.
+- **Pre-warm de Tavus en mount + touchstart** — reduce latencia perceptible de ~5-8s a ~1-2s. TTL 50s (debajo del 60s `participant_absent_timeout`). Si el usuario no toca el trigger en 50s, la conversación se descarta y el siguiente click crea fresca.
+- **Wireframe vs gradient en Idle/Billboard** — decidido reemplazar para no sesgar al usuario por la estética del placeholder.
+- **Rename Arizona → TrueOmni** — solo afecta `KioskConfig.nombre` en KV (Studio breadcrumb). El `clients/default/config.json:client.nombre` sigue siendo "Arizona" porque el contenido del kiosk es Arizona-themed (eventos, restaurants).
+
+**Fase:** Milestone Studio — sesión 2026-04-30 polish + Tavus live. Siguiente: Idle/Billboard editor v2.
 
 ---
 

@@ -141,6 +141,30 @@ export function usePreviewBridge() {
     } catch {}
   }, []);
 
+  const openBillboardPreview = useCallback(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:billboard-open-preview' }, '*');
+    } catch {}
+  }, []);
+
+  const openHomeDashboardPreview = useCallback(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:home-dashboard-open-preview' }, '*');
+    } catch {}
+  }, []);
+
+  const openAiAvatarPreview = useCallback(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:ai-avatar-open-preview' }, '*');
+    } catch {}
+  }, []);
+
   const sendAiNow = useCallback((aiAvatar: AiAvatarConfig) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
@@ -277,11 +301,27 @@ export function usePreviewBridge() {
     } catch {}
   }, []);
 
+  const openEventsPreview = useCallback(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:events-open-preview' }, '*');
+    } catch {}
+  }, []);
+
   const sendTicketsNow = useCallback((tickets: TicketsModule) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:tickets-update', tickets }, '*');
+    } catch {}
+  }, []);
+
+  const openTicketsPreview = useCallback(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:tickets-open-preview' }, '*');
     } catch {}
   }, []);
 
@@ -293,11 +333,27 @@ export function usePreviewBridge() {
     } catch {}
   }, []);
 
+  const openPassesPreview = useCallback(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:passes-open-preview' }, '*');
+    } catch {}
+  }, []);
+
   const sendTrailsNow = useCallback((trails: TrailsModule) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:trails-update', trails }, '*');
+    } catch {}
+  }, []);
+
+  const openTrailsPreview = useCallback(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:trails-open-preview' }, '*');
     } catch {}
   }, []);
 
@@ -507,7 +563,10 @@ export function usePreviewBridge() {
     pushBranding,
     pushModules,
     pushBillboard,
+    openBillboardPreview,
+    openHomeDashboardPreview,
     pushAiAvatar,
+    openAiAvatarPreview,
     pushSurvey,
     openSurveyPreview,
     pushDeals,
@@ -522,9 +581,13 @@ export function usePreviewBridge() {
     openGuestbookPreview,
     pushListings,
     pushEvents,
+    openEventsPreview,
     pushTickets,
+    openTicketsPreview,
     pushPasses,
+    openPassesPreview,
     pushTrails,
+    openTrailsPreview,
     pushAds,
     isReady,
     onIframeLoad,

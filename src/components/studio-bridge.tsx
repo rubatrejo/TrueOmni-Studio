@@ -166,14 +166,65 @@ export function StudioBridge() {
         case 'studio:events-update':
           if (data.events) applyEventsOverride(data.events);
           break;
+        case 'studio:events-open-preview':
+          try {
+            if (window.location.pathname !== '/home/events') {
+              window.location.assign('/home/events');
+            }
+          } catch {}
+          break;
         case 'studio:tickets-update':
           if (data.tickets) applyTicketsOverride(data.tickets);
+          break;
+        case 'studio:tickets-open-preview':
+          try {
+            if (window.location.pathname !== '/home/tickets') {
+              window.location.assign('/home/tickets');
+            }
+          } catch {}
           break;
         case 'studio:passes-update':
           if (data.passes) applyPassesOverride(data.passes);
           break;
+        case 'studio:passes-open-preview':
+          try {
+            if (window.location.pathname !== '/home/passes') {
+              window.location.assign('/home/passes');
+            }
+          } catch {}
+          break;
         case 'studio:trails-update':
           if (data.trails) applyTrailsOverride(data.trails);
+          break;
+        case 'studio:trails-open-preview':
+          try {
+            if (window.location.pathname !== '/home/trails') {
+              window.location.assign('/home/trails');
+            }
+          } catch {}
+          break;
+        case 'studio:billboard-open-preview':
+          try {
+            if (window.location.pathname !== '/') {
+              window.location.assign('/');
+            }
+          } catch {}
+          break;
+        case 'studio:home-dashboard-open-preview':
+          try {
+            if (window.location.pathname !== '/home') {
+              window.location.assign('/home');
+            }
+          } catch {}
+          break;
+        case 'studio:ai-avatar-open-preview':
+          try {
+            if (window.location.pathname !== '/home') {
+              window.location.assign('/home');
+            } else {
+              window.dispatchEvent(new CustomEvent('kiosk:ai-avatar-open'));
+            }
+          } catch {}
           break;
         case 'studio:ads-update':
           if (data.ads) applyAdsOverride(data.ads);
@@ -452,14 +503,38 @@ export function getCachedLogoOverride(slot: 'default' | 'idle' | 'footer'): stri
 
 const injectedCustomFonts = new Set<string>();
 
+/**
+ * Mapea la extensión del archivo al valor canónico que CSS Fonts spec
+ * acepta dentro de `format()`. Pasar "ttf" u "otf" directamente hace que
+ * Chrome/Safari descarten silenciosamente el @font-face — por eso el font
+ * subido por el usuario "no se aplicaba" y caía al fallback system-ui.
+ *
+ * Spec: https://drafts.csswg.org/css-fonts/#font-face-rule
+ */
+const CSS_FORMAT_BY_EXT: Record<CustomFontPatch['format'], string> = {
+  woff2: 'woff2',
+  woff: 'woff',
+  ttf: 'truetype',
+  otf: 'opentype',
+};
+
 function injectCustomFontFace(font: CustomFontPatch) {
   const id = `kiosk-custom-font-${font.name.replace(/\s+/g, '-').toLowerCase()}`;
-  if (injectedCustomFonts.has(id) || document.getElementById(id)) return;
+  // Si ya fue inyectada con el MISMO dataUrl, skip. Si la font cambió de
+  // bytes, removemos el style anterior para que el browser cargue la nueva.
+  const existing = document.getElementById(id) as HTMLStyleElement | null;
+  if (existing) {
+    if (existing.dataset.fontHash === font.dataUrl.length.toString()) return;
+    existing.remove();
+    injectedCustomFonts.delete(id);
+  }
+  const cssFormat = CSS_FORMAT_BY_EXT[font.format] ?? font.format;
   const style = document.createElement('style');
   style.id = id;
+  style.dataset.fontHash = font.dataUrl.length.toString();
   style.textContent = `@font-face {
   font-family: "${font.name}";
-  src: url(${font.dataUrl}) format("${font.format}");
+  src: url(${font.dataUrl}) format("${cssFormat}");
   font-display: swap;
 }`;
   document.head.appendChild(style);

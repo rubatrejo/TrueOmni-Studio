@@ -2,9 +2,11 @@ import { NextResponse } from 'next/server';
 
 import { kv, kvKeys } from '@/lib/studio/kv';
 import {
+  KIOSK_ORIENTATIONS,
   KioskConfigSchema,
   type ConfigMeta,
   type KioskConfig,
+  type KioskOrientation,
   makeBlankConfig,
 } from '@/lib/studio/schema';
 
@@ -38,12 +40,21 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { slug?: string; nombre?: string };
+    const body = (await request.json()) as {
+      slug?: string;
+      nombre?: string;
+      orientation?: string;
+    };
     if (!body.slug || !body.nombre) {
       return NextResponse.json({ error: 'slug and nombre are required' }, { status: 400 });
     }
+    const orientation: KioskOrientation = (KIOSK_ORIENTATIONS as readonly string[]).includes(
+      body.orientation ?? '',
+    )
+      ? (body.orientation as KioskOrientation)
+      : 'portrait';
 
-    const config = makeBlankConfig(body.slug, body.nombre);
+    const config = makeBlankConfig(body.slug, body.nombre, orientation);
     const parsed = KioskConfigSchema.safeParse(config);
     if (!parsed.success) {
       return NextResponse.json(

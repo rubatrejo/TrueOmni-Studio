@@ -105,6 +105,17 @@ export function buildFilesystemConfig(
     if (studio.integrations.api?.baseUrl) intg.api_base_url = studio.integrations.api.baseUrl;
     if (studio.integrations.mapbox?.token) intg.mapbox_token = studio.integrations.mapbox.token;
     if (studio.integrations.analytics?.gaId) intg.analytics_id = studio.integrations.analytics.gaId;
+    if (studio.integrations.satisfi?.apiKey) intg.satisfi_api_key = studio.integrations.satisfi.apiKey;
+    if (studio.integrations.satisfi?.hubId) intg.satisfi_hub_id = studio.integrations.satisfi.hubId;
+    if (studio.integrations.tavus?.apiKey) intg.tavus_api_key = studio.integrations.tavus.apiKey;
+    if (studio.integrations.tavus?.replicaId) intg.tavus_replica_id = studio.integrations.tavus.replicaId;
+    if (studio.integrations.tavus?.personaId) intg.tavus_persona_id = studio.integrations.tavus.personaId;
+    if (studio.integrations.bandwango?.apiKey) intg.bandwango_api_key = studio.integrations.bandwango.apiKey;
+    if (studio.integrations.bandwango?.partnerId) intg.bandwango_partner_id = studio.integrations.bandwango.partnerId;
+    if (studio.integrations.crowdriff?.apiKey) intg.crowdriff_api_key = studio.integrations.crowdriff.apiKey;
+    if (studio.integrations.crowdriff?.galleryId) intg.crowdriff_gallery_id = studio.integrations.crowdriff.galleryId;
+    if (studio.integrations.viator?.apiKey) intg.viator_api_key = studio.integrations.viator.apiKey;
+    if (studio.integrations.viator?.partnerId) intg.viator_partner_id = studio.integrations.viator.partnerId;
     // weather no tiene equivalente legacy; se omite.
   }
 

@@ -26,11 +26,9 @@ import { PdfField } from './PdfField';
 export function BrochuresEditor({
   brochures,
   onChange,
-  onPreview,
 }: {
   brochures: BrochuresModuleConfig;
   onChange: (next: BrochuresModuleConfig) => void;
-  onPreview: () => void;
 }) {
   const setList = (list: BrochureItem[]) => onChange({ ...brochures, brochures: list });
 
@@ -92,13 +90,6 @@ export function BrochuresEditor({
           accept="image/jpeg,image/png,image/webp"
           maxBytes={1.5 * 1024 * 1024}
         />
-        <button
-          type="button"
-          onClick={onPreview}
-          className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-sky-500/30 bg-sky-500/10 px-2.5 py-1.5 text-[12px] font-medium text-sky-700 transition hover:bg-sky-500/20 dark:border-sky-400/30 dark:text-sky-300"
-        >
-          Preview Brochures page
-        </button>
       </Group>
 
       {/* Categories */}

@@ -85,7 +85,22 @@ interface FsConfig {
       modules?: Record<string, Record<string, unknown>>;
     };
   };
-  integraciones?: { api_base_url?: string; mapbox_token?: string; analytics_id?: string };
+  integraciones?: {
+    api_base_url?: string;
+    mapbox_token?: string;
+    analytics_id?: string;
+    satisfi_api_key?: string;
+    satisfi_hub_id?: string;
+    tavus_api_key?: string;
+    tavus_replica_id?: string;
+    tavus_persona_id?: string;
+    bandwango_api_key?: string;
+    bandwango_partner_id?: string;
+    crowdriff_api_key?: string;
+    crowdriff_gallery_id?: string;
+    viator_api_key?: string;
+    viator_partner_id?: string;
+  };
 }
 
 export async function readClientFs(
@@ -167,11 +182,33 @@ export function bootstrapStudioFromFs(
   if (!next.integrations || structuralEqual(next.integrations, defaultIntegrations())) {
     const legacy = fsConfig.integraciones;
     if (legacy) {
+      const str = (v: unknown) => (typeof v === 'string' ? v : '');
       const candidate = {
-        api: { baseUrl: typeof legacy.api_base_url === 'string' ? legacy.api_base_url : '' },
-        mapbox: { token: typeof legacy.mapbox_token === 'string' ? legacy.mapbox_token : '' },
-        analytics: { gaId: typeof legacy.analytics_id === 'string' ? legacy.analytics_id : '' },
+        api: { baseUrl: str(legacy.api_base_url) },
+        mapbox: { token: str(legacy.mapbox_token) },
+        analytics: { gaId: str(legacy.analytics_id) },
         weather: { provider: 'open-meteo' as const, apiKey: '', city: '', units: 'metric' as const },
+        satisfi: {
+          apiKey: str(legacy.satisfi_api_key),
+          hubId: str(legacy.satisfi_hub_id),
+        },
+        tavus: {
+          apiKey: str(legacy.tavus_api_key),
+          replicaId: str(legacy.tavus_replica_id),
+          personaId: str(legacy.tavus_persona_id),
+        },
+        bandwango: {
+          apiKey: str(legacy.bandwango_api_key),
+          partnerId: str(legacy.bandwango_partner_id),
+        },
+        crowdriff: {
+          apiKey: str(legacy.crowdriff_api_key),
+          galleryId: str(legacy.crowdriff_gallery_id),
+        },
+        viator: {
+          apiKey: str(legacy.viator_api_key),
+          partnerId: str(legacy.viator_partner_id),
+        },
       };
       const parsed = IntegrationsConfigSchema.safeParse(candidate);
       if (parsed.success) next.integrations = parsed.data;

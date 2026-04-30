@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 
+import { bootstrapStudioFromFs, readClientFs } from '@/lib/studio/bootstrap-from-fs';
 import { kv, kvKeys } from '@/lib/studio/kv';
 import {
   DEFAULT_AI_AVATAR,
@@ -11,7 +12,9 @@ import {
   DEFAULT_SOCIAL_WALL,
   DEFAULT_SURVEY,
   DEFAULT_SYSTEM_MODULES,
+  defaultAds,
   defaultEvents,
+  defaultIntegrations,
   defaultListings,
   defaultModules,
   defaultPasses,
@@ -35,7 +38,7 @@ export default async function StudioEditorPage({
   // Backfill defensivo: clientes pre-S2 pueden no tener modules / billboard /
   // aiAvatar, o tener `systemModules` con shape antiguo de solo 3 campos.
   const baseModules = raw.modules ?? defaultModules();
-  const config: KioskConfig = {
+  const filled: KioskConfig = {
     ...raw,
     modules: {
       ...baseModules,
@@ -54,7 +57,21 @@ export default async function StudioEditorPage({
     tickets: raw.tickets ?? defaultTickets(),
     passes: raw.passes ?? defaultPasses(),
     trails: raw.trails ?? defaultTrails(),
+    ads: raw.ads ?? defaultAds(),
+    // Merge profundo de integrations: clientes pre-S6.X pueden tener `api`,
+    // `mapbox`, `analytics`, `weather` pero faltarles `satisfi`/`tavus`/
+    // `bandwango`. Llenamos los huecos con los defaults para que el editor
+    // no explote al leer `value.satisfi.apiKey`.
+    integrations: {
+      ...defaultIntegrations(),
+      ...(raw.integrations ?? {}),
+    },
   };
+  // Hidrata desde filesystem (clients/<slug>/) todo lo que sigue siendo
+  // factory default — mismo flujo que la API GET para evitar drift entre
+  // SSR y el fetch en el cliente.
+  const { config: fsConfig, tokensCss } = await readClientFs(slug);
+  const config = bootstrapStudioFromFs(filled, fsConfig, tokensCss);
   const meta = await kv.get<ConfigMeta>(kvKeys.cfgMeta(slug));
 
   return <Shell initialConfig={config} initialMeta={meta} />;

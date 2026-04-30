@@ -22,17 +22,39 @@ const MIME_BY_FORMAT: Record<CustomFont['format'], string> = {
   otf: 'font/otf',
 };
 
+/**
+ * Valor canónico para `format()` en `@font-face` segun CSS Fonts spec.
+ * Browsers (Chrome/Safari) descartan el @font-face si format() es algo
+ * distinto a estos cuatro valores — por eso un .ttf u .otf subido por el
+ * usuario "no se aplicaba" y caía al fallback system-ui.
+ */
+const CSS_FORMAT_BY_EXT: Record<CustomFont['format'], string> = {
+  woff2: 'woff2',
+  woff: 'woff',
+  ttf: 'truetype',
+  otf: 'opentype',
+};
+
 const injected = new Set<string>();
 
 function injectFontFace(font: CustomFont) {
   if (typeof document === 'undefined') return;
   const id = `studio-custom-font-${font.name.replace(/\s+/g, '-').toLowerCase()}`;
-  if (injected.has(id) || document.getElementById(id)) return;
+  // Reemplaza el @font-face si los bytes cambiaron (mismo nombre,
+  // distinto archivo); browsers no recargan src de un @font-face existente.
+  const existing = document.getElementById(id) as HTMLStyleElement | null;
+  if (existing) {
+    if (existing.dataset.fontHash === font.dataUrl.length.toString()) return;
+    existing.remove();
+    injected.delete(id);
+  }
+  const cssFormat = CSS_FORMAT_BY_EXT[font.format] ?? font.format;
   const style = document.createElement('style');
   style.id = id;
+  style.dataset.fontHash = font.dataUrl.length.toString();
   style.textContent = `@font-face {
   font-family: "${font.name}";
-  src: url(${font.dataUrl}) format("${font.format}");
+  src: url(${font.dataUrl}) format("${cssFormat}");
   font-display: swap;
 }`;
   document.head.appendChild(style);

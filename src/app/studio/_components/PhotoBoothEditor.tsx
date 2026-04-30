@@ -22,6 +22,9 @@ import {
   type PhotoBoothSticker,
 } from '@/lib/studio/schema';
 
+import { resolveStudioAsset } from '../_lib/asset-resolve';
+import { useStudioSlug } from '../_lib/slug-context';
+
 import { ImageField } from './ImageField';
 
 type EditorTab = 'settings' | 'backgrounds' | 'frames' | 'filters' | 'stickers';
@@ -37,11 +40,9 @@ const TABS: Array<{ key: EditorTab; label: string; icon: typeof Camera }> = [
 export function PhotoBoothEditor({
   photoBooth,
   onChange,
-  onPreview,
 }: {
   photoBooth: PhotoBoothConfig;
   onChange: (next: PhotoBoothConfig) => void;
-  onPreview: () => void;
 }) {
   const [tab, setTab] = useState<EditorTab>('settings');
 
@@ -85,15 +86,6 @@ export function PhotoBoothEditor({
           );
         })}
       </div>
-
-      {/* Preview button */}
-      <button
-        type="button"
-        onClick={onPreview}
-        className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-sky-500/30 bg-sky-500/10 px-2.5 py-1.5 text-[12px] font-medium text-sky-700 transition hover:bg-sky-500/20 dark:border-sky-400/30 dark:text-sky-300"
-      >
-        Preview Photo Booth
-      </button>
 
       {tab === 'settings' && <SettingsTab photoBooth={photoBooth} onChange={onChange} />}
       {tab === 'backgrounds' && (
@@ -727,6 +719,11 @@ function ListReorderItem<T extends IdItem>({
 }) {
   const dragControls = useDragControls();
   const [expanded, setExpanded] = useState(false);
+  const slug = useStudioSlug();
+  const resolvedPreview =
+    previewKind === 'image' && preview && slug
+      ? resolveStudioAsset(slug, preview)
+      : preview;
 
   return (
     <Reorder.Item
@@ -745,9 +742,9 @@ function ListReorderItem<T extends IdItem>({
           <GripVertical className="h-4 w-4" />
         </button>
         <div className="grid h-10 w-10 shrink-0 overflow-hidden rounded-md bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-          {previewKind === 'image' && preview ? (
+          {previewKind === 'image' && resolvedPreview ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={preview} alt="" className="h-full w-full object-cover" />
+            <img src={resolvedPreview} alt="" className="h-full w-full object-cover" />
           ) : previewKind === 'filter' ? (
             <span
               className="grid h-full w-full place-items-center bg-gradient-to-br from-zinc-300 to-zinc-500 text-[9px] font-bold text-white"

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 
+import { prewarmAiAvatar } from '@/components/ai/ai-modal';
 import { useAiStore } from '@/stores/ai-store';
 
 interface AskAiTriggerProps {
@@ -47,6 +48,12 @@ export function AskAiTrigger({
       type="button"
       whileTap={{ scale: 0.92 }}
       onClick={openAi}
+      // Pre-warm la conversación de Tavus al primer touch/hover del trigger.
+      // Para cuando el modal abre, el conversation_url casi siempre ya está
+      // listo y el avatar carga ~3-4s más rápido.
+      onPointerDown={prewarmAiAvatar}
+      onPointerEnter={prewarmAiAvatar}
+      onTouchStart={prewarmAiAvatar}
       aria-label={ariaLabel}
       className="absolute flex items-center justify-center"
       style={{

@@ -7,6 +7,20 @@
  * profesional, independiente del tema del kiosk renderizado.
  */
 
+/*
+ * Bloquea el scroll fantasma en html/body cuando estamos en el Studio.
+ * El container raíz `.studio-root` ya tiene `h-screen overflow-hidden`
+ * pero los iframes del PreviewPanel (transform: scale, bounding box
+ * 1080×1920 nativa) y secciones largas del editor a veces leak al
+ * scrollHeight del documento y aparece un scrollbar al fondo. Con
+ * `:has()` activamos el lock solo cuando el Studio está montado —
+ * el runtime del kiosk (en /home, /, etc.) sigue scrolleando normal.
+ */
+html:has(.studio-root),
+body:has(.studio-root) {
+  overflow: hidden;
+}
+
 .studio-root {
   /*
    * Override de las font-size del kiosk dentro del Studio.

@@ -852,6 +852,22 @@ export interface KioskConfig {
     analytics_id?: string;
     /** Token público de Mapbox para los mapas de listings. */
     mapbox_token?: string;
+    /** Tavus — AI Avatar (replica + persona) que reemplaza el video placeholder. */
+    tavus_api_key?: string;
+    tavus_replica_id?: string;
+    tavus_persona_id?: string;
+    /** Satisfi Labs — chatbot backend, sin UI. */
+    satisfi_api_key?: string;
+    satisfi_hub_id?: string;
+    /** Bandwango — feed de partner data (passes / deals / listings). */
+    bandwango_api_key?: string;
+    bandwango_partner_id?: string;
+    /** CrowdRiff — agregador del Social Wall. */
+    crowdriff_api_key?: string;
+    crowdriff_gallery_id?: string;
+    /** Viator — feed de tours/tickets. */
+    viator_api_key?: string;
+    viator_partner_id?: string;
   };
   meta: {
     creado_en?: string;

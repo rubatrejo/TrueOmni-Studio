@@ -48,6 +48,7 @@ import {
 
 import { getI18n, patchConfig, patchI18n } from '../_lib/api-client';
 import { STUDIO_SECTIONS, type StudioSectionKey } from '../_lib/sections';
+import { StudioSlugProvider } from '../_lib/slug-context';
 import { usePreviewBridge } from '../_lib/use-preview-bridge';
 
 import { EditorPanel } from './EditorPanel';
@@ -169,7 +170,10 @@ export function Shell({
     pushBranding,
     pushModules,
     pushBillboard,
+    openBillboardPreview,
+    openHomeDashboardPreview,
     pushAiAvatar,
+    openAiAvatarPreview,
     pushSurvey,
     openSurveyPreview,
     pushDeals,
@@ -184,9 +188,13 @@ export function Shell({
     openGuestbookPreview,
     pushListings,
     pushEvents,
+    openEventsPreview,
     pushTickets,
+    openTicketsPreview,
     pushPasses,
+    openPassesPreview,
     pushTrails,
+    openTrailsPreview,
     pushAds,
     onIframeLoad,
   } = usePreviewBridge();
@@ -544,6 +552,7 @@ export function Shell({
   }, [handleSave]);
 
   return (
+    <StudioSlugProvider slug={initialConfig.slug}>
     <div className="flex h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
       <TopBar
         slug={initialConfig.slug}
@@ -579,7 +588,7 @@ export function Shell({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.18, ease: 'easeOut' }}
-                className="flex flex-1 flex-col overflow-hidden"
+                className="flex min-h-0 flex-1 flex-col overflow-hidden"
               >
                 <EditorPanel
                   sectionKey={activeTab}
@@ -589,8 +598,11 @@ export function Shell({
                   onModulesChange={setModules}
                   billboard={billboard}
                   onBillboardChange={setBillboard}
+                  onBillboardPreview={openBillboardPreview}
+                  onHomeDashboardPreview={openHomeDashboardPreview}
                   aiAvatar={aiAvatar}
                   onAiAvatarChange={setAiAvatar}
+                  onAiAvatarPreview={openAiAvatarPreview}
                   survey={survey}
                   onSurveyChange={setSurvey}
                   onSurveyPreview={openSurveyPreview}
@@ -613,18 +625,26 @@ export function Shell({
                   onListingsChange={setListings}
                   events={events}
                   onEventsChange={setEvents}
+                  onEventsPreview={openEventsPreview}
                   tickets={tickets}
                   onTicketsChange={setTickets}
+                  onTicketsPreview={openTicketsPreview}
                   passes={passes}
                   onPassesChange={setPasses}
+                  onPassesPreview={openPassesPreview}
                   trails={trails}
                   onTrailsChange={setTrails}
+                  onTrailsPreview={openTrailsPreview}
                   i18nBundle={i18nBundle}
                   onI18nBundleChange={setI18nBundle}
                   ads={ads}
                   onAdsChange={setAds}
                   integrations={integrations}
                   onIntegrationsChange={setIntegrations}
+                  currentVersion={initialConfig.currentVersion ?? 0}
+                  lastPublishedAt={initialMeta?.lastEditedAt}
+                  lastEditor={initialMeta?.lastEditor}
+                  onPublish={() => setPublishOpen(true)}
                 />
               </motion.div>
             </AnimatePresence>
@@ -641,6 +661,7 @@ export function Shell({
             <PreviewPanel
               slug={initialConfig.slug}
               nombre={initialConfig.nombre}
+              initialOrientation={initialConfig.orientation ?? 'portrait'}
               reloadKey={previewKey}
               iframeRef={iframeRef}
               onIframeLoad={onIframeLoad}
@@ -669,6 +690,7 @@ export function Shell({
         onClose={() => setPublishOpen(false)}
       />
     </div>
+    </StudioSlugProvider>
   );
 }
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { prewarmAiAvatar } from '@/components/ai/ai-modal';
 import { AiModalHost } from '@/components/ai/ai-modal-host';
 import { AskAiTrigger } from '@/components/ai/ask-ai-trigger';
 
@@ -47,6 +48,15 @@ type AiAvatarDetail = {
 export function AskAiHost(props: AskAiHostProps) {
   const [hidden, setHidden] = useState(!props.enabled);
   const [override, setOverride] = useState<AiAvatarDetail | null>(null);
+
+  // Pre-warm la conversación Tavus en background al montar /home (si el
+  // módulo está habilitado). Resultado: cuando el usuario tap el trigger,
+  // el conversation_url ya está creado → avatar visible ~3-4s más rápido.
+  useEffect(() => {
+    if (!props.enabled) return;
+    const t = setTimeout(prewarmAiAvatar, 1500);
+    return () => clearTimeout(t);
+  }, [props.enabled]);
 
   useEffect(() => {
     setHidden(!props.enabled);

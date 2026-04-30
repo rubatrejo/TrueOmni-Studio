@@ -1,5 +1,6 @@
 'use client';
 
+import DailyIframe from '@daily-co/daily-js';
 import { useGSAP } from '@gsap/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import gsap from 'gsap';
@@ -24,6 +25,72 @@ interface AiModalProps {
   textos: AiModalTextos;
   /** Nombre del cliente — se inyecta en `ai_subtitle` reemplazando `{client_name}`. */
   clientName?: string;
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Pre-warm Tavus — cache de conversación a nivel de módulo                 */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+interface PrewarmedConversation {
+  conversationId: string;
+  conversationUrl: string;
+  warmedAt: number;
+}
+
+let prewarmCache: PrewarmedConversation | null = null;
+let prewarmPromise: Promise<PrewarmedConversation | null> | null = null;
+const PREWARM_TTL_MS = 50_000; // bajo el participant_absent_timeout (60s) de Tavus
+
+async function fetchStart(): Promise<PrewarmedConversation | null> {
+  try {
+    const res = await fetch('/api/ai-avatar/start', { method: 'POST' });
+    const data = (await res.json().catch(() => null)) as
+      | { ok: boolean; conversationId?: string; conversationUrl?: string }
+      | null;
+    if (!res.ok || !data?.ok || !data.conversationUrl || !data.conversationId) return null;
+    return {
+      conversationId: data.conversationId,
+      conversationUrl: data.conversationUrl,
+      warmedAt: Date.now(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Lanza /start en background y cachea el resultado. Si ya hay una pendiente,
+ * no dispara otra. Llamar en cualquier momento es idempotente.
+ *
+ * Exportada para que `<AskAiTrigger>` la dispare en touchstart/mouseenter
+ * del bubble flotante — así para cuando el modal abre el conversation_url
+ * casi siempre ya está listo.
+ */
+export function prewarmAiAvatar(): void {
+  if (prewarmCache && Date.now() - prewarmCache.warmedAt < PREWARM_TTL_MS) return;
+  if (prewarmPromise) return;
+  prewarmPromise = fetchStart().then((result) => {
+    prewarmCache = result;
+    prewarmPromise = null;
+    return result;
+  });
+}
+
+async function consumePrewarmOrCreate(): Promise<PrewarmedConversation | null> {
+  // Si hay cache fresco lo usamos directo y lo invalidamos (one-shot).
+  if (prewarmCache && Date.now() - prewarmCache.warmedAt < PREWARM_TTL_MS) {
+    const cached = prewarmCache;
+    prewarmCache = null;
+    return cached;
+  }
+  // Si hay una pre-warm en vuelo, esperamos a que termine.
+  if (prewarmPromise) {
+    const result = await prewarmPromise;
+    prewarmCache = null;
+    if (result && Date.now() - result.warmedAt < PREWARM_TTL_MS) return result;
+  }
+  // Sin cache → request fresca.
+  return fetchStart();
 }
 
 type SpeechRecognitionAlt = 'SpeechRecognition' | 'webkitSpeechRecognition';
@@ -63,7 +130,7 @@ type SpeechRecognitionCtor = new () => SpeechRecognitionInstance;
  *     diseño mobile original para garantizar legibilidad y target táctil
  *     adecuados a un kiosk retrato 1080×1920.
  */
-export function AiModal({ heroVideoSrc, textos: incomingTextos, clientName }: AiModalProps) {
+export function AiModal({ heroVideoSrc: _heroVideoSrc, textos: incomingTextos, clientName }: AiModalProps) {
   const t = useTextos();
   const pick = (key: string, fallback: string) => {
     const r = t(key);
@@ -92,6 +159,259 @@ export function AiModal({ heroVideoSrc, textos: incomingTextos, clientName }: Ai
   const [voiceSupported, setVoiceSupported] = useState(false);
   const micRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+
+  // ── Tavus live avatar — reemplaza el heroVideo cuando hay creds. ─────────
+  // Estrategia: NO usamos Daily Prebuilt (createFrame) porque su prejoin
+  // lobby ("Are you ready to join?") es property del room y Tavus rechaza
+  // `enable_prejoin_ui: false`. En su lugar usamos `createCallObject()` —
+  // modo headless sin UI propia — y renderizamos los tracks del avatar
+  // (video + audio) directamente en un <video> propio.
+  //
+  // Mic local: se ADQUIERE en join (audioSource: true) pero arranca muteado
+  // vía setLocalAudio(false). Push-to-talk lo toggla. NO se puede usar
+  // audioSource:false aquí porque entonces no hay mic que toglear y el
+  // avatar nunca escucha al usuario.
+  const [, setTavusReady] = useState(false);
+  const [, setTavusUnavailable] = useState(false);
+  const [caption, setCaption] = useState<string>('');
+  const tavusConvIdRef = useRef<string | null>(null);
+  const avatarVideoRef = useRef<HTMLVideoElement | null>(null);
+  const captionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dailyCallRef = useRef<{
+    leave: () => Promise<unknown>;
+    destroy: () => Promise<unknown>;
+    setLocalAudio: (on: boolean) => unknown;
+    updateReceiveSettings: (settings: unknown) => Promise<unknown>;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    let active = true;
+    setTavusReady(false);
+    setTavusUnavailable(false);
+
+    // Pre-arranca el <video> con autoplay dentro del gesture del click del
+    // trigger. Aunque srcObject siga null, llamar play() acá preserva la
+    // user-activation para que después attachTrack() pueda reproducir audio
+    // sin que Chrome lo bloquee por autoplay-policy.
+    const video = avatarVideoRef.current;
+    if (video) {
+      video.muted = false;
+      video.play().catch(() => {});
+    }
+
+    (async () => {
+      try {
+        console.info('[ai-modal] resolving Tavus conversation (prewarm or fresh)…');
+        const conv = await consumePrewarmOrCreate();
+        if (!active) return;
+        if (!conv) {
+          console.warn('[ai-modal] start failed');
+          setTavusUnavailable(true);
+          return;
+        }
+        tavusConvIdRef.current = conv.conversationId;
+        console.info('[ai-modal] conversation:', conv.conversationId);
+
+        // Daily no permite dos call objects activos a la vez. En StrictMode
+        // dev la cleanup del primer effect run intenta destroy(), pero a
+        // veces queda lingering — buscamos cualquier instancia previa global
+        // y la matamos antes de crear la nueva.
+        const Lib = DailyIframe as unknown as {
+          getCallInstance?: () => { destroy?: () => Promise<unknown> } | undefined;
+        };
+        const existing = Lib.getCallInstance?.();
+        if (existing?.destroy) {
+          await existing.destroy().catch(() => {});
+        }
+
+        const call = DailyIframe.createCallObject({
+          audioSource: true, // mic se adquiere para push-to-talk
+          videoSource: false,
+          subscribeToTracksAutomatically: true,
+        });
+        dailyCallRef.current = call as unknown as typeof dailyCallRef.current;
+        console.info('[ai-modal] daily callObject created');
+
+        const attachTrack = (track: MediaStreamTrack) => {
+          const el = avatarVideoRef.current;
+          if (!el) return;
+          // Solo asignamos srcObject la PRIMERA vez. Después modificamos
+          // los tracks del MediaStream existente para no resetear el
+          // playback state (cada `el.srcObject = ...` re-arma autoplay y
+          // a veces pausa el audio en Chrome).
+          let stream = el.srcObject as MediaStream | null;
+          if (!stream) {
+            stream = new MediaStream();
+            el.srcObject = stream;
+            el.muted = false;
+            const playPromise = el.play();
+            if (playPromise) {
+              playPromise.then(
+                () => console.info('[ai-modal] avatar element playing'),
+                (err) => console.warn('[ai-modal] avatar play() blocked:', err?.name, err?.message),
+              );
+            }
+          }
+          stream
+            .getTracks()
+            .filter((t) => t.kind === track.kind)
+            .forEach((t) => stream!.removeTrack(t));
+          stream.addTrack(track);
+        };
+
+        const onTrackStarted = (event: {
+          participant: { local: boolean; user_name?: string } | null;
+          track: MediaStreamTrack;
+        }) => {
+          const p = event.participant;
+          const t = event.track;
+          if (!p || !t) return;
+          console.info('[ai-modal] track-started', {
+            kind: t.kind,
+            local: p.local,
+            user: p.user_name,
+            readyState: t.readyState,
+          });
+          if (p.local) return;
+          attachTrack(t);
+          if (active && t.kind === 'video') setTavusReady(true);
+        };
+
+        const onJoined = () => {
+          console.info('[ai-modal] local joined-meeting — muting mic + max receive quality');
+          try {
+            call.setLocalAudio(false);
+          } catch {}
+          // Solicita la capa de simulcast más alta para todos los participantes
+          // remotos (avatar) — sube la calidad del video del avatar al máximo
+          // que esté publicando Tavus en lugar de la capa por defecto.
+          try {
+            call.updateReceiveSettings({
+              base: {
+                video: { layer: 2 },
+                screenVideo: { layer: 2 },
+              },
+            });
+          } catch (err) {
+            console.warn('[ai-modal] updateReceiveSettings failed', err);
+          }
+        };
+
+        // Helper común — actualiza el caption visible y reinicia el auto-clear.
+        const showCaption = (text: string) => {
+          if (!text || !active) return;
+          setCaption(text);
+          if (captionTimerRef.current) clearTimeout(captionTimerRef.current);
+          captionTimerRef.current = setTimeout(() => setCaption(''), 4500);
+        };
+
+        const onTranscription = (event: {
+          text?: string;
+          is_final?: boolean;
+          participant?: { local?: boolean };
+        }) => {
+          const text = event.text?.trim();
+          if (!text) return;
+          // Filtramos al usuario local; solo mostramos lo que dice el avatar.
+          if (event.participant?.local) return;
+          // Aceptamos tanto interim como final → caption en tiempo real.
+          showCaption(text);
+        };
+
+        const onParticipantJoined = (event: { participant: { local: boolean; user_name?: string } }) => {
+          console.info('[ai-modal] participant-joined', event.participant.user_name, 'local=', event.participant.local);
+        };
+
+        const onError = (err: unknown) => {
+          console.error('[ai-modal] daily error', err);
+          if (active) {
+            setTavusReady(false);
+            setTavusUnavailable(true);
+          }
+        };
+
+        call.on('track-started', onTrackStarted);
+        call.on('joined-meeting', onJoined);
+        call.on('participant-joined', onParticipantJoined);
+        call.on('error', onError);
+        call.on('transcription-message', onTranscription);
+
+        // Tavus emite múltiples app-message events durante una utterance del
+        // avatar. Para captions en tiempo real usamos el PRIMERO que llega
+        // con el texto del speech — típicamente `replica.started_speaking`,
+        // que se emite antes de que el audio empiece, así que el caption
+        // aparece sincronizado con la voz en lugar de delayed.
+        call.on(
+          'app-message',
+          (event: {
+            data?: { event_type?: string; properties?: Record<string, unknown> };
+          }) => {
+            const ev = event?.data;
+            const type = ev?.event_type;
+            if (!type || !type.startsWith('conversation.')) return;
+            // Solo eventos del replica/avatar — ignoramos los del user.
+            if (type.includes('user.')) return;
+            const props = ev?.properties ?? {};
+            const speech = (props.speech ?? props.text ?? props.transcript) as string | undefined;
+            const trimmed = typeof speech === 'string' ? speech.trim() : '';
+            if (!trimmed) return;
+            // Aceptamos cualquier evento con texto: started_speaking, utterance,
+            // replica.utterance, etc. El primero que llega gana.
+            showCaption(trimmed);
+          },
+        );
+
+        try {
+          await call.join({ url: conv.conversationUrl });
+          console.info('[ai-modal] call.join() resolved');
+        } catch (err) {
+          console.error('[ai-modal] join() failed', err);
+          if (active) {
+            setTavusReady(false);
+            setTavusUnavailable(true);
+          }
+        }
+      } catch (err) {
+        console.error('[ai-modal] tavus mount failed', err);
+        if (active) setTavusUnavailable(true);
+      }
+    })();
+
+    return () => {
+      active = false;
+      const id = tavusConvIdRef.current;
+      const call = dailyCallRef.current;
+      tavusConvIdRef.current = null;
+      dailyCallRef.current = null;
+      setTavusReady(false);
+      setTavusUnavailable(false);
+      setCaption('');
+      if (captionTimerRef.current) {
+        clearTimeout(captionTimerRef.current);
+        captionTimerRef.current = null;
+      }
+      if (avatarVideoRef.current) avatarVideoRef.current.srcObject = null;
+      if (call) {
+        call.leave().catch(() => {});
+        call.destroy().catch(() => {});
+      }
+      if (id) {
+        fetch(`/api/ai-avatar/end/${encodeURIComponent(id)}`, { method: 'POST' }).catch(() => {});
+      }
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    const call = dailyCallRef.current;
+    if (!call) return;
+    try {
+      call.setLocalAudio(isListening);
+      console.info('[ai-modal] mic →', isListening ? 'unmuted' : 'muted');
+    } catch (err) {
+      console.warn('[ai-modal] setLocalAudio failed', err);
+    }
+  }, [isListening]);
 
   // Inicializa Web Speech API una vez al montar.
   useEffect(() => {
@@ -219,11 +539,11 @@ export function AiModal({ heroVideoSrc, textos: incomingTextos, clientName }: Ai
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Hero video 16:9 con overlay degradado y mic flotante.
+            {/* Hero 16:9 — Tavus live avatar cuando hay creds, video placeholder
+                como fallback, hero hidden cuando Tavus está unavailable (option B).
                 Altura explícita 608 (1080 * 9/16) + marginBottom: -10 +
-                bg blanco explícito en el hero garantizan que no aparezca
-                ningún row sub-píxel del backdrop oscuro entre hero y body
-                aún con scaling fraccional del KioskCanvas. */}
+                bg blanco explícito garantizan que no aparezca ningún row sub-píxel
+                del backdrop oscuro entre hero y body aún con scaling fraccional. */}
             <div
               className="relative flex-shrink-0 overflow-hidden"
               style={{
@@ -232,14 +552,47 @@ export function AiModal({ heroVideoSrc, textos: incomingTextos, clientName }: Ai
                 backgroundColor: 'hsl(var(--ai-surface))',
               }}
             >
+              {/* <video> propio donde renderizamos los tracks (video + audio)
+                  del avatar Tavus. Modo headless con createCallObject — sin
+                  Daily Prebuilt UI, sin prejoin lobby. Ambos tracks van al
+                  mismo MediaStream para que un solo media element reproduzca
+                  video + audio sin problemas de autoplay-policy. */}
+              {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
               <video
-                src={heroVideoSrc}
+                ref={avatarVideoRef}
                 autoPlay
-                loop
-                muted
                 playsInline
-                className="h-full w-full object-cover"
+                className="absolute inset-0 h-full w-full object-cover"
+                style={{ background: 'hsl(var(--ai-surface))' }}
+                aria-label="AI Avatar"
               />
+
+              {/* Closed Captions overlay — texto del avatar sobre el video.
+                  Aparece cuando llega un `transcription-message` o
+                  `app-message` de Tavus, fade-out a los 4s. */}
+              {caption && (
+                <div
+                  className="pointer-events-none absolute"
+                  style={{
+                    left: 32,
+                    right: 120,
+                    bottom: 130,
+                    padding: '14px 22px',
+                    borderRadius: 18,
+                    backgroundColor: 'hsl(var(--ai-text) / 0.65)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    color: '#fff',
+                    fontSize: 26,
+                    lineHeight: 1.3,
+                    fontWeight: 500,
+                    textAlign: 'center',
+                  }}
+                  aria-live="polite"
+                >
+                  {caption}
+                </div>
+              )}
               <div
                 className="absolute inset-0"
                 style={{
@@ -542,3 +895,4 @@ export function AiModal({ heroVideoSrc, textos: incomingTextos, clientName }: Ai
     </AnimatePresence>
   );
 }
+

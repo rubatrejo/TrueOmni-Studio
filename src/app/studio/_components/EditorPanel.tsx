@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
+import { History, Play, Rocket, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 
 import type {
@@ -57,8 +57,11 @@ export function EditorPanel({
   onModulesChange,
   billboard,
   onBillboardChange,
+  onBillboardPreview,
+  onHomeDashboardPreview,
   aiAvatar,
   onAiAvatarChange,
+  onAiAvatarPreview,
   survey,
   onSurveyChange,
   onSurveyPreview,
@@ -81,18 +84,26 @@ export function EditorPanel({
   onListingsChange,
   events,
   onEventsChange,
+  onEventsPreview,
   tickets,
   onTicketsChange,
+  onTicketsPreview,
   passes,
   onPassesChange,
+  onPassesPreview,
   trails,
   onTrailsChange,
+  onTrailsPreview,
   i18nBundle,
   onI18nBundleChange,
   ads,
   onAdsChange,
   integrations,
   onIntegrationsChange,
+  currentVersion,
+  lastPublishedAt,
+  lastEditor,
+  onPublish,
 }: {
   sectionKey: StudioSectionKey;
   branding: Branding;
@@ -101,8 +112,11 @@ export function EditorPanel({
   onModulesChange: (next: ModulesConfig) => void;
   billboard: BillboardConfig;
   onBillboardChange: (next: BillboardConfig) => void;
+  onBillboardPreview: () => void;
+  onHomeDashboardPreview: () => void;
   aiAvatar: AiAvatarConfig;
   onAiAvatarChange: (next: AiAvatarConfig) => void;
+  onAiAvatarPreview: () => void;
   survey: SurveyConfig;
   onSurveyChange: (next: SurveyConfig) => void;
   onSurveyPreview: () => void;
@@ -125,18 +139,26 @@ export function EditorPanel({
   onListingsChange: (next: ListingsModule) => void;
   events: EventsModule;
   onEventsChange: (next: EventsModule) => void;
+  onEventsPreview: () => void;
   tickets: TicketsModule;
   onTicketsChange: (next: TicketsModule) => void;
+  onTicketsPreview: () => void;
   passes: PassesModule;
   onPassesChange: (next: PassesModule) => void;
+  onPassesPreview: () => void;
   trails: TrailsModule;
   onTrailsChange: (next: TrailsModule) => void;
+  onTrailsPreview: () => void;
   i18nBundle: I18nBundle;
   onI18nBundleChange: (next: I18nBundle) => void;
   ads: AdsModule;
   onAdsChange: (next: AdsModule) => void;
   integrations: IntegrationsConfig;
   onIntegrationsChange: (next: IntegrationsConfig) => void;
+  currentVersion: number;
+  lastPublishedAt?: string;
+  lastEditor?: string;
+  onPublish: () => void;
 }) {
   const section =
     sectionKey === 'versions'
@@ -161,23 +183,47 @@ export function EditorPanel({
     sectionKey === 'trails' ||
     sectionKey === 'i18n' ||
     sectionKey === 'ads' ||
-    sectionKey === 'integrations';
+    sectionKey === 'integrations' ||
+    sectionKey === 'versions';
+
+  const previewAction = getPreviewActionFor(sectionKey, {
+    onBillboardPreview,
+    onHomeDashboardPreview,
+    onAiAvatarPreview,
+    onSurveyPreview,
+    onDealsPreview,
+    onPhotoBoothPreview,
+    onBrochuresPreview,
+    onSocialWallPreview,
+    onGuestbookPreview,
+    onEventsPreview,
+    onTicketsPreview,
+    onPassesPreview,
+    onTrailsPreview,
+  });
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden bg-white dark:bg-zinc-950">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white dark:bg-zinc-950">
       <header className="shrink-0 border-b border-zinc-200 px-6 py-5 dark:border-zinc-900">
-        <p className="mb-1 font-mono text-[10.5px] font-bold uppercase tracking-[0.18em] text-sky-600 dark:text-sky-400">
-          {section.num} · Phase {section.phase}
-        </p>
         <h2 className="font-display text-xl font-semibold text-zinc-900 dark:text-white">
           {section.title}
         </h2>
         <p className="mt-1 text-[12.5px] leading-relaxed text-zinc-500 dark:text-zinc-500">
           {section.description}
         </p>
+        {previewAction && (
+          <button
+            type="button"
+            onClick={previewAction.onClick}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-sky-500/30 bg-sky-500/10 px-2.5 py-1.5 text-[11.5px] font-medium text-sky-700 transition hover:bg-sky-500/20 dark:border-sky-400/30 dark:text-sky-300"
+          >
+            <Play className="h-3 w-3" />
+            {previewAction.label}
+          </button>
+        )}
       </header>
 
-      <div className="flex-1 overflow-y-auto px-6 py-6">
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
         {sectionKey === 'branding' && (
           <BrandingEditor branding={branding} onChange={onBrandingChange} />
         )}
@@ -199,46 +245,20 @@ export function EditorPanel({
           <AiAvatarEditor aiAvatar={aiAvatar} onChange={onAiAvatarChange} />
         )}
         {sectionKey === 'survey' && (
-          <SurveyEditor
-            survey={survey}
-            onChange={onSurveyChange}
-            onPreview={onSurveyPreview}
-          />
+          <SurveyEditor survey={survey} onChange={onSurveyChange} />
         )}
-        {sectionKey === 'deals' && (
-          <DealsEditor
-            deals={deals}
-            onChange={onDealsChange}
-            onPreview={onDealsPreview}
-          />
-        )}
+        {sectionKey === 'deals' && <DealsEditor deals={deals} onChange={onDealsChange} />}
         {sectionKey === 'photo-booth' && (
-          <PhotoBoothEditor
-            photoBooth={photoBooth}
-            onChange={onPhotoBoothChange}
-            onPreview={onPhotoBoothPreview}
-          />
+          <PhotoBoothEditor photoBooth={photoBooth} onChange={onPhotoBoothChange} />
         )}
         {sectionKey === 'digital-brochure' && (
-          <BrochuresEditor
-            brochures={brochures}
-            onChange={onBrochuresChange}
-            onPreview={onBrochuresPreview}
-          />
+          <BrochuresEditor brochures={brochures} onChange={onBrochuresChange} />
         )}
         {sectionKey === 'social-wall' && (
-          <SocialWallEditor
-            socialWall={socialWall}
-            onChange={onSocialWallChange}
-            onPreview={onSocialWallPreview}
-          />
+          <SocialWallEditor socialWall={socialWall} onChange={onSocialWallChange} />
         )}
         {sectionKey === 'guestbook' && (
-          <GuestbookEditor
-            guestbook={guestbook}
-            onChange={onGuestbookChange}
-            onPreview={onGuestbookPreview}
-          />
+          <GuestbookEditor guestbook={guestbook} onChange={onGuestbookChange} />
         )}
         {sectionKey === 'listings' && (
           <ListingsEditor value={listings} onChange={onListingsChange} />
@@ -267,6 +287,14 @@ export function EditorPanel({
         )}
         {sectionKey === 'integrations' && (
           <IntegrationsEditor value={integrations} onChange={onIntegrationsChange} />
+        )}
+        {sectionKey === 'versions' && (
+          <VersionsEditor
+            currentVersion={currentVersion}
+            lastPublishedAt={lastPublishedAt}
+            lastEditor={lastEditor}
+            onPublish={onPublish}
+          />
         )}
         {!isImplemented && <ComingSoon section={section} />}
       </div>
@@ -541,6 +569,167 @@ const PRESET_PALETTES = [
 ];
 
 /* ────────────────────────────────────────────────────────────────────────── */
+
+type PreviewHandlers = {
+  onBillboardPreview: () => void;
+  onHomeDashboardPreview: () => void;
+  onAiAvatarPreview: () => void;
+  onSurveyPreview: () => void;
+  onDealsPreview: () => void;
+  onPhotoBoothPreview: () => void;
+  onBrochuresPreview: () => void;
+  onSocialWallPreview: () => void;
+  onGuestbookPreview: () => void;
+  onEventsPreview: () => void;
+  onTicketsPreview: () => void;
+  onPassesPreview: () => void;
+  onTrailsPreview: () => void;
+};
+
+/**
+ * Mapea cada sección con un destino visible en el iframe del kiosk al
+ * callback que lo dispara. Las secciones sin destino directo (Branding,
+ * Modules, Listings, i18n, Ads, Integrations, Versions, Publish) devuelven
+ * null y la cabecera no muestra el CTA.
+ */
+function getPreviewActionFor(
+  sectionKey: StudioSectionKey,
+  h: PreviewHandlers,
+): { label: string; onClick: () => void } | null {
+  switch (sectionKey) {
+    case 'billboard':
+      return { label: 'Open idle screen', onClick: h.onBillboardPreview };
+    case 'home-dashboard':
+      return { label: 'Open Home dashboard', onClick: h.onHomeDashboardPreview };
+    case 'ai-avatar':
+      return { label: 'Open AI Avatar', onClick: h.onAiAvatarPreview };
+    case 'survey':
+      return { label: 'Open Survey overlay', onClick: h.onSurveyPreview };
+    case 'deals':
+      return { label: 'Open Deals page', onClick: h.onDealsPreview };
+    case 'photo-booth':
+      return { label: 'Open Photo Booth', onClick: h.onPhotoBoothPreview };
+    case 'digital-brochure':
+      return { label: 'Open Brochures page', onClick: h.onBrochuresPreview };
+    case 'social-wall':
+      return { label: 'Open Social Wall', onClick: h.onSocialWallPreview };
+    case 'guestbook':
+      return { label: 'Open Guestbook', onClick: h.onGuestbookPreview };
+    case 'events':
+      return { label: 'Open Events page', onClick: h.onEventsPreview };
+    case 'tickets':
+      return { label: 'Open Tickets page', onClick: h.onTicketsPreview };
+    case 'passes':
+      return { label: 'Open Passes page', onClick: h.onPassesPreview };
+    case 'trails':
+      return { label: 'Open Trails page', onClick: h.onTrailsPreview };
+    default:
+      return null;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* Versions empty state                                                       */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function VersionsEditor({
+  currentVersion,
+  lastPublishedAt,
+  lastEditor,
+  onPublish,
+}: {
+  currentVersion: number;
+  lastPublishedAt?: string;
+  lastEditor?: string;
+  onPublish: () => void;
+}) {
+  const hasPublished = currentVersion > 0;
+  return (
+    <div className="space-y-6">
+      {/* Current version pill */}
+      <section className="rounded-xl border border-zinc-200 bg-gradient-to-br from-zinc-50 to-white p-4 dark:border-zinc-900 dark:from-zinc-900/40 dark:to-zinc-900/10">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+              Current version
+            </p>
+            <div className="mt-1 flex items-baseline gap-2">
+              <span className="font-display text-2xl font-bold text-zinc-900 dark:text-white">
+                v{currentVersion}
+              </span>
+              {!hasPublished && (
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
+                  Draft
+                </span>
+              )}
+            </div>
+            <p className="mt-1.5 text-[12px] leading-relaxed text-zinc-500 dark:text-zinc-500">
+              {hasPublished ? (
+                <>
+                  Last published{' '}
+                  {lastPublishedAt ? (
+                    <time dateTime={lastPublishedAt}>{relativeTime(lastPublishedAt)}</time>
+                  ) : (
+                    'recently'
+                  )}
+                  {lastEditor ? <> by {lastEditor.split('@')[0]}</> : null}.
+                </>
+              ) : (
+                <>This kiosk has not been published yet. Hit Publish to ship v1.</>
+              )}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onPublish}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-[12px] font-medium text-sky-700 transition hover:bg-sky-500/20 dark:border-sky-400/30 dark:text-sky-300"
+          >
+            <Rocket className="h-3.5 w-3.5" />
+            Publish
+          </button>
+        </div>
+      </section>
+
+      {/* Empty state */}
+      <section className="flex flex-col items-center rounded-xl border border-dashed border-zinc-300 bg-zinc-50/40 px-6 py-10 text-center dark:border-zinc-800 dark:bg-zinc-900/20">
+        <span className="mb-3 grid h-12 w-12 place-items-center rounded-2xl border border-zinc-200 bg-white text-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-500">
+          <History className="h-5 w-5" />
+        </span>
+        <h3 className="font-display text-base font-semibold text-zinc-800 dark:text-zinc-200">
+          Version history starts after your first publish
+        </h3>
+        <p className="mt-2 max-w-sm text-[12.5px] leading-relaxed text-zinc-500 dark:text-zinc-500">
+          Each release will appear here as an immutable snapshot you can review, diff against the
+          current draft, and roll back to with a single click. Coming with the next platform
+          update.
+        </p>
+        <ul className="mt-5 space-y-1 text-left text-[11.5px] text-zinc-500 dark:text-zinc-500">
+          <li>• Audit trail of every publish (who, when, what changed)</li>
+          <li>• Side-by-side diff between any two versions</li>
+          <li>• One-click rollback or pin a kiosk to a specific version</li>
+          <li>• Auto-generated release notes</li>
+        </ul>
+      </section>
+    </div>
+  );
+}
+
+/** Devuelve "2 days ago" / "just now" para un ISO string. */
+function relativeTime(iso: string): string {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return 'recently';
+  const diff = Date.now() - then;
+  if (diff < 60_000) return 'just now';
+  const min = Math.round(diff / 60_000);
+  if (min < 60) return `${min} min ago`;
+  const hr = Math.round(min / 60);
+  if (hr < 24) return `${hr} h ago`;
+  const day = Math.round(hr / 24);
+  if (day < 30) return `${day} ${day === 1 ? 'day' : 'days'} ago`;
+  const month = Math.round(day / 30);
+  if (month < 12) return `${month} mo ago`;
+  return `${Math.round(month / 12)} yr ago`;
+}
 
 function ComingSoon({ section }: { section: ReturnType<typeof STUDIO_SECTIONS.find> }) {
   if (!section) return null;

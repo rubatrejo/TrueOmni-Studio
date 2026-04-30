@@ -3,7 +3,9 @@
 import { Upload, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 
+import { resolveStudioAsset } from '../_lib/asset-resolve';
 import { compressImage } from '../_lib/image-utils';
+import { useStudioSlug } from '../_lib/slug-context';
 
 interface ImageFieldProps {
   label: string;
@@ -41,6 +43,8 @@ export function ImageField({
   const [busy, setBusy] = useState(false);
   const [hover, setHover] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const slug = useStudioSlug();
+  const previewSrc = slug ? resolveStudioAsset(slug, value) : value;
 
   const pickFile = async (file: File) => {
     setError(null);
@@ -97,7 +101,7 @@ export function ImageField({
           {value ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={value}
+              src={previewSrc}
               alt={label}
               className="block h-full w-full object-contain p-1"
             />
@@ -173,7 +177,7 @@ export function ImageField({
           <div className="grid h-full w-full place-items-center overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={value}
+              src={previewSrc}
               alt={label}
               className="max-h-[80%] max-w-[80%] object-contain"
             />

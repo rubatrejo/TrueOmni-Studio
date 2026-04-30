@@ -1453,6 +1453,42 @@ export const IntegrationsConfigSchema = z.object({
       units: z.enum(WEATHER_UNITS).default('metric'),
     })
     .default({ provider: 'open-meteo', apiKey: '', city: '', units: 'metric' }),
+  /** Satisfi Labs — chatbot backend. No UI — only credentials stored for the runtime. */
+  satisfi: z
+    .object({
+      apiKey: z.string().max(256).default(''),
+      hubId: z.string().max(128).default(''),
+    })
+    .default({ apiKey: '', hubId: '' }),
+  /** Tavus — replica/persona used by the AI Avatar module. */
+  tavus: z
+    .object({
+      apiKey: z.string().max(256).default(''),
+      replicaId: z.string().max(128).default(''),
+      personaId: z.string().max(128).default(''),
+    })
+    .default({ apiKey: '', replicaId: '', personaId: '' }),
+  /** Bandwango — partner data feed (passes, deals, listings). */
+  bandwango: z
+    .object({
+      apiKey: z.string().max(256).default(''),
+      partnerId: z.string().max(128).default(''),
+    })
+    .default({ apiKey: '', partnerId: '' }),
+  /** CrowdRiff — social media aggregator that powers the Social Wall. */
+  crowdriff: z
+    .object({
+      apiKey: z.string().max(256).default(''),
+      galleryId: z.string().max(128).default(''),
+    })
+    .default({ apiKey: '', galleryId: '' }),
+  /** Viator — tours & tickets feed. */
+  viator: z
+    .object({
+      apiKey: z.string().max(256).default(''),
+      partnerId: z.string().max(128).default(''),
+    })
+    .default({ apiKey: '', partnerId: '' }),
 });
 export type IntegrationsConfig = z.infer<typeof IntegrationsConfigSchema>;
 
@@ -1462,6 +1498,11 @@ export function defaultIntegrations(): IntegrationsConfig {
     mapbox: { token: '' },
     analytics: { gaId: '' },
     weather: { provider: 'open-meteo', apiKey: '', city: '', units: 'metric' },
+    satisfi: { apiKey: '', hubId: '' },
+    tavus: { apiKey: '', replicaId: '', personaId: '' },
+    bandwango: { apiKey: '', partnerId: '' },
+    crowdriff: { apiKey: '', galleryId: '' },
+    viator: { apiKey: '', partnerId: '' },
   };
 }
 
@@ -1557,9 +1598,14 @@ const SlugSchema = z
     message: 'slug must be lowercase letters, digits and hyphens (1–64 chars).',
   });
 
+export const KIOSK_ORIENTATIONS = ['portrait', 'landscape'] as const;
+export type KioskOrientation = (typeof KIOSK_ORIENTATIONS)[number];
+
 export const KioskConfigSchema = z.object({
   slug: SlugSchema,
   nombre: z.string().min(1).max(120),
+  /** Orientación física del kiosk. `portrait` = 1080×1920, `landscape` = 1920×1080. */
+  orientation: z.enum(KIOSK_ORIENTATIONS).default('portrait'),
   branding: BrandingSchema,
   /** Lista de tiles del Home — ordenada, con toggle on/off y label editable. */
   modules: ModulesSchema.optional(),
@@ -1623,10 +1669,15 @@ export const DEFAULT_BRANDING: Branding = {
 };
 
 /** Crea un KioskConfig nuevo a partir de slug+nombre, clonando branding default. */
-export function makeBlankConfig(slug: string, nombre: string): KioskConfig {
+export function makeBlankConfig(
+  slug: string,
+  nombre: string,
+  orientation: KioskOrientation = 'portrait',
+): KioskConfig {
   return {
     slug,
     nombre,
+    orientation,
     branding: { ...DEFAULT_BRANDING },
     modules: defaultModules(),
     billboard: { ...DEFAULT_BILLBOARD },

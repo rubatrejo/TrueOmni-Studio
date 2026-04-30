@@ -65,11 +65,9 @@ const TYPE_ICON: Record<SocialPostType, LucideIcon> = {
 export function SocialWallEditor({
   socialWall,
   onChange,
-  onPreview,
 }: {
   socialWall: SocialWallConfig;
   onChange: (next: SocialWallConfig) => void;
-  onPreview: () => void;
 }) {
   const setHandle = (k: SocialSource, v: string) => {
     const handles: SocialHandles = { ...(socialWall.handles ?? {}) };
@@ -156,13 +154,6 @@ export function SocialWallEditor({
           accept="image/jpeg,image/png,image/webp"
           maxBytes={1.5 * 1024 * 1024}
         />
-        <button
-          type="button"
-          onClick={onPreview}
-          className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-sky-500/30 bg-sky-500/10 px-2.5 py-1.5 text-[12px] font-medium text-sky-700 transition hover:bg-sky-500/20 dark:border-sky-400/30 dark:text-sky-300"
-        >
-          Preview Social Wall
-        </button>
       </Group>
 
       {/* Handles */}

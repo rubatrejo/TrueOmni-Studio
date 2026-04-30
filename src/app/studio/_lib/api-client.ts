@@ -65,7 +65,11 @@ export async function getConfig(slug: string): Promise<{ config: KioskConfig; me
   return http<{ config: KioskConfig; meta: ConfigMeta | null }>(`/api/studio/configs/${slug}`);
 }
 
-export async function createConfig(input: { slug: string; nombre: string }): Promise<ConfigEntry> {
+export async function createConfig(input: {
+  slug: string;
+  nombre: string;
+  orientation?: 'portrait' | 'landscape';
+}): Promise<ConfigEntry> {
   const data = await http<{ slug: string; config: KioskConfig; meta: ConfigMeta }>(
     '/api/studio/configs',
     { method: 'POST', body: input },
@@ -185,7 +189,12 @@ export type IntegrationCheckInput =
       apiKey: string;
       city: string;
       units: 'metric' | 'imperial';
-    };
+    }
+  | { kind: 'satisfi'; apiKey: string; hubId: string }
+  | { kind: 'tavus'; apiKey: string; replicaId: string }
+  | { kind: 'bandwango'; apiKey: string; partnerId: string }
+  | { kind: 'crowdriff'; apiKey: string; galleryId: string }
+  | { kind: 'viator'; apiKey: string; partnerId: string };
 
 export async function checkIntegration(
   input: IntegrationCheckInput,

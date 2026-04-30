@@ -3,6 +3,7 @@
 import {
   AlertCircle,
   BarChart3,
+  Bot,
   CheckCircle2,
   CloudSun,
   Eye,
@@ -10,6 +11,10 @@ import {
   Globe,
   Loader2,
   Map,
+  Plane,
+  Share2,
+  Ticket,
+  Video,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -48,6 +53,26 @@ export function IntegrationsEditor({ value, onChange }: IntegrationsEditorProps)
       <AnalyticsCard
         gaId={value.analytics.gaId}
         onChange={(next) => update({ analytics: { gaId: next } })}
+      />
+      <SatisfiCard
+        config={value.satisfi}
+        onChange={(next) => update({ satisfi: next })}
+      />
+      <TavusCard
+        config={value.tavus}
+        onChange={(next) => update({ tavus: next })}
+      />
+      <BandwangoCard
+        config={value.bandwango}
+        onChange={(next) => update({ bandwango: next })}
+      />
+      <CrowdriffCard
+        config={value.crowdriff}
+        onChange={(next) => update({ crowdriff: next })}
+      />
+      <ViatorCard
+        config={value.viator}
+        onChange={(next) => update({ viator: next })}
       />
     </div>
   );
@@ -283,6 +308,320 @@ function AnalyticsCard({
       </Field>
       <TestRow
         disabled={!gaId.trim()}
+        testing={testing}
+        result={result}
+        onTest={handleTest}
+        onDismiss={() => setResult(null)}
+      />
+    </Card>
+  );
+}
+
+function SatisfiCard({
+  config,
+  onChange,
+}: {
+  config: IntegrationsConfig['satisfi'];
+  onChange: (next: IntegrationsConfig['satisfi']) => void;
+}) {
+  const [result, setResult] = useState<CheckResult | null>(null);
+  const [testing, setTesting] = useState(false);
+  const update = (patch: Partial<IntegrationsConfig['satisfi']>) =>
+    onChange({ ...config, ...patch });
+
+  const handleTest = async () => {
+    setTesting(true);
+    try {
+      const r = await checkIntegration({
+        kind: 'satisfi',
+        apiKey: config.apiKey,
+        hubId: config.hubId,
+      });
+      setResult(r);
+    } catch (err) {
+      setResult({ ok: false, message: err instanceof Error ? err.message : 'Failed' });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  return (
+    <Card
+      icon={<Bot className="h-4 w-4" />}
+      title="Satisfi Labs"
+      subtitle="Chatbot backend wired into the kiosk runtime. No UI in Studio — credentials only."
+    >
+      <Field label="API key" hint="Provided by Satisfi when your hub is created.">
+        <SecretInput
+          value={config.apiKey}
+          onChange={(v) => update({ apiKey: v })}
+          placeholder="sat_…"
+        />
+      </Field>
+      <Field label="Hub ID" hint="Identifier of the chatbot hub for this kiosk.">
+        <input
+          type="text"
+          value={config.hubId}
+          onChange={(e) => update({ hubId: e.target.value })}
+          placeholder="hub_abc123"
+          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+        />
+      </Field>
+      <TestRow
+        disabled={!config.apiKey.trim() || !config.hubId.trim()}
+        testing={testing}
+        result={result}
+        onTest={handleTest}
+        onDismiss={() => setResult(null)}
+      />
+    </Card>
+  );
+}
+
+function TavusCard({
+  config,
+  onChange,
+}: {
+  config: IntegrationsConfig['tavus'];
+  onChange: (next: IntegrationsConfig['tavus']) => void;
+}) {
+  const [result, setResult] = useState<CheckResult | null>(null);
+  const [testing, setTesting] = useState(false);
+  const update = (patch: Partial<IntegrationsConfig['tavus']>) =>
+    onChange({ ...config, ...patch });
+
+  const handleTest = async () => {
+    setTesting(true);
+    try {
+      const r = await checkIntegration({
+        kind: 'tavus',
+        apiKey: config.apiKey,
+        replicaId: config.replicaId,
+      });
+      setResult(r);
+    } catch (err) {
+      setResult({ ok: false, message: err instanceof Error ? err.message : 'Failed' });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  return (
+    <Card
+      icon={<Video className="h-4 w-4" />}
+      title="Tavus"
+      subtitle="Video replica + persona used by the AI Avatar module."
+    >
+      <Field label="API key" hint="Get one at tavusapi.com — used to fetch the replica.">
+        <SecretInput
+          value={config.apiKey}
+          onChange={(v) => update({ apiKey: v })}
+          placeholder="t_…"
+        />
+      </Field>
+      <Field label="Replica ID" hint="The pre-trained avatar replica that drives the video.">
+        <input
+          type="text"
+          value={config.replicaId}
+          onChange={(e) => update({ replicaId: e.target.value })}
+          placeholder="r1a2b3c4…"
+          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+        />
+      </Field>
+      <Field label="Persona ID (optional)" hint="Persona config layered on the replica.">
+        <input
+          type="text"
+          value={config.personaId}
+          onChange={(e) => update({ personaId: e.target.value })}
+          placeholder="p1a2b3c4…"
+          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+        />
+      </Field>
+      <TestRow
+        disabled={!config.apiKey.trim()}
+        testing={testing}
+        result={result}
+        onTest={handleTest}
+        onDismiss={() => setResult(null)}
+      />
+    </Card>
+  );
+}
+
+function BandwangoCard({
+  config,
+  onChange,
+}: {
+  config: IntegrationsConfig['bandwango'];
+  onChange: (next: IntegrationsConfig['bandwango']) => void;
+}) {
+  const [result, setResult] = useState<CheckResult | null>(null);
+  const [testing, setTesting] = useState(false);
+  const update = (patch: Partial<IntegrationsConfig['bandwango']>) =>
+    onChange({ ...config, ...patch });
+
+  const handleTest = async () => {
+    setTesting(true);
+    try {
+      const r = await checkIntegration({
+        kind: 'bandwango',
+        apiKey: config.apiKey,
+        partnerId: config.partnerId,
+      });
+      setResult(r);
+    } catch (err) {
+      setResult({ ok: false, message: err instanceof Error ? err.message : 'Failed' });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  return (
+    <Card
+      icon={<Ticket className="h-4 w-4" />}
+      title="Bandwango"
+      subtitle="Partner data feed for passes, deals and listings."
+    >
+      <Field label="API key" hint="Issued by Bandwango when your partner account is set up.">
+        <SecretInput
+          value={config.apiKey}
+          onChange={(v) => update({ apiKey: v })}
+          placeholder="bw_…"
+        />
+      </Field>
+      <Field label="Partner ID" hint="Numeric or string identifier of the partner account.">
+        <input
+          type="text"
+          value={config.partnerId}
+          onChange={(e) => update({ partnerId: e.target.value })}
+          placeholder="12345"
+          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+        />
+      </Field>
+      <TestRow
+        disabled={!config.apiKey.trim() || !config.partnerId.trim()}
+        testing={testing}
+        result={result}
+        onTest={handleTest}
+        onDismiss={() => setResult(null)}
+      />
+    </Card>
+  );
+}
+
+function CrowdriffCard({
+  config,
+  onChange,
+}: {
+  config: IntegrationsConfig['crowdriff'];
+  onChange: (next: IntegrationsConfig['crowdriff']) => void;
+}) {
+  const [result, setResult] = useState<CheckResult | null>(null);
+  const [testing, setTesting] = useState(false);
+  const update = (patch: Partial<IntegrationsConfig['crowdriff']>) =>
+    onChange({ ...config, ...patch });
+
+  const handleTest = async () => {
+    setTesting(true);
+    try {
+      const r = await checkIntegration({
+        kind: 'crowdriff',
+        apiKey: config.apiKey,
+        galleryId: config.galleryId,
+      });
+      setResult(r);
+    } catch (err) {
+      setResult({ ok: false, message: err instanceof Error ? err.message : 'Failed' });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  return (
+    <Card
+      icon={<Share2 className="h-4 w-4" />}
+      title="CrowdRiff"
+      subtitle="Aggregates social media into the Social Wall (Instagram, TikTok, Facebook, X)."
+    >
+      <Field label="API key" hint="Provided by CrowdRiff once your account is set up.">
+        <SecretInput
+          value={config.apiKey}
+          onChange={(v) => update({ apiKey: v })}
+          placeholder="cr_…"
+        />
+      </Field>
+      <Field label="Gallery ID" hint="ID of the gallery whose feed powers the wall.">
+        <input
+          type="text"
+          value={config.galleryId}
+          onChange={(e) => update({ galleryId: e.target.value })}
+          placeholder="gallery-abc123"
+          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+        />
+      </Field>
+      <TestRow
+        disabled={!config.apiKey.trim() || !config.galleryId.trim()}
+        testing={testing}
+        result={result}
+        onTest={handleTest}
+        onDismiss={() => setResult(null)}
+      />
+    </Card>
+  );
+}
+
+function ViatorCard({
+  config,
+  onChange,
+}: {
+  config: IntegrationsConfig['viator'];
+  onChange: (next: IntegrationsConfig['viator']) => void;
+}) {
+  const [result, setResult] = useState<CheckResult | null>(null);
+  const [testing, setTesting] = useState(false);
+  const update = (patch: Partial<IntegrationsConfig['viator']>) =>
+    onChange({ ...config, ...patch });
+
+  const handleTest = async () => {
+    setTesting(true);
+    try {
+      const r = await checkIntegration({
+        kind: 'viator',
+        apiKey: config.apiKey,
+        partnerId: config.partnerId,
+      });
+      setResult(r);
+    } catch (err) {
+      setResult({ ok: false, message: err instanceof Error ? err.message : 'Failed' });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  return (
+    <Card
+      icon={<Plane className="h-4 w-4" />}
+      title="Viator"
+      subtitle="Tours & tickets feed for the Tickets module."
+    >
+      <Field label="API key" hint="Partner API key from your Viator partner dashboard.">
+        <SecretInput
+          value={config.apiKey}
+          onChange={(v) => update({ apiKey: v })}
+          placeholder="exp-…"
+        />
+      </Field>
+      <Field label="Partner ID" hint="Affiliate / partner identifier for attribution.">
+        <input
+          type="text"
+          value={config.partnerId}
+          onChange={(e) => update({ partnerId: e.target.value })}
+          placeholder="P00012345"
+          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+        />
+      </Field>
+      <TestRow
+        disabled={!config.apiKey.trim()}
         testing={testing}
         result={result}
         onTest={handleTest}

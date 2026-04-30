@@ -36,6 +36,26 @@ export async function POST(req: Request) {
             (String(body.units ?? 'metric') as 'metric' | 'imperial') || 'metric',
           ),
         );
+      case 'satisfi':
+        return NextResponse.json(
+          checkSatisfi(String(body.apiKey ?? ''), String(body.hubId ?? '')),
+        );
+      case 'tavus':
+        return NextResponse.json(
+          await checkTavus(String(body.apiKey ?? ''), String(body.replicaId ?? '')),
+        );
+      case 'bandwango':
+        return NextResponse.json(
+          checkBandwango(String(body.apiKey ?? ''), String(body.partnerId ?? '')),
+        );
+      case 'crowdriff':
+        return NextResponse.json(
+          checkCrowdriff(String(body.apiKey ?? ''), String(body.galleryId ?? '')),
+        );
+      case 'viator':
+        return NextResponse.json(
+          await checkViator(String(body.apiKey ?? ''), String(body.partnerId ?? '')),
+        );
       default:
         return NextResponse.json(
           { ok: false, message: `Unknown kind "${kind}"` },
@@ -101,6 +121,107 @@ function checkAnalytics(gaId: string): { ok: boolean; message: string } {
     };
   }
   return { ok: false, message: 'Use G-XXXXXXX (GA4) or UA-XXXXX-X (Universal).' };
+}
+
+function checkSatisfi(apiKey: string, hubId: string): { ok: boolean; message: string } {
+  const k = apiKey.trim();
+  const h = hubId.trim();
+  if (!k) return { ok: false, message: 'API key is empty.' };
+  if (!h) return { ok: false, message: 'Hub ID is empty.' };
+  if (k.length < 16) return { ok: false, message: 'API key looks too short.' };
+  return {
+    ok: true,
+    message: `Credentials format valid · hub ${h}.`,
+  };
+}
+
+async function checkTavus(
+  apiKey: string,
+  replicaId: string,
+): Promise<{ ok: boolean; message: string }> {
+  const k = apiKey.trim();
+  if (!k) return { ok: false, message: 'API key is empty.' };
+  // Tavus API: https://docs.tavus.io — the replicas list endpoint validates the key cheaply.
+  try {
+    const res = await fetchWithTimeout('https://tavusapi.com/v2/replicas?limit=1', {
+      headers: { 'x-api-key': k },
+    });
+    if (res.ok) {
+      return {
+        ok: true,
+        message: replicaId.trim()
+          ? `API key valid · using replica ${replicaId.trim()}.`
+          : 'API key valid · pick a replica ID below.',
+      };
+    }
+    if (res.status === 401 || res.status === 403) {
+      return { ok: false, message: `Invalid API key (${res.status} from Tavus).` };
+    }
+    return { ok: false, message: `Unexpected status ${res.status} from Tavus.` };
+  } catch (err) {
+    const m = err instanceof Error ? err.message : 'Network error';
+    return { ok: false, message: `Network error: ${m}` };
+  }
+}
+
+function checkBandwango(apiKey: string, partnerId: string): { ok: boolean; message: string } {
+  const k = apiKey.trim();
+  const p = partnerId.trim();
+  if (!k) return { ok: false, message: 'API key is empty.' };
+  if (!p) return { ok: false, message: 'Partner ID is empty.' };
+  if (k.length < 16) return { ok: false, message: 'API key looks too short.' };
+  return {
+    ok: true,
+    message: `Credentials format valid · partner ${p}.`,
+  };
+}
+
+function checkCrowdriff(apiKey: string, galleryId: string): { ok: boolean; message: string } {
+  const k = apiKey.trim();
+  const g = galleryId.trim();
+  if (!k) return { ok: false, message: 'API key is empty.' };
+  if (!g) return { ok: false, message: 'Gallery ID is empty.' };
+  if (k.length < 16) return { ok: false, message: 'API key looks too short.' };
+  return {
+    ok: true,
+    message: `Credentials format valid · gallery ${g}.`,
+  };
+}
+
+async function checkViator(
+  apiKey: string,
+  partnerId: string,
+): Promise<{ ok: boolean; message: string }> {
+  const k = apiKey.trim();
+  const p = partnerId.trim();
+  if (!k) return { ok: false, message: 'API key is empty.' };
+  // Viator Partner API: validamos formato + ping al endpoint de taxonomy
+  // que es liviano y devuelve 401 si la key es inválida.
+  try {
+    const res = await fetchWithTimeout(
+      'https://api.viator.com/partner/taxonomy/destinations?count=1',
+      {
+        headers: {
+          'exp-api-key': k,
+          Accept: 'application/json;version=2.0',
+          'Accept-Language': 'en-US',
+        },
+      },
+    );
+    if (res.ok) {
+      return {
+        ok: true,
+        message: p ? `API key valid · partner ${p}.` : 'API key valid.',
+      };
+    }
+    if (res.status === 401 || res.status === 403) {
+      return { ok: false, message: `Invalid API key (${res.status} from Viator).` };
+    }
+    return { ok: false, message: `Unexpected status ${res.status} from Viator.` };
+  } catch (err) {
+    const m = err instanceof Error ? err.message : 'Network error';
+    return { ok: false, message: `Network error: ${m}` };
+  }
 }
 
 async function checkOpenWeather(

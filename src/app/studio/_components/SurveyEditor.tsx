@@ -10,7 +10,6 @@ import {
   ListPlus,
   Mail,
   Phone,
-  Play,
   Plus,
   Star,
   TextCursorInput,
@@ -70,11 +69,9 @@ const QUESTION_TYPES: SurveyQuestionType[] = [
 export function SurveyEditor({
   survey,
   onChange,
-  onPreview,
 }: {
   survey: SurveyConfig;
   onChange: (next: SurveyConfig) => void;
-  onPreview: () => void;
 }) {
   const setQuestions = (questions: SurveyQuestion[]) => onChange({ ...survey, questions });
 
@@ -141,26 +138,14 @@ export function SurveyEditor({
 
   return (
     <div className="space-y-7">
-      {/* Toggle + preview */}
+      {/* Toggle hint */}
       <section className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-900 dark:bg-zinc-900/40">
-        <div className="flex items-start gap-3">
-          <div className="flex-1">
-            <div className="font-display text-[12.5px] font-semibold text-zinc-800 dark:text-zinc-200">
-              Survey overlay
-            </div>
-            <p className="mt-0.5 text-[11.5px] leading-relaxed text-zinc-500 dark:text-zinc-500">
-              Triggered when a visitor taps the Survey tile. Disable globally in the Modules tab.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onPreview}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-sky-500/30 bg-sky-500/10 px-2.5 py-1.5 text-[11.5px] font-medium text-sky-700 transition hover:bg-sky-500/20 dark:border-sky-400/30 dark:text-sky-300"
-          >
-            <Play className="h-3 w-3" />
-            Preview
-          </button>
+        <div className="font-display text-[12.5px] font-semibold text-zinc-800 dark:text-zinc-200">
+          Survey overlay
         </div>
+        <p className="mt-0.5 text-[11.5px] leading-relaxed text-zinc-500 dark:text-zinc-500">
+          Triggered when a visitor taps the Survey tile. Disable globally in the Modules tab.
+        </p>
       </section>
 
       {/* Intro */}

@@ -26,11 +26,9 @@ import { ImageField } from './ImageField';
 export function DealsEditor({
   deals,
   onChange,
-  onPreview,
 }: {
   deals: DealsModuleConfig;
   onChange: (next: DealsModuleConfig) => void;
-  onPreview: () => void;
 }) {
   const setDeals = (list: Deal[]) => onChange({ ...deals, deals: list });
 
@@ -91,14 +89,6 @@ export function DealsEditor({
           value={deals.qrLogo}
           onChange={(v) => onChange({ ...deals, qrLogo: v })}
         />
-
-        <button
-          type="button"
-          onClick={onPreview}
-          className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-sky-500/30 bg-sky-500/10 px-2.5 py-1.5 text-[12px] font-medium text-sky-700 transition hover:bg-sky-500/20 dark:border-sky-400/30 dark:text-sky-300"
-        >
-          Preview Deals page
-        </button>
       </Group>
 
       {/* Feature catalog */}

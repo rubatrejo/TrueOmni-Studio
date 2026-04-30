@@ -126,6 +126,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     if (!cfg) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     const body = (await req.json()) as {
+      nombre?: unknown;
       branding?: unknown;
       modules?: unknown;
       billboard?: unknown;
@@ -146,6 +147,16 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     };
 
     let next: KioskConfig = cfg;
+    if (typeof body.nombre === 'string') {
+      const trimmed = body.nombre.trim();
+      if (trimmed.length === 0 || trimmed.length > 120) {
+        return NextResponse.json(
+          { error: 'nombre must be 1-120 chars' },
+          { status: 400 },
+        );
+      }
+      next = { ...next, nombre: trimmed };
+    }
     if (body.branding !== undefined) {
       const parsed = BrandingSchema.safeParse(body.branding);
       if (!parsed.success) {

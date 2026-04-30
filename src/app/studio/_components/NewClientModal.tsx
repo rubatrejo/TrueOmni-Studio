@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from 'react';
 
 const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
 
+type Orientation = 'portrait' | 'landscape';
+
 export function NewClientModal({
   open,
   existingSlugs,
@@ -15,10 +17,11 @@ export function NewClientModal({
   open: boolean;
   existingSlugs: string[];
   onClose: () => void;
-  onCreate: (input: { slug: string; nombre: string }) => Promise<void>;
+  onCreate: (input: { slug: string; nombre: string; orientation: Orientation }) => Promise<void>;
 }) {
   const [nombre, setNombre] = useState('');
   const [slug, setSlug] = useState('');
+  const [orientation, setOrientation] = useState<Orientation>('portrait');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const nombreRef = useRef<HTMLInputElement>(null);
@@ -27,6 +30,7 @@ export function NewClientModal({
     if (!open) return;
     setNombre('');
     setSlug('');
+    setOrientation('portrait');
     setError(null);
     setSubmitting(false);
     // Auto-focus al abrir.
@@ -66,7 +70,7 @@ export function NewClientModal({
     }
     setSubmitting(true);
     try {
-      await onCreate({ slug, nombre: nombre.trim() });
+      await onCreate({ slug, nombre: nombre.trim(), orientation });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create');
       setSubmitting(false);
@@ -151,6 +155,41 @@ export function NewClientModal({
                 }
               />
 
+              <div>
+                <span className="mb-1.5 block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+                  Orientation
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  <OrientationOption
+                    active={orientation === 'portrait'}
+                    onClick={() => setOrientation('portrait')}
+                    label="Portrait"
+                    sub="1080 × 1920"
+                    glyph={
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="7" y="2.5" width="10" height="19" rx="1.5" />
+                        <line x1="10.5" y1="19" x2="13.5" y2="19" />
+                      </svg>
+                    }
+                  />
+                  <OrientationOption
+                    active={orientation === 'landscape'}
+                    onClick={() => setOrientation('landscape')}
+                    label="Landscape"
+                    sub="1920 × 1080"
+                    glyph={
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2.5" y="7" width="19" height="10" rx="1.5" />
+                        <line x1="19" y1="10.5" x2="19" y2="13.5" />
+                      </svg>
+                    }
+                  />
+                </div>
+                <p className="mt-1 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-500">
+                  Physical kiosk display orientation. Landscape support is in development.
+                </p>
+              </div>
+
               {error && (
                 <p
                   role="alert"
@@ -186,6 +225,48 @@ export function NewClientModal({
         </>
       )}
     </AnimatePresence>
+  );
+}
+
+function OrientationOption({
+  active,
+  onClick,
+  label,
+  sub,
+  glyph,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  sub: string;
+  glyph: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`flex items-center gap-3 rounded-md border px-3 py-2.5 text-left transition ${
+        active
+          ? 'border-sky-500 bg-sky-50 text-sky-900 dark:border-sky-500/60 dark:bg-sky-500/10 dark:text-sky-100'
+          : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-900'
+      }`}
+    >
+      <span
+        className={`grid h-9 w-9 shrink-0 place-items-center rounded-md ${
+          active
+            ? 'bg-sky-500/15 text-sky-700 dark:text-sky-300'
+            : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400'
+        }`}
+        aria-hidden="true"
+      >
+        {glyph}
+      </span>
+      <span className="flex flex-col">
+        <span className="text-[12.5px] font-semibold leading-tight">{label}</span>
+        <span className="text-[10.5px] font-mono opacity-70">{sub}</span>
+      </span>
+    </button>
   );
 }
 

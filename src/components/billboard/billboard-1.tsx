@@ -5,6 +5,8 @@ import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon } from './billboard-footer-parts';
+import { resolveSlotLabel } from './module-info';
+import { useBillboardOverride } from './use-billboard-override';
 
 /**
  * Billboard 1 — variante "Grid + Clock + Weather".
@@ -27,6 +29,14 @@ import { AccessibilityIcon } from './billboard-footer-parts';
  */
 export function Billboard1() {
   const t = useTextosMap();
+  const { modules } = useBillboardOverride();
+  // Slot labels: si el usuario asignó un módulo distinto al hardcoded del SVG,
+  // sustituimos solo el texto. Imagen/icono/color del slot quedan tal cual
+  // (decoración heredada del SVG — cambiar imagen e icono por slot es v2.1).
+  const slot0 = resolveSlotLabel(modules?.[0], { label: 'Things to do' });
+  const slot1 = resolveSlotLabel(modules?.[1], { label: 'Events' });
+  const slot2 = resolveSlotLabel(modules?.[2], { label: 'Itinerary', labelLine2: 'Builder' });
+  const slot3 = resolveSlotLabel(modules?.[3], { label: 'Photo', labelLine2: 'Booth' });
   return (
     <div
       data-billboard="1"
@@ -111,10 +121,16 @@ export function Billboard1() {
         />
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }} />
         <span
-          className="absolute font-display font-bold uppercase text-white"
+          className="absolute font-display font-bold uppercase leading-[1.05] text-white"
           style={{ left: '70px', top: '336px', fontSize: '50px', letterSpacing: '0.02em' }}
         >
-          Things to do
+          {slot0.label}
+          {slot0.labelLine2 ? (
+            <>
+              <br />
+              {slot0.labelLine2}
+            </>
+          ) : null}
         </span>
       </div>
 
@@ -130,10 +146,16 @@ export function Billboard1() {
         />
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(17,16,13,0.352)' }} />
         <span
-          className="absolute font-display font-bold uppercase text-white"
+          className="absolute font-display font-bold uppercase leading-[1.05] text-white"
           style={{ left: '40px', bottom: '40px', fontSize: '50px', letterSpacing: '0.02em' }}
         >
-          Events
+          {slot1.label}
+          {slot1.labelLine2 ? (
+            <>
+              <br />
+              {slot1.labelLine2}
+            </>
+          ) : null}
         </span>
       </div>
 
@@ -155,9 +177,13 @@ export function Billboard1() {
           className="font-display font-bold uppercase leading-[1.05] text-white"
           style={{ fontSize: '50px' }}
         >
-          Itinerary
-          <br />
-          Builder
+          {slot2.label}
+          {slot2.labelLine2 ? (
+            <>
+              <br />
+              {slot2.labelLine2}
+            </>
+          ) : null}
         </div>
         {/* Route icon — paths verbatim de designs/TNT/Billboard/Itinery-Icon.svg */}
         <svg
@@ -224,9 +250,13 @@ export function Billboard1() {
           className="ml-auto font-display font-bold uppercase leading-[1.05] text-white"
           style={{ fontSize: '50px' }}
         >
-          Photo
-          <br />
-          Booth
+          {slot3.label}
+          {slot3.labelLine2 ? (
+            <>
+              <br />
+              {slot3.labelLine2}
+            </>
+          ) : null}
         </div>
       </div>
 

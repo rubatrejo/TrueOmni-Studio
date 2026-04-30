@@ -5,7 +5,8 @@ import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon } from './billboard-footer-parts';
-import { useBillboardLogoHeight } from './use-billboard-override';
+import { resolveSlotLabel } from './module-info';
+import { useBillboardLogoHeight, useBillboardOverride } from './use-billboard-override';
 
 /**
  * Billboard 3 — variante "2 cards arriba + banner central + 2 cards abajo".
@@ -21,6 +22,12 @@ import { useBillboardLogoHeight } from './use-billboard-override';
 export function Billboard3() {
   const t = useTextosMap();
   const logoH = useBillboardLogoHeight();
+  const { modules } = useBillboardOverride();
+  // Slots 0..3 del 2×2: top-left → top-right → bottom-left → bottom-right.
+  const slot0 = resolveSlotLabel(modules?.[0], { label: 'Food &', labelLine2: 'Drink' });
+  const slot1 = resolveSlotLabel(modules?.[1], { label: 'Events' });
+  const slot2 = resolveSlotLabel(modules?.[2], { label: 'Things', labelLine2: 'to Do' });
+  const slot3 = resolveSlotLabel(modules?.[3], { label: 'Itinerary', labelLine2: 'Builder' });
   const cardBase = 'absolute overflow-hidden';
   const topRowSize = { width: '540px', height: '475px' } as const;
   const bottomRowSize = { width: '540px', height: '475px' } as const;
@@ -44,8 +51,13 @@ export function Billboard3() {
         />
         <div className="absolute inset-0" style={overlayStyle} />
         <span className={labelClass} style={labelStyle}>
-          Food &<br />
-          Drink
+          {slot0.label}
+          {slot0.labelLine2 ? (
+            <>
+              <br />
+              {slot0.labelLine2}
+            </>
+          ) : null}
         </span>
       </div>
       <div className={cardBase} style={{ ...topRowSize, left: '540px', top: '0' }}>
@@ -56,7 +68,13 @@ export function Billboard3() {
         />
         <div className="absolute inset-0" style={overlayStyle} />
         <span className={labelClass} style={labelStyle}>
-          Events
+          {slot1.label}
+          {slot1.labelLine2 ? (
+            <>
+              <br />
+              {slot1.labelLine2}
+            </>
+          ) : null}
         </span>
       </div>
 
@@ -107,9 +125,13 @@ export function Billboard3() {
         />
         <div className="absolute inset-0" style={overlayStyle} />
         <span className={labelClass} style={labelStyle}>
-          Things
-          <br />
-          to Do
+          {slot2.label}
+          {slot2.labelLine2 ? (
+            <>
+              <br />
+              {slot2.labelLine2}
+            </>
+          ) : null}
         </span>
       </div>
       <div className={cardBase} style={{ ...bottomRowSize, left: '540px', top: '1245px' }}>
@@ -120,9 +142,13 @@ export function Billboard3() {
         />
         <div className="absolute inset-0" style={overlayStyle} />
         <span className={labelClass} style={labelStyle}>
-          Itineray
-          <br />
-          Builder
+          {slot3.label}
+          {slot3.labelLine2 ? (
+            <>
+              <br />
+              {slot3.labelLine2}
+            </>
+          ) : null}
         </span>
       </div>
 

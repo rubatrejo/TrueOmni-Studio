@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon } from './billboard-footer-parts';
-import { useBillboardLogoHeight } from './use-billboard-override';
+import { MODULE_BILLBOARD_INFO } from './module-info';
+import { useBillboardLogoHeight, useBillboardOverride } from './use-billboard-override';
 
 /**
  * Billboard 2 — "Hero full-bleed + carousel de cards".
@@ -28,7 +29,10 @@ interface CardData {
   labelLine2?: string;
 }
 
-const CARDS: readonly CardData[] = [
+/** Cards default del SVG original. Se usan como fallback cuando el slot
+ *  correspondiente no está asignado en `billboard.modules` o el módulo
+ *  asignado no tiene info en MODULE_BILLBOARD_INFO. */
+const DEFAULT_CARDS: readonly CardData[] = [
   { key: 'things-to-do', image: '/assets/billboard-2/things-to-do.jpg', label: 'Things to Do' },
   { key: 'events', image: '/assets/billboard-2/events.jpg', label: 'Events' },
   { key: 'hotels', image: '/assets/billboard-2/hotels.jpg', label: 'Hotels' },
@@ -43,9 +47,30 @@ const CARDS: readonly CardData[] = [
 export function Billboard2() {
   const t = useTextosMap();
   const logoH = useBillboardLogoHeight();
+  const { modules } = useBillboardOverride();
   const [active, setActive] = useState(0);
-  const n = CARDS.length;
 
+  // CARDS reactivo: por cada slot 0..3, si `billboard.modules[i]` está
+  // asignado y existe en MODULE_BILLBOARD_INFO, usar esa info; si no, fallback
+  // al DEFAULT_CARDS del slot. La imagen también respeta el override (si el
+  // módulo asignado tiene `image` en el catálogo, se usa; si no, conserva la
+  // del slot original para no romper la composición visual).
+  const CARDS = useMemo<readonly CardData[]>(() => {
+    return DEFAULT_CARDS.map((fallback, i) => {
+      const slotKey = modules?.[i];
+      if (!slotKey) return fallback;
+      const info = MODULE_BILLBOARD_INFO[slotKey];
+      if (!info) return fallback;
+      return {
+        key: slotKey,
+        image: info.image ?? fallback.image,
+        label: info.label,
+        labelLine2: info.labelLine2,
+      };
+    });
+  }, [modules]);
+
+  const n = CARDS.length;
   const prev = CARDS[(active - 1 + n) % n]!;
   const current = CARDS[active]!;
   const next = CARDS[(active + 1) % n]!;

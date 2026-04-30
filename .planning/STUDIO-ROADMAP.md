@@ -106,7 +106,8 @@ Sub-fases entregadas:
 ## Fase S5 — Ads system
 
 - [x] **S5 base** ✅ cerrada 2026-04-29 — `AdSchema` + `AdsModuleSchema` añadidos al KioskConfig (al lado de events/listings/etc), endpoint `[slug]/route.ts` PATCH soporta `ads` con backfill defensivo en `hydrateConfig`. `AdsEditor` con search + filtro por kind (popup/hero/bottom) + Add/Toggle/Duplicate/Delete inline + per-item edit panel (id, kind, image, alt, routes multi-line, theme, enabled). `getAdsForRoute` filtra ads sin imagen para evitar render incompleto. `image` opcional en schema (permite crear ad → completar después). Wiring completo en Shell/EditorPanel; verificado E2E con persistencia tras Cmd+S.
-- [ ] **S5.1 — Bridge live preview** + bulk import CSV/JSON (futuro).
+- [x] **S5.2 — Bulk import CSV/JSON ads** ✅ cerrada 2026-04-29 — `'ads'` añadido a `ImportKind`, `AdsModule` reusa `ImportModal`/`ImportToast`. Generalizada la primary key del helper (`PK_FIELD: 'slug' | 'id'`) sin afectar editores existentes. Nuevo `upsertById` paralelo a `upsertBySlug`. CSV columns: `id,kind,image,alt,routes,enabled,theme` con `;`-separated routes. PreviewTable adapta cols por kind (id+kind para ads, slug+title para el resto). Botones Import/Export añadidos al toolbar de AdsEditor. Verificado E2E: 3 ads importados desde CSV, persistidos en KV.
+- [ ] **S5.1 — Bridge live preview ads** (override evento al kiosk runtime — pequeño, opcional).
 - [ ] **S5.2 — Rotación weighted/random por path** (v2, no MVP).
 
 ---

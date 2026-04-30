@@ -1874,6 +1874,58 @@ Para cada uno se entregó:
 
 ---
 
+### Sesión 2026-04-29 (cont. 8) — Build SSG fix + AI translate feature flag + S5.2 ads bulk import
+
+**Hecho:**
+
+- **Fix build SSG `/404` y `/500`** (`af4713f`):
+  - Next 15 con App Router auto-genera fallbacks legacy `/_error/_app/_document` que importan `<Html>` desde `next/document`, lo que rompe SSG.
+  - Añadido `src/app/error.tsx` (error boundary regular del App Router con `force-dynamic`).
+  - Añadidos `src/pages/_document.tsx` y `src/pages/_error.tsx` minimales en `src/pages/` (no en root — para no romper srcDir detection y typed routes resolvers).
+  - Añadido `force-dynamic` a `src/app/global-error.tsx` por consistencia.
+  - `pnpm build` ahora completa con todas las rutas como `Dynamic ƒ`. Bloqueador para Vercel deploy resuelto.
+- **Feature flag AI translate** (`9ee8a4b`): el botón ✨ ahora se oculta cuando no hay `ANTHROPIC_API_KEY` configurada en lugar de mostrar 503 al click. Decisión del usuario (no usar AI por ahora). Implementación:
+  - GET `/api/studio/i18n/translate` → `{ available: !!process.env.ANTHROPIC_API_KEY }`.
+  - `I18nEditor` consulta el status al montar y guarda en `aiAvailable`. `I18nCell` solo recibe `translateInput` cuando `aiAvailable === true`.
+  - Sin key: edición manual normal, celdas missing siguen marcadas en ámbar, cero ruido visual. Con key: comportamiento original (botón ✨ funcional sin tocar nada).
+- **S5.2 — Bulk import CSV/JSON de ads**:
+  - `'ads'` añadido a `ImportKind` literal type.
+  - `PK_FIELD: Record<ImportKind, 'slug' | 'id'>` generaliza la primary key (ads usa `id`, otros usan `slug`).
+  - `coerceCatalogRow` solo auto-deriva slug-from-title cuando pk='slug' (ads no tiene title → no auto-deriva).
+  - Dedupe + stats added/updated ahora usan `pkOf(item)` genérico vía cast doble `as unknown as Record<string,string>`.
+  - `upsertById` añadido al lado de `upsertBySlug` en `import-utils.ts`, ambos delegan a `upsertByKey<T>(existing, incoming, field)`.
+  - `KIND_LABELS` y `PreviewTable` del `ImportModal` adaptan cols por kind: ads muestra ID+Kind, otros muestran Slug+Title.
+  - `AdsEditor` añade botones Import/Export al toolbar custom + state `importOpen`/`lastImport` + `handleImport(items, mode, stats)` con upsertById + `handleExport(format)` con `downloadCatalog('ads', …)`.
+  - CSV columns aceptadas: `id,kind,image,alt,routes,enabled,theme`. Routes con separador `;`.
+
+**Verificado:**
+
+- `pnpm build` completa sin errores (todas las rutas Dynamic ƒ).
+- `pnpm typecheck` y `pnpm lint` limpios tras cada commit.
+- E2E AI translate feature flag: GET `/api/studio/i18n/translate` retorna `{available:false}`; al borrar valor de celda ES → celda missing visible (borde ámbar) pero **0 botones translate** en el DOM. Con key configurada el botón aparecería sin tocar código.
+- E2E S5.2 ads import: drop CSV con 3 ads → preview "3 valid · 3 added · 0 errors" con cols ID + Kind → click "Import 3 ads" → toast "3 ads imported (3 added · 0 updated)" → 3 rows visibles en lista con multi-route correcto ("2 routes · /home/events, /home/passes") → Cmd+S → 3 ads persistidos en KV con IDs `home-special/restaurants-banner/events-strip`. Cleanup tras smoke.
+
+**Pendiente / siguiente:**
+
+- **S7.1 wide — config.json publish** (mapping shape Studio↔filesystem para branding/colors→tokens.css, módulos editables, ads→features.advertisements, integrations→integraciones legacy). Sesión dedicada con decisiones de Rubén.
+- **S7.2 — GitHub PR-publish**: necesita GitHub PAT.
+- **S7.3 — NextAuth + admin gate**: necesita OAuth app.
+- **S7.4 — Vercel deploy**: necesita proyecto Vercel.
+- **S5.1 — Bridge live preview ads** (override evento al kiosk `useAds` — pequeño, opcional).
+- **AI translate path feliz**: validar cuando se añada `ANTHROPIC_API_KEY` — Rubén decidió no usar por costo.
+
+**Decisiones:**
+
+- **Pages dir en `src/pages/` no en root**: Next 15 detecta srcDir desde `src/app/`; pages en root rompía typed routes (path resolution). Mover a `src/pages/` mantiene el detect consistente.
+- **Botón ✨ oculto vs deshabilitado**: el operador no debe ver UI que no funciona. La feature flag server-side garantiza que SOLO se muestra si hay key real.
+- **Generalización PK con `Record<string, string>` cast** (no refactor mayor): cambio quirúrgico que no afecta los 4 catálogos existentes. `pkOf(item)` helper hace el dedupe agnóstico. Editores existentes no tocados.
+- **Ads sin auto-derive de id**: a diferencia de slug-from-title, no hay un campo natural en `Ad` del que derivar el id. CSV requiere columna `id` explícita; el operador la pone (es estable, parte del schema).
+- **Routes en CSV con `;`-separator**: consistente con features y arrays del resto. Un único separador en todo el sistema.
+
+**Fase:** Studio S5.2 cerrada (2026-04-29). Build SSG arreglado. Siguiente arranque: **S7.1 wide** o paramos.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

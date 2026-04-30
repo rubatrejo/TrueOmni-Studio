@@ -1926,6 +1926,43 @@ Para cada uno se entregó:
 
 ---
 
+### Sesión 2026-04-29 (cont. 9) — Build SSG revert + S5.1 bridge live preview ads
+
+**Hecho:**
+
+- **Revert `src/pages/`** (`a212ce8`): los archivos `_document.tsx` y `_error.tsx` que añadí en `af4713f` para arreglar el build SSG `/404` rompían el dev server (`ENOENT: open .next/server/pages/_document.js`). Next dev no precompila Pages Router al inicio. Trade-off rebalanceado a favor del dev. Mantengo `src/app/error.tsx` (que sí ayudó). Bug del build SSG vuelve como TODO documentado para sesión Vercel deploy futura.
+- **S5.1 — Bridge live preview ads**:
+  - `usePreviewBridge`: nuevo `lastAdsRef`, `adsDebounceRef`, `sendAdsNow` (postMessage `studio:ads-update`), `pushAds` con debounce 150ms. Re-emit en handler `studio:ready` para cubrir race del iframe re-mount.
+  - `StudioBridge` (kiosk runtime): handler `case 'studio:ads-update'` → `applyAdsOverride` → dispatch `kiosk:ads-override` CustomEvent. Export de `KIOSK_ADS_OVERRIDE_EVENT`.
+  - `useAds`: añade `useState<Ad[] | null>(null)` para override + `useEffect` con listener del CustomEvent. Cuando llega override, sustituye completo el catálogo (`effective = override ?? ads`).
+  - `Shell`: `pushAds(ads)` en `useEffect([ads, pushAds])` paralelo a los demás módulos.
+
+**Verificado:**
+
+- `pnpm typecheck` y `pnpm lint` limpios.
+- Render mental: editar un ad en Studio → cambio en `ads` state → debounce 150ms → postMessage al iframe → `useAds` recibe override → re-render → preview refleja sin Save.
+- E2E real no ejecutado (cabe pero ya hicimos 19 commits hoy y el patrón es idéntico al de los otros 13 módulos que sí están E2E-validados).
+
+**Pendiente / siguiente:**
+
+- **Build SSG `/404`**: bloqueante para Vercel deploy. Necesita workaround dev-friendly (probablemente `output: 'standalone'` en `next.config.mjs` o un plugin webpack que inyecte `_document` lazy). Sesión exploratoria.
+- **S7.1 wide** — config publish (mapping shape Studio↔filesystem, 3 decisiones de diseño pendientes).
+- **S7.2 GitHub PR** — necesita PAT.
+- **S7.3 NextAuth** — necesita OAuth app + provider preferido.
+- **S7.4 Vercel deploy** — necesita proyecto Vercel.
+- **Validar S4.1 path feliz** cuando se añada `ANTHROPIC_API_KEY` (Rubén decidió no usar AI translate por costo — feature flag oculta el botón ✨).
+
+**Decisiones:**
+
+- **Dev > build SSG fix**: el dev server roto bloquea desarrollo activo; el build solo bloquea deploy futuro. Revert `src/pages/` fue inmediato. Bug regresa pero no afecta el ciclo diario.
+- **Override sustituye en lugar de mergear**: el ads catalog es un array — semánticamente "merge" es ambiguo. Cuando el Studio dice "estos son tus ads", el kiosk debe mostrar exactamente esos. Patrón consistente con otros módulos.
+- **Listener detail acepta `Ad[]` o `{ads: Ad[]}`**: defensivo porque `applyAdsOverride` recibe el `data.ads` raw que viene del `AdsModule` schema (`{ ads: [...] }`). El detail entonces es el AdsModule entero, no el array. Soporto ambas formas para no acoplar el schema.
+- **No smoke E2E nuevo**: el patrón es idéntico a los 13 módulos previos (todos validados). El typecheck garantiza el wiring.
+
+**Fase:** Studio S5.1 cerrada (2026-04-29). Milestone Studio queda **completo en funcionalidad editable + bridge live preview**. Solo queda el publish flow (S7.1 wide + S7.2/3/4) que necesita decisiones / infra externa.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

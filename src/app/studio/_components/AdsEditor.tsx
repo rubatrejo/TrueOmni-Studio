@@ -1,8 +1,23 @@
 'use client';
 
-import { ChevronLeft, Copy, Eye, EyeOff, Megaphone, Plus, Search, Trash2 } from 'lucide-react';
+import {
+  ChevronLeft,
+  Copy,
+  Download,
+  Eye,
+  EyeOff,
+  Megaphone,
+  Plus,
+  Search,
+  Trash2,
+  Upload,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import type {
+  ImportMode,
+  ImportStats,
+} from '@/app/studio/_lib/import-helpers';
 import {
   AD_KINDS,
   AD_THEMES,
@@ -12,7 +27,11 @@ import {
   makeBlankAd,
 } from '@/lib/studio/schema';
 
+import { downloadCatalog } from './catalog/export-utils';
 import { ImageUrlField } from './catalog/ImageUrlField';
+import { upsertById } from './catalog/import-utils';
+import { ImportModal } from './catalog/ImportModal';
+import { ImportToast } from './catalog/ImportToast';
 
 interface AdsEditorProps {
   value: AdsModule;
@@ -23,6 +42,18 @@ export function AdsEditor({ value, onChange }: AdsEditorProps) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'' | AdKind>('');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const [lastImport, setLastImport] = useState<ImportStats | null>(null);
+
+  const handleImport = (items: Ad[], mode: ImportMode, stats: ImportStats) => {
+    const nextAds = mode === 'replace' ? items : upsertById(value.ads, items);
+    onChange({ ads: nextAds });
+    setLastImport(stats);
+  };
+
+  const handleExport = (format: 'csv' | 'json') => {
+    downloadCatalog('ads', value.ads, format, 'ads');
+  };
 
   const editingAd = useMemo(
     () => (editingId ? (value.ads.find((a) => a.id === editingId) ?? null) : null),
@@ -118,6 +149,24 @@ export function AdsEditor({ value, onChange }: AdsEditorProps) {
         </select>
         <button
           type="button"
+          onClick={() => handleExport('json')}
+          disabled={value.ads.length === 0}
+          className="flex items-center gap-1 rounded-md border border-zinc-200 bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 disabled:opacity-40 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+          title="Download all ads as JSON"
+        >
+          <Download className="h-3.5 w-3.5" />
+          Export
+        </button>
+        <button
+          type="button"
+          onClick={() => setImportOpen(true)}
+          className="flex items-center gap-1 rounded-md border border-zinc-200 bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+        >
+          <Upload className="h-3.5 w-3.5" />
+          Import
+        </button>
+        <button
+          type="button"
           onClick={handleAdd}
           className="flex items-center gap-1 rounded-md bg-sky-500/15 px-2.5 py-1.5 text-[11.5px] font-medium text-sky-700 transition hover:bg-sky-500/25 dark:text-sky-300"
         >
@@ -125,6 +174,20 @@ export function AdsEditor({ value, onChange }: AdsEditorProps) {
           Add ad
         </button>
       </div>
+
+      <ImportToast
+        stats={lastImport}
+        noun={lastImport && lastImport.total === 1 ? 'ad' : 'ads'}
+        onDismiss={() => setLastImport(null)}
+      />
+
+      <ImportModal
+        open={importOpen}
+        kind="ads"
+        existingItems={value.ads}
+        onClose={() => setImportOpen(false)}
+        onImport={handleImport}
+      />
 
       {visible.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-4 py-10 text-center dark:border-zinc-800 dark:bg-zinc-900/20">

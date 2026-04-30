@@ -37,6 +37,7 @@ const KIND_LABELS: Record<ImportKind, { singular: string; plural: string }> = {
   events: { singular: 'event', plural: 'events' },
   passes: { singular: 'pass', plural: 'passes' },
   trails: { singular: 'trail', plural: 'trails' },
+  ads: { singular: 'ad', plural: 'ads' },
 };
 
 export function ImportModal<K extends ImportKind>({
@@ -175,6 +176,7 @@ export function ImportModal<K extends ImportKind>({
                 />
               ) : (
                 <FilePreview
+                  kind={kind}
                   filename={filename}
                   format={format}
                   result={result}
@@ -291,6 +293,7 @@ function DropZone({
 }
 
 function FilePreview<K extends ImportKind>({
+  kind,
   filename,
   format,
   result,
@@ -298,6 +301,7 @@ function FilePreview<K extends ImportKind>({
   onToggleErrors,
   onReset,
 }: {
+  kind: K;
   filename: string;
   format: 'csv' | 'json';
   result: ImportResult<K> | null;
@@ -379,7 +383,7 @@ function FilePreview<K extends ImportKind>({
       )}
 
       {result && result.items.length > 0 && (
-        <PreviewTable items={result.items} />
+        <PreviewTable items={result.items} kind={kind} />
       )}
     </div>
   );
@@ -415,24 +419,42 @@ function Stat({
   );
 }
 
-function PreviewTable({ items }: { items: ReadonlyArray<{ slug: string; title: string }> }) {
+function PreviewTable({
+  items,
+  kind,
+}: {
+  items: ReadonlyArray<Record<string, unknown>>;
+  kind: ImportKind;
+}) {
   const preview = items.slice(0, 10);
+  const isAds = kind === 'ads';
+  const keyField = isAds ? 'id' : 'slug';
+  const labelField = isAds ? 'kind' : 'title';
+  const keyHeader = isAds ? 'ID' : 'Slug';
+  const labelHeader = isAds ? 'Kind' : 'Title';
   return (
     <div className="overflow-hidden rounded-md border border-zinc-200 dark:border-zinc-800">
       <table className="w-full table-fixed text-left text-[11.5px]">
         <thead className="bg-zinc-50 text-zinc-500 dark:bg-zinc-900/40 dark:text-zinc-400">
           <tr>
             <th className="w-10 px-2 py-1.5 font-medium">#</th>
-            <th className="w-[42%] px-2 py-1.5 font-medium">Slug</th>
-            <th className="px-2 py-1.5 font-medium">Title</th>
+            <th className="w-[42%] px-2 py-1.5 font-medium">{keyHeader}</th>
+            <th className="px-2 py-1.5 font-medium">{labelHeader}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
           {preview.map((item, idx) => (
-            <tr key={item.slug} className="text-zinc-700 dark:text-zinc-300">
+            <tr
+              key={String(item[keyField] ?? idx)}
+              className="text-zinc-700 dark:text-zinc-300"
+            >
               <td className="px-2 py-1.5 font-mono text-zinc-500">{idx + 1}</td>
-              <td className="truncate px-2 py-1.5 font-mono">{item.slug}</td>
-              <td className="truncate px-2 py-1.5">{item.title}</td>
+              <td className="truncate px-2 py-1.5 font-mono">
+                {String(item[keyField] ?? '')}
+              </td>
+              <td className="truncate px-2 py-1.5">
+                {String(item[labelField] ?? '')}
+              </td>
             </tr>
           ))}
         </tbody>

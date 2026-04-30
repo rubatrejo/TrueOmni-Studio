@@ -7,24 +7,39 @@ export function upsertBySlug<T extends { slug: string }>(
   existing: T[],
   incoming: T[],
 ): T[] {
-  const incomingMap = new Map(incoming.map((it) => [it.slug, it]));
+  return upsertByKey(existing, incoming, 'slug');
+}
+
+export function upsertById<T extends { id: string }>(
+  existing: T[],
+  incoming: T[],
+): T[] {
+  return upsertByKey(existing, incoming, 'id');
+}
+
+function upsertByKey<T extends Record<string, unknown>>(
+  existing: T[],
+  incoming: T[],
+  field: string,
+): T[] {
+  const incomingMap = new Map(incoming.map((it) => [it[field] as string, it]));
   const result: T[] = [];
   const seen = new Set<string>();
 
-  // mantener orden de existentes; reemplazar por la versión incoming si hay match
   for (const it of existing) {
-    if (incomingMap.has(it.slug)) {
-      result.push(incomingMap.get(it.slug) as T);
-      seen.add(it.slug);
+    const key = it[field] as string;
+    if (incomingMap.has(key)) {
+      result.push(incomingMap.get(key) as T);
+      seen.add(key);
     } else {
       result.push(it);
     }
   }
-  // appendear los nuevos al final, preservando el orden del payload
   for (const it of incoming) {
-    if (!seen.has(it.slug)) {
+    const key = it[field] as string;
+    if (!seen.has(key)) {
       result.push(it);
-      seen.add(it.slug);
+      seen.add(key);
     }
   }
   return result;

@@ -1,23 +1,25 @@
 /**
- * Import helpers — parseo CSV/JSON + coerción a schemas zod de los 4 catálogos
- * que soportan bulk import (Listings / Events / Passes / Trails).
+ * Import helpers — parseo CSV/JSON + coerción a schemas zod de los catálogos
+ * que soportan bulk import (Listings / Events / Passes / Trails / Ads).
  *
  * Puro. Sin React. Sin imports de cliente. Lo consumen el ImportModal y los
  * editores.
  */
 
 import {
+  AdSchema,
   EventItemSchema,
   ListingItemSchema,
   PassItemSchema,
   TrailItemSchema,
+  type Ad,
   type EventItem,
   type ListingItem,
   type PassItem,
   type TrailItem,
 } from '@/lib/studio/schema';
 
-export type ImportKind = 'listings' | 'events' | 'passes' | 'trails';
+export type ImportKind = 'listings' | 'events' | 'passes' | 'trails' | 'ads';
 export type ImportMode = 'merge' | 'replace';
 
 export interface ImportRowError {
@@ -34,7 +36,18 @@ export type ImportItem<K extends ImportKind> = K extends 'listings'
       ? PassItem
       : K extends 'trails'
         ? TrailItem
-        : never;
+        : K extends 'ads'
+          ? Ad
+          : never;
+
+/** Primary key field por kind. Listings/events/passes/trails usan `slug`; ads usa `id`. */
+const PK_FIELD: Record<ImportKind, 'slug' | 'id'> = {
+  listings: 'slug',
+  events: 'slug',
+  passes: 'slug',
+  trails: 'slug',
+  ads: 'id',
+};
 
 export interface ImportStats {
   added: number;
@@ -260,6 +273,16 @@ const PASSES_SPEC: CsvSpec = {
   tagline: { path: 'tagline', coerce: 'string' },
 };
 
+const ADS_SPEC: CsvSpec = {
+  id: { path: 'id', coerce: 'string' },
+  kind: { path: 'kind', coerce: 'string' },
+  image: { path: 'image', coerce: 'string' },
+  alt: { path: 'alt', coerce: 'string' },
+  routes: { path: 'routes', coerce: 'array' },
+  enabled: { path: 'enabled', coerce: 'bool' },
+  theme: { path: 'theme', coerce: 'string' },
+};
+
 const TRAILS_SPEC: CsvSpec = {
   slug: { path: 'slug', coerce: 'string' },
   title: { path: 'title', coerce: 'string' },
@@ -286,6 +309,7 @@ const SPECS: Record<ImportKind, CsvSpec> = {
   events: EVENTS_SPEC,
   passes: PASSES_SPEC,
   trails: TRAILS_SPEC,
+  ads: ADS_SPEC,
 };
 
 const SCHEMAS = {
@@ -293,6 +317,7 @@ const SCHEMAS = {
   events: EventItemSchema,
   passes: PassItemSchema,
   trails: TrailItemSchema,
+  ads: AdSchema,
 } as const;
 
 /* ──────────────────────────────────────────────────────────────────────── */
@@ -373,9 +398,16 @@ export function coerceCatalogRow<K extends ImportKind>(
   raw: Record<string, unknown>,
 ): CoerceResult<K> {
   const schema = SCHEMAS[kind];
+  const pk = PK_FIELD[kind];
 
-  // auto-slug si falta
-  if ((!raw.slug || raw.slug === '') && typeof raw.title === 'string' && raw.title.trim() !== '') {
+  // auto-derive primary key (slug) desde title si falta. Ads usa `id` y NO se
+  // auto-deriva (no hay title).
+  if (
+    pk === 'slug' &&
+    (!raw.slug || raw.slug === '') &&
+    typeof raw.title === 'string' &&
+    raw.title.trim() !== ''
+  ) {
     const candidate = slugify(raw.title);
     if (candidate) raw.slug = candidate;
   }
@@ -468,20 +500,22 @@ export function normalizeImport<K extends ImportKind>(
     });
   }
 
-  // dedupe por slug dentro del payload (último gana)
+  // dedupe por primary key dentro del payload (último gana). pk = slug | id.
+  const pk = PK_FIELD[kind];
+  const pkOf = (item: ImportItem<K>): string =>
+    (item as unknown as Record<string, string>)[pk];
+
   const dedupedMap = new Map<string, ImportItem<K>>();
   for (const it of items) {
-    const slug = (it as { slug: string }).slug;
-    dedupedMap.set(slug, it);
+    dedupedMap.set(pkOf(it), it);
   }
   const deduped = Array.from(dedupedMap.values());
 
-  const existingSlugs = new Set(existing.map((i) => (i as { slug: string }).slug));
+  const existingKeys = new Set(existing.map(pkOf));
   let added = 0;
   let updated = 0;
   for (const it of deduped) {
-    const slug = (it as { slug: string }).slug;
-    if (existingSlugs.has(slug)) updated++;
+    if (existingKeys.has(pkOf(it))) updated++;
     else added++;
   }
 

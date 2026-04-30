@@ -1,8 +1,6 @@
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-
 import { NextResponse } from 'next/server';
 
+import { bootstrapStudioFromFs, readClientFs } from '@/lib/studio/bootstrap-from-fs';
 import { kv, kvKeys } from '@/lib/studio/kv';
 import {
   AiAvatarSchema,
@@ -79,23 +77,24 @@ export async function GET(_req: Request, { params }: RouteParams) {
   }
 }
 
-/** Backfill defensivo de un KioskConfig leído del KV. */
+/** Backfill defensivo de un KioskConfig leído del KV.
+ *
+ * Aplica defaults para campos undefined (cliente legacy pre-S2) y luego
+ * llama a `bootstrapStudioFromFs` para hidratar campos que sigan en
+ * factory default con datos del filesystem (caso típico: cliente recién
+ * creado por el seed o por `makeBlankConfig`, cuyo Studio tiene events=[]
+ * y nombre="TrueOmni Default" pero el filesystem tiene 69 events y un
+ * nombre real).
+ */
 async function hydrateConfig(slug: string, cfg: KioskConfig): Promise<KioskConfig> {
   const baseModules = cfg.modules ?? defaultModules();
-  // Merge de systemModules: legacy clients pueden tener solo 3 campos.
   const mergedSystemModules = {
     ...DEFAULT_SYSTEM_MODULES,
     ...(baseModules.systemModules ?? {}),
   };
 
-  // Bootstrap defensivo de ads e integrations desde filesystem para clientes
-  // legacy que tienen data en `clients/<slug>/config.json` pero no en KV.
-  const fsConfig =
-    cfg.ads === undefined || cfg.integrations === undefined
-      ? await readClientConfigFromFs(slug)
-      : null;
-
-  return {
+  // Aplica defaults para todo undefined → estado consistente para el bootstrap.
+  const filled: KioskConfig = {
     ...cfg,
     modules: { ...baseModules, systemModules: mergedSystemModules },
     billboard: cfg.billboard ?? { ...DEFAULT_BILLBOARD },
@@ -111,56 +110,13 @@ async function hydrateConfig(slug: string, cfg: KioskConfig): Promise<KioskConfi
     tickets: cfg.tickets ?? defaultTickets(),
     passes: cfg.passes ?? defaultPasses(),
     trails: cfg.trails ?? defaultTrails(),
-    ads: cfg.ads ?? bootstrapAdsFromFs(fsConfig) ?? defaultAds(),
-    integrations:
-      cfg.integrations ?? bootstrapIntegrationsFromFs(fsConfig) ?? defaultIntegrations(),
+    ads: cfg.ads ?? defaultAds(),
+    integrations: cfg.integrations ?? defaultIntegrations(),
   };
-}
 
-/* ──────────────────────────────────────────────────────────────────────── */
-/*  Bootstrap helpers                                                       */
-/* ──────────────────────────────────────────────────────────────────────── */
-
-interface LegacyConfigSubset {
-  features?: {
-    advertisements?: { ads?: unknown };
-  };
-  integraciones?: {
-    api_base_url?: unknown;
-    analytics_id?: unknown;
-    mapbox_token?: unknown;
-  };
-}
-
-async function readClientConfigFromFs(slug: string): Promise<LegacyConfigSubset | null> {
-  const filePath = path.join(process.cwd(), 'clients', slug, 'config.json');
-  try {
-    const raw = await fs.readFile(filePath, 'utf8');
-    return JSON.parse(raw) as LegacyConfigSubset;
-  } catch {
-    return null;
-  }
-}
-
-function bootstrapAdsFromFs(fsConfig: LegacyConfigSubset | null) {
-  if (!fsConfig) return null;
-  const legacyAds = fsConfig.features?.advertisements?.ads;
-  if (!Array.isArray(legacyAds)) return null;
-  const parsed = AdsModuleSchema.safeParse({ ads: legacyAds });
-  return parsed.success ? parsed.data : null;
-}
-
-function bootstrapIntegrationsFromFs(fsConfig: LegacyConfigSubset | null) {
-  if (!fsConfig?.integraciones) return null;
-  const legacy = fsConfig.integraciones;
-  const candidate = {
-    api: { baseUrl: typeof legacy.api_base_url === 'string' ? legacy.api_base_url : '' },
-    mapbox: { token: typeof legacy.mapbox_token === 'string' ? legacy.mapbox_token : '' },
-    analytics: { gaId: typeof legacy.analytics_id === 'string' ? legacy.analytics_id : '' },
-    weather: { provider: 'open-meteo' as const, apiKey: '', city: '', units: 'metric' as const },
-  };
-  const parsed = IntegrationsConfigSchema.safeParse(candidate);
-  return parsed.success ? parsed.data : null;
+  // Hidrata desde filesystem todo lo que sigue siendo factory default.
+  const { config: fsConfig, tokensCss } = await readClientFs(slug);
+  return bootstrapStudioFromFs(filled, fsConfig, tokensCss);
 }
 
 export async function PATCH(req: Request, { params }: RouteParams) {

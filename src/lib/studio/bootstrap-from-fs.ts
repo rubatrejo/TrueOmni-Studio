@@ -1,0 +1,467 @@
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+
+import 'server-only';
+
+import { hslToHex } from './hex-to-hsl';
+import {
+  AdsModuleSchema,
+  AiAvatarSchema,
+  BrochuresModuleSchema,
+  DealsModuleSchema,
+  DEFAULT_AI_AVATAR,
+  DEFAULT_BILLBOARD,
+  DEFAULT_BRANDING,
+  DEFAULT_BROCHURES,
+  DEFAULT_DEALS,
+  DEFAULT_GUESTBOOK,
+  DEFAULT_PHOTO_BOOTH,
+  DEFAULT_SOCIAL_WALL,
+  DEFAULT_SURVEY,
+  EventsModuleSchema,
+  GuestbookSchema,
+  IntegrationsConfigSchema,
+  ListingsCatalogSchema,
+  PassesModuleSchema,
+  PhotoBoothSchema,
+  SocialWallSchema,
+  SurveySchema,
+  TicketsModuleSchema,
+  TrailsModuleSchema,
+  defaultEvents,
+  defaultIntegrations,
+  defaultListings,
+  defaultPasses,
+  defaultTickets,
+  defaultTrails,
+  type KioskConfig,
+  type ListingsCatalogEntry,
+  type ListingsModule,
+} from './schema';
+
+/**
+ * Bootstrap inverso filesystem → Studio.
+ *
+ * Cuando el Studio carga un cliente con cfg incompleto en KV (típicamente
+ * creado desde `makeBlankConfig`), este módulo lee `clients/<slug>/` y
+ * hidrata los campos del Studio que SIGUEN siendo defaults factory con
+ * los datos reales del filesystem. Campos ya editados por el operador no
+ * se tocan — la heurística es estructural (`JSON.stringify` equality
+ * contra el factory default).
+ *
+ * Esto cierra el desfase visual que tenía el Studio para `default`:
+ * el operador veía 0 events / 0 ads / "TrueOmni Default" como nombre,
+ * cuando el filesystem ya tenía 69 events, 4 ads y "Arizona".
+ */
+
+const TEMPLATE_NAME_SENTINEL = 'TrueOmni Default';
+
+interface FsConfig {
+  client?: {
+    slug?: string;
+    nombre?: string;
+    locale?: string;
+    timezone?: string;
+    coords?: { lat: number; lng: number };
+  };
+  branding?: {
+    logo?: { default?: string; dark?: string; alt?: string } | string;
+    favicon?: string;
+    idleLogo?: string;
+    footerLogo?: string;
+    fonts?: { display?: string; body?: string };
+  };
+  features?: {
+    advertisements?: { ads?: unknown[] };
+    billboard_variant?: number;
+    inactividad_reset_seg?: number;
+    languages?: { enabled?: boolean; available?: string[]; default?: string };
+    home?: {
+      tiles?: Array<{ key?: string; label?: string; enabled?: boolean; image?: string }>;
+      wayfinding?: { enabled?: boolean; label?: string; image?: string };
+      askAi?: Record<string, unknown>;
+      photoBooth?: Record<string, unknown>;
+      survey?: Record<string, unknown>;
+      modules?: Record<string, Record<string, unknown>>;
+    };
+  };
+  integraciones?: { api_base_url?: string; mapbox_token?: string; analytics_id?: string };
+}
+
+export async function readClientFs(
+  slug: string,
+): Promise<{ config: FsConfig | null; tokensCss: string | null }> {
+  const dir = path.join(process.cwd(), 'clients', slug);
+  const [config, tokensCss] = await Promise.all([
+    readJson(path.join(dir, 'config.json')),
+    readText(path.join(dir, 'tokens.css')),
+  ]);
+  return { config, tokensCss };
+}
+
+async function readJson(p: string): Promise<FsConfig | null> {
+  try {
+    return JSON.parse(await fs.readFile(p, 'utf8')) as FsConfig;
+  } catch {
+    return null;
+  }
+}
+
+async function readText(p: string): Promise<string | null> {
+  try {
+    return await fs.readFile(p, 'utf8');
+  } catch {
+    return null;
+  }
+}
+
+function structuralEqual<T>(a: T, b: T): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  bootstrap principal                                                      */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export function bootstrapStudioFromFs(
+  studio: KioskConfig,
+  fsConfig: FsConfig | null,
+  tokensCss: string | null,
+): KioskConfig {
+  if (!fsConfig) return studio;
+  let next: KioskConfig = { ...studio };
+
+  // ── nombre ──
+  if (next.nombre === TEMPLATE_NAME_SENTINEL && fsConfig.client?.nombre) {
+    next.nombre = fsConfig.client.nombre;
+  }
+
+  // ── branding ──
+  next = { ...next, branding: bootstrapBranding(next.branding, fsConfig.branding, tokensCss) };
+
+  // ── billboard ──
+  if (next.billboard && structuralEqual(next.billboard, DEFAULT_BILLBOARD)) {
+    const variant = fsConfig.features?.billboard_variant;
+    const idleSec = fsConfig.features?.inactividad_reset_seg;
+    if (variant === 0 || variant === 1 || variant === 2 || variant === 3) {
+      next.billboard = {
+        variant,
+        idleTimeoutSec:
+          typeof idleSec === 'number' && idleSec >= 15 && idleSec <= 600
+            ? idleSec
+            : DEFAULT_BILLBOARD.idleTimeoutSec,
+      };
+    }
+  }
+
+  // ── ads ──
+  if (!next.ads || next.ads.ads.length === 0) {
+    const fsAds = fsConfig.features?.advertisements?.ads;
+    if (Array.isArray(fsAds) && fsAds.length > 0) {
+      const parsed = AdsModuleSchema.safeParse({ ads: fsAds });
+      if (parsed.success) next.ads = parsed.data;
+    }
+  }
+
+  // ── integrations ──
+  if (!next.integrations || structuralEqual(next.integrations, defaultIntegrations())) {
+    const legacy = fsConfig.integraciones;
+    if (legacy) {
+      const candidate = {
+        api: { baseUrl: typeof legacy.api_base_url === 'string' ? legacy.api_base_url : '' },
+        mapbox: { token: typeof legacy.mapbox_token === 'string' ? legacy.mapbox_token : '' },
+        analytics: { gaId: typeof legacy.analytics_id === 'string' ? legacy.analytics_id : '' },
+        weather: { provider: 'open-meteo' as const, apiKey: '', city: '', units: 'metric' as const },
+      };
+      const parsed = IntegrationsConfigSchema.safeParse(candidate);
+      if (parsed.success) next.integrations = parsed.data;
+    }
+  }
+
+  // ── modules (tiles enabled + labels) ──
+  // El Studio.modules.tiles ya tiene shape correcto; sólo importa hidratar
+  // los `enabled` desde fs si el operador no los tocó. Heurística: si
+  // todos los enabled del Studio están en true (default factory), copiar
+  // los enabled del fs.
+  if (next.modules) {
+    const fsTiles = fsConfig.features?.home?.tiles;
+    if (Array.isArray(fsTiles) && allTilesEnabled(next.modules.tiles)) {
+      const fsEnabledByKey = new Map<string, boolean>();
+      for (const t of fsTiles) {
+        if (typeof t?.key === 'string' && typeof t?.enabled === 'boolean') {
+          fsEnabledByKey.set(t.key, t.enabled);
+        }
+      }
+      const wayfindingTile = fsConfig.features?.home?.wayfinding;
+      if (wayfindingTile && typeof wayfindingTile.enabled === 'boolean') {
+        fsEnabledByKey.set('wayfinding', wayfindingTile.enabled);
+      }
+      next.modules = {
+        ...next.modules,
+        tiles: next.modules.tiles.map((t) => ({
+          ...t,
+          enabled: fsEnabledByKey.get(t.key) ?? t.enabled,
+        })),
+      };
+    }
+  }
+
+  // ── modules con kind ──
+  const fsModules = fsConfig.features?.home?.modules ?? {};
+
+  next.events = takeFsIfDefault(
+    next.events,
+    defaultEvents(),
+    () => parseStripKind(EventsModuleSchema, fsModules.events),
+  );
+  next.deals = takeFsIfDefault(
+    next.deals,
+    DEFAULT_DEALS,
+    () => parseStripKind(DealsModuleSchema, fsModules.deals),
+  );
+  next.passes = takeFsIfDefault(
+    next.passes,
+    defaultPasses(),
+    () => parseStripKind(PassesModuleSchema, fsModules.passes),
+  );
+  next.tickets = takeFsIfDefault(
+    next.tickets,
+    defaultTickets(),
+    () => parseStripKind(TicketsModuleSchema, fsModules.tickets),
+  );
+  next.trails = takeFsIfDefault(
+    next.trails,
+    defaultTrails(),
+    () => parseStripKind(TrailsModuleSchema, fsModules.trails),
+  );
+  next.socialWall = takeFsIfDefault(
+    next.socialWall,
+    DEFAULT_SOCIAL_WALL,
+    () => parseStripKind(SocialWallSchema, fsModules['social-wall']),
+  );
+  next.brochures = takeFsIfDefault(
+    next.brochures,
+    DEFAULT_BROCHURES,
+    () => parseStripKind(BrochuresModuleSchema, fsModules['digital-brochure']),
+  );
+  next.guestbook = takeFsIfDefault(
+    next.guestbook,
+    DEFAULT_GUESTBOOK,
+    () => parseStripKind(GuestbookSchema, fsModules.guestbook),
+  );
+
+  // ── photoBooth, survey, aiAvatar ──
+  const home = fsConfig.features?.home ?? {};
+  next.photoBooth = takeFsIfDefault(next.photoBooth, DEFAULT_PHOTO_BOOTH, () =>
+    parseSchema(PhotoBoothSchema, home.photoBooth),
+  );
+  next.survey = takeFsIfDefault(next.survey, DEFAULT_SURVEY, () =>
+    parseSchema(SurveySchema, home.survey),
+  );
+  next.aiAvatar = takeFsIfDefault(next.aiAvatar, DEFAULT_AI_AVATAR, () => {
+    if (!home.askAi) return null;
+    const candidate = {
+      avatar: typeof home.askAi.avatar === 'string' ? home.askAi.avatar : undefined,
+      heroVideo: typeof home.askAi.heroVideo === 'string' ? home.askAi.heroVideo : undefined,
+      greeting:
+        typeof home.askAi.greeting === 'string'
+          ? home.askAi.greeting
+          : DEFAULT_AI_AVATAR.greeting,
+      model: DEFAULT_AI_AVATAR.model,
+      suggestedQuestions: Array.isArray(home.askAi.suggestedQuestions)
+        ? home.askAi.suggestedQuestions
+        : [],
+    };
+    return parseSchema(AiAvatarSchema, candidate);
+  });
+
+  // ── listings ──
+  next.listings = bootstrapListings(next.listings, fsConfig);
+
+  return next;
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Helpers                                                                  */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function allTilesEnabled(tiles: NonNullable<KioskConfig['modules']>['tiles']): boolean {
+  return tiles.every((t) => t.enabled === true);
+}
+
+function takeFsIfDefault<T>(
+  studioValue: T | undefined,
+  factoryDefault: T,
+  fromFs: () => T | null,
+): T | undefined {
+  if (studioValue === undefined) {
+    const fs = fromFs();
+    return fs ?? undefined;
+  }
+  if (!structuralEqual(studioValue, factoryDefault)) return studioValue;
+  const fs = fromFs();
+  return fs ?? studioValue;
+}
+
+interface ZodLike<T> {
+  safeParse: (input: unknown) => { success: true; data: T } | { success: false };
+}
+
+function parseSchema<T>(schema: ZodLike<T>, candidate: unknown): T | null {
+  if (!candidate) return null;
+  const parsed = schema.safeParse(candidate);
+  return parsed.success ? parsed.data : null;
+}
+
+/** Filesystem modules.{key} traen un `kind` extra que el Studio shape NO acepta. */
+function parseStripKind<T>(
+  schema: ZodLike<T>,
+  candidate: Record<string, unknown> | undefined,
+): T | null {
+  if (!candidate || typeof candidate !== 'object') return null;
+  const { kind: _kind, ...rest } = candidate as { kind?: unknown } & Record<string, unknown>;
+  return parseSchema(schema, rest);
+}
+
+function bootstrapBranding(
+  studioBranding: KioskConfig['branding'],
+  fsBranding: FsConfig['branding'],
+  tokensCss: string | null,
+): KioskConfig['branding'] {
+  let next = { ...studioBranding };
+
+  // Colors desde tokens.css.
+  if (tokensCss && allBrandColorsAreDefault(next)) {
+    const fromCss = extractBrandHexFromTokensCss(tokensCss);
+    if (fromCss) {
+      next = { ...next, ...fromCss };
+    }
+  }
+
+  // Logo / favicon / idleLogo / footerLogo desde fs.branding.
+  if (fsBranding) {
+    const fsLogo = pickLogoString(fsBranding.logo);
+    if (!next.logo && fsLogo) next.logo = fsLogo;
+
+    if (!next.favicon && typeof fsBranding.favicon === 'string') {
+      next.favicon = fsBranding.favicon;
+    }
+    if (!next.idleLogo && typeof fsBranding.idleLogo === 'string') {
+      next.idleLogo = fsBranding.idleLogo;
+    }
+    if (!next.footerLogo && typeof fsBranding.footerLogo === 'string') {
+      next.footerLogo = fsBranding.footerLogo;
+    }
+  }
+
+  return next;
+}
+
+function pickLogoString(logo: NonNullable<FsConfig['branding']>['logo'] | undefined): string | null {
+  if (!logo) return null;
+  if (typeof logo === 'string') return logo;
+  if (typeof logo === 'object' && 'default' in logo && typeof logo.default === 'string') {
+    return logo.default;
+  }
+  return null;
+}
+
+function allBrandColorsAreDefault(branding: KioskConfig['branding']): boolean {
+  return (
+    branding.primary === DEFAULT_BRANDING.primary &&
+    branding.secondary === DEFAULT_BRANDING.secondary &&
+    branding.tertiary === DEFAULT_BRANDING.tertiary
+  );
+}
+
+function extractBrandHexFromTokensCss(
+  css: string,
+): Pick<KioskConfig['branding'], 'primary' | 'secondary' | 'tertiary'> | null {
+  const primary = extractHsl(css, '--brand-primary');
+  const secondary = extractHsl(css, '--brand-secondary');
+  const tertiary = extractHsl(css, '--brand-tertiary');
+  if (!primary || !secondary || !tertiary) return null;
+  return {
+    primary: hslToHex(primary),
+    secondary: hslToHex(secondary),
+    tertiary: hslToHex(tertiary),
+  };
+}
+
+function extractHsl(css: string, name: string): string | null {
+  const re = new RegExp(`${name.replace(/[-]/g, '\\-')}\\s*:\\s*([^;]+);`);
+  const m = re.exec(css);
+  return m ? m[1].trim() : null;
+}
+
+function bootstrapListings(
+  studioListings: ListingsModule | undefined,
+  fsConfig: FsConfig,
+): ListingsModule | undefined {
+  if (studioListings && !structuralEqual(studioListings, defaultListings())) {
+    return studioListings;
+  }
+  const fsModules = fsConfig.features?.home?.modules ?? {};
+  const fsTiles = fsConfig.features?.home?.tiles ?? [];
+  const tileLabelByKey = new Map<string, string>();
+  for (const t of fsTiles) {
+    if (typeof t?.key === 'string' && typeof t?.label === 'string') {
+      tileLabelByKey.set(t.key, t.label);
+    }
+  }
+
+  // Considerar una entrada como "listings catalog" cualquier entry de
+  // features.home.modules sin `kind` o con kind ausente que tenga shape
+  // de catalog (heroImage / listings / subcategories / features).
+  const KINDED_KEYS = new Set([
+    'events',
+    'deals',
+    'passes',
+    'tickets',
+    'trails',
+    'social-wall',
+    'digital-brochure',
+    'guestbook',
+    'map',
+  ]);
+
+  const entries: ListingsCatalogEntry[] = [];
+  for (const [key, value] of Object.entries(fsModules)) {
+    if (!value || typeof value !== 'object') continue;
+    if (KINDED_KEYS.has(key)) continue;
+    if (typeof (value as { kind?: unknown }).kind === 'string') continue;
+
+    const candidateCatalog = {
+      heroImage: typeof value.heroImage === 'string' ? value.heroImage : '',
+      subcategories: Array.isArray(value.subcategories) ? value.subcategories : [],
+      features: Array.isArray(value.features) ? value.features : [],
+      listings: Array.isArray(value.listings) ? value.listings : [],
+    };
+    const parsed = ListingsCatalogSchema.safeParse(candidateCatalog);
+    if (!parsed.success) continue;
+
+    entries.push({
+      key,
+      label: typeof value.label === 'string' ? value.label : (tileLabelByKey.get(key) ?? key),
+      iconKey: defaultIconForKey(key),
+      enabled: true,
+      catalog: parsed.data,
+    });
+  }
+
+  if (entries.length === 0) return studioListings;
+  return entries;
+}
+
+function defaultIconForKey(key: string): string {
+  switch (key) {
+    case 'restaurants':
+      return 'UtensilsCrossed';
+    case 'things-to-do':
+      return 'Sparkles';
+    case 'stay':
+      return 'BedDouble';
+    default:
+      return 'MapPin';
+  }
+}

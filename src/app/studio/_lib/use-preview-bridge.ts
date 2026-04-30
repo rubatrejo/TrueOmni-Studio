@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { hexToHsl } from '@/lib/studio/hex-to-hsl';
 import type {
+  AdsModule,
   AiAvatarConfig,
   BillboardConfig,
   BrochuresModuleConfig,
@@ -82,6 +83,7 @@ export function usePreviewBridge() {
   const lastTicketsRef = useRef<TicketsModule | null>(null);
   const lastPassesRef = useRef<PassesModule | null>(null);
   const lastTrailsRef = useRef<TrailsModule | null>(null);
+  const lastAdsRef = useRef<AdsModule | null>(null);
   const brandingDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const modulesDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const billboardDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -97,6 +99,7 @@ export function usePreviewBridge() {
   const ticketsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const passesDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const trailsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const adsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isReady, setIsReady] = useState(false);
 
   const sendBrandingNow = useCallback((branding: BrandingPatch) => {
@@ -298,6 +301,14 @@ export function usePreviewBridge() {
     } catch {}
   }, []);
 
+  const sendAdsNow = useCallback((ads: AdsModule) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:ads-update', ads }, '*');
+    } catch {}
+  }, []);
+
   // Listener del handshake studio:ready desde el iframe.
   useEffect(() => {
     const handler = (event: MessageEvent) => {
@@ -319,6 +330,7 @@ export function usePreviewBridge() {
       if (lastTicketsRef.current) sendTicketsNow(lastTicketsRef.current);
       if (lastPassesRef.current) sendPassesNow(lastPassesRef.current);
       if (lastTrailsRef.current) sendTrailsNow(lastTrailsRef.current);
+      if (lastAdsRef.current) sendAdsNow(lastAdsRef.current);
     };
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
@@ -338,6 +350,7 @@ export function usePreviewBridge() {
     sendTicketsNow,
     sendPassesNow,
     sendTrailsNow,
+    sendAdsNow,
   ]);
 
   const pushBranding = useCallback(
@@ -475,6 +488,15 @@ export function usePreviewBridge() {
     [sendTrailsNow],
   );
 
+  const pushAds = useCallback(
+    (ads: AdsModule) => {
+      lastAdsRef.current = ads;
+      if (adsDebounceRef.current) clearTimeout(adsDebounceRef.current);
+      adsDebounceRef.current = setTimeout(() => sendAdsNow(ads), 150);
+    },
+    [sendAdsNow],
+  );
+
   // Cuando el iframe re-monta, resetea ready para forzar un nuevo handshake.
   const onIframeLoad = useCallback(() => {
     setIsReady(false);
@@ -503,6 +525,7 @@ export function usePreviewBridge() {
     pushTickets,
     pushPasses,
     pushTrails,
+    pushAds,
     isReady,
     onIframeLoad,
   };

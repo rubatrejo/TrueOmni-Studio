@@ -187,6 +187,7 @@ export function Shell({
     pushTickets,
     pushPasses,
     pushTrails,
+    pushAds,
     onIframeLoad,
   } = usePreviewBridge();
 
@@ -269,6 +270,10 @@ export function Shell({
   useEffect(() => {
     pushTrails(trails);
   }, [trails, pushTrails]);
+
+  useEffect(() => {
+    pushAds(ads);
+  }, [ads, pushAds]);
 
   const brandingDirty = useMemo(
     () => !shallowEqualBranding(branding, savedBranding),

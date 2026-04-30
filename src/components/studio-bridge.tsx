@@ -81,6 +81,7 @@ export function StudioBridge() {
             tickets?: unknown;
             passes?: unknown;
             trails?: unknown;
+            ads?: unknown;
           }
         | null;
       if (!data || typeof data !== 'object' || !data.type) return;
@@ -174,6 +175,9 @@ export function StudioBridge() {
         case 'studio:trails-update':
           if (data.trails) applyTrailsOverride(data.trails);
           break;
+        case 'studio:ads-update':
+          if (data.ads) applyAdsOverride(data.ads);
+          break;
         default:
           break;
       }
@@ -265,6 +269,7 @@ export const KIOSK_EVENTS_OVERRIDE_EVENT = 'kiosk:events-override';
 export const KIOSK_TICKETS_OVERRIDE_EVENT = 'kiosk:tickets-override';
 export const KIOSK_PASSES_OVERRIDE_EVENT = 'kiosk:passes-override';
 export const KIOSK_TRAILS_OVERRIDE_EVENT = 'kiosk:trails-override';
+export const KIOSK_ADS_OVERRIDE_EVENT = 'kiosk:ads-override';
 
 function applyModulesOverride(modules: ModulesPatch) {
   if (typeof window === 'undefined') return;
@@ -343,6 +348,11 @@ function applyPassesOverride(passes: unknown) {
 function applyTrailsOverride(trails: unknown) {
   if (typeof window === 'undefined') return;
   window.dispatchEvent(new CustomEvent(KIOSK_TRAILS_OVERRIDE_EVENT, { detail: trails }));
+}
+
+function applyAdsOverride(ads: unknown) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(KIOSK_ADS_OVERRIDE_EVENT, { detail: ads }));
 }
 
 const injectedFontLinks = new Set<string>();

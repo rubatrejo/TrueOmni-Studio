@@ -1,8 +1,9 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 
+import { KIOSK_ADS_OVERRIDE_EVENT } from '@/components/studio-bridge';
 import { AD_DISMISSED_STORAGE_KEY, getAdsForRoute } from '@/lib/ads';
 import type { Ad } from '@/lib/config';
 
@@ -94,19 +95,36 @@ export function useAds(ads: readonly Ad[]): UseAdsResult {
   const pathname = usePathname() ?? '';
   const dismissed = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
+  // Override from Studio bridge (kiosk:ads-override). Cuando llega, sustituye
+  // por completo el catálogo del kiosk para preview live <300ms.
+  const [override, setOverride] = useState<readonly Ad[] | null>(null);
+
   useEffect(() => {
     hydrateIfNeeded();
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { ads?: Ad[] } | Ad[] | undefined;
+      const next = Array.isArray(detail) ? detail : detail?.ads;
+      if (Array.isArray(next)) setOverride(next);
+    };
+    window.addEventListener(KIOSK_ADS_OVERRIDE_EVENT, handler);
+    return () => window.removeEventListener(KIOSK_ADS_OVERRIDE_EVENT, handler);
+  }, []);
+
+  const effective = override ?? ads;
+
   const result = useMemo(() => {
-    const { popup, hero, bottom } = getAdsForRoute(ads, pathname);
+    const { popup, hero, bottom } = getAdsForRoute(effective, pathname);
     const visible = (ad: Ad | null) => (ad && !dismissed[ad.id] ? ad : null);
     return {
       popupAd: visible(popup),
       heroAd: visible(hero),
       bottomAd: visible(bottom),
     };
-  }, [ads, pathname, dismissed]);
+  }, [effective, pathname, dismissed]);
 
   const dismiss = useCallback((id: string) => dismissAd(id), []);
 

@@ -4,6 +4,8 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
+import { useBillboardLogoHeight } from './use-billboard-override';
+
 /**
  * Billboard 0 — variante "Dark Hero".
  *
@@ -23,6 +25,7 @@ import { useTextosMap } from '@/components/i18n-provider';
  */
 export function Billboard0() {
   const t = useTextosMap();
+  const logoH = useBillboardLogoHeight();
   return (
     <div
       data-billboard="0"
@@ -36,18 +39,16 @@ export function Billboard0() {
         className="absolute inset-0 h-full w-full object-cover"
       />
 
-      {/* Logo grande TrueOmni encima del botón (193, 371), ~704×128px.
-          `slot="idle"` para que use el logo subido en `branding.idleLogo`.
-          `width: 694px + flex center` mantiene el logo centrado aunque
-          el aspect ratio del logo subido sea distinto al SVG original. */}
+      {/* Logo grande TrueOmni encima del botón (193, 371), height configurable
+          desde el Studio (S=80 / M=128 default / L=180). El contenedor mantiene
+          el ancho fijo del SVG y la altura sigue al logoSize del billboard;
+          `flex center` mantiene el logo centrado aunque el aspect ratio del
+          logo subido sea distinto al original. */}
       <div
         className="absolute flex items-center justify-center"
-        style={{ left: '193px', top: '371px', width: '694px', height: '128px' }}
+        style={{ left: '193px', top: '371px', width: '694px', height: `${logoH}px` }}
       >
-        <TrueOmniLogo
-          slot="idle"
-          className="h-[128px] max-w-full w-auto text-white"
-        />
+        <TrueOmniLogo slot="idle" className="h-full w-auto max-w-full text-white" />
       </div>
 
       {/* Botón central TOUCH HERE (548×342 @ x=281 y=776, rx=20) con ring
@@ -77,11 +78,7 @@ export function Billboard0() {
           `data-billboard-no-link` evita que el click navegue al Dashboard
           (el `<BillboardLink>` que envuelve el Billboard hace preventDefault
           cuando detecta este atributo en el subtree). */}
-      <div
-        data-billboard-no-link
-        className="absolute"
-        style={{ left: '418px', top: '1565px' }}
-      >
+      <div data-billboard-no-link className="absolute" style={{ left: '418px', top: '1565px' }}>
         <LanguageDropdown />
       </div>
 
@@ -118,7 +115,7 @@ export function Billboard0() {
           className="absolute flex items-center"
           style={{ left: '60px', top: '103px', height: '65px', width: '360px' }}
         >
-          <TrueOmniLogo slot="footer" className="h-[65px] max-w-full w-auto text-white" />
+          <TrueOmniLogo slot="footer" className="h-[65px] w-auto max-w-full text-white" />
         </div>
 
         {/* Wheelchair icon — path exacto del SVG @ relativo (540, 114.357). */}

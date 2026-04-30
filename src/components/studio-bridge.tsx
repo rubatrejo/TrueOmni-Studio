@@ -62,28 +62,26 @@ export function StudioBridge() {
     if (typeof window === 'undefined') return;
 
     const handler = (event: MessageEvent) => {
-      const data = event.data as
-        | {
-            type?: string;
-            brand?: BrandPatch;
-            branding?: BrandingPatch;
-            modules?: ModulesPatch;
-            billboard?: BillboardPatch;
-            aiAvatar?: AiAvatarPatch;
-            survey?: unknown;
-            deals?: unknown;
-            photoBooth?: unknown;
-            brochures?: unknown;
-            socialWall?: unknown;
-            guestbook?: unknown;
-            listings?: unknown;
-            events?: unknown;
-            tickets?: unknown;
-            passes?: unknown;
-            trails?: unknown;
-            ads?: unknown;
-          }
-        | null;
+      const data = event.data as {
+        type?: string;
+        brand?: BrandPatch;
+        branding?: BrandingPatch;
+        modules?: ModulesPatch;
+        billboard?: BillboardPatch;
+        aiAvatar?: AiAvatarPatch;
+        survey?: unknown;
+        deals?: unknown;
+        photoBooth?: unknown;
+        brochures?: unknown;
+        socialWall?: unknown;
+        guestbook?: unknown;
+        listings?: unknown;
+        events?: unknown;
+        tickets?: unknown;
+        passes?: unknown;
+        trails?: unknown;
+        ads?: unknown;
+      } | null;
       if (!data || typeof data !== 'object' || !data.type) return;
 
       switch (data.type) {
@@ -292,6 +290,8 @@ type ModulesPatch = {
 type BillboardPatch = {
   variant: 0 | 1 | 2 | 3;
   idleTimeoutSec: number;
+  logoSize?: 'S' | 'M' | 'L';
+  modules?: string[];
 };
 
 type AiAvatarPatch = {

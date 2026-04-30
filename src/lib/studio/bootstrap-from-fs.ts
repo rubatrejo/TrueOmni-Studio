@@ -74,6 +74,8 @@ interface FsConfig {
   features?: {
     advertisements?: { ads?: unknown[] };
     billboard_variant?: number;
+    billboard_logo_size?: string;
+    billboard_modules?: string[];
     inactividad_reset_seg?: number;
     languages?: { enabled?: boolean; available?: string[]; default?: string };
     home?: {
@@ -158,13 +160,24 @@ export function bootstrapStudioFromFs(
   if (next.billboard && structuralEqual(next.billboard, DEFAULT_BILLBOARD)) {
     const variant = fsConfig.features?.billboard_variant;
     const idleSec = fsConfig.features?.inactividad_reset_seg;
+    const logoSizeRaw = fsConfig.features?.billboard_logo_size;
+    const modulesRaw = fsConfig.features?.billboard_modules;
     if (variant === 0 || variant === 1 || variant === 2 || variant === 3) {
+      const logoSize: 'S' | 'M' | 'L' =
+        logoSizeRaw === 'S' || logoSizeRaw === 'M' || logoSizeRaw === 'L'
+          ? logoSizeRaw
+          : DEFAULT_BILLBOARD.logoSize;
+      const modules = Array.isArray(modulesRaw)
+        ? modulesRaw.filter((m): m is string => typeof m === 'string').slice(0, 4)
+        : DEFAULT_BILLBOARD.modules;
       next.billboard = {
         variant,
         idleTimeoutSec:
           typeof idleSec === 'number' && idleSec >= 15 && idleSec <= 600
             ? idleSec
             : DEFAULT_BILLBOARD.idleTimeoutSec,
+        logoSize,
+        modules,
       };
     }
   }
@@ -187,7 +200,12 @@ export function bootstrapStudioFromFs(
         api: { baseUrl: str(legacy.api_base_url) },
         mapbox: { token: str(legacy.mapbox_token) },
         analytics: { gaId: str(legacy.analytics_id) },
-        weather: { provider: 'open-meteo' as const, apiKey: '', city: '', units: 'metric' as const },
+        weather: {
+          provider: 'open-meteo' as const,
+          apiKey: '',
+          city: '',
+          units: 'metric' as const,
+        },
         satisfi: {
           apiKey: str(legacy.satisfi_api_key),
           hubId: str(legacy.satisfi_hub_id),
@@ -246,45 +264,29 @@ export function bootstrapStudioFromFs(
   // ── modules con kind ──
   const fsModules = fsConfig.features?.home?.modules ?? {};
 
-  next.events = takeFsIfDefault(
-    next.events,
-    defaultEvents(),
-    () => parseStripKind(EventsModuleSchema, fsModules.events),
+  next.events = takeFsIfDefault(next.events, defaultEvents(), () =>
+    parseStripKind(EventsModuleSchema, fsModules.events),
   );
-  next.deals = takeFsIfDefault(
-    next.deals,
-    DEFAULT_DEALS,
-    () => parseStripKind(DealsModuleSchema, fsModules.deals),
+  next.deals = takeFsIfDefault(next.deals, DEFAULT_DEALS, () =>
+    parseStripKind(DealsModuleSchema, fsModules.deals),
   );
-  next.passes = takeFsIfDefault(
-    next.passes,
-    defaultPasses(),
-    () => parseStripKind(PassesModuleSchema, fsModules.passes),
+  next.passes = takeFsIfDefault(next.passes, defaultPasses(), () =>
+    parseStripKind(PassesModuleSchema, fsModules.passes),
   );
-  next.tickets = takeFsIfDefault(
-    next.tickets,
-    defaultTickets(),
-    () => parseStripKind(TicketsModuleSchema, fsModules.tickets),
+  next.tickets = takeFsIfDefault(next.tickets, defaultTickets(), () =>
+    parseStripKind(TicketsModuleSchema, fsModules.tickets),
   );
-  next.trails = takeFsIfDefault(
-    next.trails,
-    defaultTrails(),
-    () => parseStripKind(TrailsModuleSchema, fsModules.trails),
+  next.trails = takeFsIfDefault(next.trails, defaultTrails(), () =>
+    parseStripKind(TrailsModuleSchema, fsModules.trails),
   );
-  next.socialWall = takeFsIfDefault(
-    next.socialWall,
-    DEFAULT_SOCIAL_WALL,
-    () => parseStripKind(SocialWallSchema, fsModules['social-wall']),
+  next.socialWall = takeFsIfDefault(next.socialWall, DEFAULT_SOCIAL_WALL, () =>
+    parseStripKind(SocialWallSchema, fsModules['social-wall']),
   );
-  next.brochures = takeFsIfDefault(
-    next.brochures,
-    DEFAULT_BROCHURES,
-    () => parseStripKind(BrochuresModuleSchema, fsModules['digital-brochure']),
+  next.brochures = takeFsIfDefault(next.brochures, DEFAULT_BROCHURES, () =>
+    parseStripKind(BrochuresModuleSchema, fsModules['digital-brochure']),
   );
-  next.guestbook = takeFsIfDefault(
-    next.guestbook,
-    DEFAULT_GUESTBOOK,
-    () => parseStripKind(GuestbookSchema, fsModules.guestbook),
+  next.guestbook = takeFsIfDefault(next.guestbook, DEFAULT_GUESTBOOK, () =>
+    parseStripKind(GuestbookSchema, fsModules.guestbook),
   );
 
   // ── photoBooth, survey, aiAvatar ──
@@ -301,9 +303,7 @@ export function bootstrapStudioFromFs(
       avatar: typeof home.askAi.avatar === 'string' ? home.askAi.avatar : undefined,
       heroVideo: typeof home.askAi.heroVideo === 'string' ? home.askAi.heroVideo : undefined,
       greeting:
-        typeof home.askAi.greeting === 'string'
-          ? home.askAi.greeting
-          : DEFAULT_AI_AVATAR.greeting,
+        typeof home.askAi.greeting === 'string' ? home.askAi.greeting : DEFAULT_AI_AVATAR.greeting,
       model: DEFAULT_AI_AVATAR.model,
       suggestedQuestions: Array.isArray(home.askAi.suggestedQuestions)
         ? home.askAi.suggestedQuestions
@@ -394,7 +394,9 @@ function bootstrapBranding(
   return next;
 }
 
-function pickLogoString(logo: NonNullable<FsConfig['branding']>['logo'] | undefined): string | null {
+function pickLogoString(
+  logo: NonNullable<FsConfig['branding']>['logo'] | undefined,
+): string | null {
   if (!logo) return null;
   if (typeof logo === 'string') return logo;
   if (typeof logo === 'object' && 'default' in logo && typeof logo.default === 'string') {

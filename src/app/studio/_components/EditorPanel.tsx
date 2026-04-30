@@ -239,14 +239,16 @@ export function EditorPanel({
           />
         )}
         {sectionKey === 'billboard' && (
-          <BillboardEditor billboard={billboard} onChange={onBillboardChange} />
+          <BillboardEditor
+            billboard={billboard}
+            onChange={onBillboardChange}
+            modulesAvailable={modules.tiles.filter((t) => t.enabled && t.key !== 'wayfinding')}
+          />
         )}
         {sectionKey === 'ai-avatar' && (
           <AiAvatarEditor aiAvatar={aiAvatar} onChange={onAiAvatarChange} />
         )}
-        {sectionKey === 'survey' && (
-          <SurveyEditor survey={survey} onChange={onSurveyChange} />
-        )}
+        {sectionKey === 'survey' && <SurveyEditor survey={survey} onChange={onSurveyChange} />}
         {sectionKey === 'deals' && <DealsEditor deals={deals} onChange={onDealsChange} />}
         {sectionKey === 'photo-booth' && (
           <PhotoBoothEditor photoBooth={photoBooth} onChange={onPhotoBoothChange} />
@@ -263,28 +265,14 @@ export function EditorPanel({
         {sectionKey === 'listings' && (
           <ListingsEditor value={listings} onChange={onListingsChange} />
         )}
-        {sectionKey === 'events' && (
-          <EventsEditor value={events} onChange={onEventsChange} />
-        )}
+        {sectionKey === 'events' && <EventsEditor value={events} onChange={onEventsChange} />}
         {sectionKey === 'tickets' && (
-          <TicketsEditor
-            value={tickets}
-            eventsValue={events}
-            onChange={onTicketsChange}
-          />
+          <TicketsEditor value={tickets} eventsValue={events} onChange={onTicketsChange} />
         )}
-        {sectionKey === 'passes' && (
-          <PassesEditor value={passes} onChange={onPassesChange} />
-        )}
-        {sectionKey === 'trails' && (
-          <TrailsEditor value={trails} onChange={onTrailsChange} />
-        )}
-        {sectionKey === 'i18n' && (
-          <I18nEditor value={i18nBundle} onChange={onI18nBundleChange} />
-        )}
-        {sectionKey === 'ads' && (
-          <AdsEditor value={ads} onChange={onAdsChange} />
-        )}
+        {sectionKey === 'passes' && <PassesEditor value={passes} onChange={onPassesChange} />}
+        {sectionKey === 'trails' && <TrailsEditor value={trails} onChange={onTrailsChange} />}
+        {sectionKey === 'i18n' && <I18nEditor value={i18nBundle} onChange={onI18nBundleChange} />}
+        {sectionKey === 'ads' && <AdsEditor value={ads} onChange={onAdsChange} />}
         {sectionKey === 'integrations' && (
           <IntegrationsEditor value={integrations} onChange={onIntegrationsChange} />
         )}
@@ -458,7 +446,10 @@ function BrandingEditor({
       </Group>
 
       {/* Fonts */}
-      <Group title="Typography" hint="Headings + body fonts. Google Fonts curated, or upload your own.">
+      <Group
+        title="Typography"
+        hint="Headings + body fonts. Google Fonts curated, or upload your own."
+      >
         <FontSelector
           kind="Display"
           value={branding.fonts?.display ?? 'Montserrat'}
@@ -560,12 +551,48 @@ function ColorRow({
 }
 
 const PRESET_PALETTES = [
-  { name: 'TrueOmni', tagline: 'Tech Blue', primary: '#004F8B', secondary: '#0088CE', tertiary: '#B9BD39' },
-  { name: 'Arizona', tagline: 'Desert', primary: '#5C2317', secondary: '#D2691E', tertiary: '#F4A460' },
-  { name: 'Hotel Beach', tagline: 'Calm', primary: '#1E5F74', secondary: '#42B5D9', tertiary: '#FCD581' },
-  { name: 'Forest', tagline: 'Nature', primary: '#173B30', secondary: '#3E885B', tertiary: '#E0C879' },
-  { name: 'Mono', tagline: 'Editorial', primary: '#0A0A0A', secondary: '#404040', tertiary: '#FACC15' },
-  { name: 'Sunset', tagline: 'Warm', primary: '#7C2D12', secondary: '#EA580C', tertiary: '#FCD34D' },
+  {
+    name: 'TrueOmni',
+    tagline: 'Tech Blue',
+    primary: '#004F8B',
+    secondary: '#0088CE',
+    tertiary: '#B9BD39',
+  },
+  {
+    name: 'Arizona',
+    tagline: 'Desert',
+    primary: '#5C2317',
+    secondary: '#D2691E',
+    tertiary: '#F4A460',
+  },
+  {
+    name: 'Hotel Beach',
+    tagline: 'Calm',
+    primary: '#1E5F74',
+    secondary: '#42B5D9',
+    tertiary: '#FCD581',
+  },
+  {
+    name: 'Forest',
+    tagline: 'Nature',
+    primary: '#173B30',
+    secondary: '#3E885B',
+    tertiary: '#E0C879',
+  },
+  {
+    name: 'Mono',
+    tagline: 'Editorial',
+    primary: '#0A0A0A',
+    secondary: '#404040',
+    tertiary: '#FACC15',
+  },
+  {
+    name: 'Sunset',
+    tagline: 'Warm',
+    primary: '#7C2D12',
+    secondary: '#EA580C',
+    tertiary: '#FCD34D',
+  },
 ];
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -700,8 +727,7 @@ function VersionsEditor({
         </h3>
         <p className="mt-2 max-w-sm text-[12.5px] leading-relaxed text-zinc-500 dark:text-zinc-500">
           Each release will appear here as an immutable snapshot you can review, diff against the
-          current draft, and roll back to with a single click. Coming with the next platform
-          update.
+          current draft, and roll back to with a single click. Coming with the next platform update.
         </p>
         <ul className="mt-5 space-y-1 text-left text-[11.5px] text-zinc-500 dark:text-zinc-500">
           <li>• Audit trail of every publish (who, when, what changed)</li>
@@ -740,7 +766,16 @@ function ComingSoon({ section }: { section: ReturnType<typeof STUDIO_SECTIONS.fi
       className="flex h-full flex-col items-center justify-center text-center"
     >
       <span className="mb-3 grid h-12 w-12 place-items-center rounded-2xl border border-zinc-200 bg-zinc-50 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-600">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="M12 2v4M12 18v4M22 12h-4M6 12H2M19.07 4.93l-2.83 2.83M7.76 16.24l-2.83 2.83M19.07 19.07l-2.83-2.83M7.76 7.76L4.93 4.93" />
         </svg>
       </span>

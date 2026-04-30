@@ -245,11 +245,32 @@ export function defaultModules(): ModulesConfig {
 export const BILLBOARD_VARIANTS = [0, 1, 2, 3] as const;
 export type BillboardVariant = (typeof BILLBOARD_VARIANTS)[number];
 
+export const BILLBOARD_LOGO_SIZES = ['S', 'M', 'L'] as const;
+export type BillboardLogoSize = (typeof BILLBOARD_LOGO_SIZES)[number];
+
+/** Mapa logoSize → altura en px del logo idle del Billboard. */
+export const BILLBOARD_LOGO_SIZE_PX: Record<BillboardLogoSize, number> = {
+  S: 80,
+  M: 128,
+  L: 180,
+};
+
 export const BillboardSchema = z.object({
   /** Cuál de los 4 layouts del Billboard idle se muestra. */
   variant: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]),
   /** Segundos sin actividad en /home antes del aviso de timeout. */
   idleTimeoutSec: z.number().int().min(15).max(600).default(60),
+  /**
+   * Tamaño del logo idle en B0/B2/B3 (B1 no muestra logo idle grande).
+   * Mapeo: S=80px, M=128px (default), L=180px.
+   */
+  logoSize: z.enum(BILLBOARD_LOGO_SIZES).default('M'),
+  /**
+   * Lista ordenada de IDs de módulos a mostrar en los slots del Billboard
+   * (B1/B2/B3 — B0 no tiene grid). Máximo 4. Los IDs corresponden a
+   * `modules.tiles[].key` activos en el Modules tab.
+   */
+  modules: z.array(z.string()).max(4).default([]),
 });
 
 export type BillboardConfig = z.infer<typeof BillboardSchema>;
@@ -257,6 +278,8 @@ export type BillboardConfig = z.infer<typeof BillboardSchema>;
 export const DEFAULT_BILLBOARD: BillboardConfig = {
   variant: 0,
   idleTimeoutSec: 60,
+  logoSize: 'M',
+  modules: [],
 };
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -306,9 +329,7 @@ export const SurveyQuestionSchema = z.discriminatedUnion('type', [
   z.object({
     ...SurveyQuestionBase,
     type: z.literal('nps'),
-    labels: z
-      .object({ low: z.string().max(64), high: z.string().max(64) })
-      .optional(),
+    labels: z.object({ low: z.string().max(64), high: z.string().max(64) }).optional(),
   }),
   z.object({
     ...SurveyQuestionBase,
@@ -423,9 +444,7 @@ const SlugStringSchema = z
   .regex(/^[a-z0-9][a-z0-9-]*$/, 'must be lowercase letters/digits/hyphens');
 
 /** Fecha ISO yyyy-mm-dd. */
-const IsoDateSchema = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, 'must be ISO date (yyyy-mm-dd)');
+const IsoDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'must be ISO date (yyyy-mm-dd)');
 
 export const DealSchema = z.object({
   slug: SlugStringSchema,
@@ -572,9 +591,7 @@ export function newPhotoBoothId(prefix = 'pb'): string {
 
 export const DEFAULT_PHOTO_BOOTH: PhotoBoothConfig = {
   enabled: true,
-  backgrounds: [
-    { id: 'bg-original', image: '', label: 'Original' },
-  ],
+  backgrounds: [{ id: 'bg-original', image: '', label: 'Original' }],
   frames: [],
   filters: [
     { id: 'filter-none', label: 'Original', cssFilter: 'none' },
@@ -832,9 +849,7 @@ const COMMON_COUNTRIES: GuestbookCountry[] = [
 export const DEFAULT_GUESTBOOK: GuestbookConfig = {
   label: 'Guestbook',
   heroImage: '',
-  pinCatalog: [
-    { id: 'pin-default', image: '', label: 'Default' },
-  ],
+  pinCatalog: [{ id: 'pin-default', image: '', label: 'Default' }],
   countries: COMMON_COUNTRIES,
   seedPins: [],
   earthStart: { center: { lat: 30, lng: 0 }, zoom: 1.5 },
@@ -878,12 +893,7 @@ const DirectionStepSchema = z.object({
   instruction: z.string().max(280),
 });
 
-const PriceRangeSchema = z.union([
-  z.literal(1),
-  z.literal(2),
-  z.literal(3),
-  z.literal(4),
-]);
+const PriceRangeSchema = z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]);
 
 /** Ensure all `slug` values inside an array are unique. */
 function uniqueBySlug<T extends { slug: string }>(arr: T[], ctx: z.RefinementCtx) {
@@ -973,21 +983,19 @@ export const ListingsCatalogEntrySchema = z.object({
 
 export type ListingsCatalogEntry = z.infer<typeof ListingsCatalogEntrySchema>;
 
-export const ListingsModuleSchema = z
-  .array(ListingsCatalogEntrySchema)
-  .superRefine((arr, ctx) => {
-    const seen = new Set<string>();
-    arr.forEach((entry, idx) => {
-      if (seen.has(entry.key)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: [idx, 'key'],
-          message: `duplicate listing module key "${entry.key}"`,
-        });
-      }
-      seen.add(entry.key);
-    });
+export const ListingsModuleSchema = z.array(ListingsCatalogEntrySchema).superRefine((arr, ctx) => {
+  const seen = new Set<string>();
+  arr.forEach((entry, idx) => {
+    if (seen.has(entry.key)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [idx, 'key'],
+        message: `duplicate listing module key "${entry.key}"`,
+      });
+    }
+    seen.add(entry.key);
   });
+});
 
 export type ListingsModule = z.infer<typeof ListingsModuleSchema>;
 
@@ -1053,8 +1061,20 @@ export function migrateListings(raw: unknown): ListingsModule {
       return { ...EMPTY_LISTINGS_CATALOG };
     };
     return [
-      { key: 'restaurants', label: 'Restaurants', iconKey: 'UtensilsCrossed', enabled: true, catalog: grab('restaurants') },
-      { key: 'things-to-do', label: 'Things to Do', iconKey: 'Sparkles', enabled: true, catalog: grab('thingsToDo') },
+      {
+        key: 'restaurants',
+        label: 'Restaurants',
+        iconKey: 'UtensilsCrossed',
+        enabled: true,
+        catalog: grab('restaurants'),
+      },
+      {
+        key: 'things-to-do',
+        label: 'Things to Do',
+        iconKey: 'Sparkles',
+        enabled: true,
+        catalog: grab('thingsToDo'),
+      },
       { key: 'stay', label: 'Stay', iconKey: 'BedDouble', enabled: true, catalog: grab('stay') },
     ];
   }
@@ -1086,11 +1106,12 @@ export function makeBlankListing(): ListingItem {
  */
 export function uniqueListingKey(existing: ListingsModule, base: string): string {
   const taken = new Set(existing.map((e) => e.key));
-  const slug = base
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '') || 'module';
+  const slug =
+    base
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'module';
   if (!taken.has(slug)) return slug;
   let i = 2;
   while (taken.has(`${slug}-${i}`)) i++;
@@ -1147,16 +1168,9 @@ const DateIsoSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'date must be YYYY-MM-DD.' });
 
-const TimeHmSchema = z
-  .string()
-  .regex(/^\d{2}:\d{2}$/, { message: 'time must be HH:MM (24h).' });
+const TimeHmSchema = z.string().regex(/^\d{2}:\d{2}$/, { message: 'time must be HH:MM (24h).' });
 
-const PriceBandSchema = z.union([
-  z.literal(1),
-  z.literal(2),
-  z.literal(3),
-  z.literal(4),
-]);
+const PriceBandSchema = z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]);
 
 export const EventTicketSchema = z.object({
   priceDisplay: z.string().min(1).max(64),
@@ -1379,9 +1393,7 @@ export const TrailsModuleSchema = z.object({
   subcategories: z.array(z.string().max(64)).default([]),
   features: z.array(z.string().max(64)).default([]),
   difficulties: z.array(TrailDifficultySchema).default(['Easy', 'Moderate', 'Hard']),
-  trailTypes: z
-    .array(TrailTypeSchema)
-    .default(['Loop', 'Out & Back', 'Point to Point']),
+  trailTypes: z.array(TrailTypeSchema).default(['Loop', 'Out & Back', 'Point to Point']),
   trails: z.array(TrailItemSchema).superRefine(uniqueBySlug).default([]),
 });
 

@@ -85,6 +85,8 @@ export function buildFilesystemConfig(
   if (studio.billboard) {
     features.billboard_variant = studio.billboard.variant;
     features.inactividad_reset_seg = studio.billboard.idleTimeoutSec;
+    features.billboard_logo_size = studio.billboard.logoSize;
+    features.billboard_modules = [...studio.billboard.modules];
   }
 
   // ───── modules / tiles / wayfinding / systemModules ─────
@@ -105,17 +107,25 @@ export function buildFilesystemConfig(
     if (studio.integrations.api?.baseUrl) intg.api_base_url = studio.integrations.api.baseUrl;
     if (studio.integrations.mapbox?.token) intg.mapbox_token = studio.integrations.mapbox.token;
     if (studio.integrations.analytics?.gaId) intg.analytics_id = studio.integrations.analytics.gaId;
-    if (studio.integrations.satisfi?.apiKey) intg.satisfi_api_key = studio.integrations.satisfi.apiKey;
+    if (studio.integrations.satisfi?.apiKey)
+      intg.satisfi_api_key = studio.integrations.satisfi.apiKey;
     if (studio.integrations.satisfi?.hubId) intg.satisfi_hub_id = studio.integrations.satisfi.hubId;
     if (studio.integrations.tavus?.apiKey) intg.tavus_api_key = studio.integrations.tavus.apiKey;
-    if (studio.integrations.tavus?.replicaId) intg.tavus_replica_id = studio.integrations.tavus.replicaId;
-    if (studio.integrations.tavus?.personaId) intg.tavus_persona_id = studio.integrations.tavus.personaId;
-    if (studio.integrations.bandwango?.apiKey) intg.bandwango_api_key = studio.integrations.bandwango.apiKey;
-    if (studio.integrations.bandwango?.partnerId) intg.bandwango_partner_id = studio.integrations.bandwango.partnerId;
-    if (studio.integrations.crowdriff?.apiKey) intg.crowdriff_api_key = studio.integrations.crowdriff.apiKey;
-    if (studio.integrations.crowdriff?.galleryId) intg.crowdriff_gallery_id = studio.integrations.crowdriff.galleryId;
+    if (studio.integrations.tavus?.replicaId)
+      intg.tavus_replica_id = studio.integrations.tavus.replicaId;
+    if (studio.integrations.tavus?.personaId)
+      intg.tavus_persona_id = studio.integrations.tavus.personaId;
+    if (studio.integrations.bandwango?.apiKey)
+      intg.bandwango_api_key = studio.integrations.bandwango.apiKey;
+    if (studio.integrations.bandwango?.partnerId)
+      intg.bandwango_partner_id = studio.integrations.bandwango.partnerId;
+    if (studio.integrations.crowdriff?.apiKey)
+      intg.crowdriff_api_key = studio.integrations.crowdriff.apiKey;
+    if (studio.integrations.crowdriff?.galleryId)
+      intg.crowdriff_gallery_id = studio.integrations.crowdriff.galleryId;
     if (studio.integrations.viator?.apiKey) intg.viator_api_key = studio.integrations.viator.apiKey;
-    if (studio.integrations.viator?.partnerId) intg.viator_partner_id = studio.integrations.viator.partnerId;
+    if (studio.integrations.viator?.partnerId)
+      intg.viator_partner_id = studio.integrations.viator.partnerId;
     // weather no tiene equivalente legacy; se omite.
   }
 
@@ -233,7 +243,9 @@ function applyModulesAndTiles(
   const homeTiles = modules.tiles.filter((t) => t.key !== 'wayfinding');
 
   // Preservar `image` por key de los tiles existentes en filesystem.
-  const currentTiles = Array.isArray(home.tiles) ? (home.tiles as Array<Record<string, unknown>>) : [];
+  const currentTiles = Array.isArray(home.tiles)
+    ? (home.tiles as Array<Record<string, unknown>>)
+    : [];
   const imageByKey = new Map<string, string>();
   for (const t of currentTiles) {
     if (typeof t.key === 'string' && typeof t.image === 'string') {
@@ -324,14 +336,25 @@ function replaceBrandToken(css: string, name: string, hex: string): string {
     'g',
   );
   let found = false;
-  const replaced = css.replace(re, (match, head: string, _value: string, semi: string, commPre: string | undefined, _hexComment: string | undefined, commPost: string | undefined) => {
-    found = true;
-    if (commPre && commPost) {
-      return `${head}${hsl}${semi}${commPre}${upperHex}${commPost}`;
-    }
-    // Token sin comentario lateral (defensivo): reemplazar solo el valor.
-    return match.replace(/^[^;]*;/, `${head}${hsl}${semi}`);
-  });
+  const replaced = css.replace(
+    re,
+    (
+      match,
+      head: string,
+      _value: string,
+      semi: string,
+      commPre: string | undefined,
+      _hexComment: string | undefined,
+      commPost: string | undefined,
+    ) => {
+      found = true;
+      if (commPre && commPost) {
+        return `${head}${hsl}${semi}${commPre}${upperHex}${commPost}`;
+      }
+      // Token sin comentario lateral (defensivo): reemplazar solo el valor.
+      return match.replace(/^[^;]*;/, `${head}${hsl}${semi}`);
+    },
+  );
   if (!found) {
     // Fallback simple sin comentario por si el formato cambia.
     const reFallback = new RegExp(`(${escapeRegex(name)}\\s*:\\s*)([^;]*?)(;)`, 'g');

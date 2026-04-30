@@ -5,6 +5,7 @@ import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon } from './billboard-footer-parts';
+import { useBillboardLogoHeight } from './use-billboard-override';
 
 /**
  * Billboard 3 — variante "2 cards arriba + banner central + 2 cards abajo".
@@ -19,6 +20,7 @@ import { AccessibilityIcon } from './billboard-footer-parts';
  */
 export function Billboard3() {
   const t = useTextosMap();
+  const logoH = useBillboardLogoHeight();
   const cardBase = 'absolute overflow-hidden';
   const topRowSize = { width: '540px', height: '475px' } as const;
   const bottomRowSize = { width: '540px', height: '475px' } as const;
@@ -67,7 +69,11 @@ export function Billboard3() {
         />
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,79,139,0.6)' }} />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-16">
-          <TrueOmniLogo slot="idle" className="h-[110px] w-auto text-white" />
+          {/* Logo height configurable desde Studio (S=80 / M=128 / L=180).
+              SVG original era 110px → cae cerca del L. */}
+          <div className="flex items-center justify-center" style={{ height: `${logoH}px` }}>
+            <TrueOmniLogo slot="idle" className="h-full w-auto text-white" />
+          </div>
           <div className="flex items-center gap-10">
             <span
               className="font-display font-bold uppercase text-white"

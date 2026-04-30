@@ -7,6 +7,7 @@ import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon } from './billboard-footer-parts';
+import { useBillboardLogoHeight } from './use-billboard-override';
 
 /**
  * Billboard 2 — "Hero full-bleed + carousel de cards".
@@ -41,6 +42,7 @@ const CARDS: readonly CardData[] = [
 
 export function Billboard2() {
   const t = useTextosMap();
+  const logoH = useBillboardLogoHeight();
   const [active, setActive] = useState(0);
   const n = CARDS.length;
 
@@ -70,9 +72,13 @@ export function Billboard2() {
         }}
       />
 
-      {/* Logo TrueOmni blanco centrado — slot="idle" (logo del Billboard). */}
-      <div className="absolute flex justify-center" style={{ left: '0', right: '0', top: '120px' }}>
-        <TrueOmniLogo slot="idle" className="h-[100px] w-auto text-white" />
+      {/* Logo TrueOmni blanco centrado — height configurable desde Studio
+          (S=80 / M=128 / L=180 — default M para preservar el SVG original). */}
+      <div
+        className="absolute flex justify-center"
+        style={{ left: '0', right: '0', top: '120px', height: `${logoH}px` }}
+      >
+        <TrueOmniLogo slot="idle" className="h-full w-auto text-white" />
       </div>
 
       {/* Peek izquierda — más chica y en Y más alto (retranqueada) */}

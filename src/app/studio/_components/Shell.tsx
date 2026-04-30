@@ -95,23 +95,19 @@ export function Shell({
   const [deals, setDeals] = useState<DealsModuleConfig>(initialDeals);
 
   const initialPhotoBooth = initialConfig.photoBooth ?? structuredClone(DEFAULT_PHOTO_BOOTH);
-  const [savedPhotoBooth, setSavedPhotoBooth] =
-    useState<PhotoBoothConfig>(initialPhotoBooth);
+  const [savedPhotoBooth, setSavedPhotoBooth] = useState<PhotoBoothConfig>(initialPhotoBooth);
   const [photoBooth, setPhotoBooth] = useState<PhotoBoothConfig>(initialPhotoBooth);
 
   const initialBrochures = initialConfig.brochures ?? structuredClone(DEFAULT_BROCHURES);
-  const [savedBrochures, setSavedBrochures] =
-    useState<BrochuresModuleConfig>(initialBrochures);
+  const [savedBrochures, setSavedBrochures] = useState<BrochuresModuleConfig>(initialBrochures);
   const [brochures, setBrochures] = useState<BrochuresModuleConfig>(initialBrochures);
 
   const initialSocialWall = initialConfig.socialWall ?? structuredClone(DEFAULT_SOCIAL_WALL);
-  const [savedSocialWall, setSavedSocialWall] =
-    useState<SocialWallConfig>(initialSocialWall);
+  const [savedSocialWall, setSavedSocialWall] = useState<SocialWallConfig>(initialSocialWall);
   const [socialWall, setSocialWall] = useState<SocialWallConfig>(initialSocialWall);
 
   const initialGuestbook = initialConfig.guestbook ?? structuredClone(DEFAULT_GUESTBOOK);
-  const [savedGuestbook, setSavedGuestbook] =
-    useState<GuestbookConfig>(initialGuestbook);
+  const [savedGuestbook, setSavedGuestbook] = useState<GuestbookConfig>(initialGuestbook);
   const [guestbook, setGuestbook] = useState<GuestbookConfig>(initialGuestbook);
 
   const initialListings = initialConfig.listings ?? defaultListings();
@@ -295,10 +291,7 @@ export function Shell({
     () => !shallowEqualBillboard(billboard, savedBillboard),
     [billboard, savedBillboard],
   );
-  const aiDirty = useMemo(
-    () => !shallowEqualAi(aiAvatar, savedAi),
-    [aiAvatar, savedAi],
-  );
+  const aiDirty = useMemo(() => !shallowEqualAi(aiAvatar, savedAi), [aiAvatar, savedAi]);
   const surveyDirty = useMemo(
     () => JSON.stringify(survey) !== JSON.stringify(savedSurvey),
     [survey, savedSurvey],
@@ -343,10 +336,7 @@ export function Shell({
     () => JSON.stringify(trails) !== JSON.stringify(savedTrails),
     [trails, savedTrails],
   );
-  const adsDirty = useMemo(
-    () => JSON.stringify(ads) !== JSON.stringify(savedAds),
-    [ads, savedAds],
-  );
+  const adsDirty = useMemo(() => JSON.stringify(ads) !== JSON.stringify(savedAds), [ads, savedAds]);
   const integrationsDirty = useMemo(
     () => JSON.stringify(integrations) !== JSON.stringify(savedIntegrations),
     [integrations, savedIntegrations],
@@ -376,11 +366,7 @@ export function Shell({
     i18nDirty;
 
   const effectiveSaveState =
-    saveState === 'saving' || saveState === 'error'
-      ? saveState
-      : isDirty
-        ? 'idle'
-        : 'saved';
+    saveState === 'saving' || saveState === 'error' ? saveState : isDirty ? 'idle' : 'saved';
 
   const handleSave = useCallback(async () => {
     if (!isDirty) return;
@@ -553,143 +539,143 @@ export function Shell({
 
   return (
     <StudioSlugProvider slug={initialConfig.slug}>
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
-      <TopBar
-        slug={initialConfig.slug}
-        nombre={initialConfig.nombre}
-        currentVersion={initialConfig.currentVersion}
-        saveState={effectiveSaveState}
-        isDirty={isDirty}
-        onOpenVersions={() => setActiveTab('versions')}
-        versionsActive={activeTab === 'versions'}
-        onPublish={() => setPublishOpen(true)}
-      />
-
-      {errorMsg && (
-        <div className="border-b border-red-200 bg-red-50 px-5 py-2 text-[12px] text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
-          {errorMsg}
-        </div>
-      )}
-
-      <div className="flex flex-1 overflow-hidden">
-        <SidebarTabs
-          sections={STUDIO_SECTIONS}
-          activeKey={activeTab}
-          onSelect={(k) => setActiveTab(k)}
-          systemModules={modules.systemModules ?? DEFAULT_SYSTEM_MODULES}
+      <div className="flex h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+        <TopBar
+          slug={initialConfig.slug}
+          nombre={initialConfig.nombre}
+          currentVersion={initialConfig.currentVersion}
+          saveState={effectiveSaveState}
+          isDirty={isDirty}
+          onOpenVersions={() => setActiveTab('versions')}
+          versionsActive={activeTab === 'versions'}
+          onPublish={() => setPublishOpen(true)}
         />
 
-        <main className="flex flex-1 overflow-hidden">
-          <div className="flex w-[480px] shrink-0 flex-col overflow-hidden border-r border-zinc-200 dark:border-zinc-900">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.18, ease: 'easeOut' }}
-                className="flex min-h-0 flex-1 flex-col overflow-hidden"
-              >
-                <EditorPanel
-                  sectionKey={activeTab}
-                  branding={branding}
-                  onBrandingChange={setBranding}
-                  modules={modules}
-                  onModulesChange={setModules}
-                  billboard={billboard}
-                  onBillboardChange={setBillboard}
-                  onBillboardPreview={openBillboardPreview}
-                  onHomeDashboardPreview={openHomeDashboardPreview}
-                  aiAvatar={aiAvatar}
-                  onAiAvatarChange={setAiAvatar}
-                  onAiAvatarPreview={openAiAvatarPreview}
-                  survey={survey}
-                  onSurveyChange={setSurvey}
-                  onSurveyPreview={openSurveyPreview}
-                  deals={deals}
-                  onDealsChange={setDeals}
-                  onDealsPreview={openDealsPreview}
-                  photoBooth={photoBooth}
-                  onPhotoBoothChange={setPhotoBooth}
-                  onPhotoBoothPreview={openPhotoBoothPreview}
-                  brochures={brochures}
-                  onBrochuresChange={setBrochures}
-                  onBrochuresPreview={openBrochuresPreview}
-                  socialWall={socialWall}
-                  onSocialWallChange={setSocialWall}
-                  onSocialWallPreview={openSocialWallPreview}
-                  guestbook={guestbook}
-                  onGuestbookChange={setGuestbook}
-                  onGuestbookPreview={openGuestbookPreview}
-                  listings={listings}
-                  onListingsChange={setListings}
-                  events={events}
-                  onEventsChange={setEvents}
-                  onEventsPreview={openEventsPreview}
-                  tickets={tickets}
-                  onTicketsChange={setTickets}
-                  onTicketsPreview={openTicketsPreview}
-                  passes={passes}
-                  onPassesChange={setPasses}
-                  onPassesPreview={openPassesPreview}
-                  trails={trails}
-                  onTrailsChange={setTrails}
-                  onTrailsPreview={openTrailsPreview}
-                  i18nBundle={i18nBundle}
-                  onI18nBundleChange={setI18nBundle}
-                  ads={ads}
-                  onAdsChange={setAds}
-                  integrations={integrations}
-                  onIntegrationsChange={setIntegrations}
-                  currentVersion={initialConfig.currentVersion ?? 0}
-                  lastPublishedAt={initialMeta?.lastEditedAt}
-                  lastEditor={initialMeta?.lastEditor}
-                  onPublish={() => setPublishOpen(true)}
-                />
-              </motion.div>
-            </AnimatePresence>
-            <SaveBar
-              saveState={effectiveSaveState}
-              isDirty={isDirty}
-              onSave={handleSave}
-              onUndo={handleDiscard}
-              onRedo={() => setPreviewKey((k) => k + 1)}
-            />
+        {errorMsg && (
+          <div className="border-b border-red-200 bg-red-50 px-5 py-2 text-[12px] text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+            {errorMsg}
           </div>
+        )}
 
-          <div className="relative flex flex-1 items-center justify-center overflow-hidden">
-            <PreviewPanel
-              slug={initialConfig.slug}
-              nombre={initialConfig.nombre}
-              initialOrientation={initialConfig.orientation ?? 'portrait'}
-              reloadKey={previewKey}
-              iframeRef={iframeRef}
-              onIframeLoad={onIframeLoad}
-            />
-          </div>
-        </main>
+        <div className="flex flex-1 overflow-hidden">
+          <SidebarTabs
+            sections={STUDIO_SECTIONS}
+            activeKey={activeTab}
+            onSelect={(k) => setActiveTab(k)}
+            systemModules={modules.systemModules ?? DEFAULT_SYSTEM_MODULES}
+          />
+
+          <main className="flex flex-1 overflow-hidden">
+            <div className="flex w-[480px] shrink-0 flex-col overflow-hidden border-r border-zinc-200 dark:border-zinc-900">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                  className="flex min-h-0 flex-1 flex-col overflow-hidden"
+                >
+                  <EditorPanel
+                    sectionKey={activeTab}
+                    branding={branding}
+                    onBrandingChange={setBranding}
+                    modules={modules}
+                    onModulesChange={setModules}
+                    billboard={billboard}
+                    onBillboardChange={setBillboard}
+                    onBillboardPreview={openBillboardPreview}
+                    onHomeDashboardPreview={openHomeDashboardPreview}
+                    aiAvatar={aiAvatar}
+                    onAiAvatarChange={setAiAvatar}
+                    onAiAvatarPreview={openAiAvatarPreview}
+                    survey={survey}
+                    onSurveyChange={setSurvey}
+                    onSurveyPreview={openSurveyPreview}
+                    deals={deals}
+                    onDealsChange={setDeals}
+                    onDealsPreview={openDealsPreview}
+                    photoBooth={photoBooth}
+                    onPhotoBoothChange={setPhotoBooth}
+                    onPhotoBoothPreview={openPhotoBoothPreview}
+                    brochures={brochures}
+                    onBrochuresChange={setBrochures}
+                    onBrochuresPreview={openBrochuresPreview}
+                    socialWall={socialWall}
+                    onSocialWallChange={setSocialWall}
+                    onSocialWallPreview={openSocialWallPreview}
+                    guestbook={guestbook}
+                    onGuestbookChange={setGuestbook}
+                    onGuestbookPreview={openGuestbookPreview}
+                    listings={listings}
+                    onListingsChange={setListings}
+                    events={events}
+                    onEventsChange={setEvents}
+                    onEventsPreview={openEventsPreview}
+                    tickets={tickets}
+                    onTicketsChange={setTickets}
+                    onTicketsPreview={openTicketsPreview}
+                    passes={passes}
+                    onPassesChange={setPasses}
+                    onPassesPreview={openPassesPreview}
+                    trails={trails}
+                    onTrailsChange={setTrails}
+                    onTrailsPreview={openTrailsPreview}
+                    i18nBundle={i18nBundle}
+                    onI18nBundleChange={setI18nBundle}
+                    ads={ads}
+                    onAdsChange={setAds}
+                    integrations={integrations}
+                    onIntegrationsChange={setIntegrations}
+                    currentVersion={initialConfig.currentVersion ?? 0}
+                    lastPublishedAt={initialMeta?.lastEditedAt}
+                    lastEditor={initialMeta?.lastEditor}
+                    onPublish={() => setPublishOpen(true)}
+                  />
+                </motion.div>
+              </AnimatePresence>
+              <SaveBar
+                saveState={effectiveSaveState}
+                isDirty={isDirty}
+                onSave={handleSave}
+                onUndo={handleDiscard}
+                onRedo={() => setPreviewKey((k) => k + 1)}
+              />
+            </div>
+
+            <div className="relative flex flex-1 items-center justify-center overflow-hidden">
+              <PreviewPanel
+                slug={initialConfig.slug}
+                nombre={initialConfig.nombre}
+                initialOrientation={initialConfig.orientation ?? 'portrait'}
+                reloadKey={previewKey}
+                iframeRef={iframeRef}
+                onIframeLoad={onIframeLoad}
+              />
+            </div>
+          </main>
+        </div>
+
+        <p className="sr-only" aria-live="polite">
+          {effectiveSaveState === 'saving'
+            ? 'Saving changes'
+            : effectiveSaveState === 'saved' && !isDirty
+              ? 'All changes saved'
+              : isDirty
+                ? 'You have unsaved changes'
+                : ''}
+        </p>
+
+        <span hidden suppressHydrationWarning>
+          {initialMeta?.lastEditedAt ?? ''}
+        </span>
+
+        <PublishModal
+          open={publishOpen}
+          slug={initialConfig.slug}
+          onClose={() => setPublishOpen(false)}
+        />
       </div>
-
-      <p className="sr-only" aria-live="polite">
-        {effectiveSaveState === 'saving'
-          ? 'Saving changes'
-          : effectiveSaveState === 'saved' && !isDirty
-            ? 'All changes saved'
-            : isDirty
-              ? 'You have unsaved changes'
-              : ''}
-      </p>
-
-      <span hidden suppressHydrationWarning>
-        {initialMeta?.lastEditedAt ?? ''}
-      </span>
-
-      <PublishModal
-        open={publishOpen}
-        slug={initialConfig.slug}
-        onClose={() => setPublishOpen(false)}
-      />
-    </div>
     </StudioSlugProvider>
   );
 }
@@ -727,7 +713,14 @@ function shallowEqualModules(a: ModulesConfig, b: ModulesConfig): boolean {
 }
 
 function shallowEqualBillboard(a: BillboardConfig, b: BillboardConfig): boolean {
-  return a.variant === b.variant && a.idleTimeoutSec === b.idleTimeoutSec;
+  if (a.variant !== b.variant) return false;
+  if (a.idleTimeoutSec !== b.idleTimeoutSec) return false;
+  if (a.logoSize !== b.logoSize) return false;
+  if (a.modules.length !== b.modules.length) return false;
+  for (let i = 0; i < a.modules.length; i++) {
+    if (a.modules[i] !== b.modules[i]) return false;
+  }
+  return true;
 }
 
 function shallowEqualAi(a: AiAvatarConfig, b: AiAvatarConfig): boolean {

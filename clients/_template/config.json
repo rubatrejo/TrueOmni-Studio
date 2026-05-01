@@ -12,7 +12,7 @@
       "dark": "assets/logo-dark.svg",
       "alt": "Logo del cliente"
     },
-    "favicon": "assets/favicon.ico"
+    "favicon": "assets/favicon.svg"
   },
   "textos": {
     "titulo_principal": "Bienvenido",

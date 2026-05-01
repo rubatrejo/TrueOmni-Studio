@@ -180,8 +180,8 @@ export function I18nEditor({ value, onChange }: I18nEditorProps) {
         </div>
       ) : null}
 
-      <div className="overflow-auto rounded-md border border-zinc-200 dark:border-zinc-800">
-        <table className="w-full table-fixed text-left text-[12px]">
+      <div className="overflow-x-auto overflow-y-auto rounded-md border border-zinc-200 dark:border-zinc-800">
+        <table className="w-full min-w-[720px] table-fixed text-left text-[12px]">
           <thead className="sticky top-0 z-10 bg-zinc-50 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">
             <tr>
               <th className="w-[22%] px-2 py-2 font-medium">Key</th>

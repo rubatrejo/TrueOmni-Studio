@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   FileText,
   Loader2,
+  RotateCcw,
   Upload,
   X,
 } from 'lucide-react';
@@ -26,6 +27,8 @@ export function PublishModal({ open, slug, onClose }: PublishModalProps) {
   const [files, setFiles] = useState<PublishFileChange[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [written, setWritten] = useState(0);
+  // Countdown para auto-cerrar el modal tras success.
+  const [autoCloseSec, setAutoCloseSec] = useState<number | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -51,6 +54,28 @@ export function PublishModal({ open, slug, onClose }: PublishModalProps) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
+
+  // Auto-close on done: countdown 3 → 0 segundos. El operador puede
+  // cancelar el auto-close cualquier interacción (clicks Cancel/Close).
+  useEffect(() => {
+    if (phase !== 'done') {
+      setAutoCloseSec(null);
+      return;
+    }
+    setAutoCloseSec(3);
+    const interval = setInterval(() => {
+      setAutoCloseSec((prev) => {
+        if (prev === null) return null;
+        if (prev <= 1) {
+          clearInterval(interval);
+          onClose();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [phase, onClose]);
 
   const changes = files.filter((f) => f.action !== 'unchanged');
   const unchanged = files.filter((f) => f.action === 'unchanged');
@@ -167,16 +192,28 @@ export function PublishModal({ open, slug, onClose }: PublishModalProps) {
                 onClick={onClose}
                 className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-[12.5px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
               >
-                {phase === 'done' ? 'Close' : 'Cancel'}
+                {phase === 'done'
+                  ? autoCloseSec !== null
+                    ? `Close (${autoCloseSec})`
+                    : 'Close'
+                  : 'Cancel'}
               </button>
-              {phase !== 'done' ? (
+              {phase === 'error' ? (
+                <button
+                  type="button"
+                  onClick={handleConfirm}
+                  className="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition hover:bg-red-500 dark:bg-red-500 dark:hover:bg-red-400"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Retry
+                </button>
+              ) : phase !== 'done' ? (
                 <button
                   type="button"
                   onClick={handleConfirm}
                   disabled={
                     phase === 'preview-loading' ||
                     phase === 'publishing' ||
-                    phase === 'error' ||
                     changes.length === 0
                   }
                   className="inline-flex items-center gap-1.5 rounded-md bg-sky-600 px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition hover:bg-sky-500 disabled:opacity-40 dark:bg-sky-500 dark:hover:bg-sky-400"

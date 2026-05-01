@@ -25,48 +25,49 @@ export type BillboardModuleInfo = {
   href: string;
 };
 
+/**
+ * Pool de imágenes existentes en `clients/default/assets/billboard-{1,2,3}/`.
+ * El route handler `/assets/[...path]` cae a default cuando el cliente activo
+ * no tiene la imagen, así que estos paths son seguros para todos los kiosks.
+ */
+const IMG = {
+  eat: '/assets/billboard-3/eat.jpg',
+  events: '/assets/billboard-2/events.jpg',
+  hero: '/assets/billboard-1/hero.jpg',
+  hotels: '/assets/billboard-2/hotels.jpg',
+  itinerary: '/assets/billboard-2/itinerary.jpg',
+  play: '/assets/billboard-3/play.jpg',
+  thingsToDo: '/assets/billboard-2/things-to-do.jpg',
+} as const;
+
 export const MODULE_BILLBOARD_INFO: Record<string, BillboardModuleInfo> = {
-  restaurants: {
-    label: 'Food &',
-    labelLine2: 'Drink',
-    image: '/assets/billboard-3/eat.jpg',
-    href: '/home/restaurants',
-  },
-  'things-to-do': {
-    label: 'Things to do',
-    image: '/assets/billboard-2/things-to-do.jpg',
-    href: '/home/things-to-do',
-  },
+  restaurants: { label: 'Food &', labelLine2: 'Drink', image: IMG.eat, href: '/home/restaurants' },
+  'things-to-do': { label: 'Things to do', image: IMG.thingsToDo, href: '/home/things-to-do' },
   'itinerary-builder': {
     label: 'Itinerary',
     labelLine2: 'Builder',
-    image: '/assets/billboard-2/itinerary.jpg',
+    image: IMG.itinerary,
     href: '/home/itinerary-builder',
   },
-  events: {
-    label: 'Events',
-    image: '/assets/billboard-2/events.jpg',
-    href: '/home/events',
+  events: { label: 'Events', image: IMG.events, href: '/home/events' },
+  // Tickets / Passes: events tienen vibra ticketed, hero como secondary
+  tickets: { label: 'Tickets', image: IMG.events, href: '/home/tickets' },
+  passes: { label: 'Passes', image: IMG.hero, href: '/home/passes' },
+  // Guestbook / Social wall: hero/landscape genéricos
+  guestbook: { label: 'Guestbook', image: IMG.hero, href: '/home/guestbook' },
+  'social-wall': { label: 'Social', labelLine2: 'Wall', image: IMG.hero, href: '/home/social-wall' },
+  'digital-brochure': { label: 'Brochure', image: IMG.thingsToDo, href: '/home/digital-brochure' },
+  map: { label: 'Map', image: IMG.hotels, href: '/home/map' },
+  stay: { label: 'Stay', image: IMG.hotels, href: '/home/stay' },
+  survey: { label: 'Survey', image: IMG.hero, href: '/home/survey' },
+  deals: { label: 'Deals', image: IMG.eat, href: '/home/deals' },
+  'photo-booth': {
+    label: 'Photo',
+    labelLine2: 'Booth',
+    image: IMG.hero,
+    href: '/home/photo-booth',
   },
-  passes: { label: 'Passes', href: '/home/passes' },
-  tickets: { label: 'Tickets', href: '/home/tickets' },
-  guestbook: { label: 'Guestbook', href: '/home/guestbook' },
-  'social-wall': { label: 'Social', labelLine2: 'Wall', href: '/home/social-wall' },
-  'digital-brochure': { label: 'Brochure', href: '/home/digital-brochure' },
-  map: { label: 'Map', href: '/home/map' },
-  stay: {
-    label: 'Stay',
-    image: '/assets/billboard-2/hotels.jpg',
-    href: '/home/stay',
-  },
-  survey: { label: 'Survey', href: '/home/survey' },
-  deals: { label: 'Deals', href: '/home/deals' },
-  'photo-booth': { label: 'Photo', labelLine2: 'Booth', href: '/home/photo-booth' },
-  trails: {
-    label: 'Trails',
-    image: '/assets/billboard-3/play.jpg',
-    href: '/home/trails',
-  },
+  trails: { label: 'Trails', image: IMG.play, href: '/home/trails' },
 };
 
 /** Devuelve el label resuelto del slot con fallback al original del SVG. */

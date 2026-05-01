@@ -8,6 +8,7 @@ import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon } from './billboard-footer-parts';
 import { resolveSlotHref, resolveSlotImage, resolveSlotLabel } from './module-info';
+import { SlotImage } from './slot-image';
 import { useBillboardOverride } from './use-billboard-override';
 
 /**
@@ -118,15 +119,18 @@ export function Billboard1() {
         style={{ left: '30px', top: '374px', width: '495px', height: '410px', borderRadius: '9px' }}
         aria-label={`${slot0.label} ${slot0.labelLine2 ?? ''}`.trim()}
       >
-        <img
+        <SlotImage
           src={resolveSlotImage(modules?.[0], '/assets/billboard-1/things-to-do.png')}
-          alt=""
+          fallbackSrc="/assets/billboard-1/things-to-do.png"
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }} />
         <span
           className="absolute font-display font-bold uppercase leading-[1.05] text-white"
-          style={{ left: '70px', top: '336px', fontSize: '50px', letterSpacing: '0.02em' }}
+          // Anclado abajo (como slot 1) para que crezca hacia arriba si el
+          // módulo asignado tiene labelLine2 (2 líneas) sin desbordar la card.
+          // SVG original tenía top:336 con 1 línea — equivalente a bottom:24.
+          style={{ left: '70px', bottom: '24px', fontSize: '50px', letterSpacing: '0.02em' }}
         >
           {slot0.label}
           {slot0.labelLine2 ? (
@@ -145,9 +149,9 @@ export function Billboard1() {
         style={{ left: '30px', top: '810px', width: '495px', height: '410px', borderRadius: '9px' }}
         aria-label={`${slot1.label} ${slot1.labelLine2 ?? ''}`.trim()}
       >
-        <img
+        <SlotImage
           src={resolveSlotImage(modules?.[1], '/assets/billboard-1/events.jpg')}
-          alt=""
+          fallbackSrc="/assets/billboard-1/events.jpg"
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(17,16,13,0.352)' }} />

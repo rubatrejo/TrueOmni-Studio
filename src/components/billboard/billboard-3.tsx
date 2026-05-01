@@ -8,6 +8,7 @@ import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon } from './billboard-footer-parts';
 import { resolveSlotHref, resolveSlotImage, resolveSlotLabel } from './module-info';
+import { SlotImage } from './slot-image';
 import { useBillboardLogoHeight, useBillboardOverride } from './use-billboard-override';
 
 /**
@@ -51,9 +52,9 @@ export function Billboard3() {
         style={{ ...topRowSize, left: '0', top: '0' }}
         aria-label={`${slot0.label} ${slot0.labelLine2 ?? ''}`.trim()}
       >
-        <img
+        <SlotImage
           src={resolveSlotImage(modules?.[0], '/assets/billboard-3/eat.jpg')}
-          alt=""
+          fallbackSrc="/assets/billboard-3/eat.jpg"
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0" style={overlayStyle} />
@@ -73,9 +74,9 @@ export function Billboard3() {
         style={{ ...topRowSize, left: '540px', top: '0' }}
         aria-label={`${slot1.label} ${slot1.labelLine2 ?? ''}`.trim()}
       >
-        <img
+        <SlotImage
           src={resolveSlotImage(modules?.[1], '/assets/billboard-3/events.jpg')}
-          alt=""
+          fallbackSrc="/assets/billboard-3/events.jpg"
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0" style={overlayStyle} />
@@ -135,9 +136,9 @@ export function Billboard3() {
         style={{ ...bottomRowSize, left: '0', top: '1245px' }}
         aria-label={`${slot2.label} ${slot2.labelLine2 ?? ''}`.trim()}
       >
-        <img
+        <SlotImage
           src={resolveSlotImage(modules?.[2], '/assets/billboard-3/play.jpg')}
-          alt=""
+          fallbackSrc="/assets/billboard-3/play.jpg"
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0" style={overlayStyle} />
@@ -157,9 +158,9 @@ export function Billboard3() {
         style={{ ...bottomRowSize, left: '540px', top: '1245px' }}
         aria-label={`${slot3.label} ${slot3.labelLine2 ?? ''}`.trim()}
       >
-        <img
+        <SlotImage
           src={resolveSlotImage(modules?.[3], '/assets/billboard-3/things-to-do.jpg')}
-          alt=""
+          fallbackSrc="/assets/billboard-3/things-to-do.jpg"
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0" style={overlayStyle} />

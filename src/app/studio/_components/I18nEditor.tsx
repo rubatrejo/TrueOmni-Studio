@@ -221,25 +221,16 @@ export function I18nEditor({ value, onChange }: I18nEditorProps) {
       ) : null}
 
       <div className="overflow-x-auto overflow-y-auto rounded-md border border-zinc-200 dark:border-zinc-800">
-        <table
-          className="w-full min-w-[720px] table-fixed text-left text-[12px]"
-          style={
-            {
-              // Anchos dinámicos: Key fija 22%, resto distribuido equitativamente.
-              ['--locale-col-width']: `${(78 / Math.max(1, localeList.length)).toFixed(2)}%`,
-            } as React.CSSProperties
-          }
-        >
+        <table className="w-full table-auto text-left text-[12px]">
           <thead className="sticky top-0 z-10 bg-zinc-50 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">
             <tr>
-              <th className="w-[22%] px-2 py-2 font-medium">Key</th>
+              <th className="min-w-[180px] px-2 py-2 font-medium">Key</th>
               {localeList.map((loc) => {
                 const info = getLocaleInfo(loc);
                 return (
                   <th
                     key={loc}
-                    className="px-2 py-2 font-medium"
-                    style={{ width: 'var(--locale-col-width)' }}
+                    className="min-w-[160px] px-2 py-2 font-medium"
                   >
                     <span className="flex items-center gap-1">
                       <span className="font-mono text-[10.5px] uppercase">{loc}</span>

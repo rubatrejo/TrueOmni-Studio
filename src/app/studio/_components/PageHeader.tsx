@@ -1,5 +1,8 @@
-import { BookOpen } from 'lucide-react';
+'use client';
+
+import { BookOpen, ChevronDown, LogOut, Settings, UserCircle } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
 
 import { ProductDropdown } from './ProductDropdown';
 import { StudioBrand } from './StudioBrand';
@@ -44,15 +47,137 @@ export function StudioPageHeader({
           <span className="hidden sm:inline">Documentation</span>
         </Link>
         <ThemeToggle />
-        <div className="flex h-9 items-center gap-2 rounded-lg border border-zinc-200 bg-white px-2 dark:border-zinc-800 dark:bg-zinc-900 sm:px-3">
-          <div className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-sky-500 to-cyan-400 text-[11px] font-semibold text-zinc-900">
-            R
-          </div>
-          <span className="hidden text-xs text-zinc-600 dark:text-zinc-400 sm:inline">
-            ruben@trueomni.com
-          </span>
-        </div>
+        <UserDropdown email="ruben@trueomni.com" />
       </div>
     </header>
+  );
+}
+
+/**
+ * Dropdown del avatar (audit F-39). Antes era un pill decorativo. Ahora abre
+ * un menú con accesos a Account / Sign out — placeholder hasta que la fase
+ * S7.x entregue auth real con NextAuth.
+ *
+ * Click outside o Escape lo cierran. Ítems sin handler real muestran un
+ * tooltip "Coming with auth" para no engañar al operador.
+ */
+function UserDropdown({ email }: { email: string }) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const initial = email.charAt(0).toUpperCase();
+
+  useEffect(() => {
+    if (!open) return;
+    const onClickOutside = (e: MouseEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('mousedown', onClickOutside);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('mousedown', onClickOutside);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={wrapRef} className="relative">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="flex h-9 items-center gap-2 rounded-lg border border-zinc-200 bg-white px-2 transition hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/80 sm:px-3"
+      >
+        <div className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-sky-500 to-cyan-400 text-[11px] font-semibold text-zinc-900">
+          {initial}
+        </div>
+        <span className="hidden text-xs text-zinc-600 dark:text-zinc-400 sm:inline">
+          {email}
+        </span>
+        <ChevronDown
+          className={`hidden h-3.5 w-3.5 text-zinc-400 transition-transform sm:block ${open ? 'rotate-180' : ''}`}
+          strokeWidth={2}
+        />
+      </button>
+      {open ? (
+        <div
+          role="menu"
+          className="absolute right-0 top-11 z-30 w-56 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-xl ring-1 ring-black/5 dark:border-zinc-800 dark:bg-zinc-950 dark:ring-white/5"
+        >
+          <div className="border-b border-zinc-200 px-3 py-2.5 dark:border-zinc-900">
+            <div className="flex items-center gap-2">
+              <div className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-sky-500 to-cyan-400 text-sm font-semibold text-zinc-900">
+                {initial}
+              </div>
+              <div className="min-w-0">
+                <div className="truncate text-[12px] font-semibold text-zinc-800 dark:text-zinc-100">
+                  {email.split('@')[0]}
+                </div>
+                <div className="truncate font-mono text-[10.5px] text-zinc-500 dark:text-zinc-500">
+                  {email}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="py-1">
+            <UserMenuItem
+              icon={<UserCircle className="h-3.5 w-3.5" />}
+              label="Account"
+              hint="Coming with auth"
+            />
+            <UserMenuItem
+              icon={<Settings className="h-3.5 w-3.5" />}
+              label="Preferences"
+              hint="Coming soon"
+            />
+            <div className="my-1 h-px bg-zinc-200 dark:bg-zinc-900" />
+            <UserMenuItem
+              icon={<LogOut className="h-3.5 w-3.5" />}
+              label="Sign out"
+              hint="Coming with auth"
+              danger
+            />
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function UserMenuItem({
+  icon,
+  label,
+  hint,
+  danger = false,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  hint?: string;
+  danger?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      title={hint}
+      disabled
+      className={
+        'flex w-full cursor-not-allowed items-center justify-between gap-2 px-3 py-1.5 text-left text-[12.5px] transition disabled:opacity-60 ' +
+        (danger
+          ? 'text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10'
+          : 'text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-900')
+      }
+    >
+      <span className="flex items-center gap-2">
+        <span className="text-zinc-400 dark:text-zinc-500">{icon}</span>
+        {label}
+      </span>
+      {hint ? (
+        <span className="text-[10px] text-zinc-400 dark:text-zinc-600">{hint}</span>
+      ) : null}
+    </button>
   );
 }

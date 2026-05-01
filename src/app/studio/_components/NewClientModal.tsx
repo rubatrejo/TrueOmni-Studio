@@ -45,6 +45,17 @@ export function NewClientModal({
     });
   }, [nombre]);
 
+  // Escape cierra el modal (audit F-35 — los otros 3 modales del Studio
+  // ya lo hacían; este faltaba).
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
   const validateSlug = (): string | null => {
     if (!slug) return 'Slug is required';
     if (!SLUG_REGEX.test(slug)) {
@@ -88,7 +99,7 @@ export function NewClientModal({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
             onClick={onClose}
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-zinc-950/70 backdrop-blur-md"
           />
           <motion.div
             key="modal"

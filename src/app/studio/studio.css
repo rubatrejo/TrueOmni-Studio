@@ -93,3 +93,189 @@ body:has(.studio-root) {
   background: var(--studio-accent-soft);
   color: var(--studio-text);
 }
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* Design tokens + utility classes (audit F-18, F-19, F-20, F-21).
+ *
+ * Estos tokens documentan la convención del Studio. Componentes nuevos
+ * deben usar estas utilities; los existentes se migran incrementalmente.
+ * Los valores se exponen como CSS custom properties para que JS pueda
+ * leerlos cuando necesite calcular layout (ej. PreviewPanel scaling).
+ *
+ * ─── F-18 · Type scale ───────────────────────────────────────────────────
+ *   .text-caption    11.5px  · meta info, tags, captions
+ *   .text-body-sm    12.5px  · UI text estándar (rows, hints)
+ *   .text-body       14px    · default body, párrafos descriptivos
+ *   .text-heading-sm 15px    · section labels (h3 dentro de cards)
+ *   .text-heading    20px    · h2 / page sub-titles
+ *   .text-display    32-48px · h1, hero
+ *
+ * ─── F-19 · Spacing (8pt grid) ───────────────────────────────────────────
+ *   gap-2 / p-2  =  8px  · entre elementos hermanos pequeños (icon + label)
+ *   gap-3 / p-3  = 12px  · entre rows de un mismo grupo
+ *   gap-4 / p-4  = 16px  · entre grupos relacionados (form fields)
+ *   gap-6 / p-6  = 24px  · entre secciones (header / body / footer)
+ *   gap-8 / p-8  = 32px  · entre módulos top-level (hero, kiosks, footer)
+ *
+ * ─── F-20 · Accent color semantics ───────────────────────────────────────
+ *   sky-500  · focus rings, primary actions (Save, Publish, New kiosk)
+ *   zinc-100 · active states neutros (sidebar item activo, tabs)
+ *   sky-700  · enlaces inline + hover state de items navegables
+ *   emerald  · success / live states (badge "Live", health probe ok)
+ *   amber    · warnings (degraded health, "draft" pendiente)
+ *   red      · errores y destrucción (delete confirm, form invalid)
+ *
+ *   Regla: el sky no se usa como decoración. Si un elemento es sky pero
+ *   no es focus ring ni primary action, está mal categorizado.
+ *
+ * ─── F-21 · Icon sizes ───────────────────────────────────────────────────
+ *   .icon-sm     14px · inline en botones small (h-3.5 w-3.5)
+ *   .icon-base   16px · default — la mayoría de iconos del Studio
+ *   .icon-md     20px · navegación principal, headers de cards
+ *   .icon-lg     24px · empty states, illustrations, hero
+ */
+.studio-root {
+  /* Type scale (F-18) — sirve como source of truth si JS o tests necesitan
+     leer los breakpoints. Las utility classes abajo aplican los valores. */
+  --text-caption: 11.5px;
+  --text-body-sm: 12.5px;
+  --text-body: 14px;
+  --text-heading-sm: 15px;
+  --text-heading: 20px;
+  --text-display-sm: 32px;
+  --text-display: 48px;
+
+  /* Spacing scale (F-19) — alias del 8pt grid de Tailwind. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Icon scale (F-21). */
+  --icon-sm: 14px;
+  --icon-base: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+}
+
+/* Type scale utilities (F-18). Cada una redefine font-size + line-height
+   sano + tracking que el ojo lea bien a esa escala. Usar `font-display`
+   (Tailwind) en paralelo cuando se quiera la display font. */
+.studio-root .text-caption {
+  font-size: var(--text-caption);
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+.studio-root .text-body-sm {
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+}
+.studio-root .text-body {
+  font-size: var(--text-body);
+  line-height: 1.55;
+}
+.studio-root .text-heading-sm {
+  font-size: var(--text-heading-sm);
+  line-height: 1.35;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.studio-root .text-heading {
+  font-size: var(--text-heading);
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.studio-root .text-display {
+  font-size: var(--text-display);
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.studio-root .text-display-sm {
+  font-size: var(--text-display-sm);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+}
+
+/* Icon size utilities (F-21). Aplicar al SVG/icon directamente — Tailwind
+   `h-X w-X` sigue funcionando, estas son solo aliases semánticos para
+   componentes nuevos. */
+.studio-root .icon-sm {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+.studio-root .icon-base {
+  width: var(--icon-base);
+  height: var(--icon-base);
+}
+.studio-root .icon-md {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+.studio-root .icon-lg {
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* Image-field thumbnail backdrop.
+ *
+ * Diagonal split mitad-oscura / mitad-clara. Garantiza que un logo de
+ * CUALQUIER color (white, black, brand color, gradient) tenga al menos
+ * una mitad con contraste alto. Reemplaza el checker estándar — un logo
+ * white sobre checker light/lighter sigue siendo invisible. La diagonal
+ * cubre el rango completo white→black.
+ */
+.studio-root .studio-img-checker {
+  background:
+    linear-gradient(
+      135deg,
+      #18181b 0%,
+      #18181b 49.5%,
+      #e4e4e7 50.5%,
+      #fafafa 100%
+    );
+}
+.dark .studio-root .studio-img-checker,
+.studio-root.dark .studio-img-checker {
+  background:
+    linear-gradient(
+      135deg,
+      #09090b 0%,
+      #09090b 49.5%,
+      #71717a 50.5%,
+      #d4d4d8 100%
+    );
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* Tab transition (audit F-41)
+ *
+ * Reemplaza el AnimatePresence + motion.div del Shell para el tab change.
+ * framer-motion (~60KB gzip) era overkill para un fade+y simple. CSS
+ * keyframes nativos son ~0KB y respetan motion-reduce sin código extra.
+ *
+ * Uso: aplicar `studio-tab-fade` al wrapper que cambia con cada tab. La
+ * key `key={activeTab}` fuerza re-mount, que reinicia la animación. */
+@keyframes studio-tab-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.studio-root .studio-tab-fade {
+  animation: studio-tab-fade 180ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-root .studio-tab-fade {
+    animation: none;
+  }
+}

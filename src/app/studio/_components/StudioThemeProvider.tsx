@@ -69,8 +69,11 @@ export function StudioThemeProvider({ children }: { children: ReactNode }) {
         data-studio-theme={theme}
         suppressHydrationWarning
       >
-        {/* Wrapper interior: aplica el bg/fg base + dark: variants. */}
-        <div className="studio-root min-h-screen bg-zinc-50 font-sans text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
+        {/* Wrapper interior: aplica el bg/fg base + dark: variants.
+            transition-colors da un fade suave (~250ms) al cambiar de tema en
+            todo el subtree (audit F-40). motion-reduce respeta usuarios con
+            la preferencia activada. */}
+        <div className="studio-root min-h-screen bg-zinc-50 font-sans text-zinc-900 antialiased transition-colors duration-300 ease-out motion-reduce:transition-none dark:bg-zinc-950 dark:text-zinc-100">
           {children}
         </div>
       </div>

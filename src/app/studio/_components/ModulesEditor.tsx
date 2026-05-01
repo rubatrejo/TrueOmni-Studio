@@ -210,29 +210,53 @@ export function HomeDashboardEditor({
  * usuario, aunque su schema sea propio (Events, Trails) y no se puedan
  * duplicar/borrar.
  */
-const CATALOG_SYSTEM_MODULE_LIST: Array<{ key: keyof SystemModules; tileKey: string; label: string; subtitle: string }> = [
-  { key: 'events', tileKey: 'events', label: 'Events', subtitle: 'Calendar of events' },
-  { key: 'tickets', tileKey: 'tickets', label: 'Tickets', subtitle: 'Single-attraction tickets (derived)' },
-  { key: 'passes', tileKey: 'passes', label: 'Passes', subtitle: 'Multi-attraction passes' },
-  { key: 'trails', tileKey: 'trails', label: 'Trails', subtitle: 'Hiking / walking trails' },
+/** Lista de side-effects (cascadas) por módulo. Audit F-09: comunicar al
+ *  operador que toggle off no solo apaga la sección — también esconde el
+ *  tile del Home Dashboard, las claves de i18n, etc. */
+const CASCADE_HOME_TILE = 'Home Dashboard tile · Sidebar editor';
+const CASCADE_HOME_TILE_AND_I18N = 'Home Dashboard tile · Sidebar editor · Languages columns';
+
+const CATALOG_SYSTEM_MODULE_LIST: Array<{
+  key: keyof SystemModules;
+  tileKey: string;
+  label: string;
+  subtitle: string;
+  cascade: string;
+}> = [
+  { key: 'events', tileKey: 'events', label: 'Events', subtitle: 'Calendar of events', cascade: CASCADE_HOME_TILE_AND_I18N },
+  { key: 'tickets', tileKey: 'tickets', label: 'Tickets', subtitle: 'Single-attraction tickets (derived)', cascade: CASCADE_HOME_TILE },
+  { key: 'passes', tileKey: 'passes', label: 'Passes', subtitle: 'Multi-attraction passes', cascade: CASCADE_HOME_TILE },
+  { key: 'trails', tileKey: 'trails', label: 'Trails', subtitle: 'Hiking / walking trails', cascade: CASCADE_HOME_TILE },
 ];
 
-const HOME_MODULE_LIST: Array<{ key: keyof SystemModules; tileKey: string; label: string; subtitle: string }> = [
-  { key: 'itineraryBuilder', tileKey: 'itinerary-builder', label: 'Trip Planner', subtitle: 'AI-assisted trip planner' },
-  { key: 'guestbook', tileKey: 'guestbook', label: 'Guestbook', subtitle: 'Visitor pins on the map' },
-  { key: 'socialWall', tileKey: 'social-wall', label: 'Social Wall', subtitle: 'Curated social feed' },
-  { key: 'digitalBrochure', tileKey: 'digital-brochure', label: 'Digital Brochure', subtitle: 'Flippable brochures' },
-  { key: 'map', tileKey: 'map', label: 'Map', subtitle: 'Interactive POI map' },
-  { key: 'survey', tileKey: 'survey', label: 'Survey', subtitle: 'NPS / feedback overlay' },
-  { key: 'deals', tileKey: 'deals', label: 'Deals', subtitle: 'Promotions & discounts' },
-  { key: 'photoBooth', tileKey: 'photo-booth', label: 'Photo Booth', subtitle: 'Green-screen capture' },
-  { key: 'wayfinding', tileKey: 'wayfinding', label: 'Wayfinding', subtitle: 'On-property navigation' },
+const HOME_MODULE_LIST: Array<{
+  key: keyof SystemModules;
+  tileKey: string;
+  label: string;
+  subtitle: string;
+  cascade: string;
+}> = [
+  { key: 'itineraryBuilder', tileKey: 'itinerary-builder', label: 'Trip Planner', subtitle: 'AI-assisted trip planner', cascade: CASCADE_HOME_TILE },
+  { key: 'guestbook', tileKey: 'guestbook', label: 'Guestbook', subtitle: 'Visitor pins on the map', cascade: CASCADE_HOME_TILE },
+  { key: 'socialWall', tileKey: 'social-wall', label: 'Social Wall', subtitle: 'Curated social feed', cascade: CASCADE_HOME_TILE },
+  { key: 'digitalBrochure', tileKey: 'digital-brochure', label: 'Digital Brochure', subtitle: 'Flippable brochures', cascade: CASCADE_HOME_TILE },
+  { key: 'map', tileKey: 'map', label: 'Map', subtitle: 'Interactive POI map', cascade: CASCADE_HOME_TILE },
+  { key: 'survey', tileKey: 'survey', label: 'Survey', subtitle: 'NPS / feedback overlay', cascade: 'Sidebar editor' },
+  { key: 'deals', tileKey: 'deals', label: 'Deals', subtitle: 'Promotions & discounts', cascade: CASCADE_HOME_TILE },
+  { key: 'photoBooth', tileKey: 'photo-booth', label: 'Photo Booth', subtitle: 'Green-screen capture', cascade: CASCADE_HOME_TILE },
+  { key: 'wayfinding', tileKey: 'wayfinding', label: 'Wayfinding', subtitle: 'On-property navigation', cascade: CASCADE_HOME_TILE },
 ];
 
-const GLOBAL_MODULE_LIST: Array<{ key: keyof SystemModules; icon: LucideIcon; label: string; subtitle: string }> = [
-  { key: 'ads', icon: Megaphone, label: 'Ads', subtitle: 'Hero, bottom banner, popup interstitial' },
-  { key: 'languages', icon: Languages, label: 'Languages', subtitle: 'Locale picker on the Billboard' },
-  { key: 'aiAvatar', icon: Sparkles, label: 'AI Avatar', subtitle: 'Floating Ask Anything bubble' },
+const GLOBAL_MODULE_LIST: Array<{
+  key: keyof SystemModules;
+  icon: LucideIcon;
+  label: string;
+  subtitle: string;
+  cascade: string;
+}> = [
+  { key: 'ads', icon: Megaphone, label: 'Ads', subtitle: 'Hero, bottom banner, popup interstitial', cascade: 'Hero / bottom / popup ad slots kiosk-wide' },
+  { key: 'languages', icon: Languages, label: 'Languages', subtitle: 'Locale picker on the Billboard', cascade: 'Billboard locale picker · Sidebar Languages editor' },
+  { key: 'aiAvatar', icon: Sparkles, label: 'AI Avatar', subtitle: 'Floating Ask Anything bubble', cascade: 'Ask Anything bubble · Sidebar AI Avatar editor' },
 ];
 
 export function SystemModulesEditor({
@@ -397,6 +421,7 @@ export function SystemModulesEditor({
                 icon={<Icon className="h-4 w-4" />}
                 title={m.label}
                 subtitle={m.subtitle}
+                cascade={m.cascade}
                 enabled={sys[m.key]}
                 onToggle={() => setSystem(m.key)}
               />
@@ -483,6 +508,7 @@ export function SystemModulesEditor({
                 icon={<Icon className="h-4 w-4" />}
                 title={m.label}
                 subtitle={m.subtitle}
+                cascade={m.cascade}
                 enabled={sys[m.key]}
                 onToggle={() => setSystem(m.key)}
               />
@@ -508,6 +534,7 @@ export function SystemModulesEditor({
               icon={<m.icon className="h-4 w-4" />}
               title={m.label}
               subtitle={m.subtitle}
+              cascade={m.cascade}
               enabled={sys[m.key]}
               onToggle={() => setSystem(m.key)}
             />
@@ -522,15 +549,21 @@ function SystemRow({
   icon,
   title,
   subtitle,
+  cascade,
   enabled,
   onToggle,
 }: {
   icon: React.ReactNode;
   title: string;
   subtitle: string;
+  /** Lista de side-effects al togglear este módulo (audit F-09). */
+  cascade?: string;
   enabled: boolean;
   onToggle: () => void;
 }) {
+  const cascadeMsg = cascade
+    ? `Toggling ${title} ${enabled ? 'off' : 'on'} also affects: ${cascade}`
+    : undefined;
   return (
     <div
       className={
@@ -553,8 +586,16 @@ function SystemRow({
         <div className="mt-0.5 truncate text-[10.5px] text-zinc-500 dark:text-zinc-500">
           {subtitle}
         </div>
+        {cascade ? (
+          <div
+            className="mt-1 truncate text-[10px] text-zinc-400 dark:text-zinc-600"
+            title={cascadeMsg}
+          >
+            <span className="font-mono uppercase tracking-wide">Cascades to:</span> {cascade}
+          </div>
+        ) : null}
       </div>
-      <ToggleSwitch enabled={enabled} onChange={onToggle} label={title} />
+      <ToggleSwitch enabled={enabled} onChange={onToggle} label={title} title={cascadeMsg} />
     </div>
   );
 }
@@ -675,10 +716,13 @@ function ToggleSwitch({
   enabled,
   onChange,
   label,
+  title,
 }: {
   enabled: boolean;
   onChange: () => void;
   label: string;
+  /** Tooltip nativo opcional — útil para comunicar cascadas (audit F-09). */
+  title?: string;
 }) {
   return (
     <button
@@ -686,6 +730,7 @@ function ToggleSwitch({
       role="switch"
       aria-checked={enabled}
       aria-label={`${enabled ? 'Hide' : 'Show'} ${label}`}
+      title={title}
       onClick={onChange}
       className={
         'relative flex h-6 w-10 shrink-0 items-center rounded-full transition ' +

@@ -21,6 +21,7 @@ import {
   type DealsModuleConfig,
 } from '@/lib/studio/schema';
 
+import { EditorEmptyState } from './EditorEmptyState';
 import { ImageField } from './ImageField';
 
 export function DealsEditor({
@@ -113,9 +114,12 @@ export function DealsEditor({
         </header>
 
         {deals.deals.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-zinc-300 bg-zinc-50/50 p-6 text-center text-[12px] text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/20">
-            No deals yet. Add your first deal to start.
-          </div>
+          <EditorEmptyState
+            icon={Tag}
+            headline="No deals yet"
+            description="Promotions and discounts surfaced from the Deals tile in the Home grid. Operators usually start with 5–10 hero offers and expand from there."
+            primaryAction={{ label: 'Add deal', onClick: addDeal }}
+          />
         ) : (
           <Reorder.Group
             axis="y"

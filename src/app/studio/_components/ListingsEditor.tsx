@@ -1,5 +1,6 @@
 'use client';
 
+import { Sparkles } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import type {
@@ -24,6 +25,7 @@ import { mergeTaxonomy, upsertBySlug } from './catalog/import-utils';
 import { ImportModal } from './catalog/ImportModal';
 import { ImportToast } from './catalog/ImportToast';
 import { TaxonomyEditor } from './catalog/TaxonomyEditor';
+import { EditorEmptyState } from './EditorEmptyState';
 
 interface ListingsEditorProps {
   value: ListingsModule;
@@ -198,6 +200,29 @@ function ListingsCatalogEditor({
     onCatalogChange({ listings: next });
   };
 
+  const handleBulkDelete = (slugs: string[]) => {
+    const set = new Set(slugs);
+    onCatalogChange({ listings: catalog.listings.filter((l) => !set.has(l.slug)) });
+    if (editingSlug && set.has(editingSlug)) setEditingSlug(null);
+  };
+
+  const handleBulkDuplicate = (slugs: string[]) => {
+    const set = new Set(slugs);
+    const next = catalog.listings.slice();
+    let inserted = 0;
+    catalog.listings.forEach((listing, idx) => {
+      if (!set.has(listing.slug)) return;
+      const dup: ListingItem = {
+        ...listing,
+        slug: `${listing.slug}-copy-${Date.now()}-${inserted}`,
+        title: `${listing.title} (Copy)`,
+      };
+      next.splice(idx + 1 + inserted, 0, dup);
+      inserted += 1;
+    });
+    onCatalogChange({ listings: next });
+  };
+
   if (editingItem) {
     const fields: FieldConfig<ListingItem>[] = [
       { kind: 'text', key: 'title', label: 'Title' },
@@ -333,7 +358,20 @@ function ListingsCatalogEditor({
         onReorder={handleReorder}
         onItemDelete={handleItemDelete}
         onItemDuplicate={handleItemDuplicate}
+        onItemsBulkDelete={handleBulkDelete}
+        onItemsBulkDuplicate={handleBulkDuplicate}
+        itemNoun="listing"
         onItemSelect={setEditingSlug}
+        emptyState={
+          catalog.listings.length === 0 ? (
+            <EditorEmptyState
+              icon={Sparkles}
+              headline={`No ${entry.label.toLowerCase()} yet`}
+              description="Listings power the dynamic Home tiles like Food & Drink, Things to Do or Stay. Each listing has a hero image, description, hours and an optional reservation CTA."
+              primaryAction={{ label: 'Add listing', onClick: handleAdd }}
+            />
+          ) : undefined
+        }
         renderRow={(item) => (
           <div className="flex items-center gap-2">
             {item.image ? (

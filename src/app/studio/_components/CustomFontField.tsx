@@ -82,7 +82,14 @@ export function CustomFontField({
   const handleFile = async (file: File) => {
     setError(null);
     if (file.size > MAX_BYTES) {
-      setError(`File too large (max ${Math.round(MAX_BYTES / 1024)}KB).`);
+      // Audit F-33: sugerir subset cuando el font excede el límite. Una font
+      // completa con todos los glyphs unicode puede ser 5MB+ — un subset con
+      // solo lat/grek/cyrl baja a <300KB típicamente.
+      const sizeKb = Math.round(file.size / 1024);
+      const limitKb = Math.round(MAX_BYTES / 1024);
+      setError(
+        `File too large: ${sizeKb}KB (max ${limitKb}KB). Try subsetting with glyphhanger or google-webfonts-helper to keep only the glyphs your kiosk uses.`,
+      );
       return;
     }
     const ext = file.name.split('.').pop()?.toLowerCase() ?? '';

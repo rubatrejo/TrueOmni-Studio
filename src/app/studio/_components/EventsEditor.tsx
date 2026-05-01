@@ -1,5 +1,6 @@
 'use client';
 
+import { Calendar } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import type {
@@ -22,6 +23,7 @@ import { mergeTaxonomy, upsertBySlug } from './catalog/import-utils';
 import { ImportModal } from './catalog/ImportModal';
 import { ImportToast } from './catalog/ImportToast';
 import { TaxonomyEditor } from './catalog/TaxonomyEditor';
+import { EditorEmptyState } from './EditorEmptyState';
 
 interface EventsEditorProps {
   value: EventsModule;
@@ -105,6 +107,30 @@ export function EventsEditor({ value, onChange }: EventsEditorProps) {
     const idx = value.events.findIndex((e) => e.slug === slug);
     const next = value.events.slice();
     next.splice(idx + 1, 0, dup);
+    update({ events: next });
+  };
+
+  const handleBulkDelete = (slugs: string[]) => {
+    const set = new Set(slugs);
+    update({ events: value.events.filter((e) => !set.has(e.slug)) });
+    if (editingSlug && set.has(editingSlug)) setEditingSlug(null);
+  };
+
+  const handleBulkDuplicate = (slugs: string[]) => {
+    const set = new Set(slugs);
+    const next = value.events.slice();
+    // Iteramos sobre el original para duplicar respetando el orden actual.
+    let inserted = 0;
+    value.events.forEach((event, idx) => {
+      if (!set.has(event.slug)) return;
+      const dup: EventItem = {
+        ...event,
+        slug: `${event.slug}-copy-${Date.now()}-${inserted}`,
+        title: `${event.title} (Copy)`,
+      };
+      next.splice(idx + 1 + inserted, 0, dup);
+      inserted += 1;
+    });
     update({ events: next });
   };
 
@@ -244,7 +270,20 @@ export function EventsEditor({ value, onChange }: EventsEditorProps) {
         onReorder={handleReorder}
         onItemDelete={handleItemDelete}
         onItemDuplicate={handleItemDuplicate}
+        onItemsBulkDelete={handleBulkDelete}
+        onItemsBulkDuplicate={handleBulkDuplicate}
+        itemNoun="event"
         onItemSelect={setEditingSlug}
+        emptyState={
+          value.events.length === 0 ? (
+            <EditorEmptyState
+              icon={Calendar}
+              headline="No events yet"
+              description="Concerts, festivals, exhibitions and recurring activities. Each event becomes a card on the Events tile and can drive ticket conversions."
+              primaryAction={{ label: 'Add event', onClick: handleAdd }}
+            />
+          ) : undefined
+        }
         renderRow={(item) => (
           <div className="flex items-center gap-2">
             {item.image ? (

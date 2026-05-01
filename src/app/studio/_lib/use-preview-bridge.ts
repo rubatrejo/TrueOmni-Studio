@@ -101,6 +101,18 @@ export function usePreviewBridge() {
   const trailsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const adsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isReady, setIsReady] = useState(false);
+  // Timestamp del último handshake/heartbeat recibido del iframe. Se usa para
+  // calcular `bridgeStatus` (connecting/connected/stale/lost). El kiosk emite
+  // `studio:ready` al montar y cada 5s como heartbeat (ver `StudioBridge`).
+  const [lastAckAt, setLastAckAt] = useState<number | null>(null);
+  const [mountAt, setMountAt] = useState<number>(() => Date.now());
+  // Ticker que fuerza re-render cada segundo para que el `bridgeStatus`
+  // derivado refleje el paso del tiempo (sin esto se quedaría obsoleto).
+  const [, setNowTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setNowTick((n) => n + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   const sendBrandingNow = useCallback((branding: BrandingPatch) => {
     const win = iframeRef.current?.contentWindow;
@@ -371,6 +383,7 @@ export function usePreviewBridge() {
       const data = event.data as { type?: string } | null;
       if (!data || data.type !== 'studio:ready') return;
       setIsReady(true);
+      setLastAckAt(Date.now());
       if (lastBrandingRef.current) sendBrandingNow(lastBrandingRef.current);
       if (lastModulesRef.current) sendModulesNow(lastModulesRef.current);
       if (lastBillboardRef.current) sendBillboardNow(lastBillboardRef.current);
@@ -556,7 +569,26 @@ export function usePreviewBridge() {
   // Cuando el iframe re-monta, resetea ready para forzar un nuevo handshake.
   const onIframeLoad = useCallback(() => {
     setIsReady(false);
+    setLastAckAt(null);
+    setMountAt(Date.now());
   }, []);
+
+  // Estado derivado del bridge para el indicador del Sidebar.
+  // Reglas (audit F-17):
+  //   - 'connecting': montado <5s sin handshake (esperable mientras carga el iframe).
+  //   - 'connected':  último heartbeat <5s.
+  //   - 'stale':      último heartbeat 5–30s (atípico — kiosk pausado, throttling).
+  //   - 'lost':       sin heartbeat >30s o falló el handshake inicial.
+  const bridgeStatus: 'connecting' | 'connected' | 'stale' | 'lost' = (() => {
+    const now = Date.now();
+    if (lastAckAt === null) {
+      return now - mountAt < 5000 ? 'connecting' : 'lost';
+    }
+    const elapsed = now - lastAckAt;
+    if (elapsed < 5000) return 'connected';
+    if (elapsed < 30000) return 'stale';
+    return 'lost';
+  })();
 
   return {
     iframeRef,
@@ -590,6 +622,7 @@ export function usePreviewBridge() {
     openTrailsPreview,
     pushAds,
     isReady,
+    bridgeStatus,
     onIframeLoad,
   };
 }

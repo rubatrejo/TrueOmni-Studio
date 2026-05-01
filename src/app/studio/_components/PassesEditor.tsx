@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, TicketCheck, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import type {
@@ -24,6 +24,7 @@ import { ImageUrlField } from './catalog/ImageUrlField';
 import { upsertBySlug } from './catalog/import-utils';
 import { ImportModal } from './catalog/ImportModal';
 import { ImportToast } from './catalog/ImportToast';
+import { EditorEmptyState } from './EditorEmptyState';
 
 interface PassesEditorProps {
   value: PassesModule;
@@ -98,6 +99,29 @@ export function PassesEditor({ value, onChange }: PassesEditorProps) {
     const idx = value.passes.findIndex((p) => p.slug === slug);
     const next = value.passes.slice();
     next.splice(idx + 1, 0, dup);
+    update({ passes: next });
+  };
+
+  const handleBulkDelete = (slugs: string[]) => {
+    const set = new Set(slugs);
+    update({ passes: value.passes.filter((p) => !set.has(p.slug)) });
+    if (editingSlug && set.has(editingSlug)) setEditingSlug(null);
+  };
+
+  const handleBulkDuplicate = (slugs: string[]) => {
+    const set = new Set(slugs);
+    const next = value.passes.slice();
+    let inserted = 0;
+    value.passes.forEach((pass, idx) => {
+      if (!set.has(pass.slug)) return;
+      const dup: PassItem = {
+        ...pass,
+        slug: `${pass.slug}-copy-${Date.now()}-${inserted}`,
+        title: `${pass.title} (Copy)`,
+      };
+      next.splice(idx + 1 + inserted, 0, dup);
+      inserted += 1;
+    });
     update({ passes: next });
   };
 
@@ -181,7 +205,20 @@ export function PassesEditor({ value, onChange }: PassesEditorProps) {
         onReorder={handleReorder}
         onItemDelete={handleItemDelete}
         onItemDuplicate={handleItemDuplicate}
+        onItemsBulkDelete={handleBulkDelete}
+        onItemsBulkDuplicate={handleBulkDuplicate}
+        itemNoun="pass"
         onItemSelect={setEditingSlug}
+        emptyState={
+          value.passes.length === 0 ? (
+            <EditorEmptyState
+              icon={TicketCheck}
+              headline="No passes yet"
+              description="Multi-attraction passes (e.g. CityPASS, Explorer). Bundle several attractions into a single QR-coded pass with a discounted price."
+              primaryAction={{ label: 'Add pass', onClick: handleAdd }}
+            />
+          ) : undefined
+        }
         renderRow={(item) => (
           <div className="flex items-center gap-2">
             {item.cover ? (

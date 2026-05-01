@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { StudioProduct } from '../_lib/products';
 
 import { StudioPageHeader } from './PageHeader';
+import { SystemStatusBadge } from './SystemStatusBadge';
 
 /**
  * Placeholder reutilizable para productos del Studio que aún no están
@@ -43,6 +44,24 @@ export function ComingSoon({ product }: { product: StudioProduct }) {
           </p>
         )}
 
+        {product.comingSoonFeatures && product.comingSoonFeatures.length > 0 && (
+          <ul className="mt-8 grid max-w-3xl gap-3 text-left sm:grid-cols-3">
+            {product.comingSoonFeatures.map((feature, idx) => (
+              <li
+                key={idx}
+                className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/40"
+              >
+                <span className="grid h-6 w-6 place-items-center rounded-md bg-amber-500/15 font-mono text-[10.5px] font-semibold text-amber-700 ring-1 ring-inset ring-amber-500/30 dark:text-amber-300">
+                  {idx + 1}
+                </span>
+                <p className="text-[12.5px] leading-relaxed text-zinc-700 dark:text-zinc-300">
+                  {feature}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+
         <p className="mt-10 text-[12.5px] text-zinc-400 dark:text-zinc-600">
           We&rsquo;re shaping this module — switch back to{' '}
           <Link
@@ -58,10 +77,7 @@ export function ComingSoon({ product }: { product: StudioProduct }) {
       <footer className="mt-24 flex items-center justify-between border-t border-zinc-200 pt-6 text-xs text-zinc-500 dark:border-zinc-900 dark:text-zinc-600">
         <span>© 2026 TrueOmni · TrueOmni Studio v0.1</span>
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5">
-            <span className="block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            All systems operational
-          </span>
+          <SystemStatusBadge />
           <span>Local · main</span>
         </div>
       </footer>

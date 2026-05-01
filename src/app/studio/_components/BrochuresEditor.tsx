@@ -20,6 +20,7 @@ import {
   type BrochuresModuleConfig,
 } from '@/lib/studio/schema';
 
+import { EditorEmptyState } from './EditorEmptyState';
 import { ImageField } from './ImageField';
 import { PdfField } from './PdfField';
 
@@ -114,9 +115,12 @@ export function BrochuresEditor({
         </header>
 
         {brochures.brochures.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-zinc-300 bg-zinc-50/50 p-6 text-center text-[12px] text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/20">
-            No brochures yet. Add your first PDF to start.
-          </div>
+          <EditorEmptyState
+            icon={BookOpen}
+            headline="No brochures yet"
+            description="Flippable PDF brochures (visitor guides, restaurant menus, event programs) surface from the Digital Brochure tile. Each brochure renders a thumbnail and inline reader."
+            primaryAction={{ label: 'Add brochure', onClick: add }}
+          />
         ) : (
           <Reorder.Group
             axis="y"

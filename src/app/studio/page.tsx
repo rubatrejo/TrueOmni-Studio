@@ -8,7 +8,9 @@ import type { ConfigMeta, KioskConfig } from '@/lib/studio/schema';
 
 import { FaviconBadge } from './_components/FaviconBadge';
 import { NewClientModal } from './_components/NewClientModal';
+import { OnboardingTour } from './_components/OnboardingTour';
 import { StudioPageHeader } from './_components/PageHeader';
+import { SystemStatusBadge } from './_components/SystemStatusBadge';
 import {
   type ConfigEntry,
   createConfig,
@@ -80,11 +82,10 @@ export default function StudioHome() {
         <p className="mb-3 text-sm font-medium uppercase tracking-[0.18em] text-zinc-500">
           White-label studio
         </p>
-        <h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight text-zinc-900 dark:text-white">
-          Build a kiosk in minutes,<br />
-          not in commits.
+        <h1 className="font-display text-4xl font-bold leading-[1.08] tracking-tight text-balance text-zinc-900 sm:text-5xl sm:leading-[1.05] dark:text-white">
+          Build a kiosk in minutes, not in commits.
         </h1>
-        <p className="mt-5 max-w-2xl text-base leading-relaxed text-zinc-600 dark:text-zinc-400">
+        <p className="mt-5 max-w-2xl text-base leading-relaxed text-pretty text-zinc-600 dark:text-zinc-400">
           Configure branding, modules, content, ads and integrations from a single canvas
           with the kiosk rendering live next to you. No JSON, no terminals — just decisions.
         </p>
@@ -131,10 +132,7 @@ export default function StudioHome() {
       <footer className="mt-24 flex items-center justify-between border-t border-zinc-200 pt-6 text-xs text-zinc-500 dark:border-zinc-900 dark:text-zinc-600">
         <span>© 2026 TrueOmni · Kiosk Studio v0.1</span>
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5">
-            <span className="block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            All systems operational
-          </span>
+          <SystemStatusBadge />
           <span>Local · main</span>
         </div>
       </footer>
@@ -145,6 +143,9 @@ export default function StudioHome() {
         onClose={() => setShowNewModal(false)}
         onCreate={handleCreate}
       />
+
+      {/* Onboarding tour — solo se muestra al primer login (audit F-31). */}
+      <OnboardingTour />
     </main>
   );
 }
@@ -169,7 +170,7 @@ function ClientCard({
     >
       <Link
         href={`/studio/${config.slug}`}
-        className="relative flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/40 dark:shadow-none dark:hover:border-zinc-700 dark:hover:bg-zinc-900/80"
+        className="relative flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md motion-reduce:hover:translate-y-0 dark:border-zinc-800 dark:bg-zinc-900/40 dark:shadow-none dark:hover:border-zinc-700 dark:hover:bg-zinc-900/80 dark:hover:shadow-[0_8px_24px_-12px_rgba(56,189,248,0.25)]"
       >
         {/* Brand gradient hero with centered client logo */}
         <div

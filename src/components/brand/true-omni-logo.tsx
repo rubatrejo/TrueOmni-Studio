@@ -18,7 +18,7 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 
 import { getCachedLogoOverride } from '@/components/studio-bridge';
 
@@ -37,7 +37,7 @@ interface TrueOmniLogoProps {
   slot?: 'default' | 'idle' | 'footer' | 'brand';
 }
 
-export function TrueOmniLogo({
+function TrueOmniLogoBase({
   className,
   title = 'TrueOmni',
   slot = 'default',
@@ -141,3 +141,10 @@ export function TrueOmniLogo({
     </svg>
   );
 }
+
+/**
+ * Wrapper memoizado (audit F-42). Evita re-render del SVG inline en cada
+ * navegación cuando los props no cambian. Importante porque el SVG son ~50
+ * paths inline y el TopBar lo renderiza en cada page change.
+ */
+export const TrueOmniLogo = memo(TrueOmniLogoBase);

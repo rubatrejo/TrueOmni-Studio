@@ -18,13 +18,25 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const nextConfig = {
   reactStrictMode: true,
   outputFileTracingRoot: __dirname,
-  // Mueve el dev indicator al borde inferior izquierdo (donde no estorba al
-  // preview del kiosk dentro del iframe del Studio). Cuando se carga el
-  // kiosk embebido, además ocultamos completamente el indicador con CSS
-  // (ver `<StudioBridge />`).
-  devIndicators: {
-    position: 'bottom-left',
+  // Rewrites: `/k/<slug>` → `/?client=<slug>` (audit F-25). URL más limpio
+  // para compartir entre operadores: "Visita /k/default" en vez de
+  // "/?client=default". El query param se mantiene como source of truth
+  // interno (KIOSK_CLIENT lo ignora — el client lo lee del URL).
+  // Cuando el dominio real exista, este rewrite seguirá funcionando y
+  // además podremos añadir subdominios via wildcard en Vercel.
+  async rewrites() {
+    return [
+      {
+        source: '/k/:slug',
+        destination: '/?client=:slug',
+      },
+    ];
   },
+  // Dev indicator: oculto por completo (audit F-30 — quedaba en screenshots
+  // que se compartían con stakeholders). Cuando el kiosk se embebe en el
+  // Studio, `<StudioBridge>` además inyecta CSS para ocultar cualquier portal
+  // Next residual. Para verlo localmente, comenta este bloque.
+  devIndicators: false,
   // pdfjs-dist declara `canvas` como dep opcional (native Node canvas). En
   // browser no se usa pero webpack intenta resolverlo igual y explota con
   // "Can't resolve '../build/Release/canvas.node'". Lo aliaseamos a `false`.

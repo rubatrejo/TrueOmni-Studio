@@ -1,6 +1,9 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+// framer-motion ya no es necesario aquí — el tab transition usa CSS keyframes
+// nativos (`studio-tab-fade` en studio.css). Audit F-41 quitó este peso del
+// bundle del Shell. Otros componentes (modales, sidebar active indicator
+// con layoutId) siguen usando framer-motion.
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type {
@@ -47,6 +50,7 @@ import {
 } from '@/lib/studio/schema';
 
 import { getI18n, patchConfig, patchI18n } from '../_lib/api-client';
+import { recordSave as recordSaveLocal } from '../_lib/local-version-history';
 import { STUDIO_SECTIONS, type StudioSectionKey } from '../_lib/sections';
 import { StudioSlugProvider } from '../_lib/slug-context';
 import { usePreviewBridge } from '../_lib/use-preview-bridge';
@@ -54,8 +58,10 @@ import { usePreviewBridge } from '../_lib/use-preview-bridge';
 import { EditorPanel } from './EditorPanel';
 import { MobileTabBar, type MobileEditorTab } from './MobileTabBar';
 import { PreviewPanel } from './PreviewPanel';
+import { CommandPalette } from './CommandPalette';
 import { PublishModal } from './PublishModal';
 import { SaveBar } from './SaveBar';
+import { ShortcutsModal } from './ShortcutsModal';
 import { SidebarTabs } from './SidebarTabs';
 import { TopBar } from './TopBar';
 
@@ -75,6 +81,8 @@ export function Shell({
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [publishOpen, setPublishOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
   const [savedBranding, setSavedBranding] = useState<Branding>(initialConfig.branding);
   const [branding, setBranding] = useState<Branding>(savedBranding);
@@ -197,6 +205,7 @@ export function Shell({
     pushTrails,
     openTrailsPreview,
     pushAds,
+    bridgeStatus,
     onIframeLoad,
   } = usePreviewBridge();
 
@@ -440,6 +449,8 @@ export function Shell({
       if (adsDirty) setSavedAds(ads);
       if (integrationsDirty) setSavedIntegrations(integrations);
       if (i18nDirty) setSavedI18nBundle(i18nBundle);
+      // Append al timeline local de versiones (placeholder hasta S7.2 — audit F-10).
+      recordSaveLocal(initialConfig.slug, initialMeta?.lastEditor ?? 'ruben@trueomni.com');
       setSaveState('saved');
       setTimeout(() => setSaveState('idle'), 1500);
     } catch (err) {
@@ -487,6 +498,22 @@ export function Shell({
     isDirty,
     initialConfig.slug,
   ]);
+
+  // beforeunload guard (audit F-26): si hay cambios sin guardar, el navegador
+  // dispara su confirm dialog nativo al cerrar pestaña / refrescar / navegar
+  // a otra URL. El operador puede cancelar y volver al editor sin perder.
+  useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      // Necesario para que Chrome muestre el confirm. El texto custom se
+      // ignora en navegadores modernos por seguridad.
+      e.returnValue = '';
+      return '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [isDirty]);
 
   const handleDiscard = useCallback(() => {
     setBranding(savedBranding);
@@ -537,6 +564,16 @@ export function Shell({
         e.preventDefault();
         void handleSave();
       }
+      // Cmd+/ abre el cheat sheet de shortcuts (audit F-44).
+      if ((e.metaKey || e.ctrlKey) && e.key === '/') {
+        e.preventDefault();
+        setShortcutsOpen((v) => !v);
+      }
+      // Cmd+K abre el command palette (audit F-47).
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setPaletteOpen((v) => !v);
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -585,6 +622,8 @@ export function Shell({
                 setMobileTab('editor');
               }}
               systemModules={modules.systemModules ?? DEFAULT_SYSTEM_MODULES}
+              bridgeStatus={bridgeStatus}
+              onReloadPreview={() => setPreviewKey((k) => k + 1)}
             />
           </div>
 
@@ -592,15 +631,13 @@ export function Shell({
             <div
               className={`${mobileTab === 'editor' ? 'flex' : 'hidden'} w-full shrink-0 flex-col overflow-hidden border-r border-zinc-200 dark:border-zinc-900 lg:flex lg:w-[400px] xl:w-[480px]`}
             >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.18, ease: 'easeOut' }}
-                  className="flex min-h-0 flex-1 flex-col overflow-hidden"
-                >
+              {/* `key={activeTab}` fuerza re-mount al cambiar de sección;
+                  la animación CSS `studio-tab-fade` se reproduce en cada
+                  re-mount. Reemplaza AnimatePresence (audit F-41). */}
+              <div
+                key={activeTab}
+                className="studio-tab-fade flex min-h-0 flex-1 flex-col overflow-hidden"
+              >
                   <EditorPanel
                     sectionKey={activeTab}
                     branding={branding}
@@ -657,8 +694,7 @@ export function Shell({
                     lastEditor={initialMeta?.lastEditor}
                     onPublish={() => setPublishOpen(true)}
                   />
-                </motion.div>
-              </AnimatePresence>
+              </div>
               <SaveBar
                 saveState={effectiveSaveState}
                 isDirty={isDirty}
@@ -701,6 +737,20 @@ export function Shell({
           open={publishOpen}
           slug={initialConfig.slug}
           onClose={() => setPublishOpen(false)}
+          currentVersion={initialConfig.currentVersion ?? 0}
+          editor={initialMeta?.lastEditor ?? 'ruben@trueomni.com'}
+        />
+
+        <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+
+        <CommandPalette
+          open={paletteOpen}
+          onClose={() => setPaletteOpen(false)}
+          onSelectSection={(k) => setActiveTab(k)}
+          slug={initialConfig.slug}
+          onPublish={() => setPublishOpen(true)}
+          onOpenShortcuts={() => setShortcutsOpen(true)}
+          onSave={() => void handleSave()}
         />
       </div>
     </StudioSlugProvider>

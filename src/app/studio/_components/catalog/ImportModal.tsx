@@ -131,7 +131,7 @@ export function ImportModal<K extends ImportKind>({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
             onClick={onClose}
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-zinc-950/70 backdrop-blur-md"
           />
           <motion.div
             key="modal"

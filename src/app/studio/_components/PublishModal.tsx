@@ -13,16 +13,22 @@ import {
 import { useEffect, useState } from 'react';
 
 import { publishToFilesystem, type PublishFileChange } from '../_lib/api-client';
+import { recordPublish as recordPublishLocal } from '../_lib/local-version-history';
 
 interface PublishModalProps {
   open: boolean;
   slug: string;
   onClose: () => void;
+  /** Versión actual (post-incremento al publicar). Si no se conoce, lo
+   *  registramos como `version+1` o 1 cuando se desconoce. */
+  currentVersion?: number;
+  /** Editor que está publicando. Se persiste en el timeline local. */
+  editor?: string;
 }
 
 type Phase = 'preview' | 'preview-loading' | 'publishing' | 'done' | 'error';
 
-export function PublishModal({ open, slug, onClose }: PublishModalProps) {
+export function PublishModal({ open, slug, onClose, currentVersion = 0, editor = 'ruben@trueomni.com' }: PublishModalProps) {
   const [phase, setPhase] = useState<Phase>('preview-loading');
   const [files, setFiles] = useState<PublishFileChange[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -87,6 +93,8 @@ export function PublishModal({ open, slug, onClose }: PublishModalProps) {
       const res = await publishToFilesystem(slug, { dryRun: false });
       setFiles(res.files);
       setWritten(res.written);
+      // Append al timeline local (audit F-10).
+      recordPublishLocal(slug, currentVersion + 1, editor);
       setPhase('done');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Publish failed');
@@ -105,7 +113,7 @@ export function PublishModal({ open, slug, onClose }: PublishModalProps) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
             onClick={onClose}
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-zinc-950/70 backdrop-blur-md"
           />
           <motion.div
             key="modal"

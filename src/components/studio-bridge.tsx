@@ -245,12 +245,16 @@ export function StudioBridge() {
     const t1 = setTimeout(announceReady, 50);
     const t2 = setTimeout(announceReady, 250);
     const t3 = setTimeout(announceReady, 800);
+    // Heartbeat: re-anunciamos cada 5s para que el host pueda detectar
+    // desconexiones reales del bridge (postMessage roto, iframe paused…).
+    const heartbeat = setInterval(announceReady, 5000);
 
     return () => {
       window.removeEventListener('message', handler);
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
+      clearInterval(heartbeat);
     };
   }, []);
 

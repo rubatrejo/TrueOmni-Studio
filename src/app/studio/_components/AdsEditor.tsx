@@ -32,6 +32,7 @@ import { ImageUrlField } from './catalog/ImageUrlField';
 import { upsertById } from './catalog/import-utils';
 import { ImportModal } from './catalog/ImportModal';
 import { ImportToast } from './catalog/ImportToast';
+import { EditorEmptyState } from './EditorEmptyState';
 
 interface AdsEditorProps {
   value: AdsModule;
@@ -190,14 +191,19 @@ export function AdsEditor({ value, onChange }: AdsEditorProps) {
       />
 
       {visible.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-4 py-10 text-center dark:border-zinc-800 dark:bg-zinc-900/20">
-          <Megaphone className="h-7 w-7 text-zinc-400" />
-          <p className="text-[12px] italic text-zinc-500">
-            {value.ads.length === 0
-              ? 'No ads yet. Click "Add ad" to create one.'
-              : 'No ads match the current filter.'}
-          </p>
-        </div>
+        value.ads.length === 0 ? (
+          <EditorEmptyState
+            icon={Megaphone}
+            headline="No ads yet"
+            description="Hero, bottom banner and popup interstitials. Schedule by date, frequency cap and target route — operators usually start with one popup and one bottom banner."
+            primaryAction={{ label: 'Add ad', onClick: handleAdd }}
+          />
+        ) : (
+          <div className="flex flex-col items-center gap-2 rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-4 py-10 text-center dark:border-zinc-800 dark:bg-zinc-900/20">
+            <Megaphone className="h-7 w-7 text-zinc-400" />
+            <p className="text-[12px] italic text-zinc-500">No ads match the current filter.</p>
+          </div>
+        )
       ) : (
         <ul className="space-y-1.5">
           {visible.map((ad) => (

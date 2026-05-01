@@ -1,5 +1,6 @@
 'use client';
 
+import { Footprints } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import type {
@@ -24,6 +25,7 @@ import { mergeTaxonomy, upsertBySlug } from './catalog/import-utils';
 import { ImportModal } from './catalog/ImportModal';
 import { ImportToast } from './catalog/ImportToast';
 import { TaxonomyEditor } from './catalog/TaxonomyEditor';
+import { EditorEmptyState } from './EditorEmptyState';
 
 const DIFFICULTY_OPTIONS: TrailDifficulty[] = ['Easy', 'Moderate', 'Hard'];
 const TRAIL_TYPE_OPTIONS: TrailType[] = ['Loop', 'Out & Back', 'Point to Point'];
@@ -109,6 +111,29 @@ export function TrailsEditor({ value, onChange }: TrailsEditorProps) {
     const idx = value.trails.findIndex((t) => t.slug === slug);
     const next = value.trails.slice();
     next.splice(idx + 1, 0, dup);
+    update({ trails: next });
+  };
+
+  const handleBulkDelete = (slugs: string[]) => {
+    const set = new Set(slugs);
+    update({ trails: value.trails.filter((t) => !set.has(t.slug)) });
+    if (editingSlug && set.has(editingSlug)) setEditingSlug(null);
+  };
+
+  const handleBulkDuplicate = (slugs: string[]) => {
+    const set = new Set(slugs);
+    const next = value.trails.slice();
+    let inserted = 0;
+    value.trails.forEach((trail, idx) => {
+      if (!set.has(trail.slug)) return;
+      const dup: TrailItem = {
+        ...trail,
+        slug: `${trail.slug}-copy-${Date.now()}-${inserted}`,
+        title: `${trail.title} (Copy)`,
+      };
+      next.splice(idx + 1 + inserted, 0, dup);
+      inserted += 1;
+    });
     update({ trails: next });
   };
 
@@ -246,7 +271,20 @@ export function TrailsEditor({ value, onChange }: TrailsEditorProps) {
         onReorder={handleReorder}
         onItemDelete={handleItemDelete}
         onItemDuplicate={handleItemDuplicate}
+        onItemsBulkDelete={handleBulkDelete}
+        onItemsBulkDuplicate={handleBulkDuplicate}
+        itemNoun="trail"
         onItemSelect={setEditingSlug}
+        emptyState={
+          value.trails.length === 0 ? (
+            <EditorEmptyState
+              icon={Footprints}
+              headline="No trails yet"
+              description="Hiking, walking and biking trails surface on the Trails tile with difficulty, length and a map preview. Useful for outdoor-leaning kiosks."
+              primaryAction={{ label: 'Add trail', onClick: handleAdd }}
+            />
+          ) : undefined
+        }
         renderRow={(item) => (
           <div className="flex items-center gap-2">
             {item.image ? (

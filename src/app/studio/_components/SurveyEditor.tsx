@@ -177,13 +177,33 @@ export function SurveyEditor({
       {/* Questions */}
       <section>
         <header className="mb-3 flex items-end justify-between gap-3">
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h3 className="font-display text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500 dark:text-zinc-400">
               Questions
             </h3>
             <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
               Drag to reorder · click to expand · {survey.questions.length}/20 questions.
             </p>
+            {/* Progress bar (audit F-34): visual del % usado del límite. */}
+            <div
+              className="mt-2 h-1 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-900"
+              role="progressbar"
+              aria-valuenow={survey.questions.length}
+              aria-valuemin={0}
+              aria-valuemax={20}
+              aria-label="Survey questions used"
+            >
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${
+                  survey.questions.length >= 18
+                    ? 'bg-amber-500'
+                    : survey.questions.length >= 20
+                      ? 'bg-red-500'
+                      : 'bg-sky-500'
+                }`}
+                style={{ width: `${Math.min(100, (survey.questions.length / 20) * 100)}%` }}
+              />
+            </div>
           </div>
         </header>
 

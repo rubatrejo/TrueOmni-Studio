@@ -47,6 +47,7 @@ export function BillboardEditor({
   billboard,
   onChange,
   modulesAvailable,
+  onBillboardPreview,
 }: {
   billboard: BillboardConfig;
   onChange: (next: BillboardConfig) => void;
@@ -56,6 +57,9 @@ export function BillboardEditor({
    * existen en el kiosk.
    */
   modulesAvailable: readonly ModuleEntry[];
+  /** Audit F-23: al elegir un variant nuevo, también disparamos el preview
+   *  del idle en el iframe para que el operador vea el cambio sin clic extra. */
+  onBillboardPreview?: () => void;
 }) {
   const slots = VARIANT_SLOTS[billboard.variant];
   const hasLogo = VARIANT_HAS_LOGO[billboard.variant];
@@ -109,7 +113,10 @@ export function BillboardEditor({
               <button
                 key={v}
                 type="button"
-                onClick={() => onChange({ ...billboard, variant: v })}
+                onClick={() => {
+                  onChange({ ...billboard, variant: v });
+                  onBillboardPreview?.();
+                }}
                 className={
                   'group relative overflow-hidden rounded-lg border p-2.5 text-left transition ' +
                   (active

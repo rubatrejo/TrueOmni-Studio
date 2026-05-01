@@ -35,6 +35,7 @@ import {
   type SocialWallConfig,
 } from '@/lib/studio/schema';
 
+import { EditorEmptyState } from './EditorEmptyState';
 import { ImageField } from './ImageField';
 
 const SOURCE_ICON: Record<SocialSource, LucideIcon> = {
@@ -244,9 +245,12 @@ export function SocialWallEditor({
         </header>
 
         {socialWall.posts.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-zinc-300 bg-zinc-50/50 p-6 text-center text-[12px] text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/20">
-            No posts yet. Connect a handle and add your first post.
-          </div>
+          <EditorEmptyState
+            icon={Hash}
+            headline="No posts yet"
+            description="Curated social posts surface on the Social Wall tile. Configure a handle above and seed the first post — the kiosk replaces seed posts as live content arrives."
+            primaryAction={{ label: 'Add post', onClick: () => addPost('instagram') }}
+          />
         ) : (
           <Reorder.Group
             axis="y"

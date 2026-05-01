@@ -32,16 +32,51 @@ export function PreviewPanel({
   const [orientation, setOrientation] = useState<'portrait' | 'landscape'>(initialOrientation);
   const [fullScreen, setFullScreen] = useState(false);
 
-  // Default fijo a 40% en cada cambio de orientación. El usuario zoomea con
-  // los botones +/- o resetea con el ↻ que recalcula auto-fit a la pantalla.
-  // No queremos auto-fit en el mount porque resulta en valores fraccionarios
-  // (49%, 36%) que el usuario no pidió — pidió 40% específico.
-  useEffect(() => {
-    setScale(0.4);
-  }, [orientation]);
-
   const w = orientation === 'portrait' ? 1080 : 1920;
   const h = orientation === 'portrait' ? 1920 : 1080;
+
+  // Default 40% pero auto-fit hacia abajo si el panel es muy estrecho (lg @1024
+  // tiene ~384px de ancho útil → 1080*0.4=432 se cortaría 48px).
+  // El usuario sigue pudiendo zoomear con +/- libremente. El ResizeObserver
+  // solo BAJA el scale si overflowearía; si el panel se ensancha, dejamos el
+  // scale como está (no auto-subimos para no pelear con el usuario).
+  //
+  // Audit F-38: al cambiar orientation (portrait↔landscape), recomputamos un
+  // scale base apropiado al nuevo ratio en lugar de hard-set 0.4 — landscape
+  // 1920px casi nunca cabe a 0.4 (= 768px) en lg.
+  useEffect(() => {
+    const holder = containerRef.current?.parentElement;
+    if (!holder) {
+      setScale(0.4);
+      return;
+    }
+    const padding = 24;
+    const availW = holder.clientWidth - padding * 2;
+    const availH = holder.clientHeight - padding * 2;
+    const fit = Math.min(availW / w, availH / h);
+    setScale(Math.min(0.4, Math.max(0.15, fit)));
+  }, [orientation, w, h]);
+
+  useEffect(() => {
+    const holder = containerRef.current?.parentElement;
+    if (!holder) return;
+    const padding = 24; // p-6 alrededor del holder
+    const computeMaxFit = () => {
+      const availW = holder.clientWidth - padding * 2;
+      const availH = holder.clientHeight - padding * 2;
+      if (availW <= 0 || availH <= 0) return null;
+      return Math.min(availW / w, availH / h);
+    };
+    const apply = () => {
+      const max = computeMaxFit();
+      if (max === null) return;
+      setScale((current) => (current > max ? Math.max(0.15, max) : current));
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(holder);
+    return () => ro.disconnect();
+  }, [w, h]);
   // Apuntamos a la raíz del kiosk (`/`), que es el Billboard idle / splash —
   // la primera pantalla que ve el usuario antes de tocar y entrar a /home.
   // Fase S0 lo cambiará por `/preview/${client.slug}`.

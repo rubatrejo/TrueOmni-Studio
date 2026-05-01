@@ -42,7 +42,8 @@ export default function StudioDocsPage() {
 
       <div className="grid grid-cols-12 gap-12">
         <aside className="col-span-12 lg:col-span-3">
-          <nav className="sticky top-8 space-y-1 border-l border-zinc-200 pl-4 text-sm dark:border-zinc-800">
+          {/* Sticky TOC — top-20 (80px) deja respiro al TopBar y al hero (audit F-37). */}
+          <nav className="sticky top-20 max-h-[calc(100vh-6rem)] space-y-1 overflow-y-auto border-l border-zinc-200 pl-4 text-sm dark:border-zinc-800">
             <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
               On this page
             </p>

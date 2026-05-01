@@ -22,6 +22,9 @@ export interface StudioProduct {
   status: ProductStatus;
   /** Subtítulo del coming-soon (solo se usa cuando status === 'soon'). */
   comingSoonCopy?: string;
+  /** 3 bullets describiendo el value prop específico (audit F-45 — los
+   *  coming-soon eran demasiado genéricos). Solo aplica si status='soon'. */
+  comingSoonFeatures?: readonly string[];
 }
 
 export const STUDIO_PRODUCTS: readonly StudioProduct[] = [
@@ -40,6 +43,11 @@ export const STUDIO_PRODUCTS: readonly StudioProduct[] = [
     status: 'soon',
     comingSoonCopy:
       'Build interactive sales decks for retail champions — drag-and-drop slides, live data widgets, branded exports.',
+    comingSoonFeatures: [
+      'Slides with live KPI widgets that pull from your actual sales data',
+      'Brand tokens shared with your kiosks — change colors once, update everywhere',
+      'Export to PDF, Keynote or share a private URL with one click',
+    ],
   },
   {
     id: 'hardware-wraps',
@@ -49,6 +57,11 @@ export const STUDIO_PRODUCTS: readonly StudioProduct[] = [
     status: 'soon',
     comingSoonCopy:
       'Design vinyl wraps for kiosk enclosures, totems and walls — preview them on real device renders before printing.',
+    comingSoonFeatures: [
+      'Real-device 3D mockups for the most common kiosk enclosures (Pyramid, Slab, Pedestal)',
+      'Drag artwork onto each face with bleed marks, safe areas and cut paths baked in',
+      'Print-ready PDF/AI export with ICC profile and dimensions per panel',
+    ],
   },
   {
     id: 'landing-pages',
@@ -58,6 +71,11 @@ export const STUDIO_PRODUCTS: readonly StudioProduct[] = [
     status: 'soon',
     comingSoonCopy:
       'Generate marketing landing pages from the same brand tokens as your kiosks. Publish to a TrueOmni subdomain in one click.',
+    comingSoonFeatures: [
+      'Section-based builder (Hero / Features / CTA) that inherits brand tokens automatically',
+      'Mobile-first responsive — every section ships with a tested mobile/tablet/desktop variant',
+      'Publish to {your-slug}.kiosks.trueomni.com with HTTPS and analytics out of the box',
+    ],
   },
 ] as const;
 

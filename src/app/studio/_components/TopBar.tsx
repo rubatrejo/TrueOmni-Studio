@@ -3,6 +3,7 @@
 import { ChevronRight, Eye, History, Send, Undo2, Redo2 } from 'lucide-react';
 import Link from 'next/link';
 
+import { ProductDropdown } from './ProductDropdown';
 import { StudioBrand } from './StudioBrand';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -27,8 +28,9 @@ export function TopBar({
 }) {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-5 dark:border-zinc-900 dark:bg-zinc-950">
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-4">
         <StudioBrand />
+        <ProductDropdown />
         <span className="block h-5 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden="true" />
         <nav className="flex items-center gap-1.5 text-[13px] text-zinc-500">
           <Link href="/studio" className="transition hover:text-zinc-800 dark:hover:text-zinc-300">

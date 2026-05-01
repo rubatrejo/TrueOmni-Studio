@@ -74,7 +74,7 @@ export function ProductDropdown() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.14, ease: 'easeOut' }}
-            className="absolute left-0 top-[calc(100%+6px)] z-40 w-[260px] overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
+            className="absolute left-0 top-[calc(100%+6px)] z-40 w-[280px] overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
           >
             <div className="p-1.5">
               {STUDIO_PRODUCTS.map((product) => {
@@ -87,7 +87,7 @@ export function ProductDropdown() {
                     href={product.href}
                     role="menuitem"
                     className={
-                      'group flex items-center gap-3 rounded-lg px-2.5 py-2 transition ' +
+                      'group flex items-center gap-3 rounded-lg px-2.5 py-3 transition ' +
                       (isActive
                         ? 'bg-zinc-100 dark:bg-zinc-900'
                         : 'hover:bg-zinc-50 dark:hover:bg-zinc-900/60')
@@ -95,32 +95,31 @@ export function ProductDropdown() {
                   >
                     <span
                       className={
-                        'grid h-7 w-7 shrink-0 place-items-center rounded-md transition ' +
+                        'grid h-8 w-8 shrink-0 place-items-center rounded-md transition ' +
                         (isActive
                           ? 'bg-white text-zinc-900 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:text-white dark:ring-zinc-700'
                           : 'text-zinc-500 group-hover:text-zinc-700 dark:text-zinc-400 dark:group-hover:text-zinc-200')
                       }
                     >
-                      <Icon className="h-[15px] w-[15px]" strokeWidth={1.75} />
+                      <Icon className="h-[16px] w-[16px]" strokeWidth={1.75} />
                     </span>
-                    <span className="flex-1 leading-tight">
+                    <span
+                      className={
+                        'flex-1 truncate text-[13px] font-medium leading-tight ' +
+                        (isActive
+                          ? 'text-zinc-900 dark:text-white'
+                          : 'text-zinc-700 group-hover:text-zinc-900 dark:text-zinc-300 dark:group-hover:text-white')
+                      }
+                    >
+                      {product.label}
+                    </span>
+                    {isSoon && !isActive && (
                       <span
-                        className={
-                          'block text-[13px] font-medium ' +
-                          (isActive
-                            ? 'text-zinc-900 dark:text-white'
-                            : 'text-zinc-700 group-hover:text-zinc-900 dark:text-zinc-300 dark:group-hover:text-white')
-                        }
-                      >
-                        {product.label}
-                      </span>
-                      {isSoon && (
-                        <span className="mt-0.5 inline-flex items-center gap-1 text-[10.5px] uppercase tracking-[0.12em] text-amber-600 dark:text-amber-400">
-                          <span className="block h-1 w-1 rounded-full bg-amber-500" />
-                          Coming soon
-                        </span>
-                      )}
-                    </span>
+                        aria-label="Coming soon"
+                        title="Coming soon"
+                        className="block h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500"
+                      />
+                    )}
                     {isActive && (
                       <Check
                         className="h-3.5 w-3.5 shrink-0 text-zinc-400 dark:text-zinc-500"

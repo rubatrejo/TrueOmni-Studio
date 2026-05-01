@@ -213,7 +213,7 @@ export const MODULE_KEY_TO_SYSTEM_FIELD: Record<string, keyof SystemModules> = {
  * Si un cliente recién creado no trae `modules`, se inicializa con esto.
  */
 export const KIOSK_MODULES: readonly ModuleEntry[] = [
-  { key: 'restaurants', label: 'Restaurants', enabled: true },
+  { key: 'restaurants', label: 'Food & Drink', enabled: true },
   { key: 'things-to-do', label: 'Things\nto Do', enabled: true },
   { key: 'itinerary-builder', label: 'Trip Planner', enabled: true },
   { key: 'events', label: 'Events', enabled: true },
@@ -1013,7 +1013,7 @@ export function defaultListings(): ListingsModule {
   return [
     {
       key: 'restaurants',
-      label: 'Restaurants',
+      label: 'Food & Drink',
       iconKey: 'UtensilsCrossed',
       enabled: true,
       catalog: { ...EMPTY_LISTINGS_CATALOG },
@@ -1063,7 +1063,7 @@ export function migrateListings(raw: unknown): ListingsModule {
     return [
       {
         key: 'restaurants',
-        label: 'Restaurants',
+        label: 'Food & Drink',
         iconKey: 'UtensilsCrossed',
         enabled: true,
         catalog: grab('restaurants'),

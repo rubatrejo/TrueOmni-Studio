@@ -30,7 +30,7 @@ export function Billboard3() {
   const slot0 = resolveSlotLabel(modules?.[0], { label: 'Food &', labelLine2: 'Drink' });
   const slot1 = resolveSlotLabel(modules?.[1], { label: 'Events' });
   const slot2 = resolveSlotLabel(modules?.[2], { label: 'Things', labelLine2: 'to Do' });
-  const slot3 = resolveSlotLabel(modules?.[3], { label: 'Itinerary', labelLine2: 'Builder' });
+  const slot3 = resolveSlotLabel(modules?.[3], { label: 'Trip', labelLine2: 'Planner' });
   const cardBase = 'absolute overflow-hidden';
   const topRowSize = { width: '540px', height: '475px' } as const;
   const bottomRowSize = { width: '540px', height: '475px' } as const;

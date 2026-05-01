@@ -40,8 +40,8 @@ const DEFAULT_CARDS: readonly CardData[] = [
   {
     key: 'itinerary',
     image: '/assets/billboard-2/itinerary.jpg',
-    label: 'Itinerary',
-    labelLine2: 'Builder',
+    label: 'Trip',
+    labelLine2: 'Planner',
   },
 ];
 

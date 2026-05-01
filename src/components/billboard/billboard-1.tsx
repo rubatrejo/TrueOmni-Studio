@@ -45,7 +45,7 @@ export function Billboard1() {
   // (decoración heredada del SVG — cambiar imagen e icono por slot es v2.1).
   const slot0 = resolveSlotLabel(modules?.[0], { label: 'Things to do' });
   const slot1 = resolveSlotLabel(modules?.[1], { label: 'Events' });
-  const slot2 = resolveSlotLabel(modules?.[2], { label: 'Itinerary', labelLine2: 'Builder' });
+  const slot2 = resolveSlotLabel(modules?.[2], { label: 'Trip', labelLine2: 'Planner' });
   const slot3 = resolveSlotLabel(modules?.[3], { label: 'Photo', labelLine2: 'Booth' });
   // v2.1: solo el icono reacciona al módulo asignado. Color del slot fijo
   // (olive #b9bd39 / azul #1796d6) — decisión de Rubén 2026-05-01: la

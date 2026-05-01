@@ -7,6 +7,7 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import type { ConfigMeta, KioskConfig } from '@/lib/studio/schema';
 
 import { NewClientModal } from './_components/NewClientModal';
+import { ProductDropdown } from './_components/ProductDropdown';
 import { StudioBrand } from './_components/StudioBrand';
 import { ThemeToggle } from './_components/ThemeToggle';
 import {
@@ -75,7 +76,10 @@ export default function StudioHome() {
     <main className="mx-auto flex min-h-screen max-w-[1280px] flex-col px-8 pb-24 pt-12">
       {/* Top bar */}
       <header className="mb-16 flex items-center justify-between">
-        <StudioBrand />
+        <div className="flex items-center gap-4">
+          <StudioBrand />
+          <ProductDropdown />
+        </div>
         <div className="flex items-center gap-3">
           <Link
             href="/studio/docs"

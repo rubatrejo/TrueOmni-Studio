@@ -2,8 +2,8 @@
  * Mapa estático de keys de módulos (KIOSK_MODULES) → metadata visible en
  * los slots del Billboard idle.
  *
- * Lo usan B1/B2/B3 para reemplazar label, imagen, icono, color de acento y
- * href cuando el usuario asigna un módulo distinto al hardcoded del SVG en
+ * Lo usan B1/B2/B3 para reemplazar label, imagen, icono y href cuando el
+ * usuario asigna un módulo distinto al hardcoded del SVG en
  * `billboard.modules[i]`.
  *
  * `image` referencia paths del cliente activo (`/assets/billboard-N/...`),
@@ -12,8 +12,11 @@
  * dispara el `onError` y el fallback del slot (color/imagen original) sigue
  * activo.
  *
- * `icon` y `accentColor` (v2.1) permiten que slots con color sólido + icono
- * (B1 slots 2-3) reaccionen al módulo asignado. Los 2 iconos verbatim del
+ * `icon` (v2.1) permite que slots con color sólido + icono (B1 slots 2-3)
+ * sustituyan el icono cuando el operador asigna otro módulo. **El color
+ * sólido del slot se mantiene fijo** — la identidad cromática (olive #b9bd39
+ * para slot 2, azul #1796d6 para slot 3) pertenece al SVG original, no al
+ * módulo asignado (decisión Rubén 2026-05-01). Los 2 iconos verbatim del
  * SVG original (route, camera) viven en `./icons/`. Los 13 restantes usan
  * lucide-react.
  *
@@ -69,8 +72,6 @@ export type BillboardModuleInfo = {
   href: string;
   /** Icono del módulo (verbatim SVG o lucide). v2.1. */
   icon: BillboardIcon;
-  /** Color sólido del slot cuando el slot original tiene fondo plano. v2.1. */
-  accentColor: string;
 };
 
 /**
@@ -95,14 +96,12 @@ export const MODULE_BILLBOARD_INFO: Record<string, BillboardModuleInfo> = {
     image: IMG.eat,
     href: '/home/restaurants',
     icon: lucide(Utensils),
-    accentColor: '#d63b3b',
   },
   'things-to-do': {
     label: 'Things to do',
     image: IMG.thingsToDo,
     href: '/home/things-to-do',
     icon: lucide(Sparkles),
-    accentColor: '#7c4dff',
   },
   'itinerary-builder': {
     label: 'Itinerary',
@@ -110,35 +109,30 @@ export const MODULE_BILLBOARD_INFO: Record<string, BillboardModuleInfo> = {
     image: IMG.itinerary,
     href: '/home/itinerary-builder',
     icon: RouteIcon,
-    accentColor: '#b9bd39',
   },
   events: {
     label: 'Events',
     image: IMG.events,
     href: '/home/events',
     icon: lucide(CalendarDays),
-    accentColor: '#ff6f3c',
   },
   tickets: {
     label: 'Tickets',
     image: IMG.events,
     href: '/home/tickets',
     icon: lucide(Ticket),
-    accentColor: '#e91e63',
   },
   passes: {
     label: 'Passes',
     image: IMG.hero,
     href: '/home/passes',
     icon: lucide(BadgeCheck),
-    accentColor: '#d4a017',
   },
   guestbook: {
     label: 'Guestbook',
     image: IMG.hero,
     href: '/home/guestbook',
     icon: lucide(BookHeart),
-    accentColor: '#26a69a',
   },
   'social-wall': {
     label: 'Social',
@@ -146,42 +140,36 @@ export const MODULE_BILLBOARD_INFO: Record<string, BillboardModuleInfo> = {
     image: IMG.hero,
     href: '/home/social-wall',
     icon: lucide(Share2),
-    accentColor: '#ec407a',
   },
   'digital-brochure': {
     label: 'Brochure',
     image: IMG.thingsToDo,
     href: '/home/digital-brochure',
     icon: lucide(BookOpen),
-    accentColor: '#455a64',
   },
   map: {
     label: 'Map',
     image: IMG.hotels,
     href: '/home/map',
     icon: lucide(MapPin),
-    accentColor: '#43a047',
   },
   stay: {
     label: 'Stay',
     image: IMG.hotels,
     href: '/home/stay',
     icon: lucide(BedDouble),
-    accentColor: '#a1887f',
   },
   survey: {
     label: 'Survey',
     image: IMG.hero,
     href: '/home/survey',
     icon: lucide(ClipboardList),
-    accentColor: '#5c6bc0',
   },
   deals: {
     label: 'Deals',
     image: IMG.eat,
     href: '/home/deals',
     icon: lucide(Tag),
-    accentColor: '#ff8f00',
   },
   'photo-booth': {
     label: 'Photo',
@@ -189,14 +177,12 @@ export const MODULE_BILLBOARD_INFO: Record<string, BillboardModuleInfo> = {
     image: IMG.hero,
     href: '/home/photo-booth',
     icon: CameraIcon,
-    accentColor: '#1796d6',
   },
   trails: {
     label: 'Trails',
     image: IMG.play,
     href: '/home/trails',
     icon: lucide(Mountain),
-    accentColor: '#558b2f',
   },
 };
 
@@ -234,11 +220,4 @@ export function resolveSlotIcon(
 ): BillboardIcon {
   if (!slotKey) return fallback;
   return MODULE_BILLBOARD_INFO[slotKey]?.icon ?? fallback;
-}
-
-/** Devuelve el color sólido del slot. v2.1. Fallback al color original del
- *  SVG (#b9bd39 olive para slot 2, #1796d6 azul para slot 3 de B1). */
-export function resolveSlotAccent(slotKey: string | undefined, fallback: string): string {
-  if (!slotKey) return fallback;
-  return MODULE_BILLBOARD_INFO[slotKey]?.accentColor ?? fallback;
 }

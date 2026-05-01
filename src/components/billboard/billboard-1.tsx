@@ -10,7 +10,6 @@ import { AccessibilityIcon } from './billboard-footer-parts';
 import { CameraIcon } from './icons/camera-icon';
 import { RouteIcon } from './icons/route-icon';
 import {
-  resolveSlotAccent,
   resolveSlotHref,
   resolveSlotIcon,
   resolveSlotImage,
@@ -48,12 +47,11 @@ export function Billboard1() {
   const slot1 = resolveSlotLabel(modules?.[1], { label: 'Events' });
   const slot2 = resolveSlotLabel(modules?.[2], { label: 'Itinerary', labelLine2: 'Builder' });
   const slot3 = resolveSlotLabel(modules?.[3], { label: 'Photo', labelLine2: 'Booth' });
-  // v2.1: color e icono también reactivos al módulo asignado en slots 2 y 3
-  // (slots con color sólido). Fallback al SVG original.
+  // v2.1: solo el icono reacciona al módulo asignado. Color del slot fijo
+  // (olive #b9bd39 / azul #1796d6) — decisión de Rubén 2026-05-01: la
+  // identidad cromática de cada slot pertenece al SVG original, no al módulo.
   const Slot2Icon = resolveSlotIcon(modules?.[2], RouteIcon);
-  const slot2Accent = resolveSlotAccent(modules?.[2], '#b9bd39');
   const Slot3Icon = resolveSlotIcon(modules?.[3], CameraIcon);
-  const slot3Accent = resolveSlotAccent(modules?.[3], '#1796d6');
   return (
     <div
       data-billboard="1"
@@ -184,8 +182,8 @@ export function Billboard1() {
       </Link>
 
       {/* Slot 2 — original SVG: ITINERARY BUILDER (495×208 @ 30, 1250) olive #b9bd39.
-          v2.1: color e icono reactivos al módulo asignado (catálogo
-          MODULE_BILLBOARD_INFO). Fallback al olive + RouteIcon original. */}
+          v2.1: solo icono reactivo al módulo asignado. El color olive es
+          identidad fija del slot. */}
       <Link
         href={resolveSlotHref(modules?.[2])}
         className="absolute flex items-center overflow-hidden"
@@ -195,7 +193,7 @@ export function Billboard1() {
           width: '495px',
           height: '208px',
           borderRadius: '9px',
-          backgroundColor: slot2Accent,
+          backgroundColor: '#b9bd39',
           paddingLeft: '36px',
           paddingRight: '36px',
         }}
@@ -219,8 +217,8 @@ export function Billboard1() {
       </Link>
 
       {/* Slot 3 — original SVG: PHOTO BOOTH (495×208 @ 30, 1488) blue #1796d6.
-          v2.1: color e icono reactivos al módulo asignado. Fallback al azul +
-          CameraIcon original. */}
+          v2.1: solo icono reactivo al módulo asignado. El color azul es
+          identidad fija del slot. */}
       <Link
         href={resolveSlotHref(modules?.[3])}
         className="absolute flex items-center overflow-hidden"
@@ -230,7 +228,7 @@ export function Billboard1() {
           width: '495px',
           height: '208px',
           borderRadius: '9px',
-          backgroundColor: slot3Accent,
+          backgroundColor: '#1796d6',
           paddingLeft: '36px',
           paddingRight: '36px',
         }}

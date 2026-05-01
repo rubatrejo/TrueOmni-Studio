@@ -3,6 +3,7 @@
 import { ChevronRight, Eye, History, Send, Undo2, Redo2 } from 'lucide-react';
 import Link from 'next/link';
 
+import { FaviconBadge } from './FaviconBadge';
 import { ProductDropdown } from './ProductDropdown';
 import { StudioBrand } from './StudioBrand';
 import { ThemeToggle } from './ThemeToggle';
@@ -42,15 +43,11 @@ export function TopBar({
             Kiosks
           </Link>
           <ChevronRight className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-700" aria-hidden="true" />
-          {favicon ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={resolveFaviconSrc(favicon, slug)}
-              alt=""
-              className="block h-4 w-4 rounded-sm object-cover ring-1 ring-zinc-200 dark:ring-zinc-800"
-              aria-hidden="true"
-            />
-          ) : null}
+          <FaviconBadge
+            favicon={favicon}
+            slug={slug}
+            className="block h-4 w-4 rounded-sm object-cover ring-1 ring-zinc-200 dark:ring-zinc-800"
+          />
           <span className="font-medium text-zinc-900 dark:text-zinc-100">{nombre}</span>
           <span className="ml-1 rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-[11px] text-zinc-500 dark:bg-zinc-900 dark:text-zinc-500">
             v{currentVersion}
@@ -121,18 +118,6 @@ export function TopBar({
       </div>
     </header>
   );
-}
-
-/**
- * Resuelve el src del favicon. Si es data URL (sube directo del Studio),
- * pasa tal cual. Si es path relativo, lo resuelve contra el handler
- * `/api/studio/clients/<slug>/...` para que sirva el asset del cliente
- * activo en edición sin depender de KIOSK_CLIENT global.
- */
-function resolveFaviconSrc(favicon: string, slug: string): string {
-  if (favicon.startsWith('data:') || favicon.startsWith('http')) return favicon;
-  const trimmed = favicon.startsWith('/') ? favicon.slice(1) : favicon;
-  return `/api/studio/clients/${slug}/${trimmed}`;
 }
 
 function SaveStatusPill({

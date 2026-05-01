@@ -6,11 +6,11 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Milestone Studio — **iteración masiva UX/funcional 2026-04-30** (Studio docs, Versions tab, Integrations Satisfi/Tavus/Bandwango/CrowdRiff/Viator, Tavus AI Avatar end-to-end, Photo Booth fix, fonts custom fix, Full screen preview, orientation, scroll fix).
+**Fase activa:** Milestone Studio — **iteración polish UX/funcional + multi-producto UI mock 2026-04-30** (sesión 2: Idle/Billboard editor v2 + Studio multi-producto via ProductDropdown).
 
-**Última fase cerrada:** Tavus AI Avatar live + Studio polish session 2026-04-30.
+**Última fase cerrada:** Idle/Billboard editor v2 + Studio multi-producto (dropdown) — sesión 2026-04-30 sesión 2.
 
-**Siguiente acción concreta:** **Idle/Billboard editor v2** — reemplazar gradients de las miniaturas de layout por **wireframes neutros** (4 SVGs simples por variant 0/1/2/3, solo cajas/divisores), y añadir **edición de contenido por layout** (logo size slider/presets, módulos visibles, custom CTA). Requiere: extender schema `billboard` con campos por-variant, sub-sección de controles que cambia según variant, bridge wiring para overrides en tiempo real, y que `billboard-0/1/2/3.tsx` lean los overrides. Pieza grande — arrancar fresca con esto al inicio de la próxima sesión.
+**Siguiente acción concreta:** **v2.1 del Billboard slot rendering** — los iconos custom (route de Itinerary, cámara de Photo Booth) y colores sólidos (olive/azul de B1 slots 2-3, navy del banner de B3) hoy son decoración del slot, no reactivos al módulo asignado. Si el usuario asigna Map al slot 4 de B1, queda con la cámara y fondo azul pero label "Map". Reescribir esto requiere repensar el modelo del slot (icono per-key + imagen para slots con color sólido). Alternativa más pequeña como warm-up: añadir el `ProductDropdown` también al `TopBar.tsx` del editor de kiosks (hoy solo está en la home + pages coming-soon).
 
 **Pendiente de la sesión 2026-04-30 (cosas pequeñas):**
 - **Favicon visibility** — el favicon subido en Studio se aplica vía `studio-bridge.tsx:setFavicon()` al `<link rel="icon">` del iframe (visible en pestaña del browser cuando el kiosk corre como URL pública). NO se refleja todavía en la card de `/studio` ni en el TopBar del editor. Rubén preguntó dónde se ve — pendiente decidir si también debe aparecer en esos sitios del Studio mismo.
@@ -2053,6 +2053,49 @@ Para cada uno se entregó:
 - **Rename Arizona → TrueOmni** — solo afecta `KioskConfig.nombre` en KV (Studio breadcrumb). El `clients/default/config.json:client.nombre` sigue siendo "Arizona" porque el contenido del kiosk es Arizona-themed (eventos, restaurants).
 
 **Fase:** Milestone Studio — sesión 2026-04-30 polish + Tavus live. Siguiente: Idle/Billboard editor v2.
+
+---
+
+### Sesión 2026-04-30 (sesión 2) — Idle/Billboard editor v2 + Studio multi-producto (dropdown)
+
+**Hecho:**
+
+- **Idle/Billboard editor v2** (commit `ac22558`): wireframes neutros zinc reemplazan los gradients del selector; schema extendido con `logoSize: 'S'|'M'|'L'` y `modules: string[]` (max 4); editor UI condicional por variant (logo size oculto en B1 sin logo idle; modules oculto en B0 sin grid); persistencia en `features.billboard_logo_size`/`features.billboard_modules` + bootstrap-from-fs + publish-merger; bridge wiring vía `KIOSK_BILLBOARD_OVERRIDE_EVENT`; B0/B2/B3 leen `logoSize` en runtime via hook `useBillboardOverride`.
+- **Wireframes pulidos** (commit `987dbfb`): rediseño con 2 tonos (fills zinc-100/200 + strokes), iconos placeholder (montaña + sol), logo abstracto wordmark, CTAs como pills, footer split de B0 con polígonos rellenos en vez de X de líneas. Primitivas reutilizables en `parts.tsx` (SlotBox, PanelBox, Pill, LogoPlaceholder, ImagePlaceholder, ClockGlyph, WeatherGlyph). Skill `frontend-design` cargado.
+- **Modules en runtime** (commit `987dbfb`): cada billboard lee `billboard.modules[i]` y resuelve label desde catálogo `MODULE_BILLBOARD_INFO`. B2 (carousel) regenera `CARDS` array completo (label + image). B1/B3 sustituyen labels.
+- **Click-through por slot + imagen reactiva** (commit `61418fe`): `BillboardLink` pasa de `<Link>` a `<div role=button>` con click programático; sub-Links por slot navegan al módulo asignado (`/home/{moduleKey}`). Cada slot de B1/B3 envuelto en `<Link href={resolveSlotHref(modules[i])}>` con imagen `resolveSlotImage`. B2 carousel: card central + TOUCH TO START son `<Link>` al módulo del slot activo; peeks siguen siendo botones para advance/recede.
+- **Imágenes para todos los módulos + fallback robusto** (commit `8e9de69`): `MODULE_BILLBOARD_INFO` ampliado a los 15 módulos reusando pool de assets en default (eat/events/hero/hotels/itinerary/play/things-to-do). Nuevo `<SlotImage>` con onError → fallback al path original del slot, y si ese también falla, oculta el `<img>`. B1 slot 0 alineación: `top: 336px` → `bottom: 24px` para no desbordar con labels de 2 líneas.
+- **Studio multi-producto (intento 1 — revertido)**: brainstorm aprobado opción A (activity bar lateral 72px estilo VSCode); commit `bc3153b` con ActivityBar + StudioShell + ComingSoon + 3 pages — usuario rechazó visual ("no me gustó nada como quedó"). Revertido con `git reset --hard HEAD~1`.
+- **Studio multi-producto (intento 2 — aprobado)** (commits `0303629` + `200b4bc`): `ProductDropdown` al lado del wordmark "TrueOmni Studio" en el header de la home. Pill `[icon] Kiosks ▾` + menu desplegable 280px con 4 productos (Kiosks live + Champion Decks/Hardware Wraps/Landing Pages coming-soon con dot ámbar discreto). Click outside / Escape cierran. Animación fade+slide framer-motion. 3 pages nuevas con `<ComingSoon>` (header espejo + pill ámbar + icono lucide grande + título + copy + link de vuelta a Kiosks). Wording "TrueOmni Studio v0.1" en footer de las pages nuevas.
+
+**Verificado:**
+
+- `pnpm typecheck` limpio en cada commit.
+- `pnpm lint` sin errores nuevos.
+- `pnpm kiosk:dev` arrancó limpio (`Ready in 1358ms`, sin ENOENT — regla CLAUDE.md sección 9).
+- `GET /` y `GET /studio` → 200 (smoke con `Monitor` + `curl`).
+- HMR en navegador validado por el usuario para Idle/Billboard editor v2 (logo size en vivo, dropdown de módulos cambia label + imagen + click navega al módulo).
+- Dropdown del Studio: usuario aprobó visual final tras pulir (más ancho + items más altos + sin texto "COMING SOON" + dot ámbar discreto).
+
+**Pendiente / siguiente:**
+
+- **v2.1 Billboard slot rendering**: hoy iconos custom (route de Itinerary en B1, cámara de Photo Booth en B1) y colores sólidos (olive/azul de B1 slots 2-3, navy del banner de B3) son decoración del slot, no del módulo asignado. Cambiar el módulo Photo Booth a Map deja la cámara/azul pero el label dice "Map". Reescribir esto requiere repensar el modelo del slot (¿icono per-key del catálogo? ¿imagen también para slots con color sólido?). Pieza grande.
+- **ProductDropdown en el editor de kiosks**: hoy solo en home (`/studio`) y pages coming-soon. Si el usuario quiere saltar entre productos desde el editor (`/studio/{slug}`), añadir el dropdown al `TopBar.tsx` del editor — no tocado por regla explícita esta sesión.
+- **Favicon visibility** en card de `/studio` y TopBar del editor (heredado de la sesión anterior — pendiente decidir).
+- **Filter overlay i18n debt** (events/tickets/map) — Fase 5.
+- Studio docs changelog automation cuando S7.2 esté operativo (heredado).
+
+**Decisiones:**
+
+- **Wireframes con dos tonos + iconos placeholder** (no líneas crudas) — usuario reportó "low quality wireframe", pulido con skill `frontend-design`.
+- **B2 carousel: card central navega al módulo, no avanza el carousel** — los peeks son la única forma de avanzar. Más coherente con "el centro es el CTA".
+- **`BillboardLink` reescrito a `<div role=button>` programático** — los `<Link>` anidados son HTML inválido. El wrapper detecta sub-`<a>`/`<button>`/`[data-billboard-no-link]` con `closest()` y deja pasar.
+- **Studio multi-producto: dropdown en header > activity bar lateral** — usuario probó la activity bar y la rechazó por sentir el layout robado. Dropdown es más discreto, no roba ancho, y mantiene el editor intacto.
+- **Coming-soon en dropdown: dot ámbar discreto sin texto** — antes había pill "COMING SOON" en cada item, los labels largos rompían en 2 líneas + 1 línea más para la pill = 3 líneas por item, encimado.
+- **Editor de kiosks NO se toca** en el commit del Studio multi-producto — regla explícita del usuario antes de empezar y se respetó.
+- **`SlotImage` con cascade fallback** — si la imagen del módulo asignado falla, cae al original del slot; si ese también falla, oculta el `<img>`. Robusto a clientes sin assets en su carpeta.
+
+**Fase:** Milestone Studio — iteración polish UX/funcional + multi-producto UI mock.
 
 ---
 

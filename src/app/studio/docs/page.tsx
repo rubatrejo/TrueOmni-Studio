@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { StudioBrand } from '../_components/StudioBrand';
-import { ThemeToggle } from '../_components/ThemeToggle';
+import { StudioPageHeader } from '../_components/PageHeader';
 
 export const metadata: Metadata = {
   title: 'Documentation · Kiosk Studio',
@@ -23,25 +22,8 @@ const sections = [
 
 export default function StudioDocsPage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-[1280px] flex-col px-8 pb-24 pt-12">
-      <header className="mb-16 flex items-center justify-between">
-        <StudioBrand />
-        <div className="flex items-center gap-3">
-          <Link
-            href="/studio/docs"
-            className="rounded-lg border border-sky-500 bg-sky-50 px-4 py-2 text-sm font-medium text-sky-700 transition dark:border-sky-500/60 dark:bg-sky-500/10 dark:text-sky-300"
-          >
-            Documentation
-          </Link>
-          <ThemeToggle />
-          <div className="flex h-9 items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-sky-500 to-cyan-400 text-[11px] font-semibold text-zinc-900">
-              R
-            </div>
-            <span className="text-xs text-zinc-600 dark:text-zinc-400">ruben@trueomni.com</span>
-          </div>
-        </div>
-      </header>
+    <main className="mx-auto flex min-h-screen max-w-[1280px] flex-col px-4 pb-24 pt-12 sm:px-8">
+      <StudioPageHeader docsActive showProductDropdown={false} />
 
       <section className="mb-12">
         <p className="mb-3 text-sm font-medium uppercase tracking-[0.18em] text-zinc-500">

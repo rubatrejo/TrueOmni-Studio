@@ -7,9 +7,7 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import type { ConfigMeta, KioskConfig } from '@/lib/studio/schema';
 
 import { NewClientModal } from './_components/NewClientModal';
-import { ProductDropdown } from './_components/ProductDropdown';
-import { StudioBrand } from './_components/StudioBrand';
-import { ThemeToggle } from './_components/ThemeToggle';
+import { StudioPageHeader } from './_components/PageHeader';
 import {
   type ConfigEntry,
   createConfig,
@@ -73,29 +71,8 @@ export default function StudioHome() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-[1280px] flex-col px-8 pb-24 pt-12">
-      {/* Top bar */}
-      <header className="mb-16 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <StudioBrand />
-          <ProductDropdown />
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/studio/docs"
-            className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/80"
-          >
-            Documentation
-          </Link>
-          <ThemeToggle />
-          <div className="flex h-9 items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-sky-500 to-cyan-400 text-[11px] font-semibold text-zinc-900">
-              R
-            </div>
-            <span className="text-xs text-zinc-600 dark:text-zinc-400">ruben@trueomni.com</span>
-          </div>
-        </div>
-      </header>
+    <main className="mx-auto flex min-h-screen max-w-[1280px] flex-col px-4 pb-24 pt-12 sm:px-8">
+      <StudioPageHeader />
 
       {/* Hero */}
       <section className="mb-12">

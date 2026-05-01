@@ -52,6 +52,7 @@ import { StudioSlugProvider } from '../_lib/slug-context';
 import { usePreviewBridge } from '../_lib/use-preview-bridge';
 
 import { EditorPanel } from './EditorPanel';
+import { EditorViewportGate } from './EditorViewportGate';
 import { PreviewPanel } from './PreviewPanel';
 import { PublishModal } from './PublishModal';
 import { SaveBar } from './SaveBar';
@@ -539,7 +540,12 @@ export function Shell({
 
   return (
     <StudioSlugProvider slug={initialConfig.slug}>
-      <div className="flex h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+      {/* Viewport gate: el editor requiere ≥1024px (Tailwind lg). Debajo
+          mostramos el placeholder con CTAs (back to kiosks / open kiosk). */}
+      <div className="lg:hidden">
+        <EditorViewportGate slug={initialConfig.slug} nombre={initialConfig.nombre} />
+      </div>
+      <div className="hidden h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950 lg:flex">
         <TopBar
           slug={initialConfig.slug}
           nombre={initialConfig.nombre}
@@ -566,7 +572,7 @@ export function Shell({
           />
 
           <main className="flex flex-1 overflow-hidden">
-            <div className="flex w-[480px] shrink-0 flex-col overflow-hidden border-r border-zinc-200 dark:border-zinc-900">
+            <div className="flex w-[400px] shrink-0 flex-col overflow-hidden border-r border-zinc-200 dark:border-zinc-900 xl:w-[480px]">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeTab}

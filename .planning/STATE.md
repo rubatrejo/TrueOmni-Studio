@@ -2099,6 +2099,60 @@ Para cada uno se entregó:
 
 ---
 
+### Sesión 2026-05-01 — Audit Studio + 3 P0 + i18n locales dinámicos
+
+**Hecho (17 commits sobre `main`, todo limpio):**
+
+- **Billboard slot v2.1** (`8a08ea1`→`2b1c2e3`): spec + plan + implementación. Catálogo `MODULE_BILLBOARD_INFO` extendido con `icon` por módulo (2 verbatim SVG: RouteIcon/CameraIcon + 13 lucide). B1 slots 2-3 ahora reactivos al módulo asignado (icono cambia). Color del slot fijo (decisión Rubén tras ver rosa/morado: identidad cromática es del SVG, no del módulo). Padding interno 80% en lucide para igualar visualmente con verbatim. `c8032f8`, `838d5de`.
+- **Naming consistency** (`e75aad2`): Itinerary Builder → Trip Planner en catálogo + fallbacks B1/B2/B3. Restaurants → Food & Drink en KIOSK_MODULES + defaultListings + migrateListings. Things to do → Things/to Do. Guestbook → Guest/Book. Social Wall icon: Share2 → Hash. Fix consistencia entre dropdown del Studio y labels del kiosk.
+- **ProductDropdown en TopBar editor** (`88c572c`): añadido al lado del wordmark Studio en `TopBar.tsx` (antes solo en home y coming-soon).
+- **Responsive audit + fixes** (`4a70645`, `134b27b`): `<StudioPageHeader>` DRY componente nuevo (3 callers home/docs/coming-soon). EditorViewportGate (luego reemplazado por tabbed mode). EditorPanel `w-[400px] xl:w-[480px]`. TopBar @ 1024 con icon-only en lg-xl, text en xl+.
+- **Tabbed editor mode** (`8884720`): reemplaza el ViewportGate. `<MobileTabBar>` 3 pills (Sections/Editor/Preview) visible solo `<lg`. Side-by-side a `lg+` intacto. Auto-flow: tap section → vuelve a Editor tab. EditorViewportGate borrado.
+- **Favicon visibility** (`191d7ce`, `0ac1bbc`): `<FaviconBadge>` reusable con onError + useEffect post-mount checking naturalWidth=0 (resilient a hidratación). Mostrado en card `/studio` (reemplaza dot tertiary) + TopBar editor (junto a breadcrumb).
+- **Audit profundo /studio** (`9577001`): 9 design skills aplicados, 48 findings (3 P0 / 14 P1 / 22 P2 / 9 P3), 42 screenshots @ 4 viewports × light/dark, PDF 32 págs en `docs/superpowers/audits/2026-05-01-studio-design-audit.pdf` (5.1 MB) + markdown source 1048 líneas. HTML report rediseñado web-first después de queja del print-CSS (containers, hero gradient, sticky TOC, finding cards).
+- **3 P0 fixes** (`7fd3326`):
+  - **F-01** Languages tab unusable → `min-w-[720px]` + `overflow-x-auto`
+  - **F-02** Default favicon 404 → `favicon.svg` real (TrueOmni mark 128×128) en _template y default
+  - **F-03** Publish flow sin error feedback → botón Retry rojo en error phase + auto-close countdown 3s en done phase
+- **i18n locales dinámicos** (`4a3f62d`, `22510ff`):
+  - `Locale` → `string` (loose). `LOCALES` queda como `DEFAULT_LOCALES` alias back-compat. `I18nBundleSchema` = `z.record(z.string(), LocaleStrings)`.
+  - Nuevo `src/lib/studio/locale-catalog.ts` con ~100 idiomas ISO 639-1 agrupados Europe/Americas/Asia/Middle East/Africa/Pacific.
+  - `<AddLanguageModal>` con search + scrollable list, idiomas existentes con badge "Added" green.
+  - I18nEditor refactor: `localeList = Object.keys(value)` ordenado con en primero. Headers usan `getLocaleInfo()` para native names. Botón "Add language" + X por column header (excepto en — canonical, no removible). MissingSummary y I18nRow con `localeList` prop dinámico. Cells anchas: `table-auto` + `min-w-[160px]` por locale (vs `min-w-[720px]` antes que daba 93px y truncaba).
+  - 3 API routes loose: translate (regex ISO), publish (itera Object.keys(bundle)), mergeBundle (spread dinámico).
+  - **NO se implementó auto-translate**: decisión Rubén para coordinar luego con su equipo dev usando herramientas internas. Botón ✨ Claude per-cell sigue funcionando para todos los locales.
+
+**Verificado:**
+
+- `pnpm typecheck` limpio en cada commit.
+- `pnpm lint` sin errores nuevos.
+- Smoke en navegador con Playwright a 4 viewports (375/768/1024/1440) × light + dark.
+- 19 secciones del editor revisadas individualmente en dark mode.
+- FaviconBadge real test con SVG inline patched al config + revertido.
+- Languages tab post-fix: cells "Close Ask AI", "Toggle voice", "Hiking & Off" ahora legibles (antes truncadas a 5 chars).
+
+**Pendiente / siguiente sesión:**
+
+Ver `~/.claude/projects/-Users-rubenramirez-Documents-Claude-Code-Kiosk-Portrait-Old/memory/project_next_session_priorities.md` para el orden completo. Resumen:
+1. **Languages auto-translate** — coordinar provider con dev team (Rubén). Opciones evaluadas: Claude Haiku batched (~$0.08/kiosk, recomendado), MS Translator free, DeepL free, LibreTranslate self-hosted.
+2. **Audit P1/P2 quick wins** — top 10 ROI ~15h estimadas. Detalles en PDF (`docs/superpowers/audits/2026-05-01-studio-design-audit.pdf`).
+3. **S7.x publish flow** — GitHub PR-publish (necesita PAT), NextAuth (necesita OAuth app), Vercel deploy (necesita proyecto).
+
+**Deuda menor anotada:**
+
+- Subtítulo "Editor for the 6 translations (EN/ES/FR/DE/PT/JA)" en `sections.ts` está hardcoded — actualizar cuando se decida flujo final i18n.
+
+**Decisiones:**
+
+- **Color del slot fijo en Billboard v2.1**: la identidad cromática es del SVG, no del módulo. Solo icono cambia con módulo asignado. Operador prefiere consistencia visual del kiosk vs identidad por módulo.
+- **Tabbed mode > viewport gate**: bloquear el editor a `<lg` con un overlay era hostil. Alternativa C aprobada → 3 tabs (Sections/Editor/Preview) preserva funcionalidad completa en tablets.
+- **`en` canonical en i18n**: enforced en UI (no X icon en header) y backend (mergeBundle protege).
+- **Auto-translate diferido**: scope claro de la sesión: solo añadir UI dinámica de locales. La integración con provider la decide el dev team.
+
+**Fase:** Milestone Studio — sesión cierre 2026-05-01. 17 commits. Siguiente: terminar Languages (auto-translate) + audit polish + S7.x.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

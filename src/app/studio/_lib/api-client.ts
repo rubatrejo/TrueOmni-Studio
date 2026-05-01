@@ -165,15 +165,49 @@ export async function translateI18nText(input: {
   toLocale: string;
   context?: string;
   key?: string;
-}): Promise<{ translation: string; model: string }> {
-  return http<{ translation: string; model: string }>('/api/studio/i18n/translate', {
-    method: 'POST',
-    body: input,
-  });
+}): Promise<{ translation: string; model: string; provider?: string }> {
+  return http<{ translation: string; model: string; provider?: string }>(
+    '/api/studio/i18n/translate',
+    {
+      method: 'POST',
+      body: input,
+    },
+  );
 }
 
-export async function getTranslateStatus(): Promise<{ available: boolean }> {
-  return http<{ available: boolean }>('/api/studio/i18n/translate');
+export interface BulkTranslateItem {
+  key: string;
+  text: string;
+  context?: string;
+}
+
+export interface BulkTranslateResult {
+  key: string;
+  translation?: string;
+  error?: string;
+}
+
+export async function translateI18nBulk(input: {
+  fromLocale: string;
+  toLocale: string;
+  items: BulkTranslateItem[];
+}): Promise<{ translations: BulkTranslateResult[]; provider: string }> {
+  return http<{ translations: BulkTranslateResult[]; provider: string }>(
+    '/api/studio/i18n/translate-bulk',
+    {
+      method: 'POST',
+      body: input,
+    },
+  );
+}
+
+export async function getTranslateStatus(): Promise<{
+  available: boolean;
+  provider: 'deepl' | 'anthropic' | null;
+}> {
+  return http<{ available: boolean; provider: 'deepl' | 'anthropic' | null }>(
+    '/api/studio/i18n/translate',
+  );
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */

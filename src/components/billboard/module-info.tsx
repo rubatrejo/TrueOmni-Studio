@@ -50,13 +50,29 @@ export type BillboardIcon = ComponentType<{ size: number; color: string }>;
  * Wrapper que adapta cualquier lucide-react al contrato `{ size, color }`
  * que usan los slots del Billboard. Centraliza el bridging para que el
  * catálogo trate verbatim y lucide igual.
+ *
+ * Renderiza el glyph lucide al 80% dentro de una bounding box del tamaño
+ * nominal. Esto compensa que los verbatim (route, camera) traen padding
+ * natural en su viewBox (paths centrados con margen), mientras que los
+ * lucide-react ocupan toda su caja sin holgura. Sin este wrapper, un
+ * lucide a size=120 se ve visualmente más pesado que un verbatim a
+ * size=120 y "pega" con el label adyacente (caso BROCHURE en slot 2 con
+ * BookOpen). Con padding interno se igualan ópticamente.
  */
 function lucide(
   LucideIcon: ComponentType<{ size?: number; color?: string; strokeWidth?: number }>,
 ): BillboardIcon {
-  const Wrapped: BillboardIcon = ({ size, color }) => (
-    <LucideIcon size={size} color={color} strokeWidth={1.6} />
-  );
+  const Wrapped: BillboardIcon = ({ size, color }) => {
+    const inner = Math.round(size * 0.8);
+    return (
+      <span
+        className="inline-flex items-center justify-center"
+        style={{ width: size, height: size }}
+      >
+        <LucideIcon size={inner} color={color} strokeWidth={1.6} />
+      </span>
+    );
+  };
   Wrapped.displayName = `Lucide(${LucideIcon.displayName ?? 'Icon'})`;
   return Wrapped;
 }

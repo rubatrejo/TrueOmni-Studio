@@ -202,11 +202,21 @@ function ClientCard({
             <PublishBadge currentVersion={config.currentVersion} />
           </div>
 
-          <div
-            className="absolute right-3 top-3 h-3 w-3 rounded-full ring-2 ring-white/30"
-            style={{ background: config.branding.tertiary }}
-            aria-hidden="true"
-          />
+          {config.branding.favicon ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={resolveFaviconPreview(config.branding.favicon, config.slug)}
+              alt=""
+              className="absolute right-3 top-3 h-7 w-7 rounded-md bg-white/90 object-cover p-0.5 shadow-sm ring-1 ring-white/40 backdrop-blur"
+              aria-hidden="true"
+            />
+          ) : (
+            <div
+              className="absolute right-3 top-3 h-3 w-3 rounded-full ring-2 ring-white/30"
+              style={{ background: config.branding.tertiary }}
+              aria-hidden="true"
+            />
+          )}
 
           <div className="absolute bottom-3 left-3 rounded-full bg-black/30 px-2.5 py-1 font-mono text-[10.5px] text-white/85 backdrop-blur">
             {config.slug}
@@ -339,6 +349,17 @@ function PublishBadge({ currentVersion }: { currentVersion: number }) {
       Draft
     </span>
   );
+}
+
+/**
+ * Resuelve el src del favicon para preview en /studio. Data URLs y http(s)
+ * pasan tal cual; paths relativos los servimos vía
+ * `/api/studio/clients/<slug>/...` para no depender de KIOSK_CLIENT global.
+ */
+function resolveFaviconPreview(favicon: string, slug: string): string {
+  if (favicon.startsWith('data:') || favicon.startsWith('http')) return favicon;
+  const trimmed = favicon.startsWith('/') ? favicon.slice(1) : favicon;
+  return `/api/studio/clients/${slug}/${trimmed}`;
 }
 
 function relativeTime(iso: string): string {

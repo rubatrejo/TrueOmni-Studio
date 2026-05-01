@@ -549,6 +549,7 @@ export function Shell({
         <TopBar
           slug={initialConfig.slug}
           nombre={initialConfig.nombre}
+          favicon={branding.favicon}
           currentVersion={initialConfig.currentVersion}
           saveState={effectiveSaveState}
           isDirty={isDirty}

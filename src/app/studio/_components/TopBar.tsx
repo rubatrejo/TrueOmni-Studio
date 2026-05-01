@@ -59,7 +59,7 @@ export function TopBar({
             }`}
           >
             <History className="h-3.5 w-3.5" />
-            Versions
+            <span className="hidden xl:inline">Versions</span>
           </button>
         ) : null}
         <SaveStatusPill state={saveState} isDirty={isDirty} />
@@ -91,7 +91,7 @@ export function TopBar({
           className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1.5 text-[12px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-800"
         >
           <Eye className="h-3.5 w-3.5" />
-          Open in tab
+          <span className="hidden xl:inline">Open in tab</span>
         </Link>
 
         <button
@@ -102,7 +102,7 @@ export function TopBar({
           className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
         >
           <Send className="h-3.5 w-3.5" />
-          Publish
+          <span className="hidden xl:inline">Publish</span>
         </button>
       </div>
     </header>
@@ -125,9 +125,12 @@ function SaveStatusPill({
   })();
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-1.5 text-[11.5px] ${effective.text}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 px-1.5 text-[11.5px] ${effective.text}`}
+      title={effective.label}
+    >
       <span className={`h-1.5 w-1.5 rounded-full ${effective.dot}`} />
-      {effective.label}
+      <span className="hidden xl:inline">{effective.label}</span>
     </span>
   );
 }

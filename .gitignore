@@ -28,6 +28,9 @@ __MACOSX/
 
 # Logs
 *.log
+
+# Studio audit working dir (keep PDFs in docs/, not here)
+.audit/
 npm-debug.log*
 pnpm-debug.log*
 yarn-error.log*

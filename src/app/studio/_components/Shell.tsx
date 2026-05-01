@@ -52,7 +52,7 @@ import { StudioSlugProvider } from '../_lib/slug-context';
 import { usePreviewBridge } from '../_lib/use-preview-bridge';
 
 import { EditorPanel } from './EditorPanel';
-import { EditorViewportGate } from './EditorViewportGate';
+import { MobileTabBar, type MobileEditorTab } from './MobileTabBar';
 import { PreviewPanel } from './PreviewPanel';
 import { PublishModal } from './PublishModal';
 import { SaveBar } from './SaveBar';
@@ -67,6 +67,10 @@ export function Shell({
   initialMeta: ConfigMeta | null;
 }) {
   const [activeTab, setActiveTab] = useState<StudioSectionKey>('branding');
+  // Mobile/tablet tab state (`<lg` viewport): solo un panel visible a la vez.
+  // En `lg+` ignorado — los 3 paneles (sidebar / editor / preview) se ven
+  // simultáneamente. Default 'editor' porque es el flujo más común al entrar.
+  const [mobileTab, setMobileTab] = useState<MobileEditorTab>('editor');
   const [previewKey, setPreviewKey] = useState(0);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -540,12 +544,7 @@ export function Shell({
 
   return (
     <StudioSlugProvider slug={initialConfig.slug}>
-      {/* Viewport gate: el editor requiere ≥1024px (Tailwind lg). Debajo
-          mostramos el placeholder con CTAs (back to kiosks / open kiosk). */}
-      <div className="lg:hidden">
-        <EditorViewportGate slug={initialConfig.slug} nombre={initialConfig.nombre} />
-      </div>
-      <div className="hidden h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950 lg:flex">
+      <div className="flex h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
         <TopBar
           slug={initialConfig.slug}
           nombre={initialConfig.nombre}
@@ -564,16 +563,35 @@ export function Shell({
           </div>
         )}
 
+        {/* Mobile tab bar — visible solo `<lg`. En `lg+` los 3 paneles
+            (sidebar/editor/preview) coexisten side-by-side y este bar se
+            oculta. */}
+        <MobileTabBar
+          active={mobileTab}
+          onChange={setMobileTab}
+          className="lg:hidden"
+        />
+
         <div className="flex flex-1 overflow-hidden">
-          <SidebarTabs
-            sections={STUDIO_SECTIONS}
-            activeKey={activeTab}
-            onSelect={(k) => setActiveTab(k)}
-            systemModules={modules.systemModules ?? DEFAULT_SYSTEM_MODULES}
-          />
+          <div
+            className={`${mobileTab === 'sections' ? 'flex' : 'hidden'} w-full shrink-0 lg:flex lg:w-auto`}
+          >
+            <SidebarTabs
+              sections={STUDIO_SECTIONS}
+              activeKey={activeTab}
+              onSelect={(k) => {
+                setActiveTab(k);
+                // Auto-flow en mobile: tras elegir sección, saltar al editor.
+                setMobileTab('editor');
+              }}
+              systemModules={modules.systemModules ?? DEFAULT_SYSTEM_MODULES}
+            />
+          </div>
 
           <main className="flex flex-1 overflow-hidden">
-            <div className="flex w-[400px] shrink-0 flex-col overflow-hidden border-r border-zinc-200 dark:border-zinc-900 xl:w-[480px]">
+            <div
+              className={`${mobileTab === 'editor' ? 'flex' : 'hidden'} w-full shrink-0 flex-col overflow-hidden border-r border-zinc-200 dark:border-zinc-900 lg:flex lg:w-[400px] xl:w-[480px]`}
+            >
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeTab}
@@ -650,7 +668,9 @@ export function Shell({
               />
             </div>
 
-            <div className="relative flex flex-1 items-center justify-center overflow-hidden">
+            <div
+              className={`${mobileTab === 'preview' ? 'flex' : 'hidden'} relative w-full flex-1 items-center justify-center overflow-hidden lg:flex lg:w-auto`}
+            >
               <PreviewPanel
                 slug={initialConfig.slug}
                 nombre={initialConfig.nombre}

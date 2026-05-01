@@ -79,7 +79,7 @@ export function SidebarTabs({
   };
 
   return (
-    <aside className="flex w-[var(--studio-sidebar-w)] shrink-0 flex-col border-r border-zinc-200 bg-white dark:border-zinc-900 dark:bg-zinc-950">
+    <aside className="flex w-full shrink-0 flex-col border-r border-zinc-200 bg-white dark:border-zinc-900 dark:bg-zinc-950 lg:w-[var(--studio-sidebar-w)]">
       <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-3" aria-label="Studio sections">
         {sections.map((section) => {
           const Icon = ICONS[section.icon] ?? Palette;

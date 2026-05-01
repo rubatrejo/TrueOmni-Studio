@@ -16,6 +16,8 @@
       "dark": "assets/logo-dark.svg",
       "alt": "Logo del kiosk"
     },
+    "idleLogo": "assets/logo.svg",
+    "footerLogo": "assets/logo.svg",
     "favicon": "assets/favicon.svg"
   },
   "textos": {

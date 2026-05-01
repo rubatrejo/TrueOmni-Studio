@@ -575,6 +575,14 @@ export const PhotoBoothSchema = z.object({
   shareCardLogo: z.string().optional(),
   shareBackground: z.string().optional(),
   edgeFeather: z.number().int().min(0).max(20).optional(),
+  /**
+   * Zoom default de la cámara (1.0 = sin zoom, 0.5 = más alejado / cabe
+   * más gente, 2.0 = más cerca). El runtime aplica `transform: scale()`
+   * al `<video>` element del Photo Booth. Útil cuando el kiosk está
+   * físicamente muy cerca del usuario y se necesita encuadrar a varias
+   * personas sin que se alejen tanto.
+   */
+  cameraZoom: z.number().min(0.5).max(2).optional(),
 });
 
 export type PhotoBoothBackground = z.infer<typeof PhotoBoothBackgroundSchema>;
@@ -601,6 +609,7 @@ export const DEFAULT_PHOTO_BOOTH: PhotoBoothConfig = {
   stickers: [],
   timer: { enabled: true, default: 5, options: [3, 5, 10] },
   edgeFeather: 3,
+  cameraZoom: 1,
 };
 
 /* ────────────────────────────────────────────────────────────────────────── */

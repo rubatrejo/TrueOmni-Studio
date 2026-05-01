@@ -223,6 +223,10 @@ export interface PhotoBoothConfig {
   shareBackground?: string;
   /** Feather del mask alpha (px) para suavizar bordes del cutout. Default 3. */
   edgeFeather?: number;
+  /** Zoom default de la cámara. 1.0 = sin zoom. <1 alejado (más gente cabe,
+   *  requiere webcam wide-angle/PTZ que soporte el constraint), >1 acerca
+   *  (digital zoom-in vía CSS transform). Default 1. */
+  cameraZoom?: number;
 }
 
 /** Categoría posible de un stop dentro de un itinerario (mapea al bucket de favoritos). */

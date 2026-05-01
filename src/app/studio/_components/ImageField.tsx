@@ -1,6 +1,6 @@
 'use client';
 
-import { Upload, X } from 'lucide-react';
+import { Loader2, Upload, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import { resolveStudioAsset } from '../_lib/asset-resolve';
@@ -95,7 +95,7 @@ export function ImageField({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={busy}
-          className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-md bg-white ring-1 ring-zinc-200 transition hover:ring-sky-500/40 dark:bg-zinc-900 dark:ring-zinc-800"
+          className="studio-img-checker grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-md ring-1 ring-zinc-200 transition hover:ring-sky-500/40 dark:ring-zinc-800"
           aria-label={value ? `Change ${label}` : `Upload ${label}`}
         >
           {value ? (
@@ -114,8 +114,17 @@ export function ImageField({
           <div className="text-[12px] font-medium text-zinc-700 dark:text-zinc-200">
             {label}
           </div>
-          <div className="mt-0.5 truncate text-[10.5px] text-zinc-500 dark:text-zinc-500">
-            {error ? <span className="text-red-600">{error}</span> : busy ? 'Reading…' : hint}
+          <div className="mt-0.5 flex items-center gap-1 truncate text-[10.5px] text-zinc-500 dark:text-zinc-500">
+            {error ? (
+              <span className="text-red-600">{error}</span>
+            ) : busy ? (
+              <>
+                <Loader2 className="h-3 w-3 shrink-0 animate-spin text-sky-500" />
+                <span>Uploading…</span>
+              </>
+            ) : (
+              <span>{hint}</span>
+            )}
           </div>
         </div>
 
@@ -174,7 +183,7 @@ export function ImageField({
 
       {value ? (
         <>
-          <div className="grid h-full w-full place-items-center overflow-hidden">
+          <div className="studio-img-checker absolute inset-2 grid place-items-center overflow-hidden rounded-md">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={previewSrc}
@@ -221,6 +230,18 @@ export function ImageField({
         >
           {error}
         </p>
+      )}
+
+      {/* Spinner overlay durante el data-URL conversion (audit F-32). */}
+      {busy && (
+        <div className="absolute inset-0 grid place-items-center rounded-lg bg-white/70 backdrop-blur-sm dark:bg-zinc-900/70">
+          <div className="flex flex-col items-center gap-1.5">
+            <Loader2 className="h-5 w-5 animate-spin text-sky-500" />
+            <span className="text-[11px] font-medium text-zinc-700 dark:text-zinc-200">
+              Uploading…
+            </span>
+          </div>
+        </div>
       )}
     </div>
   );

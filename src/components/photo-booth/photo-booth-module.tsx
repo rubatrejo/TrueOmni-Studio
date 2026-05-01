@@ -496,6 +496,7 @@ export function PhotoBoothModule({
             permission={camera.permission}
             stream={camera.stream}
             mockImageSrc={mockImageSrc}
+            zoom={config.cameraZoom ?? 1}
           />
           {/* Overlay live del frame seleccionado: preview del marco sobre
               la cámara antes de la captura. */}

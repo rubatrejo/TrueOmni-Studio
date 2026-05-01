@@ -6,19 +6,15 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Milestone Studio — **iteración polish UX/funcional + multi-producto UI mock 2026-04-30** (sesión 2: Idle/Billboard editor v2 + Studio multi-producto via ProductDropdown).
+**Fase activa:** Milestone Studio — **audit Studio 100% cerrado (48/48) + DeepL Free auto-translate** (sesión 2026-05-01 sesión 2).
 
-**Última fase cerrada:** Idle/Billboard editor v2 + Studio multi-producto (dropdown) — sesión 2026-04-30 sesión 2.
+**Última fase cerrada:** P1 + P2 + P3 audit completos + visual polish (logos del componente TrueOmniLogo, Photo Booth zoom + chroma elegante, onboarding centrado) + DeepL Free integration en `/api/studio/i18n/translate` con Anthropic fallback + UI bulk button "✨ Auto" por locale en `<MissingSummary>`.
 
-**Siguiente acción concreta:** **v2.1 del Billboard slot rendering** — los iconos custom (route de Itinerary, cámara de Photo Booth) y colores sólidos (olive/azul de B1 slots 2-3, navy del banner de B3) hoy son decoración del slot, no reactivos al módulo asignado. Si el usuario asigna Map al slot 4 de B1, queda con la cámara y fondo azul pero label "Map". Reescribir esto requiere repensar el modelo del slot (icono per-key + imagen para slots con color sólido). Alternativa más pequeña como warm-up: añadir el `ProductDropdown` también al `TopBar.tsx` del editor de kiosks (hoy solo está en la home + pages coming-soon).
-
-**Pendiente de la sesión 2026-04-30 (cosas pequeñas):**
-- **Favicon visibility** — el favicon subido en Studio se aplica vía `studio-bridge.tsx:setFavicon()` al `<link rel="icon">` del iframe (visible en pestaña del browser cuando el kiosk corre como URL pública). NO se refleja todavía en la card de `/studio` ni en el TopBar del editor. Rubén preguntó dónde se ve — pendiente decidir si también debe aparecer en esos sitios del Studio mismo.
+**Siguiente acción concreta:** Configurar `DEEPL_API_KEY` en `.env.local` (gratis 500k chars/mes en https://www.deepl.com/pro-api, key termina en `:fx`). Después: **Fase 4 — Primer cliente real** (`clients/{cliente-real}/`, build prod, Lighthouse > 95) o **S7.x — Publish flow real** (NextAuth + GitHub PR-publish + Vercel deploy).
 
 **Bloqueos:**
 - **S7.2/3/4 bloqueados por infra externa** — necesitan: GitHub PAT (S7.2), OAuth provider + credentials (S7.3 NextAuth), proyecto Vercel + env vars en dashboard (S7.4).
-- **AI translate path feliz no validado** — Rubén decidió no usar AI por costo. El feature flag oculta el botón ✨ cuando `ANTHROPIC_API_KEY` no está. Si en el futuro se añade la key, el botón aparece automáticamente sin tocar código.
-- `alwaysShowWelcome={true}` del MapModule **resuelto** (commit `1ad640e`).
+- **DeepL key**: pendiente que Rubén cree cuenta free y añada `DEEPL_API_KEY` a `.env.local`. Anthropic queda como fallback automático.
 
 **TODO de QA pendiente:**
 
@@ -2150,6 +2146,57 @@ Ver `~/.claude/projects/-Users-rubenramirez-Documents-Claude-Code-Kiosk-Portrait
 - **Auto-translate diferido**: scope claro de la sesión: solo añadir UI dinámica de locales. La integración con provider la decide el dev team.
 
 **Fase:** Milestone Studio — sesión cierre 2026-05-01. 17 commits. Siguiente: terminar Languages (auto-translate) + audit polish + S7.x.
+
+---
+
+### Sesión 2026-05-01 (sesión 2) — Audit P1-P3 cerrado + visual polish + DeepL Free
+
+**Hecho (45 findings del audit + 3 P0 ya cerrados = 48/48 = 100% audit closed):**
+
+- **14 P1** completos (F-04 a F-17): EditorEmptyState reusable + 8 editors (Deals/Ads/SocialWall/Events/Listings/Passes/Trails/Brochures), useFieldValidation hook + ValidatedTextField, hover/focus + roving tabindex en SidebarTabs, modal backdrops unificados, save pill lg-xl, ProductDropdown vs breadcrumb dedup, iframe auto-fit zoom @ 1024, bridge status real con heartbeat 5s, Modules cascade hint, Versions timeline localStorage (`local-version-history.ts`), Catalog bulk ops (`onItemsBulkDelete`/`onItemsBulkDuplicate` en CatalogList + 4 catálogos), Photo Booth chroma preview, hero `<br>` quitado.
+- **22 P2** completos (F-18 a F-39): Type scale + Spacing 8pt + Accent semantics + Icon sizes (utilities en studio.css), TopBar version badge tooltip + color, BillboardEditor variant auto-preview, i18n filter "Missing in X", beforeunload guard, StudioButton reusable, card hover dark, hide Next dev indicator, ImageField spinner overlay, CustomFontField size limit 2MB con sugerencia subset, Survey progress bar, modals Escape consistente (NewClientModal), sidebar footer truncate sm, docs TOC sticky top-20, iframe orientation auto-zoom, avatar UserDropdown (Account/Sign out placeholder), Import preview rows (ya existía).
+- **9 P3** completos (F-40 a F-48): Theme transition 300ms, CSS replace framer-motion en tab change (`studio-tab-fade` keyframes), TrueOmniLogo memoizado, Cmd+/ ShortcutsModal, coming-soon products con 3 features cada uno, Versions roadmap timeline visual con dots/conector, Cmd+K CommandPalette (vanilla React, 21 secciones + 7 acciones globales), Diagnostics page (`/studio/diagnostics`) con health probes en vivo + recent activity cross-kiosk + workspace kiosks table, Health endpoint `/api/health` real con KV + filesystem probes (degraded si memory KV).
+- **F-25 path-based URLs**: rewrite `/k/:slug → /?client=:slug` en next.config + TopBar/CommandPalette ahora usan `/k/{slug}`.
+- **Feedback visual usuario (3 rondas)**:
+  - Onboarding tour centrado con `createPortal` a `document.body` (escapaba containing-block bugs); título "Welcome to TrueOmni Studio" promovido a 22px font-display bold con icono Sparkles a la izquierda; iconos grandes laterales por step eliminados.
+  - Test Debug kiosk borrado vía DELETE API.
+  - Photo Booth ChromaPreview redesignado 4 veces hasta dejarlo monocromático cromático elegante (graphite → slate → smoke, sin tintes de color); aura blanca puro; pills neutral glass.
+  - Camera zoom slider 0.5×–2× con presets Group/Wide/Default/Portrait. zoom > 1 aplica `scale(zoom)` digital zoom in. zoom < 1 NO toca el video CSS (no quería bordes vacíos), solo intenta `track.applyConstraints({zoom})` para zoom-out óptico real con cámara PTZ. El iframe del kiosk queda intacto.
+  - Logos: el SVG de OpenClaw `Logo-Trueomni-Light.svg` tenía viewBox distinto al componente `<TrueOmniLogo>`. Solución final: `fetch http://localhost:3000/` y extraje **byte-por-byte** el SVG renderizado (5076 chars, viewBox `0 0 353.697 65.369`) → `clients/default/assets/logo.svg` (fill white) + `logo-dark.svg` (fill #0a0a0c). Favicon = `Icon-Trueomni-Dark.svg` desde OpenClaw. Bug del thumbnail: SVG fill-white invisible sobre `bg-white` → utility `.studio-img-checker` con split diagonal dark/light en studio.css.
+- **DeepL Free auto-translate**:
+  - `/api/studio/i18n/translate` rewrite con provider precedence DeepL Free → Anthropic Claude Haiku → 503. Mapping de 24 locales ISO → códigos DeepL (EN-US, PT-BR, etc.). Placeholders `{x}` preservados con `<x id="N"/>` + `ignore_tags=x`.
+  - `/api/studio/i18n/translate-bulk` nuevo: hasta 50 strings en un solo request DeepL multi-text params. Anthropic fallback con concurrency 5.
+  - UI: botón ✨ Auto al lado de cada locale con missing keys en `<MissingSummary>`. Trocea en chunks de 50, aplica resultados incrementalmente al bundle. Provider label visible. Hint para configurar `DEEPL_API_KEY` cuando no está set.
+  - `.env.example` documenta DeepL Free + sufijo `:fx`.
+
+**Verificado:**
+
+- `pnpm typecheck` limpio en cada milestone (más de 30 typechecks ejecutados).
+- Dev server compilando HMR en cada cambio sin ENOENT.
+- Smoke con Playwright (`/studio/default`): 3 thumbnails de logo + favicon visibles con split diagonal; preview kiosk renderiza wordmark TrueOmni correctamente en header/billboard/footer.
+- `/api/health` responde JSON estructurado con probes KV (memory mode = degraded) + filesystem (ok).
+- `/api/studio/i18n/translate` GET responde `{available: false, provider: null}` cuando ninguna key está set.
+- E2E: Test Debug kiosk eliminado vía DELETE; KV solo conserva `default`.
+- KV re-bootstrapped múltiples veces para cargar nuevos logos desde fs.
+
+**Pendiente / siguiente:**
+
+1. **Configurar `DEEPL_API_KEY`** en `.env.local` (free tier 500k chars/mes). Cuenta gratuita en https://www.deepl.com/pro-api. Una vez set, el botón ✨ Auto se activa solo.
+2. **Fase 4 — Primer cliente real**: crear `clients/{cliente-real}/`, build prod, Lighthouse > 95, doc handoff.
+3. **Milestone Studio · S7.x — Publish flow real**: NextAuth setup (S7.1 — necesita OAuth app), GitHub PR-publish (S7.2 — necesita PAT scope `repo`), Vercel deploy automation (S7.3 — necesita proyecto Vercel).
+4. **Fase 5 — Automatización nuevo cliente**: script `pnpm kiosk:new-client <slug>` + validador zod + slash command `/nuevo-cliente`.
+5. **Deuda menor heredada**: subtítulo "6 translations EN/ES/FR/DE/PT/JA" hardcoded en `sections.ts` actualizar cuando se finalice flujo i18n; Studio docs changelog automation cuando S7.2 esté operativo.
+
+**Decisiones:**
+
+- **Camera zoom < 1 NO afecta el iframe**: la única forma de "ver más" sin wide-angle camera es `track.applyConstraints({zoom})`. CSS scale<1 encogía el video con bordes vacíos visualmente rotos. Decisión: dejar la opción del slider intacta pero no distorsionar el frame del kiosk. Si la cámara no soporta el constraint, el slider <1 visualmente no hace nada — operador debe usar wide-angle camera real.
+- **Logo del componente vs OpenClaw**: el SVG aprobado del kiosk es el del componente inline `<TrueOmniLogo>` (viewBox 353.697×65.369), NO los SVGs de `OpenClaw-Trueomni/Logos/`. Source of truth = lo que el browser renderiza en localhost:3000/. Para logos como archivos físicos, se extrae el SSR del componente.
+- **Image-field thumbnails con split diagonal**: el bg blanco volvía invisibles los logos white-fill. El split diagonal dark/light garantiza contraste para CUALQUIER color de logo (white, dark, brand). Reemplaza checker estándar (que tiene celdas blancas).
+- **Audit ground truth**: el audit tiene 48 findings; algunos como F-43 (Import preview rows) ya estaban implementados antes del audit. Verificación caso-por-caso evita refactor innecesario.
+- **DeepL > Anthropic para i18n**: precio (free vs $0.08/kiosk), calidad superior para EN/ES/FR/DE/PT/JA, single-request bulk. Anthropic queda como fallback automático para locales fuera del catálogo de DeepL (ej. ár, hebreo) o si DeepL falla por rate limit.
+- **CommandPalette vanilla**: descartado `cmdk` dep (90KB) — implementado in-house con vanilla React + framer-motion (ya en deps). Si el scope crece (search global cross-workspace), migrar.
+
+**Fase:** Milestone Studio — audit Studio 100% cerrado (48/48). Siguiente: configurar DeepL key + arrancar Fase 4 o S7.x.
 
 ---
 

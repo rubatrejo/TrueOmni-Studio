@@ -2,7 +2,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
 
 import { LOCALE_LABELS } from '@/lib/i18n';
-import { LOCALES, type Locale } from '@/lib/studio/schema';
+import { LOCALE_CODE_REGEX } from '@/lib/studio/locale-catalog';
+import { type Locale } from '@/lib/studio/schema';
 
 /**
  * `GET  /api/studio/i18n/translate`  → `{ available: boolean }` para que el
@@ -61,7 +62,7 @@ export async function POST(req: Request) {
     }
     if (!isLocale(body.fromLocale) || !isLocale(body.toLocale)) {
       return NextResponse.json(
-        { error: '`fromLocale` and `toLocale` must be one of: ' + LOCALES.join(', ') },
+        { error: '`fromLocale` and `toLocale` must be valid ISO 639-1 codes (2 lowercase letters).' },
         { status: 400 },
       );
     }
@@ -122,5 +123,5 @@ export async function POST(req: Request) {
 }
 
 function isLocale(value: unknown): value is Locale {
-  return typeof value === 'string' && (LOCALES as readonly string[]).includes(value);
+  return typeof value === 'string' && LOCALE_CODE_REGEX.test(value);
 }

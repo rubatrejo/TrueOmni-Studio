@@ -76,7 +76,10 @@ export async function POST(req: Request, { params }: RouteParams) {
 
     // ── i18n ──
     if (bundle) {
-      for (const locale of LOCALES) {
+      // Iterar sobre TODOS los locales del bundle (dinámico). Antes solo
+      // los 6 hardcoded de LOCALES; ahora respeta locales custom añadidos
+      // por el operador desde el AddLanguageModal.
+      for (const locale of Object.keys(bundle)) {
         const filePath = path.join(i18nDir, `${locale}.json`);
         const nextContent = formatJson(bundle[locale]);
         const change = await computeChange(filePath, nextContent);

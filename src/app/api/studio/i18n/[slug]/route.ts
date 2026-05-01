@@ -104,7 +104,10 @@ export async function PATCH(req: Request, { params }: RouteParams) {
 /* ──────────────────────────────────────────────────────────────────────── */
 
 async function bootstrapBundleFromFs(slug: string): Promise<I18nBundle> {
-  const bundle = defaultI18nBundle();
+  // Solo bootstrappeamos los DEFAULT_LOCALES desde filesystem. Los locales
+  // custom añadidos por el operador viven en KV exclusivamente hasta el
+  // primer publish (donde se escriben como nuevos archivos i18n/<loc>.json).
+  const bundle: I18nBundle = defaultI18nBundle();
   const targets: Array<[Locale, string]> = LOCALES.map((loc) => [loc, slug]);
   for (const [locale, s] of targets) {
     const fromClient = await loadLocale(s, locale);
@@ -122,15 +125,16 @@ function mergeBundle(
   current: I18nBundle,
   patch: Record<string, Record<string, string>>,
 ): I18nBundle {
-  const next: I18nBundle = {
-    en: { ...current.en },
-    es: { ...current.es },
-    fr: { ...current.fr },
-    de: { ...current.de },
-    pt: { ...current.pt },
-    ja: { ...current.ja },
-  };
-  for (const locale of LOCALES) {
+  // Spread dinámico — soporta locales custom además de los 6 default.
+  const next: I18nBundle = {};
+  for (const loc of Object.keys(current)) {
+    next[loc] = { ...current[loc] };
+  }
+  // Si el patch trae locales nuevos (operador añadió un idioma), inicializa.
+  for (const loc of Object.keys(patch)) {
+    if (!next[loc]) next[loc] = {};
+  }
+  for (const locale of Object.keys(next)) {
     const localePatch = patch[locale];
     if (!localePatch || typeof localePatch !== 'object') continue;
     for (const [key, value] of Object.entries(localePatch)) {

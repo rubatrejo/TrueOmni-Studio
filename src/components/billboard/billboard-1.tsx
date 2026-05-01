@@ -218,7 +218,9 @@ export function Billboard1() {
         </div>
       </Link>
 
-      {/* Slot 3 — original SVG: PHOTO BOOTH (495×208 @ 30, 1488) blue #1796d6 */}
+      {/* Slot 3 — original SVG: PHOTO BOOTH (495×208 @ 30, 1488) blue #1796d6.
+          v2.1: color e icono reactivos al módulo asignado. Fallback al azul +
+          CameraIcon original. */}
       <Link
         href={resolveSlotHref(modules?.[3])}
         className="absolute flex items-center overflow-hidden"
@@ -228,31 +230,13 @@ export function Billboard1() {
           width: '495px',
           height: '208px',
           borderRadius: '9px',
-          backgroundColor: '#1796d6',
+          backgroundColor: slot3Accent,
           paddingLeft: '36px',
           paddingRight: '36px',
         }}
         aria-label={`${slot3.label} ${slot3.labelLine2 ?? ''}`.trim()}
       >
-        {/* Camera icon — verbatim de designs/TNT/Billboard/Photo_Booth-Icon.svg */}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="120"
-          height="114"
-          viewBox="0 0 110.382 104.639"
-          fill="none"
-          stroke="#fff"
-          strokeWidth="7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          role="img"
-          aria-label="Cámara"
-        >
-          <path
-            d="M3,43.2H8.743c5.352,0,8.028,0,10.139.874A11.488,11.488,0,0,1,25.1,50.3c.874,2.111.874,4.787.874,10.139s0,8.028-.874,10.139a11.488,11.488,0,0,1-6.217,6.217c-2.111.874-4.787.874-10.139.874H3M94.9,20.23V14.487A11.487,11.487,0,0,0,83.408,3H71.921A11.487,11.487,0,0,0,60.435,14.487V20.23M21.379,100.639H88c6.433,0,9.65,0,12.107-1.252a11.485,11.485,0,0,0,5.02-5.02c1.252-2.457,1.252-5.674,1.252-12.107V38.609c0-6.433,0-9.65-1.252-12.107a11.485,11.485,0,0,0-5.02-5.02C97.653,20.23,94.436,20.23,88,20.23H21.379c-6.433,0-9.65,0-12.107,1.252a11.486,11.486,0,0,0-5.02,5.02C3,28.959,3,32.176,3,38.609V82.26c0,6.433,0,9.65,1.252,12.107a11.485,11.485,0,0,0,5.02,5.02C11.729,100.639,14.946,100.639,21.379,100.639Zm62.029-40.2A17.23,17.23,0,1,1,66.178,43.2,17.23,17.23,0,0,1,83.408,60.435Z"
-            transform="translate(0.5 0.5)"
-          />
-        </svg>
+        <Slot3Icon size={120} color="#fff" />
         <div
           className="ml-auto font-display font-bold uppercase leading-[1.05] text-white"
           style={{ fontSize: '50px' }}

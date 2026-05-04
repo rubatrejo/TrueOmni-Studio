@@ -4,6 +4,7 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { getConfig } from '@/lib/config';
 import { fetchWeather } from '@/lib/weather';
 
+import { HeroBackgroundLayer } from './hero-background-layer';
 import { LanguageDropdown } from './language-dropdown';
 import { WeatherClock } from './weather-clock';
 
@@ -65,32 +66,15 @@ export async function HomeHeader({
         flexShrink: 0,
       }}
     >
-      {/* Background image o video (override del branding o default). */}
-      {heroSrc ? (
-        heroKind === 'video' ? (
-          <video
-            src={heroSrc}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        ) : (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={heroSrc} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        )
-      ) : null}
-      {/* Linear gradient overlay — configurable desde branding.heroGradient
-          o default azul oscuro top→bottom. */}
-      <div
-        className="absolute left-0 right-0"
-        style={{
-          top: 0,
-          height: `${height + gradientExtra}px`,
-          background: gradientCss,
-          pointerEvents: 'none',
-        }}
+      {/* Background image/video + gradient overlay — Client component
+          que escucha `kiosk:hero-override` del bridge para reaccionar a
+          ediciones live del Studio sin requerir un republish del config. */}
+      <HeroBackgroundLayer
+        initialSrc={heroSrc}
+        initialKind={heroKind}
+        initialGradientCss={gradientCss}
+        height={height}
+        gradientExtra={gradientExtra}
       />
 
       {/* TrueOmni logo @ (65, 44.4) — slot="default" (logo principal del cliente). */}

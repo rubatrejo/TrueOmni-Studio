@@ -284,6 +284,15 @@ type BrandingPatch = BrandPatch & {
     displayCustom?: CustomFontPatch;
     bodyCustom?: CustomFontPatch;
   };
+  homeHero?: { kind: 'image' | 'video'; src: string };
+  heroGradient?: { from: string; to: string; angle: number };
+};
+
+export const KIOSK_HERO_OVERRIDE_EVENT = 'kiosk:hero-override';
+
+export type HeroOverrideDetail = {
+  homeHero?: { kind: 'image' | 'video'; src: string };
+  heroGradient?: { from: string; to: string; angle: number };
 };
 
 type ModulesPatch = {
@@ -506,10 +515,41 @@ function applyBranding(branding: BrandingPatch) {
     );
   }
   (window as KioskBridgeWindow).__kioskLogos = cache;
+
+  // Hero header background + gradient. Mismo patrón que logos: dispatch
+  // event + cache en window para que componentes que se monten DESPUÉS
+  // del último dispatch (ej. nav entre rutas dentro del iframe) puedan
+  // leer el override actual.
+  if (branding.homeHero !== undefined || branding.heroGradient !== undefined) {
+    const heroCache = (window as KioskBridgeWindow).__kioskHero ?? {};
+    if (branding.homeHero !== undefined) heroCache.homeHero = branding.homeHero;
+    if (branding.heroGradient !== undefined) heroCache.heroGradient = branding.heroGradient;
+    (window as KioskBridgeWindow).__kioskHero = heroCache;
+    window.dispatchEvent(
+      new CustomEvent(KIOSK_HERO_OVERRIDE_EVENT, {
+        detail: {
+          homeHero: branding.homeHero,
+          heroGradient: branding.heroGradient,
+        },
+      }),
+    );
+  }
 }
 
 interface KioskBridgeWindow extends Window {
   __kioskLogos?: { default?: string; idle?: string; footer?: string };
+  __kioskHero?: HeroOverrideDetail;
+}
+
+/**
+ * Lee el último override de hero (homeHero/heroGradient) que el bridge
+ * haya aplicado. Usado por `<HeroBackgroundLayer>` en su mount inicial
+ * para que respete el state actual del editor sin esperar a un nuevo
+ * postMessage.
+ */
+export function getCachedHeroOverride(): HeroOverrideDetail {
+  if (typeof window === 'undefined') return {};
+  return (window as KioskBridgeWindow).__kioskHero ?? {};
 }
 
 /**

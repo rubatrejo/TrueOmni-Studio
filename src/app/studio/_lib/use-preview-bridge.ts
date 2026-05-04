@@ -64,6 +64,8 @@ export type BrandingPatch = {
     displayCustom?: CustomFontPatch;
     bodyCustom?: CustomFontPatch;
   };
+  homeHero?: { kind: 'image' | 'video'; src: string };
+  heroGradient?: { from: string; to: string; angle: number };
 };
 
 export function usePreviewBridge() {
@@ -130,6 +132,8 @@ export function usePreviewBridge() {
             footerLogo: branding.footerLogo,
             favicon: branding.favicon,
             fonts: branding.fonts,
+            homeHero: branding.homeHero,
+            heroGradient: branding.heroGradient,
           },
         },
         '*',

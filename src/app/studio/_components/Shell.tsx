@@ -219,6 +219,8 @@ export function Shell({
       footerLogo: branding.footerLogo,
       favicon: branding.favicon,
       fonts: branding.fonts,
+      homeHero: branding.homeHero,
+      heroGradient: branding.heroGradient,
     });
   }, [branding, pushBranding]);
 

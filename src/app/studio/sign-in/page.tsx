@@ -80,9 +80,6 @@ function SignInContent() {
         quality={85}
         sizes="100vw"
         className="object-cover"
-        // 60% horizontal mantiene los kioscos visibles en viewports cuadrados
-        // (1440×900, 16:10) — el grupo está en el centro-derecha de la imagen.
-        style={{ objectPosition: '60% center' }}
       />
 
       {/* Gradient overlay izquierdo: oscuro a transparente */}
@@ -101,17 +98,17 @@ function SignInContent() {
           <TrueOmniLogo className="h-8 w-auto text-white" />
         </div>
 
-        <div className="flex max-w-[520px] flex-col gap-6">
+        <div className="flex max-w-[640px] flex-col gap-7">
           <p
-            className="font-display text-[12px] uppercase text-white/70"
-            style={{ letterSpacing: '0.2em' }}
+            className="font-display text-[14px] uppercase text-white/70"
+            style={{ letterSpacing: '0.22em' }}
           >
             TrueOmni Studio
           </p>
-          <h1 className="font-display text-[68px] font-bold leading-[1.05] text-white">
+          <h1 className="font-display text-[96px] font-bold leading-[1.02] text-white">
             Welcome back.
           </h1>
-          <p className="max-w-[440px] font-sans text-[16px] leading-relaxed text-white/75">
+          <p className="max-w-[560px] font-sans text-[20px] leading-relaxed text-white/80">
             Sign in with GitHub to manage your kiosks, push branding updates and
             publish changes via Pull Request.
           </p>

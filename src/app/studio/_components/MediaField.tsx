@@ -1,7 +1,7 @@
 'use client';
 
 import { Film, Image as ImageIcon, Link as LinkIcon, Loader2, Upload, X } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { resolveStudioAsset } from '../_lib/asset-resolve';
 import { compressImage, readFileAsDataURL } from '../_lib/image-utils';
@@ -11,17 +11,20 @@ interface MediaFieldProps {
   label: string;
   hint: string;
   aspect?: string;
-  /** Límite de tamaño RAW del file de imagen. Default 5MB (la imagen se
-   *  comprime después a ~1.2MB para encajar en el body limit de Vercel). */
+  /** Límite de tamaño RAW del file de imagen. Default 5MB. Cuando Vercel
+   *  Blob está disponible se sube tal cual (hasta 5MB). Si no, se comprime
+   *  a ~1.2MB para encajar en el body limit del KV. */
   maxImageBytes?: number;
-  /** Límite de tamaño RAW del file de video. Default 2MB (data URL ~2.7MB,
-   *  encaja en el límite 4.5MB del body Vercel hobby). Para videos más
-   *  grandes el operador debe pegar URL externa abajo. */
+  /** Límite de tamaño RAW del file de video. Default 5MB con Blob, 2MB sin él
+   *  (data URL ~2.7MB, encaja en el límite 4.5MB del body Vercel hobby).
+   *  Para videos más grandes el operador puede pegar URL externa abajo. */
   maxVideoBytes?: number;
   value?: string;
   kind?: 'image' | 'video';
   onChange: (next: { src: string; kind: 'image' | 'video' } | undefined) => void;
 }
+
+const BLOB_MAX_BYTES = 5 * 1024 * 1024;
 
 /**
  * Field de upload de imagen o video — pensado para hero backgrounds
@@ -48,40 +51,75 @@ export function MediaField({
   onChange,
 }: MediaFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const xhrRef = useRef<XMLHttpRequest | null>(null);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [hover, setHover] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bytes, setBytes] = useState<number | null>(null);
   const [urlInput, setUrlInput] = useState('');
+  const [blobAvailable, setBlobAvailable] = useState<boolean | null>(null);
   const slug = useStudioSlug();
   const previewSrc = slug ? resolveStudioAsset(slug, value) : value;
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/studio/upload')
+      .then((r) => (r.ok ? r.json() : { available: false }))
+      .then((data) => {
+        if (!cancelled) setBlobAvailable(Boolean(data.available));
+      })
+      .catch(() => {
+        if (!cancelled) setBlobAvailable(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const detectedKind: 'image' | 'video' =
     kind ?? (value && /\.mp4(\?|$)|\.webm(\?|$)|^data:video\//i.test(value) ? 'video' : 'image');
 
   const pickFile = async (file: File) => {
     setError(null);
+    setProgress(0);
     const isImage = file.type.startsWith('image/');
     const isVideo = file.type.startsWith('video/');
     if (!isImage && !isVideo) {
       setError(`Unsupported file type: ${file.type || 'unknown'}.`);
       return;
     }
-    const limit = isVideo ? maxVideoBytes : maxImageBytes;
-    if (file.size > limit) {
+    const kindRes: 'image' | 'video' = isVideo ? 'video' : 'image';
+
+    // Cuando Blob está disponible aceptamos hasta 5MB raw — el endpoint
+    // valida el cap. Cuando no (dev sin token), seguimos en el régimen
+    // antiguo de data URL: imagen comprimida + video <= maxVideoBytes.
+    const useBlob = blobAvailable === true;
+    const rawLimit = useBlob
+      ? BLOB_MAX_BYTES
+      : isVideo
+        ? maxVideoBytes
+        : maxImageBytes;
+    if (file.size > rawLimit) {
       setError(
         isVideo
-          ? `Video too large (${formatBytes(file.size)}). Max ${formatBytes(limit)} for inline upload — paste a CDN URL below for larger files.`
-          : `Image too large (${formatBytes(file.size)}). Max ${formatBytes(limit)}.`,
+          ? `Video too large (${formatBytes(file.size)}). Max ${formatBytes(rawLimit)}${useBlob ? '' : ' for inline upload — paste a CDN URL below for larger files'}.`
+          : `Image too large (${formatBytes(file.size)}). Max ${formatBytes(rawLimit)}.`,
       );
       return;
     }
+
     setBusy(true);
     try {
-      // Imagen: comprime a maxBytes 1.2MB → data URL ~1.6MB, dentro del
-      // límite 4.5MB de body Vercel. Calidad 0.9 + maxDim 2160 preservan
-      // bien un hero 1080×1920 (no se ve compresión visible).
-      // Video: pasa raw — ya enforzamos 2MB de límite arriba.
+      if (useBlob && slug) {
+        const url = await uploadToBlob(file, slug, kindRes, (pct) => setProgress(pct), xhrRef);
+        setBytes(file.size);
+        onChange({ src: url, kind: kindRes });
+        return;
+      }
+
+      // Fallback (dev sin token): comprimir imagen / leer video como
+      // data URL — ruta histórica, se queda como red de seguridad.
       const dataUrl = isVideo
         ? await readFileAsDataURL(file)
         : await compressImage(file, {
@@ -90,11 +128,13 @@ export function MediaField({
             quality: 0.9,
           });
       setBytes(file.size);
-      onChange({ src: dataUrl, kind: isVideo ? 'video' : 'image' });
+      onChange({ src: dataUrl, kind: kindRes });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to read file');
     } finally {
       setBusy(false);
+      setProgress(0);
+      xhrRef.current = null;
     }
   };
 
@@ -232,12 +272,22 @@ export function MediaField({
           </button>
         )}
 
-        {/* Spinner overlay durante upload */}
+        {/* Spinner overlay durante upload, con barra de progreso si > 1MB */}
         {busy && (
-          <div className="absolute inset-0 grid place-items-center bg-black/40 backdrop-blur-sm">
-            <div className="flex flex-col items-center gap-1.5">
+          <div className="absolute inset-0 grid place-items-center bg-black/50 backdrop-blur-sm">
+            <div className="flex w-full max-w-[160px] flex-col items-center gap-2 px-4">
               <Loader2 className="h-5 w-5 animate-spin text-white" />
-              <span className="text-[11px] font-medium text-white">Reading…</span>
+              <span className="text-[11px] font-medium text-white">
+                {progress > 0 ? `Uploading… ${progress}%` : 'Reading…'}
+              </span>
+              {progress > 0 ? (
+                <div className="h-1 w-full overflow-hidden rounded-full bg-white/20">
+                  <div
+                    className="h-full bg-white transition-[width] duration-150"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              ) : null}
             </div>
           </div>
         )}
@@ -288,4 +338,53 @@ function formatBytes(b: number): string {
   if (b < 1024) return `${b}B`;
   if (b < 1024 * 1024) return `${(b / 1024).toFixed(0)}KB`;
   return `${(b / (1024 * 1024)).toFixed(1)}MB`;
+}
+
+/**
+ * Sube un archivo al endpoint `/api/studio/upload` usando XHR para tener
+ * progress events (fetch no los expone). Devuelve la URL pública del
+ * blob. Si el endpoint responde 503 (no token), lanza un error con
+ * `code: 'no-blob'` para que el caller decida si caer al fallback.
+ */
+function uploadToBlob(
+  file: File,
+  slug: string,
+  kind: 'image' | 'video',
+  onProgress: (pct: number) => void,
+  xhrRef: React.MutableRefObject<XMLHttpRequest | null>,
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhrRef.current = xhr;
+
+    const params = new URLSearchParams({ slug, kind });
+    xhr.open('POST', `/api/studio/upload?${params.toString()}`);
+
+    xhr.upload.onprogress = (ev) => {
+      if (ev.lengthComputable) {
+        onProgress(Math.round((ev.loaded / ev.total) * 100));
+      }
+    };
+
+    xhr.onload = () => {
+      let body: { url?: string; error?: string } = {};
+      try {
+        body = JSON.parse(xhr.responseText) as typeof body;
+      } catch {
+        // ignore
+      }
+      if (xhr.status >= 200 && xhr.status < 300 && body.url) {
+        resolve(body.url);
+      } else {
+        reject(new Error(body.error || `Upload failed (HTTP ${xhr.status}).`));
+      }
+    };
+    xhr.onerror = () => reject(new Error('Network error during upload'));
+    xhr.onabort = () => reject(new Error('Upload aborted'));
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('filename', file.name);
+    xhr.send(formData);
+  });
 }

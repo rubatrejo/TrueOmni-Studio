@@ -49,7 +49,7 @@ export function FavoriteAddedToast() {
         style={{
           padding: '14px 14px 14px 20px',
           borderRadius: '999px',
-          background: 'linear-gradient(95deg, hsl(var(--brand-tertiary)) 0%, #1796d6 100%)',
+          background: 'linear-gradient(95deg, hsl(var(--brand-tertiary)) 0%, hsl(var(--brand-secondary)) 100%)',
           boxShadow: '0 22px 48px rgba(0,0,0,0.45), 0 0 0 3px rgba(255,255,255,0.25) inset',
           columnGap: '14px',
           animation: 'kiosk-fav-in 0.35s cubic-bezier(0.2,0.9,0.3,1.1)',

@@ -345,7 +345,7 @@ export function DirectionsModal({
               width: '330px',
               height: '66px',
               borderRadius: '8px',
-              backgroundColor: '#1796d6',
+              backgroundColor: 'hsl(var(--brand-secondary))',
               color: '#fff',
               fontFamily: 'Helvetica, Arial, sans-serif',
               fontSize: '20px',
@@ -400,7 +400,7 @@ function TabButton({
         fontFamily: 'Helvetica, Arial, sans-serif',
         fontSize: '20px',
         fontWeight: 700,
-        borderBottom: active ? '3px solid #1796d6' : '3px solid transparent',
+        borderBottom: active ? '3px solid hsl(var(--brand-secondary))' : '3px solid transparent',
       }}
     >
       {icon}
@@ -505,7 +505,7 @@ function OriginDot() {
         width: '18px',
         height: '18px',
         borderRadius: '50%',
-        border: '3px solid #1796d6',
+        border: '3px solid hsl(var(--brand-secondary))',
         backgroundColor: '#fff',
         display: 'inline-block',
       }}

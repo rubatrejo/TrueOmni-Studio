@@ -99,7 +99,7 @@ export function MapWelcomePopup({ copy, onDismiss }: MapWelcomePopupProps) {
             onClick={onDismiss}
             className="mt-10 rounded-[10px] transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
             style={{
-              backgroundColor: '#1796d6',
+              backgroundColor: 'hsl(var(--brand-secondary))',
               color: '#ffffff',
               padding: '20px 80px',
               fontFamily: "'Open Sans', var(--font-sans)",

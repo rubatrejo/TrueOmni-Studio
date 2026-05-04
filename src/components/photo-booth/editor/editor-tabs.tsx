@@ -11,7 +11,7 @@ interface EditorTabsProps {
 /**
  * Barra de tabs Backgrounds | Frames | Filters verbatim del SVG
  * `4-Photo_Booth-Experience.svg`:
- *   - Bar: rect 1080×90 translate(0, 605) fill="#1796d6".
+ *   - Bar: rect 1080×90 translate(0, 605) fill="hsl(var(--brand-secondary))".
  *   - Tab active: rect 317×58 rx=10 translate(392, 621) fill="hsl(var(--brand-primary))".
  *   - Texto active: fill=#fff font Montserrat-Bold 30px.
  *
@@ -47,7 +47,7 @@ export function EditorTabs({ active, onSelect, labels }: EditorTabsProps) {
         style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
       >
         {/* Bar blue secondary */}
-        <rect x={0} y={0} width={1080} height={90} fill="#1796d6" />
+        <rect x={0} y={0} width={1080} height={90} fill="hsl(var(--brand-secondary))" />
         {/* Active highlight */}
         <rect
           x={positions[active].rectX}

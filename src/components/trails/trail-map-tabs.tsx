@@ -86,7 +86,7 @@ export function TrailMapTabs({
           visibility: 'none',
         },
         paint: {
-          'line-color': '#1796d6',
+          'line-color': 'hsl(var(--brand-secondary))',
           'line-width': 6,
           'line-opacity': 0.92,
         },

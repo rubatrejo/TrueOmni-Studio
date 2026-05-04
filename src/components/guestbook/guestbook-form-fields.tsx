@@ -111,7 +111,7 @@ function InputShell({
         padding: '0 24px',
         borderRadius: '8px',
         backgroundColor: '#ffffff',
-        border: focused ? '2px solid #1796d6' : '1px solid #c7c7c7',
+        border: focused ? '2px solid hsl(var(--brand-secondary))' : '1px solid #c7c7c7',
         color: hasValue ? '#1a1a1a' : '#8a8a8a',
         fontSize: '22px',
         lineHeight: '22px',

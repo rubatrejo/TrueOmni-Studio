@@ -10,7 +10,7 @@ import { AccessibilityIcon } from './billboard-footer-parts';
  * - Banda 1 (y=0..330): header azul hsl(var(--brand-primary)) con TrueOmni logo blanco.
  * - Sidebar EVENTS vertical (blue hsl(var(--brand-primary))) sobre banda 2.
  * - Banda 2 (y=330..830): fireworks/events photo.
- * - Sidebar FOOD vertical (blue #1796d6) derecha sobre banda 3.
+ * - Sidebar FOOD vertical (blue hsl(var(--brand-secondary))) derecha sobre banda 3.
  * - Banda 3 (y=830..1330): cityscape photo (landscape.jpg).
  * - Sidebar START vertical (olive hsl(var(--brand-tertiary))) izquierda sobre banda 4.
  * - Banda 4 (y=1330..1730): grass/lake photo + icono arrow circle grande.
@@ -127,7 +127,7 @@ export function Billboard4() {
           top: '830px',
           width: '140px',
           height: '500px',
-          backgroundColor: '#1796d6',
+          backgroundColor: 'hsl(var(--brand-secondary))',
         }}
       >
         <span

@@ -27,7 +27,7 @@ import { MAP_WELCOME_STORAGE_KEY, MapWelcomePopup } from './map-welcome-popup';
 /**
  * Colores del chip por categoría — ALINEADOS con los pins del mapa:
  *   Play  `hsl(var(--brand-primary))`  (things-to-do)
- *   Eat   `#1796d6`  (restaurants)
+ *   Eat   `hsl(var(--brand-secondary))`  (restaurants)
  *   Stay  `hsl(var(--brand-tertiary))`  (stay)
  *   Events `#f16651` (events)
  */

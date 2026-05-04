@@ -278,7 +278,7 @@ function LoadingState({ progress }: { progress: { loaded: number; total: number 
             style={{
               width: `${pct}%`,
               height: '100%',
-              backgroundColor: '#1796d6',
+              backgroundColor: 'hsl(var(--brand-secondary))',
               transition: 'width 120ms linear',
             }}
           />
@@ -315,7 +315,7 @@ function ErrorState({ message, pdfUrl }: { message: string; pdfUrl: string }) {
         style={{
           display: 'inline-block',
           marginTop: '14px',
-          color: '#1796d6',
+          color: 'hsl(var(--brand-secondary))',
           textDecoration: 'underline',
           fontSize: '14px',
         }}

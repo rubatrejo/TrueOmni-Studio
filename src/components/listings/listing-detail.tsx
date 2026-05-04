@@ -414,7 +414,7 @@ function HeroImage({
           aria-hidden
           className="h-full w-full"
           style={{
-            background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, #1796d6 100%)',
+            background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%)',
           }}
         />
       ) : (
@@ -606,7 +606,7 @@ function ActionRow({
           width: '260px',
           height: '64px',
           borderRadius: '8px',
-          backgroundColor: '#1796d6',
+          backgroundColor: 'hsl(var(--brand-secondary))',
           fontFamily: 'Tahoma, Verdana, sans-serif',
           fontSize: '24px',
           lineHeight: '24px',
@@ -643,7 +643,7 @@ function SecondaryCtaButton({
   const resolvedLabel = cta.labelKey ? t(cta.labelKey) : cta.label;
   const label = cta.labelKey && resolvedLabel === cta.labelKey ? cta.label : resolvedLabel;
   const color = cta.color ?? 'blue';
-  const bg = color === 'olive' ? 'hsl(var(--brand-tertiary))' : '#1796d6';
+  const bg = color === 'olive' ? 'hsl(var(--brand-tertiary))' : 'hsl(var(--brand-secondary))';
   const isOutlineRed = color === 'outline-red';
   const sharedStyle = {
     left: `${leftOverride ?? 609}px`,

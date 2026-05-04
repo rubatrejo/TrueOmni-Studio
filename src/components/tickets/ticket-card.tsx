@@ -144,7 +144,7 @@ function TicketImage({ src, alt }: { src: string; alt: string }) {
           width: '280px',
           height: '178px',
           flexShrink: 0,
-          background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, #1796d6 100%)',
+          background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%)',
         }}
       />
     );

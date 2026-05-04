@@ -243,7 +243,7 @@ export function ShareScreen({
           height: 86,
           borderRadius: 14,
           border: 'none',
-          background: '#1796d6',
+          background: 'hsl(var(--brand-secondary))',
           color: '#fff',
           fontFamily: "'Open Sans', system-ui",
           fontSize: 24,

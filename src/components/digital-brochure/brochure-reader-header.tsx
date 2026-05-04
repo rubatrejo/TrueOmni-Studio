@@ -70,7 +70,7 @@ export function BrochureReaderHeader({
             height: '60px',
             padding: '0 24px',
             borderRadius: '8px',
-            backgroundColor: '#1796d6',
+            backgroundColor: 'hsl(var(--brand-secondary))',
             color: '#fff',
             fontSize: '18px',
             lineHeight: '18px',

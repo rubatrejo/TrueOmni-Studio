@@ -19,7 +19,7 @@ import type { MapSource } from '@/lib/config';
  * `map-module.tsx` para que el usuario asocie el chip con su pin.
  */
 export const MAP_PIN_COLORS: Record<MapSource, string> = {
-  restaurants: '#1796d6', // Eat (tab #1796d6)
+  restaurants: 'hsl(var(--brand-secondary))', // Eat (tab hsl(var(--brand-secondary)))
   'things-to-do': 'hsl(var(--brand-primary))', // Play (tab hsl(var(--brand-primary)))
   stay: 'hsl(var(--brand-tertiary))', // Stay (tab hsl(var(--brand-tertiary)))
   events: '#f16651', // Events (tab #f16651)

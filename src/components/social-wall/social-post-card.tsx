@@ -13,7 +13,7 @@ import { SocialSourceIcon } from './social-source-icon';
  *   - Media arriba (imagen o poster de video) con aspect dinámico.
  *   - Badge con icono de red social en esquina top-right.
  *   - Play button centered si type='video'.
- *   - Panel azul #1796d6 con avatar + username + caption.
+ *   - Panel azul hsl(var(--brand-secondary)) con avatar + username + caption.
  *   - Si gallery → counter "1/N" en corner.
  *   - Si type='text' → sin media, solo panel azul full card.
  *
@@ -172,7 +172,7 @@ function MediaImage({ src, alt }: { src: string; alt: string }) {
       <div
         aria-hidden
         className="absolute inset-0"
-        style={{ background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, #1796d6 100%)' }}
+        style={{ background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%)' }}
       />
     );
   }

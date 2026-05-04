@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { bootstrapStudioFromFs, readClientFs } from '@/lib/studio/bootstrap-from-fs';
 import { kv, kvKeys } from '@/lib/studio/kv';
 import {
   KIOSK_ORIENTATIONS,
@@ -11,6 +12,43 @@ import {
 } from '@/lib/studio/schema';
 
 const DEFAULT_TEMPLATE_SLUG = 'default';
+
+/**
+ * Reemplaza el sufijo "City, State" de una address con la nueva location
+ * del cliente. La heurística busca el último ", XX" (estado de 2 letras)
+ * y reescribe la palabra anterior + el estado. Si la address no matchea,
+ * se queda tal cual (mejor que un guess equivocado).
+ *
+ * Ejemplos con location="Davenport, FL":
+ *   "2073 Main St, North Phoenix, AZ 85051"  →  "2073 Main St, Davenport, FL 85051"
+ *   "80 N Arizona Pl, Chandler, AZ"          →  "80 N Arizona Pl, Davenport, FL"
+ *   "address sin estado"                     →  "address sin estado" (no toca)
+ */
+function rewriteAddress(address: string, location: string): string {
+  if (!address || !location) return address;
+  // Match: ", <City>, <ST>" optional zip. Captura zip (si existe) y resto.
+  const re = /,\s*[^,]+,\s*[A-Z]{2}(\s+\d{5}(?:-\d{4})?)?\s*$/;
+  const m = address.match(re);
+  if (!m) return address;
+  const zip = m[1] ?? '';
+  return `${address.slice(0, m.index)}, ${location}${zip}`;
+}
+
+function rewriteAddressesInPlace(config: KioskConfig, location: string): void {
+  if (!location) return;
+  const visit = (item: unknown) => {
+    if (item && typeof item === 'object' && 'address' in item) {
+      const obj = item as { address?: string };
+      if (typeof obj.address === 'string' && obj.address.length > 0) {
+        obj.address = rewriteAddress(obj.address, location);
+      }
+    }
+  };
+  config.listings?.forEach((cat) => cat.catalog?.listings?.forEach(visit));
+  config.events?.events?.forEach(visit);
+  config.passes?.passes?.forEach(visit);
+  config.trails?.trails?.forEach(visit);
+}
 
 /**
  * `/api/studio/configs`
@@ -60,26 +98,40 @@ export async function POST(request: Request) {
 
     // Clonar desde el kiosk `default` (TrueOmni) para que el cliente nuevo
     // arranque con TODA la mock data poblada (listings, events, passes,
-    // deals, trails, etc.). Si `default` no existe en KV, fallback a
-    // makeBlankConfig (kiosk con catálogos vacíos).
-    const template = await kv.get<KioskConfig>(kvKeys.cfg(DEFAULT_TEMPLATE_SLUG));
-    let config: KioskConfig;
-    if (template) {
-      config = structuredClone(template);
+    // deals, trails, etc.).
+    //
+    // Estrategia híbrida: arranca con makeBlankConfig + hidrata desde
+    // filesystem `clients/default/` con bootstrapStudioFromFs. Esto cubre
+    // los dos casos:
+    //   - KV `default` está vacío (operador no abrió el editor jamás).
+    //   - KV `default` tiene state pero el filesystem es la fuente de
+    //     verdad del template canónico.
+    let config = makeBlankConfig(body.slug, body.nombre, orientation);
+    const fsTemplate = await readClientFs(DEFAULT_TEMPLATE_SLUG);
+    if (fsTemplate.config) {
+      config = bootstrapStudioFromFs(config, fsTemplate.config, fsTemplate.tokensCss);
+      // bootstrapStudioFromFs sobreescribe `nombre` si el sentinel match. Lo
+      // reaplicamos para asegurar que se respeta el nombre del operador.
       config.slug = body.slug;
       config.nombre = body.nombre;
       config.orientation = orientation;
       config.currentVersion = 0;
-    } else {
-      config = makeBlankConfig(body.slug, body.nombre, orientation);
     }
 
-    if (body.website || body.location) {
+    const trimmedLocation = body.location?.trim() ?? '';
+    const trimmedWebsite = body.website?.trim() ?? '';
+    if (trimmedWebsite || trimmedLocation) {
       config.clientInfo = {
-        website: body.website?.trim() ?? '',
-        location: body.location?.trim() ?? '',
+        website: trimmedWebsite,
+        location: trimmedLocation,
       };
     }
+
+    // Reemplazar la "City, ST" final de cada address mock (listings,
+    // events, passes, trails, deals, brochures) con la location del
+    // cliente nuevo. Garantiza que el operador NO vea "North Phoenix,
+    // AZ" en un kiosk de "Davenport, FL".
+    rewriteAddressesInPlace(config, trimmedLocation);
 
     const parsed = KioskConfigSchema.safeParse(config);
     if (!parsed.success) {

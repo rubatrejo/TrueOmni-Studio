@@ -74,7 +74,7 @@ export function SendConfirmationPopup({
           className="absolute inset-x-0 top-0"
           style={{
             height: '8px',
-            background: 'linear-gradient(90deg, hsl(var(--brand-tertiary)) 0%, #1796d6 100%)',
+            background: 'linear-gradient(90deg, hsl(var(--brand-tertiary)) 0%, hsl(var(--brand-secondary)) 100%)',
           }}
         />
 
@@ -160,7 +160,7 @@ export function SendConfirmationPopup({
               <path
                 d="M4 6h16v12H4z M4 6l8 7 8-7"
                 fill="none"
-                stroke="#1796d6"
+                stroke="hsl(var(--brand-secondary))"
                 strokeWidth="1.8"
                 strokeLinejoin="round"
               />
@@ -168,7 +168,7 @@ export function SendConfirmationPopup({
               <path
                 d="M7 2h10v20H7z M12 18h.01"
                 fill="none"
-                stroke="#1796d6"
+                stroke="hsl(var(--brand-secondary))"
                 strokeWidth="1.8"
                 strokeLinejoin="round"
               />
@@ -176,7 +176,7 @@ export function SendConfirmationPopup({
           </svg>
           <span
             className="font-sans"
-            style={{ fontSize: '18px', color: '#1796d6', fontWeight: 600 }}
+            style={{ fontSize: '18px', color: 'hsl(var(--brand-secondary))', fontWeight: 600 }}
           >
             {destination}
           </span>
@@ -203,7 +203,7 @@ export function SendConfirmationPopup({
           <div
             style={{
               height: '100%',
-              backgroundColor: '#1796d6',
+              backgroundColor: 'hsl(var(--brand-secondary))',
               animation: 'kiosk-countdown 5s linear forwards',
               transformOrigin: 'left center',
             }}

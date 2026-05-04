@@ -85,7 +85,7 @@ export function BrochureReaderControls({
         value={currentPage}
         onChange={(e) => onSeek(Number(e.currentTarget.value))}
         aria-label="Ir a página"
-        style={{ flex: 1, accentColor: '#1796d6', height: '10px' }}
+        style={{ flex: 1, accentColor: 'hsl(var(--brand-secondary))', height: '10px' }}
       />
 
       <button

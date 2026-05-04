@@ -64,7 +64,7 @@ export function SocialWallTabs({
           <SocialSourceIcon
             source={source}
             size={30}
-            color={active === source ? '#1796d6' : 'rgba(0,0,0,0.78)'}
+            color={active === source ? 'hsl(var(--brand-secondary))' : 'rgba(0,0,0,0.78)'}
           />
         </TabButton>
       ))}
@@ -95,7 +95,7 @@ function TabButton({
         height: '84px',
         minWidth: '60px',
         padding: '0 6px',
-        color: selected ? '#1796d6' : 'rgba(0,0,0,0.78)',
+        color: selected ? 'hsl(var(--brand-secondary))' : 'rgba(0,0,0,0.78)',
       }}
     >
       {children}
@@ -108,7 +108,7 @@ function TabButton({
             right: '4px',
             bottom: '-1px',
             height: '4px',
-            backgroundColor: '#1796d6',
+            backgroundColor: 'hsl(var(--brand-secondary))',
             borderRadius: '2px 2px 0 0',
           }}
         />

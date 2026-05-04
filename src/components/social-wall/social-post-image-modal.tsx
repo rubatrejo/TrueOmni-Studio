@@ -45,7 +45,7 @@ export function SocialPostImageModal({ post, onClose }: { post: SocialPost; onCl
           width: '840px',
           maxHeight: '1720px',
           borderRadius: '14px',
-          background: 'linear-gradient(180deg, #1796d6 0%, #0f6fa0 100%)',
+          background: 'linear-gradient(180deg, hsl(var(--brand-secondary)) 0%, #0f6fa0 100%)',
           boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
         }}
       >
@@ -85,7 +85,7 @@ function HeroImage({ src, alt }: { src: string; alt: string }) {
       <div
         aria-hidden
         className="absolute inset-0"
-        style={{ background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, #1796d6 100%)' }}
+        style={{ background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%)' }}
       />
     );
   }

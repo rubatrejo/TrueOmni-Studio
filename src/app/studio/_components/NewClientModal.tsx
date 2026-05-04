@@ -5,6 +5,9 @@ import { X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
+// "City, ST" — ciudad alfabética con espacios/puntos/guiones, coma, estado de
+// 2 letras mayúsculas (US states). Acepta sufijos opcionales tipo " 12345".
+const LOCATION_REGEX = /^[A-Za-z][A-Za-z .'-]{1,60},\s*[A-Z]{2}$/;
 
 type Orientation = 'portrait' | 'landscape' | 'mobile-pwa';
 
@@ -94,14 +97,28 @@ export function NewClientModal({
       setError(slugError);
       return;
     }
+    const trimmedLocation = location.trim();
+    if (!trimmedLocation) {
+      setError('Location is required');
+      return;
+    }
+    if (!LOCATION_REGEX.test(trimmedLocation)) {
+      setError('Location must be in the format "City, ST" (e.g. "Davenport, FL")');
+      return;
+    }
+    const trimmedWebsite = website.trim();
+    if (trimmedWebsite && !/^https?:\/\//i.test(trimmedWebsite)) {
+      setError('Website must start with http:// or https://');
+      return;
+    }
     setSubmitting(true);
     try {
       await onCreate({
         slug,
         nombre: nombre.trim(),
         orientation,
-        website: website.trim(),
-        location: location.trim(),
+        website: trimmedWebsite,
+        location: trimmedLocation,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create');

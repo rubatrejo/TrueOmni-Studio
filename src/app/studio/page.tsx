@@ -1,6 +1,8 @@
 'use client';
 
+import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
@@ -61,6 +63,9 @@ export default function StudioHome() {
     };
   }, []);
 
+  const router = useRouter();
+  const [creatingKiosk, setCreatingKiosk] = useState<string | null>(null);
+
   const handleCreate = async (input: {
     slug: string;
     nombre: string;
@@ -68,9 +73,17 @@ export default function StudioHome() {
     website?: string;
     location?: string;
   }) => {
-    await createConfig(input);
-    setShowNewModal(false);
-    await refresh();
+    setCreatingKiosk(input.nombre);
+    try {
+      await createConfig(input);
+      setShowNewModal(false);
+      // Redirige directo al editor del nuevo kiosk; el overlay queda
+      // visible hasta que la nav termine para evitar parpadeo.
+      router.push(`/studio/${input.slug}`);
+    } catch (err) {
+      setCreatingKiosk(null);
+      throw err;
+    }
   };
 
   const handleDelete = async (slug: string) => {
@@ -149,6 +162,22 @@ export default function StudioHome() {
         onClose={() => setShowNewModal(false)}
         onCreate={handleCreate}
       />
+
+      {creatingKiosk ? (
+        <div className="fixed inset-0 z-[70] grid place-items-center bg-zinc-950/80 backdrop-blur-md">
+          <div className="flex flex-col items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-900 px-10 py-8 text-center shadow-2xl">
+            <Loader2 className="h-8 w-8 animate-spin text-sky-400" />
+            <div>
+              <p className="font-display text-[15px] font-semibold text-white">
+                Creating &quot;{creatingKiosk}&quot;
+              </p>
+              <p className="mt-1 text-[12px] text-zinc-400">
+                Cloning template content and opening the editor…
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {/* Onboarding tour — solo se muestra al primer login (audit F-31). */}
       <OnboardingTour />

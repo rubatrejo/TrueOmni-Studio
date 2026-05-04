@@ -15,7 +15,7 @@
  * `icon` (v2.1) permite que slots con color sólido + icono (B1 slots 2-3)
  * sustituyan el icono cuando el operador asigna otro módulo. **El color
  * sólido del slot se mantiene fijo** — la identidad cromática (olive hsl(var(--brand-tertiary))
- * para slot 2, azul #1796d6 para slot 3) pertenece al SVG original, no al
+ * para slot 2, azul hsl(var(--brand-secondary)) para slot 3) pertenece al SVG original, no al
  * módulo asignado (decisión Rubén 2026-05-01). Los 2 iconos verbatim del
  * SVG original (route, camera) viven en `./icons/`. Los 13 restantes usan
  * lucide-react.

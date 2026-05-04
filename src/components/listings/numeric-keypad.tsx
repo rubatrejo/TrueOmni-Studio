@@ -8,7 +8,7 @@
  *   Row 4: . 0 Send (double-wide)
  *
  * Estilo consistente con `OnScreenKeyboard`: teclas 73×75 rx=7 fondo hsl(var(--brand-primary)),
- * teclas especiales #1796d6.
+ * teclas especiales hsl(var(--brand-secondary)).
  */
 
 export type NumericKey =

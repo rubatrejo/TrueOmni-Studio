@@ -28,7 +28,7 @@ function FilterFunnelIcon() {
 
 /**
  * Fila de tabs verbatim del SVG `Tabs-Categories-Example-.svg`:
- *   - rect 357.27 × 59.765, rx 8, fill #1796d6 (active) / gris (inactive).
+ *   - rect 357.27 × 59.765, rx 8, fill hsl(var(--brand-secondary)) (active) / gris (inactive).
  *   - filter funnel icon @ left:12.6 top:18.4 (fill blanco).
  *   - divider vertical blanco @ x:50, height 40, top:9.7.
  *   - text OpenSans 25px white @ x:66.5 y:39.9.

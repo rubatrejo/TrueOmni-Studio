@@ -229,7 +229,7 @@ function SendButton({ label, onClick }: { label: string; onClick: () => void }) 
         flex: 1,
         height: '58px',
         borderRadius: '10px',
-        backgroundColor: '#1796d6',
+        backgroundColor: 'hsl(var(--brand-secondary))',
         fontSize: '15px',
         lineHeight: '15px',
         fontWeight: 700,
@@ -257,7 +257,7 @@ function HeroWithOverlay({
         <div
           aria-hidden
           className="absolute inset-0"
-          style={{ background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, #1796d6 100%)' }}
+          style={{ background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%)' }}
         />
       ) : (
         // eslint-disable-next-line @next/next/no-img-element

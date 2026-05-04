@@ -24,7 +24,7 @@ import { WeatherIcon } from './weather-icon';
  *   - "50°" bold + "20°" light fontSize 20
  *   - Separator vertical lines 3×106 at x=148, 273, 398, 523 #4d4d4d
  *
- * OK button (182, 812): 320×71 rx=9 #1796d6 + "OK" fontSize 32 Helvetica-Bold white.
+ * OK button (182, 812): 320×71 rx=9 hsl(var(--brand-secondary)) + "OK" fontSize 32 Helvetica-Bold white.
  */
 export function WeatherPopup({ data, onClose }: { data: WeatherData; onClose: () => void }) {
   const now = new Date();
@@ -234,7 +234,7 @@ export function WeatherPopup({ data, onClose }: { data: WeatherData; onClose: ()
           ))}
         </div>
 
-        {/* OK button (182, 812). 320×71 rx=9 #1796d6 */}
+        {/* OK button (182, 812). 320×71 rx=9 hsl(var(--brand-secondary)) */}
         <button
           type="button"
           onClick={onClose}
@@ -244,7 +244,7 @@ export function WeatherPopup({ data, onClose }: { data: WeatherData; onClose: ()
             top: '812.5px',
             width: '320px',
             height: '71px',
-            backgroundColor: '#1796d6',
+            backgroundColor: 'hsl(var(--brand-secondary))',
             borderRadius: '9px',
             fontSize: '32px',
             letterSpacing: '0.02em',

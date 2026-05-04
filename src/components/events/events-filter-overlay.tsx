@@ -216,7 +216,7 @@ export function EventsFilterOverlay({
               width: '260px',
               height: '72px',
               borderRadius: '8px',
-              backgroundColor: '#1796d6',
+              backgroundColor: 'hsl(var(--brand-secondary))',
               fontSize: '24px',
               lineHeight: '24px',
               fontWeight: 700,

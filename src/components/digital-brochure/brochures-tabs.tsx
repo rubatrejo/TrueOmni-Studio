@@ -2,7 +2,7 @@
 
 /**
  * Tabs horizontales scrollables para filtrar por categoría.
- * "Select all" + categorías del módulo. Active → color azul `#1796d6` +
+ * "Select all" + categorías del módulo. Active → color azul `hsl(var(--brand-secondary))` +
  * underline. Inactivo → gris `#888`.
  */
 export function BrochuresTabs({
@@ -61,7 +61,7 @@ function TabButton({
         fontSize: '28px',
         lineHeight: '100px',
         fontWeight: selected ? 700 : 500,
-        color: selected ? '#1796d6' : '#8e8e8e',
+        color: selected ? 'hsl(var(--brand-secondary))' : '#8e8e8e',
         whiteSpace: 'nowrap',
         letterSpacing: '0.01em',
       }}
@@ -76,7 +76,7 @@ function TabButton({
             right: '0',
             bottom: '0',
             height: '4px',
-            backgroundColor: '#1796d6',
+            backgroundColor: 'hsl(var(--brand-secondary))',
             borderRadius: '2px 2px 0 0',
           }}
         />

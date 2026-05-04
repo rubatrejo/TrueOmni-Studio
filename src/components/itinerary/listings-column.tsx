@@ -55,7 +55,7 @@ const haversineMi = (
 };
 
 /** Botón close/open del sidebar — verbatim del SVG `Close-Open-Sidebar.svg`.
- *  Tab semicircular azul claro #1796d6 con chevron blanco al centro. */
+ *  Tab semicircular azul claro hsl(var(--brand-secondary)) con chevron blanco al centro. */
 function SidebarToggle({
   collapsed,
   onToggle,

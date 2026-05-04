@@ -221,7 +221,7 @@ export function GuestbookFormScreen({
               width: '320px',
               height: '76px',
               borderRadius: '10px',
-              backgroundColor: valid ? '#1796d6' : '#b9c4cd',
+              backgroundColor: valid ? 'hsl(var(--brand-secondary))' : '#b9c4cd',
               fontSize: '24px',
               lineHeight: '24px',
               fontWeight: 700,
@@ -291,7 +291,7 @@ export function GuestbookFormScreen({
               className="font-sans focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
               style={{
                 fontSize: '14px',
-                color: zip.length > 0 ? '#1796d6' : '#b9c4cd',
+                color: zip.length > 0 ? 'hsl(var(--brand-secondary))' : '#b9c4cd',
                 padding: '4px 12px',
                 letterSpacing: '0.06em',
                 fontWeight: 700,
@@ -355,7 +355,7 @@ function Checkbox({
           height: '30px',
           borderRadius: '5px',
           border: '1.5px solid #6e6e6e',
-          backgroundColor: checked ? '#1796d6' : '#ffffff',
+          backgroundColor: checked ? 'hsl(var(--brand-secondary))' : '#ffffff',
           flexShrink: 0,
         }}
       >

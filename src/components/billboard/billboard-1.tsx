@@ -29,7 +29,7 @@ import { useBillboardOverride } from './use-billboard-override';
  *   · THINGS TO DO 495×410 @ y=374 con foto cityscape.
  *   · EVENTS 495×410 @ y=810 con foto fireworks.
  *   · ITINERARY BUILDER 495×208 @ y=1250 olive hsl(var(--brand-tertiary)) con icono ruta.
- *   · PHOTO BOOTH 495×208 @ y=1488 azul #1796d6.
+ *   · PHOTO BOOTH 495×208 @ y=1488 azul hsl(var(--brand-secondary)).
  * - Card derecha grande 495×1326 @ (555, 370) con valentino street +
  *   "TOUCH TO START" 70px Montserrat-Bold + icono click (paths SVG).
  * - Footer 1080×194 @ y=1726 plano hsl(var(--brand-primary)) con logo TrueOmni.
@@ -48,7 +48,7 @@ export function Billboard1() {
   const slot2 = resolveSlotLabel(modules?.[2], { label: 'Trip', labelLine2: 'Planner' });
   const slot3 = resolveSlotLabel(modules?.[3], { label: 'Photo', labelLine2: 'Booth' });
   // v2.1: solo el icono reacciona al módulo asignado. Color del slot fijo
-  // (olive hsl(var(--brand-tertiary)) / azul #1796d6) — decisión de Rubén 2026-05-01: la
+  // (olive hsl(var(--brand-tertiary)) / azul hsl(var(--brand-secondary))) — decisión de Rubén 2026-05-01: la
   // identidad cromática de cada slot pertenece al SVG original, no al módulo.
   const Slot2Icon = resolveSlotIcon(modules?.[2], RouteIcon);
   const Slot3Icon = resolveSlotIcon(modules?.[3], CameraIcon);
@@ -216,7 +216,7 @@ export function Billboard1() {
         </div>
       </Link>
 
-      {/* Slot 3 — original SVG: PHOTO BOOTH (495×208 @ 30, 1488) blue #1796d6.
+      {/* Slot 3 — original SVG: PHOTO BOOTH (495×208 @ 30, 1488) blue hsl(var(--brand-secondary)).
           v2.1: solo icono reactivo al módulo asignado. El color azul es
           identidad fija del slot. */}
       <Link
@@ -228,7 +228,7 @@ export function Billboard1() {
           width: '495px',
           height: '208px',
           borderRadius: '9px',
-          backgroundColor: '#1796d6',
+          backgroundColor: 'hsl(var(--brand-secondary))',
           paddingLeft: '36px',
           paddingRight: '36px',
         }}

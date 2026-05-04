@@ -230,7 +230,7 @@ export function GuestbookPinCommentModal({
                 alignSelf: 'flex-start',
                 padding: '12px 40px',
                 borderRadius: '6px',
-                backgroundColor: '#1796d6',
+                backgroundColor: 'hsl(var(--brand-secondary))',
                 fontSize: '18px',
                 lineHeight: '18px',
                 fontWeight: 700,

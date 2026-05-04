@@ -176,7 +176,7 @@ export function CancelSendButtons({
           width: '240px',
           height: '60px',
           borderRadius: '8px',
-          backgroundColor: disabled ? 'rgba(23,150,214,0.5)' : '#1796d6',
+          backgroundColor: disabled ? 'rgba(23,150,214,0.5)' : 'hsl(var(--brand-secondary))',
           fontSize: '22px',
           lineHeight: '22px',
           fontWeight: 700,

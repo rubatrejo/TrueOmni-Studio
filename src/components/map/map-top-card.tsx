@@ -184,7 +184,7 @@ function CardImage({ src, title }: { src: string; title: string }) {
         aria-hidden
         className="flex h-full w-full items-center justify-center"
         style={{
-          background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, #1796d6 100%)',
+          background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%)',
           color: '#ffffff',
           fontFamily: 'Helvetica, Arial, sans-serif',
           fontSize: '16px',

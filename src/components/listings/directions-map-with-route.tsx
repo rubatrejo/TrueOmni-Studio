@@ -76,7 +76,7 @@ export function DirectionsMapWithRoute({
       originEl.style.width = '22px';
       originEl.style.height = '22px';
       originEl.style.borderRadius = '50%';
-      originEl.style.backgroundColor = '#1796d6';
+      originEl.style.backgroundColor = 'hsl(var(--brand-secondary))';
       originEl.style.border = '3px solid #fff';
       originEl.style.boxShadow = '0 0 0 4px rgba(23,150,214,0.25)';
       new mapboxgl.Marker({ element: originEl }).setLngLat([origin.lng, origin.lat]).addTo(map);
@@ -120,7 +120,7 @@ export function DirectionsMapWithRoute({
           source: sourceId,
           layout: { 'line-cap': 'round', 'line-join': 'round' },
           paint: {
-            'line-color': '#1796d6',
+            'line-color': 'hsl(var(--brand-secondary))',
             'line-width': 6,
             'line-opacity': 0.9,
           },

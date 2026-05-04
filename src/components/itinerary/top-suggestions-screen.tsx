@@ -220,7 +220,7 @@ export function TopSuggestionsScreen(props: TopSuggestionsScreenProps) {
                       <div
                         className="flex h-full w-full items-center justify-center text-white"
                         style={{
-                          background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, #1796d6 100%)',
+                          background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%)',
                           fontSize: 18,
                           fontWeight: 700,
                           padding: 12,

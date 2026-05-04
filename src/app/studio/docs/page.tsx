@@ -1,6 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import {
+  bodyToBullets,
+  formatReleaseDate,
+  getStudioReleases,
+  type StudioRelease,
+} from '@/lib/studio/github-changelog';
+
 import { StudioPageHeader } from '../_components/PageHeader';
 
 export const metadata: Metadata = {
@@ -20,7 +27,8 @@ const sections = [
   { id: 'changelog', label: 'Changelog' },
 ];
 
-export default function StudioDocsPage() {
+export default async function StudioDocsPage() {
+  const releases = await getStudioReleases();
   return (
     <main className="mx-auto flex min-h-screen max-w-[1280px] flex-col px-4 pb-24 pt-12 sm:px-8">
       <StudioPageHeader docsActive showProductDropdown={false} />
@@ -282,58 +290,7 @@ export default function StudioDocsPage() {
               What&apos;s shipped in Studio itself. The kiosk product has its own release stream;
               this section tracks updates to the editor and platform you&apos;re using right now.
             </P>
-            <ChangelogEntry
-              version="v0.1.0"
-              date="April 29, 2026"
-              tag="latest"
-              items={[
-                'Filesystem bootstrap — Studio now reflects the live state of every kiosk on load, instead of starting from the template.',
-                'Surgical publish — only the keys you changed are rewritten, preserving manual annotations in the kiosk configuration.',
-                'Validation guards on publish — invalid configurations are caught before they reach a kiosk.',
-              ]}
-            />
-            <ChangelogEntry
-              version="v0.0.9"
-              date="April 28, 2026"
-              items={[
-                'i18n editor — manage 6 locales (en, es, fr, de, pt, ja) from a single tab.',
-                'Optional AI translation for first-draft localization.',
-                'iOS-style on-screen keyboard for kiosks deployed without hardware keyboards.',
-              ]}
-            />
-            <ChangelogEntry
-              version="v0.0.8"
-              date="April 27, 2026"
-              items={[
-                'Itinerary Builder module — favorites rail, AI wizard, share via QR / email / phone.',
-                'Photo Booth module — green-screen capture with stickers, drag-and-drop editor, share flow.',
-              ]}
-            />
-            <ChangelogEntry
-              version="v0.0.7"
-              date="April 23, 2026"
-              items={[
-                'Ask AI floating avatar — typewriter responses, voice input, configurable per kiosk.',
-                'Trails module with map tabs and considerations.',
-                'Guestbook module with globe zoom and drag-and-drop comments.',
-              ]}
-            />
-            <ChangelogEntry
-              version="v0.0.6"
-              date="April 22, 2026"
-              items={[
-                'Tickets, Passes and Deals modules.',
-                'Survey overlay with 8 design variants.',
-              ]}
-            />
-            <ChangelogEntry
-              version="v0.0.1"
-              date="April 19, 2026"
-              items={[
-                'Studio launches in private preview.',
-                'Branding, Modules and Content tabs available; live preview wired end-to-end.',
-              ]}
-            />
+            <ChangelogContent releases={releases} />
           </Section>
         </article>
       </div>
@@ -437,16 +394,104 @@ function Callout({
   );
 }
 
+/**
+ * Changelog dinámico: si hay GitHub Releases tagged `studio-*`, los
+ * mostramos. Si no (token missing, repo sin releases aún), caemos al
+ * historial hardcoded como fallback. Tras crear el primer release real,
+ * el fallback queda oculto automáticamente.
+ */
+function ChangelogContent({ releases }: { releases: StudioRelease[] | null }) {
+  const live = releases?.filter((r) => !r.isPrerelease) ?? [];
+  if (live.length > 0) {
+    return (
+      <>
+        {live.map((r, i) => {
+          const items = bodyToBullets(r.body);
+          return (
+            <ChangelogEntry
+              key={r.tag}
+              version={r.version || r.tag}
+              date={formatReleaseDate(r.publishedAt)}
+              items={items.length > 0 ? items : [r.title]}
+              tag={i === 0 ? 'latest' : undefined}
+              sourceUrl={r.url}
+            />
+          );
+        })}
+      </>
+    );
+  }
+  // Fallback hardcoded mientras no haya releases reales tagged `studio-*`.
+  return (
+    <>
+      <ChangelogEntry
+        version="v0.1.0"
+        date="April 29, 2026"
+        tag="latest"
+        items={[
+          'Filesystem bootstrap — Studio now reflects the live state of every kiosk on load, instead of starting from the template.',
+          'Surgical publish — only the keys you changed are rewritten, preserving manual annotations in the kiosk configuration.',
+          'Validation guards on publish — invalid configurations are caught before they reach a kiosk.',
+        ]}
+      />
+      <ChangelogEntry
+        version="v0.0.9"
+        date="April 28, 2026"
+        items={[
+          'i18n editor — manage 6 locales (en, es, fr, de, pt, ja) from a single tab.',
+          'Optional AI translation for first-draft localization.',
+          'iOS-style on-screen keyboard for kiosks deployed without hardware keyboards.',
+        ]}
+      />
+      <ChangelogEntry
+        version="v0.0.8"
+        date="April 27, 2026"
+        items={[
+          'Itinerary Builder module — favorites rail, AI wizard, share via QR / email / phone.',
+          'Photo Booth module — green-screen capture with stickers, drag-and-drop editor, share flow.',
+        ]}
+      />
+      <ChangelogEntry
+        version="v0.0.7"
+        date="April 23, 2026"
+        items={[
+          'Ask AI floating avatar — typewriter responses, voice input, configurable per kiosk.',
+          'Trails module with map tabs and considerations.',
+          'Guestbook module with globe zoom and drag-and-drop comments.',
+        ]}
+      />
+      <ChangelogEntry
+        version="v0.0.6"
+        date="April 22, 2026"
+        items={[
+          'Tickets, Passes and Deals modules.',
+          'Survey overlay with 8 design variants.',
+        ]}
+      />
+      <ChangelogEntry
+        version="v0.0.1"
+        date="April 19, 2026"
+        items={[
+          'Studio launches in private preview.',
+          'Branding, Modules and Content tabs available; live preview wired end-to-end.',
+        ]}
+      />
+    </>
+  );
+}
+
 function ChangelogEntry({
   version,
   date,
   items,
   tag,
+  sourceUrl,
 }: {
   version: string;
   date: string;
   items: string[];
   tag?: 'latest';
+  sourceUrl?: string;
 }) {
   return (
     <div className="relative border-l-2 border-zinc-200 pl-6 dark:border-zinc-800">
@@ -461,6 +506,17 @@ function ChangelogEntry({
           </span>
         )}
         <span className="text-[12.5px] text-zinc-500">{date}</span>
+        {sourceUrl ? (
+          <a
+            href={sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-auto text-[11.5px] font-medium text-zinc-500 transition hover:text-zinc-700 dark:hover:text-zinc-300"
+            aria-label={`Open ${version} release on GitHub`}
+          >
+            View on GitHub →
+          </a>
+        ) : null}
       </div>
       <ul className="list-disc space-y-1.5 pl-5 text-[14.5px] marker:text-zinc-400">
         {items.map((item) => (

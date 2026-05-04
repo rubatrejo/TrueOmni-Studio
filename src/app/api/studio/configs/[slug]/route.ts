@@ -43,8 +43,11 @@ import {
   type KioskConfig,
 } from '@/lib/studio/schema';
 
-/** Hard cap to keep KV values comfortably under the 512 KB Upstash limit. */
-const KV_VALUE_BYTE_CAP = 480_000;
+/** Hard cap to keep KV values under the 1 MB Upstash hobby limit (10% buffer
+ *  para meta + headers Redis). Subido de 480KB tras añadir hero header
+ *  image/video y B0 background — un kiosk con todos los binarios cabía justo
+ *  por encima del límite anterior. */
+const KV_VALUE_BYTE_CAP = 950_000;
 
 /**
  * `/api/studio/configs/[slug]`
@@ -443,12 +446,34 @@ export async function PATCH(req: Request, { params }: RouteParams) {
 
     const serialized = JSON.stringify(validated.data);
     if (serialized.length > KV_VALUE_BYTE_CAP) {
+      const sizeKb = Math.round(serialized.length / 1024);
+      const capKb = Math.round(KV_VALUE_BYTE_CAP / 1024);
+      // Pista para el operador: enumerar los campos pesados detectados.
+      const heavyFields: string[] = [];
+      const cfg = validated.data as unknown as Record<string, unknown>;
+      const isHeavy = (v: unknown) =>
+        typeof v === 'string' && v.startsWith('data:') && v.length > 200_000;
+      const branding = cfg.branding as Record<string, unknown> | undefined;
+      if (branding) {
+        if (isHeavy(branding.logo)) heavyFields.push('branding.logo');
+        if (isHeavy(branding.idleLogo)) heavyFields.push('branding.idleLogo');
+        if (isHeavy(branding.footerLogo)) heavyFields.push('branding.footerLogo');
+        const hh = branding.homeHero as { src?: string } | undefined;
+        if (isHeavy(hh?.src)) heavyFields.push('branding.homeHero (use CDN URL)');
+      }
+      const billboard = cfg.billboard as { b0?: { background?: { src?: string } } } | undefined;
+      if (isHeavy(billboard?.b0?.background?.src))
+        heavyFields.push('billboard.b0.background (use CDN URL)');
+      const heavyHint =
+        heavyFields.length > 0
+          ? ` Heavy fields: ${heavyFields.join(', ')}.`
+          : '';
       return NextResponse.json(
         {
-          error:
-            'Config too large for KV (cap 512 KB). Reduce image sizes or use external URLs.',
+          error: `Config too large for KV: ${sizeKb}KB (cap ${capKb}KB). Replace heavy uploads with CDN URLs (the "Or paste URL" input below each media field).${heavyHint}`,
           size: serialized.length,
           cap: KV_VALUE_BYTE_CAP,
+          heavyFields,
         },
         { status: 413 },
       );

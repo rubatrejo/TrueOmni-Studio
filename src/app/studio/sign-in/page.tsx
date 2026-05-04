@@ -73,7 +73,7 @@ function SignInContent() {
     <div className="relative h-screen w-screen overflow-hidden bg-black">
       {/* Background image full viewport */}
       <Image
-        src="/studio/sign-in-bg.jpg"
+        src="/sign-in-bg.jpg"
         alt=""
         fill
         priority

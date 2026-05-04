@@ -769,6 +769,11 @@ function shallowEqualBranding(a: Branding, b: Branding): boolean {
   if ((a.fonts?.body ?? '') !== (b.fonts?.body ?? '')) return false;
   if ((a.fonts?.displayCustom?.name ?? '') !== (b.fonts?.displayCustom?.name ?? '')) return false;
   if ((a.fonts?.bodyCustom?.name ?? '') !== (b.fonts?.bodyCustom?.name ?? '')) return false;
+  if (JSON.stringify(a.homeHero ?? null) !== JSON.stringify(b.homeHero ?? null)) return false;
+  if (
+    JSON.stringify(a.heroGradient ?? null) !== JSON.stringify(b.heroGradient ?? null)
+  )
+    return false;
   return true;
 }
 
@@ -790,15 +795,11 @@ function shallowEqualModules(a: ModulesConfig, b: ModulesConfig): boolean {
 }
 
 function shallowEqualBillboard(a: BillboardConfig, b: BillboardConfig): boolean {
-  if (a.variant !== b.variant) return false;
-  if (a.idleTimeoutSec !== b.idleTimeoutSec) return false;
-  if (a.logoSize !== b.logoSize) return false;
-  if (a.modules.length !== b.modules.length) return false;
-  for (let i = 0; i < a.modules.length; i++) {
-    if (a.modules[i] !== b.modules[i]) return false;
-  }
-  if (JSON.stringify(a.b0) !== JSON.stringify(b.b0)) return false;
-  return true;
+  // Comparación full JSON: cubre todos los campos actuales y futuros sin
+  // riesgo de olvidar añadir uno cuando se extiende el schema (bug histórico:
+  // antes solo se comparaban variant/idleTimeout/logoSize/modules y los
+  // cambios al b0 nunca marcaban dirty).
+  return JSON.stringify(a) === JSON.stringify(b);
 }
 
 function shallowEqualAi(a: AiAvatarConfig, b: AiAvatarConfig): boolean {

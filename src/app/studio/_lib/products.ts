@@ -1,4 +1,11 @@
-import { LayoutTemplate, Monitor, Package, Presentation } from 'lucide-react';
+import {
+  LayoutGrid,
+  LayoutTemplate,
+  Monitor,
+  Package,
+  Presentation,
+  Tv,
+} from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 /**
@@ -75,6 +82,34 @@ export const STUDIO_PRODUCTS: readonly StudioProduct[] = [
       'Section-based builder (Hero / Features / CTA) that inherits brand tokens automatically',
       'Mobile-first responsive — every section ships with a tested mobile/tablet/desktop variant',
       'Publish to {your-slug}.kiosks.trueomni.com with HTTPS and analytics out of the box',
+    ],
+  },
+  {
+    id: 'digital-displays',
+    label: 'Digital Displays',
+    href: '/studio/digital-displays',
+    icon: Tv,
+    status: 'soon',
+    comingSoonCopy:
+      'Run scheduled content loops on lobby TVs, conference room screens and digital signage — same brand tokens, made for ambient playback.',
+    comingSoonFeatures: [
+      'Playlist editor with timed slides, video loops and live data tickers',
+      'Day-parting: show different content by hour, day of the week or special events',
+      'Push to any HDMI display via TrueOmni Player (Raspberry Pi, BrightSign, Chromecast)',
+    ],
+  },
+  {
+    id: 'video-walls',
+    label: 'Video Walls',
+    href: '/studio/video-walls',
+    icon: LayoutGrid,
+    status: 'soon',
+    comingSoonCopy:
+      'Compose synchronized content across a grid of displays. Layout-aware editing so a hero asset can span multiple screens or stay per-tile.',
+    comingSoonFeatures: [
+      'Grid composer (2×2, 3×3, custom) with snapping and bezel-aware safe areas',
+      'Per-tile or spanning content with frame-accurate sync between players',
+      'Stress-test renderer to preview how a video wall behaves before installing it on-site',
     ],
   },
 ] as const;

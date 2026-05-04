@@ -3,6 +3,14 @@
 import { Maximize, Minus, Plus, RotateCcw, X } from 'lucide-react';
 import { useEffect, useRef, useState, type RefObject } from 'react';
 
+type PreviewOrientation = 'portrait' | 'landscape' | 'mobile-pwa';
+
+const ORIENTATION_DIMS: Record<PreviewOrientation, { w: number; h: number }> = {
+  portrait: { w: 1080, h: 1920 },
+  landscape: { w: 1920, h: 1080 },
+  'mobile-pwa': { w: 390, h: 844 },
+};
+
 /**
  * Live Preview Panel.
  *
@@ -22,18 +30,17 @@ export function PreviewPanel({
 }: {
   slug: string;
   nombre: string;
-  initialOrientation?: 'portrait' | 'landscape';
+  initialOrientation?: PreviewOrientation;
   reloadKey: number;
   iframeRef: RefObject<HTMLIFrameElement | null>;
   onIframeLoad?: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
-  const [orientation, setOrientation] = useState<'portrait' | 'landscape'>(initialOrientation);
+  const [orientation, setOrientation] = useState<PreviewOrientation>(initialOrientation);
   const [fullScreen, setFullScreen] = useState(false);
 
-  const w = orientation === 'portrait' ? 1080 : 1920;
-  const h = orientation === 'portrait' ? 1920 : 1080;
+  const { w, h } = ORIENTATION_DIMS[orientation];
 
   // Default 40% pero auto-fit hacia abajo si el panel es muy estrecho (lg @1024
   // tiene ~384px de ancho útil → 1080*0.4=432 se cortaría 48px).
@@ -99,6 +106,12 @@ export function PreviewPanel({
             icon={<LandscapeGlyph />}
             label="Landscape · 1920×1080"
           />
+          <DeviceTab
+            active={orientation === 'mobile-pwa'}
+            onClick={() => setOrientation('mobile-pwa')}
+            icon={<MobilePwaGlyph />}
+            label="PWA · 390×844"
+          />
         </div>
 
         <div className="flex items-center gap-1 text-[11px] text-zinc-500">
@@ -133,8 +146,8 @@ export function PreviewPanel({
               const padding = 56;
               const availH = el.clientHeight - padding * 2;
               const availW = el.clientWidth - padding * 2;
-              const wantedW = orientation === 'portrait' ? 1080 : 1920;
-              const wantedH = orientation === 'portrait' ? 1920 : 1080;
+              const wantedW = ORIENTATION_DIMS[orientation].w;
+              const wantedH = ORIENTATION_DIMS[orientation].h;
               const next = Math.min(availH / wantedH, availW / wantedW);
               setScale(Math.min(Math.max(next, 0.4), 0.65));
             }}
@@ -165,8 +178,14 @@ export function PreviewPanel({
             height: h * scale,
           }}
         >
-          {orientation === 'landscape' ? (
-            <LandscapeComingSoon slug={slug} scale={scale} width={w} height={h} />
+          {orientation === 'landscape' || orientation === 'mobile-pwa' ? (
+            <OrientationComingSoon
+              slug={slug}
+              scale={scale}
+              width={w}
+              height={h}
+              orientation={orientation}
+            />
           ) : (
             <iframe
               ref={iframeRef}
@@ -226,13 +245,12 @@ function FullScreenPreview({
 }: {
   slug: string;
   nombre: string;
-  orientation: 'portrait' | 'landscape';
+  orientation: PreviewOrientation;
   onClose: () => void;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
-  const w = orientation === 'portrait' ? 1080 : 1920;
-  const h = orientation === 'portrait' ? 1920 : 1080;
+  const { w, h } = ORIENTATION_DIMS[orientation];
 
   useEffect(() => {
     function fit() {
@@ -284,8 +302,14 @@ function FullScreenPreview({
         className="relative overflow-hidden shadow-2xl"
         style={{ width: w * scale, height: h * scale }}
       >
-        {orientation === 'landscape' ? (
-          <LandscapeComingSoon slug={slug} scale={scale} width={w} height={h} />
+        {orientation === 'landscape' || orientation === 'mobile-pwa' ? (
+          <OrientationComingSoon
+            slug={slug}
+            scale={scale}
+            width={w}
+            height={h}
+            orientation={orientation}
+          />
         ) : (
           <iframe
             src="/"
@@ -337,23 +361,57 @@ function DeviceTab({
 }
 
 /**
- * Placeholder full-bleed 1920×1080 que reemplaza al iframe del kiosk
- * cuando el usuario activa la pestaña Landscape. Estética premium
- * matching el branding del Studio (gradient + grid + spotlight). El
- * contenido del kiosk en orientación horizontal entra en una fase
- * posterior — por ahora solo se muestra el "Coming Soon".
+ * Placeholder full-bleed que reemplaza al iframe del kiosk cuando el
+ * usuario activa una pestaña aún no implementada (Landscape 1920×1080
+ * o Mobile PWA 390×844). Estética premium matching el branding del
+ * Studio (gradient + grid + spotlight). El contenido real para esas
+ * orientaciones entra en una fase posterior — el publish backend ya
+ * acepta los 3 valores en el schema.
  */
-function LandscapeComingSoon({
+function OrientationComingSoon({
   slug,
   scale,
   width,
   height,
+  orientation,
 }: {
   slug: string;
   scale: number;
   width: number;
   height: number;
+  orientation: 'landscape' | 'mobile-pwa';
 }) {
+  const meta =
+    orientation === 'landscape'
+      ? {
+          modeLabel: 'Landscape mode',
+          headline: 'Coming soon.',
+          body: (
+            <>
+              A 1920×1080 horizontal kiosk experience for{' '}
+              <span className="font-semibold text-white">TrueOmni</span> is in design.
+              Switch back to <span className="text-sky-300">Kiosk · 1080×1920</span> to
+              keep editing the portrait experience.
+            </>
+          ),
+          dimsLabel: '1920 × 1080',
+          ratio: '16:9',
+        }
+      : {
+          modeLabel: 'Mobile PWA',
+          headline: 'Coming soon.',
+          body: (
+            <>
+              A 390×844 mobile PWA experience for{' '}
+              <span className="font-semibold text-white">TrueOmni</span> is in design.
+              Switch back to <span className="text-sky-300">Kiosk · 1080×1920</span> to
+              keep editing the portrait experience. The PWA bundle is still generated
+              at publish time alongside the kiosk.
+            </>
+          ),
+          dimsLabel: '390 × 844',
+          ratio: '9:19.5',
+        };
   return (
     <div
       className="absolute left-0 top-0 overflow-hidden"
@@ -397,12 +455,12 @@ function LandscapeComingSoon({
           style={{ fontSize: 28, letterSpacing: '0.18em' }}
         >
           <span className="block h-2.5 w-2.5 animate-pulse rounded-full bg-sky-400" />
-          <span className="font-mono uppercase">Landscape mode</span>
+          <span className="font-mono uppercase">{meta.modeLabel}</span>
         </span>
         <h1
           className="font-display font-bold tracking-tight"
           style={{
-            fontSize: 220,
+            fontSize: orientation === 'mobile-pwa' ? 80 : 220,
             lineHeight: 0.92,
             background: 'linear-gradient(180deg, #fff 30%, rgba(255,255,255,0.45) 100%)',
             WebkitBackgroundClip: 'text',
@@ -411,26 +469,23 @@ function LandscapeComingSoon({
             color: 'transparent',
           }}
         >
-          Coming soon.
+          {meta.headline}
         </h1>
         <p
           className="mt-12 max-w-[1400px] leading-snug text-white/75"
-          style={{ fontSize: 36, lineHeight: 1.4 }}
+          style={{ fontSize: orientation === 'mobile-pwa' ? 18 : 36, lineHeight: 1.4 }}
         >
-          A 1920×1080 horizontal kiosk experience for{' '}
-          <span className="font-semibold text-white">TrueOmni</span> is in design. Switch
-          back to <span className="text-sky-300">Kiosk · 1080×1920</span> to keep editing
-          the portrait experience.
+          {meta.body}
         </p>
         <div
           className="mt-16 flex items-center gap-6 text-white/55"
-          style={{ fontSize: 22 }}
+          style={{ fontSize: orientation === 'mobile-pwa' ? 13 : 22 }}
         >
           <span className="font-mono">/clients/{slug}</span>
           <span>·</span>
-          <span>1920 × 1080</span>
+          <span>{meta.dimsLabel}</span>
           <span>·</span>
-          <span>16:9</span>
+          <span>{meta.ratio}</span>
         </div>
       </div>
       {/* TrueOmni mark */}
@@ -458,6 +513,16 @@ function LandscapeGlyph() {
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <rect x="1.5" y="4" width="13" height="8" rx="1.2" />
       <line x1="13" y1="6.8" x2="13" y2="9.2" />
+    </svg>
+  );
+}
+
+function MobilePwaGlyph() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="1.5" width="6" height="13" rx="1.2" />
+      <line x1="7" y1="12.6" x2="9" y2="12.6" />
+      <line x1="6.5" y1="3.2" x2="9.5" y2="3.2" />
     </svg>
   );
 }

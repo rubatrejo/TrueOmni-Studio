@@ -1636,13 +1636,33 @@ const SlugSchema = z
     message: 'slug must be lowercase letters, digits and hyphens (1–64 chars).',
   });
 
-export const KIOSK_ORIENTATIONS = ['portrait', 'landscape'] as const;
+export const KIOSK_ORIENTATIONS = ['portrait', 'landscape', 'mobile-pwa'] as const;
 export type KioskOrientation = (typeof KIOSK_ORIENTATIONS)[number];
+
+/**
+ * Dimensiones canónicas de cada orientación. Usadas por el PreviewPanel del
+ * Studio y por el KioskCanvas del runtime para enforcer el viewport.
+ */
+export const ORIENTATION_DIMENSIONS: Record<
+  KioskOrientation,
+  { w: number; h: number }
+> = {
+  portrait: { w: 1080, h: 1920 },
+  landscape: { w: 1920, h: 1080 },
+  // iPhone 14 Pro estándar (393×852 → redondeado). El runtime PWA es
+  // responsive desde aquí hacia abajo (small phones se escalan).
+  'mobile-pwa': { w: 390, h: 844 },
+};
 
 export const KioskConfigSchema = z.object({
   slug: SlugSchema,
   nombre: z.string().min(1).max(120),
-  /** Orientación física del kiosk. `portrait` = 1080×1920, `landscape` = 1920×1080. */
+  /**
+   * Orientación primaria del kiosk — la que se renderiza por default al abrir
+   * el editor. Internamente todos los clientes pueden exportarse en las 3
+   * orientaciones (portrait/landscape/mobile-pwa); este campo solo controla
+   * qué viewport se ve primero y qué bundle es el "canónico" del cliente.
+   */
   orientation: z.enum(KIOSK_ORIENTATIONS).default('portrait'),
   branding: BrandingSchema,
   /** Lista de tiles del Home — ordenada, con toggle on/off y label editable. */

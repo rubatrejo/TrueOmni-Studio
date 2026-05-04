@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 
 const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
 
-type Orientation = 'portrait' | 'landscape';
+type Orientation = 'portrait' | 'landscape' | 'mobile-pwa';
 
 export function NewClientModal({
   open,
@@ -171,7 +171,7 @@ export function NewClientModal({
                 <span className="mb-1.5 block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
                   Orientation
                 </span>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <OrientationOption
                     active={orientation === 'portrait'}
                     onClick={() => setOrientation('portrait')}
@@ -196,9 +196,25 @@ export function NewClientModal({
                       </svg>
                     }
                   />
+                  <OrientationOption
+                    active={orientation === 'mobile-pwa'}
+                    onClick={() => setOrientation('mobile-pwa')}
+                    label="Mobile PWA"
+                    sub="390 × 844"
+                    glyph={
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="8" y="2" width="8" height="20" rx="2" />
+                        <line x1="11" y1="18.5" x2="13" y2="18.5" />
+                        <line x1="10" y1="4.5" x2="14" y2="4.5" />
+                      </svg>
+                    }
+                  />
                 </div>
-                <p className="mt-1 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-500">
-                  Physical kiosk display orientation. Landscape support is in development.
+                <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-500">
+                  This is the primary view that opens in the editor. All three formats
+                  (Portrait, Landscape, Mobile PWA) are generated automatically — you can
+                  switch between them inside the editor and export any of them at publish
+                  time.
                 </p>
               </div>
 

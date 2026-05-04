@@ -178,7 +178,7 @@ export function PreviewPanel({
             height: h * scale,
           }}
         >
-          {orientation === 'landscape' || orientation === 'mobile-pwa' ? (
+          {orientation === 'landscape' ? (
             <OrientationComingSoon
               slug={slug}
               scale={scale}
@@ -302,7 +302,7 @@ function FullScreenPreview({
         className="relative overflow-hidden shadow-2xl"
         style={{ width: w * scale, height: h * scale }}
       >
-        {orientation === 'landscape' || orientation === 'mobile-pwa' ? (
+        {orientation === 'landscape' ? (
           <OrientationComingSoon
             slug={slug}
             scale={scale}
@@ -379,39 +379,22 @@ function OrientationComingSoon({
   scale: number;
   width: number;
   height: number;
-  orientation: 'landscape' | 'mobile-pwa';
+  orientation: 'landscape';
 }) {
-  const meta =
-    orientation === 'landscape'
-      ? {
-          modeLabel: 'Landscape mode',
-          headline: 'Coming soon.',
-          body: (
-            <>
-              A 1920×1080 horizontal kiosk experience for{' '}
-              <span className="font-semibold text-white">TrueOmni</span> is in design.
-              Switch back to <span className="text-sky-300">Kiosk · 1080×1920</span> to
-              keep editing the portrait experience.
-            </>
-          ),
-          dimsLabel: '1920 × 1080',
-          ratio: '16:9',
-        }
-      : {
-          modeLabel: 'Mobile PWA',
-          headline: 'Coming soon.',
-          body: (
-            <>
-              A 390×844 mobile PWA experience for{' '}
-              <span className="font-semibold text-white">TrueOmni</span> is in design.
-              Switch back to <span className="text-sky-300">Kiosk · 1080×1920</span> to
-              keep editing the portrait experience. The PWA bundle is still generated
-              at publish time alongside the kiosk.
-            </>
-          ),
-          dimsLabel: '390 × 844',
-          ratio: '9:19.5',
-        };
+  const meta = {
+    modeLabel: 'Landscape mode',
+    headline: 'Coming soon.',
+    body: (
+      <>
+        A 1920×1080 horizontal kiosk experience for{' '}
+        <span className="font-semibold text-white">TrueOmni</span> is in design. Switch
+        back to <span className="text-sky-300">Kiosk · 1080×1920</span> to keep editing
+        the portrait experience.
+      </>
+    ),
+    dimsLabel: '1920 × 1080',
+    ratio: '16:9',
+  };
   return (
     <div
       className="absolute left-0 top-0 overflow-hidden"
@@ -460,7 +443,7 @@ function OrientationComingSoon({
         <h1
           className="font-display font-bold tracking-tight"
           style={{
-            fontSize: orientation === 'mobile-pwa' ? 80 : 220,
+            fontSize: 220,
             lineHeight: 0.92,
             background: 'linear-gradient(180deg, #fff 30%, rgba(255,255,255,0.45) 100%)',
             WebkitBackgroundClip: 'text',
@@ -473,13 +456,13 @@ function OrientationComingSoon({
         </h1>
         <p
           className="mt-12 max-w-[1400px] leading-snug text-white/75"
-          style={{ fontSize: orientation === 'mobile-pwa' ? 18 : 36, lineHeight: 1.4 }}
+          style={{ fontSize: 36, lineHeight: 1.4 }}
         >
           {meta.body}
         </p>
         <div
           className="mt-16 flex items-center gap-6 text-white/55"
-          style={{ fontSize: orientation === 'mobile-pwa' ? 13 : 22 }}
+          style={{ fontSize: 22 }}
         >
           <span className="font-mono">/clients/{slug}</span>
           <span>·</span>

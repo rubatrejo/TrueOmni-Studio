@@ -174,9 +174,10 @@ export function BillboardEditor({
             </label>
             <MediaField
               label="Drop image or video"
-              hint="1080×1920 portrait · JPG/PNG/WebP up to 5MB · MP4/WebM up to 5MB · keep videos short loops (5–15s)"
+              hint="1080×1920 portrait · JPG/PNG/WebP up to 5MB (compressed for upload) · MP4/WebM up to 2MB inline (paste a CDN URL below for larger videos)"
               aspect="9/16"
-              maxBytes={5 * 1024 * 1024}
+              maxImageBytes={5 * 1024 * 1024}
+              maxVideoBytes={2 * 1024 * 1024}
               value={b0.background.src}
               kind={b0.background.type}
               onChange={(next) => {
@@ -275,17 +276,121 @@ export function BillboardEditor({
             onChange={(fontSize) => setB0({ touchHere: { ...b0.touchHere, fontSize } })}
           />
 
-          {/* Overlay opacity */}
-          <SliderRow
-            label="Overlay darkness"
-            min={0}
-            max={100}
-            step={5}
-            unit="%"
-            value={Math.round(b0.overlayOpacity * 100)}
-            onChange={(pct) => setB0({ overlayOpacity: Math.max(0, Math.min(1, pct / 100)) })}
-            hint="Dark layer between background and logo + button. Useful when the bg is too bright."
-          />
+          {/* Overlay — solid color o gradient */}
+          <div className="space-y-2">
+            <span className="block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+              Overlay
+            </span>
+            <div
+              role="radiogroup"
+              aria-label="Overlay mode"
+              className="inline-flex rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-800 dark:bg-zinc-950"
+            >
+              <button
+                role="radio"
+                aria-checked={b0.overlay.mode === 'solid'}
+                type="button"
+                onClick={() =>
+                  setB0({ overlay: { ...b0.overlay, mode: 'solid' } })
+                }
+                className={
+                  'rounded-md px-3 py-1 text-[11.5px] transition ' +
+                  (b0.overlay.mode === 'solid'
+                    ? 'bg-sky-500 text-white shadow-sm'
+                    : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40')
+                }
+              >
+                Solid color
+              </button>
+              <button
+                role="radio"
+                aria-checked={b0.overlay.mode === 'gradient'}
+                type="button"
+                onClick={() =>
+                  setB0({ overlay: { ...b0.overlay, mode: 'gradient' } })
+                }
+                className={
+                  'rounded-md px-3 py-1 text-[11.5px] transition ' +
+                  (b0.overlay.mode === 'gradient'
+                    ? 'bg-sky-500 text-white shadow-sm'
+                    : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40')
+                }
+              >
+                Gradient
+              </button>
+            </div>
+
+            {b0.overlay.mode === 'solid' ? (
+              <>
+                <ColorRow
+                  label="Color"
+                  value={b0.overlay.color}
+                  onChange={(color) => setB0({ overlay: { ...b0.overlay, color } })}
+                />
+                <SliderRow
+                  label="Opacity"
+                  min={0}
+                  max={100}
+                  step={5}
+                  unit="%"
+                  value={Math.round(b0.overlay.opacity * 100)}
+                  onChange={(pct) =>
+                    setB0({
+                      overlay: {
+                        ...b0.overlay,
+                        opacity: Math.max(0, Math.min(1, pct / 100)),
+                      },
+                    })
+                  }
+                  hint="0% = no overlay. Useful to darken bright backgrounds so the logo and button stay readable."
+                />
+              </>
+            ) : (
+              <>
+                <ColorRow
+                  label="From color"
+                  value={b0.overlay.gradient.from}
+                  onChange={(from) =>
+                    setB0({
+                      overlay: {
+                        ...b0.overlay,
+                        gradient: { ...b0.overlay.gradient, from },
+                      },
+                    })
+                  }
+                />
+                <ColorRow
+                  label="To color"
+                  value={b0.overlay.gradient.to}
+                  onChange={(to) =>
+                    setB0({
+                      overlay: {
+                        ...b0.overlay,
+                        gradient: { ...b0.overlay.gradient, to },
+                      },
+                    })
+                  }
+                />
+                <SliderRow
+                  label="Angle"
+                  min={0}
+                  max={360}
+                  step={15}
+                  unit="°"
+                  value={b0.overlay.gradient.angle}
+                  onChange={(angle) =>
+                    setB0({
+                      overlay: {
+                        ...b0.overlay,
+                        gradient: { ...b0.overlay.gradient, angle },
+                      },
+                    })
+                  }
+                  hint="180° = top → bottom. Use 8-digit hex (#rrggbbAA) on To color for transparent fade."
+                />
+              </>
+            )}
+          </div>
         </section>
       )}
 
@@ -500,6 +605,46 @@ function SliderRow({
       {hint ? (
         <p className="text-[10.5px] text-zinc-500 dark:text-zinc-500">{hint}</p>
       ) : null}
+    </div>
+  );
+}
+
+function ColorRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (next: string) => void;
+}) {
+  // Solo el picker nativo necesita 6-digit hex (no soporta alpha). El input
+  // texto sí acepta 8-digit (#rrggbbAA) para alpha en gradients.
+  const sixDigit = /^#[0-9a-fA-F]{6}$/.test(value) ? value : value.slice(0, 7);
+  return (
+    <div className="space-y-1">
+      <span className="block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+        {label}
+      </span>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={sixDigit}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-8 w-12 cursor-pointer rounded border border-zinc-200 bg-transparent dark:border-zinc-700"
+          aria-label={`${label} picker`}
+        />
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => {
+            const v = e.target.value.trim();
+            if (/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(v) || v === '') onChange(v);
+          }}
+          placeholder="#000000 or #000000FF"
+          className="flex-1 rounded-md border border-zinc-200 bg-white px-2 py-1 font-mono text-[11.5px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
+        />
+      </div>
     </div>
   );
 }

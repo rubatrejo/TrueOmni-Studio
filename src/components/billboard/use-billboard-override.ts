@@ -91,5 +91,13 @@ export function useBillboardB0(): BillboardB0Config {
     background: b0?.background ?? DEFAULT_BILLBOARD_B0.background,
     touchHere: { ...DEFAULT_BILLBOARD_B0.touchHere, ...(b0?.touchHere ?? {}) },
     overlayOpacity: b0?.overlayOpacity ?? DEFAULT_BILLBOARD_B0.overlayOpacity,
+    overlay: {
+      ...DEFAULT_BILLBOARD_B0.overlay,
+      ...(b0?.overlay ?? {}),
+      gradient: {
+        ...DEFAULT_BILLBOARD_B0.overlay.gradient,
+        ...(b0?.overlay?.gradient ?? {}),
+      },
+    },
   };
 }

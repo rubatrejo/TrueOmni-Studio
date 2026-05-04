@@ -307,6 +307,12 @@ type BillboardPatch = {
       fontSize: number;
     };
     overlayOpacity?: number;
+    overlay?: {
+      mode?: 'solid' | 'gradient';
+      color?: string;
+      opacity?: number;
+      gradient?: { from?: string; to?: string; angle?: number };
+    };
   };
 };
 

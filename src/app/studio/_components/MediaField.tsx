@@ -1,24 +1,24 @@
 'use client';
 
-import { Film, Image as ImageIcon, Loader2, Upload, X } from 'lucide-react';
+import { Film, Image as ImageIcon, Link as LinkIcon, Loader2, Upload, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import { resolveStudioAsset } from '../_lib/asset-resolve';
-import { readFileAsDataURL } from '../_lib/image-utils';
+import { compressImage, readFileAsDataURL } from '../_lib/image-utils';
 import { useStudioSlug } from '../_lib/slug-context';
 
 interface MediaFieldProps {
-  /** Texto principal del campo. */
   label: string;
-  /** Subtítulo descriptivo (ej. medidas recomendadas). */
   hint: string;
-  /** Aspect ratio del preview. Default '9/16' (portrait kiosk). */
   aspect?: string;
-  /** Tamaño máximo permitido en bytes. Default 5MB. */
-  maxBytes?: number;
-  /** Data URL o path actual. */
+  /** Límite de tamaño RAW del file de imagen. Default 5MB (la imagen se
+   *  comprime después a ~1.2MB para encajar en el body limit de Vercel). */
+  maxImageBytes?: number;
+  /** Límite de tamaño RAW del file de video. Default 2MB (data URL ~2.7MB,
+   *  encaja en el límite 4.5MB del body Vercel hobby). Para videos más
+   *  grandes el operador debe pegar URL externa abajo. */
+  maxVideoBytes?: number;
   value?: string;
-  /** Mejor si recibe el `kind` actual del valor para renderizar acorde. */
   kind?: 'image' | 'video';
   onChange: (next: { src: string; kind: 'image' | 'video' } | undefined) => void;
 }
@@ -41,7 +41,8 @@ export function MediaField({
   label,
   hint,
   aspect = '9/16',
-  maxBytes = 5 * 1024 * 1024,
+  maxImageBytes = 5 * 1024 * 1024,
+  maxVideoBytes = 2 * 1024 * 1024,
   value,
   kind,
   onChange,
@@ -51,6 +52,7 @@ export function MediaField({
   const [hover, setHover] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bytes, setBytes] = useState<number | null>(null);
+  const [urlInput, setUrlInput] = useState('');
   const slug = useStudioSlug();
   const previewSrc = slug ? resolveStudioAsset(slug, value) : value;
 
@@ -59,21 +61,34 @@ export function MediaField({
 
   const pickFile = async (file: File) => {
     setError(null);
-    if (file.size > maxBytes) {
-      setError(
-        `File too large (${formatBytes(file.size)}). Max ${formatBytes(maxBytes)}.`,
-      );
-      return;
-    }
     const isImage = file.type.startsWith('image/');
     const isVideo = file.type.startsWith('video/');
     if (!isImage && !isVideo) {
       setError(`Unsupported file type: ${file.type || 'unknown'}.`);
       return;
     }
+    const limit = isVideo ? maxVideoBytes : maxImageBytes;
+    if (file.size > limit) {
+      setError(
+        isVideo
+          ? `Video too large (${formatBytes(file.size)}). Max ${formatBytes(limit)} for inline upload — paste a CDN URL below for larger files.`
+          : `Image too large (${formatBytes(file.size)}). Max ${formatBytes(limit)}.`,
+      );
+      return;
+    }
     setBusy(true);
     try {
-      const dataUrl = await readFileAsDataURL(file);
+      // Imagen: comprime a maxBytes 1.2MB → data URL ~1.6MB, dentro del
+      // límite 4.5MB de body Vercel. Calidad 0.9 + maxDim 2160 preservan
+      // bien un hero 1080×1920 (no se ve compresión visible).
+      // Video: pasa raw — ya enforzamos 2MB de límite arriba.
+      const dataUrl = isVideo
+        ? await readFileAsDataURL(file)
+        : await compressImage(file, {
+            maxDim: 2160,
+            maxBytes: 1200 * 1024,
+            quality: 0.9,
+          });
       setBytes(file.size);
       onChange({ src: dataUrl, kind: isVideo ? 'video' : 'image' });
     } catch (err) {
@@ -81,6 +96,16 @@ export function MediaField({
     } finally {
       setBusy(false);
     }
+  };
+
+  const applyUrl = () => {
+    const trimmed = urlInput.trim();
+    if (!trimmed) return;
+    const looksVideo = /\.(mp4|webm|mov)(\?|$)/i.test(trimmed);
+    onChange({ src: trimmed, kind: looksVideo ? 'video' : 'image' });
+    setBytes(null);
+    setUrlInput('');
+    setError(null);
   };
 
   return (
@@ -229,6 +254,32 @@ export function MediaField({
           {error}
         </p>
       ) : null}
+
+      {/* Or paste URL — alternativa para videos grandes via CDN */}
+      <div className="flex items-center gap-1.5 pt-1">
+        <LinkIcon className="h-3 w-3 shrink-0 text-zinc-400" />
+        <input
+          type="url"
+          value={urlInput}
+          onChange={(e) => setUrlInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              applyUrl();
+            }
+          }}
+          placeholder="Or paste a CDN URL (https://…/hero.mp4)"
+          className="flex-1 rounded-md border border-zinc-200 bg-white px-2 py-1 text-[11.5px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
+        />
+        <button
+          type="button"
+          onClick={applyUrl}
+          disabled={!urlInput.trim()}
+          className="rounded-md bg-zinc-900 px-2 py-1 text-[11px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-40 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+        >
+          Use URL
+        </button>
+      </div>
     </div>
   );
 }

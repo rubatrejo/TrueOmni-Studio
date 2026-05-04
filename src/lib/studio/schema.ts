@@ -286,8 +286,43 @@ export const BillboardB0Schema = z.object({
     .default({ label: '', twoLines: true, width: 548, height: 342, fontSize: 90 }),
   /** Opacidad del overlay oscuro entre background y contenido. 0 = sin
    *  overlay, 1 = totalmente negro. Útil cuando el bg es muy claro y el
-   *  logo blanco se pierde. */
+   *  logo blanco se pierde. (Legacy: si overlay.mode no se setea, este
+   *  valor sigue mandando con color #000.) */
   overlayOpacity: z.number().min(0).max(1).default(0),
+  /** Overlay configurable: solid color o gradient. Si está poblado,
+   *  reemplaza el comportamiento de overlayOpacity. */
+  overlay: z
+    .object({
+      mode: z.enum(['solid', 'gradient']).default('solid'),
+      /** Color hex del modo solid (ej. '#000000'). */
+      color: z
+        .string()
+        .regex(/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/)
+        .default('#000000'),
+      /** Opacidad 0-1 del modo solid. */
+      opacity: z.number().min(0).max(1).default(0),
+      /** Configuración del gradient cuando mode='gradient'. */
+      gradient: z
+        .object({
+          from: z
+            .string()
+            .regex(/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/)
+            .default('#000000'),
+          to: z
+            .string()
+            .regex(/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/)
+            .default('#00000000'),
+          /** Ángulo en grados del linear-gradient. 180 = top→bottom. */
+          angle: z.number().min(0).max(360).default(180),
+        })
+        .default({ from: '#000000', to: '#00000000', angle: 180 }),
+    })
+    .default({
+      mode: 'solid',
+      color: '#000000',
+      opacity: 0,
+      gradient: { from: '#000000', to: '#00000000', angle: 180 },
+    }),
 });
 
 export type BillboardB0Config = z.infer<typeof BillboardB0Schema>;
@@ -296,6 +331,12 @@ export const DEFAULT_BILLBOARD_B0: BillboardB0Config = {
   background: { type: 'image', src: '/assets/billboard-0/hero.jpg' },
   touchHere: { label: '', twoLines: true, width: 548, height: 342, fontSize: 90 },
   overlayOpacity: 0,
+  overlay: {
+    mode: 'solid',
+    color: '#000000',
+    opacity: 0,
+    gradient: { from: '#000000', to: '#00000000', angle: 180 },
+  },
 };
 
 export const BillboardSchema = z.object({

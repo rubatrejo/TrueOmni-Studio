@@ -51,17 +51,22 @@ export function PreviewPanel({
   // Audit F-38: al cambiar orientation (portrait↔landscape), recomputamos un
   // scale base apropiado al nuevo ratio en lugar de hard-set 0.4 — landscape
   // 1920px casi nunca cabe a 0.4 (= 768px) en lg.
+  //
+  // Mobile PWA: default 80% — el viewport es 390×844, mucho más pequeño que
+  // el portrait, así que cabe holgado y un zoom mayor hace que el placeholder
+  // y futuros previews mobile sean legibles sin tener que tocar el zoom.
   useEffect(() => {
+    const defaultScale = orientation === 'mobile-pwa' ? 0.8 : 0.4;
     const holder = containerRef.current?.parentElement;
     if (!holder) {
-      setScale(0.4);
+      setScale(defaultScale);
       return;
     }
     const padding = 24;
     const availW = holder.clientWidth - padding * 2;
     const availH = holder.clientHeight - padding * 2;
     const fit = Math.min(availW / w, availH / h);
-    setScale(Math.min(0.4, Math.max(0.15, fit)));
+    setScale(Math.min(defaultScale, Math.max(0.15, fit)));
   }, [orientation, w, h]);
 
   useEffect(() => {
@@ -178,7 +183,7 @@ export function PreviewPanel({
             height: h * scale,
           }}
         >
-          {orientation === 'landscape' ? (
+          {orientation === 'landscape' || orientation === 'mobile-pwa' ? (
             <OrientationComingSoon
               slug={slug}
               scale={scale}
@@ -302,7 +307,7 @@ function FullScreenPreview({
         className="relative overflow-hidden shadow-2xl"
         style={{ width: w * scale, height: h * scale }}
       >
-        {orientation === 'landscape' ? (
+        {orientation === 'landscape' || orientation === 'mobile-pwa' ? (
           <OrientationComingSoon
             slug={slug}
             scale={scale}
@@ -379,22 +384,39 @@ function OrientationComingSoon({
   scale: number;
   width: number;
   height: number;
-  orientation: 'landscape';
+  orientation: 'landscape' | 'mobile-pwa';
 }) {
-  const meta = {
-    modeLabel: 'Landscape mode',
-    headline: 'Coming soon.',
-    body: (
-      <>
-        A 1920×1080 horizontal kiosk experience for{' '}
-        <span className="font-semibold text-white">TrueOmni</span> is in design. Switch
-        back to <span className="text-sky-300">Kiosk · 1080×1920</span> to keep editing
-        the portrait experience.
-      </>
-    ),
-    dimsLabel: '1920 × 1080',
-    ratio: '16:9',
-  };
+  const meta =
+    orientation === 'landscape'
+      ? {
+          modeLabel: 'Landscape mode',
+          headline: 'Coming soon.',
+          body: (
+            <>
+              A 1920×1080 horizontal kiosk experience for{' '}
+              <span className="font-semibold text-white">TrueOmni</span> is in design.
+              Switch back to <span className="text-sky-300">Kiosk · 1080×1920</span> to
+              keep editing the portrait experience.
+            </>
+          ),
+          dimsLabel: '1920 × 1080',
+          ratio: '16:9',
+        }
+      : {
+          modeLabel: 'Mobile PWA',
+          headline: 'Coming soon.',
+          body: (
+            <>
+              A 390×844 mobile PWA experience for{' '}
+              <span className="font-semibold text-white">TrueOmni</span> is in design.
+              Switch back to <span className="text-sky-300">Kiosk · 1080×1920</span> to
+              keep editing the portrait experience. The PWA bundle is still generated
+              at publish time alongside the kiosk.
+            </>
+          ),
+          dimsLabel: '390 × 844',
+          ratio: '9:19.5',
+        };
   return (
     <div
       className="absolute left-0 top-0 overflow-hidden"
@@ -443,7 +465,7 @@ function OrientationComingSoon({
         <h1
           className="font-display font-bold tracking-tight"
           style={{
-            fontSize: 220,
+            fontSize: orientation === 'mobile-pwa' ? 80 : 220,
             lineHeight: 0.92,
             background: 'linear-gradient(180deg, #fff 30%, rgba(255,255,255,0.45) 100%)',
             WebkitBackgroundClip: 'text',
@@ -456,13 +478,13 @@ function OrientationComingSoon({
         </h1>
         <p
           className="mt-12 max-w-[1400px] leading-snug text-white/75"
-          style={{ fontSize: 36, lineHeight: 1.4 }}
+          style={{ fontSize: orientation === 'mobile-pwa' ? 18 : 36, lineHeight: 1.4 }}
         >
           {meta.body}
         </p>
         <div
           className="mt-16 flex items-center gap-6 text-white/55"
-          style={{ fontSize: 22 }}
+          style={{ fontSize: orientation === 'mobile-pwa' ? 13 : 22 }}
         >
           <span className="font-mono">/clients/{slug}</span>
           <span>·</span>

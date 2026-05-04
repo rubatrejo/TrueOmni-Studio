@@ -6,11 +6,11 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Milestone Studio — **audit Studio 100% cerrado (48/48) + DeepL Free auto-translate** (sesión 2026-05-01 sesión 2).
+**Fase activa:** Milestone Studio — **deploy E2E completo en `https://trueomni-studio.vercel.app`** (sesión 2026-05-04).
 
-**Última fase cerrada:** P1 + P2 + P3 audit completos + visual polish (logos del componente TrueOmniLogo, Photo Booth zoom + chroma elegante, onboarding centrado) + DeepL Free integration en `/api/studio/i18n/translate` con Anthropic fallback + UI bulk button "✨ Auto" por locale en `<MissingSummary>`.
+**Última fase cerrada:** S7.2 + S7.3 + S7.4 — Studio en producción con NextAuth (GitHub OAuth + allowlist) + PR-publish via octokit + Upstash KV cloud + sign-in page custom brandeada + editor del Billboard 0 idle (background image/video, Touch Here configurable, overlay color/gradient) + hero header editable en Branding (image/video + gradient).
 
-**Siguiente acción concreta:** Configurar `DEEPL_API_KEY` en `.env.local` (gratis 500k chars/mes en https://www.deepl.com/pro-api, key termina en `:fx`). Después: **Fase 4 — Primer cliente real** (`clients/{cliente-real}/`, build prod, Lighthouse > 95) o **S7.x — Publish flow real** (NextAuth + GitHub PR-publish + Vercel deploy).
+**Siguiente acción concreta:** **Vercel Blob storage** — desbloquea uploads hasta 5MB por archivo. Hoy data URLs van inline al config en KV con cap 950KB; con un solo bg de 5MB ya no cabe. Plan: `pnpm add @vercel/blob`, crear Blob store en marketplace (1-click), endpoint `/api/studio/upload`, MediaField sube a Blob → guarda URL (~200B). Después: **custom domain** `studio.trueomni.com` (necesita DNS de `trueomni.com`) o **DeepL/Anthropic keys** para auto-translate.
 
 **Bloqueos:**
 - **S7.2/3/4 bloqueados por infra externa** — necesitan: GitHub PAT (S7.2), OAuth provider + credentials (S7.3 NextAuth), proyecto Vercel + env vars en dashboard (S7.4).
@@ -2197,6 +2197,69 @@ Ver `~/.claude/projects/-Users-rubenramirez-Documents-Claude-Code-Kiosk-Portrait
 - **CommandPalette vanilla**: descartado `cmdk` dep (90KB) — implementado in-house con vanilla React + framer-motion (ya en deps). Si el scope crece (search global cross-workspace), migrar.
 
 **Fase:** Milestone Studio — audit Studio 100% cerrado (48/48). Siguiente: configurar DeepL key + arrancar Fase 4 o S7.x.
+
+---
+
+### Sesión 2026-05-04 — Deploy E2E (GitHub + Vercel + Upstash) + sign-in custom + Mobile PWA + Billboard 0 editor + Hero header editable
+
+**Hecho (21 commits hoy):**
+
+Setup infra (deploy a `https://trueomni-studio.vercel.app`):
+- Repo `rubatrejo/TrueOmni-Studio` privado creado, push inicial.
+- Proyecto Vercel `trueomni-studio` (`prj_puHjPHpHmjg0U6V9pRQzo8jT6Q2C`, team `team_miVkFll8Y3L0BQwWrE68AO1h`) creado via API REST.
+- SSO Protection desactivada (autorizado por Rubén) → kiosk runtime público.
+- Upstash KV cloud activo via marketplace (`upstash-kv-emerald-marble`, prefix `KV_`). Drafts persisten entre cold-starts. Footer del Studio: `Healthy · cloud KV · 51ms`.
+- Env vars en Vercel: `KIOSK_CLIENT`, `STUDIO_GITHUB_OWNER/REPO/BRANCH`, `STUDIO_ADMIN_EMAILS=designers@trueomni.com,ruben@trueomni.com,ruba.trejo@gmail.com`, `STUDIO_GITHUB_TOKEN` (PAT scope `repo`), `AUTH_GITHUB_ID/SECRET` (OAuth App), `AUTH_SECRET`, `AUTH_TRUST_HOST`, `KV_*` (5 vars Upstash).
+- Build Vercel arreglado: `eslint.ignoreDuringBuilds`, `pnpm.ignoredOptionalDependencies=['canvas']`, shim `src/pages/_document.tsx` no se borra en VERCEL=1.
+
+Studio S7.2 + S7.3 + S7.4 cerrados:
+- `src/lib/studio/github-publisher.ts` con octokit (blob → tree → commit → branch → PR) + helper `getRepoFileContent` para surgical edit de `tokens.css` en mode=pr.
+- `POST /api/studio/publish/[slug]?mode=fs|pr` auto-detecta serverless. Approval gate via `X-Studio-Admin-Email` (allowlist).
+- NextAuth v5 (`src/auth.ts`) con GitHub provider único, allowlist fail-closed. Middleware `src/middleware.ts` protege `/studio/*` y `/api/studio/*`, redirige a `/studio/sign-in` (custom).
+- Sign-in page custom (`src/app/studio/sign-in/page.tsx`): full-bleed image lobby + gradient izq + Welcome back + GitHub btn + error banner AccessDenied + footer legal.
+- Studio docs changelog auto-source desde GitHub Releases con prefix `studio-` (cache 1h, fallback hardcoded).
+
+Editor del Billboard 0 (Idle settings completo):
+- Schema `BillboardB0Config`: background (image/video), touchHere (label/twoLines/width/height/fontSize), overlayOpacity (legacy), overlay {mode: solid|gradient, color, opacity, gradient {from, to, angle}}.
+- Bridge: `BillboardPatch.b0` + `useBillboardB0()` hook con defaults canónicos.
+- `BillboardEditor` añadió sección "Idle settings" con MediaField + Touch Here label/layout/sliders + overlay editor (toggle solid/gradient + color pickers hex 6/8 dígitos + slider angle).
+- `MediaField` nuevo: image/video first-class, sin checkerboard, badge IMAGE/VIDEO, hover Replace, hint medidas, "Or paste a CDN URL" para videos grandes.
+
+Branding hero header editable:
+- Schema `branding.homeHero?: {kind, src}` y `branding.heroGradient?: {from, to, angle}`.
+- `<HomeHeader>` consume override; aplica a TODOS los hero headers del kiosk (Dashboard, Listings, Events, Map, etc.) — soporta video con autoplay+loop+muted.
+- EditorPanel nueva sección "Hero header" en Branding tab.
+
+Otros:
+- Mobile PWA orientation (390×844) en `KIOSK_ORIENTATIONS`. NewClientModal + PreviewPanel con 3 opciones (Portrait/Landscape/Mobile PWA). Modal centrado vert+horiz con grid place-items-center. Modal width 720px. PWA preview: Coming soon estilizado + default zoom 80%.
+- Digital Displays + Video Walls añadidos al ProductDropdown (coming-soon con copy específico).
+- Quick wins i18n: studio sections.ts subtítulo, Ask AI recognition.lang dinámico (BCP-47), ai_fallback_response tokenizado, stub home/[module] tokenizado, send-to-phone country code, filter overlays aria-label.
+- Fixes: New kiosk slug auto-suggest (flag `slugTouched`), `shallowEqualBranding/Billboard` con JSON.stringify completo (Save bug recurrente), KV cap 480→950KB con 413 detallado.
+
+**Verificado:**
+
+- `pnpm typecheck` y `pnpm build` limpios en cada commit.
+- Playwright smoke test: `/`, `/home`, `/home/photo-booth`, `/studio` (sign-in custom), `/studio/default` (editor con preview iframe).
+- `/api/health`: `kv.status=ok latency=51ms mode=cloud filesystem=ok`.
+- Login flow validado por Rubén con `ruba.trejo@gmail.com`.
+
+**Pendiente / siguiente:**
+
+- **Vercel Blob storage** (urgente): subir contenido hasta 5MB per file. Hoy data URLs en KV → cap 950KB total. Plan: `pnpm add @vercel/blob`, endpoint `/api/studio/upload`, MediaField sube a Blob → guarda URL (~200B) en config. ~30 min de trabajo limpio. Bloquea poder subir hero/B0 heros realistas.
+- **Custom domain** `studio.trueomni.com`: necesita DNS provider de `trueomni.com` + actualizar callback URL de la GitHub OAuth App.
+- **DeepL/Anthropic keys** auto-translate: Rubén crea cuentas, yo cableo en Vercel.
+- **Fase 4 — Primer cliente real**: Rubén lo hace manual.
+- **Smoke test E2E del flujo Studio→PR→merge→deploy**: requiere sesión browser real (no automatizable sin login NextAuth).
+
+**Decisiones:**
+
+- **Save bug fix preventive**: `shallowEqualBillboard` ahora usa `JSON.stringify(a) === JSON.stringify(b)` en lugar de campo-por-campo. El patrón antiguo era frágil (al añadir b0 olvidé incluirlo, mismo bug pasaría con cualquier extensión futura). Trade-off: ligero overhead de stringify, despreciable vs. garantía de detectar cambios anidados.
+- **Hero header en Branding (no en Home Dashboard)**: el `<HomeHeader>` se reutiliza en muchos módulos — un solo lugar de edición evita inconsistencias entre pantallas.
+- **MediaField sin Vercel Blob (v1)**: imagen comprimida a maxDim=2160 quality=0.9 maxBytes=1.2MB; video límite 2MB raw + input "Or paste URL" para CDN externa. Es solución intermedia hasta implementar Blob storage.
+- **`prompt: 'select_account'` en GitHub OAuth**: tras AccessDenied el operador puede elegir otra cuenta sin signOut explícito de GitHub.
+- **Schema overlay backwards-compatible**: `overlayOpacity` legacy queda como fallback en runtime; el nuevo `overlay {mode, color, opacity, gradient}` gana cuando está poblado. Kiosks publicados siguen idénticos hasta que el operador toque algún slider.
+
+**Fase:** Milestone Studio — Deploy E2E completo (S7.2 + S7.3 + S7.4 cerrados). Siguiente: Vercel Blob storage (desbloquea upload 5MB).
 
 ---
 

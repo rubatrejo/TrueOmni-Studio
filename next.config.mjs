@@ -18,6 +18,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const nextConfig = {
   reactStrictMode: true,
   outputFileTracingRoot: __dirname,
+  // Lint corre via `pnpm check` (CI gate separado). Dejar `next lint` dentro
+  // del build production rompía deploys en Vercel por warnings cumulativos
+  // de archivos no tocados en la rama actual. Los errores de TypeScript
+  // sí se mantienen como gate del build (más estrictos y menos ruidosos).
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   // Rewrites: `/k/<slug>` → `/?client=<slug>` (audit F-25). URL más limpio
   // para compartir entre operadores: "Visita /k/default" en vez de
   // "/?client=default". El query param se mantiene como source of truth

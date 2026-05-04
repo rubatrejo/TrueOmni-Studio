@@ -2,6 +2,7 @@
 
 import { BookOpen, ChevronDown, LogOut, Settings, UserCircle } from 'lucide-react';
 import Link from 'next/link';
+import { signOut } from 'next-auth/react';
 import { useEffect, useRef, useState } from 'react';
 
 import { ProductDropdown } from './ProductDropdown';
@@ -126,7 +127,7 @@ function UserDropdown({ email }: { email: string }) {
             <UserMenuItem
               icon={<UserCircle className="h-3.5 w-3.5" />}
               label="Account"
-              hint="Coming with auth"
+              hint="Coming soon"
             />
             <UserMenuItem
               icon={<Settings className="h-3.5 w-3.5" />}
@@ -137,8 +138,11 @@ function UserDropdown({ email }: { email: string }) {
             <UserMenuItem
               icon={<LogOut className="h-3.5 w-3.5" />}
               label="Sign out"
-              hint="Coming with auth"
               danger
+              onClick={() => {
+                setOpen(false);
+                void signOut({ callbackUrl: '/studio/sign-in' });
+              }}
             />
           </div>
         </div>
@@ -152,20 +156,24 @@ function UserMenuItem({
   label,
   hint,
   danger = false,
+  onClick,
 }: {
   icon: React.ReactNode;
   label: string;
   hint?: string;
   danger?: boolean;
+  onClick?: () => void;
 }) {
+  const interactive = Boolean(onClick);
   return (
     <button
       type="button"
       role="menuitem"
       title={hint}
-      disabled
+      disabled={!interactive}
+      onClick={onClick}
       className={
-        'flex w-full cursor-not-allowed items-center justify-between gap-2 px-3 py-1.5 text-left text-[12.5px] transition disabled:opacity-60 ' +
+        `flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-[12.5px] transition ${interactive ? 'cursor-pointer' : 'cursor-not-allowed disabled:opacity-60'} ` +
         (danger
           ? 'text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10'
           : 'text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-900')

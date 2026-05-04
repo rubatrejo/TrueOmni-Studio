@@ -41,6 +41,7 @@ import { FontSelector } from './FontSelector';
 import { GuestbookEditor } from './GuestbookEditor';
 import { I18nEditor } from './I18nEditor';
 import { ImageField } from './ImageField';
+import { MediaField } from './MediaField';
 import { IntegrationsEditor } from './IntegrationsEditor';
 import { ListingsEditor } from './ListingsEditor';
 import { HomeDashboardEditor, SystemModulesEditor } from './ModulesEditor';
@@ -446,6 +447,91 @@ function BrandingEditor({
             maxBytes={100 * 1024}
           />
         </div>
+      </Group>
+
+      {/* Hero header (image/video + gradient overlay) */}
+      <Group
+        title="Hero header"
+        hint="Background image or video for the Home Dashboard and module screens, plus the gradient overlay over it."
+      >
+        <MediaField
+          label="Drop image or video"
+          hint="1080×620 recommended · JPG/PNG/WebP up to 5MB · MP4/WebM up to 2MB · paste a CDN URL below for larger videos"
+          aspect="16/9"
+          maxImageBytes={5 * 1024 * 1024}
+          maxVideoBytes={2 * 1024 * 1024}
+          value={branding.homeHero?.src || undefined}
+          kind={branding.homeHero?.kind}
+          onChange={(next) => {
+            if (!next) {
+              setField('homeHero', undefined);
+              return;
+            }
+            setField('homeHero', { kind: next.kind, src: next.src });
+          }}
+        />
+        <p className="mt-3 text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
+          Gradient overlay
+        </p>
+        <p className="mb-1.5 text-[10.5px] text-zinc-500">
+          Layer between the hero photo and the logo + clock so they remain readable. Use 8-digit
+          hex (#rrggbbAA) for transparency in the To color.
+        </p>
+        <HexRow
+          label="From"
+          value={branding.heroGradient?.from ?? '#004f8be6'}
+          onChange={(v) =>
+            setField('heroGradient', {
+              from: v,
+              to: branding.heroGradient?.to ?? '#004f8b00',
+              angle: branding.heroGradient?.angle ?? 180,
+            })
+          }
+        />
+        <HexRow
+          label="To"
+          value={branding.heroGradient?.to ?? '#004f8b00'}
+          onChange={(v) =>
+            setField('heroGradient', {
+              from: branding.heroGradient?.from ?? '#004f8be6',
+              to: v,
+              angle: branding.heroGradient?.angle ?? 180,
+            })
+          }
+        />
+        <div className="mt-2 space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="text-[11.5px] text-zinc-700 dark:text-zinc-300">Angle</span>
+            <span className="font-mono text-[11px] text-zinc-500">
+              {branding.heroGradient?.angle ?? 180}°
+            </span>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={360}
+            step={15}
+            value={branding.heroGradient?.angle ?? 180}
+            onChange={(e) =>
+              setField('heroGradient', {
+                from: branding.heroGradient?.from ?? '#004f8be6',
+                to: branding.heroGradient?.to ?? '#004f8b00',
+                angle: Number(e.target.value),
+              })
+            }
+            className="w-full accent-sky-500"
+            aria-label="Gradient angle"
+          />
+        </div>
+        {branding.heroGradient ? (
+          <button
+            type="button"
+            onClick={() => setField('heroGradient', undefined)}
+            className="mt-1 text-[11px] text-zinc-500 underline-offset-2 hover:text-zinc-700 hover:underline dark:hover:text-zinc-300"
+          >
+            Reset gradient to default
+          </button>
+        ) : null}
       </Group>
 
       {/* Fonts */}
@@ -974,5 +1060,39 @@ function ComingSoon({ section }: { section: ReturnType<typeof STUDIO_SECTIONS.fi
         Roadmap · {section.phase}
       </span>
     </motion.div>
+  );
+}
+
+function HexRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (next: string) => void;
+}) {
+  const sixDigit = /^#[0-9a-fA-F]{6}$/.test(value) ? value : value.slice(0, 7);
+  return (
+    <div className="mt-2 flex items-center gap-2">
+      <span className="w-12 text-[11.5px] text-zinc-700 dark:text-zinc-300">{label}</span>
+      <input
+        type="color"
+        value={sixDigit}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-7 w-10 cursor-pointer rounded border border-zinc-200 bg-transparent dark:border-zinc-700"
+        aria-label={`${label} color picker`}
+      />
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => {
+          const v = e.target.value.trim();
+          if (/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(v) || v === '') onChange(v);
+        }}
+        placeholder="#004f8be6"
+        className="flex-1 rounded-md border border-zinc-200 bg-white px-2 py-1 font-mono text-[11px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
+      />
+    </div>
   );
 }

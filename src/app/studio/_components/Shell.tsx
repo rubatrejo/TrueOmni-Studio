@@ -797,6 +797,7 @@ function shallowEqualBillboard(a: BillboardConfig, b: BillboardConfig): boolean 
   for (let i = 0; i < a.modules.length; i++) {
     if (a.modules[i] !== b.modules[i]) return false;
   }
+  if (JSON.stringify(a.b0) !== JSON.stringify(b.b0)) return false;
   return true;
 }
 

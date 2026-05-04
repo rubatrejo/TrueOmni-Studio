@@ -46,32 +46,49 @@ export async function HomeHeader({
   const config = await getConfig();
   const coords = config.client.coords;
   const weather = await fetchWeather(coords?.lat, coords?.lng);
+  // Branding overrides: si el cliente tiene homeHero/heroGradient definidos
+  // los usamos por encima de los defaults hardcoded.
+  const brand = (config as unknown as { branding?: { homeHero?: { kind: 'image' | 'video'; src: string }; heroGradient?: { from: string; to: string; angle: number } } }).branding;
+  const overrideHero = brand?.homeHero?.src ? brand.homeHero : null;
+  const heroSrc = overrideHero?.src ?? heroImage;
+  const heroKind: 'image' | 'video' = overrideHero?.kind ?? 'image';
+  const grad = brand?.heroGradient;
+  const gradientCss = grad
+    ? `linear-gradient(${grad.angle}deg, ${grad.from}, ${grad.to})`
+    : 'linear-gradient(180deg, rgba(0,79,139,0.9) 0%, rgba(0,79,139,0.55) 30%, rgba(0,79,139,0) 70%)';
   return (
     <header
-      className={`relative ${heroImage ? 'overflow-hidden' : ''}`}
+      className={`relative ${heroSrc ? 'overflow-hidden' : ''}`}
       style={{
         width: '1080px',
         height: `${height}px`,
         flexShrink: 0,
       }}
     >
-      {/* Background photo (opcional) */}
-      {heroImage ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      {/* Background image o video (override del branding o default). */}
+      {heroSrc ? (
+        heroKind === 'video' ? (
+          <video
+            src={heroSrc}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={heroSrc} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        )
       ) : null}
-      {/* Linear gradient overlay — azul oscuro fijo en la parte superior
-          para que logo + hora + clima se lean sobre cualquier foto.
-          Fade a transparente hacia abajo para no ensuciar el hero. Si
-          `gradientExtra > 0`, el div del gradient se alarga esa cantidad
-          de px por debajo del box del header (sin empujar el layout). */}
+      {/* Linear gradient overlay — configurable desde branding.heroGradient
+          o default azul oscuro top→bottom. */}
       <div
         className="absolute left-0 right-0"
         style={{
           top: 0,
           height: `${height + gradientExtra}px`,
-          background:
-            'linear-gradient(180deg, rgba(0,79,139,0.9) 0%, rgba(0,79,139,0.55) 30%, rgba(0,79,139,0) 70%)',
+          background: gradientCss,
           pointerEvents: 'none',
         }}
       />

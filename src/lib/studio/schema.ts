@@ -70,6 +70,31 @@ export const BrandingSchema = z.object({
     })
     .partial()
     .optional(),
+  /** Imagen o video del hero header del Home (y módulos). Cuando está set,
+   *  reemplaza al default `/assets/home/header-bg.jpg` en TODOS los hero
+   *  headers del kiosk (Dashboard, Listings, Events, etc.). */
+  homeHero: z
+    .object({
+      kind: z.enum(['image', 'video']).default('image'),
+      src: z.string().default(''),
+    })
+    .optional(),
+  /** Gradient overlay sobre el hero header — entre la foto y el logo+widgets.
+   *  Valores hex 6 u 8 dígitos (alpha). Si está set, reemplaza el gradient
+   *  hardcoded `rgba(0,79,139, *)` del header.tsx. */
+  heroGradient: z
+    .object({
+      from: z
+        .string()
+        .regex(/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/)
+        .default('#004f8be6'),
+      to: z
+        .string()
+        .regex(/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/)
+        .default('#004f8b00'),
+      angle: z.number().min(0).max(360).default(180),
+    })
+    .optional(),
 });
 
 /** Lista curada de Google Fonts disponibles en el Font selector. */

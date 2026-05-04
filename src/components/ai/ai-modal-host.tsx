@@ -66,9 +66,23 @@ export function AiModalHost({
     });
   }, [suggestedQuestions, t]);
 
+  // Fallback response cuando ninguna suggested question matchea — tokenizado
+  // a `ai_fallback_response`. Si la key no existe, fallback al literal en
+  // inglés (manteniendo retrocompat con clientes que aún no la definen).
+  const localizedFallback = useMemo(() => {
+    const raw = t('ai_fallback_response');
+    return raw === 'ai_fallback_response'
+      ? 'I can help with that! Let me look into it for you.'
+      : raw;
+  }, [t]);
+
   useEffect(() => {
-    hydrate({ greeting: localizedGreeting, suggestedQuestions: localizedQuestions });
-  }, [hydrate, localizedGreeting, localizedQuestions]);
+    hydrate({
+      greeting: localizedGreeting,
+      suggestedQuestions: localizedQuestions,
+      fallbackResponse: localizedFallback,
+    });
+  }, [hydrate, localizedGreeting, localizedQuestions, localizedFallback]);
 
   return <AiModal heroVideoSrc={heroVideoSrc} textos={textos} clientName={clientName} />;
 }

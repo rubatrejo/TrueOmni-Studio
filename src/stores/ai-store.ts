@@ -13,7 +13,12 @@ type AiStore = {
   // Hidratado por <AiModalHost> en el primer render con la data del cliente.
   greeting: string;
   suggestedQuestions: AskAiSuggestedQuestion[];
-  hydrate: (data: { greeting: string; suggestedQuestions: AskAiSuggestedQuestion[] }) => void;
+  fallbackResponse: string;
+  hydrate: (data: {
+    greeting: string;
+    suggestedQuestions: AskAiSuggestedQuestion[];
+    fallbackResponse: string;
+  }) => void;
 
   // Estado del modal.
   isOpen: boolean;
@@ -32,9 +37,10 @@ type AiStore = {
 export const useAiStore = create<AiStore>((set, get) => ({
   greeting: '',
   suggestedQuestions: [],
-  hydrate: ({ greeting, suggestedQuestions }) => {
+  fallbackResponse: 'I can help with that! Let me look into it for you.',
+  hydrate: ({ greeting, suggestedQuestions, fallbackResponse }) => {
     const { greeting: prevGreeting, displayedText, messages, isTyping } = get();
-    set({ greeting, suggestedQuestions });
+    set({ greeting, suggestedQuestions, fallbackResponse });
     // Re-alinea displayedText con el greeting cuando NO hay conversación en curso
     // (cubre el cambio de locale: greeting nuevo se ve sin esperar al siguiente
     // open/close del modal).
@@ -56,9 +62,9 @@ export const useAiStore = create<AiStore>((set, get) => ({
   displayedText: '',
 
   askQuestion: (question: string) => {
-    const { suggestedQuestions } = get();
+    const { suggestedQuestions, fallbackResponse } = get();
     const match = suggestedQuestions.find((q) => q.text === question);
-    const response = match?.response ?? 'I can help with that! Let me look into it for you.';
+    const response = match?.response ?? fallbackResponse;
 
     set((state) => ({
       messages: [...state.messages, { role: 'user', text: question }],

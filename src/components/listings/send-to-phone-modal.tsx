@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
+import { useTextos } from '@/components/i18n-provider';
+
 import { NumericKeypad, type NumericKey } from './numeric-keypad';
 import { CancelSendButtons, SendModalChrome, TermsCheckbox } from './send-modal-chrome';
 
@@ -24,6 +26,9 @@ export function SendToPhoneModal({
   /** Si se pulsa keyboard-toggle del numpad, el componente padre puede abrir el email modal. */
   onSwitchToKeyboard?: () => void;
 }) {
+  const t = useTextos();
+  const countryCodeRaw = t('send_country_code');
+  const countryCode = countryCodeRaw === 'send_country_code' ? 'USA (+1)' : countryCodeRaw;
   const [value, setValue] = useState('');
   const [accepted, setAccepted] = useState(true);
 
@@ -97,7 +102,7 @@ export function SendToPhoneModal({
             color: '#333',
           }}
         >
-          <span>USA (+1)</span>
+          <span>{countryCode}</span>
           <span
             aria-hidden
             style={{

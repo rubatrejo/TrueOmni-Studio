@@ -83,7 +83,7 @@ export function TicketsFilterOverlay({
       <button
         type="button"
         onClick={onCancel}
-        aria-label="Cerrar filtros"
+        aria-label={t('filters_aria_close')}
         className="absolute flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
         style={{
           top: '24px',

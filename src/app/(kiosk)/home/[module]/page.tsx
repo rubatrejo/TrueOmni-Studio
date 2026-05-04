@@ -217,6 +217,9 @@ export default async function ModulePage({ params }: PageProps) {
   if (!tile && !isWayfinding) notFound();
 
   const label = tile?.label ?? home.wayfinding?.label ?? module;
+  const stubTextos = config.textos ?? {};
+  const comingSoonText = stubTextos.module_stub_coming_soon ?? 'Coming soon';
+  const backToHomeText = stubTextos.module_stub_back_to_home ?? 'Back to Home';
   return (
     <KioskCanvas>
       <div className="flex h-full w-full flex-col items-center justify-center gap-10 bg-white px-10 text-center">
@@ -227,14 +230,14 @@ export default async function ModulePage({ params }: PageProps) {
           {label}
         </h1>
         <p className="font-sans text-gray-600" style={{ fontSize: '32px' }}>
-          Coming soon
+          {comingSoonText}
         </p>
         <Link
           href="/home"
           className="mt-4 inline-flex items-center justify-center rounded-[10px] bg-[#004f8b] font-sans font-bold uppercase text-white transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
           style={{ fontSize: '26px', padding: '16px 40px', letterSpacing: '0.02em' }}
         >
-          Back to Home
+          {backToHomeText}
         </Link>
       </div>
     </KioskCanvas>

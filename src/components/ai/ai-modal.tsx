@@ -9,8 +9,28 @@ import { useEffect, useRef, useState } from 'react';
 
 import { SuggestedQuestions } from '@/components/ai/suggested-questions';
 import { OnScreenKeyboard, type KeyboardKey } from '@/components/home/on-screen-keyboard';
-import { useTextos } from '@/components/i18n-provider';
+import { useCurrentLocale, useTextos } from '@/components/i18n-provider';
 import { useAiStore } from '@/stores/ai-store';
+
+/**
+ * ISO 639-1 → BCP-47 tag para Web Speech API. Mapeo a la variante regional
+ * más extendida cuando un locale tiene varias (ej. `pt` → `pt-BR`). Locales
+ * fuera del mapa se pasan tal cual al motor del navegador.
+ */
+const VOICE_LANG_MAP: Record<string, string> = {
+  en: 'en-US',
+  es: 'es-ES',
+  fr: 'fr-FR',
+  de: 'de-DE',
+  pt: 'pt-BR',
+  ja: 'ja-JP',
+  it: 'it-IT',
+  nl: 'nl-NL',
+  pl: 'pl-PL',
+  ru: 'ru-RU',
+  zh: 'zh-CN',
+  ko: 'ko-KR',
+};
 
 interface AiModalTextos {
   title: string;
@@ -132,6 +152,7 @@ type SpeechRecognitionCtor = new () => SpeechRecognitionInstance;
  */
 export function AiModal({ heroVideoSrc: _heroVideoSrc, textos: incomingTextos, clientName }: AiModalProps) {
   const t = useTextos();
+  const currentLocale = useCurrentLocale();
   const pick = (key: string, fallback: string) => {
     const r = t(key);
     return r === key ? fallback : r;
@@ -424,7 +445,7 @@ export function AiModal({ heroVideoSrc: _heroVideoSrc, textos: incomingTextos, c
     const recognition = new Ctor();
     recognition.continuous = false;
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    recognition.lang = VOICE_LANG_MAP[currentLocale] ?? currentLocale;
 
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
@@ -444,7 +465,7 @@ export function AiModal({ heroVideoSrc: _heroVideoSrc, textos: incomingTextos, c
     return () => {
       recognition.abort();
     };
-  }, [askQuestion]);
+  }, [askQuestion, currentLocale]);
 
   // Mic listening rings — animación GSAP verbatim del paquete original.
   useGSAP(

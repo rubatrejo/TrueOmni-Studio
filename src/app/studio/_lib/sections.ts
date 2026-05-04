@@ -250,7 +250,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
     label: 'Languages',
     title: 'Languages & Translations',
     description:
-      'Editor for the 6 translations (EN/ES/FR/DE/PT/JA) with missing-key detection and AI-assisted translation.',
+      'Editor for all locales of this kiosk — add languages, fill missing keys, and bulk auto-translate via DeepL or Claude.',
     icon: 'Languages',
     systemModuleKey: 'languages',
     phase: 'S4',

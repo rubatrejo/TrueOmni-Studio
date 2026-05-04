@@ -286,9 +286,13 @@ type BrandingPatch = BrandPatch & {
   };
   homeHero?: { kind: 'image' | 'video'; src: string };
   heroGradient?: { from: string; to: string; angle: number };
+  /** Nombre del cliente — interpola `{client_name}` en textos del kiosk
+   *  reactivamente, sin esperar a publish. */
+  clientName?: string;
 };
 
 export const KIOSK_HERO_OVERRIDE_EVENT = 'kiosk:hero-override';
+export const KIOSK_CLIENT_NAME_OVERRIDE_EVENT = 'kiosk:client-name-override';
 
 export type HeroOverrideDetail = {
   homeHero?: { kind: 'image' | 'video'; src: string };
@@ -516,6 +520,18 @@ function applyBranding(branding: BrandingPatch) {
   }
   (window as KioskBridgeWindow).__kioskLogos = cache;
 
+  // Client name (reactivo): interpola `{client_name}` en greeting/subtitle
+  // del Ask AI, en módulos como Itinerary, etc. Evento separado para que
+  // los componentes solo escuchen lo que necesitan.
+  if (branding.clientName !== undefined) {
+    (window as KioskBridgeWindow).__kioskClientName = branding.clientName;
+    window.dispatchEvent(
+      new CustomEvent(KIOSK_CLIENT_NAME_OVERRIDE_EVENT, {
+        detail: { clientName: branding.clientName },
+      }),
+    );
+  }
+
   // Hero header background + gradient. Mismo patrón que logos: dispatch
   // event + cache en window para que componentes que se monten DESPUÉS
   // del último dispatch (ej. nav entre rutas dentro del iframe) puedan
@@ -539,6 +555,7 @@ function applyBranding(branding: BrandingPatch) {
 interface KioskBridgeWindow extends Window {
   __kioskLogos?: { default?: string; idle?: string; footer?: string };
   __kioskHero?: HeroOverrideDetail;
+  __kioskClientName?: string;
 }
 
 /**
@@ -550,6 +567,16 @@ interface KioskBridgeWindow extends Window {
 export function getCachedHeroOverride(): HeroOverrideDetail {
   if (typeof window === 'undefined') return {};
   return (window as KioskBridgeWindow).__kioskHero ?? {};
+}
+
+/**
+ * Lee el último client name override que el bridge haya aplicado, si
+ * existe. Usado por hooks reactivos para hidratar el estado al mount
+ * sin esperar el siguiente postMessage.
+ */
+export function getCachedClientName(): string | null {
+  if (typeof window === 'undefined') return null;
+  return (window as KioskBridgeWindow).__kioskClientName ?? null;
 }
 
 /**

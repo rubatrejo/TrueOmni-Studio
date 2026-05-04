@@ -18,6 +18,13 @@ interface HeroBackgroundLayerProps {
   /** Altura del header + extensión del gradient en px (usado en style). */
   height: number;
   gradientExtra: number;
+  /**
+   * Si `true`, escucha el evento `kiosk:hero-override` del bridge para
+   * recibir cambios live del editor del Studio. Solo el Dashboard debería
+   * activarlo: en módulos con su propio `heroImage` (Listings, Events,
+   * etc.) es ruido visual heredar el hero del Dashboard.
+   */
+  listenForOverride?: boolean;
 }
 
 /**
@@ -37,12 +44,14 @@ export function HeroBackgroundLayer({
   initialGradientCss,
   height,
   gradientExtra,
+  listenForOverride = false,
 }: HeroBackgroundLayerProps) {
   const [src, setSrc] = useState<string | null>(initialSrc);
   const [kind, setKind] = useState<'image' | 'video'>(initialKind);
   const [gradientCss, setGradientCss] = useState(initialGradientCss);
 
   useEffect(() => {
+    if (!listenForOverride) return;
     // Hidratar desde el cache del bridge si ya hubo dispatch antes del mount
     // (típico cuando se navega entre rutas dentro del iframe del Studio).
     const cached = getCachedHeroOverride();
@@ -66,7 +75,7 @@ export function HeroBackgroundLayer({
     };
     window.addEventListener(KIOSK_HERO_OVERRIDE_EVENT, onOverride);
     return () => window.removeEventListener(KIOSK_HERO_OVERRIDE_EVENT, onOverride);
-  }, []);
+  }, [listenForOverride]);
 
   return (
     <>

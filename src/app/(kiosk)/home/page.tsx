@@ -34,21 +34,25 @@ export default async function HomePage() {
     });
   }
   const askAi = home.askAi?.enabled ? home.askAi : null;
-  const interpolateClient = (raw: string) => raw.replaceAll('{client_name}', config.client.nombre);
+  // NOTA: el subtitle/greeting llevan `{client_name}` SIN interpolar — la
+  // interpolación ocurre client-side en AiModal/AiModalHost con
+  // `reactiveClientName` para que el preview del Studio se actualice
+  // reactivamente cuando el operador cambia el nombre del kiosk sin
+  // necesidad de publish.
   const askAiTextos = askAi
     ? {
         title: config.textos.ai_title ?? 'Ask AI',
-        subtitle: interpolateClient(askAi.subtitle ?? config.textos.ai_subtitle ?? ''),
+        subtitle: askAi.subtitle ?? config.textos.ai_subtitle ?? '',
         inputPlaceholder: config.textos.ai_input_placeholder ?? 'Type your question...',
         ariaClose: config.textos.ai_aria_close ?? 'Close Ask AI',
         ariaMic: config.textos.ai_aria_mic ?? 'Toggle voice input',
       }
     : null;
-  const askAiGreeting = askAi ? interpolateClient(askAi.greeting) : '';
+  const askAiGreeting = askAi ? askAi.greeting : '';
   return (
     <KioskCanvas>
       <HomeShell
-        header={<HomeHeader />}
+        header={<HomeHeader applyDashboardOverride />}
         listings={home.listings}
         allTiles={allTiles}
         survey={home.survey}

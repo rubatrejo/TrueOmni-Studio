@@ -223,8 +223,9 @@ export function Shell({
       fonts: branding.fonts,
       homeHero: branding.homeHero,
       heroGradient: branding.heroGradient,
+      clientName: initialConfig.nombre,
     });
-  }, [branding, pushBranding]);
+  }, [branding, pushBranding, initialConfig.nombre]);
 
   useEffect(() => {
     pushModules(modules);

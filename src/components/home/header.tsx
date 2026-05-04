@@ -29,6 +29,7 @@ export async function HomeHeader({
   children,
   childrenTop = 170,
   gradientExtra = 0,
+  applyDashboardOverride = false,
 }: {
   /** URL de la imagen de fondo. `null` → sin imagen, sólo gradient sobre azul. */
   heroImage?: string | null;
@@ -43,13 +44,23 @@ export async function HomeHeader({
    *  (sin afectar al flow del contenido que viene después). Útil para
    *  hacer el fade más largo sin mover el layout. */
   gradientExtra?: number;
+  /**
+   * Si `true`, aplica `branding.homeHero` y `branding.heroGradient` del
+   * config encima del `heroImage` prop. Solo el Home Dashboard debería
+   * pasar `true` — los demás módulos tienen su propio `heroImage` por
+   * sección y NO deberían heredar el hero del Dashboard.
+   */
+  applyDashboardOverride?: boolean;
 } = {}) {
   const config = await getConfig();
   const coords = config.client.coords;
   const weather = await fetchWeather(coords?.lat, coords?.lng);
-  // Branding overrides: si el cliente tiene homeHero/heroGradient definidos
-  // los usamos por encima de los defaults hardcoded.
-  const brand = (config as unknown as { branding?: { homeHero?: { kind: 'image' | 'video'; src: string }; heroGradient?: { from: string; to: string; angle: number } } }).branding;
+  // Branding overrides: SOLO en el Dashboard (applyDashboardOverride=true).
+  // En módulos como Listings/Events/Map/etc., usamos el `heroImage` prop
+  // (que el módulo controla por sí mismo) y NO heredamos el hero global.
+  const brand = applyDashboardOverride
+    ? (config as unknown as { branding?: { homeHero?: { kind: 'image' | 'video'; src: string }; heroGradient?: { from: string; to: string; angle: number } } }).branding
+    : undefined;
   const overrideHero = brand?.homeHero?.src ? brand.homeHero : null;
   const heroSrc = overrideHero?.src ?? heroImage;
   const heroKind: 'image' | 'video' = overrideHero?.kind ?? 'image';
@@ -75,6 +86,7 @@ export async function HomeHeader({
         initialGradientCss={gradientCss}
         height={height}
         gradientExtra={gradientExtra}
+        listenForOverride={applyDashboardOverride}
       />
 
       {/* TrueOmni logo @ (65, 44.4) — slot="default" (logo principal del cliente). */}

@@ -1,9 +1,13 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { AiModal } from '@/components/ai/ai-modal';
 import { useTextos } from '@/components/i18n-provider';
+import {
+  KIOSK_CLIENT_NAME_OVERRIDE_EVENT,
+  getCachedClientName,
+} from '@/components/studio-bridge';
 import type { AskAiSuggestedQuestion } from '@/lib/config';
 import { useAiStore } from '@/stores/ai-store';
 
@@ -44,12 +48,29 @@ export function AiModalHost({
   const t = useTextos();
   const hydrate = useAiStore((s) => s.hydrate);
 
+  // Reactive client name: cuando el bridge del Studio dispatcha
+  // `kiosk:client-name-override`, actualizamos el state local para que
+  // el preview refleje el nombre del kiosk en edición sin esperar a
+  // publish. En kiosk runtime normal (sin Studio) nunca llega y queda
+  // con `clientName` del prop (= server-rendered).
+  const [reactiveClientName, setReactiveClientName] = useState(
+    () => getCachedClientName() ?? clientName,
+  );
+  useEffect(() => {
+    const onOverride = (event: Event) => {
+      const detail = (event as CustomEvent<{ clientName?: string }>).detail;
+      if (detail?.clientName) setReactiveClientName(detail.clientName);
+    };
+    window.addEventListener(KIOSK_CLIENT_NAME_OVERRIDE_EVENT, onOverride);
+    return () => window.removeEventListener(KIOSK_CLIENT_NAME_OVERRIDE_EVENT, onOverride);
+  }, []);
+
   // Greeting reactivo al locale (con interpolación cliente del client_name).
   const localizedGreeting = useMemo(() => {
     const raw = t('ai_greeting');
     const base = raw === 'ai_greeting' ? greeting : raw;
-    return base.replaceAll('{client_name}', clientName);
-  }, [greeting, clientName, t]);
+    return base.replaceAll('{client_name}', reactiveClientName);
+  }, [greeting, reactiveClientName, t]);
 
   // Suggested questions con override por id si existe la key i18n.
   const localizedQuestions = useMemo<AskAiSuggestedQuestion[]>(() => {
@@ -84,5 +105,5 @@ export function AiModalHost({
     });
   }, [hydrate, localizedGreeting, localizedQuestions, localizedFallback]);
 
-  return <AiModal heroVideoSrc={heroVideoSrc} textos={textos} clientName={clientName} />;
+  return <AiModal heroVideoSrc={heroVideoSrc} textos={textos} clientName={reactiveClientName} />;
 }

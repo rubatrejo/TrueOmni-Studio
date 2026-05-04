@@ -1818,6 +1818,12 @@ export const KioskConfigSchema = z.object({
     .object({
       website: z.string().max(2048).default(''),
       location: z.string().max(120).default(''),
+      /**
+       * Coords lat/lng resueltas por geocoding al crear el kiosk.
+       * Se aplican a `client.coords` en el publish y centran el módulo
+       * Map + tiles que muestran distance.
+       */
+      coords: z.object({ lat: z.number(), lng: z.number() }).optional(),
     })
     .optional(),
   /** Versión actual publicada (incrementa en cada publish aprobado). */

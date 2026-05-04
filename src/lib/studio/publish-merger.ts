@@ -76,11 +76,13 @@ export function buildFilesystemConfig(
   if (studio.nombre && studio.nombre !== TEMPLATE_NAME_SENTINEL) {
     client.nombre = studio.nombre;
   }
-  // website + location del operador (introducidos al crear el kiosk en
-  // NewClientModal). Se reflejan al fs config para que el runtime los lea.
+  // website + location + coords del operador (introducidos al crear el
+  // kiosk en NewClientModal — coords vienen del geocoding Nominatim).
+  // Se reflejan al fs config para que el runtime los lea.
   if (studio.clientInfo?.website) client.website = studio.clientInfo.website;
   if (studio.clientInfo?.location) client.address = studio.clientInfo.location;
-  // locale, timezone, coords se preservan tal cual.
+  if (studio.clientInfo?.coords) client.coords = { ...studio.clientInfo.coords };
+  // locale, timezone se preservan tal cual.
 
   // ───── branding (sin colors — colors van a tokens.css) ─────
   applyBranding(branding, studio.branding);

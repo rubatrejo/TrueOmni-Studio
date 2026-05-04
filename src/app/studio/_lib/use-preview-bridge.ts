@@ -66,6 +66,7 @@ export type BrandingPatch = {
   };
   homeHero?: { kind: 'image' | 'video'; src: string };
   heroGradient?: { from: string; to: string; angle: number };
+  clientName?: string;
 };
 
 export function usePreviewBridge() {
@@ -134,6 +135,7 @@ export function usePreviewBridge() {
             fonts: branding.fonts,
             homeHero: branding.homeHero,
             heroGradient: branding.heroGradient,
+            clientName: branding.clientName,
           },
         },
         '*',

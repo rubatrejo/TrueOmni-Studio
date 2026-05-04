@@ -34,6 +34,38 @@ function rewriteAddress(address: string, location: string): string {
   return `${address.slice(0, m.index)}, ${location}${zip}`;
 }
 
+/**
+ * Geocode una location del operador ("Davenport, FL") usando Nominatim
+ * (OpenStreetMap) — endpoint gratuito sin API key. Devuelve coords si
+ * resuelve, null si falla. Timeout 4s para no bloquear el create del
+ * kiosk si la API está caída.
+ */
+async function geocodeLocation(location: string): Promise<{ lat: number; lng: number } | null> {
+  if (!location) return null;
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+    const url = new URL('https://nominatim.openstreetmap.org/search');
+    url.searchParams.set('q', location);
+    url.searchParams.set('format', 'json');
+    url.searchParams.set('limit', '1');
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'TrueOmniStudio/1.0 (designers@trueomni.com)' },
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    const data = (await res.json()) as Array<{ lat?: string; lon?: string }>;
+    if (!data.length) return null;
+    const lat = Number(data[0].lat);
+    const lng = Number(data[0].lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    return { lat, lng };
+  } catch {
+    return null;
+  }
+}
+
 function rewriteAddressesInPlace(config: KioskConfig, location: string): void {
   if (!location) return;
   const visit = (item: unknown) => {
@@ -120,10 +152,18 @@ export async function POST(request: Request) {
 
     const trimmedLocation = body.location?.trim() ?? '';
     const trimmedWebsite = body.website?.trim() ?? '';
-    if (trimmedWebsite || trimmedLocation) {
+    let resolvedCoords: { lat: number; lng: number } | undefined;
+    if (trimmedLocation) {
+      // Geocoding via Nominatim. Si falla (timeout, sin match), seguimos
+      // sin coords y el operador puede setearlos manualmente luego en el
+      // editor del módulo Map.
+      resolvedCoords = (await geocodeLocation(trimmedLocation)) ?? undefined;
+    }
+    if (trimmedWebsite || trimmedLocation || resolvedCoords) {
       config.clientInfo = {
         website: trimmedWebsite,
         location: trimmedLocation,
+        ...(resolvedCoords ? { coords: resolvedCoords } : {}),
       };
     }
 

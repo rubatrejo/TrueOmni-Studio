@@ -10,7 +10,9 @@ import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { ListingDetail } from '@/components/listings/listing-detail';
 import {
   KIOSK_CLIENT_COORDS_OVERRIDE_EVENT,
+  KIOSK_CLIENT_NAME_OVERRIDE_EVENT,
   getCachedClientCoords,
+  getCachedClientName,
 } from '@/components/studio-bridge';
 import type { HomeListing, HomeMapModule, MapSource } from '@/lib/config';
 import { availableChips, buildFeaturePool, buildSubcategoryPool } from '@/lib/map-aggregator';
@@ -35,6 +37,10 @@ import { MAP_WELCOME_STORAGE_KEY, MapWelcomePopup } from './map-welcome-popup';
  *   Stay  `hsl(var(--brand-tertiary))`  (stay)
  *   Events `#f16651` (events)
  */
+// Labels de chips alineados con los del Home Dashboard / módulos Listings
+// para mantener consistencia: el operador ve "Restaurants" / "Things to Do"
+// en ambos sitios (no "Eat" / "Play"). Los `chipKey` siguen siendo cortos
+// para no romper i18n keys ya publicadas.
 const DEFAULT_CHIP_DEFS: {
   source: MapSource;
   defaultLabel: string;
@@ -43,11 +49,11 @@ const DEFAULT_CHIP_DEFS: {
 }[] = [
   {
     source: 'things-to-do',
-    defaultLabel: 'Play',
+    defaultLabel: 'Things to Do',
     chipKey: 'play',
     bg: MAP_PIN_COLORS['things-to-do'],
   },
-  { source: 'restaurants', defaultLabel: 'Eat', chipKey: 'eat', bg: MAP_PIN_COLORS.restaurants },
+  { source: 'restaurants', defaultLabel: 'Restaurants', chipKey: 'eat', bg: MAP_PIN_COLORS.restaurants },
   { source: 'stay', defaultLabel: 'Stay', chipKey: 'stay', bg: MAP_PIN_COLORS.stay },
   { source: 'events', defaultLabel: 'Events', chipKey: 'events', bg: MAP_PIN_COLORS.events },
 ];
@@ -72,6 +78,7 @@ export function MapModule({
   module: mod,
   items,
   clientCoords,
+  clientName: serverClientName,
   mapboxToken,
   textos,
   detailLookup,
@@ -81,6 +88,10 @@ export function MapModule({
   moduleKey: string;
   module: HomeMapModule;
   clientCoords?: { lat: number; lng: number };
+  /** Nombre del cliente del SSR — fallback cuando el bridge del Studio no
+   *  está activo (kiosk runtime normal). Se usa para interpolar
+   *  `{client}` en `exploreTitle` y `welcomeCopy`. */
+  clientName?: string;
   mapboxToken: string | undefined;
   items: MapItem[];
   textos: MapModuleTextos;
@@ -107,6 +118,35 @@ export function MapModule({
     return () => window.removeEventListener(KIOSK_CLIENT_COORDS_OVERRIDE_EVENT, onOverride);
   }, []);
   const effectiveCoords = reactiveCoords ?? clientCoords;
+
+  // Reactive client name: re-interpola `{client}` placeholder en el
+  // exploreTitle (ej. "Explore {client} Map") cuando el operador edita
+  // el nombre del kiosk en el Studio. Sin este hook el preview se
+  // queda con el nombre server-rendered ("Arizona") hasta publish.
+  const [reactiveClientName, setReactiveClientName] = useState<string | null>(
+    () => getCachedClientName(),
+  );
+  useEffect(() => {
+    const onName = (event: Event) => {
+      const detail = (event as CustomEvent<{ clientName?: string }>).detail;
+      if (detail?.clientName) setReactiveClientName(detail.clientName);
+    };
+    window.addEventListener(KIOSK_CLIENT_NAME_OVERRIDE_EVENT, onName);
+    return () => window.removeEventListener(KIOSK_CLIENT_NAME_OVERRIDE_EVENT, onName);
+  }, []);
+  // exploreTitle viene como template (`Explore {client} Map`). Interpola
+  // con: 1) reactiveClientName (override del bridge en preview Studio),
+  // 2) serverClientName (config.client.nombre del SSR — kiosk runtime
+  // normal). Si ninguno está disponible, reemplaza por string vacío para
+  // no mostrar "{client}" literal.
+  const interpolatedExploreTitle = useMemo(() => {
+    const raw = textos.exploreTitle;
+    const name = reactiveClientName ?? serverClientName ?? '';
+    if (raw.includes('{client}')) {
+      return raw.replaceAll('{client}', name).replace(/\s{2,}/g, ' ').trim();
+    }
+    return raw;
+  }, [textos.exploreTitle, reactiveClientName, serverClientName]);
 
   // Override textos pre-renderizados por el caller con el idioma activo.
   const liveTextos = useTextosMap();
@@ -241,7 +281,7 @@ export function MapModule({
           con el block azul de los demás módulos. */}
       <div className="absolute left-0 right-0" style={{ top: '620px', height: '118px' }}>
         <MapToolbar
-          label={textos.exploreTitle}
+          label={interpolatedExploreTitle}
           onSearch={() => setShowSearch(true)}
           onFilter={() => setShowFilters(true)}
         />

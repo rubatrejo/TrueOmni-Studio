@@ -11,6 +11,10 @@ import { SendConfirmationPopup } from '@/components/listings/send-confirmation-p
 import { SendToEmailModal } from '@/components/listings/send-to-email-modal';
 import { SendToPhoneModal } from '@/components/listings/send-to-phone-modal';
 import { MapPinBubble } from '@/components/map/map-pin-bubble';
+import {
+  KIOSK_CLIENT_COORDS_OVERRIDE_EVENT,
+  getCachedClientCoords,
+} from '@/components/studio-bridge';
 import { generateItinerary, type GeneratedItinerary } from '@/lib/ai-itinerary';
 import type { ItineraryConfig, KioskConfig, MapSource } from '@/lib/config';
 import {
@@ -86,6 +90,23 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
   const { config, fullConfig, client, mapboxToken } = props;
   const textos = useTextosMap();
   const rail = useItineraryRail();
+
+  // Reactive client coords: el bridge del Studio dispatcha
+  // `kiosk:client-coords-override` cuando se edita un kiosk con location
+  // distinta. Centra el mapa del Itinerary en la nueva location y
+  // actualiza el sort por distancia.
+  const [reactiveCoords, setReactiveCoords] = useState<
+    { lat: number; lng: number } | undefined
+  >(() => getCachedClientCoords() ?? client.coords);
+  useEffect(() => {
+    const onOverride = (event: Event) => {
+      const detail = (event as CustomEvent<{ coords?: { lat: number; lng: number } }>).detail;
+      if (detail?.coords) setReactiveCoords(detail.coords);
+    };
+    window.addEventListener(KIOSK_CLIENT_COORDS_OVERRIDE_EVENT, onOverride);
+    return () => window.removeEventListener(KIOSK_CLIENT_COORDS_OVERRIDE_EVENT, onOverride);
+  }, []);
+  const effectiveClientCoords = reactiveCoords ?? client.coords;
 
   const initialPhase: ItineraryPhase = config.welcome_always_visible
     ? 'welcome'
@@ -209,11 +230,12 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
   );
 
   const computeDistance = useCallback(
-    (item: ItineraryCatalogItem) => (client.coords ? distanceMi(item.coords, client.coords) : 0),
-    [client.coords],
+    (item: ItineraryCatalogItem) =>
+      effectiveClientCoords ? distanceMi(item.coords, effectiveClientCoords) : 0,
+    [effectiveClientCoords],
   );
 
-  const center = client.coords ?? { lat: 33.4484, lng: -112.074 };
+  const center = effectiveClientCoords ?? { lat: 33.4484, lng: -112.074 };
 
   const interp = { client_name: client.nombre };
 
@@ -373,7 +395,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
               }
               collapsed={collapsedListings}
               onToggleCollapsed={() => setCollapsedListings((c) => !c)}
-              clientCoords={client.coords}
+              clientCoords={effectiveClientCoords}
               emptyLabel={textos.itinerary_no_search_results ?? 'No items match your search.'}
               isSearching={searchValue.trim().length > 0}
               emptySearchTitle={textos.itinerary_empty_search_title ?? 'Ooops! Try again'}
@@ -545,7 +567,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
                     item={mapItem}
                     left={pinPos.left}
                     top={pinPos.top + mapTop}
-                    clientCoords={client.coords}
+                    clientCoords={effectiveClientCoords}
                     labels={{
                       seeMoreInfo: textos.map_see_more_info ?? 'SEE MORE INFO',
                       addToItinerary: textos.map_add_to_itinerary ?? 'ADD TO ITINERARY',
@@ -659,7 +681,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
           weather={props.weather}
           locale={client.locale ?? 'en-US'}
           timezone={client.timezone}
-          clientCoords={client.coords}
+          clientCoords={effectiveClientCoords}
           distanceTemplate={textos.itinerary_distance_away ?? '{n} mi away'}
           onStartOver={() => setLeaveWarning('result')}
           onFinish={() => {
@@ -719,7 +741,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             weather={props.weather}
             locale={client.locale ?? 'en-US'}
             timezone={client.timezone}
-            clientCoords={client.coords}
+            clientCoords={effectiveClientCoords}
             qrUrl={`https://share.${client.slug}.kiosk.example/itinerary/preview`}
             onMoreInfo={(item) => setDetailKey(`${item.kind}:${item.slug}`)}
             onToggleFavorite={(item) =>
@@ -883,7 +905,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
                   moduleKey={entry.moduleKey}
                   listing={entry.listing}
                   mapboxToken={mapboxToken}
-                  clientCoords={client.coords}
+                  clientCoords={effectiveClientCoords}
                   eventMeta={entry.eventMeta}
                   secondaryCta={entry.secondaryCta}
                   favoritesKind={entry.favoritesKind}

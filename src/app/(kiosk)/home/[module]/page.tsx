@@ -85,7 +85,12 @@ export default async function ModulePage({ params }: PageProps) {
     const detailLookup = buildMapDetailLookup(config, mod, items);
     const clientName = config.client.nombre;
     const applyTemplate = (s: string) => s.replace(/\{client\}/g, clientName);
-    const exploreTitle = applyTemplate(t.map_explore_title ?? `Explore {client} Map`);
+    // exploreTitle se pasa con el template `{client}` SIN interpolar — el
+    // MapModule lo re-interpola client-side con el `clientName` reactivo
+    // que recibe del bridge del Studio. En kiosk runtime normal (sin
+    // Studio), el bridge nunca dispatcha y el MapModule cae al server-
+    // rendered usando `client.nombre` del config.
+    const exploreTitle = t.map_explore_title ?? `Explore {client} Map`;
     const resolvedWelcomeCopy = mod.welcomeCopy
       ? {
           ...mod.welcomeCopy,
@@ -102,6 +107,7 @@ export default async function ModulePage({ params }: PageProps) {
           moduleKey={module}
           module={resolvedMod}
           clientCoords={config.client.coords}
+          clientName={clientName}
           mapboxToken={config.integraciones?.mapbox_token}
           items={items}
           detailLookup={detailLookup}

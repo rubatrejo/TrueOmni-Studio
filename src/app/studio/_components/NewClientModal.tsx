@@ -21,6 +21,11 @@ export function NewClientModal({
 }) {
   const [nombre, setNombre] = useState('');
   const [slug, setSlug] = useState('');
+  // Flag explícito: el slug solo deja de auto-seguir al nombre cuando el
+  // usuario lo edita a mano. La heurística vieja `if (curr) return curr`
+  // mataba el auto-suggest desde la primera letra (curr siempre dejaba de
+  // estar vacío tras el primer cambio del nombre).
+  const [slugTouched, setSlugTouched] = useState(false);
   const [orientation, setOrientation] = useState<Orientation>('portrait');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +35,7 @@ export function NewClientModal({
     if (!open) return;
     setNombre('');
     setSlug('');
+    setSlugTouched(false);
     setOrientation('portrait');
     setError(null);
     setSubmitting(false);
@@ -37,13 +43,12 @@ export function NewClientModal({
     setTimeout(() => nombreRef.current?.focus(), 50);
   }, [open]);
 
-  // Auto-suggest slug a partir de nombre.
+  // Auto-suggest slug a partir del nombre. Sigue actualizándose mientras el
+  // usuario no haya editado el slug a mano.
   useEffect(() => {
-    setSlug((curr) => {
-      if (curr) return curr; // si el usuario lo editó, no sobrescribir
-      return slugify(nombre);
-    });
-  }, [nombre]);
+    if (slugTouched) return;
+    setSlug(slugify(nombre));
+  }, [nombre, slugTouched]);
 
   // Escape cierra el modal (audit F-35 — los otros 3 modales del Studio
   // ya lo hacían; este faltaba).
@@ -158,7 +163,10 @@ export function NewClientModal({
                     id="kiosk-slug"
                     type="text"
                     value={slug}
-                    onChange={(e) => setSlug(e.target.value.toLowerCase())}
+                    onChange={(e) => {
+                      setSlug(e.target.value.toLowerCase());
+                      setSlugTouched(true);
+                    }}
                     placeholder="phoenix-convention-center"
                     className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 font-mono text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
                     autoComplete="off"

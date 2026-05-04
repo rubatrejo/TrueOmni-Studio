@@ -107,7 +107,7 @@ export function GuestbookCountryDropdown({
                 style={{
                   padding: '18px 28px',
                   backgroundColor: isSelected ? '#eef6fc' : '#ffffff',
-                  color: isSelected ? '#004f8b' : '#1a1a1a',
+                  color: isSelected ? 'hsl(var(--brand-primary))' : '#1a1a1a',
                   fontSize: '20px',
                   lineHeight: '20px',
                   fontWeight: isSelected ? 700 : 500,
@@ -121,7 +121,7 @@ export function GuestbookCountryDropdown({
                     <path
                       d="M5 12l5 5 9-11"
                       fill="none"
-                      stroke="#004f8b"
+                      stroke="hsl(var(--brand-primary))"
                       strokeWidth="3"
                       strokeLinecap="round"
                       strokeLinejoin="round"

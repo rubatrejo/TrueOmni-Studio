@@ -141,7 +141,7 @@ export function GuestbookMapScreen({
       // colocado entre los seed.
       el.innerHTML = `
         <div style="position:relative;width:auto;height:170px;display:inline-block;">
-          <div style="position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);width:86px;height:24px;border-radius:50%;background:radial-gradient(ellipse,rgba(185,189,57,0.65) 0%,rgba(185,189,57,0) 70%);animation:gbPulse 1.6s ease-in-out infinite;"></div>
+          <div style="position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);width:86px;height:24px;border-radius:50%;background:radial-gradient(ellipse,hsl(var(--brand-tertiary) / 0.65) 0%,hsl(var(--brand-tertiary) / 0) 70%);animation:gbPulse 1.6s ease-in-out infinite;"></div>
           <img src="${placed.pinImage}" alt="" style="position:relative;height:160px;width:auto;display:block;filter:drop-shadow(0 8px 14px rgba(0,0,0,0.5));" />
         </div>
         <style>@keyframes gbPulse { 0%,100% { opacity: 0.45; transform: translateX(-50%) scale(0.9); } 50% { opacity: 0.9; transform: translateX(-50%) scale(1.15); } }</style>
@@ -227,12 +227,12 @@ export function GuestbookMapScreen({
                   width: '420px',
                   height: '92px',
                   borderRadius: '16px',
-                  backgroundColor: '#b9bd39',
+                  backgroundColor: 'hsl(var(--brand-tertiary))',
                   fontSize: '30px',
                   lineHeight: '30px',
                   fontWeight: 700,
                   letterSpacing: '0.14em',
-                  boxShadow: '0 10px 22px rgba(185, 189, 57, 0.35)',
+                  boxShadow: '0 10px 22px hsl(var(--brand-tertiary) / 0.35)',
                   marginTop: '32px',
                 }}
               >

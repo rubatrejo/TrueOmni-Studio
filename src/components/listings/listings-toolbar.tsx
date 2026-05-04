@@ -3,10 +3,10 @@
 /**
  * Toolbar verbatim SVG Food & Drink (y=620..738, 1080×118).
  * 4 celdas:
- *   - Cell 1 (0..481)   #004f8b — label "Food & Drink" 36px Tahoma white @ (32.5, 37.5).
- *   - Cell 2 (481..682) #004f8b — search loupe icon white.
+ *   - Cell 1 (0..481)   hsl(var(--brand-primary)) — label "Food & Drink" 36px Tahoma white @ (32.5, 37.5).
+ *   - Cell 2 (481..682) hsl(var(--brand-primary)) — search loupe icon white.
  *   - Cell 3 (682..883) #fff    — sort icon blue.
- *   - Cell 4 (883..1080)#004f8b — filter icon white.
+ *   - Cell 4 (883..1080)hsl(var(--brand-primary)) — filter icon white.
  * Vertical dividers white 1px en x=481.95, 682.63, 880.91.
  */
 
@@ -28,7 +28,7 @@ export function ListingsToolbar({
       {/* Cell 1 (label) */}
       <div
         className="absolute left-0 top-0 flex items-center"
-        style={{ width: '481px', height: '118px', backgroundColor: '#004f8b' }}
+        style={{ width: '481px', height: '118px', backgroundColor: 'hsl(var(--brand-primary))' }}
       >
         <span
           className="font-sans text-white"
@@ -49,7 +49,7 @@ export function ListingsToolbar({
           top: '0',
           width: '201px',
           height: '118px',
-          backgroundColor: '#004f8b',
+          backgroundColor: 'hsl(var(--brand-primary))',
         }}
       >
         <svg
@@ -85,7 +85,7 @@ export function ListingsToolbar({
           width="45"
           height="45"
           viewBox="0 0 45 45"
-          fill="#004f8b"
+          fill="hsl(var(--brand-primary))"
           aria-hidden
         >
           <path d="M42.5,45h0L35,35h5V0h5V35h5L42.5,45ZM10,45H0V40H10v5Zm5-10H0V30H15v5Zm5-10H0V20H20v5Zm5-10H0V10H25v5ZM30,5H0V0H30V5Z" />
@@ -103,7 +103,7 @@ export function ListingsToolbar({
           top: '0',
           width: '197px',
           height: '118px',
-          backgroundColor: '#004f8b',
+          backgroundColor: 'hsl(var(--brand-primary))',
         }}
       >
         <svg

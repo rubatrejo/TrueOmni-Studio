@@ -36,7 +36,7 @@ interface Props {
  * Modal genérico de compra/share vía QR + SMS.
  *
  * Compartido entre Passes (Fase 3.10) y Tickets (Fase 3.11). Chrome propio
- * con header azul `#004f8b`, X circular blanca top-right, body blanco con
+ * con header azul `hsl(var(--brand-primary))`, X circular blanca top-right, body blanco con
  * QR + phone input + SEND. NumericKeypad footer envuelto en wrapper blanco.
  *
  * Card 800×auto — alineado al SVG Passes-Share.png.
@@ -114,7 +114,7 @@ export function QrPurchaseModal({
       >
         <div
           className="relative flex items-center justify-center"
-          style={{ height: '92px', backgroundColor: '#004f8b' }}
+          style={{ height: '92px', backgroundColor: 'hsl(var(--brand-primary))' }}
         >
           <h2
             className="font-sans font-bold uppercase text-white"
@@ -165,7 +165,7 @@ export function QrPurchaseModal({
               className="text-center font-display font-bold"
               style={{
                 fontSize: '34px',
-                color: '#004f8b',
+                color: 'hsl(var(--brand-primary))',
                 marginBottom: '16px',
                 letterSpacing: '0.02em',
               }}

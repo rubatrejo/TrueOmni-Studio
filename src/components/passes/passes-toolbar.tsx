@@ -3,8 +3,8 @@
 /**
  * Toolbar del módulo Passes — mismo chrome que la toolbar de Listings
  * (categoría "Things to Do"), pero simplificada a 2 cells:
- *   - Cell 1 (0..880) — label "Passes" font-sans 36px padding-left 32.5, bg #004f8b.
- *   - Cell 2 (880..1080) — search icon 56×56 filled verbatim del SVG, bg #004f8b.
+ *   - Cell 1 (0..880) — label "Passes" font-sans 36px padding-left 32.5, bg hsl(var(--brand-primary)).
+ *   - Cell 2 (880..1080) — search icon 56×56 filled verbatim del SVG, bg hsl(var(--brand-primary)).
  *   - Divider vertical white 1px en x=880.91.
  */
 
@@ -20,7 +20,7 @@ export function PassesToolbar({ label, onSearchOpen, searchAriaLabel }: Props) {
       {/* Cell 1 (label) */}
       <div
         className="absolute left-0 top-0 flex items-center"
-        style={{ width: '880px', height: '118px', backgroundColor: '#004f8b' }}
+        style={{ width: '880px', height: '118px', backgroundColor: 'hsl(var(--brand-primary))' }}
       >
         <span
           className="font-sans text-white"
@@ -41,7 +41,7 @@ export function PassesToolbar({ label, onSearchOpen, searchAriaLabel }: Props) {
           top: '0',
           width: '200px',
           height: '118px',
-          backgroundColor: '#004f8b',
+          backgroundColor: 'hsl(var(--brand-primary))',
         }}
       >
         <svg

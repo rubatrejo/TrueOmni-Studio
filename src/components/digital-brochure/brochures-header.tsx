@@ -2,7 +2,7 @@
 
 /**
  * Toolbar del listado Digital Brochures — consistente con `ListingsToolbar`
- * (1080×118) pero con 2 celdas: label `#004f8b` izq + search `#004f8b` der.
+ * (1080×118) pero con 2 celdas: label `hsl(var(--brand-primary))` izq + search `hsl(var(--brand-primary))` der.
  * Divider blanco entre celdas en x≈840.
  */
 export function BrochuresHeader({ label, onSearch }: { label: string; onSearch: () => void }) {
@@ -11,7 +11,7 @@ export function BrochuresHeader({ label, onSearch }: { label: string; onSearch: 
       {/* Cell 1 (label) */}
       <div
         className="absolute left-0 top-0 flex items-center"
-        style={{ width: '840px', height: '118px', backgroundColor: '#004f8b' }}
+        style={{ width: '840px', height: '118px', backgroundColor: 'hsl(var(--brand-primary))' }}
       >
         <span
           className="font-sans text-white"
@@ -32,7 +32,7 @@ export function BrochuresHeader({ label, onSearch }: { label: string; onSearch: 
           top: '0',
           width: '240px',
           height: '118px',
-          backgroundColor: '#004f8b',
+          backgroundColor: 'hsl(var(--brand-primary))',
         }}
       >
         <svg

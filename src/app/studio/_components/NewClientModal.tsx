@@ -17,10 +17,18 @@ export function NewClientModal({
   open: boolean;
   existingSlugs: string[];
   onClose: () => void;
-  onCreate: (input: { slug: string; nombre: string; orientation: Orientation }) => Promise<void>;
+  onCreate: (input: {
+    slug: string;
+    nombre: string;
+    orientation: Orientation;
+    website: string;
+    location: string;
+  }) => Promise<void>;
 }) {
   const [nombre, setNombre] = useState('');
   const [slug, setSlug] = useState('');
+  const [website, setWebsite] = useState('');
+  const [location, setLocation] = useState('');
   // Flag explícito: el slug solo deja de auto-seguir al nombre cuando el
   // usuario lo edita a mano. La heurística vieja `if (curr) return curr`
   // mataba el auto-suggest desde la primera letra (curr siempre dejaba de
@@ -35,6 +43,8 @@ export function NewClientModal({
     if (!open) return;
     setNombre('');
     setSlug('');
+    setWebsite('');
+    setLocation('');
     setSlugTouched(false);
     setOrientation('portrait');
     setError(null);
@@ -86,7 +96,13 @@ export function NewClientModal({
     }
     setSubmitting(true);
     try {
-      await onCreate({ slug, nombre: nombre.trim(), orientation });
+      await onCreate({
+        slug,
+        nombre: nombre.trim(),
+        orientation,
+        website: website.trim(),
+        location: location.trim(),
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create');
       setSubmitting(false);
@@ -175,6 +191,42 @@ export function NewClientModal({
                 }
               />
 
+              <div className="grid grid-cols-2 gap-3">
+                <Field
+                  id="kiosk-website"
+                  label="Website"
+                  hint="Used in footer + share modals."
+                  input={
+                    <input
+                      id="kiosk-website"
+                      type="url"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                      placeholder="https://visitcentralflorida.org"
+                      className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
+                      autoComplete="off"
+                      spellCheck={false}
+                    />
+                  }
+                />
+                <Field
+                  id="kiosk-location"
+                  label="Location"
+                  hint="City + state. Used as default address for mock listings and to center the map module."
+                  input={
+                    <input
+                      id="kiosk-location"
+                      type="text"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      placeholder="Davenport, FL"
+                      className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
+                      autoComplete="off"
+                    />
+                  }
+                />
+              </div>
+
               <div>
                 <span className="mb-1.5 block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
                   Orientation
@@ -236,8 +288,9 @@ export function NewClientModal({
               )}
 
               <p className="text-[11.5px] leading-relaxed text-zinc-500">
-                Cloning the default brand palette: TrueOmni Tech Blue. You can change all
-                colors, logos, modules and content in the editor afterwards.
+                Cloning the TrueOmni Default kiosk: brand palette, modules, and full mock
+                content (listings, events, passes, deals, trails). You can change anything
+                in the editor afterwards.
               </p>
 
               <div className="flex items-center justify-end gap-2 border-t border-zinc-100 pt-4 dark:border-zinc-800">

@@ -42,7 +42,7 @@ export function EnglishButton({
   width = 244,
   height = 80,
   fontSize = 26,
-  background = '#b9bd39',
+  background = 'hsl(var(--brand-tertiary))',
 }: {
   width?: number;
   height?: number;

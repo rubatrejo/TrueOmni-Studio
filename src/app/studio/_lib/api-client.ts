@@ -68,7 +68,9 @@ export async function getConfig(slug: string): Promise<{ config: KioskConfig; me
 export async function createConfig(input: {
   slug: string;
   nombre: string;
-  orientation?: 'portrait' | 'landscape';
+  orientation?: string;
+  website?: string;
+  location?: string;
 }): Promise<ConfigEntry> {
   const data = await http<{ slug: string; config: KioskConfig; meta: ConfigMeta }>(
     '/api/studio/configs',

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 /**
- * Floating Home button — pill azul `#004f8b` de 116×232 que sobresale del
+ * Floating Home button — pill azul `hsl(var(--brand-primary))` de 116×232 que sobresale del
  * borde izquierdo del canvas con esquina izquierda plana y corona derecha
  * redondeada. Icono home blanco centrado a la derecha. Sombra drop-right.
  *
@@ -19,7 +19,7 @@ export function FloatingHomeButton() {
         top: '1000px',
         width: '116px',
         height: '232px',
-        backgroundColor: '#004f8b',
+        backgroundColor: 'hsl(var(--brand-primary))',
         borderTopRightRadius: '116px',
         borderBottomRightRadius: '116px',
         paddingRight: '28px',

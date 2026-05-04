@@ -122,7 +122,7 @@ export function AiQuestionScreen(props: AiQuestionScreenProps) {
             width: '100%',
             height: 397,
             background:
-              'linear-gradient(180deg, rgba(0,79,139,0.9) 0%, rgba(0,79,139,0.55) 30%, rgba(0,79,139,0) 100%)',
+              'linear-gradient(180deg, hsl(var(--brand-primary) / 0.9) 0%, hsl(var(--brand-primary) / 0.55) 30%, hsl(var(--brand-primary) / 0) 100%)',
             zIndex: 5,
           }}
         />
@@ -219,7 +219,7 @@ export function AiQuestionScreen(props: AiQuestionScreenProps) {
         </div>
       </div>
 
-      {/* Floating BackButton — pill `#004f8b` 116×232 al estilo `BackButton`
+      {/* Floating BackButton — pill `hsl(var(--brand-primary))` 116×232 al estilo `BackButton`
        *  estándar. Click → dispara warning (perderías el progreso). */}
       <button
         type="button"
@@ -231,7 +231,7 @@ export function AiQuestionScreen(props: AiQuestionScreenProps) {
           top: '1000px',
           width: '116px',
           height: '232px',
-          backgroundColor: '#004f8b',
+          backgroundColor: 'hsl(var(--brand-primary))',
           borderTopRightRadius: '116px',
           borderBottomRightRadius: '116px',
           paddingRight: '30px',

@@ -84,7 +84,7 @@ export function SortOverlay({
                 borderRadius: '8px',
                 border: '1.689px solid #fff',
                 backgroundColor: selected ? '#ffffff' : 'transparent',
-                color: selected ? '#004f8b' : disabled ? 'rgba(255,255,255,0.4)' : '#ffffff',
+                color: selected ? 'hsl(var(--brand-primary))' : disabled ? 'rgba(255,255,255,0.4)' : '#ffffff',
                 fontSize: '22px',
                 lineHeight: '22px',
                 fontWeight: selected ? 700 : 400,

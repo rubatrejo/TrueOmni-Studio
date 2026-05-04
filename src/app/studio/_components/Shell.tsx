@@ -4,6 +4,7 @@
 // nativos (`studio-tab-fade` en studio.css). Audit F-41 quitó este peso del
 // bundle del Shell. Otros componentes (modales, sidebar active indicator
 // con layoutId) siguen usando framer-motion.
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type {
@@ -60,6 +61,7 @@ import { MobileTabBar, type MobileEditorTab } from './MobileTabBar';
 import { PreviewPanel } from './PreviewPanel';
 import { CommandPalette } from './CommandPalette';
 import { PublishModal } from './PublishModal';
+import { UnsavedChangesModal } from './UnsavedChangesModal';
 import { SaveBar } from './SaveBar';
 import { ShortcutsModal } from './ShortcutsModal';
 import { SidebarTabs } from './SidebarTabs';
@@ -517,6 +519,37 @@ export function Shell({
     return () => window.removeEventListener('beforeunload', handler);
   }, [isDirty]);
 
+  // Intra-app guard: cuando isDirty y el operador hace click en cualquier
+  // <a> que apunte fuera del editor actual (logo, breadcrumb, otros kiosks,
+  // etc.), interceptamos el click y mostramos un modal con 3 acciones:
+  // Discard / Cancel / Save & continue. El beforeunload solo cubre full-page
+  // navigation; este complementa para la nav SPA del App Router.
+  const router = useRouter();
+  const [pendingNavHref, setPendingNavHref] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isDirty) return;
+    const onClick = (e: MouseEvent) => {
+      if (e.defaultPrevented) return;
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      const link = target?.closest('a[href]') as HTMLAnchorElement | null;
+      if (!link) return;
+      const href = link.getAttribute('href') ?? '';
+      // Excluir: links externos (#, mailto:, http*://, target=_blank).
+      if (!href || href.startsWith('#') || href.startsWith('mailto:')) return;
+      if (link.target === '_blank') return;
+      if (/^https?:\/\//.test(href) && !href.startsWith(window.location.origin)) return;
+      // Excluir: links que apuntan al editor actual (no son "salir").
+      const editorPath = `/studio/${initialConfig.slug}`;
+      if (href === editorPath || href.startsWith(`${editorPath}?`) || href.startsWith(`${editorPath}#`)) return;
+      e.preventDefault();
+      setPendingNavHref(href);
+    };
+    document.addEventListener('click', onClick, true);
+    return () => document.removeEventListener('click', onClick, true);
+  }, [isDirty, initialConfig.slug]);
+
   const handleDiscard = useCallback(() => {
     setBranding(savedBranding);
     setModules(savedModules);
@@ -753,6 +786,23 @@ export function Shell({
           onPublish={() => setPublishOpen(true)}
           onOpenShortcuts={() => setShortcutsOpen(true)}
           onSave={() => void handleSave()}
+        />
+        <UnsavedChangesModal
+          open={pendingNavHref !== null}
+          saving={saveState === 'saving'}
+          onCancel={() => setPendingNavHref(null)}
+          onDiscard={() => {
+            const target = pendingNavHref;
+            handleDiscard();
+            setPendingNavHref(null);
+            if (target) router.push(target);
+          }}
+          onSave={async () => {
+            const target = pendingNavHref;
+            await handleSave();
+            setPendingNavHref(null);
+            if (target) router.push(target);
+          }}
         />
       </div>
     </StudioSlugProvider>

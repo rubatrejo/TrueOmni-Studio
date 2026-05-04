@@ -11,10 +11,10 @@ import {
 /**
  * Week picker de Events (verbatim SVG `Events.svg`).
  *
- * 2 filas sobre fondo azul `#004f8b`:
+ * 2 filas sobre fondo azul `hsl(var(--brand-primary))`:
  *   - Fila 1 (y=0..66): flecha ← + "FEBRUARY 6 – FEBRUARY 12" + flecha →.
  *   - Fila 2 (y=66..180): 7 pills SUN..SAT (borde blanco; pill activo = fondo
- *     blanco + texto #004f8b). Gap 12px, total width ~950.
+ *     blanco + texto hsl(var(--brand-primary))). Gap 12px, total width ~950.
  */
 export function WeekPicker({
   selectedDate,
@@ -100,7 +100,7 @@ export function WeekPicker({
                 borderRadius: '8px',
                 border: '1.6px solid #ffffff',
                 backgroundColor: active ? '#ffffff' : 'transparent',
-                color: active ? '#004f8b' : '#ffffff',
+                color: active ? 'hsl(var(--brand-primary))' : '#ffffff',
                 fontSize: '20px',
                 lineHeight: '20px',
                 fontWeight: active ? 700 : 600,

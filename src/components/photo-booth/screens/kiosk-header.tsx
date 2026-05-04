@@ -32,7 +32,7 @@ export function KioskHeader({ weather, locale, timezone }: KioskHeaderProps) {
           width: 1080,
           height: 397,
           background:
-            'linear-gradient(180deg, rgba(0,79,139,0.9) 0%, rgba(0,79,139,0.55) 30%, rgba(0,79,139,0) 100%)',
+            'linear-gradient(180deg, hsl(var(--brand-primary) / 0.9) 0%, hsl(var(--brand-primary) / 0.55) 30%, hsl(var(--brand-primary) / 0) 100%)',
           zIndex: 5,
         }}
       />

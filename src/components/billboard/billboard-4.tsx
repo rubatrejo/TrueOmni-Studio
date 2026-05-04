@@ -7,14 +7,14 @@ import { AccessibilityIcon } from './billboard-footer-parts';
  * Billboard 4 — variante "Bandas horizontales + sidebars verticales".
  *
  * Layout según ref-b4:
- * - Banda 1 (y=0..330): header azul #004f8b con TrueOmni logo blanco.
- * - Sidebar EVENTS vertical (blue #004f8b) sobre banda 2.
+ * - Banda 1 (y=0..330): header azul hsl(var(--brand-primary)) con TrueOmni logo blanco.
+ * - Sidebar EVENTS vertical (blue hsl(var(--brand-primary))) sobre banda 2.
  * - Banda 2 (y=330..830): fireworks/events photo.
  * - Sidebar FOOD vertical (blue #1796d6) derecha sobre banda 3.
  * - Banda 3 (y=830..1330): cityscape photo (landscape.jpg).
- * - Sidebar START vertical (olive #b9bd39) izquierda sobre banda 4.
+ * - Sidebar START vertical (olive hsl(var(--brand-tertiary))) izquierda sobre banda 4.
  * - Banda 4 (y=1330..1730): grass/lake photo + icono arrow circle grande.
- * - Footer (y=1730..1920): #004f8b con TrueOmni + accesibilidad + ENGLISH.
+ * - Footer (y=1730..1920): hsl(var(--brand-primary)) con TrueOmni + accesibilidad + ENGLISH.
  */
 export function Billboard4() {
   return (
@@ -26,7 +26,7 @@ export function Billboard4() {
       {/* Banda 1 (y=0..330) header azul + logo */}
       <div
         className="absolute inset-x-0 flex items-center justify-center"
-        style={{ top: '0', height: '330px', backgroundColor: '#004f8b' }}
+        style={{ top: '0', height: '330px', backgroundColor: 'hsl(var(--brand-primary))' }}
       >
         <TrueOmniLogo slot="idle" className="h-[128px] w-auto text-white" />
       </div>
@@ -83,7 +83,7 @@ export function Billboard4() {
         style={{
           bottom: '0',
           height: '190px',
-          backgroundColor: '#004f8b',
+          backgroundColor: 'hsl(var(--brand-primary))',
           paddingLeft: '59px',
           paddingRight: '59px',
         }}
@@ -103,7 +103,7 @@ export function Billboard4() {
           top: '330px',
           width: '140px',
           height: '500px',
-          backgroundColor: '#004f8b',
+          backgroundColor: 'hsl(var(--brand-primary))',
         }}
       >
         <span
@@ -151,7 +151,7 @@ export function Billboard4() {
           top: '1330px',
           width: '140px',
           height: '400px',
-          backgroundColor: '#b9bd39',
+          backgroundColor: 'hsl(var(--brand-tertiary))',
         }}
       >
         <span

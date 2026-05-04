@@ -7,7 +7,7 @@
  *   Row 3: 1 2 3 keyboard-toggle
  *   Row 4: . 0 Send (double-wide)
  *
- * Estilo consistente con `OnScreenKeyboard`: teclas 73×75 rx=7 fondo #004f8b,
+ * Estilo consistente con `OnScreenKeyboard`: teclas 73×75 rx=7 fondo hsl(var(--brand-primary)),
  * teclas especiales #1796d6.
  */
 

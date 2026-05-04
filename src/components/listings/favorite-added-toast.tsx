@@ -49,7 +49,7 @@ export function FavoriteAddedToast() {
         style={{
           padding: '14px 14px 14px 20px',
           borderRadius: '999px',
-          background: 'linear-gradient(95deg, #b9bd39 0%, #1796d6 100%)',
+          background: 'linear-gradient(95deg, hsl(var(--brand-tertiary)) 0%, #1796d6 100%)',
           boxShadow: '0 22px 48px rgba(0,0,0,0.45), 0 0 0 3px rgba(255,255,255,0.25) inset',
           columnGap: '14px',
           animation: 'kiosk-fav-in 0.35s cubic-bezier(0.2,0.9,0.3,1.1)',
@@ -112,7 +112,7 @@ export function FavoriteAddedToast() {
             padding: '12px 22px',
             borderRadius: '999px',
             backgroundColor: '#ffffff',
-            color: '#004f8b',
+            color: 'hsl(var(--brand-primary))',
             fontSize: '15px',
             lineHeight: '15px',
             fontWeight: 800,
@@ -127,7 +127,7 @@ export function FavoriteAddedToast() {
             <path
               d="M5 12h14M13 5l7 7-7 7"
               fill="none"
-              stroke="#004f8b"
+              stroke="hsl(var(--brand-primary))"
               strokeWidth="2.6"
               strokeLinecap="round"
               strokeLinejoin="round"

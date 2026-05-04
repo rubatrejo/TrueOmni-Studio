@@ -302,7 +302,7 @@ export function AiResultScreen(props: AiResultScreenProps) {
         </div>
       </div>
 
-      {/* Floating BackButton — pill `#004f8b` 116×232 azul aprobado */}
+      {/* Floating BackButton — pill `hsl(var(--brand-primary))` 116×232 azul aprobado */}
       <button
         type="button"
         onClick={props.onStartOver}
@@ -313,7 +313,7 @@ export function AiResultScreen(props: AiResultScreenProps) {
           top: '1000px',
           width: '116px',
           height: '232px',
-          backgroundColor: '#004f8b',
+          backgroundColor: 'hsl(var(--brand-primary))',
           borderTopRightRadius: '116px',
           borderBottomRightRadius: '116px',
           paddingRight: '30px',

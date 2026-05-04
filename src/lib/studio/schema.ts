@@ -1809,6 +1809,17 @@ export const KioskConfigSchema = z.object({
   ads: AdsModuleSchema.optional(),
   /** Integraciones (weather, mapbox, analytics, external API). */
   integrations: IntegrationsConfigSchema.optional(),
+  /**
+   * Datos del cliente que se usan en el kiosk runtime: website (footer/share)
+   * y location ("Davenport, FL"). El operador los introduce al crear el
+   * kiosk; se pueden editar luego desde Branding.
+   */
+  clientInfo: z
+    .object({
+      website: z.string().max(2048).default(''),
+      location: z.string().max(120).default(''),
+    })
+    .optional(),
   /** Versión actual publicada (incrementa en cada publish aprobado). */
   currentVersion: z.number().int().nonnegative().default(0),
 });

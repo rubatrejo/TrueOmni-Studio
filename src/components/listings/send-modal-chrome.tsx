@@ -114,8 +114,8 @@ export function TermsCheckbox({
           width: '16px',
           height: '16px',
           borderRadius: '3px',
-          backgroundColor: checked ? '#b9bd39' : 'transparent',
-          border: checked ? '1px solid #b9bd39' : '1px solid #9a9a9a',
+          backgroundColor: checked ? 'hsl(var(--brand-tertiary))' : 'transparent',
+          border: checked ? '1px solid hsl(var(--brand-tertiary))' : '1px solid #9a9a9a',
         }}
       >
         {checked ? (
@@ -158,7 +158,7 @@ export function CancelSendButtons({
           width: '240px',
           height: '60px',
           borderRadius: '8px',
-          backgroundColor: '#b9bd39',
+          backgroundColor: 'hsl(var(--brand-tertiary))',
           fontSize: '22px',
           lineHeight: '22px',
           fontWeight: 700,

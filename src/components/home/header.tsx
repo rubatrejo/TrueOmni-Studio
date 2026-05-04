@@ -56,7 +56,7 @@ export async function HomeHeader({
   const grad = brand?.heroGradient;
   const gradientCss = grad
     ? `linear-gradient(${grad.angle}deg, ${grad.from}, ${grad.to})`
-    : 'linear-gradient(180deg, rgba(0,79,139,0.9) 0%, rgba(0,79,139,0.55) 30%, rgba(0,79,139,0) 70%)';
+    : 'linear-gradient(180deg, hsl(var(--brand-primary) / 0.9) 0%, hsl(var(--brand-primary) / 0.55) 30%, hsl(var(--brand-primary) / 0) 70%)';
   return (
     <header
       className={`relative ${heroSrc ? 'overflow-hidden' : ''}`}

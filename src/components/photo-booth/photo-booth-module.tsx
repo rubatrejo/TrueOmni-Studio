@@ -798,7 +798,7 @@ export function PhotoBoothModule({
                 fontWeight: 800,
                 letterSpacing: '-0.02em',
                 lineHeight: 0.95,
-                background: 'linear-gradient(135deg, #fff 0%, #b9bd39 70%)',
+                background: 'linear-gradient(135deg, #fff 0%, hsl(var(--brand-tertiary)) 70%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -834,7 +834,7 @@ export function PhotoBoothModule({
                 border: '3px solid hsl(var(--photo-countdown-ring))',
                 borderRadius: 9999,
                 cursor: 'pointer',
-                boxShadow: '0 0 40px rgba(185,189,57,0.35)',
+                boxShadow: '0 0 40px hsl(var(--brand-tertiary) / 0.35)',
               }}
             >
               {textos.experienceTeaserBack}

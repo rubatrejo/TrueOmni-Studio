@@ -155,7 +155,7 @@ export function GuestbookFormScreen({
             fontSize: '46px',
             lineHeight: '50px',
             fontWeight: 700,
-            color: '#004f8b',
+            color: 'hsl(var(--brand-primary))',
             letterSpacing: '-0.01em',
           }}
         >

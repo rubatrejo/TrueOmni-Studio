@@ -199,7 +199,7 @@ export function EventsFilterOverlay({
               width: '260px',
               height: '72px',
               borderRadius: '8px',
-              backgroundColor: '#b9bd39',
+              backgroundColor: 'hsl(var(--brand-tertiary))',
               fontSize: '24px',
               lineHeight: '24px',
               fontWeight: 700,

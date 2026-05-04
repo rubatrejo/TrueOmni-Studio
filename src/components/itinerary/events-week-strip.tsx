@@ -37,7 +37,7 @@ const buildDayLabels = (locale: string): string[] => {
  *   - 180px alto · bg `#1e88c6` (azul medio Eat).
  *   - Row 1 (78px): chevron + uppercase 34px bold + chevron.
  *   - Row 2 (102px): 7 pills SUN..SAT 118×64, rounded-md, white border 1.6px,
- *     active = white fill + text `#004f8b`.
+ *     active = white fill + text `hsl(var(--brand-primary))`.
  */
 export function EventsWeekStrip(props: EventsWeekStripProps) {
   const { weekStart, selectedDayIndex, onDayChange, onPrevWeek, onNextWeek } = props;
@@ -112,7 +112,7 @@ export function EventsWeekStrip(props: EventsWeekStripProps) {
                 borderRadius: 8,
                 border: '1.6px solid #ffffff',
                 backgroundColor: isActive ? '#ffffff' : 'transparent',
-                color: isActive ? '#004f8b' : '#ffffff',
+                color: isActive ? 'hsl(var(--brand-primary))' : '#ffffff',
                 fontSize: 20,
                 lineHeight: '20px',
                 fontWeight: isActive ? 700 : 600,

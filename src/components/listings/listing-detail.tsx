@@ -308,7 +308,7 @@ function DetailHeader({
           top: 0,
           width: '899px',
           height: '312px',
-          backgroundColor: '#004f8b',
+          backgroundColor: 'hsl(var(--brand-primary))',
         }}
       />
 
@@ -414,7 +414,7 @@ function HeroImage({
           aria-hidden
           className="h-full w-full"
           style={{
-            background: 'linear-gradient(135deg, #004f8b 0%, #1796d6 100%)',
+            background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, #1796d6 100%)',
           }}
         />
       ) : (
@@ -643,7 +643,7 @@ function SecondaryCtaButton({
   const resolvedLabel = cta.labelKey ? t(cta.labelKey) : cta.label;
   const label = cta.labelKey && resolvedLabel === cta.labelKey ? cta.label : resolvedLabel;
   const color = cta.color ?? 'blue';
-  const bg = color === 'olive' ? '#b9bd39' : '#1796d6';
+  const bg = color === 'olive' ? 'hsl(var(--brand-tertiary))' : '#1796d6';
   const isOutlineRed = color === 'outline-red';
   const sharedStyle = {
     left: `${leftOverride ?? 609}px`,
@@ -855,24 +855,24 @@ function ShareCell({
 }
 
 function EnvelopeIcon() {
-  // Paths verbatim del SVG (Mask-8), fill olive #b9bd39.
+  // Paths verbatim del SVG (Mask-8), fill olive hsl(var(--brand-tertiary)).
   return (
     <svg width="39" height="29" viewBox="0 0 39 29" aria-hidden>
       <path
         d="M35.344,29H3.656a3.554,3.554,0,0,1-2.589-1.058A3.5,3.5,0,0,1,0,25.375V9.968a.416.416,0,0,1,.266-.415.569.569,0,0,1,.222-.053.489.489,0,0,1,.273.086c1.671,1.254,5.618,4.126,11.731,8.534l.762.68a30.517,30.517,0,0,0,2.894,1.964,7.216,7.216,0,0,0,3.352.982,6.841,6.841,0,0,0,3.352-1.058,21.456,21.456,0,0,0,2.894-1.964l.761-.6c5.963-4.259,9.91-7.13,11.731-8.534a.409.409,0,0,1,.288-.136.42.42,0,0,1,.207.06A.491.491,0,0,1,39,9.968V25.375a3.5,3.5,0,0,1-1.067,2.568A3.551,3.551,0,0,1,35.344,29ZM19.5,19.333a4.912,4.912,0,0,1-2.438-.905A18.212,18.212,0,0,1,14.7,16.765l-.762-.528C7.721,11.725,3.441,8.575,1.219,6.872L.686,6.494A1.721,1.721,0,0,1,0,5.06V3.625A3.5,3.5,0,0,1,1.067,1.058,3.557,3.557,0,0,1,3.656,0H35.344a3.554,3.554,0,0,1,2.589,1.058A3.5,3.5,0,0,1,39,3.625V5.06a1.722,1.722,0,0,1-.685,1.435l-.382.3c-2.166,1.7-6.5,4.874-12.873,9.44l-.761.528a18.232,18.232,0,0,1-2.362,1.662A4.911,4.911,0,0,1,19.5,19.333Z"
-        fill="#b9bd39"
+        fill="hsl(var(--brand-tertiary))"
       />
     </svg>
   );
 }
 
 function PhoneIcon() {
-  // Paths verbatim del SVG (Mask-7), fill olive #b9bd39.
+  // Paths verbatim del SVG (Mask-7), fill olive hsl(var(--brand-tertiary)).
   return (
     <svg width="25" height="40" viewBox="0 0 25 40" aria-hidden>
       <path
         d="M21.25,40H3.75a3.632,3.632,0,0,1-2.657-1.094A3.632,3.632,0,0,1,0,36.251V3.75A3.633,3.633,0,0,1,1.093,1.094,3.632,3.632,0,0,1,3.75,0h17.5a3.631,3.631,0,0,1,2.656,1.094A3.63,3.63,0,0,1,25,3.75v32.5A3.735,3.735,0,0,1,21.25,40ZM12.5,32a2.534,2.534,0,1,0,1.758.742A2.412,2.412,0,0,0,12.5,32ZM4.018,4a1.038,1.038,0,0,0-.721.271.862.862,0,0,0-.3.658V29.072a.859.859,0,0,0,.3.657A1.035,1.035,0,0,0,4.018,30H20.982a1.036,1.036,0,0,0,.722-.271.861.861,0,0,0,.3-.657V4.928a.864.864,0,0,0-.3-.658A1.039,1.039,0,0,0,20.982,4Z"
-        fill="#b9bd39"
+        fill="hsl(var(--brand-tertiary))"
       />
     </svg>
   );
@@ -885,8 +885,8 @@ function HeartIcon({ filled }: { filled: boolean }) {
       width="36"
       height="32"
       viewBox="0 0 24 24"
-      fill={filled ? '#b9bd39' : 'none'}
-      stroke="#b9bd39"
+      fill={filled ? 'hsl(var(--brand-tertiary))' : 'none'}
+      stroke="hsl(var(--brand-tertiary))"
       strokeWidth={filled ? 0 : 2}
       aria-hidden
     >
@@ -981,35 +981,35 @@ function MapSection({
 
 function DirectionsIcon() {
   // Paths verbatim del SVG original (map-3 group: Path_179, 180, 181, 182)
-  // con sus transforms anidados tal cual. Pin drop con flag a la derecha, fill #004f8b.
+  // con sus transforms anidados tal cual. Pin drop con flag a la derecha, fill hsl(var(--brand-primary)).
   return (
     <svg width="46" height="36" viewBox="0 0 46 36" aria-hidden>
       <g transform="translate(8.498, 26.109)">
         <path
           transform="translate(-60.814, -373.412)"
           d="M87.3,381l-14.08-7.455a1.129,1.129,0,0,0-1.161.067L61.3,381.064a1.119,1.119,0,0,0,.635,2.038H86.777A1.119,1.119,0,0,0,87.3,381Z"
-          fill="#004f8b"
+          fill="hsl(var(--brand-primary))"
         />
       </g>
       <g transform="translate(23.409, 15.784)">
         <path
           transform="translate(-274.069, -225.744)"
           d="M290.36,241.527l-3.311-14.908a1.12,1.12,0,0,0-1.73-.678L274.55,233.4a1.118,1.118,0,0,0,.114,1.906l14.078,7.455a1.122,1.122,0,0,0,.524.132,1.1,1.1,0,0,0,.678-.23A1.12,1.12,0,0,0,290.36,241.527Z"
-          fill="#004f8b"
+          fill="hsl(var(--brand-primary))"
         />
       </g>
       <g transform="translate(5.28, 13.425)">
         <path
           transform="translate(-14.784, -192)"
           d="M41.413,192.785A1.121,1.121,0,0,0,40.344,192H30.132a46.7,46.7,0,0,1-5.734,7.835,3.355,3.355,0,0,1-4.994,0c-.436-.486-1.112-1.262-1.886-2.224L14.81,209.8a1.118,1.118,0,0,0,1.092,1.36,1.108,1.108,0,0,0,.638-.2l24.439-16.922A1.115,1.115,0,0,0,41.413,192.785Z"
-          fill="#004f8b"
+          fill="hsl(var(--brand-primary))"
         />
       </g>
       <g transform="translate(4.565, 0)">
         <path
           transform="translate(-4.565, 0)"
           d="M12.4,0A7.84,7.84,0,0,0,4.565,7.831c0,4.018,6.283,11.136,7,11.934a1.118,1.118,0,0,0,1.665,0c.716-.8,7-7.916,7-11.934A7.84,7.84,0,0,0,12.4,0Zm0,11.187a3.356,3.356,0,1,1,3.356-3.356A3.357,3.357,0,0,1,12.4,11.187Z"
-          fill="#004f8b"
+          fill="hsl(var(--brand-primary))"
         />
       </g>
     </svg>

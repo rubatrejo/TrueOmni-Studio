@@ -187,7 +187,7 @@ export function EditorScreen({
       {/* Top panel azul */}
       <div
         className="absolute"
-        style={{ left: 0, top: 0, width: 1080, height: 446, background: '#004f8b' }}
+        style={{ left: 0, top: 0, width: 1080, height: 446, background: 'hsl(var(--brand-primary))' }}
       />
 
       {/* Carrusel de opciones del tab activo */}

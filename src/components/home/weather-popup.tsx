@@ -68,7 +68,7 @@ export function WeatherPopup({ data, onClose }: { data: WeatherData; onClose: ()
             top: '0',
             width: '576px',
             height: '510px',
-            backgroundColor: '#004f8b',
+            backgroundColor: 'hsl(var(--brand-primary))',
             borderBottomLeftRadius: '15px',
             borderBottomRightRadius: '15px',
           }}

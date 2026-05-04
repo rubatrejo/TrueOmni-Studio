@@ -85,7 +85,7 @@ function HeroImage({ src, alt }: { src: string; alt: string }) {
       <div
         aria-hidden
         className="absolute inset-0"
-        style={{ background: 'linear-gradient(135deg, #004f8b 0%, #1796d6 100%)' }}
+        style={{ background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, #1796d6 100%)' }}
       />
     );
   }

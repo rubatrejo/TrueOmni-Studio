@@ -23,7 +23,7 @@ export function MapToolbar({
       {/* Cell 1 — label grande */}
       <div
         className="absolute left-0 top-0 flex items-center"
-        style={{ width: '682px', height: '118px', backgroundColor: '#004f8b' }}
+        style={{ width: '682px', height: '118px', backgroundColor: 'hsl(var(--brand-primary))' }}
       >
         <span
           className="font-sans text-white"
@@ -44,7 +44,7 @@ export function MapToolbar({
           top: '0',
           width: '199px',
           height: '118px',
-          backgroundColor: '#004f8b',
+          backgroundColor: 'hsl(var(--brand-primary))',
         }}
       >
         <svg
@@ -70,7 +70,7 @@ export function MapToolbar({
           top: '0',
           width: '199px',
           height: '118px',
-          backgroundColor: '#004f8b',
+          backgroundColor: 'hsl(var(--brand-primary))',
         }}
       >
         <svg

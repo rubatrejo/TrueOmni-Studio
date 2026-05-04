@@ -6,7 +6,7 @@ import type { SocialHighlight } from '@/lib/config';
  *
  * Dimensiones aproximadas (pixel-perfect pendiente vs SVG):
  *   - altura: ~170px
- *   - fondo: #004f8b
+ *   - fondo: hsl(var(--brand-primary))
  *   - círculos: d=80, bordes blancos, margen entre ellos 12px
  *   - hashtag: Helvetica 40 bold white, alineado derecha
  */
@@ -25,7 +25,7 @@ export function SocialWallBanner({
         width: '1080px',
         height: '220px',
         background:
-          'linear-gradient(180deg, rgba(0,79,139,0) 0%, rgba(0,79,139,0.55) 28%, rgba(0,79,139,0.88) 55%, #004f8b 100%)',
+          'linear-gradient(180deg, hsl(var(--brand-primary) / 0) 0%, hsl(var(--brand-primary) / 0.55) 28%, hsl(var(--brand-primary) / 0.88) 55%, hsl(var(--brand-primary)) 100%)',
         padding: '40px 48px 22px 48px',
         gap: '48px',
       }}

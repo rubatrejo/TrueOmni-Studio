@@ -3,7 +3,7 @@
 import { useTextos } from '@/components/i18n-provider';
 
 /**
- * Search tab verbatim del SVG Dashboard (y=620..726, 1080×106 #004f8b).
+ * Search tab verbatim del SVG Dashboard (y=620..726, 1080×106 hsl(var(--brand-primary))).
  *   - Input white 940×58 rx=8 @ (55, 24).
  *   - Botón SEARCH olive 181×54 rx=8 @ (812, 26).
  *   - Placeholder "What are you looking for?" 24px Helvetica #707070.
@@ -18,7 +18,7 @@ export function SearchBar({ onOpen }: { onOpen: () => void }) {
   return (
     <div
       className="relative"
-      style={{ height: '106px', backgroundColor: '#004f8b', flexShrink: 0 }}
+      style={{ height: '106px', backgroundColor: 'hsl(var(--brand-primary))', flexShrink: 0 }}
     >
       <button
         type="button"
@@ -48,7 +48,7 @@ export function SearchBar({ onOpen }: { onOpen: () => void }) {
           top: '26px',
           width: '181px',
           height: '54px',
-          backgroundColor: '#b9bd39',
+          backgroundColor: 'hsl(var(--brand-tertiary))',
           borderRadius: '8px',
           fontSize: '26px',
           letterSpacing: '0.02em',

@@ -119,7 +119,7 @@ export function SocialPostVideoModal({ post, onClose }: { post: SocialPost; onCl
             <div
               aria-hidden
               className="absolute inset-0"
-              style={{ background: 'linear-gradient(135deg,#004f8b,#1796d6)' }}
+              style={{ background: 'linear-gradient(135deg,hsl(var(--brand-primary)),#1796d6)' }}
             />
           )}
 

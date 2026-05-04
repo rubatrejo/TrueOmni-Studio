@@ -91,7 +91,7 @@ export function BrochuresSearchOverlay({
             width: '180px',
             height: '64px',
             borderRadius: '8px',
-            backgroundColor: '#b9bd39',
+            backgroundColor: 'hsl(var(--brand-tertiary))',
             color: '#ffffff',
             fontSize: '22px',
             fontWeight: 700,

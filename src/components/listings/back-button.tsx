@@ -23,7 +23,7 @@ export function BackButton({
         top,
         width: '116px',
         height: '232px',
-        backgroundColor: '#004f8b',
+        backgroundColor: 'hsl(var(--brand-primary))',
         borderTopRightRadius: '116px',
         borderBottomRightRadius: '116px',
         paddingRight: '30px',

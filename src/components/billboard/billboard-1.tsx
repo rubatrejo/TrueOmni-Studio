@@ -28,11 +28,11 @@ import { useBillboardOverride } from './use-billboard-override';
  * - Grid izquierdo (x=30, width=495):
  *   · THINGS TO DO 495×410 @ y=374 con foto cityscape.
  *   · EVENTS 495×410 @ y=810 con foto fireworks.
- *   · ITINERARY BUILDER 495×208 @ y=1250 olive #b9bd39 con icono ruta.
+ *   · ITINERARY BUILDER 495×208 @ y=1250 olive hsl(var(--brand-tertiary)) con icono ruta.
  *   · PHOTO BOOTH 495×208 @ y=1488 azul #1796d6.
  * - Card derecha grande 495×1326 @ (555, 370) con valentino street +
  *   "TOUCH TO START" 70px Montserrat-Bold + icono click (paths SVG).
- * - Footer 1080×194 @ y=1726 plano #004f8b con logo TrueOmni.
+ * - Footer 1080×194 @ y=1726 plano hsl(var(--brand-primary)) con logo TrueOmni.
  *
  * Todos los textos y posiciones son verbatim del SVG (Protocolo
  * pixel-perfect paso 2). Icono click-2384 copiado 1:1 sin lucide.
@@ -48,7 +48,7 @@ export function Billboard1() {
   const slot2 = resolveSlotLabel(modules?.[2], { label: 'Trip', labelLine2: 'Planner' });
   const slot3 = resolveSlotLabel(modules?.[3], { label: 'Photo', labelLine2: 'Booth' });
   // v2.1: solo el icono reacciona al módulo asignado. Color del slot fijo
-  // (olive #b9bd39 / azul #1796d6) — decisión de Rubén 2026-05-01: la
+  // (olive hsl(var(--brand-tertiary)) / azul #1796d6) — decisión de Rubén 2026-05-01: la
   // identidad cromática de cada slot pertenece al SVG original, no al módulo.
   const Slot2Icon = resolveSlotIcon(modules?.[2], RouteIcon);
   const Slot3Icon = resolveSlotIcon(modules?.[3], CameraIcon);
@@ -181,7 +181,7 @@ export function Billboard1() {
         </span>
       </Link>
 
-      {/* Slot 2 — original SVG: ITINERARY BUILDER (495×208 @ 30, 1250) olive #b9bd39.
+      {/* Slot 2 — original SVG: ITINERARY BUILDER (495×208 @ 30, 1250) olive hsl(var(--brand-tertiary)).
           v2.1: solo icono reactivo al módulo asignado. El color olive es
           identidad fija del slot. */}
       <Link
@@ -193,7 +193,7 @@ export function Billboard1() {
           width: '495px',
           height: '208px',
           borderRadius: '9px',
-          backgroundColor: '#b9bd39',
+          backgroundColor: 'hsl(var(--brand-tertiary))',
           paddingLeft: '36px',
           paddingRight: '36px',
         }}
@@ -312,13 +312,13 @@ export function Billboard1() {
         </svg>
       </div>
 
-      {/* Footer 1080×194 @ y=1726 plano #004f8b: logo + accesibilidad + ENGLISH */}
+      {/* Footer 1080×194 @ y=1726 plano hsl(var(--brand-primary)): logo + accesibilidad + ENGLISH */}
       <div
         className="absolute left-0 right-0 flex items-center justify-between"
         style={{
           bottom: '0',
           height: '194px',
-          backgroundColor: '#004f8b',
+          backgroundColor: 'hsl(var(--brand-primary))',
           paddingLeft: '59px',
           paddingRight: '59px',
         }}

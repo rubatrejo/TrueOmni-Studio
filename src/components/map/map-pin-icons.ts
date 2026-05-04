@@ -20,8 +20,8 @@ import type { MapSource } from '@/lib/config';
  */
 export const MAP_PIN_COLORS: Record<MapSource, string> = {
   restaurants: '#1796d6', // Eat (tab #1796d6)
-  'things-to-do': '#004f8b', // Play (tab #004f8b)
-  stay: '#b9bd39', // Stay (tab #b9bd39)
+  'things-to-do': 'hsl(var(--brand-primary))', // Play (tab hsl(var(--brand-primary)))
+  stay: 'hsl(var(--brand-tertiary))', // Stay (tab hsl(var(--brand-tertiary)))
   events: '#f16651', // Events (tab #f16651)
 };
 
@@ -158,7 +158,7 @@ export function selectedPinSvg(source: MapSource): string {
 /** Cluster — azul oscuro (primary del kiosk) 90×90 con número blanco bold. */
 export function clusterSvg(count: number): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 90 90">
-    <circle cx="45" cy="45" r="38" fill="#004f8b" stroke="#ffffff" stroke-width="4"/>
+    <circle cx="45" cy="45" r="38" fill="hsl(var(--brand-primary))" stroke="#ffffff" stroke-width="4"/>
     <text x="45" y="55" text-anchor="middle" fill="#ffffff" font-family="Helvetica, Arial, sans-serif" font-size="32" font-weight="700">${count}</text>
   </svg>`;
 }

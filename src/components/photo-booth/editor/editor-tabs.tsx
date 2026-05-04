@@ -12,7 +12,7 @@ interface EditorTabsProps {
  * Barra de tabs Backgrounds | Frames | Filters verbatim del SVG
  * `4-Photo_Booth-Experience.svg`:
  *   - Bar: rect 1080×90 translate(0, 605) fill="#1796d6".
- *   - Tab active: rect 317×58 rx=10 translate(392, 621) fill="#004f8b".
+ *   - Tab active: rect 317×58 rx=10 translate(392, 621) fill="hsl(var(--brand-primary))".
  *   - Texto active: fill=#fff font Montserrat-Bold 30px.
  *
  * El tab "Frames" aparece active en el SVG, pero la posición se calcula
@@ -55,7 +55,7 @@ export function EditorTabs({ active, onSelect, labels }: EditorTabsProps) {
           width={317}
           height={58}
           rx={10}
-          fill="#004f8b"
+          fill="hsl(var(--brand-primary))"
           style={{ transition: 'x 0.2s ease-out' }}
         />
       </svg>

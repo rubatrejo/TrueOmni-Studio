@@ -2,7 +2,7 @@
 
 /**
  * Banda azul del reader: título izq + botones SEND TO EMAIL y SEND TO PHONE
- * a la derecha. Altura 96px, fondo `#004f8b`.
+ * a la derecha. Altura 96px, fondo `hsl(var(--brand-primary))`.
  *
  * La navegación "volver" se hace con el `BackButton` flotante del layout
  * del reader (no dentro del header).
@@ -22,7 +22,7 @@ export function BrochureReaderHeader({
       style={{
         width: '1080px',
         height: '96px',
-        backgroundColor: '#004f8b',
+        backgroundColor: 'hsl(var(--brand-primary))',
         padding: '0 24px 0 32px',
         flexShrink: 0,
       }}
@@ -52,7 +52,7 @@ export function BrochureReaderHeader({
             height: '60px',
             padding: '0 24px',
             borderRadius: '8px',
-            backgroundColor: '#b9bd39',
+            backgroundColor: 'hsl(var(--brand-tertiary))',
             color: '#fff',
             fontSize: '18px',
             lineHeight: '18px',

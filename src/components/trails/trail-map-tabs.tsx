@@ -238,7 +238,7 @@ function Tab({ label, active, onClick }: { label: string; active: boolean; onCli
       className="relative flex-1 font-sans focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-white/60"
       style={{
         height: '68px',
-        backgroundColor: active ? '#b9bd39' : '#f1f3f5',
+        backgroundColor: active ? 'hsl(var(--brand-tertiary))' : '#f1f3f5',
         color: active ? '#ffffff' : '#4a4a4a',
         fontSize: '22px',
         lineHeight: '22px',
@@ -259,28 +259,28 @@ function DirectionsIcon() {
         <path
           transform="translate(-60.814, -373.412)"
           d="M87.3,381l-14.08-7.455a1.129,1.129,0,0,0-1.161.067L61.3,381.064a1.119,1.119,0,0,0,.635,2.038H86.777A1.119,1.119,0,0,0,87.3,381Z"
-          fill="#004f8b"
+          fill="hsl(var(--brand-primary))"
         />
       </g>
       <g transform="translate(23.409, 15.784)">
         <path
           transform="translate(-274.069, -225.744)"
           d="M290.36,241.527l-3.311-14.908a1.12,1.12,0,0,0-1.73-.678L274.55,233.4a1.118,1.118,0,0,0,.114,1.906l14.078,7.455a1.122,1.122,0,0,0,.524.132,1.1,1.1,0,0,0,.678-.23A1.12,1.12,0,0,0,290.36,241.527Z"
-          fill="#004f8b"
+          fill="hsl(var(--brand-primary))"
         />
       </g>
       <g transform="translate(5.28, 13.425)">
         <path
           transform="translate(-14.784, -192)"
           d="M41.413,192.785A1.121,1.121,0,0,0,40.344,192H30.132a46.7,46.7,0,0,1-5.734,7.835,3.355,3.355,0,0,1-4.994,0c-.436-.486-1.112-1.262-1.886-2.224L14.81,209.8a1.118,1.118,0,0,0,1.092,1.36,1.108,1.108,0,0,0,.638-.2l24.439-16.922A1.115,1.115,0,0,0,41.413,192.785Z"
-          fill="#004f8b"
+          fill="hsl(var(--brand-primary))"
         />
       </g>
       <g transform="translate(4.565, 0)">
         <path
           transform="translate(-4.565, 0)"
           d="M12.4,0A7.84,7.84,0,0,0,4.565,7.831c0,4.018,6.283,11.136,7,11.934a1.118,1.118,0,0,0,1.665,0c.716-.8,7-7.916,7-11.934A7.84,7.84,0,0,0,12.4,0Zm0,11.187a3.356,3.356,0,1,1,3.356-3.356A3.357,3.357,0,0,1,12.4,11.187Z"
-          fill="#004f8b"
+          fill="hsl(var(--brand-primary))"
         />
       </g>
     </svg>

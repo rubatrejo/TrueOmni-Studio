@@ -141,7 +141,7 @@ export function ShareScreen({
           borderRadius: 24,
           background: '#ffffff',
           boxShadow:
-            '0 18px 44px rgba(0,0,0,0.32), 0 0 0 4px rgba(185,189,57,0.18)',
+            '0 18px 44px rgba(0,0,0,0.32), 0 0 0 4px hsl(var(--brand-tertiary) / 0.18)',
           gap: 18,
         }}
       >
@@ -215,7 +215,7 @@ export function ShareScreen({
           height: 86,
           borderRadius: 14,
           border: 'none',
-          background: '#b9bd39',
+          background: 'hsl(var(--brand-tertiary))',
           color: '#fff',
           fontFamily: "'Open Sans', system-ui",
           fontSize: 24,

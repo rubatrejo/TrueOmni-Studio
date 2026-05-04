@@ -94,7 +94,7 @@ export function TicketCard({
                 paddingRight: '20px',
                 borderRadius: '999px',
                 backgroundColor: '#ffffff',
-                color: '#004f8b',
+                color: 'hsl(var(--brand-primary))',
                 fontSize: '21px',
                 letterSpacing: '0.04em',
               }}
@@ -144,7 +144,7 @@ function TicketImage({ src, alt }: { src: string; alt: string }) {
           width: '280px',
           height: '178px',
           flexShrink: 0,
-          background: 'linear-gradient(135deg, #004f8b 0%, #1796d6 100%)',
+          background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, #1796d6 100%)',
         }}
       />
     );

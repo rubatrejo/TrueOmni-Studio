@@ -100,7 +100,7 @@ function Cover({ src, alt }: { src: string; alt: string }) {
     return (
       <div
         aria-hidden
-        style={{ ...style, background: 'linear-gradient(135deg, #004f8b, #1796d6)' }}
+        style={{ ...style, background: 'linear-gradient(135deg, hsl(var(--brand-primary)), #1796d6)' }}
       />
     );
   }

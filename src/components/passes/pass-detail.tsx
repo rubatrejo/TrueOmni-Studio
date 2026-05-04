@@ -70,7 +70,7 @@ export function PassDetail({ moduleKey, pass, onShareOpen }: Props) {
       </div>
       <div
         className="relative w-full text-white"
-        style={{ height: '118px', backgroundColor: '#004f8b' }}
+        style={{ height: '118px', backgroundColor: 'hsl(var(--brand-primary))' }}
       >
         <span
           className="absolute font-sans"

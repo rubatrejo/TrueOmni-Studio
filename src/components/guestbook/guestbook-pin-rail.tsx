@@ -58,7 +58,7 @@ export function GuestbookPinRail({
           fontSize: '32px',
           lineHeight: '34px',
           fontWeight: 700,
-          color: '#004f8b',
+          color: 'hsl(var(--brand-primary))',
           letterSpacing: '-0.01em',
           marginBottom: '10px',
         }}

@@ -119,7 +119,7 @@ function Row({ icon, label, value }: { icon: React.ReactNode; label: string; val
           width: '56px',
           height: '56px',
           borderRadius: '50%',
-          backgroundColor: 'rgba(0,79,139,0.08)',
+          backgroundColor: 'hsl(var(--brand-primary) / 0.08)',
           flexShrink: 0,
         }}
       >
@@ -160,7 +160,7 @@ function DistanceIcon() {
     <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden>
       <path
         d="M4 20l16-16M6 8h4M14 18h4"
-        stroke="#004f8b"
+        stroke="hsl(var(--brand-primary))"
         strokeWidth="2"
         strokeLinecap="round"
         fill="none"
@@ -180,7 +180,7 @@ function DifficultyIcon({ level }: { level: 'Easy' | 'Moderate' | 'Hard' }) {
           y={20 - (i + 1) * 4}
           width="4"
           height={(i + 1) * 4}
-          fill={i < bars ? '#004f8b' : 'rgba(0,79,139,0.2)'}
+          fill={i < bars ? 'hsl(var(--brand-primary))' : 'hsl(var(--brand-primary) / 0.2)'}
           rx="1"
         />
       ))}
@@ -191,8 +191,8 @@ function DifficultyIcon({ level }: { level: 'Easy' | 'Moderate' | 'Hard' }) {
 function ClockIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden>
-      <circle cx="12" cy="12" r="9" fill="none" stroke="#004f8b" strokeWidth="2" />
-      <path d="M12 7v5l3 2" stroke="#004f8b" strokeWidth="2" strokeLinecap="round" fill="none" />
+      <circle cx="12" cy="12" r="9" fill="none" stroke="hsl(var(--brand-primary))" strokeWidth="2" />
+      <path d="M12 7v5l3 2" stroke="hsl(var(--brand-primary))" strokeWidth="2" strokeLinecap="round" fill="none" />
     </svg>
   );
 }
@@ -200,7 +200,7 @@ function ClockIcon() {
 function ElevationIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden>
-      <path d="M3 20l5-10 4 6 3-4 6 8H3z" fill="#004f8b" opacity="0.85" />
+      <path d="M3 20l5-10 4 6 3-4 6 8H3z" fill="hsl(var(--brand-primary))" opacity="0.85" />
     </svg>
   );
 }
@@ -209,7 +209,7 @@ function TypeIcon({ type }: { type: 'Loop' | 'Out & Back' | 'Point to Point' }) 
   if (type === 'Loop') {
     return (
       <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden>
-        <circle cx="12" cy="12" r="7" fill="none" stroke="#004f8b" strokeWidth="2" />
+        <circle cx="12" cy="12" r="7" fill="none" stroke="hsl(var(--brand-primary))" strokeWidth="2" />
       </svg>
     );
   }
@@ -218,7 +218,7 @@ function TypeIcon({ type }: { type: 'Loop' | 'Out & Back' | 'Point to Point' }) 
       <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden>
         <path
           d="M5 9h14M19 9l-3-3M19 9l-3 3M19 15H5M5 15l3-3M5 15l3 3"
-          stroke="#004f8b"
+          stroke="hsl(var(--brand-primary))"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -230,9 +230,9 @@ function TypeIcon({ type }: { type: 'Loop' | 'Out & Back' | 'Point to Point' }) 
   // Point to Point
   return (
     <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden>
-      <circle cx="5" cy="12" r="2.5" fill="#004f8b" />
-      <path d="M7.5 12h9" stroke="#004f8b" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="19" cy="12" r="2.5" fill="#004f8b" />
+      <circle cx="5" cy="12" r="2.5" fill="hsl(var(--brand-primary))" />
+      <path d="M7.5 12h9" stroke="hsl(var(--brand-primary))" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="19" cy="12" r="2.5" fill="hsl(var(--brand-primary))" />
     </svg>
   );
 }
@@ -242,7 +242,7 @@ function DogIcon() {
     <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden>
       <path
         d="M6 4c1.5 0 2.5 2 2 4l2 1 2-1c-.5-2 .5-4 2-4 1.5 0 2 2 2 3 0 2-1 3-2 3v3c0 2-2 4-5 4s-5-2-5-4v-3c-1 0-2-1-2-3 0-1 .5-3 2-3z"
-        fill="#004f8b"
+        fill="hsl(var(--brand-primary))"
         opacity="0.9"
       />
       <circle cx="9" cy="11" r="0.9" fill="#fff" />

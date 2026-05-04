@@ -25,7 +25,7 @@ interface OptionsCarouselProps {
 /**
  * Carrusel horizontal scrollable de opciones del editor (Backgrounds / Frames
  * / Filters). Coordenadas verbatim del SVG `4-Photo_Booth-Experience.svg`:
- *   - Fila entera en la zona superior blue #004f8b (y=178+4=182, h~230).
+ *   - Fila entera en la zona superior blue hsl(var(--brand-primary)) (y=178+4=182, h~230).
  *   - Círculos r=106 con stroke #fff sw=10.
  *   - Inside: rect 180×180 rx=90 con pattern fill.
  *

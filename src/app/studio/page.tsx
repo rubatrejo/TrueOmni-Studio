@@ -61,7 +61,13 @@ export default function StudioHome() {
     };
   }, []);
 
-  const handleCreate = async (input: { slug: string; nombre: string }) => {
+  const handleCreate = async (input: {
+    slug: string;
+    nombre: string;
+    orientation?: string;
+    website?: string;
+    location?: string;
+  }) => {
     await createConfig(input);
     setShowNewModal(false);
     await refresh();

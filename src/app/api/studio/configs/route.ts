@@ -10,6 +10,8 @@ import {
   makeBlankConfig,
 } from '@/lib/studio/schema';
 
+const DEFAULT_TEMPLATE_SLUG = 'default';
+
 /**
  * `/api/studio/configs`
  *
@@ -44,6 +46,8 @@ export async function POST(request: Request) {
       slug?: string;
       nombre?: string;
       orientation?: string;
+      website?: string;
+      location?: string;
     };
     if (!body.slug || !body.nombre) {
       return NextResponse.json({ error: 'slug and nombre are required' }, { status: 400 });
@@ -54,7 +58,29 @@ export async function POST(request: Request) {
       ? (body.orientation as KioskOrientation)
       : 'portrait';
 
-    const config = makeBlankConfig(body.slug, body.nombre, orientation);
+    // Clonar desde el kiosk `default` (TrueOmni) para que el cliente nuevo
+    // arranque con TODA la mock data poblada (listings, events, passes,
+    // deals, trails, etc.). Si `default` no existe en KV, fallback a
+    // makeBlankConfig (kiosk con catálogos vacíos).
+    const template = await kv.get<KioskConfig>(kvKeys.cfg(DEFAULT_TEMPLATE_SLUG));
+    let config: KioskConfig;
+    if (template) {
+      config = structuredClone(template);
+      config.slug = body.slug;
+      config.nombre = body.nombre;
+      config.orientation = orientation;
+      config.currentVersion = 0;
+    } else {
+      config = makeBlankConfig(body.slug, body.nombre, orientation);
+    }
+
+    if (body.website || body.location) {
+      config.clientInfo = {
+        website: body.website?.trim() ?? '',
+        location: body.location?.trim() ?? '',
+      };
+    }
+
     const parsed = KioskConfigSchema.safeParse(config);
     if (!parsed.success) {
       return NextResponse.json(

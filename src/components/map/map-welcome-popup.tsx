@@ -44,7 +44,7 @@ export function MapWelcomePopup({ copy, onDismiss }: MapWelcomePopupProps) {
         <div
           className="flex flex-col items-center justify-center"
           style={{
-            backgroundColor: '#004f8b',
+            backgroundColor: 'hsl(var(--brand-primary))',
             padding: '60px 32px 48px',
           }}
         >

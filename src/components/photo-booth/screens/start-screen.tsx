@@ -78,7 +78,7 @@ export function StartScreen({
       </svg>
 
       {/* Home button — mismo patrón que `FloatingHomeButton` (top:1000,
-          116×232, rounded right, #004f8b tokenizado). */}
+          116×232, rounded right, hsl(var(--brand-primary)) tokenizado). */}
       <button
         type="button"
         aria-label={ariaHome}

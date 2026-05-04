@@ -20,7 +20,7 @@ import { useBillboardLogoHeight, useBillboardOverride } from './use-billboard-ov
  *   TrueOmni logo centrado + TOUCH TO START + arrow circle.
  * - Fila 2 (y=1230..1720): THINGS TO DO (play.jpg) + ITINERARY BUILDER
  *   (things-to-do.jpg como "bikes").
- * - Footer (y=1720..1920): #004f8b con TrueOmni + accesibilidad + ENGLISH.
+ * - Footer (y=1720..1920): hsl(var(--brand-primary)) con TrueOmni + accesibilidad + ENGLISH.
  */
 export function Billboard3() {
   const t = useTextosMap();
@@ -43,7 +43,7 @@ export function Billboard3() {
     <div
       data-billboard="3"
       className="relative h-full w-full overflow-hidden"
-      style={{ backgroundColor: '#004f8b' }}
+      style={{ backgroundColor: 'hsl(var(--brand-primary))' }}
     >
       {/* Fila 1 — slots 0 (top-left) y 1 (top-right). y=0..450 */}
       <Link
@@ -98,7 +98,7 @@ export function Billboard3() {
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,79,139,0.6)' }} />
+        <div className="absolute inset-0" style={{ backgroundColor: 'hsl(var(--brand-primary) / 0.6)' }} />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-16">
           {/* Logo height configurable desde Studio (S=80 / M=128 / L=180).
               SVG original era 110px → cae cerca del L. */}
@@ -175,13 +175,13 @@ export function Billboard3() {
         </span>
       </Link>
 
-      {/* Footer (y=1720..1920): #004f8b con TrueOmni + accesibilidad + ENGLISH */}
+      {/* Footer (y=1720..1920): hsl(var(--brand-primary)) con TrueOmni + accesibilidad + ENGLISH */}
       <div
         className="absolute left-0 right-0 flex items-center justify-between"
         style={{
           bottom: '0',
           height: '200px',
-          backgroundColor: '#004f8b',
+          backgroundColor: 'hsl(var(--brand-primary))',
           paddingLeft: '59px',
           paddingRight: '59px',
         }}

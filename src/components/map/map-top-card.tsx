@@ -166,7 +166,7 @@ export function MapTopCard({ item, active, distanceMi, onClick }: MapTopCardProp
             fontSize: `${12 * scaleFont}px`,
             lineHeight: '1',
             fontWeight: 600,
-            color: '#b9bd39',
+            color: 'hsl(var(--brand-tertiary))',
           }}
         >
           {openUntil}
@@ -184,7 +184,7 @@ function CardImage({ src, title }: { src: string; title: string }) {
         aria-hidden
         className="flex h-full w-full items-center justify-center"
         style={{
-          background: 'linear-gradient(135deg, #004f8b 0%, #1796d6 100%)',
+          background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, #1796d6 100%)',
           color: '#ffffff',
           fontFamily: 'Helvetica, Arial, sans-serif',
           fontSize: '16px',

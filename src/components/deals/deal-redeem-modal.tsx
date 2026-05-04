@@ -134,7 +134,7 @@ export function DealRedeemModal({
                 style={{
                   fontSize: '18px',
                   letterSpacing: '0.04em',
-                  color: '#004f8b',
+                  color: 'hsl(var(--brand-primary))',
                   fontWeight: 700,
                 }}
               >
@@ -257,7 +257,7 @@ function HeroWithOverlay({
         <div
           aria-hidden
           className="absolute inset-0"
-          style={{ background: 'linear-gradient(135deg, #004f8b 0%, #1796d6 100%)' }}
+          style={{ background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, #1796d6 100%)' }}
         />
       ) : (
         // eslint-disable-next-line @next/next/no-img-element

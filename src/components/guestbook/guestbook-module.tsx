@@ -391,7 +391,7 @@ export function GuestbookModule({
                 fontSize: '32px',
                 lineHeight: 1.2,
                 fontWeight: 700,
-                color: '#004f8b',
+                color: 'hsl(var(--brand-primary))',
                 whiteSpace: 'pre-line',
               }}
             >
@@ -471,7 +471,7 @@ export function GuestbookModule({
               className="absolute inset-x-0 top-0"
               style={{
                 height: '8px',
-                background: 'linear-gradient(90deg, #b9bd39 0%, #1796d6 100%)',
+                background: 'linear-gradient(90deg, hsl(var(--brand-tertiary)) 0%, #1796d6 100%)',
               }}
             />
             <div
@@ -480,7 +480,7 @@ export function GuestbookModule({
                 width: '150px',
                 height: '150px',
                 borderRadius: '50%',
-                backgroundColor: 'rgba(185,189,57,0.14)',
+                backgroundColor: 'hsl(var(--brand-tertiary) / 0.14)',
                 marginBottom: '28px',
               }}
             >
@@ -488,7 +488,7 @@ export function GuestbookModule({
                 <path
                   d="M5 12l5 5 9-11"
                   fill="none"
-                  stroke="#b9bd39"
+                  stroke="hsl(var(--brand-tertiary))"
                   strokeWidth="3"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -501,7 +501,7 @@ export function GuestbookModule({
                 fontSize: '38px',
                 lineHeight: 1.15,
                 fontWeight: 700,
-                color: '#004f8b',
+                color: 'hsl(var(--brand-primary))',
                 marginBottom: '14px',
               }}
             >

@@ -59,7 +59,7 @@ export function CountdownOverlay({ value, totalSeconds }: CountdownOverlayProps)
           <circle cx={153} cy={153} r={153} />
         </g>
         {/* Arco de progreso que se rellena linealmente durante el countdown.
-            Color olive verde tomado del Send-to-Phone (#b9bd39). */}
+            Color olive verde tomado del Send-to-Phone (hsl(var(--brand-tertiary))). */}
         <g
           transform="translate(387 1544)"
           fill="none"

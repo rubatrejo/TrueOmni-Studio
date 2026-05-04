@@ -74,7 +74,7 @@ export function SendConfirmationPopup({
           className="absolute inset-x-0 top-0"
           style={{
             height: '8px',
-            background: 'linear-gradient(90deg, #b9bd39 0%, #1796d6 100%)',
+            background: 'linear-gradient(90deg, hsl(var(--brand-tertiary)) 0%, #1796d6 100%)',
           }}
         />
 
@@ -85,7 +85,7 @@ export function SendConfirmationPopup({
             width: '168px',
             height: '168px',
             borderRadius: '50%',
-            backgroundColor: 'rgba(185,189,57,0.12)',
+            backgroundColor: 'hsl(var(--brand-tertiary) / 0.12)',
             marginBottom: '36px',
           }}
         >
@@ -95,8 +95,8 @@ export function SendConfirmationPopup({
               width: '120px',
               height: '120px',
               borderRadius: '50%',
-              backgroundColor: '#b9bd39',
-              boxShadow: '0 12px 24px rgba(185,189,57,0.4)',
+              backgroundColor: 'hsl(var(--brand-tertiary))',
+              boxShadow: '0 12px 24px hsl(var(--brand-tertiary) / 0.4)',
             }}
           >
             <svg width="64" height="64" viewBox="0 0 24 24" aria-hidden>

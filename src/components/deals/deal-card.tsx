@@ -110,7 +110,7 @@ function DealCover({ src, alt }: { src: string; alt: string }) {
           width: '100%',
           aspectRatio: '306 / 192',
           flexShrink: 0,
-          background: 'linear-gradient(135deg, #004f8b 0%, #1796d6 100%)',
+          background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, #1796d6 100%)',
         }}
       />
     );

@@ -116,7 +116,7 @@ export function MapCanvas({
         filter: ['has', 'point_count'],
         paint: {
           // Azul oscuro (primario del kiosk) en lugar del coral anterior.
-          'circle-color': '#004f8b',
+          'circle-color': 'hsl(var(--brand-primary))',
           'circle-stroke-color': '#ffffff',
           'circle-stroke-width': 4,
           'circle-radius': ['step', ['get', 'point_count'], 34, 10, 42, 50, 52],
@@ -184,7 +184,7 @@ export function MapCanvas({
             .trim();
           // Mapbox no acepta el formato moderno `hsl(H S% L%)` (sin comas);
           // convertir a `hsl(H, S%, L%)` para que la librería lo parsee.
-          return v ? `hsl(${v.split(/\s+/).join(', ')})` : '#0088ce';
+          return v ? `hsl(${v.split(/\s+/).join(', ')})` : 'hsl(var(--brand-secondary))';
         })();
       map.addSource('route', {
         type: 'geojson',

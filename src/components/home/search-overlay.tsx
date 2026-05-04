@@ -60,7 +60,7 @@ export function SearchOverlay({
       {/* Search tab @ y=620 */}
       <div
         className="absolute left-0 right-0"
-        style={{ top: '620px', height: '106px', backgroundColor: '#004f8b' }}
+        style={{ top: '620px', height: '106px', backgroundColor: 'hsl(var(--brand-primary))' }}
       >
         <div
           className="absolute flex items-center bg-white"
@@ -88,7 +88,7 @@ export function SearchOverlay({
             top: '26px',
             width: '181px',
             height: '54px',
-            backgroundColor: '#b9bd39',
+            backgroundColor: 'hsl(var(--brand-tertiary))',
             borderRadius: '8px',
             fontSize: '26px',
             letterSpacing: '0.02em',

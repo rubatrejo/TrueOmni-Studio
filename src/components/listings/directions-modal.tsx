@@ -149,7 +149,7 @@ export function DirectionsModal({
         {/* Header azul — mismo estilo que el detail (subtítulo 24 uppercase + título 60 Helvetica + X at 804,31) */}
         <div
           className="relative flex-shrink-0"
-          style={{ width: '898px', height: '180px', backgroundColor: '#004f8b' }}
+          style={{ width: '898px', height: '180px', backgroundColor: 'hsl(var(--brand-primary))' }}
         >
           <span
             className="absolute font-sans uppercase text-white"
@@ -328,7 +328,7 @@ export function DirectionsModal({
               width: '330px',
               height: '66px',
               borderRadius: '8px',
-              backgroundColor: '#b9bd39',
+              backgroundColor: 'hsl(var(--brand-tertiary))',
               color: '#fff',
               fontFamily: 'Helvetica, Arial, sans-serif',
               fontSize: '20px',
@@ -396,7 +396,7 @@ function TabButton({
         justifyContent: 'center',
         columnGap: '12px',
         backgroundColor: active ? '#ffffff' : '#f4f6f8',
-        color: active ? '#004f8b' : 'rgba(0,0,0,0.57)',
+        color: active ? 'hsl(var(--brand-primary))' : 'rgba(0,0,0,0.57)',
         fontFamily: 'Helvetica, Arial, sans-serif',
         fontSize: '20px',
         fontWeight: 700,
@@ -518,7 +518,7 @@ function LocationPinIcon() {
     <svg width="28" height="36" viewBox="0 0 28 36" aria-hidden>
       <path
         d="M14 0C6.3 0 0 6.3 0 14c0 9.3 11.6 19.6 13.2 21.1.5.5 1.2.5 1.7 0C16.4 33.6 28 23.3 28 14c0-7.7-6.3-14-14-14zm0 19a5 5 0 110-10 5 5 0 010 10z"
-        fill="#004f8b"
+        fill="hsl(var(--brand-primary))"
       />
     </svg>
   );

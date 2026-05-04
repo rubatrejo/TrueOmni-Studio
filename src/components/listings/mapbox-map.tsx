@@ -46,7 +46,7 @@ export function MapboxMap({
       attributionControl: false,
     });
 
-    // Marker pin en el estilo del SVG (teardrop azul #004f8b).
+    // Marker pin en el estilo del SVG (teardrop azul hsl(var(--brand-primary))).
     const el = document.createElement('div');
     el.setAttribute('aria-hidden', 'true');
     el.style.width = '48px';

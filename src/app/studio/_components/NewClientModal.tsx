@@ -111,7 +111,7 @@ export function NewClientModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="pointer-events-auto w-[440px] max-w-[92vw] overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
+            className="pointer-events-auto w-[600px] max-w-[94vw] overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
           >
             <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5 dark:border-zinc-800">
               <h2
@@ -291,9 +291,11 @@ function OrientationOption({
       >
         {glyph}
       </span>
-      <span className="flex flex-col">
-        <span className="text-[12.5px] font-semibold leading-tight">{label}</span>
-        <span className="text-[10.5px] font-mono opacity-70">{sub}</span>
+      <span className="flex min-w-0 flex-col">
+        <span className="whitespace-nowrap text-[13px] font-semibold leading-tight">
+          {label}
+        </span>
+        <span className="whitespace-nowrap font-mono text-[11px] opacity-70">{sub}</span>
       </span>
     </button>
   );

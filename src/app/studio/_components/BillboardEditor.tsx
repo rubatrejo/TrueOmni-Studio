@@ -15,7 +15,7 @@ import {
 } from '@/lib/studio/schema';
 
 import { BILLBOARD_WIREFRAMES } from './billboard-wireframes';
-import { ImageField } from './ImageField';
+import { MediaField } from './MediaField';
 
 const VARIANT_INFO: Record<BillboardVariant, { name: string; tagline: string }> = {
   0: { name: 'Variant 1', tagline: 'Hero photo + center logo' },
@@ -168,31 +168,25 @@ export function BillboardEditor({
           </header>
 
           {/* Background image / video */}
-          <div className="space-y-2">
-            <ImageField
-              label="Background"
-              hint="Image or video full-bleed behind logo and button. JPG/PNG/WebP, or MP4 up to 5MB."
-              accept="image/jpeg,image/png,image/webp,video/mp4,video/webm"
+          <div className="space-y-1.5">
+            <label className="block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+              Background
+            </label>
+            <MediaField
+              label="Drop image or video"
+              hint="1080×1920 portrait · JPG/PNG/WebP up to 5MB · MP4/WebM up to 5MB · keep videos short loops (5–15s)"
+              aspect="9/16"
               maxBytes={5 * 1024 * 1024}
               value={b0.background.src}
+              kind={b0.background.type}
               onChange={(next) => {
                 if (!next) {
                   setB0({ background: { ...DEFAULT_BILLBOARD_B0.background } });
                   return;
                 }
-                // Detectar video por extensión o data-url mime.
-                const isVideo =
-                  /\.mp4(\?|$)|\.webm(\?|$)|^data:video\//i.test(next);
-                setB0({ background: { type: isVideo ? 'video' : 'image', src: next } });
+                setB0({ background: { type: next.kind, src: next.src } });
               }}
-              layout="square"
             />
-            <p className="text-[10.5px] text-zinc-500">
-              Type detected:{' '}
-              <span className="font-mono font-semibold text-zinc-700 dark:text-zinc-300">
-                {b0.background.type}
-              </span>
-            </p>
           </div>
 
           {/* Touch Here button — texto */}

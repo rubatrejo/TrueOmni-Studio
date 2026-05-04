@@ -116,7 +116,7 @@ export function TopBar({
           type="button"
           onClick={onPublish}
           disabled={!onPublish}
-          title={isDirty ? 'Save changes first to include them in publish' : 'Publish to filesystem'}
+          title={isDirty ? 'Save changes first to include them in publish' : 'Publish (filesystem in dev, GitHub PR in production)'}
           className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
         >
           <Send className="h-3.5 w-3.5" />

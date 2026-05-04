@@ -57,7 +57,12 @@ export function PublishModal({ open, slug, onClose, currentVersion = 0, editor =
         setPhase('preview');
       })
       .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Failed to compute diff');
+        const message = err instanceof Error ? err.message : 'Failed to compute diff';
+        // Si el backend reporta runtime read-only o GitHub no configurado,
+        // estamos claramente en flujo PR — actualiza el header para que el
+        // mensaje 503 cuadre con la intención del operador.
+        if (/read-only|github publish/i.test(message)) setMode('pr');
+        setError(message);
         setPhase('error');
       });
   }, [open, slug]);

@@ -80,6 +80,9 @@ function SignInContent() {
         quality={85}
         sizes="100vw"
         className="object-cover"
+        // 60% horizontal mantiene los kioscos visibles en viewports cuadrados
+        // (1440×900, 16:10) — el grupo está en el centro-derecha de la imagen.
+        style={{ objectPosition: '60% center' }}
       />
 
       {/* Gradient overlay izquierdo: oscuro a transparente */}

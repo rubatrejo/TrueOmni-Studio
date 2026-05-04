@@ -121,6 +121,14 @@ for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
   });
 }
 
+// En Vercel, NO borramos el shim al final: tras el exit de este script
+// Vercel ejecuta su propio tracer (`Traced Next.js server files`) que
+// resuelve archivos referenciados en `.next/server/pages/_document.js`
+// — si el shim ya no existe, lstat falla y el deploy aborta. Como cada
+// build de Vercel clona el repo desde git limpio, dejarlo "sucio" en el
+// runner no afecta a builds futuros.
+const skipCleanup = process.env.VERCEL === '1';
+
 (async () => {
   let exitCode = 0;
   try {
@@ -132,8 +140,12 @@ for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
     console.error('✖ Build falló:', err.message);
     exitCode = 1;
   } finally {
-    console.log('▶ Borrando src/pages/ shim…');
-    await safeCleanup();
+    if (skipCleanup) {
+      console.log('▶ Saltando cleanup del shim (Vercel runner — los tracers post-build lo necesitan).');
+    } else {
+      console.log('▶ Borrando src/pages/ shim…');
+      await safeCleanup();
+    }
   }
   process.exit(exitCode);
 })();

@@ -40,6 +40,13 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
+  // Short-circuit: la página custom de sign-in es por definición pública.
+  // Sin esto, el matcher `/studio/:path*` la incluye → middleware redirige
+  // a sí misma en loop infinito.
+  if (pathname === '/studio/sign-in') {
+    return NextResponse.next();
+  }
+
   const email = req.auth?.user?.email;
 
   if (!email) {
@@ -48,7 +55,7 @@ export default auth((req) => {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const url = req.nextUrl.clone();
-    url.pathname = '/api/auth/signin';
+    url.pathname = '/studio/sign-in';
     url.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(url);
   }

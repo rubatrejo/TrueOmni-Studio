@@ -35,7 +35,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // GitHub no devuelve el email primario en el perfil por defecto si es
       // privado — pedimos `user:email` scope explícitamente para forzar la
       // entrega del array de emails y poder matchear contra la allowlist.
-      authorization: { params: { scope: 'read:user user:email' } },
+      // `prompt: 'select_account'` fuerza a GitHub a mostrar el selector de
+      // cuenta cada vez. Necesario para que tras AccessDenied el operador
+      // pueda elegir otra cuenta sin signOut explícito en GitHub.
+      authorization: {
+        params: { scope: 'read:user user:email', prompt: 'select_account' },
+      },
     }),
   ],
   callbacks: {
@@ -59,5 +64,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session;
     },
+  },
+  pages: {
+    signIn: '/studio/sign-in',
   },
 });

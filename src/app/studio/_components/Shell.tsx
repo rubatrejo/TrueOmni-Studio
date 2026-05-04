@@ -224,8 +224,9 @@ export function Shell({
       homeHero: branding.homeHero,
       heroGradient: branding.heroGradient,
       clientName: initialConfig.nombre,
+      clientCoords: initialConfig.clientInfo?.coords,
     });
-  }, [branding, pushBranding, initialConfig.nombre]);
+  }, [branding, pushBranding, initialConfig.nombre, initialConfig.clientInfo?.coords]);
 
   useEffect(() => {
     pushModules(modules);

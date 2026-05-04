@@ -8,6 +8,10 @@ import { useTextosMap } from '@/components/i18n-provider';
 import { FavoriteAddedToast } from '@/components/listings/favorite-added-toast';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { ListingDetail } from '@/components/listings/listing-detail';
+import {
+  KIOSK_CLIENT_COORDS_OVERRIDE_EVENT,
+  getCachedClientCoords,
+} from '@/components/studio-bridge';
 import type { HomeListing, HomeMapModule, MapSource } from '@/lib/config';
 import { availableChips, buildFeaturePool, buildSubcategoryPool } from '@/lib/map-aggregator';
 import type { MapDetailLookup } from '@/lib/map-detail-lookup';
@@ -86,6 +90,23 @@ export function MapModule({
   header: ReactNode;
 }) {
   void moduleKey;
+
+  // Reactive client coords: el bridge del Studio dispatcha
+  // `kiosk:client-coords-override` cuando el operador crea/edita un kiosk
+  // con location distinta. Centra el mapa en la nueva location sin
+  // requerir publish.
+  const [reactiveCoords, setReactiveCoords] = useState<{ lat: number; lng: number } | undefined>(
+    () => getCachedClientCoords() ?? clientCoords,
+  );
+  useEffect(() => {
+    const onOverride = (event: Event) => {
+      const detail = (event as CustomEvent<{ coords?: { lat: number; lng: number } }>).detail;
+      if (detail?.coords) setReactiveCoords(detail.coords);
+    };
+    window.addEventListener(KIOSK_CLIENT_COORDS_OVERRIDE_EVENT, onOverride);
+    return () => window.removeEventListener(KIOSK_CLIENT_COORDS_OVERRIDE_EVENT, onOverride);
+  }, []);
+  const effectiveCoords = reactiveCoords ?? clientCoords;
 
   // Override textos pre-renderizados por el caller con el idioma activo.
   const liveTextos = useTextosMap();
@@ -184,7 +205,7 @@ export function MapModule({
     setShowWelcome(false);
   }, []);
 
-  const center = mod.defaultCenter ?? clientCoords ?? { lat: 33.4484, lng: -112.074 };
+  const center = mod.defaultCenter ?? effectiveCoords ?? { lat: 33.4484, lng: -112.074 };
   const zoom = mod.defaultZoom ?? 13;
 
   return (
@@ -200,7 +221,7 @@ export function MapModule({
             <MapTopCarousel
               items={visibleItems}
               selectedSlug={selectedSlug}
-              clientCoords={clientCoords}
+              clientCoords={effectiveCoords}
               onSelect={handleSelect}
             />
             <MapChips
@@ -247,7 +268,7 @@ export function MapModule({
                   item={item}
                   left={pinPos.left}
                   top={pinPos.top}
-                  clientCoords={clientCoords}
+                  clientCoords={effectiveCoords}
                   labels={{
                     seeMoreInfo: textos.seeMoreInfo,
                     addToItinerary: textos.addToItinerary,
@@ -303,7 +324,7 @@ export function MapModule({
                 moduleKey={entry.moduleKey}
                 listing={entry.listing}
                 mapboxToken={mapboxToken}
-                clientCoords={clientCoords}
+                clientCoords={effectiveCoords}
                 eventMeta={entry.eventMeta}
                 secondaryCta={entry.secondaryCta}
                 favoritesKind={entry.favoritesKind}

@@ -140,6 +140,16 @@ export async function POST(request: Request) {
     //     verdad del template canónico.
     let config = makeBlankConfig(body.slug, body.nombre, orientation);
     const fsTemplate = await readClientFs(DEFAULT_TEMPLATE_SLUG);
+    console.info('[configs POST] fs template', {
+      slug: body.slug,
+      hasFsConfig: Boolean(fsTemplate.config),
+      fsModulesKeys: fsTemplate.config
+        ? Object.keys(
+            (fsTemplate.config as { features?: { home?: { modules?: Record<string, unknown> } } })
+              .features?.home?.modules ?? {},
+          )
+        : [],
+    });
     if (fsTemplate.config) {
       config = bootstrapStudioFromFs(config, fsTemplate.config, fsTemplate.tokensCss);
       // bootstrapStudioFromFs sobreescribe `nombre` si el sentinel match. Lo
@@ -148,6 +158,13 @@ export async function POST(request: Request) {
       config.nombre = body.nombre;
       config.orientation = orientation;
       config.currentVersion = 0;
+      console.info('[configs POST] post-bootstrap', {
+        listingsCount: config.listings?.length ?? 0,
+        listingsCatalogSizes: config.listings?.map((l) => l.catalog.listings.length) ?? [],
+        eventsCount: config.events?.events?.length ?? 0,
+        passesCount: config.passes?.passes?.length ?? 0,
+        trailsCount: config.trails?.trails?.length ?? 0,
+      });
     }
 
     const trimmedLocation = body.location?.trim() ?? '';

@@ -83,8 +83,24 @@ export async function POST(): Promise<NextResponse> {
     const cfg = await getConfig();
     const creds = readTavusCreds(cfg);
     if (!creds) {
+      const intg = cfg.integraciones ?? {};
+      console.warn('[ai-avatar/start] missing creds', {
+        hasApiKey: Boolean(process.env.TAVUS_API_KEY),
+        hasReplicaId: Boolean(process.env.TAVUS_REPLICA_ID),
+        hasPersonaId: Boolean(process.env.TAVUS_PERSONA_ID),
+        hasApiUrl: Boolean(process.env.TAVUS_API_URL),
+        intgHasApiKey: Boolean(intg.tavus_api_key),
+        intgHasReplicaId: Boolean(intg.tavus_replica_id),
+      });
       return NextResponse.json(
-        { ok: false, message: 'Tavus credentials not configured.' },
+        {
+          ok: false,
+          message: 'Tavus credentials not configured.',
+          diag: {
+            envApiKey: Boolean(process.env.TAVUS_API_KEY),
+            envReplicaId: Boolean(process.env.TAVUS_REPLICA_ID),
+          },
+        },
         { status: 503 },
       );
     }

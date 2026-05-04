@@ -289,10 +289,14 @@ type BrandingPatch = BrandPatch & {
   /** Nombre del cliente — interpola `{client_name}` en textos del kiosk
    *  reactivamente, sin esperar a publish. */
   clientName?: string;
+  /** Coords del cliente — centra el módulo Map y el "distance" sort de
+   *  listings reactivamente. Resueltas via Nominatim al crear el kiosk. */
+  clientCoords?: { lat: number; lng: number };
 };
 
 export const KIOSK_HERO_OVERRIDE_EVENT = 'kiosk:hero-override';
 export const KIOSK_CLIENT_NAME_OVERRIDE_EVENT = 'kiosk:client-name-override';
+export const KIOSK_CLIENT_COORDS_OVERRIDE_EVENT = 'kiosk:client-coords-override';
 
 export type HeroOverrideDetail = {
   homeHero?: { kind: 'image' | 'video'; src: string };
@@ -532,6 +536,19 @@ function applyBranding(branding: BrandingPatch) {
     );
   }
 
+  // Client coords (reactivo): centra el módulo Map y el "distance" sort
+  // sin esperar a publish. Cuando el operador crea un kiosk con
+  // `Location: Davenport, FL` y Nominatim resuelve coords, el bridge las
+  // envía aquí.
+  if (branding.clientCoords) {
+    (window as KioskBridgeWindow).__kioskClientCoords = branding.clientCoords;
+    window.dispatchEvent(
+      new CustomEvent(KIOSK_CLIENT_COORDS_OVERRIDE_EVENT, {
+        detail: { coords: branding.clientCoords },
+      }),
+    );
+  }
+
   // Hero header background + gradient. Mismo patrón que logos: dispatch
   // event + cache en window para que componentes que se monten DESPUÉS
   // del último dispatch (ej. nav entre rutas dentro del iframe) puedan
@@ -556,6 +573,7 @@ interface KioskBridgeWindow extends Window {
   __kioskLogos?: { default?: string; idle?: string; footer?: string };
   __kioskHero?: HeroOverrideDetail;
   __kioskClientName?: string;
+  __kioskClientCoords?: { lat: number; lng: number };
 }
 
 /**
@@ -577,6 +595,16 @@ export function getCachedHeroOverride(): HeroOverrideDetail {
 export function getCachedClientName(): string | null {
   if (typeof window === 'undefined') return null;
   return (window as KioskBridgeWindow).__kioskClientName ?? null;
+}
+
+/**
+ * Lee las últimas coords del cliente que el bridge haya aplicado.
+ * Usado por componentes que necesitan actualizar el centro del mapa
+ * o el sort por distancia.
+ */
+export function getCachedClientCoords(): { lat: number; lng: number } | null {
+  if (typeof window === 'undefined') return null;
+  return (window as KioskBridgeWindow).__kioskClientCoords ?? null;
 }
 
 /**

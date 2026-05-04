@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 
 import {
   getGitHubPublishConfig,
+  getRepoFileContent,
   isReadOnlyRuntime,
   publishToGitHub,
 } from '@/lib/studio/github-publisher';
@@ -176,18 +177,33 @@ export async function POST(req: Request, { params }: RouteParams) {
       writes.push({ path: configPath, repoPath: repoRelative(configPath), nextContent });
 
       // ── tokens.css ──
-      const currentCss = mode === 'fs' ? await readTextFile(tokensPath) : null;
-      if (mode === 'fs' && currentCss !== null) {
+      // Surgical edit: leemos el contenido actual (filesystem o GitHub) y
+      // sólo reemplazamos los 3 brand-* HSL — preserva customizaciones.
+      let currentCss: string | null = null;
+      if (mode === 'fs') {
+        currentCss = await readTextFile(tokensPath);
+      } else if (ghConfig) {
+        const tokensRepoPath = repoRelative(tokensPath);
+        currentCss = await getRepoFileContent(
+          ghConfig,
+          tokensRepoPath,
+          ghConfig.baseBranch,
+        );
+      }
+      if (currentCss !== null) {
         const nextCss = buildTokensCss(studioConfig, currentCss);
         const tokensChange = await computeChange(tokensPath, nextCss, mode);
         changes.push(tokensChange);
-        writes.push({ path: tokensPath, repoPath: repoRelative(tokensPath), nextContent: nextCss });
+        writes.push({
+          path: tokensPath,
+          repoPath: repoRelative(tokensPath),
+          nextContent: nextCss,
+        });
       }
-      // En mode=pr no leemos `tokens.css` (read-only fs). El surgical edit
-      // de tokens.css requiere el contenido actual del repo — para v1 del
-      // PR-publish lo dejamos fuera; el operador edita tokens.css por
-      // commit manual. TODO follow-up: leer tokens.css via octokit
-      // contents.get y aplicar surgical edit en mode=pr.
+      // Si tokens.css no existe ni en fs ni en repo, NO inventamos uno —
+      // el operador debe crear el cliente desde el template antes de
+      // editar branding (evita pisar customizaciones que el merger no
+      // sabe reconstruir).
     }
 
     if (dryRun) {

@@ -65,6 +65,42 @@ export function isReadOnlyRuntime(): boolean {
   return process.env.VERCEL === '1' || process.env.NEXT_RUNTIME === 'edge';
 }
 
+/**
+ * Lee el contenido UTF-8 de un archivo del repo en una ref específica.
+ * Útil para el surgical edit de `tokens.css` en `mode=pr`: necesitamos
+ * el CSS actual del repo para preservar tokens custom y solo reemplazar
+ * los 3 brand colors. Devuelve `null` si el archivo no existe (404 de
+ * la API).
+ */
+export async function getRepoFileContent(
+  config: GitHubPublishConfig,
+  filePath: string,
+  ref?: string,
+): Promise<string | null> {
+  const octokit = new Octokit({ auth: config.token });
+  try {
+    const res = await octokit.repos.getContent({
+      owner: config.owner,
+      repo: config.repo,
+      path: filePath,
+      ref: ref ?? config.baseBranch ?? 'main',
+    });
+    // `getContent` puede devolver array (directorio) o object (archivo).
+    if (Array.isArray(res.data) || res.data.type !== 'file') {
+      throw new Error(`Path '${filePath}' is not a file in the repo.`);
+    }
+    if (!('content' in res.data) || typeof res.data.content !== 'string') {
+      throw new Error(`Repo file '${filePath}' has no inline content.`);
+    }
+    // El content viene base64 (encoding 'base64' confirmado por el shape).
+    return Buffer.from(res.data.content, 'base64').toString('utf8');
+  } catch (err) {
+    const status = (err as { status?: number }).status;
+    if (status === 404) return null;
+    throw err;
+  }
+}
+
 export async function publishToGitHub(
   config: GitHubPublishConfig,
   slug: string,

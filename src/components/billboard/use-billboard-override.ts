@@ -2,13 +2,19 @@
 
 import { useEffect, useState } from 'react';
 
-import { BILLBOARD_LOGO_SIZE_PX, type BillboardLogoSize } from '@/lib/studio/schema';
+import {
+  BILLBOARD_LOGO_SIZE_PX,
+  DEFAULT_BILLBOARD_B0,
+  type BillboardB0Config,
+  type BillboardLogoSize,
+} from '@/lib/studio/schema';
 
 import { KIOSK_BILLBOARD_OVERRIDE_EVENT } from '../studio-bridge';
 
 type BillboardOverride = {
   logoSize?: BillboardLogoSize;
   modules?: string[];
+  b0?: Partial<BillboardB0Config>;
 };
 
 type BillboardOverrideWindow = Window & {
@@ -42,6 +48,7 @@ export function useBillboardOverride(): BillboardOverride {
       const next: BillboardOverride = {
         logoSize: detail.logoSize,
         modules: Array.isArray(detail.modules) ? detail.modules : undefined,
+        b0: detail.b0,
       };
       (window as BillboardOverrideWindow).__kioskBillboardOverride = next;
       setOverride(next);
@@ -71,4 +78,18 @@ export function useBillboardSlotKey(index: number): string | undefined {
   if (!modules || index >= modules.length) return undefined;
   const key = modules[index];
   return key && key.length > 0 ? key : undefined;
+}
+
+/**
+ * Devuelve los settings B0 con defaults aplicados. Si el Studio no envió
+ * override aún, retorna los defaults canónicos (mismos valores que el
+ * SVG original). El consumidor puede asumir todos los campos definidos.
+ */
+export function useBillboardB0(): BillboardB0Config {
+  const { b0 } = useBillboardOverride();
+  return {
+    background: b0?.background ?? DEFAULT_BILLBOARD_B0.background,
+    touchHere: { ...DEFAULT_BILLBOARD_B0.touchHere, ...(b0?.touchHere ?? {}) },
+    overlayOpacity: b0?.overlayOpacity ?? DEFAULT_BILLBOARD_B0.overlayOpacity,
+  };
 }

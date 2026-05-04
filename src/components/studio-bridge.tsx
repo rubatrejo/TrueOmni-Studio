@@ -296,6 +296,18 @@ type BillboardPatch = {
   idleTimeoutSec: number;
   logoSize?: 'S' | 'M' | 'L';
   modules?: string[];
+  /** Settings exclusivos del variant 0 (Dark Hero). */
+  b0?: {
+    background?: { type: 'image' | 'video'; src: string };
+    touchHere?: {
+      label: string;
+      twoLines: boolean;
+      width: number;
+      height: number;
+      fontSize: number;
+    };
+    overlayOpacity?: number;
+  };
 };
 
 type AiAvatarPatch = {

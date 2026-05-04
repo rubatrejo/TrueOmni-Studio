@@ -255,6 +255,49 @@ export const BILLBOARD_LOGO_SIZE_PX: Record<BillboardLogoSize, number> = {
   L: 180,
 };
 
+/**
+ * Settings específicos del variant 0 ("Dark Hero"): permite personalizar
+ * el background (imagen o video), el botón TOUCH HERE y la opacidad del
+ * overlay sin tocar código.
+ */
+export const BillboardB0Schema = z.object({
+  background: z
+    .object({
+      /** `image` o `video`. Video se renderiza con `autoplay loop muted`. */
+      type: z.enum(['image', 'video']).default('image'),
+      /** Path absoluto al asset (ej. `/assets/billboard-0/hero.jpg`). */
+      src: z.string().default('/assets/billboard-0/hero.jpg'),
+    })
+    .default({ type: 'image', src: '/assets/billboard-0/hero.jpg' }),
+  touchHere: z
+    .object({
+      /** Texto del botón. Si vacío, usa la key i18n `billboard_touch_here`. */
+      label: z.string().default(''),
+      /** True = renderiza en 2 líneas (separa por espacio o por \n).
+       *  False = una sola línea ancha. */
+      twoLines: z.boolean().default(true),
+      /** Ancho del botón en px (default SVG: 548). */
+      width: z.number().int().min(280).max(900).default(548),
+      /** Alto del botón en px (default SVG: 342). */
+      height: z.number().int().min(120).max(500).default(342),
+      /** Tamaño de fuente en px. Default SVG: 90. */
+      fontSize: z.number().int().min(36).max(160).default(90),
+    })
+    .default({ label: '', twoLines: true, width: 548, height: 342, fontSize: 90 }),
+  /** Opacidad del overlay oscuro entre background y contenido. 0 = sin
+   *  overlay, 1 = totalmente negro. Útil cuando el bg es muy claro y el
+   *  logo blanco se pierde. */
+  overlayOpacity: z.number().min(0).max(1).default(0),
+});
+
+export type BillboardB0Config = z.infer<typeof BillboardB0Schema>;
+
+export const DEFAULT_BILLBOARD_B0: BillboardB0Config = {
+  background: { type: 'image', src: '/assets/billboard-0/hero.jpg' },
+  touchHere: { label: '', twoLines: true, width: 548, height: 342, fontSize: 90 },
+  overlayOpacity: 0,
+};
+
 export const BillboardSchema = z.object({
   /** Cuál de los 4 layouts del Billboard idle se muestra. */
   variant: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]),
@@ -271,6 +314,8 @@ export const BillboardSchema = z.object({
    * `modules.tiles[].key` activos en el Modules tab.
    */
   modules: z.array(z.string()).max(4).default([]),
+  /** Settings exclusivos del variant 0 (Dark Hero). */
+  b0: BillboardB0Schema.optional(),
 });
 
 export type BillboardConfig = z.infer<typeof BillboardSchema>;
@@ -280,6 +325,7 @@ export const DEFAULT_BILLBOARD: BillboardConfig = {
   idleTimeoutSec: 60,
   logoSize: 'M',
   modules: [],
+  b0: DEFAULT_BILLBOARD_B0,
 };
 
 /* ────────────────────────────────────────────────────────────────────────── */

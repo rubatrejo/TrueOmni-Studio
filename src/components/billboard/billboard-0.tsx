@@ -4,7 +4,7 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
-import { useBillboardLogoHeight } from './use-billboard-override';
+import { useBillboardB0, useBillboardLogoHeight } from './use-billboard-override';
 
 /**
  * Billboard 0 — variante "Dark Hero".
@@ -26,18 +26,58 @@ import { useBillboardLogoHeight } from './use-billboard-override';
 export function Billboard0() {
   const t = useTextosMap();
   const logoH = useBillboardLogoHeight();
+  const { background, touchHere, overlayOpacity } = useBillboardB0();
+  // Centrado horizontal del botón en el canvas 1080px: left = (1080 - w) / 2.
+  const touchLeft = (1080 - touchHere.width) / 2;
+  // Centro vertical del botón a 947px (mantiene el centro original del SVG
+  // ~776 + 342/2 = 947) cuando el alto cambia.
+  const touchTop = 947 - touchHere.height / 2;
+  // Resolver texto del botón: si el operador puso un label custom, gana.
+  // Si no, usa la key i18n.
+  const rawLabel =
+    touchHere.label.trim().length > 0
+      ? touchHere.label
+      : (t.billboard_touch_here ?? 'Touch\nHere');
+  // Normaliza el separador: en una sola línea reemplaza \n por espacio;
+  // en dos líneas asegura que haya \n (si el operador puso espacio entre
+  // las palabras lo convertimos al primer espacio).
+  const buttonLabel = touchHere.twoLines
+    ? rawLabel.replace(/\s+/, '\n')
+    : rawLabel.replace(/\n+/g, ' ');
   return (
     <div
       data-billboard="0"
       className="relative h-full w-full overflow-hidden"
       style={{ backgroundColor: '#000' }}
     >
-      {/* Hero full-bleed */}
-      <img
-        src="/assets/billboard-0/hero.jpg"
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover"
-      />
+      {/* Hero full-bleed (imagen o video según config). */}
+      {background.type === 'video' ? (
+        <video
+          src={background.src}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : (
+        <img
+          src={background.src}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      )}
+
+      {/* Overlay oscuro entre background y contenido — controlable desde el
+          Studio (0..1). Default 0 = sin overlay para mantener compat con el
+          SVG original. */}
+      {overlayOpacity > 0 && (
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }}
+        />
+      )}
 
       {/* Logo grande TrueOmni encima del botón (193, 371), height configurable
           desde el Studio (S=80 / M=128 default / L=180). El contenedor mantiene
@@ -51,15 +91,16 @@ export function Billboard0() {
         <TrueOmniLogo slot="idle" className="h-full w-auto max-w-full text-white" />
       </div>
 
-      {/* Botón central TOUCH HERE (548×342 @ x=281 y=776, rx=20) con ring
-          blanco de 10px desde el edge (equivalente al stroke del SVG). */}
+      {/* Botón central TOUCH HERE (dimensiones configurables desde el Studio,
+          default 548×342 del SVG). Centrado horizontal en el canvas 1080,
+          centro vertical fijado al baseline original (947px). */}
       <div
         className="absolute flex items-center justify-center"
         style={{
-          left: '281px',
-          top: '776px',
-          width: '548px',
-          height: '342px',
+          left: `${touchLeft}px`,
+          top: `${touchTop}px`,
+          width: `${touchHere.width}px`,
+          height: `${touchHere.height}px`,
           backgroundColor: '#2e2e2e',
           borderRadius: '20px',
           boxShadow: 'inset 0 0 0 10px #fff',
@@ -67,9 +108,13 @@ export function Billboard0() {
       >
         <p
           className="text-center font-display font-bold uppercase text-white"
-          style={{ fontSize: '90px', lineHeight: '110px', whiteSpace: 'pre-line' }}
+          style={{
+            fontSize: `${touchHere.fontSize}px`,
+            lineHeight: `${Math.round(touchHere.fontSize * 1.22)}px`,
+            whiteSpace: 'pre-line',
+          }}
         >
-          {t.billboard_touch_here ?? 'Touch\nHere'}
+          {buttonLabel}
         </p>
       </div>
 

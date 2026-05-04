@@ -6,6 +6,8 @@ import { useMemo } from 'react';
 import {
   BILLBOARD_LOGO_SIZES,
   BILLBOARD_VARIANTS,
+  DEFAULT_BILLBOARD_B0,
+  type BillboardB0Config,
   type BillboardConfig,
   type BillboardLogoSize,
   type BillboardVariant,
@@ -13,6 +15,7 @@ import {
 } from '@/lib/studio/schema';
 
 import { BILLBOARD_WIREFRAMES } from './billboard-wireframes';
+import { ImageField } from './ImageField';
 
 const VARIANT_INFO: Record<BillboardVariant, { name: string; tagline: string }> = {
   0: { name: 'Variant 1', tagline: 'Hero photo + center logo' },
@@ -64,6 +67,10 @@ export function BillboardEditor({
   const slots = VARIANT_SLOTS[billboard.variant];
   const hasLogo = VARIANT_HAS_LOGO[billboard.variant];
   const notEnoughModules = slots > 0 && modulesAvailable.length < slots;
+  const isB0 = billboard.variant === 0;
+  const b0: BillboardB0Config = billboard.b0 ?? DEFAULT_BILLBOARD_B0;
+  const setB0 = (patch: Partial<BillboardB0Config>) =>
+    onChange({ ...billboard, b0: { ...b0, ...patch } });
 
   // Slots actuales: paddear a `slots` con strings vacíos para que el render
   // siempre pinte exactamente N slots, aunque billboard.modules tenga menos.
@@ -147,6 +154,146 @@ export function BillboardEditor({
           })}
         </div>
       </section>
+
+      {/* ───────────── Idle settings (solo B0) ───────────── */}
+      {isB0 && (
+        <section className="space-y-5 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
+          <header>
+            <h3 className="font-display text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500 dark:text-zinc-400">
+              Idle settings
+            </h3>
+            <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
+              Background, Touch Here button and overlay — only Variant 1 (Dark Hero).
+            </p>
+          </header>
+
+          {/* Background image / video */}
+          <div className="space-y-2">
+            <ImageField
+              label="Background"
+              hint="Image or video full-bleed behind logo and button. JPG/PNG/WebP, or MP4 up to 5MB."
+              accept="image/jpeg,image/png,image/webp,video/mp4,video/webm"
+              maxBytes={5 * 1024 * 1024}
+              value={b0.background.src}
+              onChange={(next) => {
+                if (!next) {
+                  setB0({ background: { ...DEFAULT_BILLBOARD_B0.background } });
+                  return;
+                }
+                // Detectar video por extensión o data-url mime.
+                const isVideo =
+                  /\.mp4(\?|$)|\.webm(\?|$)|^data:video\//i.test(next);
+                setB0({ background: { type: isVideo ? 'video' : 'image', src: next } });
+              }}
+              layout="square"
+            />
+            <p className="text-[10.5px] text-zinc-500">
+              Type detected:{' '}
+              <span className="font-mono font-semibold text-zinc-700 dark:text-zinc-300">
+                {b0.background.type}
+              </span>
+            </p>
+          </div>
+
+          {/* Touch Here button — texto */}
+          <div className="space-y-1.5">
+            <label className="block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+              Touch Here label
+            </label>
+            <input
+              type="text"
+              value={b0.touchHere.label}
+              onChange={(e) =>
+                setB0({ touchHere: { ...b0.touchHere, label: e.target.value } })
+              }
+              placeholder="Touch Here   (leave empty to use the locale string)"
+              className="w-full rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-[12.5px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
+            />
+          </div>
+
+          {/* Touch Here — 1 line / 2 lines */}
+          <div className="space-y-1.5">
+            <span className="block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+              Layout
+            </span>
+            <div
+              role="radiogroup"
+              aria-label="Touch Here layout"
+              className="inline-flex rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-800 dark:bg-zinc-950"
+            >
+              <button
+                role="radio"
+                aria-checked={!b0.touchHere.twoLines}
+                type="button"
+                onClick={() => setB0({ touchHere: { ...b0.touchHere, twoLines: false } })}
+                className={
+                  'rounded-md px-3 py-1 text-[11.5px] transition ' +
+                  (!b0.touchHere.twoLines
+                    ? 'bg-sky-500 text-white shadow-sm'
+                    : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40')
+                }
+              >
+                One line
+              </button>
+              <button
+                role="radio"
+                aria-checked={b0.touchHere.twoLines}
+                type="button"
+                onClick={() => setB0({ touchHere: { ...b0.touchHere, twoLines: true } })}
+                className={
+                  'rounded-md px-3 py-1 text-[11.5px] transition ' +
+                  (b0.touchHere.twoLines
+                    ? 'bg-sky-500 text-white shadow-sm'
+                    : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40')
+                }
+              >
+                Two lines
+              </button>
+            </div>
+          </div>
+
+          {/* Touch Here — width / height / fontSize sliders */}
+          <SliderRow
+            label="Button width"
+            min={280}
+            max={900}
+            step={10}
+            unit="px"
+            value={b0.touchHere.width}
+            onChange={(width) => setB0({ touchHere: { ...b0.touchHere, width } })}
+          />
+          <SliderRow
+            label="Button height"
+            min={120}
+            max={500}
+            step={10}
+            unit="px"
+            value={b0.touchHere.height}
+            onChange={(height) => setB0({ touchHere: { ...b0.touchHere, height } })}
+          />
+          <SliderRow
+            label="Font size"
+            min={36}
+            max={160}
+            step={2}
+            unit="px"
+            value={b0.touchHere.fontSize}
+            onChange={(fontSize) => setB0({ touchHere: { ...b0.touchHere, fontSize } })}
+          />
+
+          {/* Overlay opacity */}
+          <SliderRow
+            label="Overlay darkness"
+            min={0}
+            max={100}
+            step={5}
+            unit="%"
+            value={Math.round(b0.overlayOpacity * 100)}
+            onChange={(pct) => setB0({ overlayOpacity: Math.max(0, Math.min(1, pct / 100)) })}
+            hint="Dark layer between background and logo + button. Useful when the bg is too bright."
+          />
+        </section>
+      )}
 
       {/* ───────────── Logo size (B0/B2/B3) ───────────── */}
       {hasLogo && (
@@ -312,6 +459,53 @@ export function BillboardEditor({
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+function SliderRow({
+  label,
+  min,
+  max,
+  step,
+  unit,
+  value,
+  onChange,
+  hint,
+}: {
+  label: string;
+  min: number;
+  max: number;
+  step: number;
+  unit: string;
+  value: number;
+  onChange: (next: number) => void;
+  hint?: string;
+}) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between">
+        <span className="text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+          {label}
+        </span>
+        <span className="font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
+          {value}
+          {unit}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full accent-sky-500"
+        aria-label={label}
+      />
+      {hint ? (
+        <p className="text-[10.5px] text-zinc-500 dark:text-zinc-500">{hint}</p>
+      ) : null}
     </div>
   );
 }

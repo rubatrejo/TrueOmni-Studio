@@ -20,6 +20,7 @@ import {
   defaultPasses,
   defaultTickets,
   defaultTrails,
+  makeBlankConfig,
   migrateListings,
   type ConfigMeta,
   type KioskConfig,
@@ -33,8 +34,19 @@ export default async function StudioEditorPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const raw = await kv.get<KioskConfig>(kvKeys.cfg(slug));
-  if (!raw) notFound();
+  let raw = await kv.get<KioskConfig>(kvKeys.cfg(slug));
+
+  // KV miss en serverless con `Degraded · in-memory KV` (Upstash no
+  // configurado): cada lambda es proceso nuevo y la memoria está vacía.
+  // Fallback: si `clients/<slug>/config.json` existe en filesystem
+  // (commiteado al repo), seed el editor con un blank config + el
+  // bootstrap-from-fs. El KV se rellena al primer save del operador.
+  if (!raw) {
+    const fsProbe = await readClientFs(slug);
+    if (!fsProbe.config) notFound();
+    raw = makeBlankConfig(slug, fsProbe.config.client?.nombre ?? slug);
+  }
+
   // Backfill defensivo: clientes pre-S2 pueden no tener modules / billboard /
   // aiAvatar, o tener `systemModules` con shape antiguo de solo 3 campos.
   const baseModules = raw.modules ?? defaultModules();

@@ -250,17 +250,30 @@ export interface PublishFileChange {
   sizeAfter: number;
 }
 
+export interface PublishPrInfo {
+  url: string;
+  number: number;
+  branch: string;
+  commit: string;
+}
+
 export interface PublishResult {
   slug: string;
   dryRun: boolean;
+  /** 'fs' = escritura directa, 'pr' = abre PR en GitHub (Vercel/serverless). */
+  mode: 'fs' | 'pr';
   written: number;
   files: PublishFileChange[];
+  pr?: PublishPrInfo | null;
 }
 
 export async function publishToFilesystem(
   slug: string,
-  options: { dryRun?: boolean } = {},
+  options: { dryRun?: boolean; mode?: 'fs' | 'pr' } = {},
 ): Promise<PublishResult> {
-  const qs = options.dryRun ? '?dryRun=1' : '';
+  const params = new URLSearchParams();
+  if (options.dryRun) params.set('dryRun', '1');
+  if (options.mode) params.set('mode', options.mode);
+  const qs = params.toString() ? `?${params.toString()}` : '';
   return http<PublishResult>(`/api/studio/publish/${slug}${qs}`, { method: 'POST' });
 }

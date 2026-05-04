@@ -4,7 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   AlertCircle,
   CheckCircle2,
+  ExternalLink,
   FileText,
+  GitPullRequest,
   Loader2,
   RotateCcw,
   Upload,
@@ -12,7 +14,11 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-import { publishToFilesystem, type PublishFileChange } from '../_lib/api-client';
+import {
+  publishToFilesystem,
+  type PublishFileChange,
+  type PublishPrInfo,
+} from '../_lib/api-client';
 import { recordPublish as recordPublishLocal } from '../_lib/local-version-history';
 
 interface PublishModalProps {
@@ -31,6 +37,8 @@ type Phase = 'preview' | 'preview-loading' | 'publishing' | 'done' | 'error';
 export function PublishModal({ open, slug, onClose, currentVersion = 0, editor = 'ruben@trueomni.com' }: PublishModalProps) {
   const [phase, setPhase] = useState<Phase>('preview-loading');
   const [files, setFiles] = useState<PublishFileChange[]>([]);
+  const [mode, setMode] = useState<'fs' | 'pr'>('fs');
+  const [pr, setPr] = useState<PublishPrInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [written, setWritten] = useState(0);
   // Countdown para auto-cerrar el modal tras success.
@@ -41,9 +49,11 @@ export function PublishModal({ open, slug, onClose, currentVersion = 0, editor =
     setPhase('preview-loading');
     setError(null);
     setWritten(0);
+    setPr(null);
     publishToFilesystem(slug, { dryRun: true })
       .then((res) => {
         setFiles(res.files);
+        setMode(res.mode);
         setPhase('preview');
       })
       .catch((err) => {
@@ -93,6 +103,8 @@ export function PublishModal({ open, slug, onClose, currentVersion = 0, editor =
       const res = await publishToFilesystem(slug, { dryRun: false });
       setFiles(res.files);
       setWritten(res.written);
+      setMode(res.mode);
+      setPr(res.pr ?? null);
       // Append al timeline local (audit F-10).
       recordPublishLocal(slug, currentVersion + 1, editor);
       setPhase('done');
@@ -130,13 +142,33 @@ export function PublishModal({ open, slug, onClose, currentVersion = 0, editor =
               <div>
                 <h2
                   id="publish-modal-title"
-                  className="font-display text-[15px] font-semibold text-zinc-900 dark:text-white"
+                  className="flex items-center gap-2 font-display text-[15px] font-semibold text-zinc-900 dark:text-white"
                 >
-                  Publish to filesystem
+                  {mode === 'pr' ? (
+                    <>
+                      <GitPullRequest className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                      Publish via Pull Request
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                      Publish to filesystem
+                    </>
+                  )}
                 </h2>
                 <p className="mt-0.5 text-[11px] text-zinc-500">
-                  Writes the i18n bundle from KV to{' '}
-                  <span className="font-mono">clients/{slug}/i18n/*.json</span>.
+                  {mode === 'pr' ? (
+                    <>
+                      Opens a PR against <span className="font-mono">main</span> with the
+                      diff of <span className="font-mono">clients/{slug}/</span>. Merge the
+                      PR to redeploy.
+                    </>
+                  ) : (
+                    <>
+                      Writes the bundle from KV to{' '}
+                      <span className="font-mono">clients/{slug}/</span>.
+                    </>
+                  )}
                 </p>
               </div>
               <button
@@ -170,6 +202,21 @@ export function PublishModal({ open, slug, onClose, currentVersion = 0, editor =
               {(phase === 'preview' || phase === 'publishing' || phase === 'done') && (
                 <>
                   <SummaryRow files={files} written={phase === 'done' ? written : undefined} />
+                  {phase === 'done' && pr ? (
+                    <a
+                      href={pr.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 rounded-md border border-violet-200 bg-violet-50/70 px-3 py-2 text-[12px] text-violet-900 transition hover:border-violet-300 hover:bg-violet-100 dark:border-violet-900/40 dark:bg-violet-950/30 dark:text-violet-200 dark:hover:bg-violet-900/40"
+                    >
+                      <GitPullRequest className="h-4 w-4 shrink-0" />
+                      <span className="flex-1">
+                        PR <strong>#{pr.number}</strong> opened on branch{' '}
+                        <span className="font-mono">{pr.branch}</span>
+                      </span>
+                      <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                    </a>
+                  ) : null}
                   {changes.length === 0 && phase === 'preview' ? (
                     <div className="flex items-center gap-2 rounded-md border border-zinc-200 bg-zinc-50/70 px-3 py-3 text-[12px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-400">
                       <CheckCircle2 className="h-4 w-4 text-emerald-600" />
@@ -229,13 +276,19 @@ export function PublishModal({ open, slug, onClose, currentVersion = 0, editor =
                   {phase === 'publishing' ? (
                     <>
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      Publishing…
+                      {mode === 'pr' ? 'Opening PR…' : 'Publishing…'}
                     </>
                   ) : (
                     <>
-                      <Upload className="h-3.5 w-3.5" />
+                      {mode === 'pr' ? (
+                        <GitPullRequest className="h-3.5 w-3.5" />
+                      ) : (
+                        <Upload className="h-3.5 w-3.5" />
+                      )}
                       {changes.length > 0
-                        ? `Publish ${changes.length} file${changes.length === 1 ? '' : 's'}`
+                        ? mode === 'pr'
+                          ? `Open PR · ${changes.length} file${changes.length === 1 ? '' : 's'}`
+                          : `Publish ${changes.length} file${changes.length === 1 ? '' : 's'}`
                         : 'Nothing to publish'}
                     </>
                   )}

@@ -236,7 +236,7 @@ const HOME_MODULE_LIST: Array<{
   subtitle: string;
   cascade: string;
 }> = [
-  { key: 'itineraryBuilder', tileKey: 'itinerary-builder', label: 'Trip Planner', subtitle: 'AI-assisted trip planner', cascade: CASCADE_HOME_TILE },
+  { key: 'itineraryBuilder', tileKey: 'itinerary-builder', label: 'Trip Builder', subtitle: 'AI-assisted trip planner', cascade: CASCADE_HOME_TILE },
   { key: 'guestbook', tileKey: 'guestbook', label: 'Guestbook', subtitle: 'Visitor pins on the map', cascade: CASCADE_HOME_TILE },
   { key: 'socialWall', tileKey: 'social-wall', label: 'Social Wall', subtitle: 'Curated social feed', cascade: CASCADE_HOME_TILE },
   { key: 'digitalBrochure', tileKey: 'digital-brochure', label: 'Digital Brochure', subtitle: 'Flippable brochures', cascade: CASCADE_HOME_TILE },

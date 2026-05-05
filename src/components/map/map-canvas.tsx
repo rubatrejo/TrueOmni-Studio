@@ -23,7 +23,7 @@ interface MapCanvasProps {
   onSelect: (slug: string) => void;
   /** Posición del pin seleccionado en px relativos al canvas. null si no hay. */
   onSelectedPosition?: (pos: { left: number; top: number } | null) => void;
-  /** Si se pasa, dibuja una LineString conectando estos puntos (Trip Planner). */
+  /** Si se pasa, dibuja una LineString conectando estos puntos (Trip Builder). */
   routeStops?: readonly { lng: number; lat: number }[];
   /** Color CSS de la línea de ruta. Default = primary del kiosk. */
   routeColor?: string;
@@ -174,7 +174,7 @@ export function MapCanvas({
       map.on('mouseenter', 'unclustered-point', () => (map.getCanvas().style.cursor = 'pointer'));
       map.on('mouseleave', 'unclustered-point', () => (map.getCanvas().style.cursor = ''));
 
-      // Layer opcional de ruta del Trip Planner (LineString entre stops).
+      // Layer opcional de ruta del Trip Builder (LineString entre stops).
       // Se añade siempre vacío; el effect setData lo llena cuando cambian.
       const lineColor =
         routeColor ??

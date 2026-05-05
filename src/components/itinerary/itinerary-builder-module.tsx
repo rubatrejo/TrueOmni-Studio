@@ -344,7 +344,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             weather={props.weather}
             locale={client.locale ?? 'en-US'}
             timezone={client.timezone}
-            title={textos.itinerary_title ?? 'Trip Planner'}
+            title={textos.itinerary_title ?? 'Trip Builder'}
             searchPlaceholder={textos.itinerary_search_placeholder ?? 'Search…'}
             searchValue={searchValue}
             onSearchChange={setSearchValue}
@@ -666,7 +666,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
 
       {phase === 'ai-loading' && (
         <AiLoadingScreen
-          title={textos.itinerary_ai_loading_title ?? 'AI Trip Planner'}
+          title={textos.itinerary_ai_loading_title ?? 'AI Trip Builder'}
           body={
             textos.itinerary_ai_loading_body ??
             "We're building your perfect itinerary! This might take a few seconds…"

@@ -447,7 +447,7 @@ function ChangelogContent({ releases }: { releases: StudioRelease[] | null }) {
         version="v0.0.8"
         date="April 27, 2026"
         items={[
-          'Itinerary Builder module — favorites rail, AI wizard, share via QR / email / phone.',
+          'Trip Builder module — favorites rail, AI wizard, share via QR / email / phone.',
           'Photo Booth module — green-screen capture with stickers, drag-and-drop editor, share flow.',
         ]}
       />

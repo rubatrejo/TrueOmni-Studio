@@ -6,7 +6,7 @@ import type { ItineraryStopKind } from './config';
 import { useEventFavorites, useFavorites, useTrailFavorites } from './favorites';
 
 /**
- * Hook unificado del rail del Trip Planner (Fase 3.17).
+ * Hook unificado del rail del Trip Builder (Fase 3.17).
  *
  * Combina los tres buckets de favoritos existentes (`useFavorites`,
  * `useEventFavorites`, `useTrailFavorites`) en una lista ordenada de stops.

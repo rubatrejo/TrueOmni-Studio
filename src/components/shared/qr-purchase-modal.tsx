@@ -246,12 +246,16 @@ export function QrPurchaseModal({
                 width: submitFullWidth ? '100%' : '320px',
                 height: submitFullWidth ? '82px' : '68px',
                 borderRadius: '10px',
-                backgroundColor: valid ? 'hsl(var(--brand-secondary))' : 'rgba(23,150,214,0.5)',
+                backgroundColor: valid
+                  ? 'hsl(var(--brand-secondary))'
+                  : 'hsl(var(--brand-secondary) / 0.5)',
                 fontSize: submitFullWidth ? '26px' : '22px',
                 letterSpacing: '0.08em',
                 cursor: valid ? 'pointer' : 'not-allowed',
                 boxShadow:
-                  submitFullWidth && valid ? '0 10px 22px -6px rgba(23,150,214,0.55)' : undefined,
+                  submitFullWidth && valid
+                    ? '0 10px 22px -6px hsl(var(--brand-secondary) / 0.55)'
+                    : undefined,
               }}
             >
               {submitLabel ?? textos.qr_send ?? 'SEND'}

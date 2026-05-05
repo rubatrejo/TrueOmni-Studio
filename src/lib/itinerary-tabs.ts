@@ -7,13 +7,13 @@ import type {
   KioskConfig,
 } from './config';
 
-/** Slug del módulo "places to stay" — el único excluido del Trip Planner. */
+/** Slug del módulo "places to stay" — el único excluido del Trip Builder. */
 const STAY_MODULE_SLUG = 'stay';
 
 /** Slug fijo del tab de itinerarios pre-armados. */
 export const LOCAL_LISTINGS_TAB_SLUG = '__local-listings';
 
-/** Tabs que el Trip Planner soporta. */
+/** Tabs que el Trip Builder soporta. */
 export interface ItineraryTab {
   /** Key estable. Coincide con `moduleSlug` cuando viene de un módulo del cliente. */
   slug: string;
@@ -33,7 +33,7 @@ function moduleToKind(moduleKind: 'listings' | 'events' | 'trails'): ItinerarySt
   return 'listing';
 }
 
-/** True si el módulo aporta items con coords mapeables al Trip Planner. */
+/** True si el módulo aporta items con coords mapeables al Trip Builder. */
 function isItineraryEligible(slug: string, mod: HomeModuleVariant): boolean {
   if (slug === STAY_MODULE_SLUG) return false;
   const kind = mod.kind ?? 'listings';
@@ -41,7 +41,7 @@ function isItineraryEligible(slug: string, mod: HomeModuleVariant): boolean {
 }
 
 /**
- * Devuelve la lista ordenada de tabs del Trip Planner para el cliente activo.
+ * Devuelve la lista ordenada de tabs del Trip Builder para el cliente activo.
  * - Excluye `places-to-stay` (los hoteles no van en el itinerario).
  * - Incluye solo módulos cuyo `kind` sea `'listings' | 'events' | 'trails'`.
  * - Los tabs de módulo van primero (orden = orden de `features.home.modules`).

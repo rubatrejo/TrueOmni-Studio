@@ -32,7 +32,7 @@ const buildDayLabels = (locale: string): string[] => {
 };
 
 /**
- * Week strip del Trip Planner en tab Events. Pixel-close al `WeekPicker`
+ * Week strip del Trip Builder en tab Events. Pixel-close al `WeekPicker`
  * del módulo Events (verbatim SVG `Events.svg`):
  *   - 180px alto · bg `hsl(var(--brand-secondary))` (azul medio Eat).
  *   - Row 1 (78px): chevron + uppercase 34px bold + chevron.

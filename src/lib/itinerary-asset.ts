@@ -1,5 +1,5 @@
 /**
- * Normaliza un path de asset del Trip Planner (Fase 3.17).
+ * Normaliza un path de asset del Trip Builder (Fase 3.17).
  * - URLs absolutas (http/https) se devuelven sin cambios.
  * - Paths que empiezan con `/` se devuelven sin cambios (ya son absolute).
  * - Paths relativos (`assets/itinerary/...`) se prefijan con `/`.
@@ -15,7 +15,7 @@ export function resolveItineraryAsset(raw: string): string {
 
 /**
  * Construye una URL del Mapbox Static Image API para usar de fondo decorativo
- * (ej. el welcome popup del Trip Planner). Sin pins/markers — solo el mapa.
+ * (ej. el welcome popup del Trip Builder). Sin pins/markers — solo el mapa.
  *
  * Si no hay token o coords, devuelve null y el caller usa un fallback.
  */

@@ -17,12 +17,12 @@ export interface ItineraryHeaderProps {
 }
 
 /**
- * Header del Trip Planner. Banda azul primary 230px de altura con:
+ * Header del Trip Builder. Banda azul primary 230px de altura con:
  *   - TrueOmniLogo @ (65, 44).
  *   - WeatherClock @ (744, 40).
  *   - Title (col1) + Searchbar (col2) en una segunda fila.
  *
- * Coords aproximadas del SVG `Trip Planner-Start.svg`. El pulido pixel-
+ * Coords aproximadas del SVG `Trip Builder-Start.svg`. El pulido pixel-
  * perfect se aplica en sub-fase 3.17-13.
  */
 export function ItineraryHeader(props: ItineraryHeaderProps) {

@@ -2,7 +2,7 @@
 
 /**
  * Empty state mostrado en el sidebar de listings cuando la búsqueda no
- * arroja resultados. Pixel-close al SVG `Trip Planner - Nothing Found`:
+ * arroja resultados. Pixel-close al SVG `Trip Builder - Nothing Found`:
  *   - Ilustración folder con slash (rojo `--itinerary-empty-icon`).
  *   - Título "Ooops! Try again" Montserrat Bold 26px.
  *   - Body 4 líneas Montserrat Regular ~17px gris muted.
@@ -49,7 +49,7 @@ export function EmptySearchState({ title, body }: EmptySearchStateProps) {
 
 /**
  * Icono "Ooops" — folder con stroke + slash diagonal sobre la pestaña.
- * Verbatim del SVG `Trip Planner - Nothing Found.svg` (group
+ * Verbatim del SVG `Trip Builder - Nothing Found.svg` (group
  * `noun-oops-5405055`, paths `Path_32067` + `Path_32071`).
  */
 function OopsIcon() {

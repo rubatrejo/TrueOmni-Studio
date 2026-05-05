@@ -7,7 +7,7 @@ import { useCallback, useEffect, useSyncExternalStore } from 'react';
  *
  * Se borra al cerrar la pestaña/kiosk — consistente con el comportamiento
  * esperado en un kiosk público (cada sesión de usuario = un recorrido).
- * El Trip Planner (fase posterior) consume los mismos slugs.
+ * El Trip Builder (fase posterior) consume los mismos slugs.
  *
  * Cada store es independiente (bucket propio). Usamos esto para tener
  * `kiosk_favorites` (listings) y `kiosk_event_favorites` (events) por

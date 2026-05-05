@@ -78,7 +78,7 @@ function PathCard({
 }
 
 /**
- * Modal del AI Trip Planner con dos paths: Start (AI) o Let's Go (Top
+ * Modal del AI Trip Builder con dos paths: Start (AI) o Let's Go (Top
  * Suggestions). Ambos disparan el mismo wizard, los CTAs distintos son sólo
  * estilo / framing.
  */

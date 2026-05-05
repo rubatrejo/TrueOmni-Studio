@@ -290,7 +290,7 @@ export interface ItineraryAiConfig {
 }
 
 /**
- * Configuración del módulo Trip Planner (Fase 3.17).
+ * Configuración del módulo Trip Builder (Fase 3.17).
  * Recolecta los listings/events/trails que el usuario marcó con like en otros módulos
  * y permite construir un día con stops sobre un mapa interactivo, con un flujo AI
  * opcional que genera el itinerario completo a partir de 4 preguntas.
@@ -845,7 +845,7 @@ export interface KioskConfig {
       askAi?: AskAiConfig;
       /** Módulo Photo Booth (captura + editor + share). Ruta `/home/photo-booth`. */
       photoBooth?: PhotoBoothConfig;
-      /** Módulo Trip Planner. Ruta `/home/itinerary-builder`. */
+      /** Módulo Trip Builder. Ruta `/home/itinerary-builder`. */
       itinerary?: ItineraryConfig;
     };
     /** Catálogo de ads declarativo (Fase 3.8). */

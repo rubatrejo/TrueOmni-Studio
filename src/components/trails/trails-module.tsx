@@ -30,7 +30,7 @@ import { TrailsFilterOverlay } from './trails-filter-overlay';
  *   searchTrails (si hay query) → sortListings (reusa SORT_OPTIONS).
  *
  * Reusa `ListingsGrid` via `trailToListing` adapter. Bucket de favoritos
- * propio `kiosk_trail_favorites` para que el Trip Planner futuro
+ * propio `kiosk_trail_favorites` para que el Trip Builder futuro
  * pueda leerlo sin mezclarse con listings/events.
  */
 export function TrailsModule({

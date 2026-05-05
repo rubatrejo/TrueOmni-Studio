@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import type { ConfigMeta, KioskConfig } from '@/lib/studio/schema';
 
+import { DeleteKioskModal } from './_components/DeleteKioskModal';
 import { FaviconBadge } from './_components/FaviconBadge';
 import { NewClientModal } from './_components/NewClientModal';
 import { OnboardingTour } from './_components/OnboardingTour';
@@ -86,10 +87,25 @@ export default function StudioHome() {
     }
   };
 
-  const handleDelete = async (slug: string) => {
-    if (!confirm(`Delete kiosk "${slug}"? This action cannot be undone.`)) return;
-    await deleteConfig(slug);
-    await refresh();
+  const [deleteTarget, setDeleteTarget] = useState<{ slug: string; nombre: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = (slug: string) => {
+    const target = configs.find((c) => c.slug === slug);
+    if (!target) return;
+    setDeleteTarget({ slug, nombre: target.nombre ?? slug });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await deleteConfig(deleteTarget.slug);
+      setDeleteTarget(null);
+      await refresh();
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -178,6 +194,15 @@ export default function StudioHome() {
           </div>
         </div>
       ) : null}
+
+      <DeleteKioskModal
+        open={deleteTarget !== null}
+        kioskName={deleteTarget?.nombre ?? ''}
+        kioskSlug={deleteTarget?.slug ?? ''}
+        deleting={deleting}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => void confirmDelete()}
+      />
 
       {/* Onboarding tour — solo se muestra al primer login (audit F-31). */}
       <OnboardingTour />

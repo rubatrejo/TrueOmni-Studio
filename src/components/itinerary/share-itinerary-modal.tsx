@@ -24,9 +24,9 @@ export interface ShareItineraryModalProps {
 }
 
 /**
- * Modal "You made it!" del Trip Planner. Card centrada con título + body
+ * Modal "You made it!" del Trip Builder. Card centrada con título + body
  * + QR + "Powered by TrueOmni" + 2 CTAs (Send to Phone olive, Send to Email
- * azul). Pixel-close al SVG `Trip Planner - Share_Itinerary.svg`.
+ * azul). Pixel-close al SVG `Trip Builder - Share_Itinerary.svg`.
  */
 export function ShareItineraryModal(props: ShareItineraryModalProps) {
   const { textos, qrUrl, onSendPhone, onSendEmail, onClose } = props;
@@ -43,7 +43,7 @@ export function ShareItineraryModal(props: ShareItineraryModalProps) {
         <h2 className="text-center text-[52px] font-bold leading-tight text-foreground">
           {textos.title}
         </h2>
-        <p className="mt-5 max-w-[640px] text-center text-[22px] leading-relaxed text-zinc-600">
+        <p className="mt-5 max-w-[640px] text-center text-[26px] leading-relaxed text-black">
           {textos.body}
         </p>
         <div
@@ -62,7 +62,7 @@ export function ShareItineraryModal(props: ShareItineraryModalProps) {
           style={{ color: 'hsl(var(--primary))' }}
         >
           <span className="text-[18px] font-bold">{textos.poweredBy}</span>
-          <TrueOmniLogo className="h-[38px] w-auto" />
+          <TrueOmniLogo slot="brand" className="h-[38px] w-auto" />
         </div>
         <div className="mt-12 flex gap-4">
           <button

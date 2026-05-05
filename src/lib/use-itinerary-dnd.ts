@@ -6,7 +6,7 @@ import type { ItineraryStopKind } from './config';
 import type { ItineraryCatalogItem } from './itinerary-catalog';
 
 /**
- * Drag & drop del Trip Planner con threshold de movimiento.
+ * Drag & drop del Trip Builder con threshold de movimiento.
  *
  * El drag NO se activa visualmente al pointerdown — solo se arma. Si el
  * pointer se mueve más de `MOVE_THRESHOLD` px, se activa el drag (drag-ghost

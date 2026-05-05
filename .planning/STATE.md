@@ -2263,6 +2263,56 @@ Otros:
 
 ---
 
+### Sesión 2026-05-04 (sesión 2 nocturna) — Polish masivo post-deploy: white-label universal + bridge reactivo + clone-from-fs
+
+**Hecho (18 commits sobre `main`, todo limpio en `bdab8e6`):**
+
+- **Vercel Blob storage** (`c173ec8`): endpoint `/api/studio/upload` con cap 5MB, MIME whitelist, path `kiosks/<slug>/<kind>/<filename>`. MediaField sube via XHR con barra de progreso + fallback a data URL si no hay token. Store `trueomni-studio-assets` creado (Public, IAD1, conectado).
+- **Sign out cableado** (`1ad3681`): `UserMenuItem` ya no está disabled. `signOut({callbackUrl:'/studio/sign-in'})` de NextAuth.
+- **Hero header reactivo en preview** (`bbe7c49`): bridge propaga `homeHero/heroGradient` via `kiosk:hero-override`. Nuevo `<HeroBackgroundLayer>` client component que se actualiza sin remontar `<HomeHeader>` server.
+- **4 fixes batch** (`82adf96`): clone desde KV `default` (luego cambiado a fs), modal pide website + location, `<UnsavedChangesModal>` con click capture intra-app, brand color sweep masivo (78 archivos: `#004F8B/#0088CE/#B9BD39/rgba(0,79,139)/etc`. → `hsl(var(--brand-*))`).
+- **Bootstrap from FS + template addresses + UX** (`e0e7756`): POST configs ahora usa `bootstrapStudioFromFs` directamente desde fs (no del KV vacío). `rewriteAddressesInPlace` reemplaza "City, ST" final de cada listing/event/pass/trail. Validación regex `City, ST` + `http(s)://` en el modal. Overlay loader + redirect automático al editor del nuevo kiosk.
+- **client_name reactivo + hero solo Dashboard + Nominatim geocoding** (`b4b6719`): bridge envía `clientName`. AiModalHost interpola greeting con effective. `<HomeHeader applyDashboardOverride>` flag — solo Dashboard hereda hero del Branding. Nominatim API gratis para `clientInfo.coords`. Schema extendido.
+- **rewriteContentInPlace** (`14353e7`): reemplaza 10 cities AZ + "Arizona" + "AZ" + "VisitPhoenix" hashtag en title/description/etc. Lookup table US_STATE_NAMES (50 estados + DC).
+- **Map labels alineados a listings + Itinerary coords** (`63df005`): chips "Eat/Play" → "Restaurants/Things to Do". `exploreTitle` reactivo. ItineraryBuilderModule escucha bridge coords igual que MapModule.
+- **6 fixes batch** (`cf84d13`): MapModule reinterpola `welcomeCopy` ("Welcome to Arizona Map" → reactivo). ItineraryBuilderModule client_name reactivo. SocialWallBanner oculta "Highlights:" si vacío. ListingDetail propaga effectiveClientCoords al DirectionsModal. AskAiHost greeting interpolado con reactive name. Sweep adicional brand shades (#0f6fa0/#0e518a/#0a4b78/#0b3a66/#1e88c6) en 17 archivos.
+- **6 fixes más** (`d90dcde`): `<DeleteKioskModal>` con icono red-warning. Tickets/Passes BUY button → `hsl(var(--brand-secondary)/0.5)` (era `rgba(23,150,214,0.5)`). AI question "How long will you be exploring {client_name}?" (sin Town). Share modal "Powered by" → `slot="brand"` (no override). Subtítulo +4pt black. Trip Builder rename (26 archivos). Food & Drink → Restaurants default.
+- **Events density + logos min-width** (`d10945c`): 2 → 11 events del día activo en `clients/default/config.json`. TrueOmniLogo `min-width: 120px` defensivo cuando hay override.
+- **Endpoint resync** (`cd1b2ea` + `0e6e9c5` + `bdab8e6`): `POST /api/studio/configs/[slug]/resync` para re-bootstrap desde fs. Endpoint diag temporal `/api/diag/resync-default` GET creado, ejecutado, y borrado tras propagar cambios al KV `default`.
+
+**Verificado:**
+
+- `pnpm typecheck` limpio en cada commit.
+- `pnpm exec eslint` sobre archivos tocados sin errores nuevos.
+- 4+ redeploys exitosos en Vercel (después de fix `git config user.email ruba.trejo@gmail.com` por requerimiento Hobby tier).
+- Endpoint diag `/api/diag/env` reveló `TAVUS_API_KEY: false` aunque Rubén la añadió — la había marcado solo Development. Fix: re-añadir en Production + Preview.
+- Endpoint diag `/api/diag/resync-default` ejecutado: kiosk default actualizado a labels `["Restaurants","Things to Do","Stay"]`. Endpoint borrado.
+- Tavus avatar conversacional cargando con las 4 env vars set.
+
+**Pendiente / siguiente:**
+
+1. **#5 Itinerary local_listings** ("Phoenix Foodie Trail") siguen Phoenix-specific. Extender `rewriteContentInPlace` con visit dedicado a `itineraryBuilder.local_listings`. ~10 min.
+2. **#6 Empty mode toggle** en `<NewClientModal>` — kiosk arranca sin listings/events para clientes que no quieran heredar mock data del template TrueOmni. UI + endpoint flag.
+3. **#10 Social Wall gradient** azul TrueOmni residual — verificar con hard reload, posible cache. Si persiste, screenshot fresh.
+4. **DeepL/Anthropic API keys** auto-translate — Rubén crea cuentas, yo cableo en Vercel.
+5. **Custom domain `studio.trueomni.com`** — necesita DNS provider de `trueomni.com` + actualizar callback URL OAuth GitHub.
+6. **Hashtag SocialWall del default fs** sigue "VisitPhoenix" — es el template demo, decisión: dejar.
+
+**Decisiones:**
+
+- **Git author email**: cambiado a `ruba.trejo@gmail.com` (cuenta GitHub dueña del proyecto Vercel Hobby tier). Vercel rechazaba deploys silenciosamente con `designers@trueomni.com` por mismatch con accounts vinculadas. Documentado en feedback memory.
+- **Vercel Blob `access: 'public'`**: assets del kiosk runtime se sirven sin auth (kiosks dedicados no tienen login). Upload protegido por NextAuth, runtime acceso por URL pública.
+- **Brand colors UNIVERSAL como CSS vars**: sweep total ~95 archivos (78 + 17 + 50 secondary pass). Ningún componente del kiosk runtime conserva hex literal del template TrueOmni. Documentado en feedback memory.
+- **Bridge propaga reactivamente**: clientName/clientCoords/homeHero/heroGradient + branding tokens. Componentes server NO pre-interpolan `{client_name}` — lo pasan raw para que client interpole con state reactivo (cambió en `(kiosk)/home/page.tsx` y AskAiHost). Documentado en project memory.
+- **rewriteContentInPlace conservador**: reemplaza city names + state name + abbrev en mock data. Idempotente para clientes AZ. Limitación conocida: nombres de attractions específicas (Camelback Mountain) no se tocan — operador edita. Trade-off aceptable.
+- **`bootstrapStudioFromFs` preserva customizaciones**: por design no sobreescribe fields que difieran del factory default. Para casos donde el template entero cambió y se quiere force-reset, usar `makeBlankConfig` como base en lugar de `existingKv`. Pattern documentado en reference memory.
+- **TrueOmni "Powered by" hardcoded**: `<TrueOmniLogo slot="brand">` nunca cambia con override del cliente. Diferente del slot `default/idle/footer` que sí.
+- **Hero header per-página vs global** (#8 anterior): `applyDashboardOverride` flag. Solo `/home/page.tsx` activa. Listings/Events/Map/etc. usan su propio `heroImage` del módulo.
+
+**Fase:** Milestone Studio — Polish post-deploy. Studio production-ready para clientes nuevos. Resync flow del template documentado para futuras propagaciones de cambios.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

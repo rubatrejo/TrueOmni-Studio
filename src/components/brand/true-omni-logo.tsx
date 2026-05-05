@@ -68,8 +68,20 @@ function TrueOmniLogoBase({
     // El logo subido por el usuario suele ser un raster con aspect ratio propio.
     // `object-contain` + `block` evita stretching y mantiene centrado dentro
     // del bounding box que dicta `className` (h-X w-auto).
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={override} alt={title} className={`${className ?? ''} block object-contain`} />;
+    //
+    // Si el override es un PNG/JPG cuadrado (1:1), `w-auto` lo encoge a ser
+    // = a la altura → logo se ve diminuto en headers anchos. Forzamos
+    // min-width a 4× la altura del componente para garantizar visibilidad
+    // mínima razonable, dejando que `object-contain` mantenga el aspect.
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={override}
+        alt={title}
+        className={`${className ?? ''} block object-contain`}
+        style={{ minWidth: '120px' }}
+      />
+    );
   }
 
   return (

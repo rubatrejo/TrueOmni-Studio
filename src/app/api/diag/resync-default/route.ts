@@ -29,10 +29,12 @@ export async function GET() {
       return NextResponse.json({ error: 'fs/clients/default missing' }, { status: 404 });
     }
 
-    const existing = await kv.get<KioskConfig>(kvKeys.cfg(slug));
-    const base =
-      existing ?? makeBlankConfig(slug, fs.config.client?.nombre ?? 'TrueOmni Default');
-
+    // Force fresh bootstrap: arrancar SIEMPRE desde makeBlankConfig (factory
+    // defaults) e hidratar desde fs. Garantiza que cambios al template
+    // (Trip Builder rename, Restaurants label, AI question copy, hashtag)
+    // se propaguen al KV ignorando "customizaciones" que en realidad eran
+    // sólo el shape antiguo del fs persistido.
+    const base = makeBlankConfig(slug, fs.config.client?.nombre ?? 'TrueOmni Default');
     const next = bootstrapStudioFromFs(base, fs.config, fs.tokensCss);
 
     const parsed = KioskConfigSchema.safeParse(next);

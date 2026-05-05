@@ -4,11 +4,16 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
-import { useBillboardB0, useBillboardLogoHeight } from './use-billboard-override';
+import {
+  useBillboardB0,
+  useBillboardFooterLogoHeight,
+  useBillboardLogoHeight,
+} from './use-billboard-override';
 
 export function Billboard0() {
   const t = useTextosMap();
   const logoH = useBillboardLogoHeight();
+  const footerLogoH = useBillboardFooterLogoHeight();
   const { background, touchHere, overlayOpacity, overlay } = useBillboardB0();
   const touchLeft = (1080 - touchHere.width) / 2;
   const touchTop = 947 - touchHere.height / 2;
@@ -99,9 +104,9 @@ export function Billboard0() {
         />
         <div
           className="absolute flex items-center"
-          style={{ left: '60px', top: '103px', height: '65px', width: '360px' }}
+          style={{ left: '60px', top: '103px', height: footerLogoH, width: '360px' }}
         >
-          <TrueOmniLogo slot="footer" className="h-[65px] w-auto max-w-full text-white" />
+          <TrueOmniLogo slot="footer" className="h-full w-auto max-w-full text-white" />
         </div>
         <svg
           className="absolute"

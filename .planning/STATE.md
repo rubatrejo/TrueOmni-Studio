@@ -2313,6 +2313,64 @@ Otros:
 
 ---
 
+### Sesión 2026-05-05 — Trip Planner editor + idle settings unificados + i18n + Tavus client_name
+
+**Hecho (1 sesión maratón sin commitear hasta el final):**
+
+Trip Planner (renombre + editor completo):
+- Schema nuevo `ItineraryBuilderSchema` con aiEnabled / loadingImage / defaultTitleTemplate / wizardHeroImage / questions / localListings + `ItineraryAiQuestionSchema` + `ItineraryAiOptionSchema` (con categoryKey/subcategoryKey).
+- Editor Studio nuevo `<ItineraryBuilderEditor>` con switch AI flow + AI Wizard Hero (full-bleed image card landscape 1080×760) + AI Loading Screen (full-bleed portrait 1080×1920 + title template) + Questions CRUD con drag-reorder + options inline (label/value/days/category/subcategory).
+- Las 4 questions canónicas (duration/travel_type/activities/dining) se bloquean con icono Lock (no se borran). Las custom sí se borran.
+- Categoría/subcategoría per option: dropdowns dinámicos derivados de `listings/trails/events` del config activo.
+- Hero image único compartido (antes per-question). Publish escribe el shared en cada `question.hero_image` para preservar shape legacy.
+- ImageField nuevo modo `layout="cover"` con aspect ratio explícito (object-cover 100%, hover overlay Replace).
+- Rename global "Trip Builder" / "Itinerary Builder" → "Trip Planner" en UI strings, sidebar, header iframe, en/es/fr/pt/ja i18n.
+- aiEnabled toggle ahora controla SOLO el AI flow (no el módulo entero). Welcome popup oculta CTA "AI Itinerary" cuando off. Map AI Itinerary Builder button también gateado.
+- Bridge `kiosk:itinerary-override` + push helper + runtime override merger (camel↔snake, preserva legacy flags).
+
+Idle / Billboard:
+- Schema unificado: `b0/b1/b2/b3` comparten ahora `BillboardB0Schema` completo (background + touchHere + overlay).
+- `DEFAULT_BILLBOARD` inicializa b1/b2/b3 con full settings + src por defecto correcto por variante.
+- Editor: panel "Idle settings (Variant N)" siempre visible para todos los variants (label, layout, button width/height, font size, overlay solid/gradient, color, opacity).
+- `footerLogoSize` (S/M/L → 48/65/96px, mapping separado del hero) editable. Hook `useBillboardFooterLogoHeight()` aplicado a footer logo de B0/B1/B3/B4.
+- Background runtime overrideable en B1/B2/B3 (B0 ya lo tenía). B1 hero card, B2 full-bleed, B3 banner central.
+- `B1/B2/B3 background.src` propaga via bridge + persiste a `billboard_bN_background` en publish + bootstrap-from-fs lee de vuelta.
+
+Otros:
+- `?force=true` en `/api/studio/configs/[slug]/resync` para resetear customizaciones obsoletas (resolvió "Food & Drink" → "Restaurants" en KV default).
+- AI question titles interpolan `{client_name}` reactivo (QField con `vars` prop, AiWizard pasa `clientName` desde `templateVars`).
+- Tavus greeting: `/api/ai-avatar/start` POST acepta body `clientName` que sobreescribe `cfg.client.nombre`. `prewarmAiAvatar(clientName)` + `consumePrewarmOrCreate(clientName)` con cache invalidation cuando cambia el name. AskAiTrigger recibe clientName desde host.
+- Logo del header (`<HomeHeader>`): slot fijo 280×70 + object-contain → consistencia visual entre clientes con logos de aspect ratios distintos.
+- Cascade de tile labels: wrapper `setModules` en Shell.tsx detecta rename de `tiles[].label` y propaga a typed module fields (events/trails/passes/etc.) + listings entries + i18nBundle EN (`tile_label_*` y `module_label_*`).
+
+**Verificado:**
+- `pnpm typecheck` limpio (final).
+- `pnpm lint` sin errores nuevos en archivos tocados (errores remanentes son preexistentes: Shell.tsx import order, etc.).
+- Smoke browser playwright: sidebar Trip Planner OK, dropdowns category dinámicos (Restaurants/Things to Do/Stay/Trails/Upcoming Events), aiEnabled toggle dirty diff + welcome popup hide AI CTA reactivo, Idle/Billboard variants con backgrounds editables, Footer logo size pills (48/65/96px).
+- Resync forzado en KV `default` reset "Food & Drink" → "Restaurants".
+
+**Pendiente / siguiente:**
+
+1. **Aplicar runtime de touchHere/overlay en B1/B2/B3** — el editor permite editar label/layout/width/height/fontSize/overlay para todos los variants pero el runtime solo aplica `background.src`. Hay que cablear cada `billboard-{1,2,3}.tsx` para que mapeen los settings a su "TOUCH TO START" + overlay sobre hero. ~30 min trabajo focalizado.
+2. **"Ask anything" pill en SVG** — texto embebido en `clients/default/assets/ai/trigger.svg`, no se traduce. Para localizar: extraer texto, renderear separado con i18n. Follow-up.
+3. **Push del code a Vercel** — pendiente del usuario (no auto-push). Branch main 1 commit ahead de origin tras este commit.
+4. **Smoke E2E del flow Studio→PR→merge→deploy** — sigue pendiente desde la sesión nocturna anterior.
+5. **Vercel Blob ya activo** pero sigue pendiente probarlo en producción tras el push.
+
+**Decisiones:**
+
+- **`aiEnabled` controla solo el AI flow** (NO el módulo entero) — corrigió ambigüedad de la sesión anterior. El master switch del módulo entero queda en systemModules.itineraryBuilder.
+- **4 questions canónicas locked**: keys `duration/travel_type/activities/dining` no se borran. El AI generator runtime depende de esas keys (e.g. `key === 'duration'` para asignar días). Las custom adicionales sí se borran.
+- **Hero image único en wizard**: legacy shape tenía hero_image per question pero todas las questions usaban la misma URL. Refactor a `wizardHeroImage` compartido + write-fanout en publish preserva legacy fs shape.
+- **`?force=true` en resync**: cuando el operador hizo customizaciones obsoletas (eg. "Food & Drink") y el merge respetuoso (`takeFsIfDefault`) no las pisa. Force-reset siguiendo `makeBlankConfig + bootstrap`.
+- **Idle settings unificados**: schema misma shape para los 4 variants. Editor uniforme. Runtime aplica los campos relevantes a su layout (B0 los usa todos; B1/B2/B3 solo background hoy, expandible incrementalmente).
+- **Footer logo mapping separado** (48/65/96 vs hero 80/128/180): footer es decorativo, no debe escalar como el hero principal.
+- **Tavus greeting con override por body**: dev usa `KIOSK_CLIENT=default` pero el Studio preview puede tener un cliente con nombre distinto. POST body `clientName` lo prioriza sobre `cfg.client.nombre`. Cache prewarm invalida cuando el nombre cambia.
+
+**Fase:** Milestone Studio — Trip Planner editor + idle settings unificados shippeados a `main`. Pending push a `origin/main` para que Vercel deploye.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

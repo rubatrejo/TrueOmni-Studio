@@ -88,10 +88,129 @@ function fmt(template: string, vars: Record<string, string>) {
   );
 }
 
+/**
+ * Traduce el override Studio (camelCase `ItineraryBuilderConfig`) al shape
+ * runtime `ItineraryConfig` (snake_case). Preserva legacy fields que el
+ * editor no toca (`welcome_always_visible`, `show_driving_default`, etc.).
+ * Devuelve null si el detail no es válido — el listener cae al base.
+ */
+function mergeStudioItineraryOverride(
+  base: ItineraryConfig,
+  detail: unknown,
+): ItineraryConfig | null {
+  if (!detail || typeof detail !== 'object') return null;
+  const s = detail as {
+    aiEnabled?: unknown;
+    loadingImage?: unknown;
+    defaultTitleTemplate?: unknown;
+    wizardHeroImage?: unknown;
+    questions?: unknown;
+    localListings?: unknown;
+  };
+  const sharedHero =
+    typeof s.wizardHeroImage === 'string'
+      ? s.wizardHeroImage
+      : (base.ai.questions[0]?.hero_image ?? '');
+  const questions = Array.isArray(s.questions)
+    ? s.questions
+        .map((q) => {
+          if (!q || typeof q !== 'object') return null;
+          const o = q as Record<string, unknown>;
+          const optionsRaw = Array.isArray(o.options) ? o.options : [];
+          const options = optionsRaw
+            .map((opt) => {
+              if (!opt || typeof opt !== 'object') return null;
+              const op = opt as Record<string, unknown>;
+              const value = typeof op.value === 'string' ? op.value : '';
+              const label = typeof op.label === 'string' ? op.label : '';
+              if (!value || !label) return null;
+              const days = typeof op.days === 'number' ? op.days : undefined;
+              const categoryKey =
+                typeof op.categoryKey === 'string'
+                  ? op.categoryKey
+                  : typeof op.category_key === 'string'
+                    ? op.category_key
+                    : undefined;
+              const subcategoryKey =
+                typeof op.subcategoryKey === 'string'
+                  ? op.subcategoryKey
+                  : typeof op.subcategory_key === 'string'
+                    ? op.subcategory_key
+                    : undefined;
+              return {
+                value,
+                label,
+                ...(days !== undefined ? { days } : {}),
+                ...(categoryKey ? { category_key: categoryKey } : {}),
+                ...(subcategoryKey ? { subcategory_key: subcategoryKey } : {}),
+              };
+            })
+            .filter(Boolean) as {
+            value: string;
+            label: string;
+            days?: number;
+            category_key?: string;
+            subcategory_key?: string;
+          }[];
+          if (options.length === 0) return null;
+          const type = o.type === 'multi' ? 'multi' : 'single';
+          const result: ItineraryConfig['ai']['questions'][number] = {
+            key: typeof o.key === 'string' ? o.key : '',
+            kicker: typeof o.kicker === 'string' ? o.kicker : '',
+            title: typeof o.title === 'string' ? o.title : '',
+            type,
+            hero_image: sharedHero,
+            options,
+          };
+          if (typeof o.subtitle === 'string') result.subtitle = o.subtitle;
+          return result;
+        })
+        .filter(Boolean) as ItineraryConfig['ai']['questions']
+    : null;
+
+  const localListings = Array.isArray(s.localListings)
+    ? (s.localListings.filter(
+        (l) => l && typeof l === 'object',
+      ) as ItineraryConfig['local_listings'])
+    : null;
+
+  return {
+    ...base,
+    local_listings: localListings ?? base.local_listings,
+    ai: {
+      ...base.ai,
+      enabled: typeof s.aiEnabled === 'boolean' ? s.aiEnabled : base.ai.enabled,
+      loading_image: typeof s.loadingImage === 'string' ? s.loadingImage : base.ai.loading_image,
+      default_title_template:
+        typeof s.defaultTitleTemplate === 'string'
+          ? s.defaultTitleTemplate
+          : base.ai.default_title_template,
+      questions: questions ?? base.ai.questions,
+    },
+  };
+}
+
 export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
-  const { config, fullConfig, client, mapboxToken } = props;
+  const { fullConfig, client, mapboxToken } = props;
   const textos = useTextosMap();
   const rail = useItineraryRail();
+
+  // Live preview override del Studio (S Trip Builder editor).
+  // Bridge dispatcha `kiosk:itinerary-override` con shape Studio camelCase;
+  // se traduce a `ItineraryConfig` (runtime snake_case) preservando los
+  // campos legacy que el editor no toca (welcome/driving/markers/max_stops).
+  const [overrideConfig, setOverrideConfig] = useState<ItineraryConfig | null>(null);
+  const config = overrideConfig ?? props.config;
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<unknown>).detail;
+      const next = mergeStudioItineraryOverride(props.config, detail);
+      setOverrideConfig(next);
+    };
+    window.addEventListener('kiosk:itinerary-override', handler);
+    return () => window.removeEventListener('kiosk:itinerary-override', handler);
+  }, [props.config]);
 
   // Reactive client coords: el bridge del Studio dispatcha
   // `kiosk:client-coords-override` cuando se edita un kiosk con location
@@ -344,7 +463,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             weather={props.weather}
             locale={client.locale ?? 'en-US'}
             timezone={client.timezone}
-            title={textos.itinerary_title ?? 'Trip Builder'}
+            title={textos.itinerary_title ?? 'Trip Planner'}
             searchPlaceholder={textos.itinerary_search_placeholder ?? 'Search…'}
             searchValue={searchValue}
             onSearchChange={setSearchValue}
@@ -394,11 +513,13 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             }}
           />
 
-          <AiItineraryFloatingCard
-            label={textos.itinerary_ai_popup_title ?? 'AI ITINERARY'}
-            onTap={() => setPhase('ai-popup')}
-            topY={isEventsTab ? 540 : 360}
-          />
+          {config.ai.enabled !== false && (
+            <AiItineraryFloatingCard
+              label={textos.itinerary_ai_popup_title ?? 'AI ITINERARY'}
+              onTap={() => setPhase('ai-popup')}
+              topY={isEventsTab ? 540 : 360}
+            />
+          )}
 
           {activeTab?.isModule && (
             <ListingsColumn
@@ -666,7 +787,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
 
       {phase === 'ai-loading' && (
         <AiLoadingScreen
-          title={textos.itinerary_ai_loading_title ?? 'AI Trip Builder'}
+          title={textos.itinerary_ai_loading_title ?? 'AI Trip Planner'}
           body={
             textos.itinerary_ai_loading_body ??
             "We're building your perfect itinerary! This might take a few seconds…"
@@ -953,7 +1074,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
           textos={{
             intro: textos.itinerary_welcome_intro ?? 'DISCOVER YOUR PERFECT VISIT',
             title: fmt(
-              textos.itinerary_welcome_title ?? "WELCOME TO {client_name}'S\nOFFICIAL TRIP BUILDER.",
+              textos.itinerary_welcome_title ?? "WELCOME TO {client_name}'S\nOFFICIAL TRIP PLANNER.",
               interp,
             ),
             body:
@@ -962,6 +1083,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
             createCta: textos.itinerary_welcome_create_cta ?? 'Create Itinerary',
             aiCta: textos.itinerary_welcome_ai_cta ?? 'AI Itinerary',
           }}
+          aiEnabled={config.ai.enabled !== false}
           onCreate={() => setPhase('manual')}
           onAi={() => setPhase('ai-popup')}
           onClose={() => setPhase('manual')}

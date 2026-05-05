@@ -12,20 +12,31 @@ import type { WeatherData } from '@/lib/weather';
 /**
  * Componente helper que resuelve un campo de pregunta AI vía i18n con fallback
  * al literal del config. Convención: `ai_question_${qkey}_${field}`.
+ *
+ * Interpola `{client_name}` con el nombre del cliente activo. Si `vars`
+ * contiene más claves, se interpolan también.
  */
 function QField({
   qkey,
   field,
   fallback,
+  vars,
 }: {
   qkey: string;
   field: string;
   fallback: string;
+  vars?: Record<string, string>;
 }) {
   const t = useTextos();
   const k = `ai_question_${qkey}_${field}`;
   const r = t(k);
-  return <>{r === k ? fallback : r}</>;
+  const raw = r === k ? fallback : r;
+  if (!vars) return <>{raw}</>;
+  const out = Object.entries(vars).reduce(
+    (acc, [key, value]) => acc.replaceAll(`{${key}}`, value),
+    raw,
+  );
+  return <>{out}</>;
 }
 
 export interface AiQuestionScreenProps {
@@ -51,6 +62,12 @@ export interface AiQuestionScreenProps {
   weather?: WeatherData | null;
   locale?: string;
   timezone?: string;
+  /**
+   * Nombre del cliente activo para interpolar `{client_name}` en
+   * kicker/title/subtitle de las preguntas AI. Sin este prop, las
+   * placeholders quedan literales.
+   */
+  clientName?: string;
 }
 
 function ProgressDots({ count, current }: { count: number; current: number }) {
@@ -71,9 +88,10 @@ function ProgressDots({ count, current }: { count: number; current: number }) {
 }
 
 export function AiQuestionScreen(props: AiQuestionScreenProps) {
-  const { question, value, onChange, step, totalSteps, isFirst, isLast } = props;
+  const { question, value, onChange, step, totalSteps, isFirst, isLast, clientName } = props;
   const isMulti = question.type === 'multi';
   const heroSrc = resolveItineraryAsset(question.hero_image);
+  const interpVars = clientName ? { client_name: clientName } : undefined;
 
   const isSelected = (optionValue: string) => {
     if (Array.isArray(value)) return value.includes(optionValue);
@@ -151,20 +169,35 @@ export function AiQuestionScreen(props: AiQuestionScreenProps) {
             className="text-center text-[28px] font-bold tracking-wide"
             style={{ color: 'hsl(var(--primary))' }}
           >
-            <QField qkey={question.key} field="kicker" fallback={question.kicker} />
+            <QField
+              qkey={question.key}
+              field="kicker"
+              fallback={question.kicker}
+              vars={interpVars}
+            />
           </p>
           <h2
             className="mt-4 text-center text-[42px] font-bold leading-tight text-foreground"
             style={{ whiteSpace: 'pre-line' }}
           >
-            <QField qkey={question.key} field="title" fallback={question.title} />
+            <QField
+              qkey={question.key}
+              field="title"
+              fallback={question.title}
+              vars={interpVars}
+            />
           </h2>
           {question.subtitle ? (
             <p
               className="mt-3 text-center text-[20px] font-semibold"
               style={{ color: 'hsl(var(--primary))' }}
             >
-              <QField qkey={question.key} field="subtitle" fallback={question.subtitle} />
+              <QField
+                qkey={question.key}
+                field="subtitle"
+                fallback={question.subtitle}
+                vars={interpVars}
+              />
             </p>
           ) : null}
 

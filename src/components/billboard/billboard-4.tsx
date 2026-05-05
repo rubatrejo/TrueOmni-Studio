@@ -1,7 +1,10 @@
+'use client';
+
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { LanguageDropdown } from '@/components/home/language-dropdown';
 
 import { AccessibilityIcon } from './billboard-footer-parts';
+import { useBillboardFooterLogoHeight } from './use-billboard-override';
 
 /**
  * Billboard 4 — variante "Bandas horizontales + sidebars verticales".
@@ -17,6 +20,7 @@ import { AccessibilityIcon } from './billboard-footer-parts';
  * - Footer (y=1730..1920): hsl(var(--brand-primary)) con TrueOmni + accesibilidad + ENGLISH.
  */
 export function Billboard4() {
+  const footerLogoH = useBillboardFooterLogoHeight();
   return (
     <div
       data-billboard="4"
@@ -88,7 +92,12 @@ export function Billboard4() {
           paddingRight: '59px',
         }}
       >
-        <TrueOmniLogo slot="footer" className="h-[65px] w-auto text-white" />
+        <span
+          className="flex items-center"
+          style={{ height: footerLogoH }}
+        >
+          <TrueOmniLogo slot="footer" className="h-full w-auto text-white" />
+        </span>
         <AccessibilityIcon size={80} color="#fff" />
         <div data-billboard-no-link>
           <LanguageDropdown />

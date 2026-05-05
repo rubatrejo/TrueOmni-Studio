@@ -9,7 +9,11 @@ import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon } from './billboard-footer-parts';
 import { MODULE_BILLBOARD_INFO, resolveSlotHref } from './module-info';
-import { useBillboardLogoHeight, useBillboardOverride } from './use-billboard-override';
+import {
+  useBillboardLogoHeight,
+  useBillboardOverride,
+  useBillboardVariantBackground,
+} from './use-billboard-override';
 
 /**
  * Billboard 2 — "Hero full-bleed + carousel de cards".
@@ -49,6 +53,9 @@ export function Billboard2() {
   const t = useTextosMap();
   const logoH = useBillboardLogoHeight();
   const { modules } = useBillboardOverride();
+  const heroBg = useBillboardVariantBackground(2);
+  const heroSrc = heroBg?.src || '/assets/billboard-2/hero.png';
+  const heroIsVideo = heroBg?.type === 'video';
   const [active, setActive] = useState(0);
 
   // CARDS reactivo: por cada slot 0..3, si `billboard.modules[i]` está
@@ -85,12 +92,24 @@ export function Billboard2() {
       className="relative h-full w-full overflow-hidden"
       style={{ backgroundColor: '#000' }}
     >
-      {/* Hero full-bleed */}
-      <img
-        src="/assets/billboard-2/hero.png"
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover"
-      />
+      {/* Hero full-bleed (overrideable per kiosk) */}
+      {heroIsVideo ? (
+        <video
+          src={heroSrc}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={heroSrc}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      )}
       <div
         className="absolute inset-0"
         style={{

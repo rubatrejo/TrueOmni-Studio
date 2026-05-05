@@ -80,6 +80,7 @@ export function StudioBridge() {
         tickets?: unknown;
         passes?: unknown;
         trails?: unknown;
+        itineraryBuilder?: unknown;
         ads?: unknown;
       } | null;
       if (!data || typeof data !== 'object' || !data.type) return;
@@ -201,6 +202,16 @@ export function StudioBridge() {
             }
           } catch {}
           break;
+        case 'studio:itinerary-update':
+          if (data.itineraryBuilder) applyItineraryOverride(data.itineraryBuilder);
+          break;
+        case 'studio:itinerary-open-preview':
+          try {
+            if (window.location.pathname !== '/home/itinerary-builder') {
+              window.location.assign('/home/itinerary-builder');
+            }
+          } catch {}
+          break;
         case 'studio:billboard-open-preview':
           try {
             if (window.location.pathname !== '/') {
@@ -312,6 +323,8 @@ type BillboardPatch = {
   variant: 0 | 1 | 2 | 3;
   idleTimeoutSec: number;
   logoSize?: 'S' | 'M' | 'L';
+  /** Tamaño del logo del footer (mismo enum, mapping diferente). */
+  footerLogoSize?: 'S' | 'M' | 'L';
   modules?: string[];
   /** Settings exclusivos del variant 0 (Dark Hero). */
   b0?: {
@@ -331,6 +344,10 @@ type BillboardPatch = {
       gradient?: { from?: string; to?: string; angle?: number };
     };
   };
+  /** Background editable per variant (B1/B2/B3). */
+  b1?: { background?: { type: 'image' | 'video'; src: string } };
+  b2?: { background?: { type: 'image' | 'video'; src: string } };
+  b3?: { background?: { type: 'image' | 'video'; src: string } };
 };
 
 type AiAvatarPatch = {
@@ -359,6 +376,7 @@ export const KIOSK_EVENTS_OVERRIDE_EVENT = 'kiosk:events-override';
 export const KIOSK_TICKETS_OVERRIDE_EVENT = 'kiosk:tickets-override';
 export const KIOSK_PASSES_OVERRIDE_EVENT = 'kiosk:passes-override';
 export const KIOSK_TRAILS_OVERRIDE_EVENT = 'kiosk:trails-override';
+export const KIOSK_ITINERARY_OVERRIDE_EVENT = 'kiosk:itinerary-override';
 export const KIOSK_ADS_OVERRIDE_EVENT = 'kiosk:ads-override';
 
 function applyModulesOverride(modules: ModulesPatch) {
@@ -438,6 +456,13 @@ function applyPassesOverride(passes: unknown) {
 function applyTrailsOverride(trails: unknown) {
   if (typeof window === 'undefined') return;
   window.dispatchEvent(new CustomEvent(KIOSK_TRAILS_OVERRIDE_EVENT, { detail: trails }));
+}
+
+function applyItineraryOverride(itineraryBuilder: unknown) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(
+    new CustomEvent(KIOSK_ITINERARY_OVERRIDE_EVENT, { detail: itineraryBuilder }),
+  );
 }
 
 function applyAdsOverride(ads: unknown) {

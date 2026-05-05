@@ -17,8 +17,16 @@ interface ImageFieldProps {
   /** Data URL o path actual. */
   value?: string;
   onChange: (next: string | undefined) => void;
-  /** `compact`: layout horizontal pequeño (logos múltiples). `square`: aspect 1:1 (default). */
-  layout?: 'compact' | 'square';
+  /**
+   * - `compact`: layout horizontal pequeño (logos múltiples).
+   * - `square`: aspect 1:1, image contained at 80% (default).
+   * - `cover`: image fills 100% del card con object-cover. Aspect lo dicta
+   *   el `aspect` prop (default 16/9). Sin checker — para hero/loading
+   *   screens donde la imagen es el contenido principal.
+   */
+  layout?: 'compact' | 'square' | 'cover';
+  /** Solo para `layout='cover'`: aspect ratio CSS (e.g. '1080/760', '1080/1920'). */
+  aspect?: string;
 }
 
 /**
@@ -38,6 +46,7 @@ export function ImageField({
   value,
   onChange,
   layout = 'square',
+  aspect = '16/9',
 }: ImageFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -58,6 +67,101 @@ export function ImageField({
       setBusy(false);
     }
   };
+
+  if (layout === 'cover') {
+    return (
+      <div
+        className={`relative overflow-hidden rounded-lg border bg-zinc-100 transition dark:bg-zinc-900 ${
+          hover
+            ? 'border-sky-500/60 ring-2 ring-sky-500/20'
+            : 'border-zinc-300 dark:border-zinc-800'
+        }`}
+        style={{ aspectRatio: aspect }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setHover(true);
+        }}
+        onDragLeave={() => setHover(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setHover(false);
+          const file = e.dataTransfer.files[0];
+          if (file) void pickFile(file);
+        }}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) void pickFile(file);
+          }}
+        />
+        {value ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={previewSrc}
+              alt={label || 'Image'}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <button
+              type="button"
+              onClick={() => onChange(undefined)}
+              aria-label={`Remove ${label || 'image'}`}
+              className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-zinc-900/70 text-white shadow-sm backdrop-blur-sm transition hover:bg-zinc-900"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 bg-gradient-to-t from-black/70 to-transparent py-3 text-[12px] font-medium text-white opacity-0 transition hover:opacity-100"
+              aria-label={`Replace ${label || 'image'}`}
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Replace
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={busy}
+            className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-zinc-500 transition hover:bg-sky-500/5 hover:text-sky-700 disabled:opacity-50 dark:hover:text-sky-300"
+          >
+            <Upload className="h-6 w-6" />
+            <span className="text-[12.5px] font-medium text-zinc-700 dark:text-zinc-200">
+              {busy ? 'Reading…' : label || 'Upload image'}
+            </span>
+            <span className="px-4 text-center text-[10.5px] text-zinc-400 dark:text-zinc-600">
+              {hint}
+            </span>
+          </button>
+        )}
+        {error && (
+          <p
+            role="alert"
+            className="absolute inset-x-2 bottom-2 truncate rounded-md bg-red-500/90 px-2 py-1 text-center text-[10px] font-medium text-white"
+          >
+            {error}
+          </p>
+        )}
+        {busy && (
+          <div className="absolute inset-0 grid place-items-center bg-white/70 backdrop-blur-sm dark:bg-zinc-900/70">
+            <div className="flex flex-col items-center gap-1.5">
+              <Loader2 className="h-5 w-5 animate-spin text-sky-500" />
+              <span className="text-[11px] font-medium text-zinc-700 dark:text-zinc-200">
+                Uploading…
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   if (layout === 'compact') {
     return (

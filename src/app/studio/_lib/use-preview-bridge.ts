@@ -11,6 +11,7 @@ import type {
   DealsModuleConfig,
   EventsModule,
   GuestbookConfig,
+  ItineraryBuilderConfig,
   ListingsModule,
   ModulesConfig,
   PassesModule,
@@ -87,6 +88,7 @@ export function usePreviewBridge() {
   const lastTicketsRef = useRef<TicketsModule | null>(null);
   const lastPassesRef = useRef<PassesModule | null>(null);
   const lastTrailsRef = useRef<TrailsModule | null>(null);
+  const lastItineraryRef = useRef<ItineraryBuilderConfig | null>(null);
   const lastAdsRef = useRef<AdsModule | null>(null);
   const brandingDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const modulesDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -103,6 +105,7 @@ export function usePreviewBridge() {
   const ticketsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const passesDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const trailsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const itineraryDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const adsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isReady, setIsReady] = useState(false);
   // Timestamp del último handshake/heartbeat recibido del iframe. Se usa para
@@ -377,6 +380,22 @@ export function usePreviewBridge() {
     } catch {}
   }, []);
 
+  const sendItineraryNow = useCallback((itineraryBuilder: ItineraryBuilderConfig) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:itinerary-update', itineraryBuilder }, '*');
+    } catch {}
+  }, []);
+
+  const openItineraryPreview = useCallback(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:itinerary-open-preview' }, '*');
+    } catch {}
+  }, []);
+
   const sendAdsNow = useCallback((ads: AdsModule) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
@@ -407,6 +426,7 @@ export function usePreviewBridge() {
       if (lastTicketsRef.current) sendTicketsNow(lastTicketsRef.current);
       if (lastPassesRef.current) sendPassesNow(lastPassesRef.current);
       if (lastTrailsRef.current) sendTrailsNow(lastTrailsRef.current);
+      if (lastItineraryRef.current) sendItineraryNow(lastItineraryRef.current);
       if (lastAdsRef.current) sendAdsNow(lastAdsRef.current);
     };
     window.addEventListener('message', handler);
@@ -427,6 +447,7 @@ export function usePreviewBridge() {
     sendTicketsNow,
     sendPassesNow,
     sendTrailsNow,
+    sendItineraryNow,
     sendAdsNow,
   ]);
 
@@ -565,6 +586,15 @@ export function usePreviewBridge() {
     [sendTrailsNow],
   );
 
+  const pushItinerary = useCallback(
+    (itineraryBuilder: ItineraryBuilderConfig) => {
+      lastItineraryRef.current = itineraryBuilder;
+      if (itineraryDebounceRef.current) clearTimeout(itineraryDebounceRef.current);
+      itineraryDebounceRef.current = setTimeout(() => sendItineraryNow(itineraryBuilder), 150);
+    },
+    [sendItineraryNow],
+  );
+
   const pushAds = useCallback(
     (ads: AdsModule) => {
       lastAdsRef.current = ads;
@@ -628,6 +658,8 @@ export function usePreviewBridge() {
     openPassesPreview,
     pushTrails,
     openTrailsPreview,
+    pushItinerary,
+    openItineraryPreview,
     pushAds,
     isReady,
     bridgeStatus,

@@ -51,8 +51,16 @@ async function readI18nGreeting(slug: string, locale: string): Promise<string | 
   }
 }
 
-async function buildGreeting(cfg: Awaited<ReturnType<typeof getConfig>>): Promise<string> {
-  const clientName = cfg.client?.nombre ?? '';
+async function buildGreeting(
+  cfg: Awaited<ReturnType<typeof getConfig>>,
+  overrideClientName?: string,
+): Promise<string> {
+  // Priorizamos el clientName del request body (Studio preview lo pasa con
+  // el reactiveClientName del bridge). Sin override, fallback a cfg.
+  const clientName =
+    (overrideClientName?.trim().length ?? 0) > 0
+      ? (overrideClientName as string).trim()
+      : (cfg.client?.nombre ?? '');
   const slug = getClientSlug();
   const locale = cfg.client?.locale ?? 'en';
 
@@ -78,9 +86,19 @@ async function fetchWithTimeout(url: string, init: RequestInit): Promise<Respons
   }
 }
 
-export async function POST(): Promise<NextResponse> {
+export async function POST(req: Request): Promise<NextResponse> {
   try {
     const cfg = await getConfig();
+    // Body opcional con override del clientName (Studio preview).
+    let overrideClientName: string | undefined;
+    try {
+      const body = (await req.json()) as { clientName?: unknown } | null;
+      if (body && typeof body.clientName === 'string') {
+        overrideClientName = body.clientName;
+      }
+    } catch {
+      /* sin body, está bien */
+    }
     const creds = readTavusCreds(cfg);
     if (!creds) {
       const intg = cfg.integraciones ?? {};
@@ -105,7 +123,7 @@ export async function POST(): Promise<NextResponse> {
       );
     }
 
-    const greeting = await buildGreeting(cfg);
+    const greeting = await buildGreeting(cfg, overrideClientName);
     const body: Record<string, unknown> = {
       replica_id: creds.replicaId,
       conversation_name: `kiosk-${cfg.client.slug}-${Date.now()}`,

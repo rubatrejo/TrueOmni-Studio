@@ -70,11 +70,14 @@ export function AskAiHost(props: AskAiHostProps) {
   // Pre-warm la conversación Tavus en background al montar /home (si el
   // módulo está habilitado). Resultado: cuando el usuario tap el trigger,
   // el conversation_url ya está creado → avatar visible ~3-4s más rápido.
+  // Pasamos el effectiveClientName al prewarm para que el greeting use el
+  // nombre actualizado del kiosk (Studio override). Si cambia el name,
+  // prewarmAiAvatar invalida la cache stale y re-warma con el nuevo.
   useEffect(() => {
     if (!props.enabled) return;
-    const t = setTimeout(prewarmAiAvatar, 1500);
+    const t = setTimeout(() => prewarmAiAvatar(effectiveClientName), 1500);
     return () => clearTimeout(t);
-  }, [props.enabled]);
+  }, [props.enabled, effectiveClientName]);
 
   useEffect(() => {
     setHidden(!props.enabled);
@@ -123,6 +126,7 @@ export function AskAiHost(props: AskAiHostProps) {
         width={props.position.width}
         height={props.position.height}
         position={{ right: props.position.right, bottom: props.position.bottom }}
+        clientName={effectiveClientName}
       />
       <AiModalHost
         heroVideoSrc={heroVideoSrc}

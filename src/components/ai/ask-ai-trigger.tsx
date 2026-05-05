@@ -20,6 +20,8 @@ interface AskAiTriggerProps {
   position?: { right?: number; bottom?: number };
   /** Si true, recorta a círculo (default cuando width === height). */
   circular?: boolean;
+  /** Nombre del cliente para que el prewarm Tavus interpole el greeting. */
+  clientName?: string;
 }
 
 /**
@@ -37,11 +39,13 @@ export function AskAiTrigger({
   size = 82,
   position = { right: 24, bottom: 24 },
   circular,
+  clientName,
 }: AskAiTriggerProps) {
   const openAi = useAiStore((s) => s.open);
   const w = width ?? size;
   const h = height ?? size;
   const isCircular = circular ?? w === h;
+  const onPrewarm = () => prewarmAiAvatar(clientName);
 
   return (
     <motion.button
@@ -51,9 +55,9 @@ export function AskAiTrigger({
       // Pre-warm la conversación de Tavus al primer touch/hover del trigger.
       // Para cuando el modal abre, el conversation_url casi siempre ya está
       // listo y el avatar carga ~3-4s más rápido.
-      onPointerDown={prewarmAiAvatar}
-      onPointerEnter={prewarmAiAvatar}
-      onTouchStart={prewarmAiAvatar}
+      onPointerDown={onPrewarm}
+      onPointerEnter={onPrewarm}
+      onTouchStart={onPrewarm}
       aria-label={ariaLabel}
       className="absolute flex items-center justify-center"
       style={{

@@ -16,7 +16,11 @@ import {
   resolveSlotLabel,
 } from './module-info';
 import { SlotImage } from './slot-image';
-import { useBillboardOverride } from './use-billboard-override';
+import {
+  useBillboardFooterLogoHeight,
+  useBillboardOverride,
+  useBillboardVariantBackground,
+} from './use-billboard-override';
 
 /**
  * Billboard 1 — variante "Grid + Clock + Weather".
@@ -40,6 +44,10 @@ import { useBillboardOverride } from './use-billboard-override';
 export function Billboard1() {
   const t = useTextosMap();
   const { modules } = useBillboardOverride();
+  const heroBg = useBillboardVariantBackground(1);
+  const heroSrc = heroBg?.src || '/assets/billboard-1/hero.jpg';
+  const heroIsVideo = heroBg?.type === 'video';
+  const footerLogoH = useBillboardFooterLogoHeight();
   // Slot labels: si el usuario asignó un módulo distinto al hardcoded del SVG,
   // sustituimos solo el texto. Imagen/icono/color del slot quedan tal cual
   // (decoración heredada del SVG — cambiar imagen e icono por slot es v2.1).
@@ -260,11 +268,23 @@ export function Billboard1() {
           borderRadius: '9px',
         }}
       >
-        <img
-          src="/assets/billboard-1/hero.jpg"
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+        {heroIsVideo ? (
+          <video
+            src={heroSrc}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={heroSrc}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(17,16,13,0.352)' }} />
         {/* TOUCH TO START text @ (804, 898) absolute → relative to card. */}
         <div
@@ -323,7 +343,12 @@ export function Billboard1() {
           paddingRight: '59px',
         }}
       >
-        <TrueOmniLogo slot="footer" className="h-[65px] w-auto text-white" />
+        <span
+          className="flex items-center"
+          style={{ height: footerLogoH }}
+        >
+          <TrueOmniLogo slot="footer" className="h-full w-auto text-white" />
+        </span>
         <AccessibilityIcon size={80} color="#fff" />
         <div data-billboard-no-link>
           <LanguageDropdown />

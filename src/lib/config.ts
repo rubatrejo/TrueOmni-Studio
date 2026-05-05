@@ -260,6 +260,12 @@ export interface AiQuestionOption {
   /** Solo en la pregunta `duration`: número de días que genera el resultado.
    *  0 = lista corta sin tabs DAY, 1 = un día, 3 = tres días. */
   days?: number;
+  /** Categoría del kiosk a filtrar cuando esta option es elegida (e.g.
+   *  'restaurants', 'things-to-do', 'trails'). El generador AI usa esto
+   *  para limitar el resultado al módulo específico. */
+  category_key?: string;
+  /** Subcategoría dentro del categoryKey (e.g. 'Hiking', 'Mexican'). */
+  subcategory_key?: string;
 }
 
 /** Pregunta del wizard AI — schema config-driven (Fase 3.17). */
@@ -281,6 +287,13 @@ export interface AiQuestion {
 
 /** Configuración del subsistema AI Itinerary del módulo. */
 export interface ItineraryAiConfig {
+  /**
+   * Si false, el botón "AI Itinerary" del welcome popup se oculta y los
+   * visitantes solo pueden construir el itinerario manualmente.
+   * El módulo Trip Planner sigue activo (controlado por el flag global
+   * `enabled` del bloque itinerary, no por este). Default true.
+   */
+  enabled?: boolean;
   /** Lista ordenada de preguntas que pasan por el wizard. */
   questions: AiQuestion[];
   /** Background fullscreen del loading screen mientras se "genera" el itinerario. */

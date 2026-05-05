@@ -92,6 +92,7 @@ export function AiWizard(props: AiWizardProps) {
       weather={props.weather}
       locale={props.locale}
       timezone={props.timezone}
+      clientName={vars.client_name}
     />
   );
 }

@@ -3,6 +3,7 @@ import {
   DEFAULT_BROCHURES,
   DEFAULT_DEALS,
   DEFAULT_GUESTBOOK,
+  DEFAULT_ITINERARY_BUILDER,
   DEFAULT_PHOTO_BOOTH,
   DEFAULT_SOCIAL_WALL,
   DEFAULT_SURVEY,
@@ -92,7 +93,22 @@ export function buildFilesystemConfig(
     features.billboard_variant = studio.billboard.variant;
     features.inactividad_reset_seg = studio.billboard.idleTimeoutSec;
     features.billboard_logo_size = studio.billboard.logoSize;
+    features.billboard_footer_logo_size = studio.billboard.footerLogoSize ?? 'M';
     features.billboard_modules = [...studio.billboard.modules];
+    // Backgrounds editables per variant. Si están seteados, los publicamos
+    // como `billboard_bN_background` para que el runtime fs los lea
+    // (en este momento el runtime de variants 1/2/3 ya respeta el override
+    // del bridge en vivo; al publicar persistimos para post-redeploy).
+    const variantBgs: Array<{ key: string; v: { background?: { type: 'image' | 'video'; src: string } } | undefined }> = [
+      { key: 'billboard_b1_background', v: studio.billboard.b1 },
+      { key: 'billboard_b2_background', v: studio.billboard.b2 },
+      { key: 'billboard_b3_background', v: studio.billboard.b3 },
+    ];
+    for (const { key, v } of variantBgs) {
+      if (v?.background?.src) {
+        features[key] = v.background;
+      }
+    }
   }
 
   // ───── modules / tiles / wayfinding / systemModules ─────
@@ -184,6 +200,59 @@ export function buildFilesystemConfig(
   }
   if (studio.guestbook && !structuralEqual(studio.guestbook, DEFAULT_GUESTBOOK)) {
     writeKinded(modulesObj, 'guestbook', studio.guestbook);
+  }
+
+  // ───── itineraryBuilder → home.itinerary (top-level, NO bajo modules) ─────
+  // Mapeo camelCase ↔ snake_case + strip de `id` en questions (los ids viven
+  // sólo en KV; al releer del fs, el bootstrap los regenera).
+  if (
+    studio.itineraryBuilder &&
+    !structuralEqual(studio.itineraryBuilder, DEFAULT_ITINERARY_BUILDER)
+  ) {
+    const it = studio.itineraryBuilder;
+    const existing = obj(home, 'itinerary');
+    // Preserva flags legacy (welcome_always_visible/show_driving_default/
+    // hide_markers_default/max_stops) si ya existen; si no, defaults sane.
+    home.itinerary = {
+      ...existing,
+      // `enabled` legacy del módulo NO lo tocamos — es controlado por
+      // systemModules.itineraryBuilder (master switch del módulo entero).
+      // Studio.aiEnabled mapea a `ai.enabled` (sub-toggle del flujo AI).
+      enabled: typeof existing.enabled === 'boolean' ? existing.enabled : true,
+      welcome_always_visible:
+        typeof existing.welcome_always_visible === 'boolean'
+          ? existing.welcome_always_visible
+          : true,
+      show_driving_default:
+        typeof existing.show_driving_default === 'boolean'
+          ? existing.show_driving_default
+          : true,
+      hide_markers_default:
+        typeof existing.hide_markers_default === 'boolean'
+          ? existing.hide_markers_default
+          : false,
+      max_stops: typeof existing.max_stops === 'number' ? existing.max_stops : 12,
+      local_listings: it.localListings,
+      ai: {
+        enabled: it.aiEnabled,
+        loading_image: it.loadingImage,
+        default_title_template: it.defaultTitleTemplate,
+        // Cada question recibe el wizardHeroImage compartido (legacy shape
+        // espera hero_image per question; el editor solo edita uno único).
+        // Options: camelCase categoryKey/subcategoryKey → snake_case en fs.
+        questions: it.questions.map(({ id: _id, ...q }) => ({
+          ...q,
+          hero_image: it.wizardHeroImage,
+          options: q.options.map((opt) => ({
+            value: opt.value,
+            label: opt.label,
+            ...(opt.days !== undefined ? { days: opt.days } : {}),
+            ...(opt.categoryKey ? { category_key: opt.categoryKey } : {}),
+            ...(opt.subcategoryKey ? { subcategory_key: opt.subcategoryKey } : {}),
+          })),
+        })),
+      },
+    };
   }
 
   // ───── listings (entries dinámicos sin `kind`) ─────

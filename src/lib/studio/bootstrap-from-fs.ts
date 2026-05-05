@@ -11,16 +11,19 @@ import {
   DealsModuleSchema,
   DEFAULT_AI_AVATAR,
   DEFAULT_BILLBOARD,
+  DEFAULT_BILLBOARD_B0,
   DEFAULT_BRANDING,
   DEFAULT_BROCHURES,
   DEFAULT_DEALS,
   DEFAULT_GUESTBOOK,
+  DEFAULT_ITINERARY_BUILDER,
   DEFAULT_PHOTO_BOOTH,
   DEFAULT_SOCIAL_WALL,
   DEFAULT_SURVEY,
   EventsModuleSchema,
   GuestbookSchema,
   IntegrationsConfigSchema,
+  ItineraryBuilderSchema,
   ListingsCatalogSchema,
   PassesModuleSchema,
   PhotoBoothSchema,
@@ -34,6 +37,7 @@ import {
   defaultPasses,
   defaultTickets,
   defaultTrails,
+  type ItineraryBuilderConfig,
   type KioskConfig,
   type ListingsCatalogEntry,
   type ListingsModule,
@@ -75,7 +79,11 @@ interface FsConfig {
     advertisements?: { ads?: unknown[] };
     billboard_variant?: number;
     billboard_logo_size?: string;
+    billboard_footer_logo_size?: string;
     billboard_modules?: string[];
+    billboard_b1_background?: { type?: string; src?: string };
+    billboard_b2_background?: { type?: string; src?: string };
+    billboard_b3_background?: { type?: string; src?: string };
     inactividad_reset_seg?: number;
     languages?: { enabled?: boolean; available?: string[]; default?: string };
     home?: {
@@ -84,6 +92,7 @@ interface FsConfig {
       askAi?: Record<string, unknown>;
       photoBooth?: Record<string, unknown>;
       survey?: Record<string, unknown>;
+      itinerary?: Record<string, unknown>;
       modules?: Record<string, Record<string, unknown>>;
     };
   };
@@ -161,15 +170,28 @@ export function bootstrapStudioFromFs(
     const variant = fsConfig.features?.billboard_variant;
     const idleSec = fsConfig.features?.inactividad_reset_seg;
     const logoSizeRaw = fsConfig.features?.billboard_logo_size;
+    const footerSizeRaw = fsConfig.features?.billboard_footer_logo_size;
     const modulesRaw = fsConfig.features?.billboard_modules;
     if (variant === 0 || variant === 1 || variant === 2 || variant === 3) {
       const logoSize: 'S' | 'M' | 'L' =
         logoSizeRaw === 'S' || logoSizeRaw === 'M' || logoSizeRaw === 'L'
           ? logoSizeRaw
           : DEFAULT_BILLBOARD.logoSize;
+      const footerLogoSize: 'S' | 'M' | 'L' =
+        footerSizeRaw === 'S' || footerSizeRaw === 'M' || footerSizeRaw === 'L'
+          ? footerSizeRaw
+          : DEFAULT_BILLBOARD.footerLogoSize;
       const modules = Array.isArray(modulesRaw)
         ? modulesRaw.filter((m): m is string => typeof m === 'string').slice(0, 4)
         : DEFAULT_BILLBOARD.modules;
+      const parseBg = (raw: { type?: string; src?: string } | undefined) => {
+        if (!raw || typeof raw.src !== 'string' || raw.src.length === 0) return undefined;
+        const type: 'image' | 'video' = raw.type === 'video' ? 'video' : 'image';
+        return {
+          ...DEFAULT_BILLBOARD_B0,
+          background: { type, src: raw.src },
+        };
+      };
       next.billboard = {
         variant,
         idleTimeoutSec:
@@ -177,7 +199,11 @@ export function bootstrapStudioFromFs(
             ? idleSec
             : DEFAULT_BILLBOARD.idleTimeoutSec,
         logoSize,
+        footerLogoSize,
         modules,
+        b1: parseBg(fsConfig.features?.billboard_b1_background),
+        b2: parseBg(fsConfig.features?.billboard_b2_background),
+        b3: parseBg(fsConfig.features?.billboard_b3_background),
       };
     }
   }
@@ -287,6 +313,16 @@ export function bootstrapStudioFromFs(
   );
   next.guestbook = takeFsIfDefault(next.guestbook, DEFAULT_GUESTBOOK, () =>
     parseStripKind(GuestbookSchema, fsModules.guestbook),
+  );
+
+  // ── itineraryBuilder (snake_case ↔ camelCase) ──
+  // Nota: el bloque vive en `features.home.itinerary` (top-level), NO bajo
+  // `features.home.modules.itinerary`. Los demás módulos sí están bajo
+  // modules, pero itinerary es legacy y nunca se migró.
+  next.itineraryBuilder = takeFsIfDefault(
+    next.itineraryBuilder,
+    DEFAULT_ITINERARY_BUILDER,
+    () => parseItineraryFromFs(fsConfig.features?.home?.itinerary),
   );
 
   // ── photoBooth, survey, aiAvatar ──
@@ -503,4 +539,137 @@ function defaultIconForKey(key: string): string {
     default:
       return 'MapPin';
   }
+}
+
+/**
+ * Mapea el bloque legacy `features.home.modules.itinerary` (snake_case)
+ * a `ItineraryBuilderConfig` (camelCase). Genera ids estables para
+ * questions cuando el fs no los tiene.
+ */
+function parseItineraryFromFs(
+  raw: Record<string, unknown> | undefined,
+): ItineraryBuilderConfig | null {
+  if (!raw || typeof raw !== 'object') return null;
+
+  // aiEnabled mapea a `ai.enabled` (NO al `enabled` legacy del módulo, que
+  // es un toggle separado controlado por systemModules.itineraryBuilder).
+  // Si ai.enabled no está set en el fs, default true (visible).
+  const ai = (raw.ai && typeof raw.ai === 'object' ? raw.ai : {}) as Record<string, unknown>;
+  const aiEnabled = typeof ai.enabled === 'boolean' ? ai.enabled : true;
+  const loadingImage = typeof ai.loading_image === 'string' ? ai.loading_image : '';
+  const defaultTitleTemplate =
+    typeof ai.default_title_template === 'string' ? ai.default_title_template : '';
+
+  const rawQuestions = Array.isArray(ai.questions) ? ai.questions : [];
+  // wizardHeroImage compartido: tomamos el hero_image de la primera question
+  // que tenga uno (legacy data tiene todas las questions con la misma URL).
+  let wizardHeroImage = '';
+  for (const q of rawQuestions) {
+    if (q && typeof q === 'object') {
+      const h = (q as Record<string, unknown>).hero_image;
+      if (typeof h === 'string' && h.length > 0) {
+        wizardHeroImage = h;
+        break;
+      }
+    }
+  }
+  const questions = rawQuestions.map((q, idx) => {
+    if (!q || typeof q !== 'object') return null;
+    const o = q as Record<string, unknown>;
+    const key = typeof o.key === 'string' ? o.key : `q-${idx}`;
+    const id = typeof o.id === 'string' && o.id.length > 0 ? o.id : `q-${key}-${idx}`;
+    const type = o.type === 'multi' ? 'multi' : 'single';
+    const optionsRaw = Array.isArray(o.options) ? o.options : [];
+    const options = optionsRaw
+      .map((opt) => {
+        if (!opt || typeof opt !== 'object') return null;
+        const op = opt as Record<string, unknown>;
+        const value = typeof op.value === 'string' ? op.value : '';
+        const label = typeof op.label === 'string' ? op.label : value;
+        if (!value || !label) return null;
+        const days = typeof op.days === 'number' ? op.days : undefined;
+        const categoryKey =
+          typeof op.category_key === 'string'
+            ? op.category_key
+            : typeof op.categoryKey === 'string'
+              ? op.categoryKey
+              : undefined;
+        const subcategoryKey =
+          typeof op.subcategory_key === 'string'
+            ? op.subcategory_key
+            : typeof op.subcategoryKey === 'string'
+              ? op.subcategoryKey
+              : undefined;
+        return {
+          value,
+          label,
+          ...(days !== undefined ? { days } : {}),
+          ...(categoryKey ? { categoryKey } : {}),
+          ...(subcategoryKey ? { subcategoryKey } : {}),
+        };
+      })
+      .filter(
+        (
+          x,
+        ): x is {
+          value: string;
+          label: string;
+          days?: number;
+          categoryKey?: string;
+          subcategoryKey?: string;
+        } => x !== null,
+      );
+    if (options.length === 0) return null;
+    const candidate = {
+      id,
+      key,
+      kicker: typeof o.kicker === 'string' ? o.kicker : '',
+      title: typeof o.title === 'string' ? o.title : '',
+      subtitle: typeof o.subtitle === 'string' ? o.subtitle : undefined,
+      type,
+      options,
+    };
+    return candidate;
+  });
+
+  const rawListings = Array.isArray(raw.local_listings) ? raw.local_listings : [];
+  const localListings = rawListings
+    .map((item) => {
+      if (!item || typeof item !== 'object') return null;
+      const o = item as Record<string, unknown>;
+      const slug = typeof o.slug === 'string' ? o.slug : '';
+      const title = typeof o.title === 'string' ? o.title : '';
+      if (!slug || !title) return null;
+      const stopsRaw = Array.isArray(o.stops) ? o.stops : [];
+      const stops = stopsRaw
+        .map((s) => {
+          if (!s || typeof s !== 'object') return null;
+          const sp = s as Record<string, unknown>;
+          const sslug = typeof sp.slug === 'string' ? sp.slug : '';
+          const skind = typeof sp.kind === 'string' ? sp.kind : '';
+          const sModule = typeof sp.moduleSlug === 'string' ? sp.moduleSlug : '';
+          if (!sslug || !skind || !sModule) return null;
+          return { slug: sslug, kind: skind, moduleSlug: sModule };
+        })
+        .filter((x): x is { slug: string; kind: string; moduleSlug: string } => x !== null);
+      return {
+        slug,
+        title,
+        description: typeof o.description === 'string' ? o.description : '',
+        image: typeof o.image === 'string' ? o.image : '',
+        stops,
+      };
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
+
+  const candidate = {
+    aiEnabled,
+    loadingImage,
+    defaultTitleTemplate,
+    wizardHeroImage,
+    questions: questions.filter((q): q is NonNullable<typeof q> => q !== null),
+    localListings,
+  };
+
+  return parseSchema(ItineraryBuilderSchema, candidate);
 }

@@ -9,7 +9,12 @@ import { useTextosMap } from '@/components/i18n-provider';
 import { AccessibilityIcon } from './billboard-footer-parts';
 import { resolveSlotHref, resolveSlotImage, resolveSlotLabel } from './module-info';
 import { SlotImage } from './slot-image';
-import { useBillboardLogoHeight, useBillboardOverride } from './use-billboard-override';
+import {
+  useBillboardFooterLogoHeight,
+  useBillboardLogoHeight,
+  useBillboardOverride,
+  useBillboardVariantBackground,
+} from './use-billboard-override';
 
 /**
  * Billboard 3 — variante "2 cards arriba + banner central + 2 cards abajo".
@@ -26,6 +31,10 @@ export function Billboard3() {
   const t = useTextosMap();
   const logoH = useBillboardLogoHeight();
   const { modules } = useBillboardOverride();
+  const heroBg = useBillboardVariantBackground(3);
+  const heroSrc = heroBg?.src || '/assets/billboard-4/things-to-do.jpg';
+  const heroIsVideo = heroBg?.type === 'video';
+  const footerLogoH = useBillboardFooterLogoHeight();
   // Slots 0..3 del 2×2: top-left → top-right → bottom-left → bottom-right.
   const slot0 = resolveSlotLabel(modules?.[0], { label: 'Food &', labelLine2: 'Drink' });
   const slot1 = resolveSlotLabel(modules?.[1], { label: 'Events' });
@@ -93,11 +102,23 @@ export function Billboard3() {
 
       {/* Banner central (y=475..1245): grass/city + logo + TOUCH TO START */}
       <div className="absolute inset-x-0 overflow-hidden" style={{ top: '475px', height: '770px' }}>
-        <img
-          src="/assets/billboard-4/things-to-do.jpg"
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+        {heroIsVideo ? (
+          <video
+            src={heroSrc}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={heroSrc}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        )}
         <div className="absolute inset-0" style={{ backgroundColor: 'hsl(var(--brand-primary) / 0.6)' }} />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-16">
           {/* Logo height configurable desde Studio (S=80 / M=128 / L=180).
@@ -186,7 +207,12 @@ export function Billboard3() {
           paddingRight: '59px',
         }}
       >
-        <TrueOmniLogo slot="footer" className="h-[65px] w-auto text-white" />
+        <span
+          className="flex items-center"
+          style={{ height: footerLogoH }}
+        >
+          <TrueOmniLogo slot="footer" className="h-full w-auto text-white" />
+        </span>
         <AccessibilityIcon size={80} color="#fff" />
         <div data-billboard-no-link>
           <LanguageDropdown />

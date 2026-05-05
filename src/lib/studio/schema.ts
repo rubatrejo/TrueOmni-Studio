@@ -240,7 +240,7 @@ export const MODULE_KEY_TO_SYSTEM_FIELD: Record<string, keyof SystemModules> = {
 export const KIOSK_MODULES: readonly ModuleEntry[] = [
   { key: 'restaurants', label: 'Restaurants', enabled: true },
   { key: 'things-to-do', label: 'Things\nto Do', enabled: true },
-  { key: 'itinerary-builder', label: 'Trip Builder', enabled: true },
+  { key: 'itinerary-builder', label: 'Trip Planner', enabled: true },
   { key: 'events', label: 'Events', enabled: true },
   { key: 'passes', label: 'Passes', enabled: true },
   { key: 'tickets', label: 'Tickets', enabled: true },
@@ -278,6 +278,16 @@ export const BILLBOARD_LOGO_SIZE_PX: Record<BillboardLogoSize, number> = {
   S: 80,
   M: 128,
   L: 180,
+};
+
+/**
+ * Mapa footerLogoSize → altura en px del logo del footer del Billboard.
+ * Más pequeño que el hero (BILLBOARD_LOGO_SIZE_PX) — el SVG original era 65px.
+ */
+export const BILLBOARD_FOOTER_LOGO_SIZE_PX: Record<BillboardLogoSize, number> = {
+  S: 48,
+  M: 65,
+  L: 96,
 };
 
 /**
@@ -364,6 +374,20 @@ export const DEFAULT_BILLBOARD_B0: BillboardB0Config = {
   },
 };
 
+/**
+ * Settings idle compartidos por TODOS los variants (B0/B1/B2/B3): background
+ * editable + Touch Here button + overlay. Antes solo B0 tenía este shape;
+ * ahora B1/B2/B3 también lo usan para que el operador pueda customizar de
+ * forma consistente. Cada variant runtime aplica los campos que tienen
+ * sentido en su layout (algunos como width/height del button no aplican a
+ * todos los layouts y se ignoran silenciosamente).
+ */
+export const BillboardVariantSettingsSchema = BillboardB0Schema;
+export type BillboardVariantSettings = BillboardB0Config;
+
+/** Alias retrocompat para el shape solo-background (deprecated, usar VariantSettings). */
+export type BillboardVariantBackground = { background?: { type: 'image' | 'video'; src: string } };
+
 export const BillboardSchema = z.object({
   /** Cuál de los 4 layouts del Billboard idle se muestra. */
   variant: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]),
@@ -375,13 +399,25 @@ export const BillboardSchema = z.object({
    */
   logoSize: z.enum(BILLBOARD_LOGO_SIZES).default('M'),
   /**
+   * Tamaño del logo del footer en TODAS las variantes idle. Independiente
+   * de `logoSize` (que aplica al hero principal). Mapeo: S=80px, M=128px,
+   * L=180px (mismo enum que el hero).
+   */
+  footerLogoSize: z.enum(BILLBOARD_LOGO_SIZES).default('M'),
+  /**
    * Lista ordenada de IDs de módulos a mostrar en los slots del Billboard
    * (B1/B2/B3 — B0 no tiene grid). Máximo 4. Los IDs corresponden a
    * `modules.tiles[].key` activos en el Modules tab.
    */
   modules: z.array(z.string()).max(4).default([]),
-  /** Settings exclusivos del variant 0 (Dark Hero). */
-  b0: BillboardB0Schema.optional(),
+  /** Settings idle del variant 0 (Dark Hero). Mismo shape que el resto. */
+  b0: BillboardVariantSettingsSchema.optional(),
+  /** Settings idle del variant 1 (Grid + Hero). */
+  b1: BillboardVariantSettingsSchema.optional(),
+  /** Settings idle del variant 2 (Hero + Carousel). */
+  b2: BillboardVariantSettingsSchema.optional(),
+  /** Settings idle del variant 3 (Banner + 4 cards). */
+  b3: BillboardVariantSettingsSchema.optional(),
 });
 
 export type BillboardConfig = z.infer<typeof BillboardSchema>;
@@ -390,8 +426,21 @@ export const DEFAULT_BILLBOARD: BillboardConfig = {
   variant: 0,
   idleTimeoutSec: 60,
   logoSize: 'M',
+  footerLogoSize: 'M',
   modules: [],
   b0: DEFAULT_BILLBOARD_B0,
+  b1: {
+    ...DEFAULT_BILLBOARD_B0,
+    background: { type: 'image', src: '/assets/billboard-1/hero.jpg' },
+  },
+  b2: {
+    ...DEFAULT_BILLBOARD_B0,
+    background: { type: 'image', src: '/assets/billboard-2/hero.jpg' },
+  },
+  b3: {
+    ...DEFAULT_BILLBOARD_B0,
+    background: { type: 'image', src: '/assets/billboard-3/hero.jpg' },
+  },
 };
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -1553,6 +1602,94 @@ export function makeBlankTrail(): TrailItem {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
+/*  Trip Builder (Itinerary)                                                 */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export const ItineraryAiOptionSchema = z.object({
+  value: z.string().min(1).max(64),
+  label: z.string().min(1).max(120),
+  /** Solo aplica a la question `key === 'duration'` — número de días sugeridos. */
+  days: z.number().int().min(0).max(30).optional(),
+  /**
+   * Categoría del kiosk a la que apunta esta option (e.g. 'restaurants',
+   * 'things-to-do', 'trails', 'events'). Usada por el AI Itinerary para
+   * filtrar resultados a un módulo específico cuando el usuario marca
+   * esta option.
+   */
+  categoryKey: z.string().max(64).optional(),
+  /** Subcategoría dentro del categoryKey elegido (e.g. 'Hiking', 'Mexican'). */
+  subcategoryKey: z.string().max(120).optional(),
+});
+
+export type ItineraryAiOption = z.infer<typeof ItineraryAiOptionSchema>;
+
+export const ITINERARY_QUESTION_TYPES = ['single', 'multi'] as const;
+export type ItineraryQuestionType = (typeof ITINERARY_QUESTION_TYPES)[number];
+
+export const ItineraryAiQuestionSchema = z.object({
+  /** Estable per-instance — sólo vive en KV/Studio, NO se publica a fs. */
+  id: z.string().min(1).max(64),
+  /** Slug semántico del wizard ('duration', 'travel_type', 'activities', …). */
+  key: z.string().min(1).max(64),
+  kicker: z.string().max(80).default(''),
+  title: z.string().min(1).max(200),
+  subtitle: z.string().max(200).optional(),
+  type: z.enum(ITINERARY_QUESTION_TYPES),
+  options: z.array(ItineraryAiOptionSchema).min(1).max(20),
+});
+
+export type ItineraryAiQuestion = z.infer<typeof ItineraryAiQuestionSchema>;
+
+export const ItineraryLocalListingStopSchema = z.object({
+  slug: z.string().min(1).max(120),
+  kind: z.string().min(1).max(64),
+  moduleSlug: z.string().min(1).max(120),
+});
+
+export const ItineraryLocalListingSchema = z.object({
+  slug: z.string().min(1).max(120),
+  title: z.string().min(1).max(200),
+  description: z.string().max(2000).default(''),
+  image: z.string().default(''),
+  stops: z.array(ItineraryLocalListingStopSchema).default([]),
+});
+
+export type ItineraryLocalListing = z.infer<typeof ItineraryLocalListingSchema>;
+
+export const ItineraryBuilderSchema = z.object({
+  /**
+   * Toggle del flujo AI del Trip Planner. Mapea a `ai.enabled` en
+   * `features.home.itinerary.ai.enabled`. Cuando es false, el botón
+   * "AI Itinerary" del welcome popup se oculta y los visitantes solo
+   * pueden construir el itinerario manualmente. El módulo Trip Planner
+   * sigue activo (controlado por systemModules.itineraryBuilder).
+   */
+  aiEnabled: z.boolean().default(true),
+  loadingImage: z.string().default(''),
+  defaultTitleTemplate: z.string().max(200).default(''),
+  /**
+   * Hero image compartida por TODAS las questions del wizard. Antes vivía
+   * por question (legacy `question.hero_image`). Mantenemos el shape legacy
+   * al publicar copiando este valor a cada question's `hero_image`.
+   */
+  wizardHeroImage: z.string().default(''),
+  questions: z.array(ItineraryAiQuestionSchema).max(8).default([]),
+  /** Itinerarios pre-armados curados — passthrough en Studio v1 (sin UI). */
+  localListings: z.array(ItineraryLocalListingSchema).default([]),
+});
+
+export type ItineraryBuilderConfig = z.infer<typeof ItineraryBuilderSchema>;
+
+export const DEFAULT_ITINERARY_BUILDER: ItineraryBuilderConfig = {
+  aiEnabled: true,
+  loadingImage: '',
+  defaultTitleTemplate: '',
+  wizardHeroImage: '',
+  questions: [],
+  localListings: [],
+};
+
+/* ────────────────────────────────────────────────────────────────────────── */
 /*  Integrations (weather, mapbox, analytics, external API)                  */
 /* ────────────────────────────────────────────────────────────────────────── */
 
@@ -1805,6 +1942,8 @@ export const KioskConfigSchema = z.object({
   passes: PassesModuleSchema.optional(),
   /** Módulo Trails — subcategorías, difficulties, trailTypes, trails. */
   trails: TrailsModuleSchema.optional(),
+  /** Módulo Trip Builder — toggle AI flow + questions del wizard + local_listings. */
+  itineraryBuilder: ItineraryBuilderSchema.optional(),
   /** Sistema de ads (popups, hero banners, bottom strips) por ruta. */
   ads: AdsModuleSchema.optional(),
   /** Integraciones (weather, mapbox, analytics, external API). */
@@ -1880,6 +2019,7 @@ export function makeBlankConfig(
     tickets: defaultTickets(),
     passes: defaultPasses(),
     trails: defaultTrails(),
+    itineraryBuilder: structuredClone(DEFAULT_ITINERARY_BUILDER),
     ads: defaultAds(),
     integrations: defaultIntegrations(),
     currentVersion: 0,

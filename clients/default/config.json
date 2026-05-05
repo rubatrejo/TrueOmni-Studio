@@ -193,11 +193,11 @@
     "photo_booth_experience_title": "Coming Next",
     "photo_booth_experience_body": "An immersive {client_name} experience is on the way. Stay tuned for trips, AR tours and more — right from this kiosk.",
     "photo_booth_experience_back": "Back to Photo Booth",
-    "itinerary_title": "Trip Builder",
+    "itinerary_title": "Trip Planner",
     "itinerary_search_placeholder": "What are you looking for...",
     "itinerary_welcome_kicker": "NEW · 3D TRIP PLANNER",
     "itinerary_welcome_intro": "DISCOVER YOUR PERFECT VISIT",
-    "itinerary_welcome_title": "WELCOME TO {client_name}'S\nOFFICIAL TRIP BUILDER.",
+    "itinerary_welcome_title": "WELCOME TO {client_name}'S\nOFFICIAL TRIP PLANNER.",
     "itinerary_welcome_body": "Discover the city your way\ncurated for you or explored at your own pace.",
     "itinerary_welcome_create_cta": "Create Itinerary",
     "itinerary_welcome_ai_cta": "AI Itinerary",
@@ -225,14 +225,14 @@
     "itinerary_share_send_phone": "SEND TO PHONE",
     "itinerary_share_send_email": "SEND TO EMAIL",
     "itinerary_ai_popup_title": "AI ITINERARY BUILDER",
-    "itinerary_ai_popup_subtitle": "Our AI Trip Builder creates a personalized travel plan based on your preferences. Just answer a few quick questions, and let AI design the perfect adventure just for you!",
+    "itinerary_ai_popup_subtitle": "Our AI Trip Planner creates a personalized travel plan based on your preferences. Just answer a few quick questions, and let AI design the perfect adventure just for you!",
     "itinerary_ai_card_ai_title": "AI ITINERARY",
     "itinerary_ai_card_ai_body": "Let us craft the perfect itinerary for you! Our AI will generate a customized travel plan tailored to your preferences.",
     "itinerary_ai_card_ai_cta": "Start",
     "itinerary_ai_card_top_title": "TOP SUGGESTIONS",
     "itinerary_ai_card_top_body": "Prefer to explore options yourself? Answer some questions, and we'll provide suggestions to help you build your ideal itinerary.",
     "itinerary_ai_card_top_cta": "Let's Go",
-    "itinerary_ai_loading_title": "AI Trip Builder",
+    "itinerary_ai_loading_title": "AI Trip Planner",
     "itinerary_ai_loading_body": "We're building your perfect itinerary!\nThis might take a few seconds…",
     "itinerary_ai_back": "Back",
     "itinerary_ai_next": "Next question",
@@ -274,7 +274,7 @@
     "itinerary_ai_day_label_template": "Day {n}",
     "itinerary_ai_plan_label": "Plan",
     "itinerary_ai_duration_fallback": "Trip",
-    "itinerary_disabled": "Trip Builder is not configured for the active client."
+    "itinerary_disabled": "Trip Planner is not configured for the active client."
   },
   "navegacion": {
     "home": "/",
@@ -318,7 +318,7 @@
         },
         {
           "key": "itinerary-builder",
-          "label": "Trip Builder",
+          "label": "Trip Planner",
           "enabled": true,
           "image": "/assets/home/tiles/itinerary-builder.jpg"
         },

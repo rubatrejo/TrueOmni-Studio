@@ -34,9 +34,18 @@ interface RouteParams {
  * envíe los nuevos defaults al iframe del preview sin esperar al Save del
  * operador.
  */
-export async function POST(_req: Request, { params }: RouteParams) {
+export async function POST(req: Request, { params }: RouteParams) {
   try {
     const { slug } = await params;
+    const url = new URL(req.url);
+    /**
+     * `?force=true` ignora el KV existente y arranca de `makeBlankConfig`
+     * antes de bootstrapear desde fs. Útil cuando el operador hizo
+     * customizaciones obsoletas (eg. "Food & Drink" como label de listings)
+     * y quiere alinear el KV al fs canónico. Sin force, las
+     * customizaciones del operador se preservan.
+     */
+    const force = url.searchParams.get('force') === 'true';
 
     const fs = await readClientFs(slug);
     if (!fs.config) {
@@ -46,9 +55,9 @@ export async function POST(_req: Request, { params }: RouteParams) {
       );
     }
 
-    // Si el KV tiene config existente, lo usamos como base (preserva
-    // customizaciones). Si no, makeBlankConfig + bootstrap.
-    const existing = await kv.get<KioskConfig>(kvKeys.cfg(slug));
+    // Si el KV tiene config existente y no hay force, lo usamos como base
+    // (preserva customizaciones). Con force, makeBlankConfig + bootstrap.
+    const existing = force ? null : await kv.get<KioskConfig>(kvKeys.cfg(slug));
     const base =
       existing ??
       makeBlankConfig(slug, fs.config.client?.nombre ?? slug);

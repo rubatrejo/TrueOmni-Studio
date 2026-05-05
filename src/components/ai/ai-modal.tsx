@@ -55,15 +55,22 @@ interface PrewarmedConversation {
   conversationId: string;
   conversationUrl: string;
   warmedAt: number;
+  /** clientName usado para construir el greeting de esta conversación. */
+  clientName: string;
 }
 
 let prewarmCache: PrewarmedConversation | null = null;
 let prewarmPromise: Promise<PrewarmedConversation | null> | null = null;
+let prewarmPendingClientName = '';
 const PREWARM_TTL_MS = 50_000; // bajo el participant_absent_timeout (60s) de Tavus
 
-async function fetchStart(): Promise<PrewarmedConversation | null> {
+async function fetchStart(clientName?: string): Promise<PrewarmedConversation | null> {
   try {
-    const res = await fetch('/api/ai-avatar/start', { method: 'POST' });
+    const res = await fetch('/api/ai-avatar/start', {
+      method: 'POST',
+      headers: clientName ? { 'Content-Type': 'application/json' } : undefined,
+      body: clientName ? JSON.stringify({ clientName }) : undefined,
+    });
     const data = (await res.json().catch(() => null)) as
       | { ok: boolean; conversationId?: string; conversationUrl?: string }
       | null;
@@ -72,6 +79,7 @@ async function fetchStart(): Promise<PrewarmedConversation | null> {
       conversationId: data.conversationId,
       conversationUrl: data.conversationUrl,
       warmedAt: Date.now(),
+      clientName: clientName ?? '',
     };
   } catch {
     return null;
@@ -82,35 +90,57 @@ async function fetchStart(): Promise<PrewarmedConversation | null> {
  * Lanza /start en background y cachea el resultado. Si ya hay una pendiente,
  * no dispara otra. Llamar en cualquier momento es idempotente.
  *
+ * Acepta `clientName` opcional — el server-side `/start` lo usa como
+ * override de `cfg.client.nombre` para interpolar `{client_name}` en el
+ * greeting. Necesario para Studio preview donde KIOSK_CLIENT=default
+ * pero el operador editó el nombre del nuevo kiosk.
+ *
  * Exportada para que `<AskAiTrigger>` la dispare en touchstart/mouseenter
  * del bubble flotante — así para cuando el modal abre el conversation_url
  * casi siempre ya está listo.
  */
-export function prewarmAiAvatar(): void {
-  if (prewarmCache && Date.now() - prewarmCache.warmedAt < PREWARM_TTL_MS) return;
-  if (prewarmPromise) return;
-  prewarmPromise = fetchStart().then((result) => {
+export function prewarmAiAvatar(clientName?: string): void {
+  const wanted = clientName ?? '';
+  if (
+    prewarmCache &&
+    prewarmCache.clientName === wanted &&
+    Date.now() - prewarmCache.warmedAt < PREWARM_TTL_MS
+  ) {
+    return;
+  }
+  if (prewarmPromise && prewarmPendingClientName === wanted) return;
+  prewarmPendingClientName = wanted;
+  prewarmPromise = fetchStart(clientName).then((result) => {
     prewarmCache = result;
     prewarmPromise = null;
     return result;
   });
 }
 
-async function consumePrewarmOrCreate(): Promise<PrewarmedConversation | null> {
-  // Si hay cache fresco lo usamos directo y lo invalidamos (one-shot).
-  if (prewarmCache && Date.now() - prewarmCache.warmedAt < PREWARM_TTL_MS) {
+async function consumePrewarmOrCreate(
+  clientName?: string,
+): Promise<PrewarmedConversation | null> {
+  const wanted = clientName ?? '';
+  // Cache fresca y mismo clientName → la usamos.
+  if (
+    prewarmCache &&
+    prewarmCache.clientName === wanted &&
+    Date.now() - prewarmCache.warmedAt < PREWARM_TTL_MS
+  ) {
     const cached = prewarmCache;
     prewarmCache = null;
     return cached;
   }
-  // Si hay una pre-warm en vuelo, esperamos a que termine.
-  if (prewarmPromise) {
+  // Cache obsoleta o clientName cambió: invalidamos antes de la fresh call.
+  if (prewarmCache) prewarmCache = null;
+  // Pre-warm en vuelo CON el mismo clientName: esperamos.
+  if (prewarmPromise && prewarmPendingClientName === wanted) {
     const result = await prewarmPromise;
     prewarmCache = null;
     if (result && Date.now() - result.warmedAt < PREWARM_TTL_MS) return result;
   }
-  // Sin cache → request fresca.
-  return fetchStart();
+  // Sin cache válido → request fresca con clientName actual.
+  return fetchStart(clientName);
 }
 
 type SpeechRecognitionAlt = 'SpeechRecognition' | 'webkitSpeechRecognition';
@@ -224,7 +254,7 @@ export function AiModal({ heroVideoSrc: _heroVideoSrc, textos: incomingTextos, c
     (async () => {
       try {
         console.info('[ai-modal] resolving Tavus conversation (prewarm or fresh)…');
-        const conv = await consumePrewarmOrCreate();
+        const conv = await consumePrewarmOrCreate(clientName);
         if (!active) return;
         if (!conv) {
           console.warn('[ai-modal] start failed');

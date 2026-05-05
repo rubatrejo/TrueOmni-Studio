@@ -29,6 +29,7 @@ export type StudioSectionKey =
   | 'tickets'
   | 'passes'
   | 'trails'
+  | 'itinerary-builder'
   | 'i18n'
   | 'ads'
   | 'integrations'
@@ -245,8 +246,19 @@ export const STUDIO_SECTIONS: StudioSection[] = [
     phase: 'S3',
   },
   {
-    key: 'i18n',
+    key: 'itinerary-builder',
     num: '17',
+    label: 'Trip Planner',
+    title: 'Trip Planner',
+    description:
+      'Toggle the AI wizard on/off and edit the questions visitors answer when generating an AI-powered itinerary.',
+    icon: 'Route',
+    systemModuleKey: 'itineraryBuilder',
+    phase: 'S3',
+  },
+  {
+    key: 'i18n',
+    num: '18',
     label: 'Languages',
     title: 'Languages & Translations',
     description:
@@ -257,7 +269,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
   },
   {
     key: 'ads',
-    num: '18',
+    num: '19',
     label: 'Ads',
     title: 'Advertisements',
     description:
@@ -268,7 +280,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
   },
   {
     key: 'integrations',
-    num: '19',
+    num: '20',
     label: 'Integrations',
     title: 'Integrations & APIs',
     description:
@@ -278,7 +290,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
   },
   {
     key: 'publish',
-    num: '20',
+    num: '21',
     label: 'Publish',
     title: 'Publish & Approvals',
     description:

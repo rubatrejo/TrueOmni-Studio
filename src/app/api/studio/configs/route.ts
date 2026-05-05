@@ -166,6 +166,15 @@ function rewriteContentInPlace(
   config.deals?.deals?.forEach(visit);
   config.brochures?.brochures?.forEach(visit);
 
+  // Itinerary local_listings (titles/descriptions) + AI questions (titles/
+  // subtitles). Los `value` y `label` de las options son genéricos
+  // ("A Day Trip", "Exploring") y no se rewritean. `{client_name}` queda
+  // intacto — el runtime interpola con el nombre actual.
+  if (config.itineraryBuilder) {
+    config.itineraryBuilder.localListings.forEach(visit);
+    config.itineraryBuilder.questions.forEach(visit);
+  }
+
   // Social Wall hashtag: "VisitPhoenix" → "VisitDavenport". Quitamos
   // espacios + lowercase no porque los hashtags son case-insensitive y la
   // convención en el template es CamelCase.

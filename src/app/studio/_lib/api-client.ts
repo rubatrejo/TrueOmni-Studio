@@ -8,14 +8,20 @@ import type {
   BrochuresModuleConfig,
   ConfigMeta,
   DealsModuleConfig,
+  EventsModule,
   GuestbookConfig,
   I18nBundle,
   IntegrationsConfig,
+  ItineraryBuilderConfig,
   KioskConfig,
+  ListingsModule,
   ModulesConfig,
+  PassesModule,
   PhotoBoothConfig,
   SocialWallConfig,
   SurveyConfig,
+  TicketsModule,
+  TrailsModule,
 } from '@/lib/studio/schema';
 
 /**
@@ -112,6 +118,12 @@ export async function patchConfig(
     brochures?: BrochuresModuleConfig;
     socialWall?: SocialWallConfig;
     guestbook?: GuestbookConfig;
+    listings?: ListingsModule;
+    events?: EventsModule;
+    tickets?: TicketsModule;
+    passes?: PassesModule;
+    trails?: TrailsModule;
+    itineraryBuilder?: ItineraryBuilderConfig;
     ads?: AdsModule;
     integrations?: IntegrationsConfig;
   },

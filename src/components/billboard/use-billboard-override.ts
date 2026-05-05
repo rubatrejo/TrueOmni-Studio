@@ -3,18 +3,24 @@
 import { useEffect, useState } from 'react';
 
 import {
+  BILLBOARD_FOOTER_LOGO_SIZE_PX,
   BILLBOARD_LOGO_SIZE_PX,
   DEFAULT_BILLBOARD_B0,
   type BillboardB0Config,
   type BillboardLogoSize,
+  type BillboardVariantBackground,
 } from '@/lib/studio/schema';
 
 import { KIOSK_BILLBOARD_OVERRIDE_EVENT } from '../studio-bridge';
 
 type BillboardOverride = {
   logoSize?: BillboardLogoSize;
+  footerLogoSize?: BillboardLogoSize;
   modules?: string[];
   b0?: Partial<BillboardB0Config>;
+  b1?: BillboardVariantBackground;
+  b2?: BillboardVariantBackground;
+  b3?: BillboardVariantBackground;
 };
 
 type BillboardOverrideWindow = Window & {
@@ -47,8 +53,12 @@ export function useBillboardOverride(): BillboardOverride {
       const detail = custom.detail ?? {};
       const next: BillboardOverride = {
         logoSize: detail.logoSize,
+        footerLogoSize: detail.footerLogoSize,
         modules: Array.isArray(detail.modules) ? detail.modules : undefined,
         b0: detail.b0,
+        b1: detail.b1,
+        b2: detail.b2,
+        b3: detail.b3,
       };
       (window as BillboardOverrideWindow).__kioskBillboardOverride = next;
       setOverride(next);
@@ -66,6 +76,24 @@ export function useBillboardOverride(): BillboardOverride {
 export function useBillboardLogoHeight(): number {
   const { logoSize } = useBillboardOverride();
   return BILLBOARD_LOGO_SIZE_PX[logoSize ?? 'M'];
+}
+
+/** Altura del logo del footer según el override (default M=65). */
+export function useBillboardFooterLogoHeight(): number {
+  const { footerLogoSize } = useBillboardOverride();
+  return BILLBOARD_FOOTER_LOGO_SIZE_PX[footerLogoSize ?? 'M'];
+}
+
+/**
+ * Background editable per variant (B1/B2/B3). Si el Studio no envió
+ * override, retorna `null` y el componente cae al hardcoded SVG.
+ */
+export function useBillboardVariantBackground(
+  variant: 1 | 2 | 3,
+): BillboardVariantBackground['background'] | null {
+  const override = useBillboardOverride();
+  const slot = variant === 1 ? override.b1 : variant === 2 ? override.b2 : override.b3;
+  return slot?.background ?? null;
 }
 
 /**

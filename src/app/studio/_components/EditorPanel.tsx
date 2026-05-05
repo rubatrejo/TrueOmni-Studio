@@ -15,6 +15,7 @@ import type {
   GuestbookConfig,
   I18nBundle,
   IntegrationsConfig,
+  ItineraryBuilderConfig,
   ListingsModule,
   ModulesConfig,
   PassesModule,
@@ -41,9 +42,10 @@ import { FontSelector } from './FontSelector';
 import { GuestbookEditor } from './GuestbookEditor';
 import { I18nEditor } from './I18nEditor';
 import { ImageField } from './ImageField';
-import { MediaField } from './MediaField';
 import { IntegrationsEditor } from './IntegrationsEditor';
+import { ItineraryBuilderEditor } from './ItineraryBuilderEditor';
 import { ListingsEditor } from './ListingsEditor';
+import { MediaField } from './MediaField';
 import { HomeDashboardEditor, SystemModulesEditor } from './ModulesEditor';
 import { PassesEditor } from './PassesEditor';
 import { PhotoBoothEditor } from './PhotoBoothEditor';
@@ -97,6 +99,9 @@ export function EditorPanel({
   trails,
   onTrailsChange,
   onTrailsPreview,
+  itinerary,
+  onItineraryChange,
+  onItineraryPreview,
   i18nBundle,
   onI18nBundleChange,
   ads,
@@ -152,6 +157,9 @@ export function EditorPanel({
   trails: TrailsModule;
   onTrailsChange: (next: TrailsModule) => void;
   onTrailsPreview: () => void;
+  itinerary: ItineraryBuilderConfig;
+  onItineraryChange: (next: ItineraryBuilderConfig) => void;
+  onItineraryPreview: () => void;
   i18nBundle: I18nBundle;
   onI18nBundleChange: (next: I18nBundle) => void;
   ads: AdsModule;
@@ -184,6 +192,7 @@ export function EditorPanel({
     sectionKey === 'tickets' ||
     sectionKey === 'passes' ||
     sectionKey === 'trails' ||
+    sectionKey === 'itinerary-builder' ||
     sectionKey === 'i18n' ||
     sectionKey === 'ads' ||
     sectionKey === 'integrations' ||
@@ -203,6 +212,7 @@ export function EditorPanel({
     onTicketsPreview,
     onPassesPreview,
     onTrailsPreview,
+    onItineraryPreview,
   });
 
   return (
@@ -275,6 +285,15 @@ export function EditorPanel({
         )}
         {sectionKey === 'passes' && <PassesEditor value={passes} onChange={onPassesChange} />}
         {sectionKey === 'trails' && <TrailsEditor value={trails} onChange={onTrailsChange} />}
+        {sectionKey === 'itinerary-builder' && (
+          <ItineraryBuilderEditor
+            itinerary={itinerary}
+            onChange={onItineraryChange}
+            listings={listings}
+            trails={trails}
+            events={events}
+          />
+        )}
         {sectionKey === 'i18n' && <I18nEditor value={i18nBundle} onChange={onI18nBundleChange} />}
         {sectionKey === 'ads' && <AdsEditor value={ads} onChange={onAdsChange} />}
         {sectionKey === 'integrations' && (
@@ -700,6 +719,7 @@ type PreviewHandlers = {
   onTicketsPreview: () => void;
   onPassesPreview: () => void;
   onTrailsPreview: () => void;
+  onItineraryPreview: () => void;
 };
 
 /**
@@ -739,6 +759,8 @@ function getPreviewActionFor(
       return { label: 'Open Passes page', onClick: h.onPassesPreview };
     case 'trails':
       return { label: 'Open Trails page', onClick: h.onTrailsPreview };
+    case 'itinerary-builder':
+      return { label: 'Open Trip Planner', onClick: h.onItineraryPreview };
     default:
       return null;
   }

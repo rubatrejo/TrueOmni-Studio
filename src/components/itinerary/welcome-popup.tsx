@@ -10,17 +10,22 @@ export interface WelcomePopupTextos {
 
 export interface WelcomePopupProps {
   textos: WelcomePopupTextos;
+  /**
+   * Si false, el botón "AI Itinerary" se oculta y solo se muestra el de
+   * Create Itinerary (creación manual). Default true.
+   */
+  aiEnabled?: boolean;
   onCreate: () => void;
   onAi: () => void;
   onClose: () => void;
 }
 
 /**
- * Welcome popup overlay del Trip Builder. Modal centrado al medio del
+ * Welcome popup overlay del Trip Planner. Modal centrado al medio del
  * canvas con backdrop negro 50% sobre la pantalla manual de fondo.
  */
 export function WelcomePopup(props: WelcomePopupProps) {
-  const { textos, onCreate, onAi, onClose } = props;
+  const { textos, aiEnabled = true, onCreate, onAi, onClose } = props;
 
   return (
     <div
@@ -86,23 +91,25 @@ export function WelcomePopup(props: WelcomePopupProps) {
             >
               {textos.createCta}
             </button>
-            <button
-              type="button"
-              onClick={onAi}
-              className="inline-flex items-center justify-center font-sans uppercase text-white transition hover:opacity-90 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
-              style={{
-                backgroundColor: 'hsl(var(--primary))',
-                width: 260,
-                height: 72,
-                borderRadius: 8,
-                fontSize: 23,
-                lineHeight: '24px',
-                fontWeight: 700,
-                letterSpacing: '0.06em',
-              }}
-            >
-              {textos.aiCta}
-            </button>
+            {aiEnabled && (
+              <button
+                type="button"
+                onClick={onAi}
+                className="inline-flex items-center justify-center font-sans uppercase text-white transition hover:opacity-90 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+                style={{
+                  backgroundColor: 'hsl(var(--primary))',
+                  width: 260,
+                  height: 72,
+                  borderRadius: 8,
+                  fontSize: 23,
+                  lineHeight: '24px',
+                  fontWeight: 700,
+                  letterSpacing: '0.06em',
+                }}
+              >
+                {textos.aiCta}
+              </button>
+            )}
           </div>
         </div>
       </div>

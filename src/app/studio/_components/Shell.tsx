@@ -19,6 +19,7 @@ import type {
   GuestbookConfig,
   I18nBundle,
   IntegrationsConfig,
+  ItineraryBuilderConfig,
   KioskConfig,
   ListingsModule,
   ModulesConfig,
@@ -35,6 +36,7 @@ import {
   DEFAULT_BROCHURES,
   DEFAULT_DEALS,
   DEFAULT_GUESTBOOK,
+  DEFAULT_ITINERARY_BUILDER,
   DEFAULT_PHOTO_BOOTH,
   DEFAULT_SOCIAL_WALL,
   DEFAULT_SURVEY,
@@ -91,7 +93,7 @@ export function Shell({
 
   const initialModules = initialConfig.modules ?? defaultModules();
   const [savedModules, setSavedModules] = useState<ModulesConfig>(initialModules);
-  const [modules, setModules] = useState<ModulesConfig>(initialModules);
+  const [modules, setModulesRaw] = useState<ModulesConfig>(initialModules);
 
   const initialBillboard = initialConfig.billboard ?? DEFAULT_BILLBOARD;
   const [savedBillboard, setSavedBillboard] = useState<BillboardConfig>(initialBillboard);
@@ -145,6 +147,12 @@ export function Shell({
   const [savedTrails, setSavedTrails] = useState<TrailsModule>(initialTrails);
   const [trails, setTrails] = useState<TrailsModule>(initialTrails);
 
+  const initialItinerary =
+    initialConfig.itineraryBuilder ?? structuredClone(DEFAULT_ITINERARY_BUILDER);
+  const [savedItinerary, setSavedItinerary] =
+    useState<ItineraryBuilderConfig>(initialItinerary);
+  const [itinerary, setItinerary] = useState<ItineraryBuilderConfig>(initialItinerary);
+
   const initialAds = initialConfig.ads ?? defaultAds();
   const [savedAds, setSavedAds] = useState<AdsModule>(initialAds);
   const [ads, setAds] = useState<AdsModule>(initialAds);
@@ -157,6 +165,69 @@ export function Shell({
   const [savedI18nBundle, setSavedI18nBundle] = useState<I18nBundle>(defaultI18nBundle());
   const [i18nBundle, setI18nBundle] = useState<I18nBundle>(savedI18nBundle);
   const [i18nLoaded, setI18nLoaded] = useState(false);
+
+  /**
+   * Wrapper de `setModules` que cascadea cualquier rename de tile.label a:
+   *   1. El listings entry / typed module homónimo (events.label,
+   *      trails.label, passes.label, tickets.label, deals.label,
+   *      socialWall.label, brochures.label, guestbook.label,
+   *      photoBooth.label).
+   *   2. Los keys i18n `tile_label_{key}` y `module_label_{key}` del
+   *      bundle EN para que el runtime tile y header del módulo reflejen
+   *      el nuevo nombre. Otros locales se preservan — operator gestiona
+   *      traducciones desde la tab Languages.
+   */
+  const setModules = useCallback((next: ModulesConfig) => {
+    setModulesRaw((prev) => {
+      const prevByKey = new Map(prev.tiles.map((t) => [t.key, t.label]));
+      const renames: Array<{ key: string; label: string }> = [];
+      for (const t of next.tiles) {
+        const prevLabel = prevByKey.get(t.key);
+        if (prevLabel !== undefined && prevLabel !== t.label) {
+          renames.push({ key: t.key, label: t.label });
+        }
+      }
+      if (renames.length > 0) {
+        // Cascade typed modules
+        for (const { key, label } of renames) {
+          if (key === 'events') {
+            setEvents((e) => ({ ...e, label }));
+          } else if (key === 'trails') {
+            setTrails((t) => ({ ...t, label }));
+          } else if (key === 'passes') {
+            setPasses((p) => ({ ...p, label }));
+          } else if (key === 'tickets') {
+            setTickets((t) => ({ ...t, label }));
+          } else if (key === 'deals') {
+            setDeals((d) => ({ ...d, label }));
+          } else if (key === 'social-wall') {
+            setSocialWall((s) => ({ ...s, label }));
+          } else if (key === 'digital-brochure') {
+            setBrochures((b) => ({ ...b, label }));
+          } else if (key === 'guestbook') {
+            setGuestbook((g) => ({ ...g, label }));
+          } else if (key === 'photo-booth') {
+            setPhotoBooth((pb) => ({ ...pb, label }));
+          }
+          // Listings entries (restaurants/things-to-do/stay) — match por key.
+          setListings((current) =>
+            current.map((entry) => (entry.key === key ? { ...entry, label } : entry)),
+          );
+        }
+        // Cascade i18n EN bundle.
+        setI18nBundle((bundle) => {
+          const en = { ...(bundle.en ?? {}) };
+          for (const { key, label } of renames) {
+            const slug = key.replace(/-/g, '_');
+            en[`tile_label_${slug}`] = label;
+            en[`module_label_${slug}`] = label;
+          }
+          return { ...bundle, en };
+        });
+      }
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -206,6 +277,8 @@ export function Shell({
     openPassesPreview,
     pushTrails,
     openTrailsPreview,
+    pushItinerary,
+    openItineraryPreview,
     pushAds,
     bridgeStatus,
     onIframeLoad,
@@ -296,6 +369,10 @@ export function Shell({
   }, [trails, pushTrails]);
 
   useEffect(() => {
+    pushItinerary(itinerary);
+  }, [itinerary, pushItinerary]);
+
+  useEffect(() => {
     pushAds(ads);
   }, [ads, pushAds]);
 
@@ -356,6 +433,10 @@ export function Shell({
     () => JSON.stringify(trails) !== JSON.stringify(savedTrails),
     [trails, savedTrails],
   );
+  const itineraryDirty = useMemo(
+    () => JSON.stringify(itinerary) !== JSON.stringify(savedItinerary),
+    [itinerary, savedItinerary],
+  );
   const adsDirty = useMemo(() => JSON.stringify(ads) !== JSON.stringify(savedAds), [ads, savedAds]);
   const integrationsDirty = useMemo(
     () => JSON.stringify(integrations) !== JSON.stringify(savedIntegrations),
@@ -381,6 +462,7 @@ export function Shell({
     ticketsDirty ||
     passesDirty ||
     trailsDirty ||
+    itineraryDirty ||
     adsDirty ||
     integrationsDirty ||
     i18nDirty;
@@ -409,6 +491,7 @@ export function Shell({
         tickets?: TicketsModule;
         passes?: PassesModule;
         trails?: TrailsModule;
+        itineraryBuilder?: ItineraryBuilderConfig;
         ads?: AdsModule;
         integrations?: IntegrationsConfig;
       } = {};
@@ -427,6 +510,7 @@ export function Shell({
       if (ticketsDirty) payload.tickets = tickets;
       if (passesDirty) payload.passes = passes;
       if (trailsDirty) payload.trails = trails;
+      if (itineraryDirty) payload.itineraryBuilder = itinerary;
       if (adsDirty) payload.ads = ads;
       if (integrationsDirty) payload.integrations = integrations;
       const tasks: Array<Promise<unknown>> = [];
@@ -452,6 +536,7 @@ export function Shell({
       if (ticketsDirty) setSavedTickets(tickets);
       if (passesDirty) setSavedPasses(passes);
       if (trailsDirty) setSavedTrails(trails);
+      if (itineraryDirty) setSavedItinerary(itinerary);
       if (adsDirty) setSavedAds(ads);
       if (integrationsDirty) setSavedIntegrations(integrations);
       if (i18nDirty) setSavedI18nBundle(i18nBundle);
@@ -480,6 +565,7 @@ export function Shell({
     tickets,
     passes,
     trails,
+    itinerary,
     ads,
     integrations,
     i18nBundle,
@@ -498,6 +584,7 @@ export function Shell({
     ticketsDirty,
     passesDirty,
     trailsDirty,
+    itineraryDirty,
     adsDirty,
     integrationsDirty,
     i18nDirty,
@@ -568,6 +655,7 @@ export function Shell({
     setTickets(savedTickets);
     setPasses(savedPasses);
     setTrails(savedTrails);
+    setItinerary(savedItinerary);
     setAds(savedAds);
     setIntegrations(savedIntegrations);
     setI18nBundle(savedI18nBundle);
@@ -590,6 +678,7 @@ export function Shell({
     savedTickets,
     savedPasses,
     savedTrails,
+    savedItinerary,
     savedAds,
     savedIntegrations,
     savedI18nBundle,
@@ -720,6 +809,9 @@ export function Shell({
                     trails={trails}
                     onTrailsChange={setTrails}
                     onTrailsPreview={openTrailsPreview}
+                    itinerary={itinerary}
+                    onItineraryChange={setItinerary}
+                    onItineraryPreview={openItineraryPreview}
                     i18nBundle={i18nBundle}
                     onI18nBundleChange={setI18nBundle}
                     ads={ads}

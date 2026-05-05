@@ -30,6 +30,13 @@ const LOGO_SIZE_INFO: Record<BillboardLogoSize, { label: string; px: string }> =
   L: { label: 'Large', px: '180px' },
 };
 
+/** Mapping de tamaño del logo del footer (más pequeño que el hero). */
+const FOOTER_LOGO_SIZE_INFO: Record<BillboardLogoSize, { label: string; px: string }> = {
+  S: { label: 'Small', px: '48px' },
+  M: { label: 'Medium', px: '65px' },
+  L: { label: 'Large', px: '96px' },
+};
+
 /** Cuántos slots de módulos pinta cada variant (B0 = 0, no tiene grid). */
 const VARIANT_SLOTS: Record<BillboardVariant, number> = {
   0: 0,
@@ -67,10 +74,26 @@ export function BillboardEditor({
   const slots = VARIANT_SLOTS[billboard.variant];
   const hasLogo = VARIANT_HAS_LOGO[billboard.variant];
   const notEnoughModules = slots > 0 && modulesAvailable.length < slots;
-  const isB0 = billboard.variant === 0;
-  const b0: BillboardB0Config = billboard.b0 ?? DEFAULT_BILLBOARD_B0;
+  // Settings idle per variant — todos los variants comparten el mismo shape
+  // BillboardB0Config (background + touchHere + overlay). Cada variant
+  // runtime aplica los campos relevantes a su layout y silenciosamente
+  // ignora los demás.
+  const variantKey = `b${billboard.variant}` as 'b0' | 'b1' | 'b2' | 'b3';
+  const variantDefaultSrc =
+    billboard.variant === 0
+      ? '/assets/billboard-0/hero.jpg'
+      : `/assets/billboard-${billboard.variant}/hero.jpg`;
+  const b0: BillboardB0Config = {
+    ...DEFAULT_BILLBOARD_B0,
+    ...(billboard[variantKey] ?? {}),
+    background: {
+      ...DEFAULT_BILLBOARD_B0.background,
+      src: variantDefaultSrc,
+      ...((billboard[variantKey] as BillboardB0Config | undefined)?.background ?? {}),
+    },
+  } as BillboardB0Config;
   const setB0 = (patch: Partial<BillboardB0Config>) =>
-    onChange({ ...billboard, b0: { ...b0, ...patch } });
+    onChange({ ...billboard, [variantKey]: { ...b0, ...patch } });
 
   // Slots actuales: paddear a `slots` con strings vacíos para que el render
   // siempre pinte exactamente N slots, aunque billboard.modules tenga menos.
@@ -155,15 +178,16 @@ export function BillboardEditor({
         </div>
       </section>
 
-      {/* ───────────── Idle settings (solo B0) ───────────── */}
-      {isB0 && (
+      {/* ───────────── Idle settings (todos los variants) ───────────── */}
+      {true && (
         <section className="space-y-5 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
           <header>
             <h3 className="font-display text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500 dark:text-zinc-400">
-              Idle settings
+              Idle settings (Variant {billboard.variant + 1})
             </h3>
             <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
-              Background, Touch Here button and overlay — only Variant 1 (Dark Hero).
+              Background, Touch Here button and overlay. Some fields apply only to
+              certain layouts (eg. button width/height affects only Variant 1).
             </p>
           </header>
 
@@ -443,6 +467,53 @@ export function BillboardEditor({
           </div>
         </section>
       )}
+
+      {/* ───────────── Footer logo size (todos los variants) ───────────── */}
+      <section>
+        <header className="mb-3">
+          <h3 className="font-display text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500 dark:text-zinc-400">
+            Footer logo size
+          </h3>
+          <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
+            Height of the “Powered by” logo at the bottom of every idle variant.
+          </p>
+        </header>
+        <div
+          role="radiogroup"
+          aria-label="Footer logo size"
+          className="inline-flex rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-800 dark:bg-zinc-900/40"
+        >
+          {BILLBOARD_LOGO_SIZES.map((size) => {
+            const info = FOOTER_LOGO_SIZE_INFO[size];
+            const active = (billboard.footerLogoSize ?? 'M') === size;
+            return (
+              <button
+                key={size}
+                role="radio"
+                aria-checked={active}
+                type="button"
+                onClick={() => onChange({ ...billboard, footerLogoSize: size })}
+                className={
+                  'flex flex-col items-center rounded-md px-3.5 py-1.5 text-[11.5px] transition ' +
+                  (active
+                    ? 'bg-sky-500 text-white shadow-sm'
+                    : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40')
+                }
+              >
+                <span className="font-semibold">{info.label}</span>
+                <span
+                  className={
+                    'mt-0.5 font-mono text-[9.5px] ' +
+                    (active ? 'text-white/70' : 'text-zinc-400 dark:text-zinc-500')
+                  }
+                >
+                  {info.px}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
       {/* ───────────── Modules in this layout (B1/B2/B3) ───────────── */}
       {slots > 0 && (

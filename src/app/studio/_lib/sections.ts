@@ -29,6 +29,7 @@ export type StudioSectionKey =
   | 'tickets'
   | 'passes'
   | 'trails'
+  | 'map'
   | 'itinerary-builder'
   | 'i18n'
   | 'ads'
@@ -246,8 +247,19 @@ export const STUDIO_SECTIONS: StudioSection[] = [
     phase: 'S3',
   },
   {
-    key: 'itinerary-builder',
+    key: 'map',
     num: '17',
+    label: 'Map',
+    title: 'Map',
+    description:
+      'Kiosk location, default center & zoom, welcome popup, chips labels and custom pins shown on top of the listings/events feed.',
+    icon: 'MapPin',
+    systemModuleKey: 'map',
+    phase: 'S3',
+  },
+  {
+    key: 'itinerary-builder',
+    num: '18',
     label: 'Trip Planner',
     title: 'Trip Planner',
     description:
@@ -258,7 +270,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
   },
   {
     key: 'i18n',
-    num: '18',
+    num: '19',
     label: 'Languages',
     title: 'Languages & Translations',
     description:
@@ -269,7 +281,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
   },
   {
     key: 'ads',
-    num: '19',
+    num: '20',
     label: 'Ads',
     title: 'Advertisements',
     description:
@@ -280,7 +292,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
   },
   {
     key: 'integrations',
-    num: '20',
+    num: '21',
     label: 'Integrations',
     title: 'Integrations & APIs',
     description:
@@ -290,7 +302,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
   },
   {
     key: 'publish',
-    num: '21',
+    num: '22',
     label: 'Publish',
     title: 'Publish & Approvals',
     description:

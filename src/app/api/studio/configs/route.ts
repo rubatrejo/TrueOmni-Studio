@@ -132,7 +132,8 @@ function rewriteContentInPlace(
 
   const STRING_FIELDS = [
     'title', 'description', 'shortDescription', 'longDescription', 'headline',
-    'subtitle', 'label',
+    'subtitle', 'label', 'subcategory', 'category', 'name', 'body', 'cta',
+    'tagline',
   ] as const;
 
   const replaceInString = (s: string): string => {
@@ -182,6 +183,26 @@ function rewriteContentInPlace(
     const sw = config.socialWall as { hashtag?: string };
     if (typeof sw.hashtag === 'string') {
       sw.hashtag = replaceInString(sw.hashtag).replace(/\s+/g, '');
+    }
+  }
+
+  // features.home.modules.<key>.welcomeCopy del Map y otros — el operador
+  // a veces hardcodea "Welcome to Arizona Map" en el copy en lugar de usar
+  // el template `{client}`. Aplicamos replaceInString a todos los strings
+  // del welcomeCopy (title/subtitle/body/cta) para que el cliente nuevo no
+  // herede el branding del state del template.
+  const homeModules = (
+    config as {
+      features?: { home?: { modules?: Record<string, Record<string, unknown>> } };
+    }
+  ).features?.home?.modules;
+  if (homeModules) {
+    for (const moduleConfig of Object.values(homeModules)) {
+      if (!moduleConfig) continue;
+      visit(moduleConfig);
+      const welcomeCopy = (moduleConfig as { welcomeCopy?: Record<string, unknown> })
+        .welcomeCopy;
+      if (welcomeCopy && typeof welcomeCopy === 'object') visit(welcomeCopy);
     }
   }
 }

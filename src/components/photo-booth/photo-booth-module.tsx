@@ -696,6 +696,7 @@ export function PhotoBoothModule({
             `pb-${Date.now()}`,
           )}
           shareBackgroundSrc={shareBackgroundSrc}
+          social={config.social}
           onBack={() => setPhase('editing')}
           onEmail={() => setEmailOpen(true)}
           onText={() => setPhoneOpen(true)}

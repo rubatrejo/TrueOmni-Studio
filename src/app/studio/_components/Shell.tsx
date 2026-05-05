@@ -22,6 +22,7 @@ import type {
   ItineraryBuilderConfig,
   KioskConfig,
   ListingsModule,
+  MapConfig,
   ModulesConfig,
   PassesModule,
   PhotoBoothConfig,
@@ -37,6 +38,7 @@ import {
   DEFAULT_DEALS,
   DEFAULT_GUESTBOOK,
   DEFAULT_ITINERARY_BUILDER,
+  DEFAULT_MAP,
   DEFAULT_PHOTO_BOOTH,
   DEFAULT_SOCIAL_WALL,
   DEFAULT_SURVEY,
@@ -146,6 +148,9 @@ export function Shell({
   const initialTrails = initialConfig.trails ?? defaultTrails();
   const [savedTrails, setSavedTrails] = useState<TrailsModule>(initialTrails);
   const [trails, setTrails] = useState<TrailsModule>(initialTrails);
+  const initialMap = initialConfig.map ?? DEFAULT_MAP;
+  const [savedMap, setSavedMap] = useState<MapConfig>(initialMap);
+  const [map, setMap] = useState<MapConfig>(initialMap);
 
   const initialItinerary =
     initialConfig.itineraryBuilder ?? structuredClone(DEFAULT_ITINERARY_BUILDER);
@@ -276,6 +281,8 @@ export function Shell({
     pushPasses,
     openPassesPreview,
     pushTrails,
+    pushMap,
+    openMapPreview,
     openTrailsPreview,
     pushItinerary,
     openItineraryPreview,
@@ -367,6 +374,9 @@ export function Shell({
   useEffect(() => {
     pushTrails(trails);
   }, [trails, pushTrails]);
+  useEffect(() => {
+    pushMap(map);
+  }, [map, pushMap]);
 
   useEffect(() => {
     pushItinerary(itinerary);
@@ -433,6 +443,10 @@ export function Shell({
     () => JSON.stringify(trails) !== JSON.stringify(savedTrails),
     [trails, savedTrails],
   );
+  const mapDirty = useMemo(
+    () => JSON.stringify(map) !== JSON.stringify(savedMap),
+    [map, savedMap],
+  );
   const itineraryDirty = useMemo(
     () => JSON.stringify(itinerary) !== JSON.stringify(savedItinerary),
     [itinerary, savedItinerary],
@@ -462,6 +476,7 @@ export function Shell({
     ticketsDirty ||
     passesDirty ||
     trailsDirty ||
+    mapDirty ||
     itineraryDirty ||
     adsDirty ||
     integrationsDirty ||
@@ -491,6 +506,7 @@ export function Shell({
         tickets?: TicketsModule;
         passes?: PassesModule;
         trails?: TrailsModule;
+        map?: MapConfig;
         itineraryBuilder?: ItineraryBuilderConfig;
         ads?: AdsModule;
         integrations?: IntegrationsConfig;
@@ -510,6 +526,7 @@ export function Shell({
       if (ticketsDirty) payload.tickets = tickets;
       if (passesDirty) payload.passes = passes;
       if (trailsDirty) payload.trails = trails;
+      if (mapDirty) payload.map = map;
       if (itineraryDirty) payload.itineraryBuilder = itinerary;
       if (adsDirty) payload.ads = ads;
       if (integrationsDirty) payload.integrations = integrations;
@@ -536,6 +553,7 @@ export function Shell({
       if (ticketsDirty) setSavedTickets(tickets);
       if (passesDirty) setSavedPasses(passes);
       if (trailsDirty) setSavedTrails(trails);
+      if (mapDirty) setSavedMap(map);
       if (itineraryDirty) setSavedItinerary(itinerary);
       if (adsDirty) setSavedAds(ads);
       if (integrationsDirty) setSavedIntegrations(integrations);
@@ -584,6 +602,8 @@ export function Shell({
     ticketsDirty,
     passesDirty,
     trailsDirty,
+    mapDirty,
+    map,
     itineraryDirty,
     adsDirty,
     integrationsDirty,
@@ -655,6 +675,7 @@ export function Shell({
     setTickets(savedTickets);
     setPasses(savedPasses);
     setTrails(savedTrails);
+    setMap(savedMap);
     setItinerary(savedItinerary);
     setAds(savedAds);
     setIntegrations(savedIntegrations);
@@ -678,6 +699,7 @@ export function Shell({
     savedTickets,
     savedPasses,
     savedTrails,
+    savedMap,
     savedItinerary,
     savedAds,
     savedIntegrations,
@@ -809,6 +831,9 @@ export function Shell({
                     trails={trails}
                     onTrailsChange={setTrails}
                     onTrailsPreview={openTrailsPreview}
+                    map={map}
+                    onMapChange={setMap}
+                    onMapPreview={openMapPreview}
                     itinerary={itinerary}
                     onItineraryChange={setItinerary}
                     onItineraryPreview={openItineraryPreview}

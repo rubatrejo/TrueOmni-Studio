@@ -8,11 +8,12 @@ import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon } from './billboard-footer-parts';
+import { OverlayLayer } from './billboard-overlay';
 import { MODULE_BILLBOARD_INFO, resolveSlotHref } from './module-info';
 import {
   useBillboardLogoHeight,
   useBillboardOverride,
-  useBillboardVariantBackground,
+  useBillboardSettings,
 } from './use-billboard-override';
 
 /**
@@ -53,10 +54,18 @@ export function Billboard2() {
   const t = useTextosMap();
   const logoH = useBillboardLogoHeight();
   const { modules } = useBillboardOverride();
-  const heroBg = useBillboardVariantBackground(2);
-  const heroSrc = heroBg?.src || '/assets/billboard-2/hero.png';
-  const heroIsVideo = heroBg?.type === 'video';
+  const { background, touchHere, overlayOpacity, overlay } = useBillboardSettings(2);
+  const heroSrc = background.src || '/assets/billboard-0/hero.jpg';
+  const heroIsVideo = background.type === 'video';
   const [active, setActive] = useState(0);
+  // touchHere.width/height NO aplican (texto + arrow inline, no botón).
+  const rawTouchLabel =
+    touchHere.label.trim().length > 0
+      ? touchHere.label
+      : (t.billboard_touch_here ?? 'Touch Here');
+  const touchLabel = touchHere.twoLines
+    ? rawTouchLabel.replace(/\s+/, '\n')
+    : rawTouchLabel.replace(/\n+/g, ' ');
 
   // CARDS reactivo: por cada slot 0..3, si `billboard.modules[i]` está
   // asignado y existe en MODULE_BILLBOARD_INFO, usar esa info; si no, fallback
@@ -110,12 +119,16 @@ export function Billboard2() {
           className="absolute inset-0 h-full w-full object-cover"
         />
       )}
+      {/* Overlay base de identidad (gradient negro vertical para legibilidad
+          del logo + cards). Encima, OverlayLayer aplica el overlay configurable
+          del Studio si el operador definió mode/color/opacity propios. */}
       <div
         className="absolute inset-0"
         style={{
           background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.8) 100%)',
         }}
       />
+      <OverlayLayer overlayOpacity={overlayOpacity} overlay={overlay} />
 
       {/* Logo TrueOmni blanco centrado — height configurable desde Studio
           (S=80 / M=128 / L=180 — default M para preservar el SVG original). */}
@@ -220,9 +233,13 @@ export function Billboard2() {
       >
         <span
           className="font-display font-bold uppercase leading-none text-white"
-          style={{ fontSize: '60px', letterSpacing: '0.02em', whiteSpace: 'nowrap' }}
+          style={{
+            fontSize: `${touchHere.fontSize}px`,
+            letterSpacing: '0.02em',
+            whiteSpace: 'pre-line',
+          }}
         >
-          {(t.billboard_touch_to_start ?? 'Touch to start').replace(/\n/g, ' ')}
+          {touchLabel}
         </span>
         <svg
           xmlns="http://www.w3.org/2000/svg"

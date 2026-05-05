@@ -13,6 +13,7 @@ import type {
   GuestbookConfig,
   ItineraryBuilderConfig,
   ListingsModule,
+  MapConfig,
   ModulesConfig,
   PassesModule,
   PhotoBoothConfig,
@@ -90,6 +91,7 @@ export function usePreviewBridge() {
   const lastTrailsRef = useRef<TrailsModule | null>(null);
   const lastItineraryRef = useRef<ItineraryBuilderConfig | null>(null);
   const lastAdsRef = useRef<AdsModule | null>(null);
+  const lastMapRef = useRef<MapConfig | null>(null);
   const brandingDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const modulesDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const billboardDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -107,6 +109,7 @@ export function usePreviewBridge() {
   const trailsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const itineraryDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const adsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mapDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isReady, setIsReady] = useState(false);
   // Timestamp del último handshake/heartbeat recibido del iframe. Se usa para
   // calcular `bridgeStatus` (connecting/connected/stale/lost). El kiosk emite
@@ -404,6 +407,22 @@ export function usePreviewBridge() {
     } catch {}
   }, []);
 
+  const sendMapNow = useCallback((map: MapConfig) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:map-update', map }, '*');
+    } catch {}
+  }, []);
+
+  const openMapPreview = useCallback(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:map-open-preview' }, '*');
+    } catch {}
+  }, []);
+
   // Listener del handshake studio:ready desde el iframe.
   useEffect(() => {
     const handler = (event: MessageEvent) => {
@@ -428,6 +447,7 @@ export function usePreviewBridge() {
       if (lastTrailsRef.current) sendTrailsNow(lastTrailsRef.current);
       if (lastItineraryRef.current) sendItineraryNow(lastItineraryRef.current);
       if (lastAdsRef.current) sendAdsNow(lastAdsRef.current);
+      if (lastMapRef.current) sendMapNow(lastMapRef.current);
     };
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
@@ -449,6 +469,7 @@ export function usePreviewBridge() {
     sendTrailsNow,
     sendItineraryNow,
     sendAdsNow,
+    sendMapNow,
   ]);
 
   const pushBranding = useCallback(
@@ -604,6 +625,15 @@ export function usePreviewBridge() {
     [sendAdsNow],
   );
 
+  const pushMap = useCallback(
+    (map: MapConfig) => {
+      lastMapRef.current = map;
+      if (mapDebounceRef.current) clearTimeout(mapDebounceRef.current);
+      mapDebounceRef.current = setTimeout(() => sendMapNow(map), 120);
+    },
+    [sendMapNow],
+  );
+
   // Cuando el iframe re-monta, resetea ready para forzar un nuevo handshake.
   const onIframeLoad = useCallback(() => {
     setIsReady(false);
@@ -661,6 +691,8 @@ export function usePreviewBridge() {
     pushItinerary,
     openItineraryPreview,
     pushAds,
+    pushMap,
+    openMapPreview,
     isReady,
     bridgeStatus,
     onIframeLoad,

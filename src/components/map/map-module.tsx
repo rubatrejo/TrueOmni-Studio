@@ -11,6 +11,9 @@ import { ListingDetail } from '@/components/listings/listing-detail';
 import {
   KIOSK_CLIENT_COORDS_OVERRIDE_EVENT,
   KIOSK_CLIENT_NAME_OVERRIDE_EVENT,
+  KIOSK_EVENTS_OVERRIDE_EVENT,
+  KIOSK_LISTINGS_OVERRIDE_EVENT,
+  KIOSK_MAP_OVERRIDE_EVENT,
   getCachedClientCoords,
   getCachedClientName,
 } from '@/components/studio-bridge';
@@ -25,7 +28,7 @@ import { MapCanvas } from './map-canvas';
 import { MapChips } from './map-chips';
 import { MapFilterOverlay } from './map-filter-overlay';
 import { MapPinBubble } from './map-pin-bubble';
-import { MAP_PIN_COLORS } from './map-pin-icons';
+import { dynamicPinColor, MAP_PIN_COLORS } from './map-pin-icons';
 import { MapToolbar } from './map-toolbar';
 import { MapTopCarousel } from './map-top-carousel';
 import { MAP_WELCOME_STORAGE_KEY, MapWelcomePopup } from './map-welcome-popup';
@@ -73,10 +76,19 @@ export interface MapModuleTextos {
   exploreTitle: string;
 }
 
+export interface DynamicListingEntry {
+  /** moduleKey del listing (`shopping`, `wellness`, etc — NO canónico). */
+  key: string;
+  label: string;
+  iconKey?: string;
+  customIcon?: string;
+}
+
 export function MapModule({
   moduleKey,
   module: mod,
   items,
+  dynamicListings: serverDynamicListings,
   clientCoords,
   clientName: serverClientName,
   mapboxToken,
@@ -94,6 +106,12 @@ export function MapModule({
   clientName?: string;
   mapboxToken: string | undefined;
   items: MapItem[];
+  /**
+   * Listing modules NO canónicos del config (Shopping, Wellness, etc).
+   * Se usan para construir chips/pins extra dinámicos. Server-rendered;
+   * el bridge `kiosk:listings-override` los refresca en preview.
+   */
+  dynamicListings?: DynamicListingEntry[];
   textos: MapModuleTextos;
   detailLookup: MapDetailLookup;
   /** Si true, ignora el sessionStorage y siempre muestra el welcome (para QA). */
@@ -163,16 +181,62 @@ export function MapModule({
     () => reinterpolate(textos.exploreTitle),
     [textos.exploreTitle, reinterpolate],
   );
-  const interpolatedWelcomeCopy = useMemo(() => {
-    if (!mod.welcomeCopy) return undefined;
-    return {
-      ...mod.welcomeCopy,
-      title: reinterpolate(mod.welcomeCopy.title),
-      body: reinterpolate(mod.welcomeCopy.body),
-      subtitle: mod.welcomeCopy.subtitle ? reinterpolate(mod.welcomeCopy.subtitle) : undefined,
-      cta: reinterpolate(mod.welcomeCopy.cta),
+
+  // Map editor overrides (welcome copy, chips, default center/zoom, custom pins).
+  // Declarado aquí (antes de los useMemo que dependen de él) para que TS no
+  // se queje de "used before declaration".
+  type MapEditorOverride = {
+    welcomeCopy?: { title?: string; subtitle?: string; body?: string; cta?: string };
+    chips?: { play?: string; eat?: string; stay?: string; events?: string };
+    defaultCenter?: { lat: number; lng: number };
+    defaultZoom?: number;
+    pinSize?: 'S' | 'M' | 'L';
+    categoryIcons?: Partial<Record<MapSource, string>>;
+    customPins?: Array<{
+      id: string;
+      label: string;
+      source: MapSource;
+      iconKey?: string;
+      coords: { lat: number; lng: number };
+      address?: string;
+    }>;
+  };
+  const [mapOverride, setMapOverride] = useState<MapEditorOverride | null>(null);
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<MapEditorOverride>).detail;
+      if (!detail || typeof detail !== 'object') return;
+      setMapOverride(detail);
     };
-  }, [mod.welcomeCopy, reinterpolate]);
+    window.addEventListener(KIOSK_MAP_OVERRIDE_EVENT, handler);
+    return () => window.removeEventListener(KIOSK_MAP_OVERRIDE_EVENT, handler);
+  }, []);
+
+  const interpolatedWelcomeCopy = useMemo(() => {
+    // Override del Map editor tiene prioridad. Si los 4 campos están vacíos,
+    // entonces no se muestra welcome.
+    const editorCopy = mapOverride?.welcomeCopy;
+    const baseCopy = mod.welcomeCopy;
+    const merged = editorCopy
+      ? {
+          title: editorCopy.title ?? baseCopy?.title ?? '',
+          subtitle: editorCopy.subtitle ?? baseCopy?.subtitle,
+          body: editorCopy.body ?? baseCopy?.body ?? '',
+          cta: editorCopy.cta ?? baseCopy?.cta ?? 'OK',
+        }
+      : baseCopy;
+    if (!merged) return undefined;
+    const allEmpty =
+      !merged.title?.trim() && !merged.body?.trim() && !merged.cta?.trim();
+    if (allEmpty) return undefined;
+    return {
+      ...merged,
+      title: reinterpolate(merged.title),
+      body: reinterpolate(merged.body),
+      subtitle: merged.subtitle ? reinterpolate(merged.subtitle) : undefined,
+      cta: reinterpolate(merged.cta),
+    };
+  }, [mod.welcomeCopy, mapOverride?.welcomeCopy, reinterpolate]);
 
   // Override textos pre-renderizados por el caller con el idioma activo.
   const liveTextos = useTextosMap();
@@ -191,6 +255,183 @@ export function MapModule({
     selectAll: liveTextos.map_select_all ?? incomingTextos.selectAll,
     exploreTitle: incomingTextos.exploreTitle,
   };
+
+  // Live items reactivos a overrides del Studio. SSR pinta `items` del
+  // cliente default (preview iframe carga KIOSK_CLIENT=default), por lo que
+  // sin esta lógica el Map muestra siempre listings de Arizona aunque el
+  // operador esté editando otro cliente. Aplicamos overrides por slug:
+  // sustituimos title/address/image/subcategory/features/popularity/coords/
+  // priceRange/hours sin reagregar (los slugs nuevos o borrados no se
+  // reflejan — limitación aceptable para preview reactivo).
+  const [liveItems, setLiveItems] = useState<MapItem[]>(items);
+  const [liveDynamicListings, setLiveDynamicListings] = useState<DynamicListingEntry[]>(
+    serverDynamicListings ?? [],
+  );
+  useEffect(() => {
+    setLiveItems(items);
+  }, [items]);
+  useEffect(() => {
+    setLiveDynamicListings(serverDynamicListings ?? []);
+  }, [serverDynamicListings]);
+  useEffect(() => {
+    const onListings = (event: Event) => {
+      const detail = (event as CustomEvent<unknown>).detail;
+      if (!Array.isArray(detail)) return;
+      // Detectar listing modules dinámicos (no canónicos) y extraer su
+      // metadata para construir chips/pins extra. Los 4 canónicos siguen
+      // por la pista hardcoded.
+      const CANONICAL = new Set(['restaurants', 'things-to-do', 'stay']);
+      const dynEntries: DynamicListingEntry[] = [];
+      for (const entry of detail as Array<{
+        key?: string;
+        label?: string;
+        iconKey?: string;
+        customIcon?: string;
+        enabled?: boolean;
+        catalog?: { listings?: Array<Record<string, unknown>> };
+      }>) {
+        if (!entry?.key || CANONICAL.has(entry.key)) continue;
+        if (entry.enabled === false) continue;
+        dynEntries.push({
+          key: entry.key,
+          label: entry.label ?? entry.key,
+          iconKey: entry.iconKey,
+          customIcon: entry.customIcon,
+        });
+      }
+      setLiveDynamicListings(dynEntries);
+      // Sustituir los items dinámicos del live state por los del override
+      // (con jitter recalculado en el caller no aplica aquí — usamos coords
+      // del override directamente).
+      const dynItems: MapItem[] = [];
+      for (const entry of detail as Array<{
+        key?: string;
+        catalog?: { listings?: Array<Record<string, unknown>> };
+      }>) {
+        if (!entry?.key || CANONICAL.has(entry.key)) continue;
+        const list = entry.catalog?.listings;
+        if (!Array.isArray(list)) continue;
+        for (const l of list) {
+          if (typeof l.slug !== 'string') continue;
+          dynItems.push({
+            source: entry.key,
+            moduleSlug: entry.key,
+            slug: l.slug,
+            title: typeof l.title === 'string' ? l.title : l.slug,
+            subcategory: typeof l.subcategory === 'string' ? l.subcategory : '',
+            image: typeof l.image === 'string' ? l.image : '',
+            coords:
+              l.coords && typeof l.coords === 'object'
+                ? (l.coords as { lat: number; lng: number })
+                : { lat: 0, lng: 0 },
+            address: typeof l.address === 'string' ? l.address : '',
+            phone: typeof l.phone === 'string' ? l.phone : undefined,
+            features: Array.isArray(l.features) ? (l.features as string[]) : [],
+            popularity: typeof l.popularity === 'number' ? l.popularity : 50,
+            hours: typeof l.hours === 'string' ? l.hours : undefined,
+            priceRange: (typeof l.priceRange === 'number'
+              ? l.priceRange
+              : undefined) as MapItem['priceRange'],
+          });
+        }
+      }
+      // Index slug → listing del override (para los CANÓNICOS solo
+      // actualizamos fields; para los dinámicos ya agregamos a `dynItems`
+      // arriba).
+      const bySlug = new Map<
+        string,
+        {
+          title?: string;
+          address?: string;
+          image?: string;
+          subcategory?: string;
+          features?: string[];
+          popularity?: number;
+          hours?: string;
+          coords?: { lat: number; lng: number };
+          phone?: string;
+          priceRange?: 1 | 2 | 3 | 4;
+        }
+      >();
+      for (const entry of detail as Array<{
+        key?: string;
+        catalog?: { listings?: Array<Record<string, unknown>> };
+      }>) {
+        if (!entry?.catalog?.listings) continue;
+        if (entry.key && !CANONICAL.has(entry.key)) continue; // dynItems ya cubrió esto
+        for (const l of entry.catalog.listings) {
+          if (typeof l.slug === 'string') bySlug.set(l.slug, l as never);
+        }
+      }
+      setLiveItems((prev) => {
+        // 1. Update fields de items canónicos por slug.
+        const updated = prev.map((it) => {
+          if (it.source === 'events') return it;
+          // Items dinámicos viejos: los reemplazamos abajo.
+          if (!CANONICAL.has(it.source) && it.source !== 'events') return it;
+          const o = bySlug.get(it.slug);
+          if (!o) return it;
+          return {
+            ...it,
+            title: o.title ?? it.title,
+            address: o.address ?? it.address,
+            image: o.image ?? it.image,
+            subcategory: o.subcategory ?? it.subcategory,
+            features: Array.isArray(o.features) ? o.features : it.features,
+            popularity: typeof o.popularity === 'number' ? o.popularity : it.popularity,
+            hours: o.hours ?? it.hours,
+            phone: o.phone ?? it.phone,
+            priceRange: o.priceRange ?? it.priceRange,
+            coords: o.coords ?? it.coords,
+          };
+        });
+        // 2. Quitar items dinámicos viejos (source no canonical y no events).
+        const noDyn = updated.filter(
+          (it) => CANONICAL.has(it.source) || it.source === 'events',
+        );
+        // 3. Añadir los nuevos dynItems.
+        return [...noDyn, ...dynItems];
+      });
+    };
+    const onEvents = (event: Event) => {
+      const detail = (event as CustomEvent<unknown>).detail;
+      if (!detail || typeof detail !== 'object') return;
+      const evList = (detail as { events?: Array<Record<string, unknown>> }).events;
+      if (!Array.isArray(evList)) return;
+      const bySlug = new Map<string, Record<string, unknown>>();
+      for (const e of evList) {
+        if (typeof e.slug === 'string') bySlug.set(e.slug, e);
+      }
+      if (bySlug.size === 0) return;
+      setLiveItems((prev) =>
+        prev.map((it) => {
+          if (it.source !== 'events') return it;
+          const o = bySlug.get(it.slug);
+          if (!o) return it;
+          return {
+            ...it,
+            title: typeof o.title === 'string' ? o.title : it.title,
+            address: typeof o.address === 'string' ? o.address : it.address,
+            image: typeof o.image === 'string' ? o.image : it.image,
+            subcategory: typeof o.category === 'string' ? o.category : it.subcategory,
+            features: Array.isArray(o.features) ? (o.features as string[]) : it.features,
+            popularity: typeof o.popularity === 'number' ? (o.popularity as number) : it.popularity,
+            phone: typeof o.phone === 'string' ? o.phone : it.phone,
+            coords:
+              o.coords && typeof o.coords === 'object'
+                ? (o.coords as { lat: number; lng: number })
+                : it.coords,
+          };
+        }),
+      );
+    };
+    window.addEventListener(KIOSK_LISTINGS_OVERRIDE_EVENT, onListings);
+    window.addEventListener(KIOSK_EVENTS_OVERRIDE_EVENT, onEvents);
+    return () => {
+      window.removeEventListener(KIOSK_LISTINGS_OVERRIDE_EVENT, onListings);
+      window.removeEventListener(KIOSK_EVENTS_OVERRIDE_EVENT, onEvents);
+    };
+  }, []);
 
   const [filter, setFilter] = useState<MapFilterState>(EMPTY_MAP_FILTER);
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
@@ -215,19 +456,39 @@ export function MapModule({
     }
   }, [mod.welcomeCopy, alwaysShowWelcome]);
 
-  const visibleItems = useMemo(() => applyMapFilters(items, filter), [items, filter]);
-  const available = useMemo(() => availableChips(items), [items]);
+  // Fusion de pins: liveItems (listings + events SSR/overrides) + customPins
+  // del Map editor. Los custom van como MapItem mínimo con coords y label.
+  const allItems = useMemo<MapItem[]>(() => {
+    if (!mapOverride?.customPins?.length) return liveItems;
+    const customs: MapItem[] = mapOverride.customPins.map((p) => ({
+      source: p.source,
+      moduleSlug: 'custom',
+      slug: p.id,
+      title: p.label,
+      subcategory: '',
+      image: '',
+      coords: p.coords,
+      address: p.address ?? '',
+      features: [],
+      popularity: 50,
+      iconKey: p.iconKey || undefined,
+    }));
+    return [...liveItems, ...customs];
+  }, [liveItems, mapOverride?.customPins]);
+
+  const visibleItems = useMemo(() => applyMapFilters(allItems, filter), [allItems, filter]);
+  const available = useMemo(() => availableChips(allItems), [allItems]);
   // Los pools completos son muy largos (30+ features entre 4 kinds). Recortamos
   // a la mitad para que el overlay de filtros se vea limpio — se pueden ampliar
   // si el cliente lo pide.
   const featuresPool = useMemo(() => {
-    const pool = buildFeaturePool(items);
+    const pool = buildFeaturePool(allItems);
     return pool.slice(0, Math.max(4, Math.ceil(pool.length / 2)));
-  }, [items]);
+  }, [allItems]);
   const subcategoriesPool = useMemo(() => {
-    const pool = buildSubcategoryPool(items);
+    const pool = buildSubcategoryPool(allItems);
     return pool.slice(0, Math.max(4, Math.ceil(pool.length / 2)));
-  }, [items]);
+  }, [allItems]);
 
   const searchItems: HomeListing[] = useMemo(
     () =>
@@ -240,26 +501,27 @@ export function MapModule({
     [visibleItems],
   );
 
-  const chipDefs = useMemo(
-    () =>
-      DEFAULT_CHIP_DEFS.map((c) => {
-        const fromConfig = mod.chips?.[c.chipKey];
-        // Override legacy: kiosks publicados con "Play"/"Eat" hardcoded en
-        // chips se actualizan al nuevo naming sin requerir migración del
-        // config en KV ni filesystem.
-        const LEGACY = new Map([
-          ['Play', 'Things to Do'],
-          ['Eat', 'Restaurants'],
-        ]);
-        const label = fromConfig ? (LEGACY.get(fromConfig) ?? fromConfig) : c.defaultLabel;
-        return {
-          source: c.source,
-          label,
-          bgColor: c.bg,
-        };
-      }),
-    [mod.chips],
-  );
+  const chipDefs = useMemo(() => {
+    // 1. Chips canónicos (Things to Do / Restaurants / Stay / Events).
+    const canonical = DEFAULT_CHIP_DEFS.map((c) => {
+      const fromOverride = mapOverride?.chips?.[c.chipKey];
+      const fromConfig = mod.chips?.[c.chipKey];
+      const LEGACY = new Map([
+        ['Play', 'Things to Do'],
+        ['Eat', 'Restaurants'],
+      ]);
+      const raw = fromOverride ?? fromConfig;
+      const label = raw ? (LEGACY.get(raw) ?? raw) : c.defaultLabel;
+      return { source: c.source, label, bgColor: c.bg };
+    });
+    // 2. Chips dinámicos por cada listing module no canónico.
+    const dynamic = liveDynamicListings.map((d) => ({
+      source: d.key,
+      label: d.label,
+      bgColor: dynamicPinColor(d.key),
+    }));
+    return [...canonical, ...dynamic];
+  }, [mod.chips, mapOverride?.chips, liveDynamicListings]);
 
   const handleToggleChip = useCallback((source: MapSource) => {
     setFilter((s) => toggleChip(s, source));
@@ -282,8 +544,12 @@ export function MapModule({
     setShowWelcome(false);
   }, []);
 
-  const center = mod.defaultCenter ?? effectiveCoords ?? { lat: 33.4484, lng: -112.074 };
-  const zoom = mod.defaultZoom ?? 13;
+  const center =
+    mapOverride?.defaultCenter ?? mod.defaultCenter ?? effectiveCoords ?? { lat: 33.4484, lng: -112.074 };
+  const zoom = mapOverride?.defaultZoom ?? mod.defaultZoom ?? 13;
+  const PIN_SCALE = { S: 0.75, M: 1.0, L: 1.3 } as const;
+  const pinScale = PIN_SCALE[mapOverride?.pinSize ?? 'M'];
+  const categoryIcons = mapOverride?.categoryIcons;
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-white">
@@ -333,6 +599,9 @@ export function MapModule({
           selectedSlug={selectedSlug}
           onSelect={handleSelect}
           onSelectedPosition={setPinPos}
+          pinScale={pinScale}
+          categoryIcons={categoryIcons}
+          dynamicListings={liveDynamicListings}
           style={{ width: '100%', height: '100%' }}
         />
 

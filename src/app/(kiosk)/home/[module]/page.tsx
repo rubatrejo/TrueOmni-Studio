@@ -8,6 +8,7 @@ import { EventsModule } from '@/components/events/events-module';
 import { GuestbookModule } from '@/components/guestbook/guestbook-module';
 import { HomeHeader } from '@/components/home/header';
 import { KioskCanvas } from '@/components/kiosk-canvas';
+import { DynamicListingsPlaceholder } from '@/components/listings/dynamic-listings-placeholder';
 import { ListingsModule } from '@/components/listings/listings-module';
 import { MapModule } from '@/components/map/map-module';
 import { PassesModule } from '@/components/passes/passes-module';
@@ -84,6 +85,29 @@ export default async function ModulePage({ params }: PageProps) {
     const items = getMapItems(config, mod, { openUntilPrefix });
     const detailLookup = buildMapDetailLookup(config, mod, items);
     const clientName = config.client.nombre;
+    // Listing modules NO canónicos (Shopping/Wellness/etc) — el MapModule
+    // los pinta como chips/pins extra con icono y color dinámicos.
+    const canonicalKeys = new Set(['restaurants', 'things-to-do', 'stay']);
+    const allModules = config.features?.home?.modules ?? {};
+    const dynamicListings = Object.entries(allModules)
+      .filter(([k, m]) => {
+        if (canonicalKeys.has(k)) return false;
+        const km = m as { kind?: string; listings?: unknown };
+        return (km?.kind === 'listings' || km?.kind === undefined) && Array.isArray(km?.listings);
+      })
+      .map(([k, m]) => {
+        const km = m as {
+          label?: string;
+          iconKey?: string;
+          customIcon?: string;
+        };
+        return {
+          key: k,
+          label: km.label ?? k,
+          iconKey: km.iconKey,
+          customIcon: km.customIcon,
+        };
+      });
     const applyTemplate = (s: string) => s.replace(/\{client\}/g, clientName);
     // exploreTitle se pasa con el template `{client}` SIN interpolar — el
     // MapModule lo re-interpola client-side con el `clientName` reactivo
@@ -110,6 +134,7 @@ export default async function ModulePage({ params }: PageProps) {
           clientName={clientName}
           mapboxToken={config.integraciones?.mapbox_token}
           items={items}
+          dynamicListings={dynamicListings}
           detailLookup={detailLookup}
           textos={{
             seeMoreInfo: t.map_see_more_info ?? 'SEE MORE INFO',
@@ -220,7 +245,21 @@ export default async function ModulePage({ params }: PageProps) {
   // Validar que el módulo exista como tile (placeholder stub) o como wayfinding
   const tile = home.tiles.find((t) => t.key === module);
   const isWayfinding = module === 'wayfinding' && home.wayfinding?.enabled;
-  if (!tile && !isWayfinding) notFound();
+  if (!tile && !isWayfinding) {
+    // Listing modules creados desde el Studio que aún no se publicaron al
+    // fs (preview iframe siempre lee fs). El placeholder client-side
+    // escucha `kiosk:listings-override` y renderea el listing dinámico
+    // (Party, Shopping, Wellness, etc) sin necesidad de publish.
+    return (
+      <KioskCanvas>
+        <DynamicListingsPlaceholder
+          moduleKey={module}
+          clientCoords={config.client.coords}
+        />
+        <AdsSlot ads={ads} />
+      </KioskCanvas>
+    );
+  }
 
   const label = tile?.label ?? home.wayfinding?.label ?? module;
   const stubTextos = config.textos ?? {};

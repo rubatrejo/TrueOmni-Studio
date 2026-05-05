@@ -50,12 +50,14 @@ const DEFAULT_MODULE_KEYS: Record<'play' | 'eat' | 'stay' | 'events', string> = 
  * Amp base ~0.0025° (~275 m) — notable en el mapa pero sin "saltar" a otra
  * colonia en zoom urbano.
  */
-const SOURCE_BIAS: Record<MapSource, { dLat: number; dLng: number }> = {
+const SOURCE_BIAS: Record<string, { dLat: number; dLng: number }> = {
   restaurants: { dLat: 0.0022, dLng: -0.0018 }, // NW
   'things-to-do': { dLat: 0.0022, dLng: 0.0018 }, // NE
   stay: { dLat: -0.002, dLng: 0 }, // S
   events: { dLat: 0, dLng: 0 }, // sin bias (coords ya únicas)
 };
+
+const ZERO_BIAS = { dLat: 0, dLng: 0 };
 
 function jitterCoords(
   slug: string,
@@ -73,7 +75,13 @@ function jitterCoords(
   const nx = ((h1 >>> 0) % 1000) / 500 - 1; // [-1,1]
   const ny = ((h2 >>> 0) % 1000) / 500 - 1;
   const fineAmp = 0.001; // ~110m random por slug
-  const bias = SOURCE_BIAS[source];
+  // Para sources no canónicos: bias direccional derivado del hash del key
+  // (cada categoría dinámica tiene su propio offset estable).
+  const bias = SOURCE_BIAS[source] ?? (() => {
+    const angle = (h1 % 360) * (Math.PI / 180);
+    return { dLat: Math.sin(angle) * 0.0022, dLng: Math.cos(angle) * 0.0022 };
+  })();
+  void ZERO_BIAS;
   return {
     lat: coords.lat + bias.dLat + nx * fineAmp,
     lng: coords.lng + bias.dLng + ny * fineAmp,
@@ -158,7 +166,9 @@ export function getMapItems(
   } as const;
 
   const items: MapItem[] = [];
+  const canonicalListingKeys = new Set<string>([moduleKeys.play, moduleKeys.eat, moduleKeys.stay]);
 
+  // Canónicos: usan source canónico (`restaurants/things-to-do/stay`).
   for (const chip of ['play', 'eat', 'stay'] as const) {
     const key = moduleKeys[chip];
     const m = modules[key];
@@ -166,6 +176,18 @@ export function getMapItems(
     const source = CHIP_TO_SOURCE[chip];
     for (const l of m.listings) {
       items.push(toMapItemFromListing(l, source, key, prefix));
+    }
+  }
+
+  // Listings dinámicos (Shopping, Wellness, etc): cualquier módulo
+  // `kind === 'listings'` o sin `kind` con shape de listing que NO sea uno
+  // de los canónicos. Su `source` es el moduleKey, así MapModule puede
+  // detectarlos y MapCanvas renderiza el pin con icono/color del listing.
+  for (const [key, m] of Object.entries(modules)) {
+    if (canonicalListingKeys.has(key)) continue;
+    if (!isListingsModule(m)) continue;
+    for (const l of m.listings) {
+      items.push(toMapItemFromListing(l, key, key, prefix));
     }
   }
 

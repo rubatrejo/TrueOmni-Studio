@@ -510,8 +510,14 @@ export interface HomeDigitalBrochureModule {
   brochures: BrochureItem[];
 }
 
-/** Keys lógicas del chip de categoría del Map. */
-export type MapSource = 'restaurants' | 'things-to-do' | 'stay' | 'events';
+// MapSource types live in @/lib/map-source so Client Components can import
+// them without pulling `server-only` dependencies from this file.
+export {
+  CANONICAL_MAP_SOURCES,
+  isCanonicalMapSource,
+  type CanonicalMapSource,
+  type MapSource,
+} from './map-source';
 
 /** Módulo Map: agrega listings + events de los otros módulos del cliente. */
 export interface HomeMapModule {

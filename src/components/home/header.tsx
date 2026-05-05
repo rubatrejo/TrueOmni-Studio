@@ -89,14 +89,14 @@ export async function HomeHeader({
         listenForOverride={applyDashboardOverride}
       />
 
-      {/* Logo del cliente @ (65, 44.4) — slot="default".
-          Slot fijo 280×70 con object-contain (evita que un logo cuadrado o
-          muy alto se vea diminuto, y un logo wide se desborde). El SVG
-          TrueOmni y los logos custom raster comparten el mismo bounding
-          box garantizando consistencia visual entre clientes. */}
+      {/* Logo del cliente @ (65, 38) — slot="default".
+          Slot fijo 360×90 con object-contain (presencia visual notable sin
+          desbordar el área del clock/weather a la derecha). El SVG TrueOmni
+          y los logos custom raster comparten el mismo bounding box
+          garantizando consistencia visual entre clientes. */}
       <div
         className="absolute flex items-center"
-        style={{ left: '65px', top: '44.4px', width: '280px', height: '70px' }}
+        style={{ left: '65px', top: '38px', width: '360px', height: '90px' }}
       >
         <TrueOmniLogo slot="default" className="h-full w-full text-white" />
       </div>

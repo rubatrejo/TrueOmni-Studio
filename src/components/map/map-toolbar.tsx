@@ -27,7 +27,7 @@ export function MapToolbar({
       >
         <span
           className="font-sans text-white"
-          style={{ paddingLeft: '65px', fontSize: '34px', lineHeight: '1', fontWeight: 400 }}
+          style={{ paddingLeft: '65px', fontSize: '34px', lineHeight: '1', fontWeight: 600 }}
         >
           {label}
         </span>

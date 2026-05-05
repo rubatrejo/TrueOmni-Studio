@@ -5,6 +5,19 @@ import { useEffect, useState } from 'react';
 
 const KIOSK_WIDTH_PX = 1080;
 const KIOSK_HEIGHT_PX = 1920;
+const PWA_WIDTH_PX = 390;
+const PWA_HEIGHT_PX = 844;
+
+/** Lee `?viewport=mobile-pwa` del URL (client-side). Usado para que el
+ *  preview del Studio pueda forzar dims mobile sin un canvas alternativo. */
+function detectPwaViewport(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return new URLSearchParams(window.location.search).get('viewport') === 'mobile-pwa';
+  } catch {
+    return false;
+  }
+}
 
 /** Padding horizontal alrededor del canvas (dev-view). */
 const VIEWPORT_PADDING_X_PX = 80;
@@ -36,6 +49,9 @@ export function KioskCanvas({ children }: { children: ReactNode }) {
   const [scale, setScale] = useState(1);
   // Lazy init: en cliente la primera evaluación ya sabe si está en iframe.
   const [embedded] = useState(detectEmbedded);
+  const [isPwa] = useState(detectPwaViewport);
+  const W = isPwa ? PWA_WIDTH_PX : KIOSK_WIDTH_PX;
+  const H = isPwa ? PWA_HEIGHT_PX : KIOSK_HEIGHT_PX;
 
   useEffect(() => {
     if (embedded) return; // sin scaling interno cuando es preview
@@ -43,7 +59,7 @@ export function KioskCanvas({ children }: { children: ReactNode }) {
     const updateScale = () => {
       const availW = window.innerWidth - VIEWPORT_PADDING_X_PX * 2;
       const availH = window.innerHeight - VIEWPORT_PADDING_TOP_PX - BOTTOM_NAV_SPACE_PX;
-      setScale(Math.min(availW / KIOSK_WIDTH_PX, availH / KIOSK_HEIGHT_PX));
+      setScale(Math.min(availW / W, availH / H));
     };
 
     updateScale();
@@ -59,8 +75,8 @@ export function KioskCanvas({ children }: { children: ReactNode }) {
         data-kiosk-canvas
         className="relative overflow-hidden bg-background text-foreground"
         style={{
-          width: `${KIOSK_WIDTH_PX}px`,
-          height: `${KIOSK_HEIGHT_PX}px`,
+          width: `${W}px`,
+          height: `${H}px`,
         }}
       >
         {children}
@@ -79,8 +95,8 @@ export function KioskCanvas({ children }: { children: ReactNode }) {
     >
       <div
         style={{
-          width: KIOSK_WIDTH_PX * scale,
-          height: KIOSK_HEIGHT_PX * scale,
+          width: W * scale,
+          height: H * scale,
         }}
       >
         <div

@@ -7,6 +7,7 @@ import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon } from './billboard-footer-parts';
+import { OverlayLayer } from './billboard-overlay';
 import { CameraIcon } from './icons/camera-icon';
 import { RouteIcon } from './icons/route-icon';
 import {
@@ -19,7 +20,7 @@ import { SlotImage } from './slot-image';
 import {
   useBillboardFooterLogoHeight,
   useBillboardOverride,
-  useBillboardVariantBackground,
+  useBillboardSettings,
 } from './use-billboard-override';
 
 /**
@@ -44,10 +45,19 @@ import {
 export function Billboard1() {
   const t = useTextosMap();
   const { modules } = useBillboardOverride();
-  const heroBg = useBillboardVariantBackground(1);
-  const heroSrc = heroBg?.src || '/assets/billboard-1/hero.jpg';
-  const heroIsVideo = heroBg?.type === 'video';
+  const { background, touchHere, overlayOpacity, overlay } = useBillboardSettings(1);
+  const heroSrc = background.src || '/assets/billboard-0/hero.jpg';
+  const heroIsVideo = background.type === 'video';
   const footerLogoH = useBillboardFooterLogoHeight();
+  // touchHere.width/height NO aplican en B1 (texto plain dentro del card,
+  // no botón). Solo label/twoLines/fontSize.
+  const rawTouchLabel =
+    touchHere.label.trim().length > 0
+      ? touchHere.label
+      : (t.billboard_touch_here ?? 'Touch\nHere');
+  const touchLabel = touchHere.twoLines
+    ? rawTouchLabel.replace(/\s+/, '\n')
+    : rawTouchLabel.replace(/\n+/g, ' ');
   // Slot labels: si el usuario asignó un módulo distinto al hardcoded del SVG,
   // sustituimos solo el texto. Imagen/icono/color del slot quedan tal cual
   // (decoración heredada del SVG — cambiar imagen e icono por slot es v2.1).
@@ -285,13 +295,23 @@ export function Billboard1() {
             className="absolute inset-0 h-full w-full object-cover"
           />
         )}
+        {/* Overlay base de identidad (legibilidad del TOUCH TO START sobre la
+            foto). Encima, OverlayLayer aplica el overlay configurable del
+            Studio si el operador definió mode/color/opacity propios. */}
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(17,16,13,0.352)' }} />
+        <OverlayLayer overlayOpacity={overlayOpacity} overlay={overlay} />
         {/* TOUCH TO START text @ (804, 898) absolute → relative to card. */}
         <div
           className="absolute text-center font-display font-bold uppercase leading-[1.2] text-white"
-          style={{ left: '0', right: '0', top: '500px', fontSize: '70px', whiteSpace: 'pre-line' }}
+          style={{
+            left: '0',
+            right: '0',
+            top: '500px',
+            fontSize: `${touchHere.fontSize}px`,
+            whiteSpace: 'pre-line',
+          }}
         >
-          {t.billboard_touch_to_start ?? 'Touch\nto Start'}
+          {touchLabel}
         </div>
         {/* Click icon (hand with radiating lines) @ (684.773, 1205) absolute → (129, 835) relative */}
         <svg

@@ -32,7 +32,7 @@ export function ListingsToolbar({
       >
         <span
           className="font-sans text-white"
-          style={{ paddingLeft: '32.5px', fontSize: '36px', lineHeight: '1' }}
+          style={{ paddingLeft: '32.5px', fontSize: '36px', lineHeight: '1', fontWeight: 600 }}
         >
           {label}
         </span>

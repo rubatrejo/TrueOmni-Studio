@@ -6,10 +6,16 @@ import mapboxgl from 'mapbox-gl';
 import type { GeoJSONSource } from 'mapbox-gl';
 import { useEffect, useRef } from 'react';
 
-import type { MapSource } from '@/lib/config';
+import { isCanonicalMapSource, type MapSource } from '@/lib/map-source';
 import type { MapItem } from '@/lib/map-item';
 
-import { pinDataUri, selectedPinSvg } from './map-pin-icons';
+import {
+  customPinSvg,
+  pinDataUri,
+  resolveBrandColor,
+  resolveMapPinColor,
+  selectedPinSvg,
+} from './map-pin-icons';
 
 const SOURCES: readonly MapSource[] = ['restaurants', 'things-to-do', 'stay', 'events'] as const;
 const PIN_IMAGE_PREFIX = 'map-pin-';
@@ -33,6 +39,25 @@ interface MapCanvasProps {
   /** Si true, cuando cambian los `routeStops` y hay ≥2, el mapa hace
    *  `fitBounds` para encuadrar todos los stops + ruta dentro del viewport. */
   fitRouteBounds?: boolean;
+  /** Multiplicador del tamaño de los pins (S=0.75, M=1.0, L=1.3). Default 1. */
+  pinScale?: number;
+  /**
+   * Override de iconKey por categoría. Si el operador asignó `coffee` a
+   * `restaurants`, todos los pins de esa categoría usan el icono coffee
+   * en lugar del cubiertos canónico.
+   */
+  categoryIcons?: Partial<Record<MapSource, string>>;
+  /**
+   * Listing modules dinámicos (no canónicos) con su iconKey/customIcon.
+   * Sus items se renderizan como `mapboxgl.Marker` HTML con el icono y
+   * color dinámico de cada categoría — fuera del cluster Mapbox.
+   */
+  dynamicListings?: ReadonlyArray<{
+    key: string;
+    label: string;
+    iconKey?: string;
+    customIcon?: string;
+  }>;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -56,12 +81,16 @@ export function MapCanvas({
   routeColor,
   flyToPadding,
   fitRouteBounds,
+  pinScale = 1,
+  categoryIcons,
+  dynamicListings,
   className,
   style,
 }: MapCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const selectedMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const customMarkersRef = useRef<mapboxgl.Marker[]>([]);
   const readyRef = useRef(false);
   const itemsRef = useRef<readonly MapItem[]>(items);
   const routeStopsRef = useRef<readonly { lng: number; lat: number }[] | undefined>(routeStops);
@@ -95,7 +124,7 @@ export function MapCanvas({
             map.addImage(`${PIN_IMAGE_PREFIX}${source}`, img, { pixelRatio: 2 });
           }
         };
-        img.src = pinDataUri(source);
+        img.src = pinDataUri(source, categoryIcons?.[source]);
       }
 
       map.addSource('items', {
@@ -109,14 +138,17 @@ export function MapCanvas({
         clusterRadius: 18,
       });
 
+      // Mapbox NO acepta `hsl(var(--brand-primary))` como `paint.circle-color`
+      // — su validador exige un color literal. Resolvemos la CSS var al valor
+      // hsl real en runtime (igual que ya hacía `route-line` más abajo).
+      const clusterColor = resolveBrandColor('--brand-primary', '#0066cc');
       map.addLayer({
         id: 'clusters',
         type: 'circle',
         source: 'items',
         filter: ['has', 'point_count'],
         paint: {
-          // Azul oscuro (primario del kiosk) en lugar del coral anterior.
-          'circle-color': 'hsl(var(--brand-primary))',
+          'circle-color': clusterColor,
           'circle-stroke-color': '#ffffff',
           'circle-stroke-width': 4,
           'circle-radius': ['step', ['get', 'point_count'], 34, 10, 42, 50, 52],
@@ -145,7 +177,7 @@ export function MapCanvas({
           'icon-image': ['concat', PIN_IMAGE_PREFIX, ['get', 'source']],
           'icon-anchor': 'bottom',
           'icon-allow-overlap': true,
-          'icon-size': 1,
+          'icon-size': pinScale,
         },
       });
 
@@ -243,6 +275,133 @@ export function MapCanvas({
     const src = map.getSource('items') as GeoJSONSource | undefined;
     if (src) src.setData(toFeatureCollection(items));
   }, [items]);
+
+  // Sync de zoom y center cuando el editor del Studio los cambia. Sin esto
+  // el slider del MapEditor no afecta el preview hasta hacer reload.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !readyRef.current) return;
+    if (Math.abs(map.getZoom() - zoom) > 0.05) {
+      map.easeTo({ zoom, duration: 250 });
+    }
+  }, [zoom]);
+
+  // Sync del tamaño de pins (icon-size) sin re-init.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !readyRef.current) return;
+    try {
+      map.setLayoutProperty('unclustered-point', 'icon-size', pinScale);
+    } catch {
+      /* layer aún no añadido */
+    }
+  }, [pinScale]);
+
+  // Sync de iconos por categoría: regenera el data URI y reemplaza la
+  // imagen en Mapbox sin reinicializar el mapa.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !readyRef.current) return;
+    for (const source of SOURCES) {
+      const img = new Image(140, 188);
+      img.onload = () => {
+        const key = `${PIN_IMAGE_PREFIX}${source}`;
+        try {
+          if (map.hasImage(key)) map.removeImage(key);
+          map.addImage(key, img, { pixelRatio: 2 });
+        } catch {
+          /* concurrencia con destroy del mapa */
+        }
+      };
+      img.src = pinDataUri(source, categoryIcons?.[source]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    categoryIcons?.restaurants,
+    categoryIcons?.['things-to-do'],
+    categoryIcons?.stay,
+    categoryIcons?.events,
+  ]);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !readyRef.current) return;
+    const cur = map.getCenter();
+    if (Math.abs(cur.lng - center.lng) > 1e-5 || Math.abs(cur.lat - center.lat) > 1e-5) {
+      map.easeTo({ center: [center.lng, center.lat], duration: 350 });
+    }
+  }, [center.lat, center.lng]);
+
+  // Custom pins (moduleSlug === 'custom') + items con source NO canónico
+  // (listings dinámicos como Shopping/Wellness) se renderizan como HTML
+  // Markers independientes del cluster Mapbox. Permite usar el catálogo
+  // extendido de iconos sin pre-registrar imágenes en Mapbox por cada
+  // posible categoría dinámica.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    customMarkersRef.current.forEach((m) => m.remove());
+    customMarkersRef.current = [];
+    // Index dynamicListings por key para sacar iconKey/customIcon de cada
+    // listing module no canónico.
+    const dynBySource = new Map<
+      string,
+      { iconKey?: string; customIcon?: string }
+    >();
+    if (dynamicListings) {
+      for (const d of dynamicListings) dynBySource.set(d.key, d);
+    }
+    const htmlItems = items.filter(
+      (it) => it.moduleSlug === 'custom' || !isCanonicalMapSource(it.source),
+    );
+    if (htmlItems.length === 0) {
+      return () => {
+        customMarkersRef.current.forEach((m) => m.remove());
+        customMarkersRef.current = [];
+      };
+    }
+    for (const item of htmlItems) {
+      const color = resolveMapPinColor(item.source);
+      // Para custom pins el iconKey viene en el item; para dinámicos viene
+      // del listing entry; fallback a 'info'.
+      let iconKey = item.iconKey || dynBySource.get(item.source)?.iconKey || 'info';
+      const customIconUrl = dynBySource.get(item.source)?.customIcon;
+      const w = Math.round(70 * pinScale);
+      const h = Math.round(94 * pinScale);
+      const el = document.createElement('div');
+      el.style.width = `${w}px`;
+      el.style.height = `${h}px`;
+      el.style.cursor = 'pointer';
+      el.setAttribute('aria-label', item.title);
+      if (customIconUrl) {
+        // Render del teardrop con `<img>` del custom icon en el círculo.
+        // Más simple que customPinSvg porque el SVG no puede inline una
+        // image que viva fuera del documento sin xlink:href.
+        el.innerHTML = `
+          <div style="position:relative;width:${w}px;height:${h}px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 140 188" style="position:absolute;inset:0;">
+              <g transform="scale(2)">
+                <path d="M9.586,58.734h0A34.762,34.762,0,0,1,35,0,34.762,34.762,0,0,1,60.411,58.734h.043L34.394,94Z" fill="${color}"/>
+                <g transform="translate(5 5)"><ellipse cx="29.988" cy="29.865" rx="28.988" ry="28.865" fill="#ffffff"/></g>
+              </g>
+            </svg>
+            <img src="${customIconUrl}" alt="" style="position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);width:${Math.round(w * 0.4)}px;height:${Math.round(w * 0.4)}px;object-fit:contain;pointer-events:none;" />
+          </div>`;
+      } else {
+        el.innerHTML = customPinSvg(iconKey, color)
+          .replace('width="140"', `width="${w}"`)
+          .replace('height="188"', `height="${h}"`);
+      }
+      el.addEventListener('click', () => onSelect(item.slug));
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+        .setLngLat([item.coords.lng, item.coords.lat])
+        .addTo(map);
+      customMarkersRef.current.push(marker);
+    }
+    return () => {
+      customMarkersRef.current.forEach((m) => m.remove());
+      customMarkersRef.current = [];
+    };
+  }, [items, onSelect, pinScale, dynamicListings]);
 
   // Sync de la ruta (LineString) cuando cambian los stops del rail.
   useEffect(() => {
@@ -396,17 +555,22 @@ export function MapCanvas({
 }
 
 function toFeatureCollection(items: readonly MapItem[]): GeoJSON.FeatureCollection<GeoJSON.Point> {
+  // Custom pins + dynamic listings (sources no canónicos) van fuera del
+  // GeoJSON: se renderizan como HTML Markers. Solo los 4 canónicos van por
+  // el cluster Mapbox.
   return {
     type: 'FeatureCollection',
-    features: items.map((it) => ({
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: [it.coords.lng, it.coords.lat] },
-      properties: {
-        slug: it.slug,
-        source: it.source,
-        moduleSlug: it.moduleSlug,
-        title: it.title,
-      },
-    })),
+    features: items
+      .filter((it) => it.moduleSlug !== 'custom' && isCanonicalMapSource(it.source))
+      .map((it) => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [it.coords.lng, it.coords.lat] },
+        properties: {
+          slug: it.slug,
+          source: it.source,
+          moduleSlug: it.moduleSlug,
+          title: it.title,
+        },
+      })),
   };
 }

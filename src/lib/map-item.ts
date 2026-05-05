@@ -32,4 +32,11 @@ export interface MapItem {
   dateLabel?: string;
   priceRange?: 1 | 2 | 3 | 4;
   priceMode?: 'free' | 'paid';
+  /**
+   * Custom pins añadidos desde el MapEditor pueden traer un icono del
+   * catálogo extendido (`shopping`, `coffee`, `bar`, etc.). Solo aplica
+   * cuando `moduleSlug === 'custom'`. Si vacío, el pin usa el icono
+   * canónico de la `source`.
+   */
+  iconKey?: string;
 }

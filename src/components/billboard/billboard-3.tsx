@@ -7,13 +7,14 @@ import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
 import { AccessibilityIcon } from './billboard-footer-parts';
+import { OverlayLayer } from './billboard-overlay';
 import { resolveSlotHref, resolveSlotImage, resolveSlotLabel } from './module-info';
 import { SlotImage } from './slot-image';
 import {
   useBillboardFooterLogoHeight,
   useBillboardLogoHeight,
   useBillboardOverride,
-  useBillboardVariantBackground,
+  useBillboardSettings,
 } from './use-billboard-override';
 
 /**
@@ -31,10 +32,18 @@ export function Billboard3() {
   const t = useTextosMap();
   const logoH = useBillboardLogoHeight();
   const { modules } = useBillboardOverride();
-  const heroBg = useBillboardVariantBackground(3);
-  const heroSrc = heroBg?.src || '/assets/billboard-4/things-to-do.jpg';
-  const heroIsVideo = heroBg?.type === 'video';
+  const { background, touchHere, overlayOpacity, overlay } = useBillboardSettings(3);
+  const heroSrc = background.src || '/assets/billboard-0/hero.jpg';
+  const heroIsVideo = background.type === 'video';
   const footerLogoH = useBillboardFooterLogoHeight();
+  // touchHere.width/height NO aplican (texto + arrow inline, no botón).
+  const rawTouchLabel =
+    touchHere.label.trim().length > 0
+      ? touchHere.label
+      : (t.billboard_touch_here ?? 'Touch Here');
+  const touchLabel = touchHere.twoLines
+    ? rawTouchLabel.replace(/\s+/, '\n')
+    : rawTouchLabel.replace(/\n+/g, ' ');
   // Slots 0..3 del 2×2: top-left → top-right → bottom-left → bottom-right.
   const slot0 = resolveSlotLabel(modules?.[0], { label: 'Food &', labelLine2: 'Drink' });
   const slot1 = resolveSlotLabel(modules?.[1], { label: 'Events' });
@@ -119,7 +128,12 @@ export function Billboard3() {
             className="absolute inset-0 h-full w-full object-cover"
           />
         )}
+        {/* Overlay base de identidad de marca: brand-primary 60% asegura
+            legibilidad del logo + TOUCH TO START sobre cualquier hero. Encima,
+            OverlayLayer aplica el overlay configurable del Studio si el
+            operador definió mode/color/opacity propios. */}
         <div className="absolute inset-0" style={{ backgroundColor: 'hsl(var(--brand-primary) / 0.6)' }} />
+        <OverlayLayer overlayOpacity={overlayOpacity} overlay={overlay} />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-16">
           {/* Logo height configurable desde Studio (S=80 / M=128 / L=180).
               SVG original era 110px → cae cerca del L. */}
@@ -129,9 +143,13 @@ export function Billboard3() {
           <div className="flex items-center gap-10">
             <span
               className="font-display font-bold uppercase text-white"
-              style={{ fontSize: '72px', letterSpacing: '0.02em', whiteSpace: 'pre-line' }}
+              style={{
+                fontSize: `${touchHere.fontSize}px`,
+                letterSpacing: '0.02em',
+                whiteSpace: 'pre-line',
+              }}
             >
-              {(t.billboard_touch_to_start ?? 'Touch to start').replace(/\n/g, ' ')}
+              {touchLabel}
             </span>
             <svg
               xmlns="http://www.w3.org/2000/svg"

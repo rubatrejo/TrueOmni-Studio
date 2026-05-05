@@ -182,6 +182,18 @@ export const ModulesSchema = z.object({
   tiles: z.array(ModuleEntrySchema).min(1).max(64),
   /** Toggles para módulos system-wide que no son tiles del grid. */
   systemModules: SystemModulesSchema.optional(),
+  /**
+   * Override de iconos Lucide por moduleKey (events, tickets, passes, trails, etc).
+   * El operador escoge el icono desde el Modules tab. Si vacío/undefined,
+   * se usa el icono canónico de `MODULE_ICONS`.
+   */
+  iconOverrides: z.record(z.string(), z.string()).default({}),
+  /**
+   * Imágenes custom (data URL o path) por moduleKey. Sobrescribe ambos
+   * `iconOverrides` y el icono canónico cuando está poblado para un key.
+   * Mismas dimensiones que un Lucide para coherencia visual.
+   */
+  customIcons: z.record(z.string(), z.string()).default({}),
 });
 
 export type ModuleEntry = z.infer<typeof ModuleEntrySchema>;
@@ -260,6 +272,8 @@ export function defaultModules(): ModulesConfig {
   return {
     tiles: KIOSK_MODULES.map((m) => ({ ...m })),
     systemModules: { ...DEFAULT_SYSTEM_MODULES },
+    iconOverrides: {},
+    customIcons: {},
   };
 }
 
@@ -428,19 +442,13 @@ export const DEFAULT_BILLBOARD: BillboardConfig = {
   logoSize: 'M',
   footerLogoSize: 'M',
   modules: [],
+  // Background unificado en las 4 variantes para consistencia visual al
+  // alternar entre ellas. El operador puede personalizar cada una luego
+  // desde el editor (cada variant tiene su panel "Idle settings").
   b0: DEFAULT_BILLBOARD_B0,
-  b1: {
-    ...DEFAULT_BILLBOARD_B0,
-    background: { type: 'image', src: '/assets/billboard-1/hero.jpg' },
-  },
-  b2: {
-    ...DEFAULT_BILLBOARD_B0,
-    background: { type: 'image', src: '/assets/billboard-2/hero.jpg' },
-  },
-  b3: {
-    ...DEFAULT_BILLBOARD_B0,
-    background: { type: 'image', src: '/assets/billboard-3/hero.jpg' },
-  },
+  b1: { ...DEFAULT_BILLBOARD_B0 },
+  b2: { ...DEFAULT_BILLBOARD_B0 },
+  b3: { ...DEFAULT_BILLBOARD_B0 },
 };
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -722,6 +730,8 @@ export const PhotoBoothSocialSchema = z.object({
   x: z.string().max(64).optional(),
   facebook: z.string().max(64).optional(),
   instagram: z.string().max(64).optional(),
+  tiktok: z.string().max(64).optional(),
+  youtube: z.string().max(64).optional(),
 });
 
 export const PhotoBoothSchema = z.object({
@@ -1145,6 +1155,12 @@ export const ListingsCatalogEntrySchema = z.object({
   label: z.string().min(1).max(64),
   /** Nombre del icono Lucide (string para ser serializable). */
   iconKey: z.string().min(1).max(64).default('UtensilsCrossed'),
+  /**
+   * Imagen custom (data URL o path) que sustituye el iconKey de Lucide cuando
+   * está poblado. Permite al operador subir su propio SVG/PNG con las
+   * mismas dimensiones que los Lucide (24×24 a 32×32 idealmente).
+   */
+  customIcon: z.string().max(200000).optional(),
   /** Master toggle de visibilidad del módulo. */
   enabled: z.boolean().default(true),
   /** Heroimage + taxonomies + items. */
@@ -1290,30 +1306,41 @@ export function uniqueListingKey(existing: ListingsModule, base: string): string
 
 /**
  * Duplica un listing entry — clona schema (label, subcategories, features) +
- * limpia los listings (los items NO se duplican: el operador empieza limpio).
+ * COPIA los items para que el operador no arranque vacío. El slug se deriva
+ * del nuevo label "(Copy)" para evitar slugs como `stay-2` cuando el operador
+ * intenta crear "Shopping" duplicando Stay y renombrando.
  */
 export function duplicateListingEntry(
   source: ListingsCatalogEntry,
   existing: ListingsModule,
 ): ListingsCatalogEntry {
-  const newKey = uniqueListingKey(existing, `${source.key}`);
+  const newLabel = `${source.label} Copy`;
+  const newKey = uniqueListingKey(existing, newLabel);
   return {
     key: newKey,
-    label: `${source.label} (Copy)`,
+    label: newLabel,
     iconKey: source.iconKey,
     enabled: true,
     catalog: {
       heroImage: source.catalog.heroImage,
       subcategories: [...source.catalog.subcategories],
       features: [...source.catalog.features],
-      listings: [],
+      // Clonar los items con nuevos slugs (cada listing.slug debe ser único
+      // dentro del KioskConfig). Cambiamos prefijo por la nueva key.
+      listings: source.catalog.listings.map((l, i) => ({
+        ...l,
+        slug: `${newKey}-${String(i + 1).padStart(3, '0')}`,
+      })),
     },
   };
 }
 
 /**
- * Crea un listing entry vacío con label dado por el usuario. La key se deriva
- * del label en kebab-case y se hace único.
+ * Crea un listing entry con label dado por el usuario. La key se deriva
+ * del label en kebab-case y se hace único. Si hay listings modules existentes,
+ * el catálogo se hidrata con los items del primero (cambiándoles los slugs)
+ * para que el operador no arranque con la lista vacía. Esto cumple el
+ * requerimiento "auto-cargar listings relacionados" cuando se añade un módulo.
  */
 export function makeBlankListingEntry(
   label: string,
@@ -1321,13 +1348,23 @@ export function makeBlankListingEntry(
   iconKey = 'UtensilsCrossed',
 ): ListingsCatalogEntry {
   const trimmed = label.trim() || 'New module';
-  return {
-    key: uniqueListingKey(existing, trimmed),
-    label: trimmed,
-    iconKey,
-    enabled: true,
-    catalog: { ...EMPTY_LISTINGS_CATALOG },
-  };
+  const key = uniqueListingKey(existing, trimmed);
+  // Template = "Things to Do" (más genérico que Restaurants, donde
+  // datos como precio/menú salen raros en categorías custom como
+  // "Shopping" o "Party"). Fallback al primer module si no existe.
+  const template = existing.find((e) => e.key === 'things-to-do') ?? existing[0];
+  const catalog = template
+    ? {
+        heroImage: template.catalog.heroImage,
+        subcategories: [...template.catalog.subcategories],
+        features: [...template.catalog.features],
+        listings: template.catalog.listings.map((l, i) => ({
+          ...l,
+          slug: `${key}-${String(i + 1).padStart(3, '0')}`,
+        })),
+      }
+    : { ...EMPTY_LISTINGS_CATALOG };
+  return { key, label: trimmed, iconKey, enabled: true, catalog };
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -1903,6 +1940,115 @@ export const ORIENTATION_DIMENSIONS: Record<
   'mobile-pwa': { w: 390, h: 844 },
 };
 
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Map module                                                               */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+/** Source lógico del pin custom — coincide con MapSource del kiosk runtime. */
+export const MapSourceSchema = z.enum(['restaurants', 'things-to-do', 'stay', 'events']);
+export type MapSourceKey = z.infer<typeof MapSourceSchema>;
+
+/** Pin fijo añadido por el operador (no derivado de listings). */
+export const MapCustomPinSchema = z.object({
+  id: ShortIdSchema,
+  label: z.string().min(1).max(120),
+  /** Categoría del pin — controla el color y, si no hay `iconKey`, el icono. */
+  source: MapSourceSchema.default('things-to-do'),
+  /**
+   * Icono del catálogo extendido (`shopping`, `coffee`, `bar`, `hospital`,
+   * `museum`, `bus`, `beach`, `info`, `parking`, `star`). Si vacío, se usa
+   * el icono canónico de la categoría (`source`).
+   */
+  iconKey: z.string().max(32).default(''),
+  coords: CoordsSchema,
+  /** Dirección humanizable opcional (se muestra en el bubble). */
+  address: z.string().max(280).default(''),
+});
+
+export const MapWelcomeCopySchema = z.object({
+  title: z.string().max(160).default('Welcome to {client} Map'),
+  subtitle: z.string().max(160).default('Powered by Google Maps'),
+  body: z.string().max(600).default(''),
+  cta: z.string().max(64).default('Start'),
+});
+
+export const MapChipsSchema = z.object({
+  play: z.string().max(48).default('Things to Do'),
+  eat: z.string().max(48).default('Restaurants'),
+  stay: z.string().max(48).default('Stay'),
+  events: z.string().max(48).default('Events'),
+});
+
+export const MapPinSizeSchema = z.enum(['S', 'M', 'L']);
+export type MapPinSize = z.infer<typeof MapPinSizeSchema>;
+
+/** Multiplicador `icon-size` que aplica Mapbox al pin SVG default 140×188. */
+export const MAP_PIN_SIZE_SCALE: Record<MapPinSize, number> = {
+  S: 0.75,
+  M: 1.0,
+  L: 1.3,
+};
+
+/** Override de icono por categoría — vacío = icono canónico de la categoría. */
+export const MapCategoryIconsSchema = z.object({
+  restaurants: z.string().max(32).default(''),
+  'things-to-do': z.string().max(32).default(''),
+  stay: z.string().max(32).default(''),
+  events: z.string().max(32).default(''),
+});
+
+export const MapSchema = z.object({
+  /** Centro inicial del mapa al abrir el módulo. Si vacío usa `client.coords`. */
+  defaultCenter: CoordsSchema.optional(),
+  /** Zoom inicial (1–22, default 13 = ciudad). */
+  defaultZoom: z.number().min(1).max(22).default(13),
+  /** Ventana de eventos a mostrar (días desde hoy). */
+  eventsWindowDays: z.number().int().min(1).max(60).default(7),
+  /** Tamaño global de TODOS los pins (canónicos + custom). */
+  pinSize: MapPinSizeSchema.default('M'),
+  /** Override del icono por categoría (escoger del catálogo extendido). */
+  categoryIcons: MapCategoryIconsSchema.default({
+    restaurants: '',
+    'things-to-do': '',
+    stay: '',
+    events: '',
+  }),
+  /** Labels de los chips de categoría (sobre los 4 sources canónicos). */
+  chips: MapChipsSchema.default({
+    play: 'Things to Do',
+    eat: 'Restaurants',
+    stay: 'Stay',
+    events: 'Events',
+  }),
+  /** Welcome popup al abrir el módulo. Si todos los campos están vacíos, no se muestra. */
+  welcomeCopy: MapWelcomeCopySchema.default({
+    title: 'Welcome to {client} Map',
+    subtitle: 'Powered by Google Maps',
+    body: '',
+    cta: 'Start',
+  }),
+  /** Pins fijos custom (no derivados de listings). Se añaden al canvas como pins extra. */
+  customPins: z.array(MapCustomPinSchema).default([]),
+});
+
+export type MapConfig = z.infer<typeof MapSchema>;
+export type MapCustomPin = z.infer<typeof MapCustomPinSchema>;
+
+export const DEFAULT_MAP: MapConfig = {
+  defaultZoom: 13,
+  eventsWindowDays: 7,
+  pinSize: 'M',
+  categoryIcons: { restaurants: '', 'things-to-do': '', stay: '', events: '' },
+  chips: { play: 'Things to Do', eat: 'Restaurants', stay: 'Stay', events: 'Events' },
+  welcomeCopy: {
+    title: 'Welcome to {client} Map',
+    subtitle: 'Powered by Google Maps',
+    body: '',
+    cta: 'Start',
+  },
+  customPins: [],
+};
+
 export const KioskConfigSchema = z.object({
   slug: SlugSchema,
   nombre: z.string().min(1).max(120),
@@ -1942,6 +2088,8 @@ export const KioskConfigSchema = z.object({
   passes: PassesModuleSchema.optional(),
   /** Módulo Trails — subcategorías, difficulties, trailTypes, trails. */
   trails: TrailsModuleSchema.optional(),
+  /** Módulo Map — centro/zoom, welcome popup, chips, custom pins. */
+  map: MapSchema.optional(),
   /** Módulo Trip Builder — toggle AI flow + questions del wizard + local_listings. */
   itineraryBuilder: ItineraryBuilderSchema.optional(),
   /** Sistema de ads (popups, hero banners, bottom strips) por ruta. */

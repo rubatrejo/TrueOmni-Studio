@@ -92,7 +92,9 @@ export function PreviewPanel({
   // Apuntamos a la raíz del kiosk (`/`), que es el Billboard idle / splash —
   // la primera pantalla que ve el usuario antes de tocar y entrar a /home.
   // Fase S0 lo cambiará por `/preview/${client.slug}`.
-  const previewSrc = '/';
+  // Pasa el viewport como query param para que el KioskCanvas client-side
+  // pueda detectar mobile-pwa y renderizar a 390×844 en lugar de 1080×1920.
+  const previewSrc = orientation === 'mobile-pwa' ? '/?viewport=mobile-pwa' : '/';
 
   return (
     <div className="flex h-full w-full flex-col">
@@ -183,7 +185,7 @@ export function PreviewPanel({
             height: h * scale,
           }}
         >
-          {orientation === 'landscape' || orientation === 'mobile-pwa' ? (
+          {orientation === 'landscape' ? (
             <OrientationComingSoon
               slug={slug}
               scale={scale}

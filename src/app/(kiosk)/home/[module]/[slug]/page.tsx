@@ -5,6 +5,7 @@ import { BrochureReader } from '@/components/digital-brochure/brochure-reader';
 import { EventsModule } from '@/components/events/events-module';
 import { HomeHeader } from '@/components/home/header';
 import { KioskCanvas } from '@/components/kiosk-canvas';
+import { DynamicListingDetailPlaceholder } from '@/components/listings/dynamic-listing-detail-placeholder';
 import { ListingDetail } from '@/components/listings/listing-detail';
 import type { EventMeta } from '@/components/listings/listing-detail';
 import { ListingsModule } from '@/components/listings/listings-module';
@@ -35,7 +36,22 @@ export default async function DetailPage({ params }: PageProps) {
   const { module, slug } = await params;
   const config = await getConfig();
   const mod = config.features?.home?.modules?.[module];
-  if (!mod) notFound();
+  if (!mod) {
+    // Listing module dinámico (Studio creado, sin publish todavía). El
+    // placeholder client-side espera al bridge para hidratar el detail.
+    const ads = getAdsFromConfig(config);
+    return (
+      <KioskCanvas>
+        <DynamicListingDetailPlaceholder
+          moduleKey={module}
+          slug={slug}
+          mapboxToken={config.integraciones?.mapbox_token}
+          clientCoords={config.client.coords}
+        />
+        <AdsSlot ads={ads} />
+      </KioskCanvas>
+    );
+  }
 
   const mapboxToken = config.integraciones?.mapbox_token;
   const ads = getAdsFromConfig(config);

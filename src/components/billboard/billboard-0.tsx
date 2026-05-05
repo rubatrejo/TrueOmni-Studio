@@ -4,6 +4,7 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
+import { OverlayLayer } from './billboard-overlay';
 import {
   useBillboardB0,
   useBillboardFooterLogoHeight,
@@ -141,41 +142,3 @@ export function Billboard0() {
   );
 }
 
-function OverlayLayer({
-  overlayOpacity,
-  overlay,
-}: {
-  overlayOpacity: number;
-  overlay: ReturnType<typeof useBillboardB0>['overlay'];
-}) {
-  if (overlay.mode === 'gradient') {
-    return (
-      <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `linear-gradient(${overlay.gradient.angle}deg, ${overlay.gradient.from}, ${overlay.gradient.to})`,
-        }}
-      />
-    );
-  }
-  if (overlay.opacity > 0) {
-    return (
-      <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{ backgroundColor: overlay.color, opacity: overlay.opacity }}
-      />
-    );
-  }
-  if (overlayOpacity > 0) {
-    return (
-      <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }}
-      />
-    );
-  }
-  return null;
-}

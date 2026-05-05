@@ -82,6 +82,7 @@ export function StudioBridge() {
         trails?: unknown;
         itineraryBuilder?: unknown;
         ads?: unknown;
+        map?: unknown;
       } | null;
       if (!data || typeof data !== 'object' || !data.type) return;
 
@@ -194,6 +195,16 @@ export function StudioBridge() {
           break;
         case 'studio:trails-update':
           if (data.trails) applyTrailsOverride(data.trails);
+          break;
+        case 'studio:map-update':
+          if (data.map) applyMapOverride(data.map);
+          break;
+        case 'studio:map-open-preview':
+          try {
+            if (window.location.pathname !== '/home/map') {
+              window.location.assign('/home/map');
+            }
+          } catch {}
           break;
         case 'studio:trails-open-preview':
           try {
@@ -319,6 +330,28 @@ type ModulesPatch = {
   systemModules?: { ads: boolean; languages: boolean; aiAvatar: boolean };
 };
 
+/** Settings idle de una variante del Billboard. Mismo shape que `b0`
+ *  para B0/B1/B2/B3 — cada runtime aplica los campos que tienen sentido en
+ *  su layout (algunos como width/height del button solo aplican al B0 y se
+ *  ignoran silenciosamente en B1/B2/B3). */
+type BillboardVariantPatch = {
+  background?: { type: 'image' | 'video'; src: string };
+  touchHere?: {
+    label: string;
+    twoLines: boolean;
+    width: number;
+    height: number;
+    fontSize: number;
+  };
+  overlayOpacity?: number;
+  overlay?: {
+    mode?: 'solid' | 'gradient';
+    color?: string;
+    opacity?: number;
+    gradient?: { from?: string; to?: string; angle?: number };
+  };
+};
+
 type BillboardPatch = {
   variant: 0 | 1 | 2 | 3;
   idleTimeoutSec: number;
@@ -326,28 +359,11 @@ type BillboardPatch = {
   /** Tamaño del logo del footer (mismo enum, mapping diferente). */
   footerLogoSize?: 'S' | 'M' | 'L';
   modules?: string[];
-  /** Settings exclusivos del variant 0 (Dark Hero). */
-  b0?: {
-    background?: { type: 'image' | 'video'; src: string };
-    touchHere?: {
-      label: string;
-      twoLines: boolean;
-      width: number;
-      height: number;
-      fontSize: number;
-    };
-    overlayOpacity?: number;
-    overlay?: {
-      mode?: 'solid' | 'gradient';
-      color?: string;
-      opacity?: number;
-      gradient?: { from?: string; to?: string; angle?: number };
-    };
-  };
-  /** Background editable per variant (B1/B2/B3). */
-  b1?: { background?: { type: 'image' | 'video'; src: string } };
-  b2?: { background?: { type: 'image' | 'video'; src: string } };
-  b3?: { background?: { type: 'image' | 'video'; src: string } };
+  /** Settings idle compartidos: shape unificado para los 4 variants. */
+  b0?: BillboardVariantPatch;
+  b1?: BillboardVariantPatch;
+  b2?: BillboardVariantPatch;
+  b3?: BillboardVariantPatch;
 };
 
 type AiAvatarPatch = {
@@ -378,6 +394,7 @@ export const KIOSK_PASSES_OVERRIDE_EVENT = 'kiosk:passes-override';
 export const KIOSK_TRAILS_OVERRIDE_EVENT = 'kiosk:trails-override';
 export const KIOSK_ITINERARY_OVERRIDE_EVENT = 'kiosk:itinerary-override';
 export const KIOSK_ADS_OVERRIDE_EVENT = 'kiosk:ads-override';
+export const KIOSK_MAP_OVERRIDE_EVENT = 'kiosk:map-override';
 
 function applyModulesOverride(modules: ModulesPatch) {
   if (typeof window === 'undefined') return;
@@ -435,7 +452,16 @@ function applyGuestbookOverride(guestbook: unknown) {
 
 function applyListingsOverride(listings: unknown) {
   if (typeof window === 'undefined') return;
+  // Cachear el último override para que componentes que monten DESPUÉS del
+  // dispatch (e.g. navegación SPA a /home/<dyn-module>) puedan recuperarlo.
+  (window as KioskBridgeWindow).__kioskListings = listings;
   window.dispatchEvent(new CustomEvent(KIOSK_LISTINGS_OVERRIDE_EVENT, { detail: listings }));
+}
+
+/** Devuelve el último listings override cacheado (o null si nunca se dispatched). */
+export function getCachedListings(): unknown {
+  if (typeof window === 'undefined') return null;
+  return (window as KioskBridgeWindow).__kioskListings ?? null;
 }
 
 function applyEventsOverride(events: unknown) {
@@ -463,6 +489,11 @@ function applyItineraryOverride(itineraryBuilder: unknown) {
   window.dispatchEvent(
     new CustomEvent(KIOSK_ITINERARY_OVERRIDE_EVENT, { detail: itineraryBuilder }),
   );
+}
+
+function applyMapOverride(map: unknown) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(KIOSK_MAP_OVERRIDE_EVENT, { detail: map }));
 }
 
 function applyAdsOverride(ads: unknown) {
@@ -599,6 +630,7 @@ interface KioskBridgeWindow extends Window {
   __kioskHero?: HeroOverrideDetail;
   __kioskClientName?: string;
   __kioskClientCoords?: { lat: number; lng: number };
+  __kioskListings?: unknown;
 }
 
 /**

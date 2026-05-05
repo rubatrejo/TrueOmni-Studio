@@ -270,7 +270,7 @@ export function GuestbookFormScreen({
       {/* Teclado draggable, condicional por campo */}
       {focused === 'zip' ? (
         <DraggableKeyboard
-          width={389}
+          width={1080}
           height={440}
           storageKey="kiosk_keyboard_pos:guestbook-form-numeric"
         >
@@ -279,6 +279,7 @@ export function GuestbookFormScreen({
             style={{
               rowGap: '14px',
               padding: '22px 26px 28px 26px',
+              width: '1080px',
               backgroundColor: '#ffffff',
               borderRadius: '12px 12px 0 0',
               boxShadow: '0 -8px 20px rgba(0,0,0,0.12)',

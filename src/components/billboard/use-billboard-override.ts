@@ -8,7 +8,7 @@ import {
   DEFAULT_BILLBOARD_B0,
   type BillboardB0Config,
   type BillboardLogoSize,
-  type BillboardVariantBackground,
+  type BillboardVariantSettings,
 } from '@/lib/studio/schema';
 
 import { KIOSK_BILLBOARD_OVERRIDE_EVENT } from '../studio-bridge';
@@ -17,10 +17,14 @@ type BillboardOverride = {
   logoSize?: BillboardLogoSize;
   footerLogoSize?: BillboardLogoSize;
   modules?: string[];
-  b0?: Partial<BillboardB0Config>;
-  b1?: BillboardVariantBackground;
-  b2?: BillboardVariantBackground;
-  b3?: BillboardVariantBackground;
+  /** Settings idle del variant 0 (Dark Hero). */
+  b0?: Partial<BillboardVariantSettings>;
+  /** Settings idle del variant 1 (Grid + Hero). */
+  b1?: Partial<BillboardVariantSettings>;
+  /** Settings idle del variant 2 (Hero + Carousel). */
+  b2?: Partial<BillboardVariantSettings>;
+  /** Settings idle del variant 3 (Banner + 4 cards). */
+  b3?: Partial<BillboardVariantSettings>;
 };
 
 type BillboardOverrideWindow = Window & {
@@ -29,14 +33,13 @@ type BillboardOverrideWindow = Window & {
 
 /**
  * Hook compartido para que `billboard-{0,1,2,3}.tsx` lean en tiempo real
- * los overrides empujados por el Studio (logoSize + modules) sin tocar
- * el config global ni recargar.
+ * los overrides empujados por el Studio (logoSize + modules + settings idle
+ * de cada variant) sin tocar el config global ni recargar.
  *
- * El bridge dispara `KIOSK_BILLBOARD_OVERRIDE_EVENT` con detalle
- * `{ variant, idleTimeoutSec, logoSize?, modules? }`. Aquí solo nos
- * interesan logoSize y modules. Cacheamos el último valor en
- * `window.__kioskBillboardOverride` por si un Billboard se monta
- * tarde (navegación interna del iframe).
+ * El bridge dispara `KIOSK_BILLBOARD_OVERRIDE_EVENT` con el shape completo
+ * del `BillboardConfig`. Cacheamos el último valor en
+ * `window.__kioskBillboardOverride` por si un Billboard se monta tarde
+ * (navegación interna del iframe).
  */
 export function useBillboardOverride(): BillboardOverride {
   const [override, setOverride] = useState<BillboardOverride>(() => {
@@ -85,12 +88,43 @@ export function useBillboardFooterLogoHeight(): number {
 }
 
 /**
+ * Aplica defaults sobre un patch parcial de settings idle. Garantiza al
+ * consumidor que todos los campos están definidos.
+ */
+function withDefaults(patch: Partial<BillboardVariantSettings> | undefined): BillboardB0Config {
+  return {
+    background: patch?.background ?? DEFAULT_BILLBOARD_B0.background,
+    touchHere: { ...DEFAULT_BILLBOARD_B0.touchHere, ...(patch?.touchHere ?? {}) },
+    overlayOpacity: patch?.overlayOpacity ?? DEFAULT_BILLBOARD_B0.overlayOpacity,
+    overlay: {
+      ...DEFAULT_BILLBOARD_B0.overlay,
+      ...(patch?.overlay ?? {}),
+      gradient: {
+        ...DEFAULT_BILLBOARD_B0.overlay.gradient,
+        ...(patch?.overlay?.gradient ?? {}),
+      },
+    },
+  };
+}
+
+/**
+ * Devuelve los settings idle de la variante pedida con defaults aplicados.
+ * Si el Studio no envió override aún, retorna los defaults canónicos.
+ */
+export function useBillboardSettings(variant: 0 | 1 | 2 | 3): BillboardB0Config {
+  const override = useBillboardOverride();
+  const slot =
+    variant === 0 ? override.b0 : variant === 1 ? override.b1 : variant === 2 ? override.b2 : override.b3;
+  return withDefaults(slot);
+}
+
+/**
  * Background editable per variant (B1/B2/B3). Si el Studio no envió
  * override, retorna `null` y el componente cae al hardcoded SVG.
  */
 export function useBillboardVariantBackground(
   variant: 1 | 2 | 3,
-): BillboardVariantBackground['background'] | null {
+): BillboardB0Config['background'] | null {
   const override = useBillboardOverride();
   const slot = variant === 1 ? override.b1 : variant === 2 ? override.b2 : override.b3;
   return slot?.background ?? null;
@@ -109,23 +143,9 @@ export function useBillboardSlotKey(index: number): string | undefined {
 }
 
 /**
- * Devuelve los settings B0 con defaults aplicados. Si el Studio no envió
- * override aún, retorna los defaults canónicos (mismos valores que el
- * SVG original). El consumidor puede asumir todos los campos definidos.
+ * Alias retrocompat para `useBillboardSettings(0)`. Devuelve los settings
+ * B0 con defaults aplicados.
  */
 export function useBillboardB0(): BillboardB0Config {
-  const { b0 } = useBillboardOverride();
-  return {
-    background: b0?.background ?? DEFAULT_BILLBOARD_B0.background,
-    touchHere: { ...DEFAULT_BILLBOARD_B0.touchHere, ...(b0?.touchHere ?? {}) },
-    overlayOpacity: b0?.overlayOpacity ?? DEFAULT_BILLBOARD_B0.overlayOpacity,
-    overlay: {
-      ...DEFAULT_BILLBOARD_B0.overlay,
-      ...(b0?.overlay ?? {}),
-      gradient: {
-        ...DEFAULT_BILLBOARD_B0.overlay.gradient,
-        ...(b0?.overlay?.gradient ?? {}),
-      },
-    },
-  };
+  return useBillboardSettings(0);
 }

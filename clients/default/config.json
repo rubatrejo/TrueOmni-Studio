@@ -10127,9 +10127,9 @@
           "heroImage": "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=1600&h=620&fit=crop",
           "welcomeCopy": {
             "title": "Welcome to {client} Map",
-            "subtitle": "powered by Google",
+            "subtitle": "Powered by Google Maps",
             "body": "Easily select by category, preference or location. Click on Get Directions to easily find walking or driving directions to 100's of places around you.",
-            "cta": "OK"
+            "cta": "Start"
           },
           "chips": {
             "play": "Things to Do",

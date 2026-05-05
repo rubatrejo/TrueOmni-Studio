@@ -2,33 +2,83 @@
 
 import { Reorder, useDragControls } from 'framer-motion';
 import {
+  Activity,
+  Anchor,
   BedDouble,
+  Beer,
+  Bike,
   BookOpen,
+  Briefcase,
+  Building2,
+  Bus,
   Calendar,
   Camera,
+  Car,
+  Church,
   ClipboardList,
+  Coffee,
   Compass,
   Copy,
+  Croissant,
+  Drama,
+  Dumbbell,
   Eye,
   EyeOff,
+  Film,
+  Flower2,
   Footprints,
+  Fuel,
+  GraduationCap,
   GripVertical,
+  Hammer,
+  Heart,
   Hotel,
+  IceCream,
+  Image,
   Languages,
+  Landmark,
+  Leaf,
   ListChecks,
   Map,
   MapPin,
   Megaphone,
+  Mic,
+  Mountain,
+  Music,
+  Palette,
+  ParkingCircle,
   PenSquare,
+  Phone,
+  Pill,
+  Pizza,
+  Plane,
   Plus,
+  PlusSquare,
   RotateCcw,
+  Sailboat,
+  Scissors,
   Share2,
+  ShoppingBag,
+  ShoppingCart,
   Sparkles,
+  Stethoscope,
+  Store,
+  Sun,
   Tag,
+  Tent,
+  Theater,
   Ticket,
   TicketCheck,
+  Train,
+  TreePine,
   Trash2,
+  Trophy,
+  Upload,
+  Utensils,
   UtensilsCrossed,
+  Waves,
+  Wifi,
+  Wine,
   type LucideIcon,
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -39,6 +89,7 @@ import {
   defaultModules,
   duplicateListingEntry,
   makeBlankListingEntry,
+  type ItineraryBuilderConfig,
   type ListingsCatalogEntry,
   type ListingsModule,
   type ModuleEntry,
@@ -47,14 +98,145 @@ import {
 } from '@/lib/studio/schema';
 
 /* ────────────────────────────────────────────────────────────────────────── */
+/* Icon helpers (Lucide + custom image)                                       */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+/** Renderiza un icono — Lucide si `iconKey` mapea, custom img si `customIcon`
+ *  poblado, fallback Sparkles si ninguno. `customIcon` PREVALECE sobre iconKey. */
+function IconNode({
+  iconKey,
+  customIcon,
+  className = 'h-4 w-4',
+}: {
+  iconKey?: string;
+  customIcon?: string;
+  className?: string;
+}) {
+  if (customIcon) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return (
+      <img
+        src={customIcon}
+        alt=""
+        className={`${className} object-contain`}
+        draggable={false}
+      />
+    );
+  }
+  const LucideComp: LucideIcon = iconKey && LISTING_ICONS[iconKey] ? LISTING_ICONS[iconKey] : Sparkles;
+  return <LucideComp className={className} />;
+}
+
+/** Icon picker shared — grid de Lucide + botón "Upload" → data URL.
+ *  Cuando se sube imagen, llama `onCustomChange(dataUrl)` y limpia iconKey. */
+function IconPickerGrid({
+  selectedKey,
+  customIcon,
+  onPick,
+  onCustomChange,
+}: {
+  selectedKey?: string;
+  customIcon?: string;
+  onPick: (key: string) => void;
+  onCustomChange: (dataUrl: string) => void;
+}) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const handleUpload = (file: File) => {
+    if (file.size > 200_000) {
+      alert('Icon must be under 200 KB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result === 'string') onCustomChange(result);
+    };
+    reader.readAsDataURL(file);
+  };
+  return (
+    <div className="rounded-md border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+      {/* Header con botón upload destacado — arriba del grid para que sea
+          obvio dónde subir un icono custom (era el problema reportado por
+          el operador). */}
+      <div className="border-b border-zinc-200 p-2 dark:border-zinc-800">
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className={`flex w-full items-center justify-center gap-1.5 rounded-md border px-3 py-1.5 text-[11.5px] font-medium transition ${
+            customIcon
+              ? 'border-sky-500/50 bg-sky-500/10 text-sky-700 dark:text-sky-300'
+              : 'border-dashed border-zinc-300 bg-zinc-50 text-zinc-700 hover:border-sky-500/50 hover:bg-sky-500/5 hover:text-sky-700 dark:border-zinc-700 dark:bg-zinc-900/40 dark:text-zinc-300 dark:hover:text-sky-300'
+          }`}
+        >
+          {customIcon ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={customIcon} alt="" className="h-4 w-4 object-contain" />
+              Custom icon active
+            </>
+          ) : (
+            <>
+              <Upload className="h-3.5 w-3.5" />
+              Upload your icon (SVG / PNG)
+            </>
+          )}
+        </button>
+        {customIcon ? (
+          <button
+            type="button"
+            onClick={() => onCustomChange('')}
+            className="mt-1.5 w-full rounded border border-zinc-200 px-2 py-1 text-[10.5px] text-zinc-500 hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-500 dark:hover:bg-zinc-800"
+          >
+            Remove custom · use Lucide
+          </button>
+        ) : null}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/svg+xml,image/png,image/webp"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleUpload(file);
+            e.target.value = '';
+          }}
+        />
+      </div>
+
+      {/* Grid de Lucide */}
+      <div className="grid max-h-[260px] grid-cols-7 gap-1 overflow-y-auto p-2">
+        {Object.entries(LISTING_ICONS).map(([key, IconComp]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => onPick(key)}
+            title={key}
+            className={`grid h-7 w-7 place-items-center rounded transition ${
+              !customIcon && selectedKey === key
+                ? 'bg-sky-500/15 text-sky-600 ring-1 ring-sky-500/40 dark:text-sky-300'
+                : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800'
+            }`}
+          >
+            <IconComp className="h-4 w-4" />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
 /* Iconos Lucide por module key — reemplazan los emojis del primer iter.      */
 /* ────────────────────────────────────────────────────────────────────────── */
 
 /**
- * Catálogo de iconos Lucide disponibles para listing modules.
- * Las keys son los nombres tal cual los serializa el schema (ListingsCatalogEntry.iconKey).
+ * Catálogo de iconos Lucide disponibles para listing modules + system tiles.
+ * Las keys son los nombres tal cual los serializa el schema (`iconKey`).
+ * Cubre las categorías más comunes en kioskos turísticos: comida/bebida,
+ * alojamiento, transporte, naturaleza, cultura, salud, servicios, etc.
  */
 const LISTING_ICONS: Record<string, LucideIcon> = {
+  // Categorías base (originales del template)
   UtensilsCrossed,
   MapPin,
   BedDouble,
@@ -70,6 +252,60 @@ const LISTING_ICONS: Record<string, LucideIcon> = {
   Share2,
   ClipboardList,
   Map,
+  // Comida & bebida
+  Utensils,
+  Coffee,
+  Beer,
+  Wine,
+  Pizza,
+  IceCream,
+  Croissant,
+  // Compras & servicios
+  ShoppingBag,
+  ShoppingCart,
+  Store,
+  Scissors,
+  Hammer,
+  // Transporte
+  Plane,
+  Train,
+  Bus,
+  Car,
+  Bike,
+  Sailboat,
+  Anchor,
+  ParkingCircle,
+  Fuel,
+  // Naturaleza & outdoor
+  Mountain,
+  TreePine,
+  Leaf,
+  Flower2,
+  Waves,
+  Sun,
+  Tent,
+  // Cultura & entretenimiento
+  Music,
+  Mic,
+  Theater,
+  Drama,
+  Film,
+  Palette,
+  Landmark,
+  Church,
+  Trophy,
+  // Bienestar & salud
+  Activity,
+  Dumbbell,
+  Heart,
+  Stethoscope,
+  Pill,
+  // Servicios generales
+  Briefcase,
+  Building2,
+  GraduationCap,
+  Phone,
+  Wifi,
 };
 
 const MODULE_ICONS: Record<string, LucideIcon> = {
@@ -99,12 +335,44 @@ const MODULE_ICONS: Record<string, LucideIcon> = {
 
 export function HomeDashboardEditor({
   modules,
+  listings,
   onChange,
 }: {
   modules: ModulesConfig;
+  /** Listings dinámicos para que cada tile pueda heredar su iconKey. */
+  listings: ListingsModule;
   onChange: (next: ModulesConfig) => void;
 }) {
   const sysModules = modules.systemModules ?? DEFAULT_SYSTEM_MODULES;
+  const iconOverrides = modules.iconOverrides ?? {};
+  const customIconsMap = modules.customIcons ?? {};
+  const listingIconByKey = useMemo(() => {
+    const map: Record<string, { iconKey?: string; customIcon?: string }> = {};
+    for (const l of listings) map[l.key] = { iconKey: l.iconKey, customIcon: l.customIcon };
+    return map;
+  }, [listings]);
+
+  /**
+   * Resuelve par {iconKey, customIcon} para un tile con prioridad:
+   *   1. modules.customIcons[key] (data URL explícito) — gana sobre todo.
+   *   2. modules.iconOverrides[key] (Lucide explícito en Modules tab).
+   *   3. listings[key].customIcon (custom de listing module).
+   *   4. listings[key].iconKey (Lucide de listing module).
+   *   5. MODULE_ICONS[key] como Lucide canónico.
+   */
+  const resolveTile = (tileKey: string): { iconKey?: string; customIcon?: string } => {
+    if (customIconsMap[tileKey]) return { customIcon: customIconsMap[tileKey] };
+    if (iconOverrides[tileKey]) return { iconKey: iconOverrides[tileKey] };
+    const li = listingIconByKey[tileKey];
+    if (li?.customIcon) return { customIcon: li.customIcon };
+    if (li?.iconKey) return { iconKey: li.iconKey };
+    // Caer al canónico — buscamos su key Lucide en LISTING_ICONS por nombre del componente.
+    const canonical = MODULE_ICONS[tileKey];
+    if (!canonical) return { iconKey: 'Sparkles' };
+    // Reverse-lookup del LucideIcon → key registrada en LISTING_ICONS.
+    for (const [k, v] of Object.entries(LISTING_ICONS)) if (v === canonical) return { iconKey: k };
+    return { iconKey: 'Sparkles' };
+  };
 
   const visibleTiles = useMemo(
     () =>
@@ -184,14 +452,19 @@ export function HomeDashboardEditor({
             onReorder={handleReorder}
             className="flex flex-col gap-1.5"
           >
-            {visibleTiles.map((entry) => (
-              <ModuleRow
-                key={entry.key}
-                entry={entry}
-                onToggle={() => handleToggle(entry.key)}
-                onLabel={(label) => handleLabel(entry.key, label)}
-              />
-            ))}
+            {visibleTiles.map((entry) => {
+              const tileIcon = resolveTile(entry.key);
+              return (
+                <ModuleRow
+                  key={entry.key}
+                  entry={entry}
+                  iconKey={tileIcon.iconKey}
+                  customIcon={tileIcon.customIcon}
+                  onToggle={() => handleToggle(entry.key)}
+                  onLabel={(label) => handleLabel(entry.key, label)}
+                />
+              );
+            })}
           </Reorder.Group>
         )}
       </section>
@@ -264,11 +537,17 @@ export function SystemModulesEditor({
   onChange,
   listings,
   onListingsChange,
+  itinerary,
+  onItineraryChange,
 }: {
   modules: ModulesConfig;
   onChange: (next: ModulesConfig) => void;
   listings: ListingsModule;
   onListingsChange: (next: ListingsModule) => void;
+  /** Trip Planner config — para auto-sync de option `activities` cuando se
+   *  añade/borra/renombra un listing module. */
+  itinerary?: ItineraryBuilderConfig;
+  onItineraryChange?: (next: ItineraryBuilderConfig) => void;
 }) {
   const sys: SystemModules = modules.systemModules ?? DEFAULT_SYSTEM_MODULES;
   const catalogSysKeys = CATALOG_SYSTEM_MODULE_LIST.map((m) => m.key);
@@ -285,6 +564,26 @@ export function SystemModulesEditor({
   const setSystem = (k: keyof SystemModules) =>
     onChange({ ...modules, systemModules: { ...sys, [k]: !sys[k] } });
 
+  const iconOverrides = modules.iconOverrides ?? {};
+  const customIcons = modules.customIcons ?? {};
+  const setIconOverride = (moduleKey: string, iconKey: string) =>
+    onChange({
+      ...modules,
+      iconOverrides: { ...iconOverrides, [moduleKey]: iconKey },
+      // Limpiar custom cuando se elige un Lucide nuevo.
+      customIcons: { ...customIcons, [moduleKey]: '' },
+    });
+  const setCustomIcon = (moduleKey: string, dataUrl: string) =>
+    onChange({
+      ...modules,
+      customIcons: { ...customIcons, [moduleKey]: dataUrl },
+    });
+  const resolveIcon = (canonical: LucideIcon, moduleKey: string): LucideIcon => {
+    const override = iconOverrides[moduleKey];
+    if (override && LISTING_ICONS[override]) return LISTING_ICONS[override];
+    return canonical;
+  };
+
   const handleReset = () =>
     onChange({ ...modules, systemModules: { ...DEFAULT_SYSTEM_MODULES } });
 
@@ -298,6 +597,53 @@ export function SystemModulesEditor({
     if (transformTiles) {
       onChange({ ...modules, tiles: transformTiles(modules.tiles) });
     }
+  };
+
+  /* ---------------- Trip Planner auto-sync (audit feedback) -------------- */
+  /**
+   * Cuando se añade/borra/renombra un listing module, sincroniza la option
+   * correspondiente en el AI question `activities` del Trip Planner. Permite
+   * que el operador NO tenga que ir al editor del Trip Planner a mano.
+   */
+  const syncItineraryActivity = (
+    op:
+      | { type: 'add'; key: string; label: string }
+      | { type: 'delete'; key: string }
+      | { type: 'renameKey'; oldKey: string; newKey: string }
+      | { type: 'renameLabel'; key: string; label: string },
+  ) => {
+    if (!itinerary || !onItineraryChange) return;
+    const qIdx = itinerary.questions.findIndex((q) => q.key === 'activities');
+    if (qIdx === -1) return;
+    const q = itinerary.questions[qIdx]!;
+    let nextOptions = q.options;
+    if (op.type === 'add') {
+      // No duplicar si ya existe option con ese categoryKey o value.
+      if (q.options.some((o) => o.categoryKey === op.key || o.value === op.key)) return;
+      nextOptions = [
+        ...q.options,
+        { value: op.key, label: op.label, categoryKey: op.key },
+      ];
+    } else if (op.type === 'delete') {
+      nextOptions = q.options.filter(
+        (o) => o.categoryKey !== op.key && o.value !== op.key,
+      );
+      if (nextOptions.length === q.options.length) return;
+    } else if (op.type === 'renameKey') {
+      nextOptions = q.options.map((o) =>
+        o.categoryKey === op.oldKey || o.value === op.oldKey
+          ? { ...o, value: op.newKey, categoryKey: op.newKey }
+          : o,
+      );
+    } else if (op.type === 'renameLabel') {
+      nextOptions = q.options.map((o) =>
+        o.categoryKey === op.key || o.value === op.key ? { ...o, label: op.label } : o,
+      );
+    }
+    if (nextOptions === q.options) return;
+    const nextQuestions = itinerary.questions.slice();
+    nextQuestions[qIdx] = { ...q, options: nextOptions };
+    onItineraryChange({ ...itinerary, questions: nextQuestions });
   };
 
   const handleListingToggle = (key: string) => {
@@ -316,6 +662,36 @@ export function SystemModulesEditor({
       listings.map((e) => (e.key === key ? { ...e, label } : e)),
       (tiles) => tiles.map((t) => (t.key === key ? { ...t, label } : t)),
     );
+    syncItineraryActivity({ type: 'renameLabel', key, label });
+  };
+
+  const handleListingRenameKey = (oldKey: string, rawNewKey: string) => {
+    const newKey = rawNewKey
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    if (!newKey || newKey === oldKey) return;
+    if (listings.some((e) => e.key === newKey)) return; // colisión: ignora silently
+    updateListingsAndTiles(
+      listings.map((e) => (e.key === oldKey ? { ...e, key: newKey } : e)),
+      (tiles) => tiles.map((t) => (t.key === oldKey ? { ...t, key: newKey } : t)),
+    );
+    syncItineraryActivity({ type: 'renameKey', oldKey, newKey });
+  };
+
+  const handleListingIconChange = (key: string, iconKey: string) => {
+    updateListingsAndTiles(
+      listings.map((e) => (e.key === key ? { ...e, iconKey, customIcon: '' } : e)),
+      (tiles) => tiles,
+    );
+  };
+
+  const handleListingCustomIcon = (key: string, customIcon: string) => {
+    updateListingsAndTiles(
+      listings.map((e) => (e.key === key ? { ...e, customIcon } : e)),
+      (tiles) => tiles,
+    );
   };
 
   const handleListingDuplicate = (key: string) => {
@@ -331,6 +707,7 @@ export function SystemModulesEditor({
       next.splice(idx + 1, 0, newTile);
       return next;
     });
+    syncItineraryActivity({ type: 'add', key: dup.key, label: dup.label });
   };
 
   const [confirmDelete, setConfirmDelete] = useState<{ key: string; label: string } | null>(null);
@@ -340,6 +717,7 @@ export function SystemModulesEditor({
       listings.filter((e) => e.key !== key),
       (tiles) => tiles.filter((t) => t.key !== key),
     );
+    syncItineraryActivity({ type: 'delete', key });
     setConfirmDelete(null);
   };
 
@@ -354,6 +732,7 @@ export function SystemModulesEditor({
       ...tiles,
       { key: entry.key, label: entry.label, enabled: true },
     ]);
+    syncItineraryActivity({ type: 'add', key: entry.key, label: entry.label });
     setDraftLabel('');
     setShowAdd(false);
   };
@@ -399,11 +778,13 @@ export function SystemModulesEditor({
               return (
                 <ListingModuleRow
                   key={entry.key}
-                  icon={<Icon className="h-4 w-4" />}
                   entry={entry}
                   itemCount={itemCount}
                   onToggle={() => handleListingToggle(entry.key)}
                   onRename={(label) => handleListingRename(entry.key, label)}
+                  onRenameKey={(newKey) => handleListingRenameKey(entry.key, newKey)}
+                  onIconChange={(iconKey) => handleListingIconChange(entry.key, iconKey)}
+                  onCustomIcon={(dataUrl) => handleListingCustomIcon(entry.key, dataUrl)}
                   onDuplicate={() => handleListingDuplicate(entry.key)}
                   onDelete={() => setConfirmDelete({ key: entry.key, label: entry.label })}
                 />
@@ -414,16 +795,20 @@ export function SystemModulesEditor({
           {/* System catalog modules (Events, Tickets, Passes, Trails) — same
               "data-driven" category but not duplicatable. */}
           {CATALOG_SYSTEM_MODULE_LIST.map((m) => {
-            const Icon = MODULE_ICONS[m.tileKey] ?? Sparkles;
+            const Icon = resolveIcon(MODULE_ICONS[m.tileKey] ?? Sparkles, m.tileKey);
             return (
               <SystemRow
                 key={m.key}
                 icon={<Icon className="h-4 w-4" />}
+                iconKey={iconOverrides[m.tileKey]}
+                customIcon={customIcons[m.tileKey]}
                 title={m.label}
                 subtitle={m.subtitle}
                 cascade={m.cascade}
                 enabled={sys[m.key]}
                 onToggle={() => setSystem(m.key)}
+                onIconChange={(iconKey) => setIconOverride(m.tileKey, iconKey)}
+                onCustomIcon={(dataUrl) => setCustomIcon(m.tileKey, dataUrl)}
               />
             );
           })}
@@ -501,16 +886,20 @@ export function SystemModulesEditor({
 
         <div className="flex flex-col gap-1.5">
           {HOME_MODULE_LIST.map((m) => {
-            const Icon = MODULE_ICONS[m.tileKey] ?? Sparkles;
+            const Icon = resolveIcon(MODULE_ICONS[m.tileKey] ?? Sparkles, m.tileKey);
             return (
               <SystemRow
                 key={m.key}
                 icon={<Icon className="h-4 w-4" />}
+                iconKey={iconOverrides[m.tileKey]}
+                customIcon={customIcons[m.tileKey]}
                 title={m.label}
                 subtitle={m.subtitle}
                 cascade={m.cascade}
                 enabled={sys[m.key]}
                 onToggle={() => setSystem(m.key)}
+                onIconChange={(iconKey) => setIconOverride(m.tileKey, iconKey)}
+                onCustomIcon={(dataUrl) => setCustomIcon(m.tileKey, dataUrl)}
               />
             );
           })}
@@ -547,38 +936,80 @@ export function SystemModulesEditor({
 
 function SystemRow({
   icon,
+  iconKey,
+  customIcon,
   title,
   subtitle,
   cascade,
   enabled,
   onToggle,
+  onIconChange,
+  onCustomIcon,
 }: {
   icon: React.ReactNode;
+  /** Si se pasa, habilita el icon picker para overrides en `modules.iconOverrides`. */
+  iconKey?: string;
+  customIcon?: string;
   title: string;
   subtitle: string;
   /** Lista de side-effects al togglear este módulo (audit F-09). */
   cascade?: string;
   enabled: boolean;
   onToggle: () => void;
+  onIconChange?: (iconKey: string) => void;
+  onCustomIcon?: (dataUrl: string) => void;
 }) {
+  const [iconMenuOpen, setIconMenuOpen] = useState(false);
   const cascadeMsg = cascade
     ? `Toggling ${title} ${enabled ? 'off' : 'on'} also affects: ${cascade}`
     : undefined;
+  const isInteractiveIcon = !!onIconChange;
   return (
     <div
       className={
-        'flex items-center gap-2.5 rounded-lg border bg-white p-2 transition dark:bg-zinc-900/40 ' +
+        'relative flex items-center gap-2.5 rounded-lg border bg-white p-2 transition dark:bg-zinc-900/40 ' +
         (enabled
           ? 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-900 dark:hover:border-zinc-800 dark:hover:bg-zinc-900/70'
           : 'border-dashed border-zinc-200 opacity-60 hover:opacity-100 dark:border-zinc-900')
       }
     >
-      <span
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-zinc-100 text-zinc-600 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800"
-        aria-hidden
-      >
-        {icon}
-      </span>
+      {isInteractiveIcon ? (
+        <button
+          type="button"
+          onClick={() => setIconMenuOpen((v) => !v)}
+          title="Change icon"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-zinc-100 text-zinc-600 ring-1 ring-zinc-200 transition hover:scale-105 hover:bg-sky-500/10 hover:text-sky-700 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800 dark:hover:text-sky-300"
+        >
+          {customIcon ? (
+            <IconNode customIcon={customIcon} className="h-4 w-4" />
+          ) : (
+            icon
+          )}
+        </button>
+      ) : (
+        <span
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-zinc-100 text-zinc-600 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800"
+          aria-hidden
+        >
+          {icon}
+        </span>
+      )}
+      {iconMenuOpen && onIconChange ? (
+        <div className="absolute left-2 top-12 z-20">
+          <IconPickerGrid
+            selectedKey={iconKey}
+            customIcon={customIcon}
+            onPick={(key) => {
+              onIconChange(key);
+              setIconMenuOpen(false);
+            }}
+            onCustomChange={(dataUrl) => {
+              onCustomIcon?.(dataUrl);
+              if (dataUrl) setIconMenuOpen(false);
+            }}
+          />
+        </div>
+      ) : null}
       <div className="min-w-0 flex-1">
         <div className="font-display text-[12.5px] font-medium leading-tight text-zinc-800 dark:text-zinc-200">
           {title}
@@ -606,10 +1037,15 @@ function SystemRow({
 
 function ModuleRow({
   entry,
+  iconKey,
+  customIcon,
   onToggle,
   onLabel,
 }: {
   entry: ModuleEntry;
+  /** Pareja resuelta por el caller: prioridad customIcon > iconKey Lucide. */
+  iconKey?: string;
+  customIcon?: string;
   onToggle: () => void;
   onLabel: (label: string) => void;
 }) {
@@ -639,8 +1075,6 @@ function ModuleRow({
     setEditing(false);
   };
 
-  const Icon = MODULE_ICONS[entry.key] ?? Sparkles;
-
   return (
     <Reorder.Item
       value={entry}
@@ -666,7 +1100,7 @@ function ModuleRow({
         className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-zinc-100 text-zinc-600 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800"
         aria-hidden
       >
-        <Icon className="h-4 w-4" />
+        <IconNode iconKey={iconKey} customIcon={customIcon} className="h-4 w-4" />
       </span>
 
       <div className="flex flex-1 flex-col">
@@ -760,25 +1194,33 @@ function ToggleSwitch({
 /* ────────────────────────────────────────────────────────────────────────── */
 
 function ListingModuleRow({
-  icon,
   entry,
   itemCount,
   onToggle,
   onRename,
+  onRenameKey,
+  onIconChange,
+  onCustomIcon,
   onDuplicate,
   onDelete,
 }: {
-  icon: React.ReactNode;
   entry: ListingsCatalogEntry;
   itemCount: number;
   onToggle: () => void;
   onRename: (label: string) => void;
+  onRenameKey: (newKey: string) => void;
+  onIconChange: (iconKey: string) => void;
+  onCustomIcon: (dataUrl: string) => void;
   onDuplicate: () => void;
   onDelete: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(entry.label);
   useEffect(() => setDraft(entry.label), [entry.label]);
+  const [editingKey, setEditingKey] = useState(false);
+  const [draftKey, setDraftKey] = useState(entry.key);
+  useEffect(() => setDraftKey(entry.key), [entry.key]);
+  const [iconMenuOpen, setIconMenuOpen] = useState(false);
 
   const commit = () => {
     const next = draft.trim();
@@ -786,17 +1228,42 @@ function ListingModuleRow({
     setEditing(false);
   };
 
+  const commitKey = () => {
+    if (draftKey && draftKey !== entry.key) onRenameKey(draftKey);
+    setEditingKey(false);
+  };
+
   return (
-    <div className="flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-2.5 py-2 transition hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900/40 dark:hover:border-zinc-700">
-      <span
-        className={`grid h-7 w-7 shrink-0 place-items-center rounded-md ring-1 transition ${
+    <div className="relative flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-2.5 py-2 transition hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900/40 dark:hover:border-zinc-700">
+      <button
+        type="button"
+        onClick={() => setIconMenuOpen((v) => !v)}
+        title="Change icon"
+        className={`grid h-7 w-7 shrink-0 place-items-center rounded-md ring-1 transition hover:scale-105 ${
           entry.enabled
             ? 'bg-sky-500/15 text-sky-600 ring-sky-500/30 dark:text-sky-300'
             : 'bg-zinc-100 text-zinc-400 ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-600 dark:ring-zinc-700'
         }`}
       >
-        {icon}
-      </span>
+        <IconNode iconKey={entry.iconKey} customIcon={entry.customIcon} className="h-4 w-4" />
+      </button>
+
+      {iconMenuOpen ? (
+        <div className="absolute left-2 top-9 z-20">
+          <IconPickerGrid
+            selectedKey={entry.iconKey}
+            customIcon={entry.customIcon}
+            onPick={(key) => {
+              onIconChange(key);
+              setIconMenuOpen(false);
+            }}
+            onCustomChange={(dataUrl) => {
+              onCustomIcon(dataUrl);
+              if (dataUrl) setIconMenuOpen(false);
+            }}
+          />
+        </div>
+      ) : null}
 
       <div className="min-w-0 flex-1">
         {editing ? (
@@ -826,9 +1293,37 @@ function ListingModuleRow({
           </button>
         )}
         <div className="truncate text-[10.5px] text-zinc-500">
-          <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono text-[10px] text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
-            /{entry.key}
-          </code>{' '}
+          {editingKey ? (
+            <span className="inline-flex items-center gap-1">
+              <span className="text-zinc-500">/</span>
+              <input
+                // eslint-disable-next-line jsx-a11y/no-autofocus
+                autoFocus
+                type="text"
+                value={draftKey}
+                onChange={(e) => setDraftKey(e.target.value)}
+                onBlur={commitKey}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') commitKey();
+                  if (e.key === 'Escape') {
+                    setDraftKey(entry.key);
+                    setEditingKey(false);
+                  }
+                }}
+                className="rounded border border-sky-500/40 bg-white px-1 font-mono text-[10px] text-zinc-700 focus:outline-none dark:bg-zinc-900 dark:text-zinc-300"
+                size={Math.max(draftKey.length, 8)}
+              />
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setEditingKey(true)}
+              title="Edit slug"
+              className="rounded bg-zinc-100 px-1 py-0.5 font-mono text-[10px] text-zinc-600 transition hover:bg-sky-500/10 hover:text-sky-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:text-sky-300"
+            >
+              /{entry.key}
+            </button>
+          )}{' '}
           · {itemCount} {itemCount === 1 ? 'item' : 'items'}
         </div>
       </div>

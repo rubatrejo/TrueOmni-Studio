@@ -66,10 +66,12 @@ export function MapWelcomePopup({ copy, onDismiss }: MapWelcomePopupProps) {
             <p
               style={{
                 fontFamily: "'Open Sans', var(--font-sans)",
-                fontSize: '18px',
-                color: 'rgba(255,255,255,0.9)',
-                margin: '12px 0 0',
+                fontSize: '20px',
+                fontWeight: 500,
+                color: 'rgba(255,255,255,0.95)',
+                margin: '14px 0 0',
                 textAlign: 'center',
+                letterSpacing: '0.01em',
               }}
             >
               {copy.subtitle}

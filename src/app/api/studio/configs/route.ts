@@ -82,6 +82,91 @@ function rewriteAddressesInPlace(config: KioskConfig, location: string): void {
   config.trails?.trails?.forEach(visit);
 }
 
+// US state ST → full name lookup. Usado para reemplazar referencias al
+// state hardcoded del template ("Arizona") por el state del cliente nuevo.
+const US_STATE_NAMES: Record<string, string> = {
+  AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California',
+  CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', FL: 'Florida', GA: 'Georgia',
+  HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa',
+  KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland',
+  MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri',
+  MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey',
+  NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio',
+  OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina',
+  SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont',
+  VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
+  DC: 'Washington',
+};
+
+// Cities del template Arizona — se reemplazan en titles/descriptions/etc.
+// con la ciudad del cliente nuevo. Lista cerrada para no reemplazar palabras
+// que casualmente coincidan con un nombre de ciudad en otros contextos.
+const ARIZONA_CITIES = [
+  'North Phoenix', 'Phoenix', 'Mesa', 'Glendale', 'Chandler', 'Scottsdale',
+  'Tempe', 'Gilbert', 'Peoria', 'Surprise',
+];
+
+/**
+ * Reemplaza referencias hardcoded del template Arizona ("Arizona", "Phoenix",
+ * "Mesa", etc.) en title/description/headline/longDescription/etc. con la
+ * city/state del cliente nuevo. Solo se ejecuta cuando el operador especifica
+ * una location distinta de Arizona.
+ *
+ * Limitaciones conocidas:
+ * - Si el cliente es de Arizona, no se reemplaza nada (idempotente).
+ * - Mock data específico ("Arizona Science Center", "Arizona Boardwalk") se
+ *   reemplaza también — el operador edita esos titles después.
+ */
+function rewriteContentInPlace(
+  config: KioskConfig,
+  location: string,
+): void {
+  if (!location) return;
+  const m = location.match(/^([^,]+),\s*([A-Z]{2})\s*$/);
+  if (!m) return;
+  const newCity = m[1].trim();
+  const newStateAbbrev = m[2];
+  const newStateName = US_STATE_NAMES[newStateAbbrev] ?? newStateAbbrev;
+  // Evitamos no-ops (template ya es Arizona).
+  if (newStateAbbrev === 'AZ') return;
+
+  const STRING_FIELDS = [
+    'title', 'description', 'shortDescription', 'longDescription', 'headline',
+    'subtitle', 'label',
+  ] as const;
+
+  const replaceInString = (s: string): string => {
+    let out = s;
+    for (const city of ARIZONA_CITIES) {
+      out = out.replaceAll(city, newCity);
+    }
+    out = out.replaceAll('Arizona', newStateName);
+    out = out.replace(/\bAZ\b/g, newStateAbbrev);
+    return out;
+  };
+
+  const visit = (item: unknown) => {
+    if (!item || typeof item !== 'object') return;
+    const obj = item as Record<string, unknown>;
+    for (const field of STRING_FIELDS) {
+      const v = obj[field];
+      if (typeof v === 'string' && v.length > 0) {
+        obj[field] = replaceInString(v);
+      }
+    }
+  };
+
+  config.listings?.forEach((cat) => {
+    visit(cat);
+    cat.catalog?.listings?.forEach(visit);
+  });
+  config.events?.events?.forEach(visit);
+  config.passes?.passes?.forEach(visit);
+  config.trails?.trails?.forEach(visit);
+  config.deals?.deals?.forEach(visit);
+  config.brochures?.brochures?.forEach(visit);
+}
+
 /**
  * `/api/studio/configs`
  *
@@ -189,6 +274,11 @@ export async function POST(request: Request) {
     // cliente nuevo. Garantiza que el operador NO vea "North Phoenix,
     // AZ" en un kiosk de "Davenport, FL".
     rewriteAddressesInPlace(config, trimmedLocation);
+
+    // Reemplazar referencias hardcoded del template Arizona (cities +
+    // state name + state abbrev) en title/description/headline de
+    // listings/events/passes/trails/deals/brochures.
+    rewriteContentInPlace(config, trimmedLocation);
 
     const parsed = KioskConfigSchema.safeParse(config);
     if (!parsed.success) {

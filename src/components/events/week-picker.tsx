@@ -37,7 +37,7 @@ export function WeekPicker({
   return (
     <div
       className="relative w-full"
-      style={{ height: '180px', backgroundColor: '#1e88c6', flexShrink: 0 }}
+      style={{ height: '180px', backgroundColor: 'hsl(var(--brand-secondary))', flexShrink: 0 }}
     >
       {/* Fila 1 — flechas + label */}
       <div

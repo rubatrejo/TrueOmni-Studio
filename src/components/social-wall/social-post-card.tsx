@@ -52,7 +52,7 @@ export function SocialPostCard({
             style={{
               padding: post.caption ? '110px 14px 14px 14px' : '90px 14px 14px 14px',
               background:
-                'linear-gradient(0deg, #0a4b78 0%, rgba(10,75,120,0.92) 35%, rgba(10,75,120,0.5) 70%, rgba(10,75,120,0) 100%)',
+                'linear-gradient(0deg, hsl(var(--brand-primary)) 0%, rgba(10,75,120,0.92) 35%, rgba(10,75,120,0.5) 70%, rgba(10,75,120,0) 100%)',
               color: '#ffffff',
             }}
           >
@@ -194,7 +194,7 @@ function TextBody({ post }: { post: SocialPost }) {
         padding: '18px 18px 22px 18px',
         color: '#ffffff',
         position: 'relative',
-        background: '#0a4b78',
+        background: 'hsl(var(--brand-primary))',
       }}
     >
       <AuthorRow post={post} showSourceBadge />

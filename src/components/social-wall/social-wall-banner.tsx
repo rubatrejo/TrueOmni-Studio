@@ -30,25 +30,29 @@ export function SocialWallBanner({
         gap: '48px',
       }}
     >
-      {/* Izquierda: label + círculos */}
-      <div className="flex flex-col" style={{ rowGap: '10px' }}>
-        <span
-          className="font-sans text-white"
-          style={{
-            fontSize: '22px',
-            lineHeight: '22px',
-            fontWeight: 600,
-            letterSpacing: '0.02em',
-          }}
-        >
-          Highlights:
-        </span>
-        <div className="flex items-center" style={{ columnGap: '14px' }}>
-          {highlights.slice(0, 4).map((h) => (
-            <HighlightCircle key={h.id} highlight={h} />
-          ))}
+      {/* Izquierda: label + círculos. Si no hay highlights, ocultamos
+          tanto el label "Highlights:" como el slot — para no dejar texto
+          colgado sobre nada. El hashtag de la derecha se muestra siempre. */}
+      {highlights.length > 0 ? (
+        <div className="flex flex-col" style={{ rowGap: '10px' }}>
+          <span
+            className="font-sans text-white"
+            style={{
+              fontSize: '22px',
+              lineHeight: '22px',
+              fontWeight: 600,
+              letterSpacing: '0.02em',
+            }}
+          >
+            Highlights:
+          </span>
+          <div className="flex items-center" style={{ columnGap: '14px' }}>
+            {highlights.slice(0, 4).map((h) => (
+              <HighlightCircle key={h.id} highlight={h} />
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null}
 
       {/* Derecha: hashtag grande alineado con los círculos */}
       <div className="ml-auto flex items-end" style={{ paddingBottom: '4px' }}>

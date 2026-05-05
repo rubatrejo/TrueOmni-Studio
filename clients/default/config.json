@@ -10132,8 +10132,8 @@
             "cta": "OK"
           },
           "chips": {
-            "play": "Play",
-            "eat": "Eat",
+            "play": "Things to Do",
+            "eat": "Restaurants",
             "stay": "Stay",
             "events": "Events"
           },

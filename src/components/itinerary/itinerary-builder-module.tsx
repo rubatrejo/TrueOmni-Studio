@@ -13,7 +13,9 @@ import { SendToPhoneModal } from '@/components/listings/send-to-phone-modal';
 import { MapPinBubble } from '@/components/map/map-pin-bubble';
 import {
   KIOSK_CLIENT_COORDS_OVERRIDE_EVENT,
+  KIOSK_CLIENT_NAME_OVERRIDE_EVENT,
   getCachedClientCoords,
+  getCachedClientName,
 } from '@/components/studio-bridge';
 import { generateItinerary, type GeneratedItinerary } from '@/lib/ai-itinerary';
 import type { ItineraryConfig, KioskConfig, MapSource } from '@/lib/config';
@@ -237,7 +239,22 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
 
   const center = effectiveClientCoords ?? { lat: 33.4484, lng: -112.074 };
 
-  const interp = { client_name: client.nombre };
+  // Reactive client name: en el preview del Studio, el bridge dispatcha
+  // override cuando se edita el nombre del kiosk. Sin esto el welcome
+  // popup y otros textos seguían diciendo "Arizona".
+  const [reactiveClientName, setReactiveClientName] = useState<string | null>(
+    () => getCachedClientName(),
+  );
+  useEffect(() => {
+    const onName = (event: Event) => {
+      const detail = (event as CustomEvent<{ clientName?: string }>).detail;
+      if (detail?.clientName) setReactiveClientName(detail.clientName);
+    };
+    window.addEventListener(KIOSK_CLIENT_NAME_OVERRIDE_EVENT, onName);
+    return () => window.removeEventListener(KIOSK_CLIENT_NAME_OVERRIDE_EVENT, onName);
+  }, []);
+  const effectiveClientName = reactiveClientName ?? client.nombre;
+  const interp = { client_name: effectiveClientName };
 
   // Auto-like de Top Suggestions: al entrar al screen, todos los items curados
   // se añaden al rail. El usuario puede quitar el like.

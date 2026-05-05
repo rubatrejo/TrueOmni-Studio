@@ -34,7 +34,7 @@ const buildDayLabels = (locale: string): string[] => {
 /**
  * Week strip del Trip Planner en tab Events. Pixel-close al `WeekPicker`
  * del módulo Events (verbatim SVG `Events.svg`):
- *   - 180px alto · bg `#1e88c6` (azul medio Eat).
+ *   - 180px alto · bg `hsl(var(--brand-secondary))` (azul medio Eat).
  *   - Row 1 (78px): chevron + uppercase 34px bold + chevron.
  *   - Row 2 (102px): 7 pills SUN..SAT 118×64, rounded-md, white border 1.6px,
  *     active = white fill + text `hsl(var(--brand-primary))`.
@@ -51,7 +51,7 @@ export function EventsWeekStrip(props: EventsWeekStripProps) {
         top: 350,
         width: 1080,
         height: 180,
-        backgroundColor: '#1e88c6',
+        backgroundColor: 'hsl(var(--brand-secondary))',
         zIndex: 9,
       }}
     >

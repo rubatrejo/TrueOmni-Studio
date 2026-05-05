@@ -70,8 +70,8 @@ export function StartScreen({
       >
         <defs>
           <linearGradient id="pb-bottom-fade" x1="0.5" x2="0.5" y2="1" gradientUnits="objectBoundingBox">
-            <stop offset="0" stopColor="#0e518a" stopOpacity={0} />
-            <stop offset="1" stopColor="#0e518a" stopOpacity={1} />
+            <stop offset="0" stopColor="hsl(var(--brand-primary))" stopOpacity={0} />
+            <stop offset="1" stopColor="hsl(var(--brand-primary))" stopOpacity={1} />
           </linearGradient>
         </defs>
         <rect x={0} y={0} width={1091} height={287} opacity={0.55} fill="url(#pb-bottom-fade)" />

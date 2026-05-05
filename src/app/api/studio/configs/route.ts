@@ -165,6 +165,16 @@ function rewriteContentInPlace(
   config.trails?.trails?.forEach(visit);
   config.deals?.deals?.forEach(visit);
   config.brochures?.brochures?.forEach(visit);
+
+  // Social Wall hashtag: "VisitPhoenix" → "VisitDavenport". Quitamos
+  // espacios + lowercase no porque los hashtags son case-insensitive y la
+  // convención en el template es CamelCase.
+  if (config.socialWall) {
+    const sw = config.socialWall as { hashtag?: string };
+    if (typeof sw.hashtag === 'string') {
+      sw.hashtag = replaceInString(sw.hashtag).replace(/\s+/g, '');
+    }
+  }
 }
 
 /**

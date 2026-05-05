@@ -1,9 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useSubcategoryLabel, useTextos } from '@/components/i18n-provider';
+import {
+  KIOSK_CLIENT_COORDS_OVERRIDE_EVENT,
+  getCachedClientCoords,
+} from '@/components/studio-bridge';
 import type { Listing } from '@/lib/config';
 import { useEventFavorites, useFavorites, useTrailFavorites } from '@/lib/favorites';
 
@@ -106,6 +110,23 @@ export function ListingDetail({
   }>(null);
   const [directionsOpen, setDirectionsOpen] = useState(false);
   const [threshold360Open, setThreshold360Open] = useState(false);
+
+  // Reactive client coords del bridge del Studio. El DirectionsModal y el
+  // MapboxMap usan estas coords para origin de la ruta y centro de mapa.
+  // Sin esto, "Get Directions" en un kiosk de Florida seguía centrando
+  // en Phoenix.
+  const [reactiveCoords, setReactiveCoords] = useState<
+    { lat: number; lng: number } | undefined
+  >(() => getCachedClientCoords() ?? clientCoords);
+  useEffect(() => {
+    const onOverride = (event: Event) => {
+      const detail = (event as CustomEvent<{ coords?: { lat: number; lng: number } }>).detail;
+      if (detail?.coords) setReactiveCoords(detail.coords);
+    };
+    window.addEventListener(KIOSK_CLIENT_COORDS_OVERRIDE_EVENT, onOverride);
+    return () => window.removeEventListener(KIOSK_CLIENT_COORDS_OVERRIDE_EVENT, onOverride);
+  }, []);
+  const effectiveClientCoords = reactiveCoords ?? clientCoords;
 
   const openEmail = () => setEmailOpen(true);
   const openPhone = () => setPhoneOpen(true);
@@ -253,7 +274,7 @@ export function ListingDetail({
       <DirectionsModal
         open={directionsOpen}
         listing={listing}
-        clientCoords={clientCoords}
+        clientCoords={effectiveClientCoords}
         mapboxToken={mapboxToken}
         onClose={() => setDirectionsOpen(false)}
         onSendEmail={() => {

@@ -5,6 +5,10 @@ import { useEffect, useState } from 'react';
 import { prewarmAiAvatar } from '@/components/ai/ai-modal';
 import { AiModalHost } from '@/components/ai/ai-modal-host';
 import { AskAiTrigger } from '@/components/ai/ask-ai-trigger';
+import {
+  KIOSK_CLIENT_NAME_OVERRIDE_EVENT,
+  getCachedClientName,
+} from '@/components/studio-bridge';
 
 interface AskAiTextos {
   title: string;
@@ -48,6 +52,20 @@ type AiAvatarDetail = {
 export function AskAiHost(props: AskAiHostProps) {
   const [hidden, setHidden] = useState(!props.enabled);
   const [override, setOverride] = useState<AiAvatarDetail | null>(null);
+  // Reactive client name del bridge del Studio. Sustituye `{client_name}`
+  // en greeting cuando el operador edita el nombre del kiosk en preview.
+  const [reactiveClientName, setReactiveClientName] = useState<string | null>(
+    () => getCachedClientName(),
+  );
+  useEffect(() => {
+    const onName = (event: Event) => {
+      const detail = (event as CustomEvent<{ clientName?: string }>).detail;
+      if (detail?.clientName) setReactiveClientName(detail.clientName);
+    };
+    window.addEventListener(KIOSK_CLIENT_NAME_OVERRIDE_EVENT, onName);
+    return () => window.removeEventListener(KIOSK_CLIENT_NAME_OVERRIDE_EVENT, onName);
+  }, []);
+  const effectiveClientName = reactiveClientName ?? props.clientName;
 
   // Pre-warm la conversación Tavus en background al montar /home (si el
   // módulo está habilitado). Resultado: cuando el usuario tap el trigger,
@@ -84,9 +102,14 @@ export function AskAiHost(props: AskAiHostProps) {
 
   const avatarSrc = override?.avatar?.length ? override.avatar : props.avatarSrc;
   const heroVideoSrc = override?.heroVideo?.length ? override.heroVideo : props.heroVideoSrc;
-  const greeting = override?.greeting?.length
-    ? override.greeting.replaceAll('{client_name}', props.clientName)
-    : props.greeting;
+  // Cuando el operador edita greeting en el Studio, override.greeting
+  // viene RAW con `{client_name}`. Interpolamos con effectiveClientName
+  // (reactivo). Si NO hay override, el greeting del prop también puede
+  // venir RAW (desde (kiosk)/home/page.tsx que dejó de pre-interpolar).
+  const greeting = (override?.greeting?.length
+    ? override.greeting
+    : props.greeting
+  ).replaceAll('{client_name}', effectiveClientName);
   const suggested = override?.suggestedQuestions?.length
     ? override.suggestedQuestions.map((q) => ({ id: q.id, text: q.text, response: '' }))
     : ([...props.suggestedQuestions] as Array<{ id: string; text: string; response: string }>);
@@ -105,7 +128,7 @@ export function AskAiHost(props: AskAiHostProps) {
         heroVideoSrc={heroVideoSrc}
         greeting={greeting}
         suggestedQuestions={suggested}
-        clientName={props.clientName}
+        clientName={effectiveClientName}
         textos={props.textos}
       />
     </>

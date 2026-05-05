@@ -124,7 +124,7 @@ export function SendConfirmationPopup({
             fontSize: '40px',
             lineHeight: '44px',
             fontWeight: 700,
-            color: '#0b3a66',
+            color: 'hsl(var(--brand-primary))',
             marginBottom: '20px',
             letterSpacing: '-0.01em',
           }}

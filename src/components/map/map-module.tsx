@@ -139,14 +139,40 @@ export function MapModule({
   // 2) serverClientName (config.client.nombre del SSR — kiosk runtime
   // normal). Si ninguno está disponible, reemplaza por string vacío para
   // no mostrar "{client}" literal.
-  const interpolatedExploreTitle = useMemo(() => {
-    const raw = textos.exploreTitle;
-    const name = reactiveClientName ?? serverClientName ?? '';
-    if (raw.includes('{client}')) {
-      return raw.replaceAll('{client}', name).replace(/\s{2,}/g, ' ').trim();
-    }
-    return raw;
-  }, [textos.exploreTitle, reactiveClientName, serverClientName]);
+  const effectiveClientName = reactiveClientName ?? serverClientName ?? '';
+  const reinterpolate = useCallback(
+    (raw: string): string => {
+      if (typeof raw !== 'string' || !raw) return raw;
+      // Reemplaza tanto `{client}` (template) como cualquier mención
+      // hardcoded del nombre server-rendered (ej. "Welcome to Arizona Map"
+      // en welcomeCopy.title que se publicó pre-interpolado).
+      let out = raw.replaceAll('{client}', effectiveClientName);
+      if (
+        serverClientName &&
+        reactiveClientName &&
+        serverClientName !== reactiveClientName &&
+        out.includes(serverClientName)
+      ) {
+        out = out.replaceAll(serverClientName, reactiveClientName);
+      }
+      return out.replace(/\s{2,}/g, ' ').trim();
+    },
+    [effectiveClientName, reactiveClientName, serverClientName],
+  );
+  const interpolatedExploreTitle = useMemo(
+    () => reinterpolate(textos.exploreTitle),
+    [textos.exploreTitle, reinterpolate],
+  );
+  const interpolatedWelcomeCopy = useMemo(() => {
+    if (!mod.welcomeCopy) return undefined;
+    return {
+      ...mod.welcomeCopy,
+      title: reinterpolate(mod.welcomeCopy.title),
+      body: reinterpolate(mod.welcomeCopy.body),
+      subtitle: mod.welcomeCopy.subtitle ? reinterpolate(mod.welcomeCopy.subtitle) : undefined,
+      cta: reinterpolate(mod.welcomeCopy.cta),
+    };
+  }, [mod.welcomeCopy, reinterpolate]);
 
   // Override textos pre-renderizados por el caller con el idioma activo.
   const liveTextos = useTextosMap();
@@ -216,11 +242,22 @@ export function MapModule({
 
   const chipDefs = useMemo(
     () =>
-      DEFAULT_CHIP_DEFS.map((c) => ({
-        source: c.source,
-        label: mod.chips?.[c.chipKey] ?? c.defaultLabel,
-        bgColor: c.bg,
-      })),
+      DEFAULT_CHIP_DEFS.map((c) => {
+        const fromConfig = mod.chips?.[c.chipKey];
+        // Override legacy: kiosks publicados con "Play"/"Eat" hardcoded en
+        // chips se actualizan al nuevo naming sin requerir migración del
+        // config en KV ni filesystem.
+        const LEGACY = new Map([
+          ['Play', 'Things to Do'],
+          ['Eat', 'Restaurants'],
+        ]);
+        const label = fromConfig ? (LEGACY.get(fromConfig) ?? fromConfig) : c.defaultLabel;
+        return {
+          source: c.source,
+          label,
+          bgColor: c.bg,
+        };
+      }),
     [mod.chips],
   );
 
@@ -329,8 +366,8 @@ export function MapModule({
 
       <FloatingHomeButton />
 
-      {showWelcome && mod.welcomeCopy ? (
-        <MapWelcomePopup copy={mod.welcomeCopy} onDismiss={handleDismissWelcome} />
+      {showWelcome && interpolatedWelcomeCopy ? (
+        <MapWelcomePopup copy={interpolatedWelcomeCopy} onDismiss={handleDismissWelcome} />
       ) : null}
 
       <MapFilterOverlay

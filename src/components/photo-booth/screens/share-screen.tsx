@@ -152,7 +152,7 @@ export function ShareScreen({
             fontSize: 28,
             fontWeight: 800,
             letterSpacing: '0.02em',
-            color: '#0b3a66',
+            color: 'hsl(var(--brand-primary))',
             textAlign: 'center',
           }}
         >

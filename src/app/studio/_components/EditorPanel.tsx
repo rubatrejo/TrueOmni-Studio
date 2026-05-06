@@ -314,7 +314,13 @@ export function EditorPanel({
           <TicketsEditor value={tickets} eventsValue={events} onChange={onTicketsChange} />
         )}
         {sectionKey === 'passes' && <PassesEditor value={passes} onChange={onPassesChange} />}
-        {sectionKey === 'trails' && <TrailsEditor value={trails} onChange={onTrailsChange} />}
+        {sectionKey === 'trails' && (
+          <TrailsEditor
+            value={trails}
+            onChange={onTrailsChange}
+            mapboxToken={integrations.mapbox.token}
+          />
+        )}
         {sectionKey === 'map' && <MapEditor map={map} onChange={onMapChange} />}
         {sectionKey === 'itinerary-builder' && (
           <ItineraryBuilderEditor

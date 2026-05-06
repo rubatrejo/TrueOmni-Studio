@@ -26,6 +26,7 @@ import { ImportModal } from './catalog/ImportModal';
 import { ImportToast } from './catalog/ImportToast';
 import { TaxonomyEditor } from './catalog/TaxonomyEditor';
 import { EditorEmptyState } from './EditorEmptyState';
+import { TrailGeoJsonField } from './TrailGeoJsonField';
 
 const DIFFICULTY_OPTIONS: TrailDifficulty[] = ['Easy', 'Moderate', 'Hard'];
 const TRAIL_TYPE_OPTIONS: TrailType[] = ['Loop', 'Out & Back', 'Point to Point'];
@@ -33,9 +34,11 @@ const TRAIL_TYPE_OPTIONS: TrailType[] = ['Loop', 'Out & Back', 'Point to Point']
 interface TrailsEditorProps {
   value: TrailsModule;
   onChange: (next: TrailsModule) => void;
+  /** Mapbox token (de `integrations.mapbox.token`) — habilita el draw editor. */
+  mapboxToken?: string;
 }
 
-export function TrailsEditor({ value, onChange }: TrailsEditorProps) {
+export function TrailsEditor({ value, onChange, mapboxToken = '' }: TrailsEditorProps) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
@@ -184,6 +187,8 @@ export function TrailsEditor({ value, onChange }: TrailsEditorProps) {
               />
               <TrailMapEditor
                 trailMap={editingItem.trailMap}
+                trailheadCoords={editingItem.coords}
+                mapboxToken={mapboxToken}
                 onChange={(next) =>
                   handleItemChange(editingItem.slug, { trailMap: next })
                 }
@@ -452,64 +457,30 @@ function ConsiderationsEditor({
 
 function TrailMapEditor({
   trailMap,
+  trailheadCoords,
+  mapboxToken,
   onChange,
 }: {
   trailMap: TrailItem['trailMap'];
+  trailheadCoords: TrailItem['coords'];
+  mapboxToken: string;
   onChange: (next: TrailItem['trailMap']) => void;
 }) {
-  const [text, setText] = useState(() => JSON.stringify(trailMap.geojson.coordinates));
-  const [error, setError] = useState<string | null>(null);
-
-  const commit = (raw: string) => {
-    try {
-      const parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed)) throw new Error('must be a JSON array');
-      const valid = parsed.every(
-        (p) =>
-          Array.isArray(p) &&
-          p.length === 2 &&
-          typeof p[0] === 'number' &&
-          typeof p[1] === 'number',
-      );
-      if (!valid) throw new Error('expected array of [lng, lat] tuples');
-      onChange({
-        ...trailMap,
-        geojson: { type: 'LineString', coordinates: parsed as [number, number][] },
-      });
-      setError(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Invalid JSON');
-    }
-  };
-
   return (
-    <div className="space-y-2 rounded-md border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
-      <h5 className="text-[11.5px] font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-        Trail map (GeoJSON)
-      </h5>
-
-      <label className="block space-y-1">
-        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
-          Coordinates ([lng, lat] tuples)
-        </span>
-        <textarea
-          rows={4}
-          value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-            commit(e.target.value);
-          }}
-          placeholder='[[-112.123,36.123],[-112.124,36.124]]'
-          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[11px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100 dark:placeholder:text-zinc-600"
-        />
-        {error ? (
-          <p className="text-[11px] text-amber-600 dark:text-amber-400">{error}</p>
-        ) : (
-          <p className="text-[11px] text-zinc-500">
-            {trailMap.geojson.coordinates.length} points.
-          </p>
-        )}
-      </label>
-    </div>
+    <TrailGeoJsonField
+      coordinates={trailMap.geojson.coordinates as [number, number][]}
+      fallbackCenter={
+        trailheadCoords.lat || trailheadCoords.lng
+          ? { lat: trailheadCoords.lat, lng: trailheadCoords.lng }
+          : undefined
+      }
+      mapboxToken={mapboxToken}
+      onChange={(next) =>
+        onChange({
+          ...trailMap,
+          geojson: { type: 'LineString', coordinates: next },
+        })
+      }
+    />
   );
 }

@@ -2470,6 +2470,9 @@ Audit panorámico — 8 hallazgos cerrados:
 
 **Fase:** Milestone Studio — **CERRADO**. Audit 32/32 en código + 4 TODOs runtime cerrados. Producto production-ready end-to-end. Próximo milestone: Fase 4 (primer cliente real, bloqueado por negocio).
 
+**Hotfix post-cierre (`c03e35a`):**
+- **Scroll roto en /studio/docs**: el CSS rule `html:has(.studio-root) { overflow: hidden }` se activaba para todas las páginas del Studio (ThemeProvider aplica `.studio-root` siempre), rompiendo scroll en /studio/docs, /studio (listado), /studio/diagnostics, /studio/sign-in. El lock fue diseñado solo para el editor (iframe del PreviewPanel leakea scrollHeight). Fix: selector más específico `.studio-shell` aplicado al div root de `Shell.tsx`. Páginas estáticas → scroll natural. Editor → lock preservado.
+
 ---
 
 ## Plantilla de entrada (copiar al cerrar sesión)

@@ -6,11 +6,11 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Milestone Studio — **deploy E2E completo en `https://trueomni-studio.vercel.app`** (sesión 2026-05-04).
+**Fase activa:** Milestone Studio — **audit panorámico cerrado al 81% (26/32 hallazgos)** (sesión 2026-05-05). Studio sigue deployado en `https://trueomni-studio.vercel.app`.
 
-**Última fase cerrada:** S7.2 + S7.3 + S7.4 — Studio en producción con NextAuth (GitHub OAuth + allowlist) + PR-publish via octokit + Upstash KV cloud + sign-in page custom brandeada + editor del Billboard 0 idle (background image/video, Touch Here configurable, overlay color/gradient) + hero header editable en Branding (image/video + gradient).
+**Última fase cerrada:** Audit Studio — 3 audits paralelos identificaron 32 hallazgos; 26 cerrados en código (todos los 🔴 bugs + 7/8 🟠 gaps + 5/6 🟡 friction + 8/8 🔵 automation). 6 quedan: 4 manuales de Rubén (DNS, Blob smoke prod, DEEPL key, ANTHROPIC reuse — éste último ya cableado en #21+#26), 2 sub-fases dedicadas (#12 Trails GeoJSON viewer L+, #15 Component unification XL → Tema B.2).
 
-**Siguiente acción concreta:** **Vercel Blob storage** — desbloquea uploads hasta 5MB por archivo. Hoy data URLs van inline al config en KV con cap 950KB; con un solo bg de 5MB ya no cabe. Plan: `pnpm add @vercel/blob`, crear Blob store en marketplace (1-click), endpoint `/api/studio/upload`, MediaField sube a Blob → guarda URL (~200B). Después: **custom domain** `studio.trueomni.com` (necesita DNS de `trueomni.com`) o **DeepL/Anthropic keys** para auto-translate.
+**Siguiente acción concreta:** **Push a `origin/main`** — hay ~3 commits acumulados (los 2 anteriores `9e6f7ea`/`e61e834` + los nuevos del audit). Verificar `git config user.email = ruba.trejo@gmail.com` antes (Vercel Hobby tier rechaza con `designers@trueomni.com`). Tras push, ejecutar el smoke E2E del flow Studio→PR→merge→deploy siguiendo `.planning/2026-05-05-smoke-e2e-publish.md`. Después atacar **#12 Trails GeoJSON viewer** o **#15 Component unification (Tema B.2)**.
 
 **Bloqueos:**
 - **S7.2/3/4 bloqueados por infra externa** — necesitan: GitHub PAT (S7.2), OAuth provider + credentials (S7.3 NextAuth), proyecto Vercel + env vars en dashboard (S7.4).
@@ -2368,6 +2368,58 @@ Otros:
 - **Tavus greeting con override por body**: dev usa `KIOSK_CLIENT=default` pero el Studio preview puede tener un cliente con nombre distinto. POST body `clientName` lo prioriza sobre `cfg.client.nombre`. Cache prewarm invalida cuando el nombre cambia.
 
 **Fase:** Milestone Studio — Trip Planner editor + idle settings unificados shippeados a `main`. Pending push a `origin/main` para que Vercel deploye.
+
+---
+
+### Sesión 2026-05-05 — Audit Studio panorámico (3 ronda) + 26/32 hallazgos cerrados
+
+**Hecho (sesión maratón ~14h, sin commitear hasta el final):**
+
+Polish white-label de la mañana (pre-audit):
+- **Idle background shared** en las 4 variants (B0-B3) — `BillboardBackgroundSchema` top-level, MediaField único en BillboardEditor, runtime hook prefiere shared sobre per-variant legacy.
+- **Map welcome popup body** con default `DEFAULT_MAP_WELCOME_BODY` exportable + fallback runtime para kiosks viejos con `body: ''`.
+- **Itinerary local_listings rewrite** — añadidos `venue/caption/instruction` a STRING_FIELDS + `visitWithDirections` recursivo + visit a `socialWall.posts`.
+- **NewClientModal Empty mode toggle** — checkbox propaga `emptyMode` por modal→handleCreate→createConfig→POST que limpia listings/events/passes/deals/trails/itinerary/socialWall antes del rewrite.
+- **Social Wall residual TrueOmni blue** — `rgba(10,75,120,X)` en `social-post-card.tsx:55` → `hsl(var(--brand-primary) / X)`.
+
+Audit panorámico (3 Explore agents en paralelo) → 32 hallazgos identificados → HTML deliverable `.planning/2026-05-05-studio-audit.html` (10 secciones, Tailwind CDN, light/dark, sticky nav, 5 design docs Tema A-E).
+
+**Hallazgos cerrados (26/32 = 81%):**
+- 🔴 6/6 bugs: silent catches bridge (33 logged), api-client/theme catches, race condition crear kiosk (Upstash NX `KvSetOptions`), PATCH re-bootstrap from FS (cache TTL 60s), KV cap 950KB advisor (`<PayloadSizePill>` color-coded), allowlist trim+lowercase (ya estaba bien).
+- 🟠 7/8 gaps: search en CatalogToolbar (ya estaba), diff pre-publish con `safeJsonKeyDiff` recursivo + UI desplegable, rollback con snapshots reales (ver siguiente bloque), preview multi-idioma (locale picker en PreviewPanel + bridge `pushLocale` + i18n-provider listener), OnboardingTour (ya estaba), Integrations live preview (`pushIntegrations` filtra apiKeys sensibles), unsaved-changes guard (ya cubierto por beforeunload).
+- 🟡 5/6 friction: debounces uniformes 120ms (18/18), save timeout 30s recovery, Toast unificado (`<ToastProvider>` reemplaza errorMsg banner + alert), Diagnostics link en sidebar, errorMsg→toast.
+- 🔵 8/8 automation: KV size advisor pre-save, PR auto-merge flag (GraphQL `enablePullRequestAutoMerge` SQUASH), clone kiosk UI (`<DuplicateKioskModal>`), JSON export/import endpoints + UI kebab, FS hash detection (`computeFsTemplateHash` + `/api/studio/diag/template-status`), AI content suggestions (Anthropic Claude Haiku endpoint + `<AiSuggestModal>` genérico, wired en ListingsEditor + EventsEditor), i18n auto-translate (ya estaba: DeepL primario + Anthropic fallback), smoke E2E doc (`.planning/2026-05-05-smoke-e2e-publish.md` 9 secciones step-by-step).
+
+Rollback con snapshots reales (#9):
+- `kvKeys.cfgSnap`/`cfgSnapList` con TTL 30d + cap 10 rotación FIFO. `takeSnapshot(slug, prev, reason)` antes de cada PATCH/import. Endpoint `/api/studio/configs/[slug]/snapshots` GET+POST con validación zod del snapshot (rechaza schema obsoleto). `<SnapshotsTimeline>` en VersionsEditor con confirm modal + auto-snapshot pre-revert para "un-revert".
+
+**Verificado:**
+- `pnpm typecheck` ✅ limpio en TODOS los puntos checkpoint.
+- `pnpm exec eslint` sobre archivos tocados → 0 errores nuevos (los 4 import-order + 2 hook deps de Shell.tsx siguen siendo preexistentes en `main`, verificado con git stash).
+- 33 archivos modificados + 12 nuevos (`Toast.tsx`, `AiSuggestModal.tsx`, `DuplicateKioskModal.tsx`, `snapshots.ts`, 5 endpoints en `/api/studio/`, 2 docs en `.planning/`). +1374 / -205 líneas.
+
+**Pendiente / siguiente:**
+
+1. **Push a `origin/main`** — necesita verificar `git config user.email = ruba.trejo@gmail.com` antes (Hobby tier Vercel). Tras push, smoke E2E real siguiendo el doc nuevo.
+2. **#12 Trails GeoJSON viewer** (3-5h sub-fase del módulo Trails con Mapbox draw plugin).
+3. **#15 Component unification → Tema B.2** (XL refactor de 21 editores: `<Field>` único + `<ColorPicker>` + `<MediaField>` + migración progresiva).
+4. **#13 Social Wall OAuth** — bloqueado por IG/TikTok/Facebook/X APIs (XL+ por plataforma).
+5. **#26 ext a DealsEditor** — DealsEditor no usa CatalogToolbar, integración custom (~20 min sesión fresca).
+6. **Manuales de Rubén:** custom domain `studio.trueomni.com` (DNS), Vercel Blob smoke prod (4MB upload manual), `DEEPL_API_KEY` envvar (cuenta free).
+
+**Decisiones tomadas:**
+
+- **Snapshots cap 10 + TTL 30d:** balance utility vs storage (10 × 950KB = 9.5MB/kiosk · ~25 kiosks máx en Hobby tier 256MB). Auto-snapshot pre-revert permite un-revert.
+- **Snapshot de cfgRaw, no cfg post-bootstrap:** el operador ve exactamente lo que tenía sin re-mezclar FS template.
+- **Validación zod al revertir:** rechaza con 422 si el schema cambió breaking entre snapshot y ahora — mejor que silently corromper KV.
+- **Reload tras revert:** el editor tiene 19 piezas de state, re-bootstrap via reload más seguro que swap in-place.
+- **AI suggest filtra apiKeys del bridge:** Tavus/Bandwango/CrowdRiff/Viator/Satisfi keys NUNCA cruzan al iframe. Solo Mapbox token + Weather provider/city/units + GA4 id (server-side keys quedan).
+- **Toast errors sticky por default:** info/success/warning auto-dismiss 4s; errors requieren X click manual (operador necesita ver y entender).
+- **Locale picker hardcoded a 6 codes:** EN/ES/FR/DE/PT/JA — si el cliente activo no tiene un locale cargado, i18n-provider's guard `available.includes(next)` lo ignora silenciosamente.
+- **PR auto-merge SQUASH method:** flag opcional en `publishToGitHub`; falla graceful si la repo no tiene auto-merge habilitado.
+- **EventsEditor `onAiSuggest` gated por kioskLocation:** el botón ✨ solo aparece si la location está set. Sin location AI no tiene contexto geográfico.
+
+**Fase:** Milestone Studio — Audit cerrado al 81% (26/32). Pending push + smoke E2E. Próximas sub-fases dedicadas: B.2 (component unification) o Trails GeoJSON viewer.
 
 ---
 

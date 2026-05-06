@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TrueOmni Studio · Audit panorámico · 2026-05-05</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'media',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+          },
+          colors: {
+            sev: {
+              red: '#ef4444',
+              orange: '#f97316',
+              yellow: '#eab308',
+              blue: '#3b82f6',
+              x: '#71717a',
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; font-feature-settings: "ss01", "cv11"; }
+    code, pre, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+    /* Scrollbar discreta */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-thumb { background: rgba(127,127,127,.25); border-radius: 8px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(127,127,127,.5); }
+    /* Anchor headings con offset */
+    h2[id], h3[id], section[id] { scroll-margin-top: 96px; }
+    /* Detalles */
+    details > summary { cursor: pointer; list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    /* Print */
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; color: black !important; }
+      .card { break-inside: avoid; box-shadow: none !important; border: 1px solid #ddd !important; }
+      a { color: inherit !important; text-decoration: none !important; }
+    }
+    /* Severity dots */
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 999px; vertical-align: middle; }
+  </style>
+</head>
+<body class="bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
+
+<!-- ============================ TOP NAV (sticky) ============================ -->
+<nav class="no-print sticky top-0 z-50 border-b border-zinc-200 bg-white/85 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/85">
+  <div class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-3">
+    <a href="#top" class="flex items-center gap-2.5">
+      <span class="grid h-7 w-7 place-items-center rounded-md bg-zinc-900 text-white dark:bg-white dark:text-zinc-900">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M9 9h6v6H9z"/></svg>
+      </span>
+      <span class="font-semibold tracking-tight">Studio Audit</span>
+      <span class="hidden text-[11.5px] text-zinc-500 sm:inline">2026-05-05</span>
+    </a>
+    <div class="hidden items-center gap-4 text-[12.5px] text-zinc-600 dark:text-zinc-400 lg:flex">
+      <a href="#estado" class="hover:text-zinc-900 dark:hover:text-zinc-100">Estado</a>
+      <a href="#hallazgos" class="hover:text-zinc-900 dark:hover:text-zinc-100">Hallazgos (32)</a>
+      <a href="#tema-a" class="hover:text-zinc-900 dark:hover:text-zinc-100">A · Observabilidad</a>
+      <a href="#tema-b" class="hover:text-zinc-900 dark:hover:text-zinc-100">B · Live Preview</a>
+      <a href="#tema-c" class="hover:text-zinc-900 dark:hover:text-zinc-100">C · Catálogos+AI</a>
+      <a href="#tema-d" class="hover:text-zinc-900 dark:hover:text-zinc-100">D · i18n</a>
+      <a href="#tema-e" class="hover:text-zinc-900 dark:hover:text-zinc-100">E · Publish</a>
+      <a href="#roadmap" class="hover:text-zinc-900 dark:hover:text-zinc-100">Roadmap</a>
+    </div>
+  </div>
+</nav>
+
+<main id="top" class="mx-auto max-w-7xl px-6 pb-32">
+
+<!-- ============================ HERO ============================ -->
+<header class="pt-14 pb-10">
+  <p class="text-[11.5px] font-semibold uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Audit panorámico · v0.1</p>
+  <h1 class="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">TrueOmni Studio — estado, hallazgos y los 5 temas que cierran el ciclo.</h1>
+  <p class="mt-4 max-w-3xl text-[15px] leading-relaxed text-zinc-600 dark:text-zinc-300">
+    Después de S7.4, el Studio está en producción E2E con NextAuth + GitHub PR-publish + Upstash KV cloud + Vercel Blob. 21/21 secciones con editor funcional. Tres audits paralelos identificaron 32 hallazgos accionables — 6 son ship-blockers, 8 gaps funcionales, 6 friction de UX, 8 oportunidades de automatización, 4 piezas de infra externa pendiente. Este documento agrupa todo en 5 temas atómicos, cada uno con design doc completo.
+  </p>
+
+  <!-- Stats grid -->
+  <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+    <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div class="text-[11.5px] font-medium uppercase tracking-wide text-zinc-500">Editores</div>
+      <div class="mt-1 text-3xl font-bold tabular-nums">21<span class="text-base font-medium text-zinc-400">/21</span></div>
+      <div class="mt-1 text-[11.5px] text-zinc-500">14 ✅ · 7 🟡 · 0 ❌</div>
+    </div>
+    <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div class="text-[11.5px] font-medium uppercase tracking-wide text-zinc-500">Hallazgos</div>
+      <div class="mt-1 text-3xl font-bold tabular-nums">32</div>
+      <div class="mt-1 text-[11.5px] text-zinc-500">accionables · file:line</div>
+    </div>
+    <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div class="text-[11.5px] font-medium uppercase tracking-wide text-zinc-500">Live preview</div>
+      <div class="mt-1 text-3xl font-bold tabular-nums">~75<span class="text-base font-medium text-zinc-400">%</span></div>
+      <div class="mt-1 text-[11.5px] text-zinc-500">de editores reactivos</div>
+    </div>
+    <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div class="text-[11.5px] font-medium uppercase tracking-wide text-zinc-500">Silent catches</div>
+      <div class="mt-1 text-3xl font-bold tabular-nums text-rose-600 dark:text-rose-400">55</div>
+      <div class="mt-1 text-[11.5px] text-zinc-500">52 bridge + 3 api/theme</div>
+    </div>
+    <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div class="text-[11.5px] font-medium uppercase tracking-wide text-zinc-500">Temas atómicos</div>
+      <div class="mt-1 text-3xl font-bold tabular-nums">5</div>
+      <div class="mt-1 text-[11.5px] text-zinc-500">A · B · C · D · E</div>
+    </div>
+  </div>
+
+  <div class="mt-8 flex flex-wrap items-center gap-2 text-[12.5px]">
+    <span class="font-medium text-zinc-700 dark:text-zinc-300">Recomendado primero:</span>
+    <a href="#tema-a" class="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-3.5 py-1.5 font-medium text-white hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200">
+      Tema A · Observabilidad + ship-readiness
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+    <span class="text-zinc-500">— bugs 🔴 ship-blocker, sin dependencias de infra externa.</span>
+  </div>
+</header>
+
+<!-- ============================ ESTADO ACTUAL ============================ -->
+<section id="estado" class="mt-12">
+  <div class="mb-6 flex items-baseline justify-between">
+    <h2 class="text-2xl font-bold tracking-tight">Estado actual</h2>
+    <span class="text-[12px] text-zinc-500">21 editores · 7 flujos críticos · live preview heatmap</span>
+  </div>
+
+  <!-- Maturity table -->
+  <div class="card overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <div class="border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
+      <h3 class="font-semibold">Madurez por editor</h3>
+      <p class="mt-0.5 text-[12px] text-zinc-500">✅ pulido (UI completa, live preview reactivo, edge-cases cubiertos) · 🟡 funcional (UI mínima o gaps de live preview / validation) · ❌ stub.</p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-[13px]">
+        <thead class="bg-zinc-50 text-left text-[11.5px] font-semibold uppercase tracking-wide text-zinc-500 dark:bg-zinc-900/40">
+          <tr>
+            <th class="px-4 py-2.5">#</th>
+            <th class="px-4 py-2.5">Sección</th>
+            <th class="px-4 py-2.5">Editor file</th>
+            <th class="px-4 py-2.5">Schema</th>
+            <th class="px-4 py-2.5">Bridge</th>
+            <th class="px-4 py-2.5">Estado</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <tr><td class="px-4 py-2 mono text-zinc-400">01</td><td class="px-4 py-2 font-medium">Branding</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">BrandingEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">Branding</td><td class="px-4 py-2">✅ 120ms</td><td class="px-4 py-2">✅ Pulido</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">02</td><td class="px-4 py-2 font-medium">Modules</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">ModulesEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">ModulesConfig</td><td class="px-4 py-2">✅ 80ms</td><td class="px-4 py-2">✅ Pulido</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">03</td><td class="px-4 py-2 font-medium">Billboard (Idle)</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">BillboardEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">BillboardConfig</td><td class="px-4 py-2">✅ 80ms</td><td class="px-4 py-2">✅ Pulido</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">04</td><td class="px-4 py-2 font-medium">Home Dashboard</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">ModulesEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">tiles[]</td><td class="px-4 py-2">✅</td><td class="px-4 py-2">✅ Pulido</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">05</td><td class="px-4 py-2 font-medium">AI Avatar</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">AiAvatarEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">AiAvatarConfig</td><td class="px-4 py-2">✅ 120ms</td><td class="px-4 py-2">✅ Pulido</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">06</td><td class="px-4 py-2 font-medium">Survey</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">SurveyEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">SurveyConfig</td><td class="px-4 py-2">✅ 120ms</td><td class="px-4 py-2">✅ Pulido</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">07</td><td class="px-4 py-2 font-medium">Deals</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">DealsEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">DealsModuleConfig</td><td class="px-4 py-2">✅ 150ms</td><td class="px-4 py-2">✅ Pulido</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">08</td><td class="px-4 py-2 font-medium">Photo Booth</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">PhotoBoothEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">PhotoBoothConfig</td><td class="px-4 py-2">✅ 200ms</td><td class="px-4 py-2">✅ Pulido</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">09</td><td class="px-4 py-2 font-medium">Digital Brochure</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">BrochuresEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">BrochuresModuleConfig</td><td class="px-4 py-2">✅ 150ms</td><td class="px-4 py-2">✅ Pulido</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">10</td><td class="px-4 py-2 font-medium">Social Wall</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">SocialWallEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">SocialWallConfig</td><td class="px-4 py-2">✅ 150ms</td><td class="px-4 py-2 text-amber-600 dark:text-amber-400">🟡 sin OAuth</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">11</td><td class="px-4 py-2 font-medium">Guestbook</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">GuestbookEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">GuestbookConfig</td><td class="px-4 py-2">✅ 150ms</td><td class="px-4 py-2">✅ Pulido</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">12</td><td class="px-4 py-2 font-medium">Listings</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">ListingsEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">ListingsModule</td><td class="px-4 py-2">✅ 150ms</td><td class="px-4 py-2">✅ Pulido</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">13</td><td class="px-4 py-2 font-medium">Events</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">EventsEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">EventsModule</td><td class="px-4 py-2">✅ 150ms</td><td class="px-4 py-2">✅ Pulido</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">14</td><td class="px-4 py-2 font-medium">Tickets</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">TicketsEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">TicketsModule</td><td class="px-4 py-2">✅ 120ms</td><td class="px-4 py-2">✅ Pulido</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">15</td><td class="px-4 py-2 font-medium">Passes</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">PassesEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">PassesModule</td><td class="px-4 py-2">✅ 150ms</td><td class="px-4 py-2">✅ Pulido</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">16</td><td class="px-4 py-2 font-medium">Trails</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">TrailsEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">TrailsModule</td><td class="px-4 py-2">✅ 150ms</td><td class="px-4 py-2 text-amber-600 dark:text-amber-400">🟡 GeoJSON raw</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">17</td><td class="px-4 py-2 font-medium">Map</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">MapEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">MapConfig</td><td class="px-4 py-2">✅ 120ms</td><td class="px-4 py-2">✅ Pulido</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">18</td><td class="px-4 py-2 font-medium">Trip Planner</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">ItineraryBuilderEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">ItineraryBuilderConfig</td><td class="px-4 py-2">✅ 150ms</td><td class="px-4 py-2">✅ Pulido</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">19</td><td class="px-4 py-2 font-medium">Languages (i18n)</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">I18nEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">I18nBundle</td><td class="px-4 py-2 text-rose-600 dark:text-rose-400">❌ no cableado</td><td class="px-4 py-2 text-amber-600 dark:text-amber-400">🟡 sin live preview</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">20</td><td class="px-4 py-2 font-medium">Ads</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">AdsEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">AdsModule</td><td class="px-4 py-2">✅ 150ms</td><td class="px-4 py-2 text-amber-600 dark:text-amber-400">🟡 placement mínimo</td></tr>
+          <tr><td class="px-4 py-2 mono text-zinc-400">21</td><td class="px-4 py-2 font-medium">Integrations</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">IntegrationsEditor.tsx</td><td class="px-4 py-2 mono text-zinc-500 text-[12px]">IntegrationsConfig</td><td class="px-4 py-2 text-rose-600 dark:text-rose-400">❌ solo weather/mapbox</td><td class="px-4 py-2 text-amber-600 dark:text-amber-400">🟡 keys no testeadas</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Critical flows summary -->
+  <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <div class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <h3 class="text-[15px] font-semibold">7 flujos críticos de infra</h3>
+      <ul class="mt-3 space-y-2 text-[13px]">
+        <li class="flex items-start gap-2"><span class="mono text-emerald-600">✅</span><div><b>Crear kiosk</b> — POST clone-from-fs + rewrite addr/content + KV. <span class="text-amber-600">Race condition al slug duplicado.</span></div></li>
+        <li class="flex items-start gap-2"><span class="mono text-emerald-600">✅</span><div><b>Edit config (PATCH)</b> — 15 validators zod + KV cap 950KB. <span class="text-amber-600">No re-bootstrap from FS.</span></div></li>
+        <li class="flex items-start gap-2"><span class="mono text-emerald-600">✅</span><div><b>Live preview bridge</b> — postMessage + debounce. <span class="text-amber-600">52 silent catches; algunos módulos requieren reload.</span></div></li>
+        <li class="flex items-start gap-2"><span class="mono text-emerald-600">✅</span><div><b>Resync from FS</b> — preserve edits o <code>?force=true</code> reset.</div></li>
+        <li class="flex items-start gap-2"><span class="mono text-emerald-600">✅</span><div><b>Publish to GitHub PR</b> — octokit + surgical CSS edit. <span class="text-amber-600">Auto-merge no implementado.</span></div></li>
+        <li class="flex items-start gap-2"><span class="mono text-emerald-600">✅</span><div><b>NextAuth + allowlist</b> — GitHub OAuth + STUDIO_ADMIN_EMAILS CSV. <span class="text-amber-600">Trim/lowercase naive.</span></div></li>
+        <li class="flex items-start gap-2"><span class="mono text-amber-600">🟡</span><div><b>Vercel Blob uploads</b> — endpoint + 5MB cap. <span class="text-amber-600">No probado en producción.</span></div></li>
+      </ul>
+    </div>
+
+    <div class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <h3 class="text-[15px] font-semibold">Asimetrías UI que delatan deuda visual</h3>
+      <ul class="mt-3 space-y-2 text-[13px]">
+        <li>• <b>3 patrones de form field</b> coexistiendo (Field wrapper · raw input · custom).</li>
+        <li>• <b>2 color pickers</b> distintos (BrandingEditor swatch · MapEditor lozenge).</li>
+        <li>• <b>2 image uploads</b> (ImageField compact · MediaField con video).</li>
+        <li>• <b>Debounces</b> 80/120/150/200ms sin rationale.</li>
+        <li>• <b>Errors</b> compiten por UI (banner global vs cards locales vs sin sistema unificado).</li>
+        <li>• <b>Listings/Events</b> table-style; <b>Survey/Deals/Photo Booth</b> Reorder framer-motion.</li>
+        <li>• <b>Trails</b> editor JSON raw vs el resto con UI estructurada.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ HALLAZGOS ============================ -->
+<section id="hallazgos" class="mt-16">
+  <div class="mb-6 flex items-baseline justify-between">
+    <h2 class="text-2xl font-bold tracking-tight">Hallazgos consolidados (32)</h2>
+    <span class="text-[12px] text-zinc-500">file:line + 1-line desc · agrupados por severidad</span>
+  </div>
+
+  <!-- Legend -->
+  <div class="mb-5 flex flex-wrap gap-3 text-[12.5px]">
+    <span class="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-300">🔴 Bug · 6</span>
+    <span class="inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-orange-700 dark:border-orange-900/40 dark:bg-orange-950/30 dark:text-orange-300">🟠 Gap · 8</span>
+    <span class="inline-flex items-center gap-1.5 rounded-full border border-yellow-200 bg-yellow-50 px-2.5 py-1 text-yellow-700 dark:border-yellow-900/40 dark:bg-yellow-950/30 dark:text-yellow-300">🟡 Friction · 6</span>
+    <span class="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-blue-700 dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-blue-300">🔵 Automatización · 8</span>
+    <span class="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">❌ Infra externa · 4</span>
+  </div>
+
+  <!-- 🔴 -->
+  <h3 class="mt-6 text-lg font-semibold text-rose-700 dark:text-rose-400">🔴 Bugs reales (6)</h3>
+  <div class="mt-3 space-y-2">
+    <div class="card flex items-start gap-3 rounded-xl border border-rose-200/70 bg-rose-50/40 p-3.5 dark:border-rose-900/30 dark:bg-rose-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-rose-700 dark:text-rose-300">#1</span>
+      <div class="flex-1">
+        <div class="text-[13.5px] font-medium">52 silent <code>catch {}</code> en <code>use-preview-bridge.ts</code> (líneas 151-423)</div>
+        <div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Cada postMessage entre Studio↔iframe swallowea errors sin logging. Si falla CORS, version mismatch o el listener desuscribió, el operador no se entera.</div>
+      </div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-rose-200/70 bg-rose-50/40 p-3.5 dark:border-rose-900/30 dark:bg-rose-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-rose-700 dark:text-rose-300">#2</span>
+      <div class="flex-1">
+        <div class="text-[13.5px] font-medium">3 silent catches: <code>api-client.ts:55</code>, <code>StudioThemeProvider.tsx:44,52</code></div>
+        <div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Save fetch + theme init. Save puede fallar y el Shell mostrar 'saved' igual.</div>
+      </div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-rose-200/70 bg-rose-50/40 p-3.5 dark:border-rose-900/30 dark:bg-rose-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-rose-700 dark:text-rose-300">#3</span>
+      <div class="flex-1">
+        <div class="text-[13.5px] font-medium">Race condition al crear kiosk · <code>POST /api/studio/configs</code> líneas 379-394</div>
+        <div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Dos POST concurrentes al mismo slug pasan ambos <code>kv.exists()</code> antes de que el primero haga <code>kv.set</code>. Sin lock atómico (Upstash NX flag no usado).</div>
+      </div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-rose-200/70 bg-rose-50/40 p-3.5 dark:border-rose-900/30 dark:bg-rose-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-rose-700 dark:text-rose-300">#4</span>
+      <div class="flex-1">
+        <div class="text-[13.5px] font-medium">PATCH no re-bootstrap from FS · <code>/api/studio/configs/[slug]</code></div>
+        <div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">GET sí lo hace. Si el FS template cambió desde el último GET, las customizaciones del operador se persisten sobre KV viejo.</div>
+      </div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-rose-200/70 bg-rose-50/40 p-3.5 dark:border-rose-900/30 dark:bg-rose-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-rose-700 dark:text-rose-300">#5</span>
+      <div class="flex-1">
+        <div class="text-[13.5px] font-medium">KV cap 950KB sin advisory pre-save</div>
+        <div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Operador edita 2h, hace Save, recibe 413. Sin estimador de payload size en el editor.</div>
+      </div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-rose-200/70 bg-rose-50/40 p-3.5 dark:border-rose-900/30 dark:bg-rose-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-rose-700 dark:text-rose-300">#6</span>
+      <div class="flex-1">
+        <div class="text-[13.5px] font-medium">Auth allowlist: trim/lowercase naive · <code>src/auth.ts</code></div>
+        <div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">CSV <code>STUDIO_ADMIN_EMAILS</code> con <code>"a@x.com, b@y.com"</code> espacios falla. Email mayúsculas tampoco match.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🟠 -->
+  <h3 class="mt-8 text-lg font-semibold text-orange-700 dark:text-orange-400">🟠 Gaps funcionales (8)</h3>
+  <div class="mt-3 space-y-2">
+    <div class="card flex items-start gap-3 rounded-xl border border-orange-200/70 bg-orange-50/40 p-3.5 dark:border-orange-900/30 dark:bg-orange-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-orange-700 dark:text-orange-300">#7</span>
+      <div class="flex-1"><div class="text-[13.5px] font-medium">Sin search/filter en catálogos pesados</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">ListingsEditor 50+ items, EventsEditor 30+, Trails — operador scrollea a mano. <code>CatalogToolbar</code> sin search input.</div></div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-orange-200/70 bg-orange-50/40 p-3.5 dark:border-orange-900/30 dark:bg-orange-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-orange-700 dark:text-orange-300">#8</span>
+      <div class="flex-1"><div class="text-[13.5px] font-medium">Sin diff de contenido pre-publish</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400"><code>PublishModal</code> lista files cambiados pero no muestra el JSON diff. Operador no ve qué string cambió.</div></div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-orange-200/70 bg-orange-50/40 p-3.5 dark:border-orange-900/30 dark:bg-orange-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-orange-700 dark:text-orange-300">#9</span>
+      <div class="flex-1"><div class="text-[13.5px] font-medium">Sin versionado/rollback visible</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400"><code>local-version-history</code> guarda en localStorage. Diagnostics muestra timeline pero no hay "revert to save #3".</div></div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-orange-200/70 bg-orange-50/40 p-3.5 dark:border-orange-900/30 dark:bg-orange-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-orange-700 dark:text-orange-300">#10</span>
+      <div class="flex-1"><div class="text-[13.5px] font-medium">Sin preview multi-idioma</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Iframe hardcoded al locale del kiosk. Operador no puede ver FR/ES/JA sin ir al kiosk runtime y cambiar manual.</div></div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-orange-200/70 bg-orange-50/40 p-3.5 dark:border-orange-900/30 dark:bg-orange-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-orange-700 dark:text-orange-300">#11</span>
+      <div class="flex-1"><div class="text-[13.5px] font-medium"><code>OnboardingTour.tsx</code> cableado pero inerte</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">5 pasos diseñados, sin evidencia de activación en sesión real.</div></div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-orange-200/70 bg-orange-50/40 p-3.5 dark:border-orange-900/30 dark:bg-orange-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-orange-700 dark:text-orange-300">#12</span>
+      <div class="flex-1"><div class="text-[13.5px] font-medium">Trails GeoJSON raw text editor</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Operador edita JSON literal — sin map viewer integrado.</div></div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-orange-200/70 bg-orange-50/40 p-3.5 dark:border-orange-900/30 dark:bg-orange-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-orange-700 dark:text-orange-300">#13</span>
+      <div class="flex-1"><div class="text-[13.5px] font-medium">Social Wall feed URLs sin OAuth ni validación</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">String input directo, sin fetch real. Plataformas (IG/TikTok) cada una bloquea por su lado.</div></div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-orange-200/70 bg-orange-50/40 p-3.5 dark:border-orange-900/30 dark:bg-orange-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-orange-700 dark:text-orange-300">#14</span>
+      <div class="flex-1"><div class="text-[13.5px] font-medium">Integrations sin live preview (excepto weather)</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Cambiar Mapbox token / GA4 / Tavus key no refleja al iframe.</div></div>
+    </div>
+  </div>
+
+  <!-- 🟡 -->
+  <h3 class="mt-8 text-lg font-semibold text-yellow-700 dark:text-yellow-400">🟡 Friction de UX (6)</h3>
+  <div class="mt-3 space-y-2">
+    <div class="card flex items-start gap-3 rounded-xl border border-yellow-200/70 bg-yellow-50/40 p-3.5 dark:border-yellow-900/30 dark:bg-yellow-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-yellow-700 dark:text-yellow-300">#15</span>
+      <div class="flex-1"><div class="text-[13.5px] font-medium">3 patrones de form field, 2 color pickers, 2 image uploads</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Sin design tokens unificados. Migración progresiva editor por editor pendiente.</div></div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-yellow-200/70 bg-yellow-50/40 p-3.5 dark:border-yellow-900/30 dark:bg-yellow-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-yellow-700 dark:text-yellow-300">#16</span>
+      <div class="flex-1"><div class="text-[13.5px] font-medium">Debounces inconsistentes (80-200ms) sin rationale</div></div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-yellow-200/70 bg-yellow-50/40 p-3.5 dark:border-yellow-900/30 dark:bg-yellow-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-yellow-700 dark:text-yellow-300">#17</span>
+      <div class="flex-1"><div class="text-[13.5px] font-medium">Save state sin timeout recovery</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Si POST queda colgado, <code>'saving'</code> queda atrapado indefinidamente.</div></div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-yellow-200/70 bg-yellow-50/40 p-3.5 dark:border-yellow-900/30 dark:bg-yellow-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-yellow-700 dark:text-yellow-300">#18</span>
+      <div class="flex-1"><div class="text-[13.5px] font-medium">Errores compiten por UI (banner global vs cards locales)</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Sin sistema de toasts unificado.</div></div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-yellow-200/70 bg-yellow-50/40 p-3.5 dark:border-yellow-900/30 dark:bg-yellow-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-yellow-700 dark:text-yellow-300">#19</span>
+      <div class="flex-1"><div class="text-[13.5px] font-medium">Sin "unsaved changes" guard al cambiar tab</div></div>
+    </div>
+    <div class="card flex items-start gap-3 rounded-xl border border-yellow-200/70 bg-yellow-50/40 p-3.5 dark:border-yellow-900/30 dark:bg-yellow-950/20">
+      <span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-yellow-700 dark:text-yellow-300">#20</span>
+      <div class="flex-1"><div class="text-[13.5px] font-medium"><code>/studio/diagnostics</code> oculta del sidebar</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Solo accesible vía StatusBadge dot del footer o Cmd+K.</div></div>
+    </div>
+  </div>
+
+  <!-- 🔵 -->
+  <h3 class="mt-8 text-lg font-semibold text-blue-700 dark:text-blue-400">🔵 Oportunidades de automatización (8)</h3>
+  <div class="mt-3 space-y-2">
+    <div class="card flex items-start gap-3 rounded-xl border border-blue-200/70 bg-blue-50/40 p-3.5 dark:border-blue-900/30 dark:bg-blue-950/20"><span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-blue-700 dark:text-blue-300">#21</span><div class="flex-1"><div class="text-[13.5px] font-medium">i18n auto-translate (DeepL primario + Anthropic fallback)</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Edit en EN → trigger automático para los 5 locales restantes.</div></div></div>
+    <div class="card flex items-start gap-3 rounded-xl border border-blue-200/70 bg-blue-50/40 p-3.5 dark:border-blue-900/30 dark:bg-blue-950/20"><span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-blue-700 dark:text-blue-300">#22</span><div class="flex-1"><div class="text-[13.5px] font-medium">Asset size advisory pre-save</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">"Config will be X% full" tooltip + warning si &gt;90% del cap KV.</div></div></div>
+    <div class="card flex items-start gap-3 rounded-xl border border-blue-200/70 bg-blue-50/40 p-3.5 dark:border-blue-900/30 dark:bg-blue-950/20"><span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-blue-700 dark:text-blue-300">#23</span><div class="flex-1"><div class="text-[13.5px] font-medium">GitHub PR auto-merge si CI pasa</div></div></div>
+    <div class="card flex items-start gap-3 rounded-xl border border-blue-200/70 bg-blue-50/40 p-3.5 dark:border-blue-900/30 dark:bg-blue-950/20"><span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-blue-700 dark:text-blue-300">#24</span><div class="flex-1"><div class="text-[13.5px] font-medium">Clone entire kiosk (no solo desde template)</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">"Duplicate kiosk X as Y" — reemplaza copy-paste manual en FS.</div></div></div>
+    <div class="card flex items-start gap-3 rounded-xl border border-blue-200/70 bg-blue-50/40 p-3.5 dark:border-blue-900/30 dark:bg-blue-950/20"><span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-blue-700 dark:text-blue-300">#25</span><div class="flex-1"><div class="text-[13.5px] font-medium">JSON export/import full config</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Solo hay export por catálogo. Falta backup completo.</div></div></div>
+    <div class="card flex items-start gap-3 rounded-xl border border-blue-200/70 bg-blue-50/40 p-3.5 dark:border-blue-900/30 dark:bg-blue-950/20"><span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-blue-700 dark:text-blue-300">#26</span><div class="flex-1"><div class="text-[13.5px] font-medium">AI content suggestions (Anthropic)</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Sparkles icon ya existe en ListingsEditor pero no funcional. "Generate 5 listings for {city}".</div></div></div>
+    <div class="card flex items-start gap-3 rounded-xl border border-blue-200/70 bg-blue-50/40 p-3.5 dark:border-blue-900/30 dark:bg-blue-950/20"><span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-blue-700 dark:text-blue-300">#27</span><div class="flex-1"><div class="text-[13.5px] font-medium">KV resync auto-trigger cuando FS hash cambia</div></div></div>
+    <div class="card flex items-start gap-3 rounded-xl border border-blue-200/70 bg-blue-50/40 p-3.5 dark:border-blue-900/30 dark:bg-blue-950/20"><span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-blue-700 dark:text-blue-300">#28</span><div class="flex-1"><div class="text-[13.5px] font-medium">Smoke E2E del flujo Studio→PR→merge→deploy</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Pendiente desde hace 2 sesiones. Doc con curl recipes step-by-step.</div></div></div>
+  </div>
+
+  <!-- ❌ -->
+  <h3 class="mt-8 text-lg font-semibold text-zinc-700 dark:text-zinc-400">❌ Infra externa pendiente (4)</h3>
+  <div class="mt-3 space-y-2">
+    <div class="card flex items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50/40 p-3.5 dark:border-zinc-800 dark:bg-zinc-900/40"><span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-zinc-700 dark:text-zinc-300">#29</span><div class="flex-1"><div class="text-[13.5px] font-medium">Custom domain <code>studio.trueomni.com</code></div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">DNS de <code>trueomni.com</code> + actualizar callback URL OAuth GitHub.</div></div></div>
+    <div class="card flex items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50/40 p-3.5 dark:border-zinc-800 dark:bg-zinc-900/40"><span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-zinc-700 dark:text-zinc-300">#30</span><div class="flex-1"><div class="text-[13.5px] font-medium">Vercel Blob smoke en producción</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Endpoint cableado pero sin probar 4MB upload real en prod.</div></div></div>
+    <div class="card flex items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50/40 p-3.5 dark:border-zinc-800 dark:bg-zinc-900/40"><span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-zinc-700 dark:text-zinc-300">#31</span><div class="flex-1"><div class="text-[13.5px] font-medium"><code>DEEPL_API_KEY</code> envvar pendiente</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Cuenta free de Rubén; sin esto no se activa el auto-translate.</div></div></div>
+    <div class="card flex items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50/40 p-3.5 dark:border-zinc-800 dark:bg-zinc-900/40"><span class="mt-0.5 mono text-[11px] font-bold tabular-nums text-zinc-700 dark:text-zinc-300">#32</span><div class="flex-1"><div class="text-[13.5px] font-medium"><code>ANTHROPIC_API_KEY</code> ya existente, pero usado solo en Tavus</div><div class="mt-0.5 text-[12.5px] text-zinc-600 dark:text-zinc-400">Reusable para fallback de DeepL y motor de AI content (#26).</div></div></div>
+  </div>
+</section>
+
+<!-- ============================ TEMA A ============================ -->
+<section id="tema-a" class="mt-20">
+  <div class="card overflow-hidden rounded-2xl border-2 border-rose-200 bg-white shadow-sm dark:border-rose-900/40 dark:bg-zinc-900">
+    <header class="border-b border-rose-100 bg-rose-50/60 px-6 py-5 dark:border-rose-900/30 dark:bg-rose-950/30">
+      <div class="flex items-baseline justify-between gap-4">
+        <div>
+          <p class="text-[11.5px] font-semibold uppercase tracking-[0.18em] text-rose-700 dark:text-rose-400">Tema A · Ship-blocker</p>
+          <h2 class="mt-1 text-2xl font-bold tracking-tight">Observabilidad + ship-readiness</h2>
+        </div>
+        <span class="rounded-full bg-rose-600 px-3 py-1 text-[11.5px] font-bold text-white">L · 4-6h</span>
+      </div>
+      <p class="mt-3 text-[14px] leading-relaxed text-zinc-700 dark:text-zinc-300">
+        <b>Goal.</b> Convertir el Studio en algo diagnostiable cuando llegue el primer cliente real. Hoy fallos silenciosos en bridge + race conditions + KV cap inesperado pueden tronar UX en producción sin dejar rastro.
+      </p>
+      <div class="mt-3 flex flex-wrap gap-1.5 text-[11px]">
+        <span class="rounded-full bg-rose-100 px-2 py-0.5 font-mono text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">#1</span>
+        <span class="rounded-full bg-rose-100 px-2 py-0.5 font-mono text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">#2</span>
+        <span class="rounded-full bg-rose-100 px-2 py-0.5 font-mono text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">#3</span>
+        <span class="rounded-full bg-rose-100 px-2 py-0.5 font-mono text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">#4</span>
+        <span class="rounded-full bg-rose-100 px-2 py-0.5 font-mono text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">#5</span>
+        <span class="rounded-full bg-rose-100 px-2 py-0.5 font-mono text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">#6</span>
+        <span class="rounded-full bg-yellow-100 px-2 py-0.5 font-mono text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300">#17</span>
+      </div>
+    </header>
+
+    <div class="space-y-6 p-6">
+
+      <!-- Archivos a tocar -->
+      <div>
+        <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Archivos a tocar</h3>
+        <div class="mt-2 overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+          <table class="w-full text-[12.5px]">
+            <thead class="bg-zinc-50 text-left text-[11px] font-semibold uppercase tracking-wide text-zinc-500 dark:bg-zinc-900/40">
+              <tr><th class="px-3 py-2">Archivo</th><th class="px-3 py-2">Cambio</th></tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+              <tr><td class="px-3 py-2 mono">src/app/studio/_lib/use-preview-bridge.ts</td><td class="px-3 py-2">Wrapper <code>safePostMessage(name, win, payload)</code> que loguea con <code>console.warn('[bridge:'+name+']', e)</code> y bumpea contador en <code>/studio/diagnostics</code>.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_lib/api-client.ts:55</td><td class="px-3 py-2">Reemplazar <code>catch {}</code> por logging + propagación al Toast.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/StudioThemeProvider.tsx:44,52</td><td class="px-3 py-2">Idem theme init.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/api/studio/configs/route.ts:379-394</td><td class="px-3 py-2">Lock atómico via Upstash NX flag (<code>kv.set(..., { nx: true })</code>) o <code>setnx</code>.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/api/studio/configs/[slug]/route.ts (PATCH)</td><td class="px-3 py-2">Re-correr <code>bootstrapStudioFromFs</code> antes de <code>safeParse</code>. Cachear hash del template config en memoria para no re-leer FS en cada PATCH.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/MediaField.tsx + Shell.tsx</td><td class="px-3 py-2">Calculator de payload size. <code>{X}% of 950KB used</code>. Bloquear Save si &gt;100%, warning amber si &gt;80%.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/auth.ts</td><td class="px-3 py-2"><code>STUDIO_ADMIN_EMAILS.split(',').map(e =&gt; e.trim().toLowerCase())</code>. Guard si vacío.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/Shell.tsx</td><td class="px-3 py-2"><code>setTimeout(..., 30_000)</code> que mande <code>'saving'</code> → <code>'error'</code> si POST cuelga.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Enfoque -->
+      <div>
+        <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Enfoque</h3>
+        <div class="mt-2 grid gap-3 md:grid-cols-2">
+          <details class="rounded-lg border border-zinc-200 p-3.5 dark:border-zinc-800" open>
+            <summary class="text-[13px] font-semibold">Bridge logging unificado</summary>
+            <pre class="mt-2 overflow-x-auto rounded bg-zinc-100 p-2.5 text-[11.5px] dark:bg-zinc-900"><code>// src/app/studio/_lib/use-preview-bridge.ts
+function safePostMessage(name: string, win: Window, payload: unknown) {
+  try {
+    win.postMessage({ type: name, ...payload }, '*');
+  } catch (e) {
+    console.warn(`[bridge:${name}]`, e);
+    incrementBridgeErrorCounter(name);
+  }
+}</code></pre>
+            <p class="mt-2 text-[12px] text-zinc-600 dark:text-zinc-400">El counter se expone en <code>/studio/diagnostics</code> como widget "Bridge errors (last 5min)". Si &gt;5 → banner amber sugiriendo refresh iframe.</p>
+          </details>
+          <details class="rounded-lg border border-zinc-200 p-3.5 dark:border-zinc-800">
+            <summary class="text-[13px] font-semibold">Lock atómico con Upstash NX</summary>
+            <pre class="mt-2 overflow-x-auto rounded bg-zinc-100 p-2.5 text-[11.5px] dark:bg-zinc-900"><code>const ok = await kv.set(kvKeys.cfg(slug), parsed.data, { nx: true });
+if (!ok) {
+  return NextResponse.json(
+    { error: `slug "${slug}" already exists` },
+    { status: 409 },
+  );
+}</code></pre>
+            <p class="mt-2 text-[12px] text-zinc-600 dark:text-zinc-400">Reemplaza el patrón <code>kv.exists() + kv.set()</code> de líneas 379-394.</p>
+          </details>
+          <details class="rounded-lg border border-zinc-200 p-3.5 dark:border-zinc-800">
+            <summary class="text-[13px] font-semibold">PATCH re-bootstrap-aware</summary>
+            <p class="mt-2 text-[12px] text-zinc-600 dark:text-zinc-400">Antes del <code>safeParse</code>, leer hash del FS template. Si difiere del cache (key <code>kv:fs-template-hash</code>), re-ejecutar <code>bootstrapStudioFromFs(currentKv, fsConfig, tokensCss)</code> con merge respetuoso. El takeFsIfDefault del bootstrap garantiza que customizaciones operador no se pisan.</p>
+          </details>
+          <details class="rounded-lg border border-zinc-200 p-3.5 dark:border-zinc-800">
+            <summary class="text-[13px] font-semibold">Payload advisor en MediaField + Shell</summary>
+            <pre class="mt-2 overflow-x-auto rounded bg-zinc-100 p-2.5 text-[11.5px] dark:bg-zinc-900"><code>const sizeBytes = JSON.stringify(billboard).length; // shallow estimate
+const pct = Math.round((sizeBytes / 950_000) * 100);
+// UI:
+&lt;div className={pct &gt; 90 ? 'text-amber-600' : 'text-zinc-500'}&gt;
+  Config payload: {pct}% of 950KB
+&lt;/div&gt;</code></pre>
+            <p class="mt-2 text-[12px] text-zinc-600 dark:text-zinc-400">Visible en TopBar al lado del Save button. Tooltip detalla campos pesados (heredado del actual <code>heavyFields.push</code> en route.ts:466).</p>
+          </details>
+        </div>
+      </div>
+
+      <!-- Verificación -->
+      <div>
+        <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Verificación</h3>
+        <ul class="mt-2 space-y-1.5 text-[13px]">
+          <li>• <code>pnpm typecheck</code> + <code>pnpm lint</code> limpios.</li>
+          <li>• Curl smoke: dos POST simultáneos al mismo slug → segundo recibe 409.</li>
+          <li>• Smoke browser: editar branding → console limpia (sin warnings de bridge inesperados).</li>
+          <li>• Subir imagen 4.5MB → ver advisory amber.</li>
+          <li>• Login con email <code>"  Designers@TrueOmni.COM "</code> → debe pasar tras trim+lowercase.</li>
+          <li>• Forzar timeout en POST (network throttle) → banner error tras 30s.</li>
+        </ul>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <div>
+          <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Riesgos / dependencias</h3>
+          <ul class="mt-2 space-y-1.5 text-[13px]">
+            <li>• Re-bootstrap en PATCH añade ~50-100ms latencia. Mitigable con cache de hash en memoria.</li>
+            <li>• Cero dependencias de infra externa.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Tareas atómicas</h3>
+          <ol class="mt-2 list-decimal space-y-1 pl-5 text-[13px]">
+            <li>Helper <code>safePostMessage</code> + counter diagnostics.</li>
+            <li>Migrar 52 catches del bridge.</li>
+            <li>Reemplazar 3 catches restantes (api-client, theme).</li>
+            <li>Lock atómico al crear kiosk.</li>
+            <li>PATCH re-bootstrap + cache hash.</li>
+            <li>Payload advisor en MediaField + Shell.</li>
+            <li>Allowlist trim/lowercase.</li>
+            <li>Save timeout 30s recovery.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ TEMA B ============================ -->
+<section id="tema-b" class="mt-12">
+  <div class="card overflow-hidden rounded-2xl border-2 border-orange-200 bg-white shadow-sm dark:border-orange-900/40 dark:bg-zinc-900">
+    <header class="border-b border-orange-100 bg-orange-50/60 px-6 py-5 dark:border-orange-900/30 dark:bg-orange-950/30">
+      <div class="flex items-baseline justify-between gap-4">
+        <div>
+          <p class="text-[11.5px] font-semibold uppercase tracking-[0.18em] text-orange-700 dark:text-orange-400">Tema B · Operator confidence</p>
+          <h2 class="mt-1 text-2xl font-bold tracking-tight">Live preview parity + UX coherence</h2>
+        </div>
+        <span class="rounded-full bg-orange-600 px-3 py-1 text-[11.5px] font-bold text-white">XL · 8-12h (B.1 + B.2)</span>
+      </div>
+      <p class="mt-3 text-[14px] leading-relaxed text-zinc-700 dark:text-zinc-300">
+        <b>Goal.</b> Cerrar la brecha entre módulos que propagan reactivamente vs los que requieren reload, y unificar la lengua visual del Studio. Operador edita un Mapbox token y debería ver el mapa redibujarse sin reload. Editar un FR string y verlo en preview con FR seleccionado. Cambiar de tab con dirty state debería avisar.
+      </p>
+      <div class="mt-3 flex flex-wrap gap-1.5 text-[11px]">
+        <span class="rounded-full bg-orange-100 px-2 py-0.5 font-mono text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">#10</span>
+        <span class="rounded-full bg-orange-100 px-2 py-0.5 font-mono text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">#14</span>
+        <span class="rounded-full bg-yellow-100 px-2 py-0.5 font-mono text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300">#15</span>
+        <span class="rounded-full bg-yellow-100 px-2 py-0.5 font-mono text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300">#16</span>
+        <span class="rounded-full bg-yellow-100 px-2 py-0.5 font-mono text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300">#18</span>
+        <span class="rounded-full bg-yellow-100 px-2 py-0.5 font-mono text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300">#19</span>
+        <span class="rounded-full bg-yellow-100 px-2 py-0.5 font-mono text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300">#20</span>
+      </div>
+    </header>
+
+    <div class="space-y-6 p-6">
+      <!-- Sub-fases -->
+      <div class="grid gap-3 md:grid-cols-2">
+        <div class="rounded-lg border border-orange-200 bg-orange-50/30 p-4 dark:border-orange-900/30 dark:bg-orange-950/20">
+          <h4 class="text-[13px] font-semibold uppercase tracking-wide text-orange-700 dark:text-orange-400">B.1 · Bridge gaps + locale picker</h4>
+          <p class="mt-2 text-[13px]">Cablear i18n y integrations al bridge. Locale dropdown en PreviewPanel. Debounce constante 120ms. Diagnostics en sidebar. Save guard.</p>
+          <p class="mt-2 text-[12px] text-zinc-500">~M (3-5h)</p>
+        </div>
+        <div class="rounded-lg border border-orange-200 bg-orange-50/30 p-4 dark:border-orange-900/30 dark:bg-orange-950/20">
+          <h4 class="text-[13px] font-semibold uppercase tracking-wide text-orange-700 dark:text-orange-400">B.2 · Component unification</h4>
+          <p class="mt-2 text-[13px]"><code>Field</code> · <code>ColorPicker</code> · <code>MediaField</code> · <code>Toast</code> unificados. Migración progresiva editor por editor.</p>
+          <p class="mt-2 text-[12px] text-zinc-500">~L (5-7h)</p>
+        </div>
+      </div>
+
+      <!-- Archivos -->
+      <div>
+        <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Archivos a tocar</h3>
+        <div class="mt-2 overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+          <table class="w-full text-[12.5px]">
+            <thead class="bg-zinc-50 text-left text-[11px] font-semibold uppercase tracking-wide text-zinc-500 dark:bg-zinc-900/40">
+              <tr><th class="px-3 py-2">Archivo</th><th class="px-3 py-2">Cambio</th><th class="px-3 py-2">Sub-fase</th></tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+              <tr><td class="px-3 py-2 mono">src/app/studio/_lib/use-preview-bridge.ts</td><td class="px-3 py-2"><code>pushI18n</code> + <code>pushIntegrations</code> + <code>pushLocale</code>. Debounce 120ms uniforme.</td><td class="px-3 py-2 text-orange-700">B.1</td></tr>
+              <tr><td class="px-3 py-2 mono">src/components/studio-bridge.tsx</td><td class="px-3 py-2">Listeners <code>kiosk:i18n-override</code> + <code>kiosk:integrations-override</code> + <code>kiosk:locale-update</code>.</td><td class="px-3 py-2 text-orange-700">B.1</td></tr>
+              <tr><td class="px-3 py-2 mono">src/components/i18n-provider.tsx</td><td class="px-3 py-2">Consumir override reactivo del locale + bundle.</td><td class="px-3 py-2 text-orange-700">B.1</td></tr>
+              <tr><td class="px-3 py-2 mono">src/components/map/map-canvas.tsx</td><td class="px-3 py-2">Re-init Mapbox cuando token cambia.</td><td class="px-3 py-2 text-orange-700">B.1</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/PreviewPanel.tsx</td><td class="px-3 py-2">Locale dropdown sticky en toolbar.</td><td class="px-3 py-2 text-orange-700">B.1</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/Shell.tsx</td><td class="px-3 py-2">Guard de unsaved-changes en tab switch.</td><td class="px-3 py-2 text-orange-700">B.1</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_lib/sections.ts</td><td class="px-3 py-2">Diagnostics como item visible en sidebar.</td><td class="px-3 py-2 text-orange-700">B.1</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/_lib/Field.tsx (NUEVO)</td><td class="px-3 py-2">Componente único <code>&lt;Field label hint error /&gt;</code>.</td><td class="px-3 py-2 text-orange-700">B.2</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/_lib/ColorPicker.tsx (NUEVO)</td><td class="px-3 py-2">Hex input + swatch + palette suggestions.</td><td class="px-3 py-2 text-orange-700">B.2</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/MediaField.tsx</td><td class="px-3 py-2">Single source of truth (image/video/audio). Reemplaza ImageField.</td><td class="px-3 py-2 text-orange-700">B.2</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/Toast.tsx (NUEVO)</td><td class="px-3 py-2">Sistema unificado. Reemplaza errorMsg banner + cards locales.</td><td class="px-3 py-2 text-orange-700">B.2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Verificación -->
+      <div>
+        <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Verificación</h3>
+        <ul class="mt-2 space-y-1.5 text-[13px]">
+          <li>• Editar Mapbox token → mapa redibuja sin reload.</li>
+          <li>• Editar FR string → kiosk preview con FR refresca el texto sin reload.</li>
+          <li>• Toggle locale en PreviewPanel → todos los textos del kiosk cambian al locale elegido.</li>
+          <li>• Tab switch con dirty → confirm dialog.</li>
+          <li>• Migrar 2 editores al <code>&lt;Field&gt;</code> nuevo → diff visual idéntico al actual.</li>
+          <li>• Toast aparece para success (Save), warning (KV cap), error (network).</li>
+        </ul>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <div>
+          <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Riesgos / dependencias</h3>
+          <ul class="mt-2 space-y-1.5 text-[13px]">
+            <li>• Tamaño grande. Migración B.2 puede romper editores → feature-flag por editor.</li>
+            <li>• Mantener componentes viejos hasta que TODOS los editores estén migrados.</li>
+            <li>• B.1 puede shipear independiente; B.2 después.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Tareas atómicas</h3>
+          <ol class="mt-2 list-decimal space-y-1 pl-5 text-[13px]">
+            <li><b>B.1</b> Bridge i18n + integrations + debounce uniforme.</li>
+            <li><b>B.1</b> Locale picker PreviewPanel.</li>
+            <li><b>B.1</b> Diagnostics sidebar visible.</li>
+            <li><b>B.1</b> Save guard tab switch.</li>
+            <li><b>B.2</b> Field + ColorPicker + MediaField + Toast components.</li>
+            <li><b>B.2</b> Migración 21 editores al sistema nuevo (~30 min cada uno).</li>
+            <li><b>B.2</b> Borrar componentes viejos.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ TEMA C ============================ -->
+<section id="tema-c" class="mt-12">
+  <div class="card overflow-hidden rounded-2xl border-2 border-blue-200 bg-white shadow-sm dark:border-blue-900/40 dark:bg-zinc-900">
+    <header class="border-b border-blue-100 bg-blue-50/60 px-6 py-5 dark:border-blue-900/30 dark:bg-blue-950/30">
+      <div class="flex items-baseline justify-between gap-4">
+        <div>
+          <p class="text-[11.5px] font-semibold uppercase tracking-[0.18em] text-blue-700 dark:text-blue-400">Tema C · Operator productivity</p>
+          <h2 class="mt-1 text-2xl font-bold tracking-tight">UX catálogos pesados + AI content suggestions</h2>
+        </div>
+        <span class="rounded-full bg-blue-600 px-3 py-1 text-[11.5px] font-bold text-white">L · 5-7h</span>
+      </div>
+      <p class="mt-3 text-[14px] leading-relaxed text-zinc-700 dark:text-zinc-300">
+        <b>Goal.</b> Habilitar al operador para escalar a 30+ items por catálogo sin scroll infinito y reducir el tiempo de poblar contenido inicial mediante AI suggestions. "Generate 5 listings de restaurants en Davenport, FL" debería ser un click.
+      </p>
+      <div class="mt-3 flex flex-wrap gap-1.5 text-[11px]">
+        <span class="rounded-full bg-orange-100 px-2 py-0.5 font-mono text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">#7</span>
+        <span class="rounded-full bg-blue-100 px-2 py-0.5 font-mono text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">#24</span>
+        <span class="rounded-full bg-blue-100 px-2 py-0.5 font-mono text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">#25</span>
+        <span class="rounded-full bg-blue-100 px-2 py-0.5 font-mono text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">#26</span>
+      </div>
+    </header>
+
+    <div class="space-y-6 p-6">
+
+      <div>
+        <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Archivos a tocar</h3>
+        <div class="mt-2 overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+          <table class="w-full text-[12.5px]">
+            <thead class="bg-zinc-50 text-left text-[11px] font-semibold uppercase tracking-wide text-zinc-500 dark:bg-zinc-900/40">
+              <tr><th class="px-3 py-2">Archivo</th><th class="px-3 py-2">Cambio</th></tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/catalog/CatalogToolbar.tsx</td><td class="px-3 py-2"><code>&lt;SearchInput&gt;</code> con prop <code>filter</code>. Debounce 200ms. Counter "12 of 47".</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/catalog/CatalogList.tsx</td><td class="px-3 py-2">Soportar <code>filter</code>. Bulk select + reorder respeta filter (no afecta items hidden).</td></tr>
+              <tr><td class="px-3 py-2 mono">ListingsEditor / EventsEditor / TicketsEditor / PassesEditor / TrailsEditor / DealsEditor</td><td class="px-3 py-2">Pasar filter state desde toolbar.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/api/studio/configs/route.ts (POST)</td><td class="px-3 py-2"><code>body.cloneFrom?: string</code>. Lee KV de slug existente; re-aplica rewrite si location difiere.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/NewClientModal.tsx</td><td class="px-3 py-2">Radio "Source: Template / Existing kiosk" + dropdown slugs.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/api/studio/configs/[slug]/export/route.ts (NUEVO)</td><td class="px-3 py-2">GET retorna config completo como JSON adjunto.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/api/studio/configs/[slug]/import/route.ts (NUEVO)</td><td class="px-3 py-2">POST acepta JSON, valida zod, sobreescribe KV.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/TopBar.tsx</td><td class="px-3 py-2">Botón "Export JSON" + "Import JSON" en menu kebab.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/api/studio/ai/suggest/route.ts (NUEVO)</td><td class="px-3 py-2">POST <code>{ kind, count, context: { city, state, brand } }</code>. Llama Anthropic con prompt estructurado, retorna array tipado.</td></tr>
+              <tr><td class="px-3 py-2 mono">ListingsEditor / EventsEditor / DealsEditor / etc.</td><td class="px-3 py-2">Botón "✨ Suggest with AI" → modal con preview + confirm cuáles añadir.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Enfoque AI Suggestions</h3>
+        <pre class="mt-2 overflow-x-auto rounded-lg bg-zinc-100 p-3 text-[12px] dark:bg-zinc-900"><code>// Endpoint: POST /api/studio/ai/suggest
+{
+  "kind": "listings",
+  "subkind": "restaurants",
+  "count": 5,
+  "context": {
+    "city": "Davenport",
+    "state": "FL",
+    "brand": { "primary": "#1796d6" },
+    "exclude_slugs": ["el-farolito"]  // dedupe vs items existentes
+  }
+}
+
+// Response (validado contra schema del módulo):
+{
+  "items": [
+    { "slug": "the-coffee-pot", "title": "The Coffee Pot",
+      "description": "...", "address": "Davenport, FL",
+      "tags": ["coffee","casual"], "_aiGenerated": true },
+    ...
+  ],
+  "tokensUsed": 1240
+}</code></pre>
+        <p class="mt-2 text-[12px] text-zinc-600 dark:text-zinc-400">El prompt al model incluye un ejemplo del shape esperado y el contexto del kiosk (city, brand). El operador revisa cada item generado en el modal antes de añadirlo. Items aparecen marcados con badge "AI" hasta que el operador edite manualmente.</p>
+      </div>
+
+      <div>
+        <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Verificación</h3>
+        <ul class="mt-2 space-y-1.5 text-[13px]">
+          <li>• Search "pizza" en ListingsEditor con 50 items → solo matches.</li>
+          <li>• Clone "default" como "client-y" en location distinto → addresses + titles ya rewriteados.</li>
+          <li>• Export JSON, modificar manual, Import → cambios reflejados.</li>
+          <li>• AI suggest 5 listings → 5 items plausibles con badge AI.</li>
+          <li>• Rate limit: 5 suggest calls / hora / kiosk → 6ª request retorna 429.</li>
+        </ul>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <div>
+          <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Riesgos / dependencias</h3>
+          <ul class="mt-2 space-y-1.5 text-[13px]">
+            <li>• AI consume Anthropic credits — cap N items / request, rate-limit 5 calls/hr.</li>
+            <li>• Calidad de items variable — operador review obligatorio antes de Save.</li>
+            <li>• Search en catálogos no afecta el publish — sólo UI client-side.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Tareas atómicas</h3>
+          <ol class="mt-2 list-decimal space-y-1 pl-5 text-[13px]">
+            <li>SearchInput en CatalogToolbar (~1h, código solo client-side).</li>
+            <li>Migración filter en 6 editores.</li>
+            <li>Clone kiosk endpoint + UI radio.</li>
+            <li>Export/Import JSON endpoints + UI menu kebab.</li>
+            <li>Endpoint <code>/api/studio/ai/suggest</code> con Anthropic + zod validation.</li>
+            <li>UI modal "Suggest with AI" en cada editor relevante.</li>
+            <li>Rate limit con KV.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ TEMA D ============================ -->
+<section id="tema-d" class="mt-12">
+  <div class="card overflow-hidden rounded-2xl border-2 border-emerald-200 bg-white shadow-sm dark:border-emerald-900/40 dark:bg-zinc-900">
+    <header class="border-b border-emerald-100 bg-emerald-50/60 px-6 py-5 dark:border-emerald-900/30 dark:bg-emerald-950/30">
+      <div class="flex items-baseline justify-between gap-4">
+        <div>
+          <p class="text-[11.5px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-400">Tema D · 6 locales sin fricción</p>
+          <h2 class="mt-1 text-2xl font-bold tracking-tight">i18n auto-translate + multi-idioma preview</h2>
+        </div>
+        <span class="rounded-full bg-emerald-600 px-3 py-1 text-[11.5px] font-bold text-white">M · 4-6h</span>
+      </div>
+      <p class="mt-3 text-[14px] leading-relaxed text-zinc-700 dark:text-zinc-300">
+        <b>Goal.</b> Eliminar la fricción de mantener 6 locales sincronizados (en/es/fr/de/pt/ja). Operador edita en EN; el resto se traduce solo. Preview iframe respeta el locale elegido.
+      </p>
+      <div class="mt-3 flex flex-wrap gap-1.5 text-[11px]">
+        <span class="rounded-full bg-orange-100 px-2 py-0.5 font-mono text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">#10</span>
+        <span class="rounded-full bg-blue-100 px-2 py-0.5 font-mono text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">#21</span>
+        <span class="rounded-full bg-zinc-100 px-2 py-0.5 font-mono text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">#31</span>
+        <span class="rounded-full bg-zinc-100 px-2 py-0.5 font-mono text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">#32</span>
+      </div>
+    </header>
+
+    <div class="space-y-6 p-6">
+
+      <div>
+        <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Archivos a tocar</h3>
+        <div class="mt-2 overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+          <table class="w-full text-[12.5px]">
+            <thead class="bg-zinc-50 text-left text-[11px] font-semibold uppercase tracking-wide text-zinc-500 dark:bg-zinc-900/40">
+              <tr><th class="px-3 py-2">Archivo</th><th class="px-3 py-2">Cambio</th></tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+              <tr><td class="px-3 py-2 mono">.env.local + Vercel envvars</td><td class="px-3 py-2"><code>DEEPL_API_KEY</code> + <code>ANTHROPIC_API_KEY</code> (ya existe). Manual de Rubén.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/api/studio/i18n/translate/route.ts (NUEVO)</td><td class="px-3 py-2">POST <code>{ source, targets, strings }</code>. DeepL primario, Anthropic fallback.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/I18nEditor.tsx</td><td class="px-3 py-2">Botón "Auto-translate from EN". Trigger automático debounce 2s al editar EN. Vista "missing keys" por locale + bulk-translate CTA.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_lib/use-preview-bridge.ts</td><td class="px-3 py-2"><code>pushI18n(bundle)</code> + <code>pushLocale(code)</code>. <i>Compartido con Tema B.1.</i></td></tr>
+              <tr><td class="px-3 py-2 mono">src/components/studio-bridge.tsx</td><td class="px-3 py-2">Listeners. <i>Compartido con Tema B.1.</i></td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/PreviewPanel.tsx</td><td class="px-3 py-2">Locale dropdown sticky. <i>Compartido con Tema B.1.</i></td></tr>
+              <tr><td class="px-3 py-2 mono">src/lib/i18n/runtime.ts</td><td class="px-3 py-2">Soportar override reactivo del locale activo desde el bridge.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Enfoque DeepL + Anthropic fallback</h3>
+        <pre class="mt-2 overflow-x-auto rounded-lg bg-zinc-100 p-3 text-[12px] dark:bg-zinc-900"><code>// src/app/api/studio/i18n/translate/route.ts
+async function translate(strings: Record&lt;string, string&gt;, target: string) {
+  // 1) Try DeepL
+  if (process.env.DEEPL_API_KEY) {
+    try {
+      const r = await fetch('https://api-free.deepl.com/v2/translate', {
+        method: 'POST',
+        headers: { 'Authorization': `DeepL-Auth-Key ${process.env.DEEPL_API_KEY}` },
+        body: new URLSearchParams({ text: ..., target_lang: target.toUpperCase() }),
+      });
+      if (r.ok) return mapDeepLResponse(await r.json());
+    } catch (e) { console.warn('[i18n] DeepL failed, falling back', e); }
+  }
+  // 2) Anthropic fallback
+  return translateWithClaude(strings, target);  // existente para Tavus
+}</code></pre>
+        <p class="mt-2 text-[12px] text-zinc-600 dark:text-zinc-400">Cada string traducido lleva flag <code>_aiTranslated: true</code>. UI muestra badge "AI" hasta edit manual del operador.</p>
+      </div>
+
+      <div>
+        <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Verificación</h3>
+        <ul class="mt-2 space-y-1.5 text-[13px]">
+          <li>• Editar <code>home.welcome</code> en EN → tras 2s, los otros 5 locales reciben traducción.</li>
+          <li>• Toggle locale en PreviewPanel → kiosk muestra strings sin reload.</li>
+          <li>• Vista "missing keys" en JA → lista keys faltantes; click bulk → todos traducidos.</li>
+          <li>• Sin DEEPL_API_KEY → fallback a Anthropic con warning console.</li>
+        </ul>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <div>
+          <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Riesgos / dependencias</h3>
+          <ul class="mt-2 space-y-1.5 text-[13px]">
+            <li>• <b>Bloqueante:</b> envvar <code>DEEPL_API_KEY</code> en local + Vercel Production.</li>
+            <li>• Calidad AI variable → flag "needs review" por string traducido auto.</li>
+            <li>• Compartir bridge con Tema B → desarrollar B.1 antes para no duplicar.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Tareas atómicas</h3>
+          <ol class="mt-2 list-decimal space-y-1 pl-5 text-[13px]">
+            <li>Endpoint <code>/api/studio/i18n/translate</code>.</li>
+            <li>UI editor: bulk button + auto-trigger debounce 2s.</li>
+            <li>Vista "missing keys" + CTA bulk.</li>
+            <li>Bridge i18n + locale (compartido B.1).</li>
+            <li>PreviewPanel locale dropdown (compartido B.1).</li>
+            <li>i18n runtime override reactivo.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ TEMA E ============================ -->
+<section id="tema-e" class="mt-12">
+  <div class="card overflow-hidden rounded-2xl border-2 border-violet-200 bg-white shadow-sm dark:border-violet-900/40 dark:bg-zinc-900">
+    <header class="border-b border-violet-100 bg-violet-50/60 px-6 py-5 dark:border-violet-900/30 dark:bg-violet-950/30">
+      <div class="flex items-baseline justify-between gap-4">
+        <div>
+          <p class="text-[11.5px] font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-400">Tema E · Operations layer</p>
+          <h2 class="mt-1 text-2xl font-bold tracking-tight">Workflow publish + versionado visual</h2>
+        </div>
+        <span class="rounded-full bg-violet-600 px-3 py-1 text-[11.5px] font-bold text-white">L · 5-7h</span>
+      </div>
+      <p class="mt-3 text-[14px] leading-relaxed text-zinc-700 dark:text-zinc-300">
+        <b>Goal.</b> Cerrar el ciclo de operations. Antes de publicar, el operador ve QUÉ está cambiando (diff JSON). Después de publicar, puede hacer rollback. La infra externa (custom domain, Blob prod, smoke E2E) cableada y verificada.
+      </p>
+      <div class="mt-3 flex flex-wrap gap-1.5 text-[11px]">
+        <span class="rounded-full bg-orange-100 px-2 py-0.5 font-mono text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">#8</span>
+        <span class="rounded-full bg-orange-100 px-2 py-0.5 font-mono text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">#9</span>
+        <span class="rounded-full bg-blue-100 px-2 py-0.5 font-mono text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">#23</span>
+        <span class="rounded-full bg-blue-100 px-2 py-0.5 font-mono text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">#27</span>
+        <span class="rounded-full bg-blue-100 px-2 py-0.5 font-mono text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">#28</span>
+        <span class="rounded-full bg-zinc-100 px-2 py-0.5 font-mono text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">#29</span>
+        <span class="rounded-full bg-zinc-100 px-2 py-0.5 font-mono text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">#30</span>
+      </div>
+    </header>
+
+    <div class="space-y-6 p-6">
+
+      <div>
+        <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Archivos a tocar</h3>
+        <div class="mt-2 overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+          <table class="w-full text-[12.5px]">
+            <thead class="bg-zinc-50 text-left text-[11px] font-semibold uppercase tracking-wide text-zinc-500 dark:bg-zinc-900/40">
+              <tr><th class="px-3 py-2">Archivo</th><th class="px-3 py-2">Cambio</th></tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/PublishModal.tsx</td><td class="px-3 py-2">Tab "Diff" que renderiza JSON diff vs último publicado. Library: <code>jsondiffpatch</code>.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/api/studio/configs/[slug]/diff/route.ts (NUEVO)</td><td class="px-3 py-2">GET retorna diff vs último PR mergeado.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/studio/_components/VersionsEditor.tsx</td><td class="px-3 py-2">Botón "Revert to v3" en cada entry del history. Lee localVersionHistory + GitHub Releases.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/lib/studio/github-publisher.ts</td><td class="px-3 py-2">Flag <code>autoMerge: true</code> que mergea PR si CI verde. Configurable per-kiosk.</td></tr>
+              <tr><td class="px-3 py-2 mono">src/lib/studio/bootstrap-from-fs.ts</td><td class="px-3 py-2">Calcular hash del template config.json + guardarlo en KV. Marcar "FS drift available".</td></tr>
+              <tr><td class="px-3 py-2 mono">src/app/api/studio/diag/template-status/route.ts (NUEVO)</td><td class="px-3 py-2">GET <code>{ kiosks: [{ slug, fsHash, kvHash, drift }] }</code>.</td></tr>
+              <tr><td class="px-3 py-2 mono"><i>DNS (manual Rubén)</i></td><td class="px-3 py-2"><code>studio.trueomni.com</code> CNAME → <code>cname.vercel-dns.com</code> + actualizar OAuth callback.</td></tr>
+              <tr><td class="px-3 py-2 mono"><i>Vercel Blob smoke (manual)</i></td><td class="px-3 py-2">Subir 4MB image en prod, validar URL pública, eliminar.</td></tr>
+              <tr><td class="px-3 py-2 mono">.planning/2026-XX-smoke-e2e-publish.md (NUEVO)</td><td class="px-3 py-2">Doc step-by-step Studio→PR→merge→deploy + screenshots esperados.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Verificación</h3>
+        <ul class="mt-2 space-y-1.5 text-[13px]">
+          <li>• Cambiar título de listing → Publish Modal tab Diff muestra <code>{listings.0.title: "Old" → "New"}</code>.</li>
+          <li>• Click "Revert to v3" → kiosk vuelve al state de v3 con confirm dialog.</li>
+          <li>• PR auto-merge: editar kiosk, publicar, ver PR mergeado solo si CI verde.</li>
+          <li>• <code>/studio/diagnostics</code> muestra "1 kiosk has FS drift" cuando se actualiza el template.</li>
+          <li>• Vercel Blob: 4MB upload en prod resuelve URL pública.</li>
+          <li>• <code>studio.trueomni.com</code> resuelve y OAuth callback funciona.</li>
+        </ul>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <div>
+          <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Riesgos / dependencias</h3>
+          <ul class="mt-2 space-y-1.5 text-[13px]">
+            <li>• DNS + OAuth callback bajo control de Rubén.</li>
+            <li>• Vercel Blob storage prod no probado todavía.</li>
+            <li>• <b>Rollback choca con Tema A si race condition slug no mitigado.</b> Tema A ANTES de E.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-[13px] font-semibold uppercase tracking-wide text-zinc-500">Tareas atómicas</h3>
+          <ol class="mt-2 list-decimal space-y-1 pl-5 text-[13px]">
+            <li>Diff endpoint + UI tab.</li>
+            <li>Revert button + endpoint.</li>
+            <li>Auto-merge flag en github-publisher.</li>
+            <li>FS drift detection + diagnostics widget.</li>
+            <li>DNS custom domain (Rubén).</li>
+            <li>Vercel Blob smoke prod (Rubén + yo).</li>
+            <li>Doc smoke E2E.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FUERA DE SCOPE ============================ -->
+<section id="fuera-scope" class="mt-16">
+  <h2 class="text-2xl font-bold tracking-tight">Fuera de scope</h2>
+  <p class="mt-2 text-[14px] text-zinc-600 dark:text-zinc-400">Items aislados que merecen sub-fase propia, no entran en los 5 temas para mantener cada uno atómico.</p>
+
+  <div class="mt-5 grid gap-3 md:grid-cols-2">
+    <div class="card rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <h3 class="text-[14px] font-semibold">Trails GeoJSON map viewer (#12)</h3>
+      <p class="mt-2 text-[13px] text-zinc-600 dark:text-zinc-400">Reemplazar el JSON raw editor por un map viewer (Mapbox + draw plugin). Sub-fase del módulo Trails. Estimación: M (3-5h).</p>
+    </div>
+    <div class="card rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <h3 class="text-[14px] font-semibold">Social Wall OAuth (#13)</h3>
+      <p class="mt-2 text-[13px] text-zinc-600 dark:text-zinc-400">Cada plataforma (Instagram Graph, TikTok, Facebook, X) bloquea por su lado. App registrations + scopes + tokens refresh. Estimación: XL (10h+ por plataforma) — spec separado.</p>
+    </div>
+    <div class="card rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <h3 class="text-[14px] font-semibold">OnboardingTour activation (#11)</h3>
+      <p class="mt-2 text-[13px] text-zinc-600 dark:text-zinc-400">5 pasos ya cableados en <code>OnboardingTour.tsx</code>. Validar el flag <code>localStorage 'studio:onboarding-seen'</code>, hacer smoke, y ajustar contenido. Estimación: S (1-2h).</p>
+    </div>
+    <div class="card rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <h3 class="text-[14px] font-semibold">"Coming soon" placeholders (S7+)</h3>
+      <p class="mt-2 text-[13px] text-zinc-600 dark:text-zinc-400">PreviewPanel Mobile/Slides + ProductDropdown Digital Displays/Video Walls + 2 fields del PageHeader. Son placeholders intencionales del milestone S7. Sin acción mientras esos productos no estén priorizados.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ ROADMAP ============================ -->
+<section id="roadmap" class="mt-16">
+  <h2 class="text-2xl font-bold tracking-tight">Roadmap propuesto</h2>
+  <p class="mt-2 text-[14px] text-zinc-600 dark:text-zinc-400">Orden recomendado por dependencias + ROI. Cada flecha es una sesión fresca con contexto limpio.</p>
+
+  <div class="mt-6 overflow-x-auto rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <div class="flex min-w-max items-stretch gap-3 text-[13px]">
+      <div class="rounded-xl border-2 border-rose-300 bg-rose-50 p-4 dark:border-rose-800/60 dark:bg-rose-950/30">
+        <p class="text-[10.5px] font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-400">1 · Ship-blocker</p>
+        <p class="mt-1 font-bold text-rose-900 dark:text-rose-200">A · Observabilidad</p>
+        <p class="mt-1 text-[11.5px] text-rose-700 dark:text-rose-400">L · 4-6h · sin deps</p>
+      </div>
+      <div class="self-center text-zinc-400">→</div>
+      <div class="rounded-xl border-2 border-orange-300 bg-orange-50 p-4 dark:border-orange-800/60 dark:bg-orange-950/30">
+        <p class="text-[10.5px] font-semibold uppercase tracking-wide text-orange-700 dark:text-orange-400">2 · Bridge gaps</p>
+        <p class="mt-1 font-bold text-orange-900 dark:text-orange-200">B.1 · Live preview</p>
+        <p class="mt-1 text-[11.5px] text-orange-700 dark:text-orange-400">M · 3-5h</p>
+      </div>
+      <div class="self-center text-zinc-400">→</div>
+      <div class="rounded-xl border-2 border-emerald-300 bg-emerald-50 p-4 dark:border-emerald-800/60 dark:bg-emerald-950/30">
+        <p class="text-[10.5px] font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">3 · 6 locales</p>
+        <p class="mt-1 font-bold text-emerald-900 dark:text-emerald-200">D · i18n auto-translate</p>
+        <p class="mt-1 text-[11.5px] text-emerald-700 dark:text-emerald-400">M · 4-6h · DEEPL key</p>
+      </div>
+      <div class="self-center text-zinc-400">→</div>
+      <div class="rounded-xl border-2 border-orange-300 bg-orange-50 p-4 dark:border-orange-800/60 dark:bg-orange-950/30">
+        <p class="text-[10.5px] font-semibold uppercase tracking-wide text-orange-700 dark:text-orange-400">4 · Unification</p>
+        <p class="mt-1 font-bold text-orange-900 dark:text-orange-200">B.2 · Components</p>
+        <p class="mt-1 text-[11.5px] text-orange-700 dark:text-orange-400">L · 5-7h</p>
+      </div>
+      <div class="self-center text-zinc-400">→</div>
+      <div class="rounded-xl border-2 border-blue-300 bg-blue-50 p-4 dark:border-blue-800/60 dark:bg-blue-950/30">
+        <p class="text-[10.5px] font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-400">5 · Productivity</p>
+        <p class="mt-1 font-bold text-blue-900 dark:text-blue-200">C · Catálogos+AI</p>
+        <p class="mt-1 text-[11.5px] text-blue-700 dark:text-blue-400">L · 5-7h · Anthropic</p>
+      </div>
+      <div class="self-center text-zinc-400">→</div>
+      <div class="rounded-xl border-2 border-violet-300 bg-violet-50 p-4 dark:border-violet-800/60 dark:bg-violet-950/30">
+        <p class="text-[10.5px] font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-400">6 · Operations</p>
+        <p class="mt-1 font-bold text-violet-900 dark:text-violet-200">E · Publish + versionado</p>
+        <p class="mt-1 text-[11.5px] text-violet-700 dark:text-violet-400">L · 5-7h · DNS</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 grid gap-4 md:grid-cols-2">
+    <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <h3 class="text-[14px] font-semibold">Por qué este orden</h3>
+      <ul class="mt-3 space-y-1.5 text-[13px] text-zinc-600 dark:text-zinc-400">
+        <li>• <b>A primero:</b> ship-blocker. Sin observabilidad no diagnosticamos.</li>
+        <li>• <b>B.1 abre la puerta a D:</b> el bridge i18n + locale picker se reutiliza.</li>
+        <li>• <b>D antes de B.2:</b> con auto-translate cubierto, el operador ya no bloquea por idiomas mientras refactorizamos UI.</li>
+        <li>• <b>B.2 + C juntos no:</b> B.2 es refactor estructural; C añade feature. Mejor separados.</li>
+        <li>• <b>E último:</b> requiere DNS + Blob smoke + auto-merge depende de A para evitar PRs zombies.</li>
+      </ul>
+    </div>
+    <div class="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <h3 class="text-[14px] font-semibold">Alternativa: shippear primer cliente</h3>
+      <p class="mt-3 text-[13px] text-zinc-600 dark:text-zinc-400">Si la prioridad es onboardear el primer cliente real ASAP, reducir a:</p>
+      <p class="mt-2 mono rounded bg-zinc-100 p-2 text-[12px] dark:bg-zinc-900">A → E (mínimo viable ops) → C (search ya, AI luego) → B → D</p>
+      <p class="mt-2 text-[13px] text-zinc-600 dark:text-zinc-400">Pone la infra de operations antes que el polish UX. Trade-off: el operador del primer cliente sufre las asimetrías de UI hasta B.2.</p>
+    </div>
+  </div>
+
+  <!-- Total estimation -->
+  <div class="mt-6 flex items-center justify-between rounded-2xl border border-zinc-200 bg-white px-6 py-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <div>
+      <p class="text-[11.5px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Esfuerzo total estimado</p>
+      <p class="mt-1 text-2xl font-bold tabular-nums">26–38 horas focal</p>
+      <p class="mt-1 text-[12.5px] text-zinc-500">Repartidas en 6 sesiones independientes con contexto fresco. Excluye infra de Rubén (DNS, envvars).</p>
+    </div>
+    <div class="hidden text-right md:block">
+      <p class="text-[11.5px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Status hoy</p>
+      <p class="mt-1 text-[14px]">Studio funcional E2E · pendiente push <code>main</code> · 0 ship-blockers documentados <i>antes</i> de este audit.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FOOTER ============================ -->
+<footer class="mt-20 border-t border-zinc-200 pt-8 text-[12.5px] text-zinc-500 dark:border-zinc-800">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <p>© 2026 TrueOmni · Studio Audit v0.1 · 2026-05-05</p>
+      <p class="mt-1">Generado por Claude Code Opus 4.7 con 3 agentes Explore en paralelo · referenciado en <code>.planning/STATE.md</code></p>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#top" class="hover:text-zinc-900 dark:hover:text-zinc-100">↑ Volver arriba</a>
+      <span class="hidden sm:inline">·</span>
+      <span class="hidden sm:inline">Cmd+P para imprimir</span>
+    </div>
+  </div>
+</footer>
+
+</main>
+</body>
+</html>

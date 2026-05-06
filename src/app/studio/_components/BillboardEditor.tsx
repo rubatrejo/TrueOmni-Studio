@@ -16,6 +16,7 @@ import {
 
 import { BILLBOARD_WIREFRAMES } from './billboard-wireframes';
 import { MediaField } from './MediaField';
+import { ColorPicker } from './ui';
 
 const VARIANT_INFO: Record<BillboardVariant, { name: string; tagline: string }> = {
   0: { name: 'Variant 1', tagline: 'Hero photo + center logo' },
@@ -715,33 +716,12 @@ function ColorRow({
   value: string;
   onChange: (next: string) => void;
 }) {
-  // Solo el picker nativo necesita 6-digit hex (no soporta alpha). El input
-  // texto sí acepta 8-digit (#rrggbbAA) para alpha en gradients.
-  const sixDigit = /^#[0-9a-fA-F]{6}$/.test(value) ? value : value.slice(0, 7);
   return (
     <div className="space-y-1">
       <span className="block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
         {label}
       </span>
-      <div className="flex items-center gap-2">
-        <input
-          type="color"
-          value={sixDigit}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-8 w-12 cursor-pointer rounded border border-zinc-200 bg-transparent dark:border-zinc-700"
-          aria-label={`${label} picker`}
-        />
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => {
-            const v = e.target.value.trim();
-            if (/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(v) || v === '') onChange(v);
-          }}
-          placeholder="#000000 or #000000FF"
-          className="flex-1 rounded-md border border-zinc-200 bg-white px-2 py-1 font-mono text-[11.5px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
-        />
-      </div>
+      <ColorPicker value={value} onChange={onChange} allowAlpha placeholder="#000000 or #000000FF" />
     </div>
   );
 }

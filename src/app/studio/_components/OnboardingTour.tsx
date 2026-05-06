@@ -75,13 +75,29 @@ const STEPS: TourStep[] = [
     title: 'Publish when ready',
     body: (
       <>
-        Hit <strong>Publish</strong> in the top bar. You&rsquo;ll see a diff against the
-        filesystem, confirm, and the kiosk is live. Until S7.2 ships GitHub PR-publish, the
-        Versions tab keeps a local timeline of every save.
+        Hit <strong>Publish</strong> in the top bar. You&rsquo;ll see a per-file diff with
+        the JSON keys that changed, confirm, and a GitHub PR is opened automatically. Once
+        merged, Vercel deploys. The <strong>Versions</strong> tab keeps revertable snapshots
+        of every save.
       </>
     ),
   },
 ];
+
+const REPLAY_EVENT = 'studio:replay-onboarding';
+
+/**
+ * Limpia el flag de localStorage y emite un evento para que la instancia
+ * montada de `<OnboardingTour>` reaparezca sin recargar la página.
+ *
+ * Útil desde un botón "Replay tour" en el footer del Studio (audit #11).
+ */
+export function replayOnboardingTour() {
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {}
+  window.dispatchEvent(new Event(REPLAY_EVENT));
+}
 
 /**
  * Hook que devuelve `[shouldShow, dismiss]`. shouldShow es `true` solo
@@ -100,6 +116,9 @@ function useOnboardingState(): [boolean, () => void] {
     } catch {
       // localStorage bloqueado (modo privado, etc.) — saltamos el tour.
     }
+    const onReplay = () => setShouldShow(true);
+    window.addEventListener(REPLAY_EVENT, onReplay);
+    return () => window.removeEventListener(REPLAY_EVENT, onReplay);
   }, []);
 
   const dismiss = () => {
@@ -124,6 +143,12 @@ export function OnboardingTour() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Cada vez que el tour se abre (primer login o replay), arrancamos desde
+  // el paso 1.
+  useEffect(() => {
+    if (shouldShow) setStepIndex(0);
+  }, [shouldShow]);
 
   useEffect(() => {
     if (!shouldShow) return;

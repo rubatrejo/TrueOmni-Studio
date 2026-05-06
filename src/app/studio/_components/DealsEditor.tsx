@@ -8,6 +8,7 @@ import {
   Copy,
   GripVertical,
   Plus,
+  Sparkles,
   Tag,
   Trash2,
   X,
@@ -21,16 +22,23 @@ import {
   type DealsModuleConfig,
 } from '@/lib/studio/schema';
 
+import { type AiSuggestedItem } from '../_lib/api-client';
+
+import { AiSuggestModal } from './AiSuggestModal';
 import { EditorEmptyState } from './EditorEmptyState';
 import { ImageField } from './ImageField';
 
 export function DealsEditor({
   deals,
   onChange,
+  kioskLocation,
 }: {
   deals: DealsModuleConfig;
   onChange: (next: DealsModuleConfig) => void;
+  /** Location del kiosk para AI suggest (#26 audit). */
+  kioskLocation?: string;
 }) {
+  const [aiOpen, setAiOpen] = useState(false);
   const setDeals = (list: Deal[]) => onChange({ ...deals, deals: list });
 
   const updateDeal = (slug: string, patch: Partial<Deal>) => {
@@ -111,6 +119,17 @@ export function DealsEditor({
               Drag to reorder · {deals.deals.length}/200 deals.
             </p>
           </div>
+          {kioskLocation ? (
+            <button
+              type="button"
+              onClick={() => setAiOpen(true)}
+              className="flex items-center gap-1.5 rounded-md border border-violet-300/60 bg-violet-50 px-2.5 py-1 text-[11.5px] font-medium text-violet-700 transition hover:bg-violet-100 dark:border-violet-800/50 dark:bg-violet-950/30 dark:text-violet-300 dark:hover:bg-violet-950/50"
+              title="Generate plausible deals for this kiosk's location with AI"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              Suggest with AI
+            </button>
+          ) : null}
         </header>
 
         {deals.deals.length === 0 ? (
@@ -149,6 +168,34 @@ export function DealsEditor({
           Add deal
         </button>
       </section>
+
+      <AiSuggestModal
+        open={aiOpen}
+        kind="deals"
+        location={kioskLocation ?? ''}
+        existingSlugs={deals.deals.map((d) => d.slug)}
+        onClose={() => setAiOpen(false)}
+        onConfirm={(items: AiSuggestedItem[]) => {
+          // Map AI items → Deal skeletons. AI provee title/description/tags;
+          // el operador completa cover/QR/expiresAt/promoCode después.
+          const today = new Date();
+          today.setMonth(today.getMonth() + 1);
+          const expiresAt = today.toISOString().slice(0, 10);
+          const newDeals: Deal[] = items.map((it) => ({
+            slug: it.slug,
+            title: it.title,
+            shortDescription: it.description.slice(0, 280),
+            headline: '',
+            subtitle: '',
+            longDescription: it.description,
+            cover: '',
+            expiresAt,
+            qrUrl: '',
+            features: it.tags ?? [],
+          }));
+          onChange({ ...deals, deals: [...newDeals, ...deals.deals] });
+        }}
+      />
     </div>
   );
 }

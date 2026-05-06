@@ -60,6 +60,7 @@ import { SocialWallEditor } from './SocialWallEditor';
 import { SurveyEditor } from './SurveyEditor';
 import { TicketsEditor } from './TicketsEditor';
 import { TrailsEditor } from './TrailsEditor';
+import { ColorPicker } from './ui';
 
 export function EditorPanel({
   sectionKey,
@@ -283,7 +284,13 @@ export function EditorPanel({
           <AiAvatarEditor aiAvatar={aiAvatar} onChange={onAiAvatarChange} />
         )}
         {sectionKey === 'survey' && <SurveyEditor survey={survey} onChange={onSurveyChange} />}
-        {sectionKey === 'deals' && <DealsEditor deals={deals} onChange={onDealsChange} />}
+        {sectionKey === 'deals' && (
+          <DealsEditor
+            deals={deals}
+            onChange={onDealsChange}
+            kioskLocation={kioskLocation ?? ''}
+          />
+        )}
         {sectionKey === 'photo-booth' && (
           <PhotoBoothEditor photoBooth={photoBooth} onChange={onPhotoBoothChange} />
         )}
@@ -667,31 +674,15 @@ function ColorRow({
   onChange: (v: string) => void;
 }) {
   return (
-    <label className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white p-2.5 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-900 dark:bg-zinc-900/30 dark:hover:border-zinc-800 dark:hover:bg-zinc-900/60">
-      <span
-        className="grid h-10 w-10 shrink-0 place-items-center rounded-md ring-1 ring-zinc-300 dark:ring-zinc-800"
-        style={{ background: value }}
-      >
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-full w-full cursor-pointer opacity-0"
-          aria-label={`${label} color picker`}
-        />
-      </span>
+    <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white p-2.5 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-900 dark:bg-zinc-900/30 dark:hover:border-zinc-800 dark:hover:bg-zinc-900/60">
       <span className="flex flex-1 flex-col">
         <span className="text-[12.5px] font-medium text-zinc-800 dark:text-zinc-200">{label}</span>
         <span className="text-[10.5px] leading-tight text-zinc-500">{description}</span>
       </span>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-20 rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-right font-mono text-[11px] text-zinc-700 outline-none transition focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200"
-        spellCheck={false}
-      />
-    </label>
+      <div className="w-44">
+        <ColorPicker value={value} onChange={onChange} />
+      </div>
+    </div>
   );
 }
 
@@ -1300,27 +1291,12 @@ function HexRow({
   value: string;
   onChange: (next: string) => void;
 }) {
-  const sixDigit = /^#[0-9a-fA-F]{6}$/.test(value) ? value : value.slice(0, 7);
   return (
     <div className="mt-2 flex items-center gap-2">
       <span className="w-12 text-[11.5px] text-zinc-700 dark:text-zinc-300">{label}</span>
-      <input
-        type="color"
-        value={sixDigit}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-7 w-10 cursor-pointer rounded border border-zinc-200 bg-transparent dark:border-zinc-700"
-        aria-label={`${label} color picker`}
-      />
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => {
-          const v = e.target.value.trim();
-          if (/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(v) || v === '') onChange(v);
-        }}
-        placeholder="#004f8be6"
-        className="flex-1 rounded-md border border-zinc-200 bg-white px-2 py-1 font-mono text-[11px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
-      />
+      <div className="flex-1">
+        <ColorPicker value={value} onChange={onChange} allowAlpha placeholder="#004f8be6" />
+      </div>
     </div>
   );
 }

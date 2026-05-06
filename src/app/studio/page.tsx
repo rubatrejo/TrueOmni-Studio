@@ -12,7 +12,7 @@ import { DeleteKioskModal } from './_components/DeleteKioskModal';
 import { DuplicateKioskModal } from './_components/DuplicateKioskModal';
 import { FaviconBadge } from './_components/FaviconBadge';
 import { NewClientModal } from './_components/NewClientModal';
-import { OnboardingTour } from './_components/OnboardingTour';
+import { OnboardingTour, replayOnboardingTour } from './_components/OnboardingTour';
 import { StudioPageHeader } from './_components/PageHeader';
 import { SystemStatusBadge } from './_components/SystemStatusBadge';
 import {
@@ -208,6 +208,13 @@ export default function StudioHome() {
       <footer className="mt-24 flex items-center justify-between border-t border-zinc-200 pt-6 text-xs text-zinc-500 dark:border-zinc-900 dark:text-zinc-600">
         <span>© 2026 TrueOmni · Kiosk Studio v0.1</span>
         <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={replayOnboardingTour}
+            className="text-xs text-zinc-500 underline-offset-2 transition hover:text-zinc-800 hover:underline dark:text-zinc-500 dark:hover:text-zinc-300"
+          >
+            Replay tour
+          </button>
           <SystemStatusBadge />
           <span>Local · main</span>
         </div>

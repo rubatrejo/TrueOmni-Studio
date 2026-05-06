@@ -24,6 +24,7 @@ import { ALL_CHIPS, applyMapFilters, EMPTY_MAP_FILTER, toggleChip } from '@/lib/
 import type { MapFilterState } from '@/lib/map-filter';
 import type { MapItem } from '@/lib/map-item';
 import { DEFAULT_MAP_WELCOME_BODY } from '@/lib/studio/schema';
+import { useMapboxTokenOverride } from '@/lib/use-integrations-override';
 
 import { MapCanvas } from './map-canvas';
 import { MapChips } from './map-chips';
@@ -137,6 +138,10 @@ export function MapModule({
     return () => window.removeEventListener(KIOSK_CLIENT_COORDS_OVERRIDE_EVENT, onOverride);
   }, []);
   const effectiveCoords = reactiveCoords ?? clientCoords;
+
+  // Reactive Mapbox token (#14 audit). Cuando el operador setea
+  // `integrations.mapbox.token` en el Studio, el iframe se actualiza sin reload.
+  const effectiveMapboxToken = useMapboxTokenOverride(mapboxToken);
 
   // Reactive client name: re-interpola `{client}` placeholder en el
   // exploreTitle (ej. "Explore {client} Map") cuando el operador edita
@@ -600,7 +605,7 @@ export function MapModule({
 
       <main className="absolute left-0 right-0 overflow-hidden" style={{ top: '738px', bottom: 0 }}>
         <MapCanvas
-          token={mapboxToken}
+          token={effectiveMapboxToken}
           items={visibleItems}
           center={center}
           zoom={zoom}
@@ -677,7 +682,7 @@ export function MapModule({
               <ListingDetail
                 moduleKey={entry.moduleKey}
                 listing={entry.listing}
-                mapboxToken={mapboxToken}
+                mapboxToken={effectiveMapboxToken}
                 clientCoords={effectiveCoords}
                 eventMeta={entry.eventMeta}
                 secondaryCta={entry.secondaryCta}

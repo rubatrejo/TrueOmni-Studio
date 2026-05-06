@@ -8,16 +8,19 @@
  */
 
 /*
- * Bloquea el scroll fantasma en html/body cuando estamos en el Studio.
- * El container raíz `.studio-root` ya tiene `h-screen overflow-hidden`
- * pero los iframes del PreviewPanel (transform: scale, bounding box
- * 1080×1920 nativa) y secciones largas del editor a veces leak al
- * scrollHeight del documento y aparece un scrollbar al fondo. Con
- * `:has()` activamos el lock solo cuando el Studio está montado —
- * el runtime del kiosk (en /home, /, etc.) sigue scrolleando normal.
+ * Bloquea el scroll fantasma en html/body SOLO cuando estamos en el
+ * editor del Studio (`.studio-shell` aplicado en `Shell.tsx`). Los
+ * iframes del PreviewPanel (transform: scale, bounding box 1080×1920
+ * nativa) y secciones largas del editor a veces leak al scrollHeight
+ * del documento.
+ *
+ * Las páginas estáticas del Studio (/studio listado, /studio/docs,
+ * /studio/diagnostics, /studio/sign-in, etc.) necesitan scroll natural
+ * porque su contenido excede el viewport — antes se aplicaba el lock
+ * a TODO `.studio-root` y rompía esas páginas.
  */
-html:has(.studio-root),
-body:has(.studio-root) {
+html:has(.studio-shell),
+body:has(.studio-shell) {
   overflow: hidden;
 }
 

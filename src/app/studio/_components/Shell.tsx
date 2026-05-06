@@ -805,7 +805,7 @@ export function Shell({
 
   return (
     <StudioSlugProvider slug={initialConfig.slug}>
-      <div className="flex h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+      <div className="studio-shell flex h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
         <TopBar
           slug={initialConfig.slug}
           nombre={initialConfig.nombre}

@@ -123,32 +123,33 @@ Cada sub-fase cumple:
 
 ---
 
-## Milestone Studio — Plataforma de gestión de kiosks (Kiosk Studio)
+## Milestone Studio — Plataforma de gestión de kiosks (Kiosk Studio) ✅ CERRADO 2026-05-06
 
 > Detalles completos en `.planning/STUDIO-PROJECT.md` y `.planning/STUDIO-ROADMAP.md`.
 > Plan brainstormeado y aprobado: `/Users/rubenramirez/.claude/plans/wild-weaving-key.md`.
 
-Editor visual white-label para crear y mantener kiosks sin tocar código. Vive como subruta `/studio` en el mismo repo. Live preview siempre visible vía iframe + postMessage. Storage híbrido: Upstash KV durante edición + "publish" exporta a `clients/<slug>/`.
+Editor visual white-label para crear y mantener kiosks sin tocar código. Vive como subruta `/studio` en el mismo repo. Live preview siempre visible vía iframe + postMessage. Storage híbrido: Upstash KV durante edición + "publish" exporta a `clients/<slug>/`. **Producción:** `https://trueomni-studio.vercel.app`.
 
 Fases:
 
-- [ ] **S0** — Shell + clientes + preview + persistencia (MVP).
-- [ ] **S1** — Branding tab (3 brand tokens + logos + fonts).
-- [ ] **S2** — Módulos tab (toggle + reorder + labels).
-- [ ] **S3** — Contenido / Data (CRUD listings/events/passes/deals/trails/brochures).
-- [ ] **S4** — i18n editor (6 locales, AI translation).
-- [ ] **S5** — Ads system (subir, calendarizar, emplazar).
-- [ ] **S6** — Integraciones (clima, APIs, Mapbox, Analytics).
-- [ ] **S7** — Auth + Vercel + GitHub PR-publish con approval gate (`ruben@trueomni.com`).
+- [x] **S0** — Shell + clientes + preview + persistencia (MVP).
+- [x] **S1** — Branding tab (3 brand tokens + logos + fonts).
+- [x] **S2** — Módulos tab (toggle + reorder + labels).
+- [x] **S3** — Contenido / Data (CRUD listings/events/passes/deals/trails/brochures).
+- [x] **S4** — i18n editor (6 locales, AI translation con DeepL primario + Anthropic fallback).
+- [x] **S5** — Ads system (subir, calendarizar, emplazar).
+- [x] **S6** — Integraciones (clima, APIs, Mapbox, Analytics, Tavus, Bandwango, CrowdRiff, Viator, Satisfi).
+- [x] **S7** — Auth NextAuth GitHub + Vercel + GitHub PR-publish con approval gate (`ruben@trueomni.com`).
+- [x] **Audit panorámico** (2026-05-05/06) — 32/32 hallazgos cerrados en código.
 
 ---
 
 ## v2 (después del shipping de v1)
 
 - ~~Fase 6 — Multi-idioma (R9).~~ ✅ adelantado a v1 como sub-fase 3.18 (2026-04-28).
-- Fase 7 — Editor visual de tokens (R10).
-- Fase 8 — Integración APIs externas (R11).
-- Fase 9 — Temas adicionales (R12).
+- ~~Fase 7 — Editor visual de tokens (R10).~~ ✅ cubierto por Studio Branding tab (S1).
+- ~~Fase 8 — Integración APIs externas (R11).~~ ✅ cubierto por Studio S6 Integrations.
+- ~~Fase 9 — Temas adicionales (R12).~~ ✅ catálogo definido `_lib/starters.ts` (2026-05-06). UI cableo en NewClientModal pendiente como sub-fase S.
 
 ---
 

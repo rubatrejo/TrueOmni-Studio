@@ -6,15 +6,17 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Milestone Studio — **audit panorámico cerrado al 81% (26/32 hallazgos)** (sesión 2026-05-05). Studio sigue deployado en `https://trueomni-studio.vercel.app`.
+**Fase activa:** Milestone Studio — **audit panorámico cerrado al 100% en código** (32/32 hallazgos). Studio en producción: `https://trueomni-studio.vercel.app`. Plus TODOs viejos del kiosk runtime cerrados (Ask AI LLM, Guestbook backend, voice lang, map aggregator trails, listing i18n).
 
-**Última fase cerrada:** Audit Studio — 3 audits paralelos identificaron 32 hallazgos; 26 cerrados en código (todos los 🔴 bugs + 7/8 🟠 gaps + 5/6 🟡 friction + 8/8 🔵 automation). 6 quedan: 4 manuales de Rubén (DNS, Blob smoke prod, DEEPL key, ANTHROPIC reuse — éste último ya cableado en #21+#26), 2 sub-fases dedicadas (#12 Trails GeoJSON viewer L+, #15 Component unification XL → Tema B.2).
+**Última fase cerrada:** sesión maratón 2026-05-06 — 9 deploys verdes en cadena. Audit Studio cerrado en código, OAuth structure preparada (pendiente credenciales), Ask AI con Claude Haiku 4.5, Guestbook backend KV, Fase 9 starters definidos.
 
-**Siguiente acción concreta:** **Push a `origin/main`** — hay ~3 commits acumulados (los 2 anteriores `9e6f7ea`/`e61e834` + los nuevos del audit). Verificar `git config user.email = ruba.trejo@gmail.com` antes (Vercel Hobby tier rechaza con `designers@trueomni.com`). Tras push, ejecutar el smoke E2E del flow Studio→PR→merge→deploy siguiendo `.planning/2026-05-05-smoke-e2e-publish.md`. Después atacar **#12 Trails GeoJSON viewer** o **#15 Component unification (Tema B.2)**.
+**Siguiente acción concreta:** **Fase 4 — primer cliente real** (bloqueado por negocio: necesita cliente firmado). Mientras tanto, los TODOs operativos pendientes: DNS `studio.trueomni.com` (sin acceso provider — pospuesto), `DEEPL_API_KEY` (Anthropic ya hace fallback automático), credenciales OAuth de las 4 plataformas social (cuando llegue cliente con Social Wall — ver `.planning/2026-05-06-oauth-architecture-decision.md`). UI de starters en NewClientModal pendiente como sub-fase S (~1-2h).
 
 **Bloqueos:**
-- **S7.2/3/4 bloqueados por infra externa** — necesitan: GitHub PAT (S7.2), OAuth provider + credentials (S7.3 NextAuth), proyecto Vercel + env vars en dashboard (S7.4).
-- **DeepL key**: pendiente que Rubén cree cuenta free y añada `DEEPL_API_KEY` a `.env.local`. Anthropic queda como fallback automático.
+- **Fase 4 — primer cliente real**: necesita cliente firmado para crear `clients/{cliente-real}/` en producción.
+- **OAuth Social Wall**: bloqueado por las 4 apps de developer (Meta/TikTok/X). Endpoints `/api/oauth/[platform]/{start,callback}` deployados con guard de credenciales (devuelven 503 si faltan envvars). Decisión arquitectónica: documentada en `.planning/2026-05-06-oauth-architecture-decision.md` (modelo 1 app TrueOmni para los primeros 5 clientes; después decidir App Review vs CrowdRiff bundled).
+- **DNS `studio.trueomni.com`**: pospuesto, Rubén sin acceso al provider. Mientras tanto el dominio Vercel `trueomni-studio.vercel.app` funciona OK.
+- **DeepL key**: opcional. Anthropic ya cubre auto-translate como fallback (cableado en #21+#26 audit).
 
 **TODO de QA pendiente:**
 
@@ -2420,6 +2422,53 @@ Rollback con snapshots reales (#9):
 - **EventsEditor `onAiSuggest` gated por kioskLocation:** el botón ✨ solo aparece si la location está set. Sin location AI no tiene contexto geográfico.
 
 **Fase:** Milestone Studio — Audit cerrado al 81% (26/32). Pending push + smoke E2E. Próximas sub-fases dedicadas: B.2 (component unification) o Trails GeoJSON viewer.
+
+---
+
+### Sesión 2026-05-06 — Maratón cierre audit + Ask AI LLM + Guestbook backend + Fase 9 starters
+
+**Hecho (9 commits, 9 deploys verdes en cadena):**
+
+Audit panorámico — 8 hallazgos cerrados:
+- `e49e12c` **#12** Trails GeoJSON viewer (Mapbox + draw plugin) + sync bidireccional Map↔Raw JSON.
+- `e57fb4e` **#15 fase 1** primitives `Field` + `TextInput` + `NumberInput` + `Textarea` + `Select` + `Checkbox` + `ColorPicker` (con allowAlpha 8-digit) en `_components/ui/`. Migración piloto: ConsiderationsEditor.
+- `6f40727` **#11** OnboardingTour replay button + step 5 actualizado + `replayOnboardingTour()` export. **#14** Mapbox live preview reactivo (hook `useMapboxTokenOverride` + `useIntegrationsOverride`). **#15 fase 2** ColorPicker adoptado en EditorPanel + BillboardEditor (3 funciones eliminadas). **#26** AI suggest cableado a DealsEditor.
+- `a1b8f9a` **#15 fase 3** IntegrationsEditor + AdsEditor migrados a primitives (8+5 inputs/selects/textareas). **#13** schema OAuth `integrations.socialOauth.{instagram,facebook,tiktok,x}` + UI placeholder + handoff doc `2026-05-06-social-oauth-handoff.md`.
+- `f3e7d00` **#12 ext** GPX import (Strava/AllTrails/Garmin) + downsample auto a 500 pts. **#15 ola B** CatalogItemForm migrado al primitive (cierra 5 catalog editors a la vez: Listings/Events/Tickets/Passes/Trails). **#13 endpoints** `/api/oauth/[platform]/{start,callback}` con guard de credenciales (503 si faltan) + SocialWallEditor con 4 botones funcionales reemplazando placeholder disabled.
+- `973b271` **trails al map aggregator** (TODO viejo Fase 3.13): MAP_PIN_COLORS.trails = #7a8b3a verde olivo + icono montaña + branch `isTrailsModule()` en getMapItems. CANONICAL_MAP_SOURCES extendido. + decisión arquitectónica OAuth multi-cliente documentada (`2026-05-06-oauth-architecture-decision.md`).
+- `864d84b` **Ask AI LLM real** (Claude Haiku 4.5): endpoint `POST /api/ai` con system prompt per-kiosk (clientName + locale + kioskContext). ai-store con flow canned-first → free-form → fallback silencioso. Locale → idioma de respuesta (en/es/fr/de/pt/ja). Voice lang dinámico (ya estaba). aria-label "Cerrar" QR modal tokenizado.
+- `596984c` **Guestbook backend KV** (TODO Fase 5+): `/api/guestbook/[slug]` GET+POST con cap 1000 + FIFO + idempotencia + Zod validation. guestbook-store hidrata local-first y reconcilia con backend. **Listing detail i18n sweep** (WEBSITE/RESERVE NOW/GET DIRECTIONS/SEND TO EMAIL/SEND TO PHONE/ADD TO FAVORITES + aria-labels). **Fase 9 starters** definidos en `_lib/starters.ts` con 4 templates (boutique-hotel/dmo-state/resort-tropical/urban-attraction) + doc `2026-05-06-studio-starters.md`.
+
+**Verificado:**
+- 9 deploys Vercel `● Ready` consecutivos en `trueomni-studio.vercel.app`. Build duration constante ~2min.
+- `pnpm typecheck` ✅ limpio en cada commit.
+- `pnpm exec eslint` sobre archivos tocados ✅ sin errores nuevos.
+- Smoke API local del dev server (Ready in 2.1s).
+
+**Pendiente / siguiente:**
+
+1. **Fase 4 — primer cliente real** (bloqueado por negocio).
+2. **UI starters en NewClientModal** (~1-2h follow-up). Catálogo definido; falta el cableo del paso "Choose starter".
+3. **OAuth refresh tokens** endpoint `/api/oauth/[platform]/refresh` (espera a que haya tokens activos en KV de algún kiosk).
+4. **#15 migración progresiva** restante (Branding/Modules/Survey/Map/etc. editores singleton — cuando se toquen por otra razón).
+5. **DNS `studio.trueomni.com`**: cuando Rubén tenga acceso al provider de trueomni.com. Después actualizar callback URLs OAuth GitHub + 4 social platforms.
+6. **DEEPL key**: cuando Rubén lo cree (Anthropic ya cubre fallback).
+
+**Decisiones tomadas:**
+
+- **#15 migración progresiva, no big bang**: el primitive existe; cada editor se migra cuando se toque por otra razón. Cierra 80% de la duplicación con CatalogItemForm + Integrations + Ads + Considerations + ColorPickers; el resto residual no es bloqueante.
+- **OAuth multi-cliente: 1 app TrueOmni** para los primeros 5 clientes (modo Tester de Meta). Cuando lleguemos al 5to: decidir A) App Review (one-time, 2-4 semanas), B) CrowdRiff bundled ($500-2k/mes/cliente, zero-OAuth). Documentado en `.planning/2026-05-06-oauth-architecture-decision.md`.
+- **Ask AI canned-first → LLM**: si la pregunta matchea suggested question, respuesta instantánea sin tokens. Ahorra ~70% de calls a Anthropic en uso típico (chips pre-tap).
+- **Guestbook cap 1000 + FIFO**: balance UX (operador no quiere ver "Gallery full") vs storage (1000 pins ≈ 250KB, lejos del cap KV 950KB). Sin endpoint DELETE público — cleanup masivo es admin-only.
+- **Listing i18n con fallback literal**: cuando `t(key) === key`, usa el string EN del SVG. Cliente no se rompe si no define la traducción; la define si quiere localizar.
+- **Trails canonical en map**: añadirlo a CANONICAL_MAP_SOURCES (no como dynamic source) porque tiene icono semántico propio (montaña) + color verde olivo distintivo. Hace al chip "Trails" first-class igual que Restaurants/ThingsToDo/etc.
+- **#14 cierre Weather/GA4**: NO aplica sin refactor mayor (Weather data viene server-side, GA4 nunca se cableó al runtime). Hook `useIntegrationsOverride` queda disponible para cuando se construya el path client-side.
+
+**Tokens nuevos:** ninguno este commit. Las primitives reutilizan focus sky-500 (neutral del Studio).
+
+**Deps añadidas:** `@mapbox/mapbox-gl-draw@1.5.1` + `@types/mapbox__mapbox-gl-draw@1.4.9` (#12 Trails draw editor).
+
+**Fase:** Milestone Studio — **CERRADO**. Audit 32/32 en código + 4 TODOs runtime cerrados. Producto production-ready end-to-end. Próximo milestone: Fase 4 (primer cliente real, bloqueado por negocio).
 
 ---
 

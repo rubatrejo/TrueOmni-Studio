@@ -27,6 +27,7 @@ import { ImportToast } from './catalog/ImportToast';
 import { TaxonomyEditor } from './catalog/TaxonomyEditor';
 import { EditorEmptyState } from './EditorEmptyState';
 import { TrailGeoJsonField } from './TrailGeoJsonField';
+import { Checkbox, Field, Select, TextInput } from './ui';
 
 const DIFFICULTY_OPTIONS: TrailDifficulty[] = ['Easy', 'Moderate', 'Hard'];
 const TRAIL_TYPE_OPTIONS: TrailType[] = ['Loop', 'Out & Back', 'Point to Point'];
@@ -380,58 +381,45 @@ function ConsiderationsEditor({
       </h5>
 
       <div className="grid grid-cols-2 gap-3">
-        <label className="block space-y-1">
-          <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">Distance</span>
-          <input
-            type="text"
+        <Field label="Distance">
+          <TextInput
             value={considerations.distance}
             onChange={(e) => update('distance', e.target.value)}
             placeholder="e.g. 5.2 mi"
-            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100 dark:placeholder:text-zinc-600"
           />
-        </label>
-        <label className="block space-y-1">
-          <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">Difficulty</span>
-          <select
+        </Field>
+        <Field label="Difficulty">
+          <Select
             value={considerations.difficulty}
             onChange={(e) => update('difficulty', e.target.value as TrailDifficulty)}
-            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100"
           >
             {DIFFICULTY_OPTIONS.map((d) => (
               <option key={d} value={d}>
                 {d}
               </option>
             ))}
-          </select>
-        </label>
-        <label className="block space-y-1">
-          <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">Duration (optional)</span>
-          <input
-            type="text"
+          </Select>
+        </Field>
+        <Field label="Duration (optional)">
+          <TextInput
             value={considerations.duration ?? ''}
             onChange={(e) => update('duration', e.target.value || undefined)}
             placeholder="e.g. 2-3 hours"
-            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100 dark:placeholder:text-zinc-600"
           />
-        </label>
-        <label className="block space-y-1">
-          <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">Elevation gain (optional)</span>
-          <input
-            type="text"
+        </Field>
+        <Field label="Elevation gain (optional)">
+          <TextInput
             value={considerations.elevationGain ?? ''}
             onChange={(e) => update('elevationGain', e.target.value || undefined)}
             placeholder="e.g. 1,280 ft"
-            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100 dark:placeholder:text-zinc-600"
           />
-        </label>
-        <label className="block space-y-1">
-          <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">Trail type (optional)</span>
-          <select
+        </Field>
+        <Field label="Trail type (optional)">
+          <Select
             value={considerations.trailType ?? ''}
             onChange={(e) =>
               update('trailType', (e.target.value as TrailType) || undefined)
             }
-            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100"
           >
             <option value="">—</option>
             {TRAIL_TYPE_OPTIONS.map((t) => (
@@ -439,17 +427,15 @@ function ConsiderationsEditor({
                 {t}
               </option>
             ))}
-          </select>
-        </label>
-        <label className="flex items-center gap-2 text-[12px] text-zinc-700 dark:text-zinc-200">
-          <input
-            type="checkbox"
+          </Select>
+        </Field>
+        <div className="flex items-end">
+          <Checkbox
+            label="Dog friendly"
             checked={considerations.dogFriendly ?? false}
-            onChange={(e) => update('dogFriendly', e.target.checked || undefined)}
-            className="h-3.5 w-3.5 rounded border-zinc-300 bg-white text-sky-500 focus:ring-sky-500/40 dark:border-zinc-700 dark:bg-zinc-900"
+            onChange={(next) => update('dogFriendly', next || undefined)}
           />
-          Dog friendly
-        </label>
+        </div>
       </div>
     </div>
   );

@@ -5,7 +5,13 @@
  */
 
 /** Categorías canónicas del Map — tienen colores brand y iconos hardcoded. */
-export const CANONICAL_MAP_SOURCES = ['restaurants', 'things-to-do', 'stay', 'events'] as const;
+export const CANONICAL_MAP_SOURCES = [
+  'restaurants',
+  'things-to-do',
+  'stay',
+  'events',
+  'trails',
+] as const;
 export type CanonicalMapSource = (typeof CANONICAL_MAP_SOURCES)[number];
 
 /**

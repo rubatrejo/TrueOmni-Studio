@@ -28,6 +28,7 @@ export const MAP_PIN_COLORS: Record<CanonicalMapSource, string> = {
   'things-to-do': 'hsl(var(--brand-primary))', // Play (tab hsl(var(--brand-primary)))
   stay: 'hsl(var(--brand-tertiary))', // Stay (tab hsl(var(--brand-tertiary)))
   events: '#f16651', // Events (tab #f16651)
+  trails: '#7a8b3a', // Verde olivo — outdoor/naturaleza, distinto del azul brand
 };
 
 /** Definición resoluble del color por categoría: literal hex o nombre de CSS var. */
@@ -39,6 +40,7 @@ const MAP_PIN_CSS: Record<
   'things-to-do': { kind: 'cssVar', name: '--brand-primary' },
   stay: { kind: 'cssVar', name: '--brand-tertiary' },
   events: { kind: 'literal', value: '#f16651' },
+  trails: { kind: 'literal', value: '#7a8b3a' },
 };
 
 /**
@@ -250,6 +252,15 @@ const ICONS: Record<CanonicalMapSource, IconSpec> = {
       <circle cx="26" cy="24" r="2.5"/>
       <circle cx="14" cy="30" r="2.5"/>
       <circle cx="20" cy="30" r="2.5"/>
+    `,
+  },
+  // Montaña/sendero — semánticamente trail/outdoor.
+  trails: {
+    viewBox: '0 0 40 40',
+    body: `
+      <path d="M4 32 L14 16 L20 24 L28 10 L36 32 Z"/>
+      <circle cx="28" cy="10" r="2" fill="#fff"/>
+      <path d="M14 16 L18 22" stroke="#fff" stroke-width="1.5" fill="none"/>
     `,
   },
 };

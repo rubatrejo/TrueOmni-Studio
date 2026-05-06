@@ -544,6 +544,7 @@ export interface HomeMapModule {
     eat?: string;
     stay?: string;
     events?: string;
+    trails?: string;
   };
   defaultZoom?: number;
   defaultCenter?: { lat: number; lng: number };

@@ -5,6 +5,7 @@ import type {
   KioskConfig,
   Listing,
   MapSource,
+  Trail,
 } from './config';
 import { addDays, todayISO } from './events-date';
 import type { MapItem } from './map-item';
@@ -16,22 +17,25 @@ export const MAP_SOURCES: readonly MapSource[] = [
   'restaurants',
   'stay',
   'events',
+  'trails',
 ] as const;
 
 /** Mapeo del chip lógico al valor `source` del MapItem. */
-const CHIP_TO_SOURCE: Record<'play' | 'eat' | 'stay' | 'events', MapSource> = {
+const CHIP_TO_SOURCE: Record<'play' | 'eat' | 'stay' | 'events' | 'trails', MapSource> = {
   play: 'things-to-do',
   eat: 'restaurants',
   stay: 'stay',
   events: 'events',
+  trails: 'trails',
 };
 
 /** Keys de módulo por defecto si el cliente usa el naming estándar. */
-const DEFAULT_MODULE_KEYS: Record<'play' | 'eat' | 'stay' | 'events', string> = {
+const DEFAULT_MODULE_KEYS: Record<'play' | 'eat' | 'stay' | 'events' | 'trails', string> = {
   play: 'things-to-do',
   eat: 'restaurants',
   stay: 'stay',
   events: 'events',
+  trails: 'trails',
 };
 
 /**
@@ -55,6 +59,7 @@ const SOURCE_BIAS: Record<string, { dLat: number; dLng: number }> = {
   'things-to-do': { dLat: 0.0022, dLng: 0.0018 }, // NE
   stay: { dLat: -0.002, dLng: 0 }, // S
   events: { dLat: 0, dLng: 0 }, // sin bias (coords ya únicas)
+  trails: { dLat: 0, dLng: 0 }, // trailheads son únicos por naturaleza
 };
 
 const ZERO_BIAS = { dLat: 0, dLng: 0 };
@@ -112,6 +117,23 @@ function toMapItemFromListing(
   };
 }
 
+function toMapItemFromTrail(t: Trail, moduleSlug: string): MapItem {
+  return {
+    source: 'trails',
+    moduleSlug,
+    slug: t.slug,
+    title: t.title,
+    subcategory: t.subcategory,
+    image: t.image,
+    coords: jitterCoords(t.slug, 'trails', t.coords),
+    address: t.address,
+    phone: t.phone,
+    features: t.features,
+    popularity: t.popularity,
+    hours: t.hours,
+  };
+}
+
 function toMapItemFromEvent(e: EventItem, moduleSlug: string): MapItem {
   return {
     source: 'events',
@@ -143,6 +165,12 @@ function isEventsModule(
   return !!m && m.kind === 'events';
 }
 
+function isTrailsModule(
+  m: HomeModuleVariant | undefined,
+): m is Extract<HomeModuleVariant, { kind: 'trails' }> {
+  return !!m && m.kind === 'trails';
+}
+
 /**
  * Agrega listings + events en `MapItem[]` a partir de los módulos del cliente.
  * Filtra Events a la ventana [hoy, hoy + eventsWindowDays].
@@ -163,6 +191,7 @@ export function getMapItems(
     eat: mod.sources?.eat ?? DEFAULT_MODULE_KEYS.eat,
     stay: mod.sources?.stay ?? DEFAULT_MODULE_KEYS.stay,
     events: mod.sources?.events ?? DEFAULT_MODULE_KEYS.events,
+    trails: mod.sources?.trails ?? DEFAULT_MODULE_KEYS.trails,
   } as const;
 
   const items: MapItem[] = [];
@@ -198,6 +227,17 @@ export function getMapItems(
       if (e.date >= today && e.date <= windowEnd) {
         items.push(toMapItemFromEvent(e, evModuleKey));
       }
+    }
+  }
+
+  // Trails: sin filtro de fecha (los trails son siempre accesibles).
+  // El moduleKey por default es `trails`; el cliente puede sobreescribirlo
+  // vía `mod.sources.trails`.
+  const trailsModuleKey = moduleKeys.trails;
+  const trailsModule = modules[trailsModuleKey];
+  if (isTrailsModule(trailsModule)) {
+    for (const t of trailsModule.trails) {
+      items.push(toMapItemFromTrail(t, trailsModuleKey));
     }
   }
 

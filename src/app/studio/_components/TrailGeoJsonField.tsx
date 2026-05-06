@@ -23,6 +23,8 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import mapboxgl from 'mapbox-gl';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { downsampleCoords, parseGpxToCoords } from '@/lib/gpx-parser';
+
 type Coord = [number, number];
 
 interface TrailGeoJsonFieldProps {
@@ -251,6 +253,35 @@ function TrailDrawMap({
     draw.changeMode('draw_line_string');
   };
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importInfo, setImportInfo] = useState<string | null>(null);
+
+  const handleImportGpx = () => fileInputRef.current?.click();
+
+  const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // permite re-importar el mismo archivo después.
+    if (!file) return;
+    setImportError(null);
+    setImportInfo(null);
+    try {
+      const xml = await file.text();
+      const { coords, pointCount, trackName } = parseGpxToCoords(xml);
+      // Downsample agresivo: 5000+ puntos de Strava → 500 max para no
+      // saturar el KV (cada coord son ~25 bytes serializados).
+      const reduced = downsampleCoords(coords, 500);
+      onChangeRef.current(reduced);
+      setImportInfo(
+        `Imported ${pointCount.toLocaleString()} points${
+          reduced.length < pointCount ? ` (downsampled to ${reduced.length})` : ''
+        }${trackName ? ` from “${trackName}”` : ''}.`,
+      );
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : 'Failed to parse GPX.');
+    }
+  };
+
   return (
     <div className="space-y-2">
       <div
@@ -264,6 +295,14 @@ function TrailDrawMap({
           className="rounded-md border border-sky-500/40 bg-sky-500/10 px-2 py-1 text-[11px] text-sky-700 transition hover:bg-sky-500/20 dark:text-sky-300"
         >
           Draw line
+        </button>
+        <button
+          type="button"
+          onClick={handleImportGpx}
+          className="rounded-md border border-zinc-200 bg-white px-2 py-1 text-[11px] text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-200 dark:hover:bg-zinc-900"
+          title="Import a .gpx file (Strava, AllTrails, Garmin, etc.)"
+        >
+          Import GPX
         </button>
         <button
           type="button"
@@ -283,11 +322,24 @@ function TrailDrawMap({
           {coordinates.length} points
         </span>
       </div>
-      <p className="text-[11px] leading-snug text-zinc-500">
-        Click <em>Draw line</em>, then click on the map to add points. Double-click to
-        finish. Drag a vertex to move it; click <em>Trash</em> in the top-left toolbar to
-        delete the selected feature.
-      </p>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".gpx,application/gpx+xml,application/xml,text/xml"
+        className="hidden"
+        onChange={onFileSelected}
+      />
+      {importError ? (
+        <p className="text-[11px] text-rose-600 dark:text-rose-400">{importError}</p>
+      ) : importInfo ? (
+        <p className="text-[11px] text-emerald-600 dark:text-emerald-400">{importInfo}</p>
+      ) : (
+        <p className="text-[11px] leading-snug text-zinc-500">
+          Click <em>Draw line</em>, then click on the map to add points. Double-click to
+          finish. Drag a vertex to move it; click <em>Trash</em> in the top-left toolbar to
+          delete the selected feature. Or <em>Import GPX</em> from your hike app.
+        </p>
+      )}
     </div>
   );
 }

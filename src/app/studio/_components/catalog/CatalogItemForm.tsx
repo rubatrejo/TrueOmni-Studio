@@ -2,6 +2,8 @@
 
 import type { ReactNode } from 'react';
 
+import { Field, NumberInput, Select, TextInput, Textarea } from '../ui';
+
 import { ImageUrlField } from './ImageUrlField';
 import { LatLngField } from './LatLngField';
 
@@ -79,6 +81,9 @@ interface CatalogItemFormProps<T> {
  * Form genérico para un item de catálogo. Renderiza inputs según `kind`:
  *   text · textarea · number · image · latlng · select · taxonomy-pick · checkbox.
  * Cualquier campo no cubierto se debe renderizar fuera del form como custom UI.
+ *
+ * Migrado al primitive Field/Inputs en B.2 (audit #15) — afecta a 5 catalog
+ * editors a la vez (Listings/Events/Tickets/Passes/Trails).
  */
 export function CatalogItemForm<T>({ item, fields, onChange, footer }: CatalogItemFormProps<T>) {
   return (
@@ -108,38 +113,34 @@ function FieldRenderer<T>({
     case 'text': {
       const value = (raw as string | undefined) ?? '';
       return (
-        <Labeled label={field.label} helpText={field.helpText}>
-          <input
-            type="text"
+        <Field label={field.label} helpText={field.helpText}>
+          <TextInput
             value={value}
             placeholder={field.placeholder}
             onChange={(e) => onChange({ [field.key]: e.target.value } as Partial<T>)}
-            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100 dark:placeholder:text-zinc-600"
           />
-        </Labeled>
+        </Field>
       );
     }
 
     case 'textarea': {
       const value = (raw as string | undefined) ?? '';
       return (
-        <Labeled label={field.label} helpText={field.helpText}>
-          <textarea
+        <Field label={field.label} helpText={field.helpText}>
+          <Textarea
             value={value}
             rows={field.rows ?? 3}
             onChange={(e) => onChange({ [field.key]: e.target.value } as Partial<T>)}
-            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100 dark:placeholder:text-zinc-600"
           />
-        </Labeled>
+        </Field>
       );
     }
 
     case 'number': {
       const value = typeof raw === 'number' ? raw : 0;
       return (
-        <Labeled label={field.label} helpText={field.helpText}>
-          <input
-            type="number"
+        <Field label={field.label} helpText={field.helpText}>
+          <NumberInput
             value={value}
             min={field.min}
             max={field.max}
@@ -148,9 +149,8 @@ function FieldRenderer<T>({
               const next = parseFloat(e.target.value);
               onChange({ [field.key]: Number.isFinite(next) ? next : 0 } as Partial<T>);
             }}
-            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100"
           />
-        </Labeled>
+        </Field>
       );
     }
 
@@ -183,11 +183,10 @@ function FieldRenderer<T>({
     case 'select': {
       const value = (raw as string | undefined) ?? '';
       return (
-        <Labeled label={field.label} helpText={field.helpText}>
-          <select
+        <Field label={field.label} helpText={field.helpText}>
+          <Select
             value={value}
             onChange={(e) => onChange({ [field.key]: e.target.value } as Partial<T>)}
-            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100"
           >
             <option value="">—</option>
             {field.options.map((opt) => (
@@ -195,8 +194,8 @@ function FieldRenderer<T>({
                 {opt.label}
               </option>
             ))}
-          </select>
-        </Labeled>
+          </Select>
+        </Field>
       );
     }
 
@@ -204,7 +203,7 @@ function FieldRenderer<T>({
       if (field.multiple) {
         const selected = Array.isArray(raw) ? (raw as string[]) : [];
         return (
-          <Labeled label={field.label} helpText={field.helpText}>
+          <Field label={field.label} helpText={field.helpText}>
             <div className="flex flex-wrap gap-1.5">
               {field.options.length === 0 ? (
                 <p className="text-[11px] italic text-zinc-500">
@@ -235,16 +234,15 @@ function FieldRenderer<T>({
                 })
               )}
             </div>
-          </Labeled>
+          </Field>
         );
       }
       const value = (raw as string | undefined) ?? '';
       return (
-        <Labeled label={field.label} helpText={field.helpText}>
-          <select
+        <Field label={field.label} helpText={field.helpText}>
+          <Select
             value={value}
             onChange={(e) => onChange({ [field.key]: e.target.value } as Partial<T>)}
-            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100"
           >
             <option value="">—</option>
             {field.options.map((opt) => (
@@ -252,8 +250,8 @@ function FieldRenderer<T>({
                 {opt}
               </option>
             ))}
-          </select>
-        </Labeled>
+          </Select>
+        </Field>
       );
     }
 
@@ -275,22 +273,4 @@ function FieldRenderer<T>({
       );
     }
   }
-}
-
-function Labeled({
-  label,
-  helpText,
-  children,
-}: {
-  label: string;
-  helpText?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="space-y-1">
-      <label className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">{label}</label>
-      {children}
-      {helpText ? <p className="text-[11px] text-zinc-500">{helpText}</p> : null}
-    </div>
-  );
 }

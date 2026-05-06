@@ -35,6 +35,8 @@ import {
   type SocialWallConfig,
 } from '@/lib/studio/schema';
 
+import { useStudioSlug } from '../_lib/slug-context';
+
 import { EditorEmptyState } from './EditorEmptyState';
 import { ImageField } from './ImageField';
 
@@ -202,42 +204,8 @@ export function SocialWallEditor({
         </div>
       </Group>
 
-      {/* OAuth feeds — placeholder hasta que las app credentials estén configuradas */}
-      <Group
-        title="OAuth feeds (preview)"
-        hint="Connect a real account to ingest posts automatically. Currently disabled — see the handoff doc."
-      >
-        <div className="grid grid-cols-2 gap-1.5">
-          {SOCIAL_SOURCES.filter((s) =>
-            (['instagram', 'facebook', 'tiktok', 'x'] as SocialSource[]).includes(s),
-          ).map((s) => {
-            const Icon = SOURCE_ICON[s];
-            return (
-              <button
-                key={s}
-                type="button"
-                disabled
-                title={`Requires ${SOURCE_LABEL[s]} app credentials. See .planning/2026-05-06-social-oauth-handoff.md`}
-                className="flex cursor-not-allowed items-center gap-2 rounded-md border border-dashed border-zinc-300 bg-zinc-50 p-2 text-left opacity-60 dark:border-zinc-800 dark:bg-zinc-900/40"
-              >
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-zinc-200 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-                  <Icon className="h-3.5 w-3.5" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
-                    Connect {SOURCE_LABEL[s]}
-                  </div>
-                  <div className="text-[10px] text-zinc-500">Awaiting app credentials</div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-        <p className="mt-1.5 text-[10.5px] leading-relaxed text-zinc-500 dark:text-zinc-500">
-          Until OAuth is enabled, posts are managed manually below or pulled from CrowdRiff
-          when its API key is set in <em>Integrations</em>.
-        </p>
-      </Group>
+      {/* OAuth feeds — endpoint stubs activos; cada plataforma valida sus credenciales en runtime */}
+      <OAuthConnectGroup />
 
       {/* Highlights */}
       <Group
@@ -736,5 +704,91 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       </span>
       {children}
     </label>
+  );
+}
+
+/**
+ * OAuth feeds connector. Cuatro botones IG/FB/TikTok/X que llaman al endpoint
+ * `/api/oauth/{platform}/start?slug=...`. Si las credenciales de developer
+ * no están configuradas, el endpoint devuelve 503 y mostramos el mensaje.
+ *
+ * Hallazgo #13 audit Studio (2026-05-05) · activación pendiente de envvars.
+ */
+function OAuthConnectGroup() {
+  const slug = useStudioSlug();
+  const platforms: { key: 'instagram' | 'facebook' | 'tiktok' | 'x'; label: string; icon: LucideIcon }[] = [
+    { key: 'instagram', label: 'Instagram', icon: SOURCE_ICON.instagram },
+    { key: 'facebook', label: 'Facebook', icon: SOURCE_ICON.facebook },
+    { key: 'tiktok', label: 'TikTok', icon: SOURCE_ICON.tiktok },
+    { key: 'x', label: 'X (Twitter)', icon: SOURCE_ICON.x },
+  ];
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [errorByKey, setErrorByKey] = useState<Record<string, string>>({});
+
+  const handleConnect = async (platform: 'instagram' | 'facebook' | 'tiktok' | 'x') => {
+    if (!slug) return;
+    setBusyKey(platform);
+    setErrorByKey((p) => ({ ...p, [platform]: '' }));
+    try {
+      const res = await fetch(`/api/oauth/${platform}/start?slug=${encodeURIComponent(slug)}`, {
+        method: 'POST',
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(body?.error ?? `Failed (${res.status})`);
+      }
+      const { authUrl } = (await res.json()) as { authUrl: string };
+      window.location.href = authUrl;
+    } catch (err) {
+      setErrorByKey((p) => ({
+        ...p,
+        [platform]: err instanceof Error ? err.message : 'Failed',
+      }));
+    } finally {
+      setBusyKey(null);
+    }
+  };
+
+  return (
+    <Group
+      title="OAuth feeds"
+      hint="Connect a real account to ingest posts automatically. Each platform reads its own credentials from envvars."
+    >
+      <div className="grid grid-cols-2 gap-1.5">
+        {platforms.map(({ key, label, icon: Icon }) => {
+          const error = errorByKey[key];
+          return (
+            <div key={key} className="space-y-1">
+              <button
+                type="button"
+                disabled={busyKey === key}
+                onClick={() => void handleConnect(key)}
+                className="flex w-full items-center gap-2 rounded-md border border-zinc-200 bg-white p-2 text-left transition hover:border-sky-500/50 hover:bg-sky-500/5 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-900/40 dark:hover:bg-sky-500/5"
+              >
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-sky-500/10 text-sky-700 dark:text-sky-300">
+                  <Icon className="h-3.5 w-3.5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
+                    {busyKey === key ? `Connecting ${label}…` : `Connect ${label}`}
+                  </div>
+                  <div className="text-[10px] text-zinc-500">OAuth 2.0 redirect</div>
+                </div>
+              </button>
+              {error ? (
+                <p className="text-[10.5px] leading-snug text-amber-600 dark:text-amber-400">
+                  {error}
+                </p>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+      <p className="mt-1.5 text-[10.5px] leading-relaxed text-zinc-500 dark:text-zinc-500">
+        Setup details for each provider in{' '}
+        <code>.planning/2026-05-06-social-oauth-handoff.md</code>. Without OAuth, posts are
+        managed manually below or via CrowdRiff API key in <em>Integrations</em>.
+      </p>
+    </Group>
   );
 }

@@ -10,6 +10,7 @@ import {
 } from '@/components/studio-bridge';
 import type { AskAiSuggestedQuestion } from '@/lib/config';
 import { useAiStore } from '@/stores/ai-store';
+import { useLocaleStore } from '@/stores/locale-store';
 
 interface AiModalHostProps {
   heroVideoSrc: string;
@@ -19,6 +20,9 @@ interface AiModalHostProps {
   suggestedQuestions: AskAiSuggestedQuestion[];
   /** Nombre del cliente para interpolar `{client_name}` en greeting/subtitle. */
   clientName: string;
+  /** Contexto adicional del kiosk (ciudad, módulos activos) — enviado al
+   *  endpoint `/api/ai` como parte del system prompt. Construye el server. */
+  kioskContext?: string;
   textos: {
     title: string;
     subtitle: string;
@@ -43,10 +47,12 @@ export function AiModalHost({
   greeting,
   suggestedQuestions,
   clientName,
+  kioskContext = '',
   textos,
 }: AiModalHostProps) {
   const t = useTextos();
   const hydrate = useAiStore((s) => s.hydrate);
+  const currentLocale = useLocaleStore((s) => s.currentLocale);
 
   // Reactive client name: cuando el bridge del Studio dispatcha
   // `kiosk:client-name-override`, actualizamos el state local para que
@@ -102,8 +108,19 @@ export function AiModalHost({
       greeting: localizedGreeting,
       suggestedQuestions: localizedQuestions,
       fallbackResponse: localizedFallback,
+      clientName: reactiveClientName,
+      locale: currentLocale,
+      kioskContext,
     });
-  }, [hydrate, localizedGreeting, localizedQuestions, localizedFallback]);
+  }, [
+    hydrate,
+    localizedGreeting,
+    localizedQuestions,
+    localizedFallback,
+    reactiveClientName,
+    currentLocale,
+    kioskContext,
+  ]);
 
   return <AiModal heroVideoSrc={heroVideoSrc} textos={textos} clientName={reactiveClientName} />;
 }

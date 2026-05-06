@@ -14,10 +14,19 @@ type AiStore = {
   greeting: string;
   suggestedQuestions: AskAiSuggestedQuestion[];
   fallbackResponse: string;
+  /** Nombre del cliente activo, para enviar al endpoint /api/ai. */
+  clientName: string;
+  /** Locale activo (ISO 2-letter). El backend instruye a Claude a responder en él. */
+  locale: string;
+  /** Contexto del kiosk (módulos activos, location, etc.) — se envía como system prompt. */
+  kioskContext: string;
   hydrate: (data: {
     greeting: string;
     suggestedQuestions: AskAiSuggestedQuestion[];
     fallbackResponse: string;
+    clientName?: string;
+    locale?: string;
+    kioskContext?: string;
   }) => void;
 
   // Estado del modal.
@@ -38,9 +47,26 @@ export const useAiStore = create<AiStore>((set, get) => ({
   greeting: '',
   suggestedQuestions: [],
   fallbackResponse: 'I can help with that! Let me look into it for you.',
-  hydrate: ({ greeting, suggestedQuestions, fallbackResponse }) => {
+  clientName: '',
+  locale: 'en',
+  kioskContext: '',
+  hydrate: ({
+    greeting,
+    suggestedQuestions,
+    fallbackResponse,
+    clientName,
+    locale,
+    kioskContext,
+  }) => {
     const { greeting: prevGreeting, displayedText, messages, isTyping } = get();
-    set({ greeting, suggestedQuestions, fallbackResponse });
+    set({
+      greeting,
+      suggestedQuestions,
+      fallbackResponse,
+      ...(clientName !== undefined ? { clientName } : {}),
+      ...(locale !== undefined ? { locale } : {}),
+      ...(kioskContext !== undefined ? { kioskContext } : {}),
+    });
     // Re-alinea displayedText con el greeting cuando NO hay conversación en curso
     // (cubre el cambio de locale: greeting nuevo se ve sin esperar al siguiente
     // open/close del modal).
@@ -62,9 +88,8 @@ export const useAiStore = create<AiStore>((set, get) => ({
   displayedText: '',
 
   askQuestion: (question: string) => {
-    const { suggestedQuestions, fallbackResponse } = get();
-    const match = suggestedQuestions.find((q) => q.text === question);
-    const response = match?.response ?? fallbackResponse;
+    const { suggestedQuestions, fallbackResponse, clientName, locale, kioskContext } = get();
+    const cannedMatch = suggestedQuestions.find((q) => q.text === question);
 
     set((state) => ({
       messages: [...state.messages, { role: 'user', text: question }],
@@ -72,14 +97,12 @@ export const useAiStore = create<AiStore>((set, get) => ({
       displayedText: '',
     }));
 
-    // Pequeño delay para mostrar el indicador de typing.
-    setTimeout(() => {
+    // Función que arranca el typewriter una vez tenemos la respuesta final.
+    const startTypewriter = (response: string) => {
       set((state) => ({
         messages: [...state.messages, { role: 'ai', text: response }],
         isTyping: false,
       }));
-
-      // Typewriter effect (15 ms/char — verbatim del paquete original).
       let charIndex = 0;
       const typeInterval = setInterval(() => {
         charIndex++;
@@ -88,7 +111,32 @@ export const useAiStore = create<AiStore>((set, get) => ({
           clearInterval(typeInterval);
         }
       }, 15);
-    }, 1200);
+    };
+
+    // 1) Match canned → respuesta instantánea (no llama LLM, no gasta tokens).
+    if (cannedMatch?.response) {
+      setTimeout(() => startTypewriter(cannedMatch.response), 1200);
+      return;
+    }
+
+    // 2) Free-form → llama /api/ai con Anthropic. Si falla, cae al fallback.
+    void (async () => {
+      try {
+        const res = await fetch('/api/ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question, clientName, locale, kioskContext }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = (await res.json()) as { response?: string };
+        const text = (data.response ?? '').trim();
+        startTypewriter(text || fallbackResponse);
+      } catch {
+        // Silencioso: el operador del kiosk no necesita saber el error técnico,
+        // sólo que la AI no respondió y mostramos el fallback configurable.
+        startTypewriter(fallbackResponse);
+      }
+    })();
   },
 
   reset: () => {

@@ -95,7 +95,7 @@ export function QrPurchaseModal({
     >
       <button
         type="button"
-        aria-label="Cerrar"
+        aria-label={textos.qr_close ?? 'Close'}
         onClick={onCancel}
         className="absolute inset-0 cursor-default focus:outline-none"
         style={{ backgroundColor: 'rgba(30,30,30,0.85)' }}
@@ -125,7 +125,7 @@ export function QrPurchaseModal({
           <button
             type="button"
             onClick={onCancel}
-            aria-label="Cerrar"
+            aria-label={textos.qr_close ?? 'Close'}
             className="absolute flex items-center justify-center rounded-full focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
             style={{
               right: '24px',

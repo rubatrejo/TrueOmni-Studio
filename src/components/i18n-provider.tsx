@@ -43,11 +43,28 @@ export function I18nProvider({
   children,
 }: I18nProviderProps) {
   const initFromSession = useLocaleStore((s) => s.initFromSession);
+  const setLocale = useLocaleStore((s) => s.setLocale);
 
   // Hidratación: leer sessionStorage al montar.
   useEffect(() => {
     initFromSession(defaultLocale, available);
   }, [initFromSession, defaultLocale, available]);
+
+  // Listener para el locale picker del Studio (#10 audit). Cuando el operador
+  // cambia el dropdown EN/ES/FR/DE/PT/JA en el preview panel, dispatchea
+  // `kiosk:locale-update` y aquí actualizamos el store. Solo respondemos si
+  // el locale pedido está disponible para este cliente.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<{ locale?: string }>).detail;
+      const next = detail?.locale;
+      if (!next || !available.includes(next)) return;
+      setLocale(next);
+    };
+    window.addEventListener('kiosk:locale-update', handler as EventListener);
+    return () => window.removeEventListener('kiosk:locale-update', handler as EventListener);
+  }, [available, setLocale]);
 
   const value = useMemo<I18nContextValue>(
     () => ({ localesMap, defaultLocale, available }),

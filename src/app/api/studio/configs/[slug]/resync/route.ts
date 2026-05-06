@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 
-import { bootstrapStudioFromFs, readClientFs } from '@/lib/studio/bootstrap-from-fs';
+import {
+  bootstrapStudioFromFs,
+  computeFsTemplateHash,
+  readClientFs,
+} from '@/lib/studio/bootstrap-from-fs';
 import { kv, kvKeys } from '@/lib/studio/kv';
 import {
   type ConfigMeta,
@@ -81,8 +85,12 @@ export async function POST(req: Request, { params }: RouteParams) {
     await kv.set(kvKeys.cfg(slug), parsed.data);
     await kv.set(kvKeys.cfgMeta(slug), meta);
     await kv.sadd(kvKeys.clientsList, slug);
+    // Registra el hash del FS template para que template-status detecte
+    // correctamente "no drift" hasta que el FS cambie de nuevo (#27).
+    const fsHash = await computeFsTemplateHash(slug);
+    if (fsHash) await kv.set(kvKeys.cfgFsHash(slug), fsHash);
 
-    return NextResponse.json({ slug, resynced: true, config: parsed.data, meta });
+    return NextResponse.json({ slug, resynced: true, config: parsed.data, meta, fsHash });
   } catch (error) {
     console.error('[api/studio/configs/[slug]/resync POST]', error);
     return NextResponse.json({ error: 'Failed to resync' }, { status: 500 });

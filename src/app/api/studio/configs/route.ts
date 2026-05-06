@@ -134,6 +134,15 @@ function rewriteContentInPlace(
     'title', 'description', 'shortDescription', 'longDescription', 'headline',
     'subtitle', 'label', 'subcategory', 'category', 'name', 'body', 'cta',
     'tagline',
+    // Eventos: venue ("Phoenix Convention Center" → "Davenport Convention
+    // Center"). Se visita como cualquier listing del template.
+    'venue',
+    // Social Wall: caption del post ("Best pizza in downtown Phoenix..."). Se
+    // visita en el loop dedicado de socialWall.posts.
+    'caption',
+    // Listings: directions[].instruction ("Arrive at Phoenix Convention
+    // Center"). Se visita en el loop nested abajo.
+    'instruction',
   ] as const;
 
   const replaceInString = (s: string): string => {
@@ -157,13 +166,23 @@ function rewriteContentInPlace(
     }
   };
 
+  /** Visita el item top-level y luego recurre en arrays nested conocidos
+   *  (directions, stops) para alcanzar `instruction` y campos similares
+   *  enterrados un nivel debajo de cada listing/event/etc. */
+  const visitWithDirections = (item: unknown) => {
+    visit(item);
+    if (!item || typeof item !== 'object') return;
+    const obj = item as Record<string, unknown>;
+    if (Array.isArray(obj.directions)) obj.directions.forEach(visit);
+  };
+
   config.listings?.forEach((cat) => {
     visit(cat);
-    cat.catalog?.listings?.forEach(visit);
+    cat.catalog?.listings?.forEach(visitWithDirections);
   });
-  config.events?.events?.forEach(visit);
-  config.passes?.passes?.forEach(visit);
-  config.trails?.trails?.forEach(visit);
+  config.events?.events?.forEach(visitWithDirections);
+  config.passes?.passes?.forEach(visitWithDirections);
+  config.trails?.trails?.forEach(visitWithDirections);
   config.deals?.deals?.forEach(visit);
   config.brochures?.brochures?.forEach(visit);
 
@@ -176,14 +195,18 @@ function rewriteContentInPlace(
     config.itineraryBuilder.questions.forEach(visit);
   }
 
-  // Social Wall hashtag: "VisitPhoenix" → "VisitDavenport". Quitamos
-  // espacios + lowercase no porque los hashtags son case-insensitive y la
-  // convención en el template es CamelCase.
+  // Social Wall hashtag + posts captions. La caption ("Best pizza in
+  // downtown Phoenix...") sí debe rewritearse para que un kiosk de Davenport
+  // no muestre testimonios de un visitante en Phoenix.
   if (config.socialWall) {
-    const sw = config.socialWall as { hashtag?: string };
+    const sw = config.socialWall as {
+      hashtag?: string;
+      posts?: Array<Record<string, unknown>>;
+    };
     if (typeof sw.hashtag === 'string') {
       sw.hashtag = replaceInString(sw.hashtag).replace(/\s+/g, '');
     }
+    if (Array.isArray(sw.posts)) sw.posts.forEach(visit);
   }
 
   // features.home.modules.<key>.welcomeCopy del Map y otros — el operador
@@ -243,6 +266,10 @@ export async function POST(request: Request) {
       orientation?: string;
       website?: string;
       location?: string;
+      /** Si true, arranca sin mock data (listings/events/passes/deals/trails/
+       *  itineraryBuilder.localListings/socialWall.posts vacíos). Branding,
+       *  modules, billboard, ai-avatar, etc. se conservan del template. */
+      emptyMode?: boolean;
     };
     if (!body.slug || !body.nombre) {
       return NextResponse.json({ error: 'slug and nombre are required' }, { status: 400 });
@@ -309,6 +336,27 @@ export async function POST(request: Request) {
       };
     }
 
+    // Empty mode: el operador eligió arrancar sin mock data. Limpiamos
+    // listings/events/passes/deals/trails/itineraryBuilder.localListings/
+    // socialWall.posts antes del rewrite (no hay nada Phoenix-specific que
+    // reescribir si las colecciones están vacías). Brand + modules +
+    // billboard + ai-avatar + photo-booth + map + brochures (estructura) se
+    // conservan del template para que el editor no quede roto.
+    if (body.emptyMode) {
+      if (Array.isArray(config.listings)) {
+        for (const cat of config.listings) {
+          if (cat.catalog) cat.catalog.listings = [];
+        }
+      }
+      if (config.events) config.events.events = [];
+      if (config.passes) config.passes.passes = [];
+      if (config.deals) config.deals.deals = [];
+      if (config.trails) config.trails.trails = [];
+      if (config.itineraryBuilder) config.itineraryBuilder.localListings = [];
+      const sw = config.socialWall as { posts?: unknown[] } | undefined;
+      if (sw && Array.isArray(sw.posts)) sw.posts = [];
+    }
+
     // Reemplazar la "City, ST" final de cada address mock (listings,
     // events, passes, trails, deals, brochures) con la location del
     // cliente nuevo. Garantiza que el operador NO vea "North Phoenix,
@@ -328,11 +376,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const existing = await kv.exists(kvKeys.cfg(body.slug));
-    if (existing) {
-      return NextResponse.json({ error: `slug "${body.slug}" already exists` }, { status: 409 });
-    }
-
     const now = new Date().toISOString();
     const meta: ConfigMeta = {
       slug: body.slug,
@@ -341,7 +384,14 @@ export async function POST(request: Request) {
       currentVersion: 0,
     };
 
-    await kv.set(kvKeys.cfg(body.slug), parsed.data);
+    // Lock atómico: `nx: true` hace que `set` falle si la key ya existe.
+    // Reemplaza el patrón `exists() + set()` que era vulnerable a races
+    // (dos POST concurrentes al mismo slug pasaban ambos exists() antes de
+    // que el primero hiciera set).
+    const created = await kv.set(kvKeys.cfg(body.slug), parsed.data, { nx: true });
+    if (created !== 'OK') {
+      return NextResponse.json({ error: `slug "${body.slug}" already exists` }, { status: 409 });
+    }
     await kv.set(kvKeys.cfgMeta(body.slug), meta);
     await kv.sadd(kvKeys.clientsList, body.slug);
 

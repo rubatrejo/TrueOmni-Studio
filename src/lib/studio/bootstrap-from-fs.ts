@@ -125,6 +125,25 @@ export async function readClientFs(
   return { config, tokensCss };
 }
 
+/**
+ * Hash estable del config.json + tokens.css del template para detectar drift
+ * entre el FS y los kiosks en KV. Hallazgo #27 del audit.
+ *
+ * Uso típico: el endpoint `/api/studio/diag/template-status` devuelve este
+ * hash + el hash que cada kiosk tenía la última vez que se boostrappeó. Si
+ * difieren → "FS template updated — resync available".
+ *
+ * Implementación: SHA-256 hex del concat de config + tokens. Se trunca a 16
+ * chars para que ocupe poco en el header del Diagnostics card.
+ */
+export async function computeFsTemplateHash(slug: string): Promise<string | null> {
+  const { config, tokensCss } = await readClientFs(slug);
+  if (!config) return null;
+  const payload = JSON.stringify(config) + (tokensCss ?? '');
+  const { createHash } = await import('node:crypto');
+  return createHash('sha256').update(payload).digest('hex').slice(0, 16);
+}
+
 async function readJson(p: string): Promise<FsConfig | null> {
   try {
     return JSON.parse(await fs.readFile(p, 'utf8')) as FsConfig;
@@ -192,6 +211,19 @@ export function bootstrapStudioFromFs(
           background: { type, src: raw.src },
         };
       };
+      // Background shared para los 4 variants. Si el FS trae uno explícito
+      // por `billboard_background`, usarlo; si no, hoist del `b1.background`
+      // legacy para preservar la imagen previa; último recurso, default.
+      const sharedBgRaw =
+        (fsConfig.features as { billboard_background?: { type?: string; src?: string } } | undefined)
+          ?.billboard_background ?? fsConfig.features?.billboard_b1_background;
+      const sharedBg =
+        sharedBgRaw && typeof sharedBgRaw.src === 'string' && sharedBgRaw.src.length > 0
+          ? {
+              type: (sharedBgRaw.type === 'video' ? 'video' : 'image') as 'image' | 'video',
+              src: sharedBgRaw.src,
+            }
+          : { ...DEFAULT_BILLBOARD.background };
       next.billboard = {
         variant,
         idleTimeoutSec:
@@ -201,6 +233,7 @@ export function bootstrapStudioFromFs(
         logoSize,
         footerLogoSize,
         modules,
+        background: sharedBg,
         b1: parseBg(fsConfig.features?.billboard_b1_background),
         b2: parseBg(fsConfig.features?.billboard_b2_background),
         b3: parseBg(fsConfig.features?.billboard_b3_background),

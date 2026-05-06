@@ -83,6 +83,8 @@ export function StudioBridge() {
         itineraryBuilder?: unknown;
         ads?: unknown;
         map?: unknown;
+        integrations?: unknown;
+        locale?: string;
       } | null;
       if (!data || typeof data !== 'object' || !data.type) return;
 
@@ -198,6 +200,18 @@ export function StudioBridge() {
           break;
         case 'studio:map-update':
           if (data.map) applyMapOverride(data.map);
+          break;
+        case 'studio:integrations-update':
+          if (data.integrations) applyIntegrationsOverride(data.integrations);
+          break;
+        case 'studio:locale-update':
+          // Multi-idioma preview (#10 audit). El i18n-provider escucha este
+          // evento y cambia el locale activo del store sin reload.
+          if (typeof data.locale === 'string') {
+            window.dispatchEvent(
+              new CustomEvent('kiosk:locale-update', { detail: { locale: data.locale } }),
+            );
+          }
           break;
         case 'studio:map-open-preview':
           try {
@@ -359,6 +373,9 @@ type BillboardPatch = {
   /** Tamaño del logo del footer (mismo enum, mapping diferente). */
   footerLogoSize?: 'S' | 'M' | 'L';
   modules?: string[];
+  /** Background compartido por las 4 variants. Tiene prioridad sobre el
+   *  `b{N}.background` (legacy). */
+  background?: { type?: 'image' | 'video'; src?: string };
   /** Settings idle compartidos: shape unificado para los 4 variants. */
   b0?: BillboardVariantPatch;
   b1?: BillboardVariantPatch;
@@ -395,6 +412,7 @@ export const KIOSK_TRAILS_OVERRIDE_EVENT = 'kiosk:trails-override';
 export const KIOSK_ITINERARY_OVERRIDE_EVENT = 'kiosk:itinerary-override';
 export const KIOSK_ADS_OVERRIDE_EVENT = 'kiosk:ads-override';
 export const KIOSK_MAP_OVERRIDE_EVENT = 'kiosk:map-override';
+export const KIOSK_INTEGRATIONS_OVERRIDE_EVENT = 'kiosk:integrations-override';
 
 function applyModulesOverride(modules: ModulesPatch) {
   if (typeof window === 'undefined') return;
@@ -494,6 +512,18 @@ function applyItineraryOverride(itineraryBuilder: unknown) {
 function applyMapOverride(map: unknown) {
   if (typeof window === 'undefined') return;
   window.dispatchEvent(new CustomEvent(KIOSK_MAP_OVERRIDE_EVENT, { detail: map }));
+}
+
+function applyIntegrationsOverride(integrations: unknown) {
+  if (typeof window === 'undefined') return;
+  // Cache en window para que un component que se monte tarde
+  // (post-`studio:integrations-update`) pueda leer el último valor sin
+  // esperar al siguiente push del Studio.
+  (window as unknown as { __kioskIntegrationsOverride?: unknown }).__kioskIntegrationsOverride =
+    integrations;
+  window.dispatchEvent(
+    new CustomEvent(KIOSK_INTEGRATIONS_OVERRIDE_EVENT, { detail: integrations }),
+  );
 }
 
 function applyAdsOverride(ads: unknown) {

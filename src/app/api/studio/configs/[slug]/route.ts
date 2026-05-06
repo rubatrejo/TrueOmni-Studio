@@ -42,12 +42,35 @@ import {
   type ConfigMeta,
   type KioskConfig,
 } from '@/lib/studio/schema';
+import { takeSnapshot } from '@/lib/studio/snapshots';
 
 /** Hard cap to keep KV values under the 1 MB Upstash hobby limit (10% buffer
  *  para meta + headers Redis). Subido de 480KB tras añadir hero header
  *  image/video y B0 background — un kiosk con todos los binarios cabía justo
  *  por encima del límite anterior. */
 const KV_VALUE_BYTE_CAP = 950_000;
+
+/** Cache en memoria del FS read del template para que múltiples PATCHes
+ *  consecutivos no relean el filesystem. TTL 60s — si el template cambia,
+ *  la siguiente PATCH después del TTL ya lo agarra (un reinicio del server
+ *  también invalida).
+ *
+ *  Hallazgo #4 del audit: PATCH no re-bootstrap from FS hacía que cuando el
+ *  template cambiaba, los kiosks viejos en KV quedaban stale. Re-correr
+ *  bootstrapStudioFromFs antes de aplicar el patch garantiza que campos no
+ *  customizados (igual a default) se actualicen al siguiente save. */
+const FS_CACHE_TTL_MS = 60_000;
+type FsCache = { at: number; slug: string; result: Awaited<ReturnType<typeof readClientFs>> };
+let fsCache: FsCache | null = null;
+async function getFsTemplateCached(slug: string) {
+  const now = Date.now();
+  if (fsCache && fsCache.slug === slug && now - fsCache.at < FS_CACHE_TTL_MS) {
+    return fsCache.result;
+  }
+  const result = await readClientFs(slug);
+  fsCache = { at: now, slug, result };
+  return result;
+}
 
 /**
  * `/api/studio/configs/[slug]`
@@ -100,7 +123,12 @@ async function hydrateConfig(slug: string, cfg: KioskConfig): Promise<KioskConfi
   const filled: KioskConfig = {
     ...cfg,
     modules: { ...baseModules, systemModules: mergedSystemModules },
-    billboard: cfg.billboard ?? { ...DEFAULT_BILLBOARD },
+    // Spread DEFAULT_BILLBOARD primero para que los campos nuevos (eg.
+    // `background` shared) se inyecten en kiosks viejos que ya tenían
+    // `billboard` en KV pero sin esos campos.
+    billboard: cfg.billboard
+      ? { ...DEFAULT_BILLBOARD, ...cfg.billboard }
+      : { ...DEFAULT_BILLBOARD },
     aiAvatar: cfg.aiAvatar ?? { ...DEFAULT_AI_AVATAR },
     survey: cfg.survey ?? structuredClone(DEFAULT_SURVEY),
     deals: cfg.deals ?? structuredClone(DEFAULT_DEALS),
@@ -125,8 +153,16 @@ async function hydrateConfig(slug: string, cfg: KioskConfig): Promise<KioskConfi
 export async function PATCH(req: Request, { params }: RouteParams) {
   const { slug } = await params;
   try {
-    const cfg = await kv.get<KioskConfig>(kvKeys.cfg(slug));
-    if (!cfg) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    const cfgRaw = await kv.get<KioskConfig>(kvKeys.cfg(slug));
+    if (!cfgRaw) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    // Re-bootstrap from FS para que campos no customizados absorban cambios
+    // recientes del template (`bootstrap-from-fs.ts` solo pisa fields que
+    // siguen igual al factory default — customizaciones del operador NO se
+    // pierden). El cache de 60s evita re-leer el FS en PATCHes consecutivos.
+    const fsTemplate = await getFsTemplateCached(slug);
+    const cfg = fsTemplate.config
+      ? bootstrapStudioFromFs(cfgRaw, fsTemplate.config, fsTemplate.tokensCss)
+      : cfgRaw;
 
     const body = (await req.json()) as {
       nombre?: unknown;
@@ -478,6 +514,12 @@ export async function PATCH(req: Request, { params }: RouteParams) {
         { status: 413 },
       );
     }
+
+    // Snapshot del estado anterior ANTES de sobreescribirlo (#9 audit). Si el
+    // operador hace un "Revert" después, restauramos a esto. cfgRaw es el
+    // valor literal del KV (no el bootstrap re-aplicado) — eso es lo que el
+    // operador espera ver al revertir, sin re-templating del FS.
+    if (cfgRaw) await takeSnapshot(slug, cfgRaw, 'patch');
 
     await kv.set(kvKeys.cfg(slug), validated.data);
 

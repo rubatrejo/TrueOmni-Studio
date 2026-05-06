@@ -25,9 +25,16 @@ import 'server-only';
  *   changelog:<slug>     → array de entries del changelog.
  */
 
+type KvSetOptions = {
+  /** Set IF NOT EXISTS — atómico. Devuelve 'OK' o null. */
+  nx?: boolean;
+  /** TTL en segundos. */
+  ex?: number;
+};
+
 type KvLike = {
   get: <T>(key: string) => Promise<T | null>;
-  set: (key: string, value: unknown) => Promise<unknown>;
+  set: (key: string, value: unknown, options?: KvSetOptions) => Promise<unknown>;
   del: (key: string) => Promise<unknown>;
   smembers: (key: string) => Promise<string[]>;
   sadd: (key: string, ...members: string[]) => Promise<unknown>;
@@ -44,7 +51,9 @@ function createInMemoryKv(): KvLike {
     async get<T>(key: string): Promise<T | null> {
       return (store.get(key) as T | undefined) ?? null;
     },
-    async set(key, value) {
+    async set(key, value, options) {
+      // NX: solo set si no existe — devuelve null si la key ya está.
+      if (options?.nx && store.has(key)) return null;
       store.set(key, value);
       return 'OK';
     },
@@ -113,6 +122,18 @@ export const kvKeys = {
   cfg: (slug: string) => `cfg:${slug}`,
   cfgMeta: (slug: string) => `cfg:${slug}:meta`,
   cfgVersion: (slug: string, version: number) => `cfg:${slug}:v${version}`,
+  /** Hash del template FS (config.json + tokens.css) la última vez que el
+   *  kiosk se bootstrappeó. Permite detectar FS drift sin re-bootstrap caro
+   *  en cada GET. Hallazgo #27 del audit. */
+  cfgFsHash: (slug: string) => `cfg:${slug}:fs-hash`,
+  /** Snapshot inmutable del config previo a un PATCH/import. Identificado
+   *  por timestamp ISO. TTL 30d. Cap 10 por kiosk (rotación FIFO en
+   *  cfgSnapList). Hallazgo #9 del audit. */
+  cfgSnap: (slug: string, ts: string) => `cfg:${slug}:snap:${ts}`,
+  /** Lista ordenada (más reciente primero) de timestamps de snapshots
+   *  disponibles para un kiosk. Stored as JSON array para poder rotar
+   *  atómicamente con kv.set. */
+  cfgSnapList: (slug: string) => `cfg:${slug}:snap-list`,
   i18n: (slug: string) => `i18n:${slug}`,
   clientsList: 'clients:list',
   pubRequest: (slug: string, reqId: string) => `pub:${slug}:${reqId}`,

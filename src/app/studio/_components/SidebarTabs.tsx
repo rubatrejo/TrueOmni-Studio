@@ -273,7 +273,7 @@ function BridgeStatusCard({
   const showReload = status === 'stale' || status === 'lost';
 
   return (
-    <div className="border-t border-zinc-200 p-3 dark:border-zinc-900">
+    <div className="space-y-2 border-t border-zinc-200 p-3 dark:border-zinc-900">
       <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-900 dark:bg-zinc-900/50">
         <div className={`mb-1 flex items-center gap-1.5 text-[11px] ${p.tone}`}>
           <span className={`h-1.5 w-1.5 rounded-full ${p.dot}`} />
@@ -293,6 +293,25 @@ function BridgeStatusCard({
           </button>
         ) : null}
       </div>
+      {/* Diagnostics link — antes solo accesible via Cmd+K o el StatusBadge
+          dot del footer (audit hallazgo #20). Visible y descubrible. */}
+      <a
+        href="/studio/diagnostics"
+        target="_blank"
+        rel="noreferrer"
+        className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-[11px] font-medium text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-500 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+      >
+        <span className="inline-flex items-center gap-1.5">
+          <span className="grid h-4 w-4 place-items-center rounded bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M9 12l2 2 4-4" />
+              <circle cx="12" cy="12" r="10" />
+            </svg>
+          </span>
+          Diagnostics
+        </span>
+        <span className="text-zinc-400 dark:text-zinc-600" aria-hidden>↗</span>
+      </a>
     </div>
   );
 }

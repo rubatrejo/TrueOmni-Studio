@@ -1,12 +1,16 @@
 'use client';
 
-import { ChevronRight, Eye, History, Send, Undo2, Redo2 } from 'lucide-react';
+import { ChevronRight, Download, Eye, History, Send, Undo2, Redo2, Upload } from 'lucide-react';
 import Link from 'next/link';
+import { useRef } from 'react';
+
+import { downloadConfigExport, importConfig } from '../_lib/api-client';
 
 import { FaviconBadge } from './FaviconBadge';
 import { ProductDropdown } from './ProductDropdown';
 import { StudioBrand } from './StudioBrand';
 import { ThemeToggle } from './ThemeToggle';
+import { useToast } from './Toast';
 
 export function TopBar({
   slug,
@@ -15,6 +19,9 @@ export function TopBar({
   currentVersion,
   saveState,
   isDirty,
+  payloadPct,
+  payloadOverCap,
+  payloadSizeKb,
   onOpenVersions,
   versionsActive,
   onPublish,
@@ -28,6 +35,10 @@ export function TopBar({
   currentVersion: number;
   saveState: 'idle' | 'saving' | 'saved' | 'error';
   isDirty: boolean;
+  /** Porcentaje del payload del config vs el cap KV (~950KB). >100 = overflow. */
+  payloadPct?: number;
+  payloadOverCap?: boolean;
+  payloadSizeKb?: number;
   onOpenVersions?: () => void;
   versionsActive?: boolean;
   onPublish?: () => void;
@@ -80,6 +91,9 @@ export function TopBar({
           </button>
         ) : null}
         <SaveStatusPill state={saveState} isDirty={isDirty} />
+        {typeof payloadPct === 'number' && payloadPct >= 60 ? (
+          <PayloadSizePill pct={payloadPct} overCap={payloadOverCap ?? false} sizeKb={payloadSizeKb ?? 0} />
+        ) : null}
         <span className="mx-1 block h-5 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden="true" />
 
         <button
@@ -100,6 +114,9 @@ export function TopBar({
         <span className="mx-1 block h-5 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden="true" />
 
         <ThemeToggle />
+
+        {/* Export / Import full config (hallazgo #25 del audit). */}
+        <ExportImportButtons slug={slug} />
 
         <Link
           href={`/k/${slug}`}
@@ -156,6 +173,101 @@ function VersionBadge({ currentVersion }: { currentVersion: number }) {
       }
     >
       {label}
+    </span>
+  );
+}
+
+/** Export full config como JSON adjunto + Import desde JSON local. Cuando se
+ *  importa, recargamos la página para que el editor pick-up el state nuevo. */
+function ExportImportButtons({ slug }: { slug: string }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const toast = useToast();
+
+  const handleImportFile = async (file: File) => {
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text);
+      await importConfig(slug, json);
+      toast.show('Config imported · reloading…', { variant: 'success' });
+      // Reload para que el Shell levante el state importado limpio.
+      window.location.reload();
+    } catch (e) {
+      console.error('[topbar] import failed', e);
+      toast.show('Import failed', {
+        variant: 'error',
+        description: e instanceof Error ? e.message : String(e),
+      });
+    }
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => downloadConfigExport(slug)}
+        title="Export full config as JSON"
+        aria-label="Export config JSON"
+        className="grid h-8 w-8 place-items-center rounded-md text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+      >
+        <Download className="h-[15px] w-[15px]" />
+      </button>
+      <button
+        type="button"
+        onClick={() => fileRef.current?.click()}
+        title="Import config from JSON (overwrites current)"
+        aria-label="Import config JSON"
+        className="grid h-8 w-8 place-items-center rounded-md text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+      >
+        <Upload className="h-[15px] w-[15px]" />
+      </button>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="application/json,.json"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) void handleImportFile(f);
+          e.target.value = '';
+        }}
+      />
+    </>
+  );
+}
+
+/** Pill que se muestra junto a SaveStatus cuando el config se acerca al cap KV
+ *  (~950KB). Visible cuando pct >= 60. Color amber 60-89, orange 90-99, red >=100.
+ *  Hallazgos #5 + #22 del audit — antes el operador editaba 2h y recibía 413 al
+ *  guardar; ahora el aviso es continuo. */
+function PayloadSizePill({
+  pct,
+  overCap,
+  sizeKb,
+}: {
+  pct: number;
+  overCap: boolean;
+  sizeKb: number;
+}) {
+  const color = overCap
+    ? 'bg-red-500/15 text-red-700 ring-1 ring-inset ring-red-500/30 dark:text-red-400'
+    : pct >= 90
+      ? 'bg-orange-500/15 text-orange-700 ring-1 ring-inset ring-orange-500/30 dark:text-orange-300'
+      : 'bg-amber-500/15 text-amber-700 ring-1 ring-inset ring-amber-500/30 dark:text-amber-300';
+  const tooltip = overCap
+    ? `Config payload is ${sizeKb}KB — over the 950KB KV cap. Save will fail with 413. Use CDN URLs for heavy media.`
+    : `Config payload is ${sizeKb}KB (${pct}% of 950KB cap). Consider moving heavy media to CDN URLs to stay under the limit.`;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-mono text-[11px] ${color}`}
+      title={tooltip}
+      aria-label={tooltip}
+    >
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+      </svg>
+      {pct}%
     </span>
   );
 }

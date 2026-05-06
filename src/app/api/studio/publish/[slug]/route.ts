@@ -48,6 +48,11 @@ interface FileChange {
   action: 'create' | 'update' | 'unchanged';
   sizeBefore?: number;
   sizeAfter: number;
+  /** Lista de paths JSON top-level que difieren (eg. "branding.primary",
+   *  "listings.0.title"). Solo se popula en `dryRun=1` y para JSON files
+   *  pequeños (<300KB). Hallazgo #8 del audit — antes el operador veía solo
+   *  filenames cambiados; ahora ve qué keys del JSON cambiaron. */
+  changedKeys?: string[];
 }
 
 type RouteParams = { params: Promise<{ slug: string }> };
@@ -306,9 +311,59 @@ async function computeChange(
     if (current === nextContent) {
       return { path: filePath, action: 'unchanged', sizeBefore, sizeAfter };
     }
-    return { path: filePath, action: 'update', sizeBefore, sizeAfter };
+    // JSON diff por keys top-level (#8 del audit). Solo si ambos lados son
+    // JSON parseable y el archivo no es enorme (cap ~300KB para evitar
+    // payloads pesados al cliente).
+    const changedKeys =
+      filePath.endsWith('.json') && Math.max(sizeAfter, sizeBefore) < 300_000
+        ? safeJsonKeyDiff(current, nextContent)
+        : undefined;
+    return { path: filePath, action: 'update', sizeBefore, sizeAfter, changedKeys };
   } catch {
     return { path: filePath, action: 'create', sizeAfter };
+  }
+}
+
+/** Compara dos strings JSON y devuelve los paths donde hay diferencias. Si
+ *  el parse falla, retorna `undefined` (el caller cae a solo size). */
+function safeJsonKeyDiff(beforeRaw: string, afterRaw: string): string[] | undefined {
+  let before: unknown;
+  let after: unknown;
+  try {
+    before = JSON.parse(beforeRaw);
+    after = JSON.parse(afterRaw);
+  } catch {
+    return undefined;
+  }
+  const paths: string[] = [];
+  diffWalk(before, after, '', paths, 0);
+  return paths.slice(0, 50); // cap para no inflar el response
+}
+
+function diffWalk(a: unknown, b: unknown, path: string, paths: string[], depth: number): void {
+  if (paths.length >= 50 || depth > 6) return;
+  if (a === b) return;
+  if (
+    a === null ||
+    b === null ||
+    typeof a !== 'object' ||
+    typeof b !== 'object' ||
+    Array.isArray(a) !== Array.isArray(b)
+  ) {
+    paths.push(path || '(root)');
+    return;
+  }
+  const aRec = a as Record<string, unknown>;
+  const bRec = b as Record<string, unknown>;
+  const keys = new Set([...Object.keys(aRec), ...Object.keys(bRec)]);
+  for (const k of keys) {
+    if (paths.length >= 50) break;
+    const child = path ? `${path}.${k}` : k;
+    if (!(k in aRec) || !(k in bRec)) {
+      paths.push(child);
+      continue;
+    }
+    diffWalk(aRec[k], bRec[k], child, paths, depth + 1);
   }
 }
 

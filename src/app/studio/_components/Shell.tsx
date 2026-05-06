@@ -65,6 +65,7 @@ import { MobileTabBar, type MobileEditorTab } from './MobileTabBar';
 import { PreviewPanel } from './PreviewPanel';
 import { CommandPalette } from './CommandPalette';
 import { PublishModal } from './PublishModal';
+import { useToast } from './Toast';
 import { UnsavedChangesModal } from './UnsavedChangesModal';
 import { SaveBar } from './SaveBar';
 import { ShortcutsModal } from './ShortcutsModal';
@@ -85,7 +86,7 @@ export function Shell({
   const [mobileTab, setMobileTab] = useState<MobileEditorTab>('editor');
   const [previewKey, setPreviewKey] = useState(0);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const toast = useToast();
   const [publishOpen, setPublishOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -287,6 +288,8 @@ export function Shell({
     pushItinerary,
     openItineraryPreview,
     pushAds,
+    pushIntegrations,
+    pushLocale,
     bridgeStatus,
     onIframeLoad,
   } = usePreviewBridge();
@@ -385,6 +388,13 @@ export function Shell({
   useEffect(() => {
     pushAds(ads);
   }, [ads, pushAds]);
+
+  // Hallazgo #14 del audit: live preview reactivo de integrations (Mapbox
+  // token + weather provider/city/units + GA4 id). El bridge filtra los
+  // apiKeys sensibles para que NO crucen al iframe.
+  useEffect(() => {
+    pushIntegrations(integrations);
+  }, [integrations, pushIntegrations]);
 
   const brandingDirty = useMemo(
     () => !shallowEqualBranding(branding, savedBranding),
@@ -485,10 +495,72 @@ export function Shell({
   const effectiveSaveState =
     saveState === 'saving' || saveState === 'error' ? saveState : isDirty ? 'idle' : 'saved';
 
+  // Estimación del tamaño del payload contra el cap KV (~950KB del server).
+  // Se calcula sobre el snapshot completo del editor — no perfecto (el
+  // serializer del API puede pesar distinto) pero da la señal correcta para
+  // que el operador no se sorprenda con un 413 después de 2h editando.
+  const KV_SIZE_CAP_BYTES = 950 * 1024;
+  const payloadSizeBytes = useMemo(
+    () =>
+      JSON.stringify({
+        branding,
+        modules,
+        billboard,
+        aiAvatar,
+        survey,
+        deals,
+        photoBooth,
+        brochures,
+        socialWall,
+        guestbook,
+        listings,
+        events,
+        tickets,
+        passes,
+        trails,
+        map,
+        itineraryBuilder: itinerary,
+        ads,
+        integrations,
+      }).length,
+    [
+      branding,
+      modules,
+      billboard,
+      aiAvatar,
+      survey,
+      deals,
+      photoBooth,
+      brochures,
+      socialWall,
+      guestbook,
+      listings,
+      events,
+      tickets,
+      passes,
+      trails,
+      map,
+      itinerary,
+      ads,
+      integrations,
+    ],
+  );
+  const payloadPct = Math.min(999, Math.round((payloadSizeBytes / KV_SIZE_CAP_BYTES) * 100));
+  const payloadOverCap = payloadSizeBytes > KV_SIZE_CAP_BYTES;
+
   const handleSave = useCallback(async () => {
     if (!isDirty) return;
     setSaveState('saving');
-    setErrorMsg(null);
+    // Timeout fallback: si el POST queda colgado >30s (network slow, edge
+    // function timeout, etc.) marcamos error en lugar de dejar el estado
+    // 'saving' atrapado indefinidamente. El usuario puede reintentar.
+    const stuckTimer = setTimeout(() => {
+      toast.show('Save timed out after 30s', {
+        variant: 'error',
+        description: 'Check your connection and retry.',
+      });
+      setSaveState('error');
+    }, 30_000);
     try {
       const payload: {
         branding?: Branding;
@@ -560,11 +632,16 @@ export function Shell({
       if (i18nDirty) setSavedI18nBundle(i18nBundle);
       // Append al timeline local de versiones (placeholder hasta S7.2 — audit F-10).
       recordSaveLocal(initialConfig.slug, initialMeta?.lastEditor ?? 'ruben@trueomni.com');
+      clearTimeout(stuckTimer);
       setSaveState('saved');
       setTimeout(() => setSaveState('idle'), 1500);
     } catch (err) {
       console.error('[Studio Save]', err);
-      setErrorMsg(err instanceof Error ? err.message : 'Save failed');
+      clearTimeout(stuckTimer);
+      toast.show('Save failed', {
+        variant: 'error',
+        description: err instanceof Error ? err.message : 'Unknown error',
+      });
       setSaveState('error');
     }
   }, [
@@ -681,7 +758,6 @@ export function Shell({
     setIntegrations(savedIntegrations);
     setI18nBundle(savedI18nBundle);
     setSaveState('idle');
-    setErrorMsg(null);
     setPreviewKey((k) => k + 1);
   }, [
     savedBranding,
@@ -737,16 +813,16 @@ export function Shell({
           currentVersion={initialConfig.currentVersion}
           saveState={effectiveSaveState}
           isDirty={isDirty}
+          payloadPct={payloadPct}
+          payloadOverCap={payloadOverCap}
+          payloadSizeKb={Math.round(payloadSizeBytes / 1024)}
           onOpenVersions={() => setActiveTab('versions')}
           versionsActive={activeTab === 'versions'}
           onPublish={() => setPublishOpen(true)}
         />
 
-        {errorMsg && (
-          <div className="border-b border-red-200 bg-red-50 px-5 py-2 text-[12px] text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
-            {errorMsg}
-          </div>
-        )}
+        {/* Errors antes vivían en un banner aquí; ahora van por <Toast> top-right
+            (#18 audit) — el Save pill del TopBar sigue marcando el estado. */}
 
         {/* Mobile tab bar — visible solo `<lg`. En `lg+` los 3 paneles
             (sidebar/editor/preview) coexisten side-by-side y este bar se
@@ -846,6 +922,7 @@ export function Shell({
                     currentVersion={initialConfig.currentVersion ?? 0}
                     lastPublishedAt={initialMeta?.lastEditedAt}
                     lastEditor={initialMeta?.lastEditor}
+                    kioskLocation={initialConfig.clientInfo?.location ?? ''}
                     onPublish={() => setPublishOpen(true)}
                   />
               </div>
@@ -868,6 +945,7 @@ export function Shell({
                 reloadKey={previewKey}
                 iframeRef={iframeRef}
                 onIframeLoad={onIframeLoad}
+                onLocaleChange={pushLocale}
               />
             </div>
           </main>

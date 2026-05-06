@@ -79,10 +79,17 @@ export function BillboardEditor({
   // runtime aplica los campos relevantes a su layout y silenciosamente
   // ignora los demás.
   const variantKey = `b${billboard.variant}` as 'b0' | 'b1' | 'b2' | 'b3';
+  // Mantener sincronizado con `VARIANT_DEFAULT_BACKGROUND` en
+  // `use-billboard-override.ts`. B2 usa `hero.png`; B3 reutiliza el de B0
+  // porque no se exporta hero dedicado.
   const variantDefaultSrc =
     billboard.variant === 0
       ? '/assets/billboard-0/hero.jpg'
-      : `/assets/billboard-${billboard.variant}/hero.jpg`;
+      : billboard.variant === 1
+        ? '/assets/billboard-1/hero.jpg'
+        : billboard.variant === 2
+          ? '/assets/billboard-2/hero.png'
+          : '/assets/billboard-0/hero.jpg';
   const b0: BillboardB0Config = {
     ...DEFAULT_BILLBOARD_B0,
     ...(billboard[variantKey] ?? {}),
@@ -178,7 +185,41 @@ export function BillboardEditor({
         </div>
       </section>
 
-      {/* ───────────── Idle settings (todos los variants) ───────────── */}
+      {/* ───────────── Background (shared across all 4 variants) ───────────── */}
+      <section className="space-y-3 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
+        <header>
+          <h3 className="font-display text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500 dark:text-zinc-400">
+            Background (shared across all variants)
+          </h3>
+          <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
+            One image/video applies to the hero of all 4 idle layouts so the kiosk identity stays consistent when switching variants.
+          </p>
+        </header>
+        <MediaField
+          label="Drop image or video"
+          hint="1080×1920 portrait · JPG/PNG/WebP up to 5MB (compressed for upload) · MP4/WebM up to 2MB inline (paste a CDN URL below for larger videos)"
+          aspect="9/16"
+          maxImageBytes={5 * 1024 * 1024}
+          maxVideoBytes={2 * 1024 * 1024}
+          value={billboard.background?.src ?? '/assets/billboard-0/hero.jpg'}
+          kind={billboard.background?.type ?? 'image'}
+          onChange={(next) => {
+            if (!next) {
+              onChange({
+                ...billboard,
+                background: { type: 'image', src: '/assets/billboard-0/hero.jpg' },
+              });
+              return;
+            }
+            onChange({
+              ...billboard,
+              background: { type: next.kind, src: next.src },
+            });
+          }}
+        />
+      </section>
+
+      {/* ───────────── Idle settings (per-variant: touchHere + overlay) ───────────── */}
       {true && (
         <section className="space-y-5 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
           <header>
@@ -186,33 +227,11 @@ export function BillboardEditor({
               Idle settings (Variant {billboard.variant + 1})
             </h3>
             <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
-              Background, Touch Here button and overlay. Some fields apply only to
-              certain layouts (eg. button width/height affects only Variant 1).
+              {billboard.variant === 0
+                ? 'Touch Here button and overlay (per-variant). The background is shared above.'
+                : 'Touch Here label and overlay (per-variant). The background is shared above. Button width/height sliders only apply to Variant 1.'}
             </p>
           </header>
-
-          {/* Background image / video */}
-          <div className="space-y-1.5">
-            <label className="block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
-              Background
-            </label>
-            <MediaField
-              label="Drop image or video"
-              hint="1080×1920 portrait · JPG/PNG/WebP up to 5MB (compressed for upload) · MP4/WebM up to 2MB inline (paste a CDN URL below for larger videos)"
-              aspect="9/16"
-              maxImageBytes={5 * 1024 * 1024}
-              maxVideoBytes={2 * 1024 * 1024}
-              value={b0.background.src}
-              kind={b0.background.type}
-              onChange={(next) => {
-                if (!next) {
-                  setB0({ background: { ...DEFAULT_BILLBOARD_B0.background } });
-                  return;
-                }
-                setB0({ background: { type: next.kind, src: next.src } });
-              }}
-            />
-          </div>
 
           {/* Touch Here button — texto */}
           <div className="space-y-1.5">
@@ -271,25 +290,32 @@ export function BillboardEditor({
             </div>
           </div>
 
-          {/* Touch Here — width / height / fontSize sliders */}
-          <SliderRow
-            label="Button width"
-            min={280}
-            max={900}
-            step={10}
-            unit="px"
-            value={b0.touchHere.width}
-            onChange={(width) => setB0({ touchHere: { ...b0.touchHere, width } })}
-          />
-          <SliderRow
-            label="Button height"
-            min={120}
-            max={500}
-            step={10}
-            unit="px"
-            value={b0.touchHere.height}
-            onChange={(height) => setB0({ touchHere: { ...b0.touchHere, height } })}
-          />
+          {/* Touch Here — width / height / fontSize sliders. Width/height
+              solo aplican al botón visible de Variant 1 (B0). En B1/B2/B3 el
+              touchHere se renderiza como texto inline sobre el hero, así que
+              ocultamos los sliders para no engañar al operador. */}
+          {billboard.variant === 0 && (
+            <>
+              <SliderRow
+                label="Button width"
+                min={280}
+                max={900}
+                step={10}
+                unit="px"
+                value={b0.touchHere.width}
+                onChange={(width) => setB0({ touchHere: { ...b0.touchHere, width } })}
+              />
+              <SliderRow
+                label="Button height"
+                min={120}
+                max={500}
+                step={10}
+                unit="px"
+                value={b0.touchHere.height}
+                onChange={(height) => setB0({ touchHere: { ...b0.touchHere, height } })}
+              />
+            </>
+          )}
           <SliderRow
             label="Font size"
             min={36}

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
 import { StudioThemeProvider } from './_components/StudioThemeProvider';
+import { ToastProvider } from './_components/Toast';
 
 import './studio.css';
 
@@ -18,5 +19,9 @@ export const metadata: Metadata = {
  * respondan. La preferencia se persiste en localStorage.
  */
 export default function StudioLayout({ children }: { children: ReactNode }) {
-  return <StudioThemeProvider>{children}</StudioThemeProvider>;
+  return (
+    <StudioThemeProvider>
+      <ToastProvider>{children}</ToastProvider>
+    </StudioThemeProvider>
+  );
 }

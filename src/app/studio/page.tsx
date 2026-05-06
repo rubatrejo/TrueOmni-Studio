@@ -9,6 +9,7 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import type { ConfigMeta, KioskConfig } from '@/lib/studio/schema';
 
 import { DeleteKioskModal } from './_components/DeleteKioskModal';
+import { DuplicateKioskModal } from './_components/DuplicateKioskModal';
 import { FaviconBadge } from './_components/FaviconBadge';
 import { NewClientModal } from './_components/NewClientModal';
 import { OnboardingTour } from './_components/OnboardingTour';
@@ -16,6 +17,7 @@ import { StudioPageHeader } from './_components/PageHeader';
 import { SystemStatusBadge } from './_components/SystemStatusBadge';
 import {
   type ConfigEntry,
+  cloneConfig,
   createConfig,
   deleteConfig,
   listConfigs,
@@ -73,6 +75,7 @@ export default function StudioHome() {
     orientation?: string;
     website?: string;
     location?: string;
+    emptyMode?: boolean;
   }) => {
     setCreatingKiosk(input.nombre);
     try {
@@ -94,6 +97,39 @@ export default function StudioHome() {
     const target = configs.find((c) => c.slug === slug);
     if (!target) return;
     setDeleteTarget({ slug, nombre: target.nombre ?? slug });
+  };
+
+  // Duplicate flow — hallazgo #24 del audit. Reusa el endpoint
+  // `/api/studio/configs/[slug]/clone` (S3.x) que ya existía sin UI surface.
+  const [cloningSource, setCloningSource] = useState<{ slug: string; nombre: string } | null>(null);
+  const [cloneInProgress, setCloneInProgress] = useState(false);
+  const handleClone = (slug: string) => {
+    const target = configs.find((c) => c.slug === slug);
+    if (!target) return;
+    setCloningSource({ slug, nombre: target.nombre ?? slug });
+  };
+  const submitClone = async (newNombre: string) => {
+    if (!cloningSource) return;
+    const trimmed = newNombre.trim();
+    if (!trimmed) return;
+    const newSlug = trimmed
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 64);
+    if (!newSlug) return;
+    setCloneInProgress(true);
+    try {
+      await cloneConfig(cloningSource.slug, { newSlug, newNombre: trimmed });
+      setCloningSource(null);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to clone');
+    } finally {
+      setCloneInProgress(false);
+    }
   };
 
   const confirmDelete = async () => {
@@ -151,7 +187,12 @@ export default function StudioHome() {
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {!loading &&
             configs.map((config) => (
-              <ClientCard key={config.slug} config={config} onDelete={handleDelete} />
+              <ClientCard
+                key={config.slug}
+                config={config}
+                onDelete={handleDelete}
+                onClone={handleClone}
+              />
             ))}
           {!loading && <NewClientCard onClick={() => setShowNewModal(true)} />}
           {loading && (
@@ -204,6 +245,15 @@ export default function StudioHome() {
         onConfirm={() => void confirmDelete()}
       />
 
+      <DuplicateKioskModal
+        open={cloningSource !== null}
+        sourceNombre={cloningSource?.nombre ?? ''}
+        existingSlugs={configs.map((c) => c.slug)}
+        cloning={cloneInProgress}
+        onCancel={() => setCloningSource(null)}
+        onConfirm={(name) => void submitClone(name)}
+      />
+
       {/* Onboarding tour — solo se muestra al primer login (audit F-31). */}
       <OnboardingTour />
     </main>
@@ -217,9 +267,11 @@ export default function StudioHome() {
 function ClientCard({
   config,
   onDelete,
+  onClone,
 }: {
   config: KioskConfig & { meta?: ConfigMeta | null };
   onDelete: (slug: string) => void;
+  onClone: (slug: string) => void;
 }) {
   const [hovered, setHovered] = useState(false);
   return (
@@ -312,21 +364,40 @@ function ClientCard({
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-sky-400/50 to-transparent opacity-0 transition group-hover:opacity-100" />
       </Link>
 
-      {/* Floating delete button (only for non-default + on hover) */}
-      {hovered && config.slug !== 'default' && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            onDelete(config.slug);
-          }}
-          aria-label={`Delete ${config.nombre}`}
-          className="absolute right-3 top-3 z-10 grid h-7 w-7 place-items-center rounded-md bg-red-500/90 text-white shadow-lg transition hover:bg-red-600"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-          </svg>
-        </button>
+      {/* Floating action buttons (Duplicate + Delete) on hover */}
+      {hovered && (
+        <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              onClone(config.slug);
+            }}
+            aria-label={`Duplicate ${config.nombre}`}
+            title="Duplicate this kiosk"
+            className="grid h-7 w-7 place-items-center rounded-md bg-zinc-900/80 text-white shadow-lg transition hover:bg-zinc-700"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+          </button>
+          {config.slug !== 'default' && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                onDelete(config.slug);
+              }}
+              aria-label={`Delete ${config.nombre}`}
+              className="grid h-7 w-7 place-items-center rounded-md bg-red-500/90 text-white shadow-lg transition hover:bg-red-600"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+              </svg>
+            </button>
+          )}
+        </div>
       )}
     </div>
   );

@@ -39,13 +39,6 @@ export async function POST(req: Request, { params }: RouteParams) {
       return NextResponse.json({ error: `Source slug "${source}" not found` }, { status: 404 });
     }
 
-    if (await kv.exists(kvKeys.cfg(body.newSlug))) {
-      return NextResponse.json(
-        { error: `Slug "${body.newSlug}" already exists` },
-        { status: 409 },
-      );
-    }
-
     const cloned: KioskConfig = {
       ...sourceCfg,
       slug: body.newSlug,
@@ -69,7 +62,14 @@ export async function POST(req: Request, { params }: RouteParams) {
       currentVersion: 0,
     };
 
-    await kv.set(kvKeys.cfg(body.newSlug), validated.data);
+    // Lock atómico (mismo patrón que POST /api/studio/configs).
+    const created = await kv.set(kvKeys.cfg(body.newSlug), validated.data, { nx: true });
+    if (created !== 'OK') {
+      return NextResponse.json(
+        { error: `Slug "${body.newSlug}" already exists` },
+        { status: 409 },
+      );
+    }
     await kv.set(kvKeys.cfgMeta(body.newSlug), meta);
     await kv.sadd(kvKeys.clientsList, body.newSlug);
 

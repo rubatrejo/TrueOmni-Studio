@@ -11,6 +11,7 @@ import type {
   DealsModuleConfig,
   EventsModule,
   GuestbookConfig,
+  IntegrationsConfig,
   ItineraryBuilderConfig,
   ListingsModule,
   MapConfig,
@@ -110,6 +111,8 @@ export function usePreviewBridge() {
   const itineraryDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const adsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mapDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const integrationsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastIntegrationsRef = useRef<IntegrationsConfig | null>(null);
   const [isReady, setIsReady] = useState(false);
   // Timestamp del último handshake/heartbeat recibido del iframe. Se usa para
   // calcular `bridgeStatus` (connecting/connected/stale/lost). El kiosk emite
@@ -148,7 +151,7 @@ export function usePreviewBridge() {
         },
         '*',
       );
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendModulesNow = useCallback((modules: ModulesConfig) => {
@@ -156,7 +159,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:modules-update', modules }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendBillboardNow = useCallback((billboard: BillboardConfig) => {
@@ -164,7 +167,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:billboard-update', billboard }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const openBillboardPreview = useCallback(() => {
@@ -172,7 +175,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:billboard-open-preview' }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const openHomeDashboardPreview = useCallback(() => {
@@ -180,7 +183,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:home-dashboard-open-preview' }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const openAiAvatarPreview = useCallback(() => {
@@ -188,7 +191,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:ai-avatar-open-preview' }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendAiNow = useCallback((aiAvatar: AiAvatarConfig) => {
@@ -204,7 +207,7 @@ export function usePreviewBridge() {
         suggestedQuestions: aiAvatar.suggestedQuestions,
       };
       win.postMessage({ type: 'studio:ai-avatar-update', aiAvatar: safe }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendSurveyNow = useCallback((survey: SurveyConfig) => {
@@ -212,7 +215,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:survey-update', survey }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   /**
@@ -224,7 +227,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:survey-open-preview' }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendDealsNow = useCallback((deals: DealsModuleConfig) => {
@@ -232,7 +235,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:deals-update', deals }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   /**
@@ -244,7 +247,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:deals-open-preview' }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendPhotoBoothNow = useCallback((photoBooth: PhotoBoothConfig) => {
@@ -252,7 +255,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:photo-booth-update', photoBooth }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const openPhotoBoothPreview = useCallback(() => {
@@ -260,7 +263,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:photo-booth-open-preview' }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendBrochuresNow = useCallback((brochures: BrochuresModuleConfig) => {
@@ -268,7 +271,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:brochures-update', brochures }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const openBrochuresPreview = useCallback(() => {
@@ -276,7 +279,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:brochures-open-preview' }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendSocialWallNow = useCallback((socialWall: SocialWallConfig) => {
@@ -284,7 +287,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:social-wall-update', socialWall }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const openSocialWallPreview = useCallback(() => {
@@ -292,7 +295,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:social-wall-open-preview' }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendGuestbookNow = useCallback((guestbook: GuestbookConfig) => {
@@ -300,7 +303,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:guestbook-update', guestbook }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const openGuestbookPreview = useCallback(() => {
@@ -308,7 +311,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:guestbook-open-preview' }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendListingsNow = useCallback((listings: ListingsModule) => {
@@ -316,7 +319,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:listings-update', listings }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendEventsNow = useCallback((events: EventsModule) => {
@@ -324,7 +327,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:events-update', events }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const openEventsPreview = useCallback(() => {
@@ -332,7 +335,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:events-open-preview' }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendTicketsNow = useCallback((tickets: TicketsModule) => {
@@ -340,7 +343,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:tickets-update', tickets }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const openTicketsPreview = useCallback(() => {
@@ -348,7 +351,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:tickets-open-preview' }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendPassesNow = useCallback((passes: PassesModule) => {
@@ -356,7 +359,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:passes-update', passes }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const openPassesPreview = useCallback(() => {
@@ -364,7 +367,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:passes-open-preview' }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendTrailsNow = useCallback((trails: TrailsModule) => {
@@ -372,7 +375,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:trails-update', trails }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const openTrailsPreview = useCallback(() => {
@@ -380,7 +383,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:trails-open-preview' }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendItineraryNow = useCallback((itineraryBuilder: ItineraryBuilderConfig) => {
@@ -388,7 +391,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:itinerary-update', itineraryBuilder }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const openItineraryPreview = useCallback(() => {
@@ -396,7 +399,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:itinerary-open-preview' }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendAdsNow = useCallback((ads: AdsModule) => {
@@ -404,7 +407,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:ads-update', ads }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const sendMapNow = useCallback((map: MapConfig) => {
@@ -412,7 +415,30 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:map-update', map }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
+  }, []);
+
+  /** Push del IntegrationsConfig al iframe. Hallazgo #14 del audit — antes
+   *  el cambio de Mapbox token / weather provider / etc. requería reload.
+   *  Filtramos los campos sensibles (apiKeys de Tavus/Bandwango/etc. NO
+   *  salen del Studio — eso solo lo lee el server runtime). Lo único que
+   *  el iframe puede usar es el Mapbox token (cliente) y el weather
+   *  provider/city/units (no la apiKey del provider, que es server-side). */
+  const sendIntegrationsNow = useCallback((integrations: IntegrationsConfig) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      const safe = {
+        mapbox: { token: integrations.mapbox.token },
+        weather: {
+          provider: integrations.weather.provider,
+          city: integrations.weather.city,
+          units: integrations.weather.units,
+        },
+        analytics: { gaId: integrations.analytics.gaId },
+      };
+      win.postMessage({ type: 'studio:integrations-update', integrations: safe }, '*');
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   const openMapPreview = useCallback(() => {
@@ -420,7 +446,7 @@ export function usePreviewBridge() {
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:map-open-preview' }, '*');
-    } catch {}
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
   }, []);
 
   // Listener del handshake studio:ready desde el iframe.
@@ -448,6 +474,7 @@ export function usePreviewBridge() {
       if (lastItineraryRef.current) sendItineraryNow(lastItineraryRef.current);
       if (lastAdsRef.current) sendAdsNow(lastAdsRef.current);
       if (lastMapRef.current) sendMapNow(lastMapRef.current);
+      if (lastIntegrationsRef.current) sendIntegrationsNow(lastIntegrationsRef.current);
     };
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
@@ -470,6 +497,7 @@ export function usePreviewBridge() {
     sendItineraryNow,
     sendAdsNow,
     sendMapNow,
+    sendIntegrationsNow,
   ]);
 
   const pushBranding = useCallback(
@@ -485,7 +513,7 @@ export function usePreviewBridge() {
     (modules: ModulesConfig) => {
       lastModulesRef.current = modules;
       if (modulesDebounceRef.current) clearTimeout(modulesDebounceRef.current);
-      modulesDebounceRef.current = setTimeout(() => sendModulesNow(modules), 80);
+      modulesDebounceRef.current = setTimeout(() => sendModulesNow(modules), 120);
     },
     [sendModulesNow],
   );
@@ -494,7 +522,7 @@ export function usePreviewBridge() {
     (billboard: BillboardConfig) => {
       lastBillboardRef.current = billboard;
       if (billboardDebounceRef.current) clearTimeout(billboardDebounceRef.current);
-      billboardDebounceRef.current = setTimeout(() => sendBillboardNow(billboard), 80);
+      billboardDebounceRef.current = setTimeout(() => sendBillboardNow(billboard), 120);
     },
     [sendBillboardNow],
   );
@@ -521,7 +549,7 @@ export function usePreviewBridge() {
     (deals: DealsModuleConfig) => {
       lastDealsRef.current = deals;
       if (dealsDebounceRef.current) clearTimeout(dealsDebounceRef.current);
-      dealsDebounceRef.current = setTimeout(() => sendDealsNow(deals), 150);
+      dealsDebounceRef.current = setTimeout(() => sendDealsNow(deals), 120);
     },
     [sendDealsNow],
   );
@@ -530,7 +558,7 @@ export function usePreviewBridge() {
     (pb: PhotoBoothConfig) => {
       lastPhotoBoothRef.current = pb;
       if (photoBoothDebounceRef.current) clearTimeout(photoBoothDebounceRef.current);
-      photoBoothDebounceRef.current = setTimeout(() => sendPhotoBoothNow(pb), 200);
+      photoBoothDebounceRef.current = setTimeout(() => sendPhotoBoothNow(pb), 120);
     },
     [sendPhotoBoothNow],
   );
@@ -539,7 +567,7 @@ export function usePreviewBridge() {
     (b: BrochuresModuleConfig) => {
       lastBrochuresRef.current = b;
       if (brochuresDebounceRef.current) clearTimeout(brochuresDebounceRef.current);
-      brochuresDebounceRef.current = setTimeout(() => sendBrochuresNow(b), 150);
+      brochuresDebounceRef.current = setTimeout(() => sendBrochuresNow(b), 120);
     },
     [sendBrochuresNow],
   );
@@ -548,7 +576,7 @@ export function usePreviewBridge() {
     (sw: SocialWallConfig) => {
       lastSocialWallRef.current = sw;
       if (socialWallDebounceRef.current) clearTimeout(socialWallDebounceRef.current);
-      socialWallDebounceRef.current = setTimeout(() => sendSocialWallNow(sw), 150);
+      socialWallDebounceRef.current = setTimeout(() => sendSocialWallNow(sw), 120);
     },
     [sendSocialWallNow],
   );
@@ -557,7 +585,7 @@ export function usePreviewBridge() {
     (gb: GuestbookConfig) => {
       lastGuestbookRef.current = gb;
       if (guestbookDebounceRef.current) clearTimeout(guestbookDebounceRef.current);
-      guestbookDebounceRef.current = setTimeout(() => sendGuestbookNow(gb), 150);
+      guestbookDebounceRef.current = setTimeout(() => sendGuestbookNow(gb), 120);
     },
     [sendGuestbookNow],
   );
@@ -566,7 +594,7 @@ export function usePreviewBridge() {
     (listings: ListingsModule) => {
       lastListingsRef.current = listings;
       if (listingsDebounceRef.current) clearTimeout(listingsDebounceRef.current);
-      listingsDebounceRef.current = setTimeout(() => sendListingsNow(listings), 150);
+      listingsDebounceRef.current = setTimeout(() => sendListingsNow(listings), 120);
     },
     [sendListingsNow],
   );
@@ -575,7 +603,7 @@ export function usePreviewBridge() {
     (events: EventsModule) => {
       lastEventsRef.current = events;
       if (eventsDebounceRef.current) clearTimeout(eventsDebounceRef.current);
-      eventsDebounceRef.current = setTimeout(() => sendEventsNow(events), 150);
+      eventsDebounceRef.current = setTimeout(() => sendEventsNow(events), 120);
     },
     [sendEventsNow],
   );
@@ -593,7 +621,7 @@ export function usePreviewBridge() {
     (passes: PassesModule) => {
       lastPassesRef.current = passes;
       if (passesDebounceRef.current) clearTimeout(passesDebounceRef.current);
-      passesDebounceRef.current = setTimeout(() => sendPassesNow(passes), 150);
+      passesDebounceRef.current = setTimeout(() => sendPassesNow(passes), 120);
     },
     [sendPassesNow],
   );
@@ -602,7 +630,7 @@ export function usePreviewBridge() {
     (trails: TrailsModule) => {
       lastTrailsRef.current = trails;
       if (trailsDebounceRef.current) clearTimeout(trailsDebounceRef.current);
-      trailsDebounceRef.current = setTimeout(() => sendTrailsNow(trails), 150);
+      trailsDebounceRef.current = setTimeout(() => sendTrailsNow(trails), 120);
     },
     [sendTrailsNow],
   );
@@ -611,7 +639,7 @@ export function usePreviewBridge() {
     (itineraryBuilder: ItineraryBuilderConfig) => {
       lastItineraryRef.current = itineraryBuilder;
       if (itineraryDebounceRef.current) clearTimeout(itineraryDebounceRef.current);
-      itineraryDebounceRef.current = setTimeout(() => sendItineraryNow(itineraryBuilder), 150);
+      itineraryDebounceRef.current = setTimeout(() => sendItineraryNow(itineraryBuilder), 120);
     },
     [sendItineraryNow],
   );
@@ -620,7 +648,7 @@ export function usePreviewBridge() {
     (ads: AdsModule) => {
       lastAdsRef.current = ads;
       if (adsDebounceRef.current) clearTimeout(adsDebounceRef.current);
-      adsDebounceRef.current = setTimeout(() => sendAdsNow(ads), 150);
+      adsDebounceRef.current = setTimeout(() => sendAdsNow(ads), 120);
     },
     [sendAdsNow],
   );
@@ -633,6 +661,26 @@ export function usePreviewBridge() {
     },
     [sendMapNow],
   );
+
+  const pushIntegrations = useCallback(
+    (integrations: IntegrationsConfig) => {
+      lastIntegrationsRef.current = integrations;
+      if (integrationsDebounceRef.current) clearTimeout(integrationsDebounceRef.current);
+      integrationsDebounceRef.current = setTimeout(() => sendIntegrationsNow(integrations), 120);
+    },
+    [sendIntegrationsNow],
+  );
+
+  /** Cambia el locale activo del kiosk-iframe sin reload (#10 audit). El
+   *  i18n-provider escucha `kiosk:locale-update` y actualiza el store de
+   *  zustand. No hay debounce — el cambio es discreto (dropdown). */
+  const pushLocale = useCallback((locale: string) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:locale-update', locale }, '*');
+    } catch (e) { console.warn('[bridge:postMessage]', e); }
+  }, []);
 
   // Cuando el iframe re-monta, resetea ready para forzar un nuevo handshake.
   const onIframeLoad = useCallback(() => {
@@ -693,6 +741,8 @@ export function usePreviewBridge() {
     pushAds,
     pushMap,
     openMapPreview,
+    pushIntegrations,
+    pushLocale,
     isReady,
     bridgeStatus,
     onIframeLoad,

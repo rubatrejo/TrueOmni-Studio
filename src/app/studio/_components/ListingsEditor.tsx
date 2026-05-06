@@ -15,6 +15,9 @@ import {
   makeBlankListing,
 } from '@/lib/studio/schema';
 
+import { type AiSuggestKind, type AiSuggestedItem } from '../_lib/api-client';
+
+import { AiSuggestModal } from './AiSuggestModal';
 import { CatalogItemForm, type FieldConfig } from './catalog/CatalogItemForm';
 import { CatalogItemPanel } from './catalog/CatalogItemPanel';
 import { CatalogList } from './catalog/CatalogList';
@@ -30,13 +33,15 @@ import { EditorEmptyState } from './EditorEmptyState';
 interface ListingsEditorProps {
   value: ListingsModule;
   onChange: (next: ListingsModule) => void;
+  /** Location del kiosk ("Davenport, FL") para AI suggest (#26). */
+  kioskLocation: string;
 }
 
 /**
  * Editor del módulo Listings — sub-tabs dinámicos uno por entry del array.
  * Las entries se pueden duplicar / borrar / añadir desde la tab Modules.
  */
-export function ListingsEditor({ value, onChange }: ListingsEditorProps) {
+export function ListingsEditor({ value, onChange, kioskLocation }: ListingsEditorProps) {
   const [activeKey, setActiveKey] = useState<string>(value[0]?.key ?? '');
 
   // Si el active key se borra desde Modules, saltamos al primero disponible.
@@ -103,6 +108,7 @@ export function ListingsEditor({ value, onChange }: ListingsEditorProps) {
         entry={activeEntry}
         onEntryChange={updateEntry}
         onCatalogChange={updateCatalog}
+        kioskLocation={kioskLocation}
       />
     </div>
   );
@@ -112,10 +118,12 @@ function ListingsCatalogEditor({
   entry,
   onEntryChange,
   onCatalogChange,
+  kioskLocation,
 }: {
   entry: ListingsCatalogEntry;
   onEntryChange: (patch: Partial<ListingsCatalogEntry>) => void;
   onCatalogChange: (patch: Partial<ListingsCatalog>) => void;
+  kioskLocation: string;
 }) {
   const catalog = entry.catalog;
   const [search, setSearch] = useState('');
@@ -166,6 +174,28 @@ function ListingsCatalogEditor({
     const item = makeBlankListing();
     onCatalogChange({ listings: [item, ...catalog.listings] });
     setEditingSlug(item.slug);
+  };
+
+  // AI suggest (#26 audit) — el kind se infiere del entry.key activo. Si el
+  // operador customizó la key del catálogo (eg. 'food-drink' en lugar de
+  // 'restaurants'), caemos a 'things-to-do' como default seguro.
+  const [aiOpen, setAiOpen] = useState(false);
+  const aiKind: AiSuggestKind = (() => {
+    const k = entry.key.toLowerCase();
+    if (k === 'restaurants' || k === 'food-drink' || k === 'food') return 'restaurants';
+    if (k === 'stay' || k === 'hotels' || k === 'lodging') return 'stay';
+    return 'things-to-do';
+  })();
+  const handleAiAccept = (items: AiSuggestedItem[]) => {
+    const newListings: ListingItem[] = items.map((it) => ({
+      ...makeBlankListing(),
+      slug: it.slug,
+      title: it.title,
+      description: it.description,
+      address: it.address,
+      features: it.tags ?? [],
+    }));
+    onCatalogChange({ listings: [...newListings, ...catalog.listings] });
   };
 
   const handleReorder = (next: ListingItem[]) => {
@@ -337,6 +367,16 @@ function ListingsCatalogEditor({
         filterOptions={catalog.subcategories.map((s) => ({ value: s, label: s }))}
         filterPlaceholder="All subcategories"
         count={catalog.listings.length}
+        onAiSuggest={() => setAiOpen(true)}
+      />
+
+      <AiSuggestModal
+        open={aiOpen}
+        kind={aiKind}
+        location={kioskLocation}
+        existingSlugs={catalog.listings.map((l) => l.slug)}
+        onClose={() => setAiOpen(false)}
+        onConfirm={handleAiAccept}
       />
 
       <ImportToast

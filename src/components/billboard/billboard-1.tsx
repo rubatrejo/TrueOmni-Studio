@@ -46,7 +46,7 @@ export function Billboard1() {
   const t = useTextosMap();
   const { modules } = useBillboardOverride();
   const { background, touchHere, overlayOpacity, overlay } = useBillboardSettings(1);
-  const heroSrc = background.src || '/assets/billboard-0/hero.jpg';
+  const heroSrc = background.src || '/assets/billboard-1/hero.jpg';
   const heroIsVideo = background.type === 'video';
   const footerLogoH = useBillboardFooterLogoHeight();
   // touchHere.width/height NO aplican en B1 (texto plain dentro del card,

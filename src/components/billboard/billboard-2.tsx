@@ -55,7 +55,7 @@ export function Billboard2() {
   const logoH = useBillboardLogoHeight();
   const { modules } = useBillboardOverride();
   const { background, touchHere, overlayOpacity, overlay } = useBillboardSettings(2);
-  const heroSrc = background.src || '/assets/billboard-0/hero.jpg';
+  const heroSrc = background.src || '/assets/billboard-2/hero.png';
   const heroIsVideo = background.type === 'video';
   const [active, setActive] = useState(0);
   // touchHere.width/height NO aplican (texto + arrow inline, no botón).

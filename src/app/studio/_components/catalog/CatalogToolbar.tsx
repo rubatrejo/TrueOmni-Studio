@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, Plus, Search, Upload } from 'lucide-react';
+import { Download, Plus, Search, Sparkles, Upload } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 interface FilterOption {
@@ -27,6 +27,9 @@ interface CatalogToolbarProps {
   filterPlaceholder?: string;
   /** Conteo total opcional ("12 items"). */
   count?: number;
+  /** Si está presente, muestra el botón "✨ Suggest" — abre el AI suggest
+   *  modal que añade N items generados por Claude (#26 audit). */
+  onAiSuggest?: () => void;
 }
 
 /**
@@ -46,6 +49,7 @@ export function CatalogToolbar({
   filterOptions,
   filterPlaceholder = 'All',
   count,
+  onAiSuggest,
 }: CatalogToolbarProps) {
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-md border border-zinc-200 bg-zinc-50 p-2 dark:border-zinc-800 dark:bg-zinc-900/30">
@@ -91,6 +95,18 @@ export function CatalogToolbar({
         >
           <Upload className="h-3.5 w-3.5" />
           {importLabel}
+        </button>
+      ) : null}
+
+      {onAiSuggest ? (
+        <button
+          type="button"
+          onClick={onAiSuggest}
+          title="Generate items with AI"
+          className="flex items-center gap-1 rounded-md border border-violet-300/60 bg-violet-500/10 px-2.5 py-1.5 text-[11.5px] font-medium text-violet-700 transition hover:bg-violet-500/20 dark:border-violet-500/40 dark:text-violet-300"
+        >
+          <Sparkles className="h-3.5 w-3.5" />
+          Suggest
         </button>
       ) : null}
 

@@ -380,34 +380,56 @@ function FileList({
       ) : null}
       <ul className="space-y-0.5">
         {files.map((f) => (
-          <li
-            key={f.path}
-            className={`flex items-center gap-2 rounded px-2 py-1 ${
-              compact
-                ? 'text-zinc-500'
-                : f.action === 'create'
-                  ? 'bg-sky-50 text-sky-900 dark:bg-sky-950/30 dark:text-sky-200'
-                  : f.action === 'update'
-                    ? 'bg-amber-50 text-amber-900 dark:bg-amber-950/30 dark:text-amber-200'
-                    : 'text-zinc-500'
-            }`}
-          >
-            <FileText className="h-3 w-3 shrink-0" />
-            <span className="flex-1 truncate font-mono text-[10.5px]">
-              {shortenPath(f.path)}
-            </span>
-            <span className="shrink-0 font-mono text-[10px] uppercase">
-              {f.action}
-            </span>
-            {f.action === 'update' && f.sizeBefore !== undefined ? (
-              <span className="shrink-0 font-mono text-[10px] text-zinc-500">
-                {f.sizeBefore} → {f.sizeAfter}B
+          <li key={f.path}>
+            <div
+              className={`flex items-center gap-2 rounded px-2 py-1 ${
+                compact
+                  ? 'text-zinc-500'
+                  : f.action === 'create'
+                    ? 'bg-sky-50 text-sky-900 dark:bg-sky-950/30 dark:text-sky-200'
+                    : f.action === 'update'
+                      ? 'bg-amber-50 text-amber-900 dark:bg-amber-950/30 dark:text-amber-200'
+                      : 'text-zinc-500'
+              }`}
+            >
+              <FileText className="h-3 w-3 shrink-0" />
+              <span className="flex-1 truncate font-mono text-[10.5px]">
+                {shortenPath(f.path)}
               </span>
-            ) : (
-              <span className="shrink-0 font-mono text-[10px] text-zinc-500">
-                {f.sizeAfter}B
+              <span className="shrink-0 font-mono text-[10px] uppercase">
+                {f.action}
               </span>
-            )}
+              {f.action === 'update' && f.sizeBefore !== undefined ? (
+                <span className="shrink-0 font-mono text-[10px] text-zinc-500">
+                  {f.sizeBefore} → {f.sizeAfter}B
+                </span>
+              ) : (
+                <span className="shrink-0 font-mono text-[10px] text-zinc-500">
+                  {f.sizeAfter}B
+                </span>
+              )}
+            </div>
+            {/* JSON key diff (#8 audit) — desplegable solo si el backend
+                pobló `changedKeys`. Útil cuando cambia un solo string en
+                un config.json de 950KB y el operador quiere saber dónde. */}
+            {!compact && f.changedKeys && f.changedKeys.length > 0 ? (
+              <details className="ml-6 mt-1">
+                <summary className="cursor-pointer text-[10.5px] text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
+                  {f.changedKeys.length === 50 ? '50+' : f.changedKeys.length} JSON{' '}
+                  key{f.changedKeys.length === 1 ? '' : 's'} changed
+                </summary>
+                <ul className="mt-1 space-y-0.5">
+                  {f.changedKeys.map((k) => (
+                    <li
+                      key={k}
+                      className="rounded bg-zinc-100 px-2 py-0.5 font-mono text-[10px] text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
+                    >
+                      {k}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
           </li>
         ))}
       </ul>

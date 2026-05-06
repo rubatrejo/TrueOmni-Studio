@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CheckCircle2, History, Play, Rocket, Save, Sparkles } from 'lucide-react';
+import { CheckCircle2, History, Loader2, Play, Rocket, RotateCcw, Save, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import type {
@@ -27,6 +27,11 @@ import type {
   TrailsModule,
 } from '@/lib/studio/schema';
 
+import {
+  listSnapshots as fetchSnapshots,
+  revertSnapshot,
+  type SnapshotEntry,
+} from '../_lib/api-client';
 import { getHistory, type LocalVersionEntry } from '../_lib/local-version-history';
 import { extractPaletteFromImage } from '../_lib/palette-from-image';
 import { STUDIO_SECTIONS, VERSIONS_SECTION, type StudioSectionKey } from '../_lib/sections';
@@ -116,6 +121,7 @@ export function EditorPanel({
   currentVersion,
   lastPublishedAt,
   lastEditor,
+  kioskLocation,
   onPublish,
 }: {
   sectionKey: StudioSectionKey;
@@ -177,6 +183,8 @@ export function EditorPanel({
   currentVersion: number;
   lastPublishedAt?: string;
   lastEditor?: string;
+  /** Location del kiosk ("Davenport, FL"), usado por AI suggest (#26). */
+  kioskLocation?: string;
   onPublish: () => void;
 }) {
   const section =
@@ -289,9 +297,19 @@ export function EditorPanel({
           <GuestbookEditor guestbook={guestbook} onChange={onGuestbookChange} />
         )}
         {sectionKey === 'listings' && (
-          <ListingsEditor value={listings} onChange={onListingsChange} />
+          <ListingsEditor
+            value={listings}
+            onChange={onListingsChange}
+            kioskLocation={kioskLocation ?? ''}
+          />
         )}
-        {sectionKey === 'events' && <EventsEditor value={events} onChange={onEventsChange} />}
+        {sectionKey === 'events' && (
+          <EventsEditor
+            value={events}
+            onChange={onEventsChange}
+            kioskLocation={kioskLocation ?? ''}
+          />
+        )}
         {sectionKey === 'tickets' && (
           <TicketsEditor value={tickets} eventsValue={events} onChange={onTicketsChange} />
         )}
@@ -847,6 +865,9 @@ function VersionsEditor({
       {/* Local timeline (audit F-10) — placeholder hasta S7.2 con git real. */}
       <LocalVersionTimeline />
 
+      {/* Snapshots reales en KV — botón Revert (#9 audit). */}
+      <SnapshotsTimeline />
+
       {/* Roadmap del versioning real (S7.2) */}
       <section className="rounded-xl border border-dashed border-zinc-300 bg-zinc-50/40 px-5 py-5 dark:border-zinc-800 dark:bg-zinc-900/20">
         <header className="mb-2 flex items-center gap-2">
@@ -1045,6 +1066,169 @@ function LocalVersionTimeline() {
           ))}
         </ol>
       )}
+    </section>
+  );
+}
+
+/**
+ * Snapshots reales del config en KV (#9 audit). Cada PATCH/import deja un
+ * snapshot del estado anterior con TTL 30d (cap 10 por kiosk). Esta lista
+ * permite al operador revertir a cualquiera con un click.
+ */
+function SnapshotsTimeline() {
+  const slug = useStudioSlug();
+  const [entries, setEntries] = useState<SnapshotEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [confirmTs, setConfirmTs] = useState<string | null>(null);
+  const [reverting, setReverting] = useState(false);
+
+  useEffect(() => {
+    if (!slug) return;
+    let cancelled = false;
+    setLoading(true);
+    fetchSnapshots(slug)
+      .then((list) => {
+        if (!cancelled) {
+          setEntries(list);
+          setError(null);
+        }
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  const handleRevert = async (ts: string) => {
+    if (!slug) return;
+    setReverting(true);
+    try {
+      await revertSnapshot(slug, ts);
+      // Reload para re-bootstrappear el editor con el config restaurado.
+      // Podríamos hacer un swap in-place pero el editor tiene 19 piezas de
+      // state que reconciliar — el reload es más seguro.
+      window.location.reload();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Revert failed');
+      setReverting(false);
+      setConfirmTs(null);
+    }
+  };
+
+  return (
+    <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-900 dark:bg-zinc-950">
+      <header className="mb-3 flex items-center justify-between">
+        <div>
+          <h3 className="font-display text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500 dark:text-zinc-400">
+            Restore from snapshot
+          </h3>
+          <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
+            Server-side snapshots taken before each Save / Import · TTL 30 days · last 10 kept
+          </p>
+        </div>
+        <span className="rounded-full border border-emerald-300/40 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+          Real
+        </span>
+      </header>
+
+      {loading ? (
+        <div className="flex items-center gap-2 px-3 py-4 text-[11.5px] text-zinc-500">
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          Loading snapshots…
+        </div>
+      ) : error ? (
+        <div className="rounded-md border border-red-200 bg-red-50/70 px-3 py-2 text-[11.5px] text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+          {error}
+        </div>
+      ) : entries.length === 0 ? (
+        <div className="rounded-md border border-dashed border-zinc-200 bg-zinc-50/60 px-3 py-6 text-center text-[11.5px] italic text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/30">
+          No snapshots yet — they appear after the next Save.
+        </div>
+      ) : (
+        <ol className="space-y-1.5">
+          {entries.map((e) => {
+            const sizeKb = Math.round(e.sizeBytes / 1024);
+            const reasonColor =
+              e.reason === 'patch'
+                ? 'bg-sky-500/10 text-sky-600 ring-sky-500/30 dark:text-sky-300'
+                : e.reason === 'import'
+                  ? 'bg-violet-500/10 text-violet-600 ring-violet-500/30 dark:text-violet-300'
+                  : 'bg-amber-500/10 text-amber-600 ring-amber-500/30 dark:text-amber-300';
+            return (
+              <li
+                key={e.ts}
+                className="flex items-center gap-3 rounded-md border border-zinc-200/70 bg-zinc-50/50 px-3 py-2 dark:border-zinc-900 dark:bg-zinc-900/40"
+              >
+                <span
+                  className={`grid h-6 w-6 shrink-0 place-items-center rounded-md ring-1 ${reasonColor}`}
+                  aria-hidden
+                  title={`Source: ${e.reason}`}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+                    Snapshot before {e.reason}
+                    <span className="ml-2 font-mono text-[10.5px] text-zinc-500">{sizeKb}KB</span>
+                  </div>
+                  <div className="mt-0.5 flex items-center gap-2 text-[10.5px] text-zinc-500 dark:text-zinc-500">
+                    <time dateTime={e.ts}>{relativeTime(e.ts)}</time>
+                    <span>·</span>
+                    <span className="font-mono">{e.ts.slice(0, 16).replace('T', ' ')}</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setConfirmTs(e.ts)}
+                  className="shrink-0 rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-900"
+                >
+                  Revert
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+
+      {/* Confirm modal — inline para evitar otro componente. */}
+      {confirmTs ? (
+        <div className="fixed inset-0 z-[80] grid place-items-center bg-zinc-950/70 p-4 backdrop-blur-md">
+          <div className="w-[480px] max-w-[94vw] rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900">
+            <h3 className="font-display text-[15px] font-semibold text-zinc-900 dark:text-white">
+              Revert to {confirmTs.slice(0, 16).replace('T', ' ')}?
+            </h3>
+            <p className="mt-2 text-[12.5px] leading-relaxed text-zinc-600 dark:text-zinc-400">
+              The current config will be saved as a new snapshot first (so this is undoable). The
+              kiosk will reload with the restored state.
+            </p>
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmTs(null)}
+                disabled={reverting}
+                className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-[12.5px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleRevert(confirmTs)}
+                disabled={reverting}
+                className="inline-flex items-center gap-1.5 rounded-md bg-amber-600 px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition hover:bg-amber-500 disabled:opacity-50"
+              >
+                {reverting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                {reverting ? 'Reverting…' : 'Revert'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

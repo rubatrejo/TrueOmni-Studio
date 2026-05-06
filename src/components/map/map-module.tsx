@@ -23,6 +23,7 @@ import type { MapDetailLookup } from '@/lib/map-detail-lookup';
 import { ALL_CHIPS, applyMapFilters, EMPTY_MAP_FILTER, toggleChip } from '@/lib/map-filter';
 import type { MapFilterState } from '@/lib/map-filter';
 import type { MapItem } from '@/lib/map-item';
+import { DEFAULT_MAP_WELCOME_BODY } from '@/lib/studio/schema';
 
 import { MapCanvas } from './map-canvas';
 import { MapChips } from './map-chips';
@@ -221,10 +222,17 @@ export function MapModule({
       ? {
           title: editorCopy.title ?? baseCopy?.title ?? '',
           subtitle: editorCopy.subtitle ?? baseCopy?.subtitle,
-          body: editorCopy.body ?? baseCopy?.body ?? '',
+          // Fallback al body por default cuando ni editor ni base tienen valor
+          // — kiosks viejos guardaron `body: ''` en KV antes de que el schema
+          // lo defaulteara a un texto humanizable.
+          body: editorCopy.body || baseCopy?.body || DEFAULT_MAP_WELCOME_BODY,
           cta: editorCopy.cta ?? baseCopy?.cta ?? 'OK',
         }
-      : baseCopy;
+      : baseCopy && baseCopy.body
+        ? baseCopy
+        : baseCopy
+          ? { ...baseCopy, body: DEFAULT_MAP_WELCOME_BODY }
+          : baseCopy;
     if (!merged) return undefined;
     const allEmpty =
       !merged.title?.trim() && !merged.body?.trim() && !merged.cta?.trim();

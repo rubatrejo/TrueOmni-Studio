@@ -41,7 +41,9 @@ export function StudioThemeProvider({ children }: { children: ReactNode }) {
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);
       if (saved === 'light' || saved === 'dark') setThemeState(saved);
-    } catch {}
+    } catch (e) {
+      console.warn('[studio-theme] localStorage read failed', e);
+    }
   }, []);
 
   const setTheme = useMemo(
@@ -49,7 +51,9 @@ export function StudioThemeProvider({ children }: { children: ReactNode }) {
       setThemeState(next);
       try {
         window.localStorage.setItem(STORAGE_KEY, next);
-      } catch {}
+      } catch (e) {
+        console.warn('[studio-theme] localStorage write failed', e);
+      }
     },
     [],
   );

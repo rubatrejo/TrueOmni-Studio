@@ -26,6 +26,7 @@ export function NewClientModal({
     orientation: Orientation;
     website: string;
     location: string;
+    emptyMode: boolean;
   }) => Promise<void>;
 }) {
   const [nombre, setNombre] = useState('');
@@ -38,6 +39,10 @@ export function NewClientModal({
   // estar vacío tras el primer cambio del nombre).
   const [slugTouched, setSlugTouched] = useState(false);
   const [orientation, setOrientation] = useState<Orientation>('portrait');
+  // Empty mode: arranca el kiosk sin mock data (listings/events/passes/deals/
+  // trails/itinerary local_listings/social-wall posts). Útil cuando el cliente
+  // quiere poblar todo a mano y no heredar el contenido demo de TrueOmni.
+  const [emptyMode, setEmptyMode] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const nombreRef = useRef<HTMLInputElement>(null);
@@ -50,6 +55,7 @@ export function NewClientModal({
     setLocation('');
     setSlugTouched(false);
     setOrientation('portrait');
+    setEmptyMode(false);
     setError(null);
     setSubmitting(false);
     // Auto-focus al abrir.
@@ -119,6 +125,7 @@ export function NewClientModal({
         orientation,
         website: trimmedWebsite,
         location: trimmedLocation,
+        emptyMode,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create');
@@ -304,10 +311,31 @@ export function NewClientModal({
                 </p>
               )}
 
+              {/* Empty mode toggle: arranca sin mock data (listings/events/etc.) */}
+              <div className="flex items-start gap-3 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-[12px] leading-relaxed text-zinc-700 transition hover:border-zinc-300 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-900">
+                <input
+                  id="kiosk-empty-mode"
+                  type="checkbox"
+                  checked={emptyMode}
+                  onChange={(e) => setEmptyMode(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 text-sky-600 focus:ring-sky-500/40 dark:border-zinc-600"
+                />
+                <label htmlFor="kiosk-empty-mode" className="flex cursor-pointer flex-col gap-0.5">
+                  <span className="font-medium text-zinc-800 dark:text-zinc-200">
+                    Start empty (no demo content)
+                  </span>
+                  <span className="text-[11px] text-zinc-500 dark:text-zinc-500">
+                    Skip the listings, events, passes, deals, trails, social-wall posts and
+                    Trip Planner local listings from the TrueOmni template. Branding and
+                    module structure are still inherited.
+                  </span>
+                </label>
+              </div>
+
               <p className="text-[11.5px] leading-relaxed text-zinc-500">
-                Cloning the TrueOmni Default kiosk: brand palette, modules, and full mock
-                content (listings, events, passes, deals, trails). You can change anything
-                in the editor afterwards.
+                {emptyMode
+                  ? 'Cloning the TrueOmni Default kiosk: brand palette and modules only — no demo listings or events. You can populate content from the editor.'
+                  : 'Cloning the TrueOmni Default kiosk: brand palette, modules, and full mock content (listings, events, passes, deals, trails). You can change anything in the editor afterwards.'}
               </p>
 
               <div className="flex items-center justify-end gap-2 border-t border-zinc-100 pt-4 dark:border-zinc-800">

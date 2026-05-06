@@ -52,7 +52,9 @@ async function http<T>(
     try {
       const err = (await res.json()) as { error?: string };
       detail = err?.error ?? JSON.stringify(err);
-    } catch {}
+    } catch (e) {
+      console.warn('[api-client] failed to parse error response', e);
+    }
     throw new Error(`${res.status} ${res.statusText}${detail ? ` — ${detail}` : ''}`);
   }
   return (await res.json()) as T;
@@ -77,6 +79,7 @@ export async function createConfig(input: {
   orientation?: string;
   website?: string;
   location?: string;
+  emptyMode?: boolean;
 }): Promise<ConfigEntry> {
   const data = await http<{ slug: string; config: KioskConfig; meta: ConfigMeta }>(
     '/api/studio/configs',
@@ -149,6 +152,84 @@ export async function cloneConfig(
 export async function deleteConfig(slug: string): Promise<void> {
   await http<{ slug: string; deleted: true }>(`/api/studio/configs/${slug}`, {
     method: 'DELETE',
+  });
+}
+
+/**
+ * Trigger del download del config completo como JSON. Hallazgo #25 del audit.
+ * Usa el endpoint que devuelve `Content-Disposition: attachment` para que el
+ * browser fuerce save-as.
+ */
+export function downloadConfigExport(slug: string): void {
+  const url = `/api/studio/configs/${slug}/export`;
+  const a = document.createElement('a');
+  a.href = url;
+  a.rel = 'noreferrer';
+  a.click();
+}
+
+/**
+ * Importa un config JSON al slug indicado. Hallazgo #25 del audit. El backend
+ * sobreescribe el slug del JSON con el del path para evitar identity drift.
+ */
+export async function importConfig(slug: string, configJson: unknown): Promise<KioskConfig> {
+  const data = await http<{ slug: string; config: KioskConfig }>(
+    `/api/studio/configs/${slug}/import`,
+    { method: 'POST', body: configJson },
+  );
+  return data.config;
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Snapshots / Rollback (#9)                                                */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export interface SnapshotEntry {
+  ts: string;
+  reason: 'patch' | 'import' | 'revert';
+  sizeBytes: number;
+}
+
+export async function listSnapshots(slug: string): Promise<SnapshotEntry[]> {
+  const data = await http<{ slug: string; entries: SnapshotEntry[] }>(
+    `/api/studio/configs/${slug}/snapshots`,
+  );
+  return data.entries;
+}
+
+export async function revertSnapshot(slug: string, ts: string): Promise<KioskConfig> {
+  const data = await http<{ slug: string; revertedTo: string; config: KioskConfig }>(
+    `/api/studio/configs/${slug}/snapshots`,
+    { method: 'POST', body: { ts } },
+  );
+  return data.config;
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  AI content suggestions (#26)                                             */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export interface AiSuggestedItem {
+  slug: string;
+  title: string;
+  description: string;
+  address: string;
+  tags?: string[];
+  _aiGenerated: true;
+}
+
+export type AiSuggestKind = 'restaurants' | 'things-to-do' | 'stay' | 'events' | 'deals';
+
+export async function suggestContent(input: {
+  kind: AiSuggestKind;
+  count: number;
+  city: string;
+  state: string;
+  exclude?: string[];
+}): Promise<{ items: AiSuggestedItem[]; tokensUsed: number }> {
+  return http<{ items: AiSuggestedItem[]; tokensUsed: number }>('/api/studio/ai/suggest', {
+    method: 'POST',
+    body: input,
   });
 }
 
@@ -262,6 +343,9 @@ export interface PublishFileChange {
   action: 'create' | 'update' | 'unchanged';
   sizeBefore?: number;
   sizeAfter: number;
+  /** Paths del JSON que cambiaron (#8 audit). Solo en dryRun + JSON files
+   *  &lt;300KB. Cap a 50 entradas. */
+  changedKeys?: string[];
 }
 
 export interface PublishPrInfo {

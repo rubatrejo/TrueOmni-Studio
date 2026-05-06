@@ -51,8 +51,12 @@ export function SocialPostCard({
             className="absolute bottom-0 left-0 right-0"
             style={{
               padding: post.caption ? '110px 14px 14px 14px' : '90px 14px 14px 14px',
+              // Gradient bottom→top: brand-primary opaco abajo, fade a 0
+              // arriba. Antes mezclaba `rgba(10,75,120,X)` (azul TrueOmni
+              // hex hardcoded) — ahora todos los stops usan el token para
+              // que el cliente activo mande también en el fade.
               background:
-                'linear-gradient(0deg, hsl(var(--brand-primary)) 0%, rgba(10,75,120,0.92) 35%, rgba(10,75,120,0.5) 70%, rgba(10,75,120,0) 100%)',
+                'linear-gradient(0deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-primary) / 0.92) 35%, hsl(var(--brand-primary) / 0.5) 70%, hsl(var(--brand-primary) / 0) 100%)',
               color: '#ffffff',
             }}
           >

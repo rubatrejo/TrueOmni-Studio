@@ -20,6 +20,18 @@ const ORIENTATION_DIMS: Record<PreviewOrientation, { w: number; h: number }> = {
  * y notificamos `onLoad` para que el bridge pueda re-handshake al
  * cambiar de orientación / reload.
  */
+/** Locales soportados por todos los kiosks. Si el cliente activo no tiene
+ *  uno cargado en el bundle, el i18n-provider runtime lo ignora silenciosa-
+ *  mente (guard `available.includes(next)`). */
+const PREVIEW_LOCALES = [
+  { value: 'en', label: 'EN' },
+  { value: 'es', label: 'ES' },
+  { value: 'fr', label: 'FR' },
+  { value: 'de', label: 'DE' },
+  { value: 'pt', label: 'PT' },
+  { value: 'ja', label: 'JA' },
+] as const;
+
 export function PreviewPanel({
   slug,
   nombre,
@@ -27,6 +39,7 @@ export function PreviewPanel({
   reloadKey,
   iframeRef,
   onIframeLoad,
+  onLocaleChange,
 }: {
   slug: string;
   nombre: string;
@@ -34,11 +47,16 @@ export function PreviewPanel({
   reloadKey: number;
   iframeRef: RefObject<HTMLIFrameElement | null>;
   onIframeLoad?: () => void;
+  /** Callback al cambiar el locale del preview iframe (#10 audit). El Studio
+   *  empuja el locale al kiosk via postMessage; el i18n-provider lo aplica
+   *  sin reload. */
+  onLocaleChange?: (locale: string) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
   const [orientation, setOrientation] = useState<PreviewOrientation>(initialOrientation);
   const [fullScreen, setFullScreen] = useState(false);
+  const [locale, setLocale] = useState<string>('en');
 
   const { w, h } = ORIENTATION_DIMS[orientation];
 
@@ -122,6 +140,26 @@ export function PreviewPanel({
         </div>
 
         <div className="flex items-center gap-1 text-[11px] text-zinc-500">
+          {/* Locale picker — empuja al iframe via postMessage sin reload (#10). */}
+          {onLocaleChange ? (
+            <select
+              value={locale}
+              onChange={(e) => {
+                const next = e.target.value;
+                setLocale(next);
+                onLocaleChange(next);
+              }}
+              aria-label="Preview locale"
+              title="Preview locale (changes the kiosk language without reload)"
+              className="mr-2 rounded-md border border-zinc-200 bg-white px-1.5 py-0.5 font-mono text-[11px] text-zinc-700 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200"
+            >
+              {PREVIEW_LOCALES.map((l) => (
+                <option key={l.value} value={l.value}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+          ) : null}
           <button
             type="button"
             className="grid h-7 w-7 place-items-center rounded-md text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-zinc-900 dark:hover:text-zinc-200"

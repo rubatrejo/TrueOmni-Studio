@@ -13,6 +13,9 @@ import {
   makeBlankEvent,
 } from '@/lib/studio/schema';
 
+import { type AiSuggestedItem } from '../_lib/api-client';
+
+import { AiSuggestModal } from './AiSuggestModal';
 import { CatalogItemForm, type FieldConfig } from './catalog/CatalogItemForm';
 import { CatalogItemPanel } from './catalog/CatalogItemPanel';
 import { CatalogList } from './catalog/CatalogList';
@@ -28,14 +31,17 @@ import { EditorEmptyState } from './EditorEmptyState';
 interface EventsEditorProps {
   value: EventsModule;
   onChange: (next: EventsModule) => void;
+  /** Location del kiosk para AI suggest (#26 audit). */
+  kioskLocation?: string;
 }
 
-export function EventsEditor({ value, onChange }: EventsEditorProps) {
+export function EventsEditor({ value, onChange, kioskLocation }: EventsEditorProps) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [lastImport, setLastImport] = useState<ImportStats | null>(null);
+  const [aiOpen, setAiOpen] = useState(false);
 
   const handleImport = (items: EventItem[], mode: ImportMode, stats: ImportStats) => {
     const nextEvents = mode === 'replace' ? items : upsertBySlug(value.events, items);
@@ -249,6 +255,28 @@ export function EventsEditor({ value, onChange }: EventsEditorProps) {
         filterOptions={value.categories.map((c) => ({ value: c, label: c }))}
         filterPlaceholder="All categories"
         count={value.events.length}
+        onAiSuggest={kioskLocation ? () => setAiOpen(true) : undefined}
+      />
+
+      <AiSuggestModal
+        open={aiOpen}
+        kind="events"
+        location={kioskLocation ?? ''}
+        existingSlugs={value.events.map((e) => e.slug)}
+        onClose={() => setAiOpen(false)}
+        onConfirm={(items: AiSuggestedItem[]) => {
+          // Map AI items to EventItem skeletons. Title/description/address
+          // del AI; el resto (date/time/venue/etc.) lo completa el operador.
+          const newEvents: EventItem[] = items.map((it) => ({
+            ...makeBlankEvent(),
+            slug: it.slug,
+            title: it.title,
+            description: it.description,
+            venue: it.address,
+            features: it.tags ?? [],
+          }));
+          onChange({ ...value, events: [...newEvents, ...value.events] });
+        }}
       />
 
       <ImportToast

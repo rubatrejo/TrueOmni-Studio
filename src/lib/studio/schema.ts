@@ -402,11 +402,31 @@ export type BillboardVariantSettings = BillboardB0Config;
 /** Alias retrocompat para el shape solo-background (deprecated, usar VariantSettings). */
 export type BillboardVariantBackground = { background?: { type: 'image' | 'video'; src: string } };
 
+/**
+ * Background compartido por las 4 variants del idle (B0/B1/B2/B3). El operador
+ * sube UNA imagen/video y se aplica al hero de los 4 layouts. Para overrides
+ * por variant existe `b{N}.background` (legacy/back-compat) — el runtime
+ * prefiere el shared cuando está poblado.
+ */
+export const BillboardBackgroundSchema = z.object({
+  type: z.enum(['image', 'video']).default('image'),
+  src: z.string().default('/assets/billboard-0/hero.jpg'),
+});
+
 export const BillboardSchema = z.object({
   /** Cuál de los 4 layouts del Billboard idle se muestra. */
   variant: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]),
   /** Segundos sin actividad en /home antes del aviso de timeout. */
   idleTimeoutSec: z.number().int().min(15).max(600).default(60),
+  /**
+   * Background compartido por las 4 variants idle. Cambia este campo y los
+   * 4 layouts heredan la misma imagen/video de hero. Tiene prioridad sobre
+   * `b{N}.background` (legacy).
+   */
+  background: BillboardBackgroundSchema.default({
+    type: 'image',
+    src: '/assets/billboard-0/hero.jpg',
+  }),
   /**
    * Tamaño del logo idle en B0/B2/B3 (B1 no muestra logo idle grande).
    * Mapeo: S=80px, M=128px (default), L=180px.
@@ -443,8 +463,9 @@ export const DEFAULT_BILLBOARD: BillboardConfig = {
   footerLogoSize: 'M',
   modules: [],
   // Background unificado en las 4 variantes para consistencia visual al
-  // alternar entre ellas. El operador puede personalizar cada una luego
-  // desde el editor (cada variant tiene su panel "Idle settings").
+  // alternar entre ellas. Editado desde la sección "Background (shared)" del
+  // editor. Los `b{N}` quedan para overlay/touchHere/etc per-variant.
+  background: { type: 'image', src: '/assets/billboard-0/hero.jpg' },
   b0: DEFAULT_BILLBOARD_B0,
   b1: { ...DEFAULT_BILLBOARD_B0 },
   b2: { ...DEFAULT_BILLBOARD_B0 },
@@ -1965,10 +1986,17 @@ export const MapCustomPinSchema = z.object({
   address: z.string().max(280).default(''),
 });
 
+/** Body por default del Map welcome popup. Se usa como fallback runtime
+ *  cuando el operador no ha seteado un body custom (kiosks viejos en KV
+ *  guardaron `body: ''`). Importable por componentes para renderizarlo
+ *  cuando el body merged sale vacío. */
+export const DEFAULT_MAP_WELCOME_BODY =
+  'Tap a pin to see details — restaurants, things to do, places to stay and upcoming events near you.';
+
 export const MapWelcomeCopySchema = z.object({
   title: z.string().max(160).default('Welcome to {client} Map'),
   subtitle: z.string().max(160).default('Powered by Google Maps'),
-  body: z.string().max(600).default(''),
+  body: z.string().max(600).default(DEFAULT_MAP_WELCOME_BODY),
   cta: z.string().max(64).default('Start'),
 });
 
@@ -2024,7 +2052,7 @@ export const MapSchema = z.object({
   welcomeCopy: MapWelcomeCopySchema.default({
     title: 'Welcome to {client} Map',
     subtitle: 'Powered by Google Maps',
-    body: '',
+    body: DEFAULT_MAP_WELCOME_BODY,
     cta: 'Start',
   }),
   /** Pins fijos custom (no derivados de listings). Se añaden al canvas como pins extra. */
@@ -2043,7 +2071,7 @@ export const DEFAULT_MAP: MapConfig = {
   welcomeCopy: {
     title: 'Welcome to {client} Map',
     subtitle: 'Powered by Google Maps',
-    body: '',
+    body: DEFAULT_MAP_WELCOME_BODY,
     cta: 'Start',
   },
   customPins: [],

@@ -30,6 +30,9 @@ export interface GitHubPublishResult {
   branch: string;
   commitSha: string;
   filesChanged: number;
+  /** True si el PR quedó marcado como auto-merge (espera CI verde). False si
+   *  el operador no lo pidió o si GitHub rechazó la mutation. */
+  autoMergeEnabled?: boolean;
 }
 
 export interface GitHubPublishConfig {
@@ -105,7 +108,19 @@ export async function publishToGitHub(
   config: GitHubPublishConfig,
   slug: string,
   files: PublishFile[],
-  options?: { actorEmail?: string; commitMessage?: string },
+  options?: {
+    actorEmail?: string;
+    commitMessage?: string;
+    /**
+     * Si `true`, intenta hacer auto-merge del PR via GitHub API tras crearlo.
+     * Requiere que la repo tenga "Auto-merge" habilitado en settings y que el
+     * PR cumpla los requisitos de protected branch (CI verde, reviews, etc.).
+     * Si el merge falla por checks pendientes, GitHub lo ejecutará cuando los
+     * checks pasen. Si los checks fallan o el PR es rechazado, el operador
+     * tiene que mergearlo a mano. Hallazgo #23 del audit.
+     */
+    autoMerge?: boolean;
+  },
 ): Promise<GitHubPublishResult> {
   if (files.length === 0) {
     throw new Error('No file changes to publish.');
@@ -188,12 +203,38 @@ export async function publishToGitHub(
     body: buildPrBody(slug, files, options?.actorEmail),
   });
 
+  // 8. Auto-merge opcional (hallazgo #23 del audit). El backend usa la GraphQL
+  // mutation `enablePullRequestAutoMerge` para que GitHub haga merge cuando
+  // todos los checks de CI pasen. Si la repo no tiene auto-merge habilitado o
+  // el PR no cumple las protected-branch rules, capturamos el error y devolve-
+  // mos el PR igualmente (el operador puede mergear a mano).
+  let autoMergeEnabled = false;
+  if (options?.autoMerge) {
+    try {
+      await octokit.graphql(
+        `mutation($pullRequestId: ID!) {
+          enablePullRequestAutoMerge(input: {
+            pullRequestId: $pullRequestId,
+            mergeMethod: SQUASH
+          }) {
+            pullRequest { autoMergeRequest { enabledAt } }
+          }
+        }`,
+        { pullRequestId: pr.data.node_id },
+      );
+      autoMergeEnabled = true;
+    } catch (e) {
+      console.warn('[github-publisher] auto-merge failed', e);
+    }
+  }
+
   return {
     prUrl: pr.data.html_url,
     prNumber: pr.data.number,
     branch: branchName,
     commitSha: commit.data.sha,
     filesChanged: files.length,
+    autoMergeEnabled,
   };
 }
 

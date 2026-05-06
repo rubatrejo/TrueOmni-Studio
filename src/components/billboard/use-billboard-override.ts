@@ -17,6 +17,8 @@ type BillboardOverride = {
   logoSize?: BillboardLogoSize;
   footerLogoSize?: BillboardLogoSize;
   modules?: string[];
+  /** Background compartido por las 4 variants (gana sobre b{N}.background). */
+  background?: BillboardB0Config['background'];
   /** Settings idle del variant 0 (Dark Hero). */
   b0?: Partial<BillboardVariantSettings>;
   /** Settings idle del variant 1 (Grid + Hero). */
@@ -58,6 +60,7 @@ export function useBillboardOverride(): BillboardOverride {
         logoSize: detail.logoSize,
         footerLogoSize: detail.footerLogoSize,
         modules: Array.isArray(detail.modules) ? detail.modules : undefined,
+        background: detail.background,
         b0: detail.b0,
         b1: detail.b1,
         b2: detail.b2,
@@ -88,12 +91,28 @@ export function useBillboardFooterLogoHeight(): number {
 }
 
 /**
- * Aplica defaults sobre un patch parcial de settings idle. Garantiza al
- * consumidor que todos los campos están definidos.
+ * Background default por variant. Cada layout idle tiene su hero propio
+ * (excepto B3 que reusa el de B0 porque no se exporta hero dedicado).
+ * Mantener sincronizado con el `variantDefaultSrc` del BillboardEditor.
  */
-function withDefaults(patch: Partial<BillboardVariantSettings> | undefined): BillboardB0Config {
+const VARIANT_DEFAULT_BACKGROUND: Record<0 | 1 | 2 | 3, BillboardB0Config['background']> = {
+  0: { type: 'image', src: '/assets/billboard-0/hero.jpg' },
+  1: { type: 'image', src: '/assets/billboard-1/hero.jpg' },
+  2: { type: 'image', src: '/assets/billboard-2/hero.png' },
+  3: { type: 'image', src: '/assets/billboard-0/hero.jpg' },
+};
+
+/**
+ * Aplica defaults sobre un patch parcial de settings idle. Garantiza al
+ * consumidor que todos los campos están definidos. El default del
+ * `background` depende del variant — los demás campos comparten defaults.
+ */
+function withDefaults(
+  patch: Partial<BillboardVariantSettings> | undefined,
+  variant: 0 | 1 | 2 | 3,
+): BillboardB0Config {
   return {
-    background: patch?.background ?? DEFAULT_BILLBOARD_B0.background,
+    background: patch?.background ?? VARIANT_DEFAULT_BACKGROUND[variant],
     touchHere: { ...DEFAULT_BILLBOARD_B0.touchHere, ...(patch?.touchHere ?? {}) },
     overlayOpacity: patch?.overlayOpacity ?? DEFAULT_BILLBOARD_B0.overlayOpacity,
     overlay: {
@@ -109,13 +128,22 @@ function withDefaults(patch: Partial<BillboardVariantSettings> | undefined): Bil
 
 /**
  * Devuelve los settings idle de la variante pedida con defaults aplicados.
- * Si el Studio no envió override aún, retorna los defaults canónicos.
+ * Si el Studio no envió override aún, retorna los defaults canónicos del
+ * variant (background per-variant, touchHere/overlay compartidos con B0).
+ *
+ * Background resolution order:
+ *   1. `override.background` (shared, nuevo) — si está poblado gana siempre.
+ *   2. `override.b{N}.background` (legacy per-variant) — back-compat.
+ *   3. `VARIANT_DEFAULT_BACKGROUND[N]` — fallback canónico del variant.
  */
 export function useBillboardSettings(variant: 0 | 1 | 2 | 3): BillboardB0Config {
   const override = useBillboardOverride();
   const slot =
     variant === 0 ? override.b0 : variant === 1 ? override.b1 : variant === 2 ? override.b2 : override.b3;
-  return withDefaults(slot);
+  const base = withDefaults(slot, variant);
+  return override.background
+    ? { ...base, background: override.background }
+    : base;
 }
 
 /**

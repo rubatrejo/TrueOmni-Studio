@@ -202,6 +202,43 @@ export function SocialWallEditor({
         </div>
       </Group>
 
+      {/* OAuth feeds — placeholder hasta que las app credentials estén configuradas */}
+      <Group
+        title="OAuth feeds (preview)"
+        hint="Connect a real account to ingest posts automatically. Currently disabled — see the handoff doc."
+      >
+        <div className="grid grid-cols-2 gap-1.5">
+          {SOCIAL_SOURCES.filter((s) =>
+            (['instagram', 'facebook', 'tiktok', 'x'] as SocialSource[]).includes(s),
+          ).map((s) => {
+            const Icon = SOURCE_ICON[s];
+            return (
+              <button
+                key={s}
+                type="button"
+                disabled
+                title={`Requires ${SOURCE_LABEL[s]} app credentials. See .planning/2026-05-06-social-oauth-handoff.md`}
+                className="flex cursor-not-allowed items-center gap-2 rounded-md border border-dashed border-zinc-300 bg-zinc-50 p-2 text-left opacity-60 dark:border-zinc-800 dark:bg-zinc-900/40"
+              >
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-zinc-200 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                  <Icon className="h-3.5 w-3.5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
+                    Connect {SOURCE_LABEL[s]}
+                  </div>
+                  <div className="text-[10px] text-zinc-500">Awaiting app credentials</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-1.5 text-[10.5px] leading-relaxed text-zinc-500 dark:text-zinc-500">
+          Until OAuth is enabled, posts are managed manually below or pulled from CrowdRiff
+          when its API key is set in <em>Integrations</em>.
+        </p>
+      </Group>
+
       {/* Highlights */}
       <Group
         title="Highlights"

@@ -28,6 +28,8 @@ import {
 
 import { checkIntegration } from '../_lib/api-client';
 
+import { TextInput } from './ui';
+
 interface IntegrationsEditorProps {
   value: IntegrationsConfig;
   onChange: (next: IntegrationsConfig) => void;
@@ -140,12 +142,10 @@ function WeatherCard({
             />
           </Field>
           <Field label="City" hint="City name + optional country code, e.g. 'Phoenix, US'.">
-            <input
-              type="text"
+            <TextInput
               value={config.city}
               onChange={(e) => update({ city: e.target.value })}
               placeholder="e.g. Phoenix, US"
-              className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
             />
           </Field>
           <Field label="Units">
@@ -208,12 +208,12 @@ function ApiCard({
       subtitle="Base URL for client-side fetches (events, weather proxy, etc)."
     >
       <Field label="Base URL">
-        <input
+        <TextInput
           type="url"
           value={baseUrl}
           onChange={(e) => onChange(e.target.value)}
           placeholder="https://api.example.com"
-          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+          className="font-mono"
         />
       </Field>
       <TestRow
@@ -298,12 +298,11 @@ function AnalyticsCard({
       subtitle="Tracking ID for kiosk telemetry."
     >
       <Field label="Tracking ID" hint="GA4 (G-XXXXXXX) or Universal Analytics (UA-XXXXX-X).">
-        <input
-          type="text"
+        <TextInput
           value={gaId}
           onChange={(e) => onChange(e.target.value)}
           placeholder="G-XXXXXXX"
-          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+          className="font-mono"
         />
       </Field>
       <TestRow
@@ -359,12 +358,11 @@ function SatisfiCard({
         />
       </Field>
       <Field label="Hub ID" hint="Identifier of the chatbot hub for this kiosk.">
-        <input
-          type="text"
+        <TextInput
           value={config.hubId}
           onChange={(e) => update({ hubId: e.target.value })}
           placeholder="hub_abc123"
-          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+          className="font-mono"
         />
       </Field>
       <TestRow
@@ -420,21 +418,19 @@ function TavusCard({
         />
       </Field>
       <Field label="Replica ID" hint="The pre-trained avatar replica that drives the video.">
-        <input
-          type="text"
+        <TextInput
           value={config.replicaId}
           onChange={(e) => update({ replicaId: e.target.value })}
           placeholder="r1a2b3c4…"
-          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+          className="font-mono"
         />
       </Field>
       <Field label="Persona ID (optional)" hint="Persona config layered on the replica.">
-        <input
-          type="text"
+        <TextInput
           value={config.personaId}
           onChange={(e) => update({ personaId: e.target.value })}
           placeholder="p1a2b3c4…"
-          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+          className="font-mono"
         />
       </Field>
       <TestRow
@@ -490,12 +486,11 @@ function BandwangoCard({
         />
       </Field>
       <Field label="Partner ID" hint="Numeric or string identifier of the partner account.">
-        <input
-          type="text"
+        <TextInput
           value={config.partnerId}
           onChange={(e) => update({ partnerId: e.target.value })}
           placeholder="12345"
-          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+          className="font-mono"
         />
       </Field>
       <TestRow
@@ -551,12 +546,11 @@ function CrowdriffCard({
         />
       </Field>
       <Field label="Gallery ID" hint="ID of the gallery whose feed powers the wall.">
-        <input
-          type="text"
+        <TextInput
           value={config.galleryId}
           onChange={(e) => update({ galleryId: e.target.value })}
           placeholder="gallery-abc123"
-          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+          className="font-mono"
         />
       </Field>
       <TestRow
@@ -612,12 +606,11 @@ function ViatorCard({
         />
       </Field>
       <Field label="Partner ID" hint="Affiliate / partner identifier for attribution.">
-        <input
-          type="text"
+        <TextInput
           value={config.partnerId}
           onChange={(e) => update({ partnerId: e.target.value })}
           placeholder="P00012345"
-          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+          className="font-mono"
         />
       </Field>
       <TestRow

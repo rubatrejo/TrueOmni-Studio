@@ -33,6 +33,7 @@ import { upsertById } from './catalog/import-utils';
 import { ImportModal } from './catalog/ImportModal';
 import { ImportToast } from './catalog/ImportToast';
 import { EditorEmptyState } from './EditorEmptyState';
+import { Select, TextInput, Textarea } from './ui';
 
 interface AdsEditorProps {
   value: AdsModule;
@@ -367,27 +368,22 @@ function AdEditPanel({
 
       <div className="space-y-4">
         <Field label="ID" hint="Stable identifier (kebab-case). Used internally and to track dismissals.">
-          <input
-            type="text"
+          <TextInput
             value={ad.id}
             onChange={(e) => setField('id', e.target.value.trim().toLowerCase())}
             spellCheck={false}
-            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+            className="font-mono"
           />
         </Field>
 
         <Field label="Kind">
-          <select
-            value={ad.kind}
-            onChange={(e) => setField('kind', e.target.value as AdKind)}
-            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
-          >
+          <Select value={ad.kind} onChange={(e) => setField('kind', e.target.value as AdKind)}>
             {AD_KINDS.map((k) => (
               <option key={k} value={k}>
                 {k}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
 
         <ImageUrlField
@@ -398,41 +394,36 @@ function AdEditPanel({
         />
 
         <Field label="Alt text" hint="Description for accessibility. Shown to screen readers.">
-          <input
-            type="text"
-            value={ad.alt ?? ''}
-            onChange={(e) => onChange({ alt: e.target.value })}
-            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
-          />
+          <TextInput value={ad.alt ?? ''} onChange={(e) => onChange({ alt: e.target.value })} />
         </Field>
 
         <Field
           label="Routes"
           hint="One route per line. Use /home/* for prefix matching. Empty = never shown."
         >
-          <textarea
+          <Textarea
             value={routesText}
             onChange={(e) => setRoutes(e.target.value)}
             rows={Math.max(3, Math.min(8, ad.routes.length + 1))}
             spellCheck={false}
-            className="w-full resize-y rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[11.5px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+            mono
+            className="resize-y"
             placeholder="/home&#10;/home/restaurants/*"
           />
         </Field>
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Theme" hint="Controls the X close button color.">
-            <select
+            <Select
               value={ad.theme}
               onChange={(e) => setField('theme', e.target.value as Ad['theme'])}
-              className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
             >
               {AD_THEMES.map((t) => (
                 <option key={t} value={t}>
                   {t}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
           <Field label="Enabled" hint="Disable to hide without deleting.">
             <label className="flex h-[34px] items-center gap-2 rounded-md border border-zinc-200 bg-white px-2.5 dark:border-zinc-800 dark:bg-zinc-950">

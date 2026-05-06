@@ -57,6 +57,7 @@ export function GuestbookModule({
   module: mod,
   mapboxToken,
   clientFallbackCoords,
+  kioskSlug,
   startHeader,
   formHeader,
   mapHeader,
@@ -65,6 +66,8 @@ export function GuestbookModule({
   mapboxToken: string | undefined;
   /** Coord de fallback si el geocoding falla. */
   clientFallbackCoords?: { lat: number; lng: number };
+  /** Slug del kiosk activo — usado para persistir pins en `/api/guestbook/{slug}`. */
+  kioskSlug: string;
   startHeader: ReactNode;
   formHeader: ReactNode;
   mapHeader: ReactNode;
@@ -90,7 +93,7 @@ export function GuestbookModule({
   const [userAddress, setUserAddress] = useState<string>('');
   const [fallbackUsed, setFallbackUsed] = useState(false);
   const globeRef = useRef<GlobeHandle | null>(null);
-  const { pins: userPins, add: addUserPin } = useGuestbookUserPins();
+  const { pins: userPins, add: addUserPin } = useGuestbookUserPins(kioskSlug);
 
   // Pool de pins visibles: seedPins del config + pins que este usuario
   // dejó en sesión. Filtrados por proximidad al coord del user.

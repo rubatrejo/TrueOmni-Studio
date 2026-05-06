@@ -16,6 +16,7 @@ import { SocialWallModule } from '@/components/social-wall/social-wall-module';
 import { TicketsModule } from '@/components/tickets/tickets-module';
 import { TrailsModule } from '@/components/trails/trails-module';
 import { getAdsFromConfig } from '@/lib/ads';
+import { getClientSlug } from '@/lib/client-env';
 import { getConfig } from '@/lib/config';
 import { getMapItems } from '@/lib/map-aggregator';
 import { buildMapDetailLookup } from '@/lib/map-detail-lookup';
@@ -217,6 +218,7 @@ export default async function ModulePage({ params }: PageProps) {
           module={mod}
           mapboxToken={config.integraciones?.mapbox_token}
           clientFallbackCoords={config.client.coords}
+          kioskSlug={getClientSlug()}
           startHeader={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
           formHeader={
             <HomeHeader heroImage={null} showLanguage={false} height={180} gradientExtra={80} />

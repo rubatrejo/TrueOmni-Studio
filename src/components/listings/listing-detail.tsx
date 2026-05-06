@@ -561,6 +561,7 @@ function ActionRow({
   eventMeta?: EventMeta;
   secondaryCta?: SecondaryCta;
 }) {
+  const t = useTextos();
   // Orden de precedencia en el slot "segundo botón":
   //   1) listing.reserveUrl  → RESERVE NOW (OpenTable-ish)
   //   2) secondaryCta        → botón configurable (GET TICKETS)
@@ -635,7 +636,7 @@ function ActionRow({
           letterSpacing: '0.02em',
         }}
       >
-        WEBSITE
+        {t('listing_action_website') === 'listing_action_website' ? 'WEBSITE' : t('listing_action_website')}
       </a>
 
       {/* Segundo botón: RESERVE NOW o CTA configurable (GET TICKETS). */}
@@ -705,6 +706,8 @@ function SecondaryCtaButton({
 }
 
 function ReserveNowButton({ href }: { href: string }) {
+  const t = useTextos();
+  const label = t('listing_reserve_now') === 'listing_reserve_now' ? 'RESERVE NOW' : t('listing_reserve_now');
   return (
     <a
       href={href}
@@ -722,7 +725,7 @@ function ReserveNowButton({ href }: { href: string }) {
         paddingLeft: '17px',
         gap: '14px',
       }}
-      aria-label="Reservar en OpenTable"
+      aria-label={label}
     >
       {/* Logo OpenTable: 3 círculos en cascada #da3743 */}
       <svg width="38" height="16" viewBox="0 0 38 16" aria-hidden>
@@ -740,7 +743,7 @@ function ReserveNowButton({ href }: { href: string }) {
           fontWeight: 600,
         }}
       >
-        RESERVE NOW
+        {label}
       </span>
     </a>
   );
@@ -760,6 +763,11 @@ function SharingRow({
   onPhoneClick: () => void;
   favoritesKind: 'listing' | 'event' | 'trail';
 }) {
+  const t = useTextos();
+  const orFallback = (key: string, fallback: string) => {
+    const v = t(key);
+    return v === key ? fallback : v;
+  };
   // Llamamos los TRES hooks siempre (reglas de React hooks). Todos son stores
   // externos ligeros (useSyncExternalStore). Escogemos el que corresponde.
   const listingStore = useFavorites();
@@ -797,8 +805,8 @@ function SharingRow({
       <ShareCell
         left={0}
         width={298}
-        label="SEND TO EMAIL"
-        ariaLabel="Enviar al correo"
+        label={orFallback('share_send_email', 'SEND TO EMAIL')}
+        ariaLabel={orFallback('share_send_email_aria', 'Send to email')}
         icon={<EnvelopeIcon />}
         onClick={onEmailClick}
       />
@@ -807,8 +815,8 @@ function SharingRow({
       <ShareCell
         left={299}
         width={298}
-        label="SEND TO PHONE"
-        ariaLabel="Enviar al teléfono"
+        label={orFallback('share_send_phone', 'SEND TO PHONE')}
+        ariaLabel={orFallback('share_send_phone_aria', 'Send to phone')}
         icon={<PhoneIcon />}
         onClick={onPhoneClick}
       />
@@ -817,7 +825,11 @@ function SharingRow({
       <ShareCell
         left={597}
         width={300}
-        label={favorited ? 'ADDED TO FAVORITES' : 'ADD TO FAVORITES'}
+        label={
+          favorited
+            ? orFallback('share_added_favorites', 'ADDED TO FAVORITES')
+            : orFallback('share_add_favorites', 'ADD TO FAVORITES')
+        }
         ariaLabel={favorited ? 'Quitar de favoritos' : 'Añadir a favoritos'}
         ariaPressed={favorited}
         icon={<HeartIcon filled={favorited} />}
@@ -928,6 +940,11 @@ function MapSection({
   token: string | undefined;
   onGetDirections: () => void;
 }) {
+  const t = useTextos();
+  const directionsLabel =
+    t('listing_get_directions') === 'listing_get_directions'
+      ? 'GET DIRECTIONS'
+      : t('listing_get_directions');
   return (
     <>
       <div
@@ -973,7 +990,7 @@ function MapSection({
       {/* GET DIRECTIONS (icon + texto) */}
       <button
         type="button"
-        aria-label={`Obtener direcciones a ${listing.title}`}
+        aria-label={`${directionsLabel}: ${listing.title}`}
         onClick={onGetDirections}
         className="absolute flex items-center gap-3 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
         style={{
@@ -993,7 +1010,7 @@ function MapSection({
             letterSpacing: '0.02em',
           }}
         >
-          GET DIRECTIONS
+          {directionsLabel}
         </span>
       </button>
     </>

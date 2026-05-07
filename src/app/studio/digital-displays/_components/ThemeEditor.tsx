@@ -4,6 +4,7 @@ import {
   ChevronLeft,
   ExternalLink,
   History,
+  Languages,
   LayoutPanelTop,
   Monitor,
   Palette,
@@ -21,6 +22,7 @@ import { StudioPageHeader } from '../../_components/PageHeader';
 import { BrandingTab } from './tabs/BrandingTab';
 import { DisplaysTab } from './tabs/DisplaysTab';
 import { HeaderTab } from './tabs/HeaderTab';
+import { I18nTab } from './tabs/I18nTab';
 import { PublishTab } from './tabs/PublishTab';
 import { VersionsTab } from './tabs/VersionsTab';
 
@@ -44,7 +46,7 @@ export interface ThemeEditorProps {
   tokensCss: string;
 }
 
-type TabId = 'branding' | 'header' | 'displays' | 'versions' | 'publish';
+type TabId = 'branding' | 'header' | 'displays' | 'i18n' | 'versions' | 'publish';
 
 interface TabDef {
   id: TabId;
@@ -58,20 +60,9 @@ const TABS: readonly TabDef[] = [
   { id: 'branding', label: 'Branding', icon: Palette },
   { id: 'header', label: 'Header', icon: LayoutPanelTop },
   { id: 'displays', label: 'Displays', icon: Monitor },
-  {
-    id: 'versions',
-    label: 'Versions',
-    icon: History,
-    disabled: true,
-    comingSoon: 'DSS6',
-  },
-  {
-    id: 'publish',
-    label: 'Publish',
-    icon: Send,
-    disabled: true,
-    comingSoon: 'DSS7',
-  },
+  { id: 'i18n', label: 'i18n', icon: Languages },
+  { id: 'versions', label: 'Versions', icon: History },
+  { id: 'publish', label: 'Publish', icon: Send },
 ] as const;
 
 export function ThemeEditor({ client, displays, tokensCss }: ThemeEditorProps) {
@@ -192,6 +183,9 @@ export function ThemeEditor({ client, displays, tokensCss }: ThemeEditorProps) {
           {activeTab === 'header' ? <HeaderTab client={client} /> : null}
           {activeTab === 'displays' ? (
             <DisplaysTab clientSlug={client.slug} displays={displays} />
+          ) : null}
+          {activeTab === 'i18n' ? (
+            <I18nTab clientSlug={client.slug} defaultLocale={client.locale} />
           ) : null}
           {activeTab === 'versions' ? <VersionsTab /> : null}
           {activeTab === 'publish' ? <PublishTab /> : null}

@@ -75,7 +75,7 @@ aprobación visual entre ambos. Plan completo de diseño en
 - [x] **DSS5** — Module editors (6 forms) + overrides reactivos runtime (2026-05-07). Template catalog client-safe POJO. Slot configurator inline en playlist con chevron expand. 6 forms (Events/Social/VideoImage/Ads/News/Weather) compactos. `<SignagePlayer>` consume `useSignageBridgeStore` con shallow merge → push live se ve sin reload. AI suggest hooks deferidos a DSS5.5. Resumen en `.planning/DSS5-SUMMARY.md`.
 - [x] **DSS6** — Snapshots / Versions del display + restore (2026-05-07). Cada PUT crea snapshot del previo (FIFO cap 10). API endpoints GET list + POST restore. UI `<VersionsPanel>` collapsible con timestamp + restore button con confirm inline. Patrón git-like: restore crea snapshot del current pre-restore. Resumen en `.planning/DSS6-SUMMARY.md`.
 - [x] **DSS7** — Publish + JSON export/import + KV size advisor (2026-05-07). 4 endpoints API: publish (reusa github-publisher con autoMerge), export (`<a download>`), import (snapshot pre-import + Zod), size. UI `<PublishToolbar>` + `<KvSizeAdvisor>` (bar verde/amber/red). Solo `display.json` en publish; theme publish difere a DSS7.5. Resumen en `.planning/DSS7-SUMMARY.md`.
-- [ ] **DSS8** — Diagnostics + onboarding tour signage + i18n editor extension.
+- [x] **DSS8** — Diagnostics + i18n editor (2026-05-07). Página `/studio/digital-displays/diagnostics` con system info (clients/displays count, KV usage, GitHub config). i18n editor tab nuevo en theme editor (locale selector + keys editables + KV persistence). `loadSignageI18n` ahora KV-first. Onboarding tour deferido a DSS8.5. Resumen en `.planning/DSS8-SUMMARY.md`.
 - [ ] **DSS9** — Smoke E2E producción + doc paso a paso.
 
 ### Verificación

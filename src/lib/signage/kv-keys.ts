@@ -24,3 +24,6 @@ export const kSignageSnapList = (client: string, display: string): string =>
 export const kSignageEvents = (client: string): string => `signage:events:${client}`;
 export const kSignageSocial = (client: string): string => `signage:social:${client}`;
 export const kSignageNews = (client: string): string => `signage:news:${client}`;
+
+export const kSignageI18n = (client: string, locale: string): string =>
+  `signage:i18n:${client}:${locale}`;

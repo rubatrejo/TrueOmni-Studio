@@ -7,6 +7,7 @@ import {
   kSignageClientList,
   kSignageDisplay,
   kSignageDisplayRaw,
+  kSignageI18n,
   kSignageSnap,
   kSignageSnapList,
 } from './kv-keys';
@@ -139,6 +140,24 @@ export const kvSignageSnapshot = {
     const ids = await kvSignageSnapshot.listIds(client, display);
     const nextIds = ids.filter((i) => i !== id);
     await kv.set(kSignageSnapList(client, display), nextIds);
+  },
+};
+
+export const kvSignageI18n = {
+  async get(client: string, locale: string): Promise<Record<string, string> | null> {
+    const raw = await kv.get<unknown>(kSignageI18n(client, locale));
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+    return raw as Record<string, string>;
+  },
+  async set(
+    client: string,
+    locale: string,
+    bag: Record<string, string>,
+  ): Promise<void> {
+    await kv.set(kSignageI18n(client, locale), bag);
+  },
+  async delete(client: string, locale: string): Promise<void> {
+    await kv.del(kSignageI18n(client, locale));
   },
 };
 

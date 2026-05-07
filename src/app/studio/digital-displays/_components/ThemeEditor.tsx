@@ -7,6 +7,7 @@ import type { SignageClientResolved } from '@/lib/signage/schema';
 
 import { useDebouncedAutosave } from '../_lib/save-display';
 import { saveTheme } from '../_lib/save-theme';
+import { SignageEditorProvider } from '../_lib/signage-editor-context';
 import { useThemeEditStore } from '../_lib/theme-edit-store';
 import { useSignageBridge } from '../_lib/use-signage-bridge';
 
@@ -101,6 +102,11 @@ export function ThemeEditor({ client, displays, tokensCss }: ThemeEditorProps) {
     const result = await saveTheme(current);
     if (result.ok) {
       markSaved();
+      // Cambios estructurales del header (position, height, layout, visibility,
+      // clockFormat, weatherUnits, forecastDays) requieren re-render server.
+      // Los token overrides ya se aplican live via SignageBridgeStyleApplier;
+      // refrescar el iframe los reaplica desde KV sin pérdida visual perceptible.
+      setPreviewKey((k) => k + 1);
     } else {
       setError(result.error ?? 'Save failed');
     }
@@ -138,6 +144,7 @@ export function ThemeEditor({ client, displays, tokensCss }: ThemeEditorProps) {
   }, [client, init]);
 
   return (
+    <SignageEditorProvider clientSlug={client.slug}>
     <div className="studio-shell flex h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
       <SignageTopBar
         slug={client.slug}
@@ -174,7 +181,9 @@ export function ThemeEditor({ client, displays, tokensCss }: ThemeEditorProps) {
                 {activeTab === 'i18n' ? (
                   <I18nTab clientSlug={client.slug} defaultLocale={client.locale} />
                 ) : null}
-                {activeTab === 'versions' ? <VersionsTab /> : null}
+                {activeTab === 'versions' ? (
+                  <VersionsTab clientSlug={client.slug} />
+                ) : null}
                 {activeTab === 'publish' ? (
                   <PublishTab clientSlug={client.slug} />
                 ) : null}
@@ -213,6 +222,7 @@ export function ThemeEditor({ client, displays, tokensCss }: ThemeEditorProps) {
               : ''}
       </p>
     </div>
+    </SignageEditorProvider>
   );
 }
 

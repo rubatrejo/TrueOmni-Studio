@@ -10,6 +10,8 @@ import {
   kSignageI18n,
   kSignageSnap,
   kSignageSnapList,
+  kSignageThemeSnap,
+  kSignageThemeSnapList,
 } from './kv-keys';
 import {
   SignageClientFileSchema,
@@ -140,6 +142,82 @@ export const kvSignageSnapshot = {
     const ids = await kvSignageSnapshot.listIds(client, display);
     const nextIds = ids.filter((i) => i !== id);
     await kv.set(kSignageSnapList(client, display), nextIds);
+  },
+};
+
+/**
+ * `kvSignageThemeSnapshot` — snapshots theme-level (DSS-fix Versions).
+ *
+ * Cada PUT del client.json crea snapshot del previo. FIFO cap 10. UI lo
+ * lista en el tab Versions con timestamp + restore. Restore crea snapshot
+ * del current pre-restore (patrón git-like, mismo que display snapshots).
+ */
+export interface SignageThemeSnapshotEntry {
+  id: string;
+  meta: SignageSnapshotMeta;
+  data: SignageClientFile;
+}
+
+interface StoredThemeSnapshot {
+  meta: SignageSnapshotMeta;
+  data: unknown;
+}
+
+export const kvSignageThemeSnapshot = {
+  async listIds(client: string): Promise<string[]> {
+    const raw = await kv.get<string[]>(kSignageThemeSnapList(client));
+    return Array.isArray(raw) ? raw : [];
+  },
+
+  async listMeta(
+    client: string,
+  ): Promise<{ id: string; meta: SignageSnapshotMeta }[]> {
+    const ids = await kvSignageThemeSnapshot.listIds(client);
+    const out: { id: string; meta: SignageSnapshotMeta }[] = [];
+    for (const id of ids) {
+      const stored = await kv.get<StoredThemeSnapshot>(
+        kSignageThemeSnap(client, id),
+      );
+      if (stored && stored.meta) out.push({ id, meta: stored.meta });
+    }
+    return out;
+  },
+
+  async get(client: string, id: string): Promise<SignageThemeSnapshotEntry | null> {
+    const stored = await kv.get<StoredThemeSnapshot>(kSignageThemeSnap(client, id));
+    if (!stored) return null;
+    const parsed = SignageClientFileSchema.safeParse(stored.data);
+    if (!parsed.success) return null;
+    return { id, meta: stored.meta, data: parsed.data };
+  },
+
+  async create(
+    client: string,
+    data: SignageClientFile,
+    meta: Partial<SignageSnapshotMeta> = {},
+  ): Promise<string> {
+    const ts = meta.ts ?? Date.now();
+    const id = ts.toString();
+    const stored: StoredThemeSnapshot = {
+      meta: { ts, savedBy: meta.savedBy, note: meta.note },
+      data,
+    };
+    await kv.set(kSignageThemeSnap(client, id), stored);
+    const ids = await kvSignageThemeSnapshot.listIds(client);
+    const nextIds = [id, ...ids.filter((i) => i !== id)].slice(0, SNAPSHOT_CAP);
+    const trimmed = ids.filter((i) => !nextIds.includes(i));
+    await kv.set(kSignageThemeSnapList(client), nextIds);
+    for (const trim of trimmed) {
+      await kv.del(kSignageThemeSnap(client, trim));
+    }
+    return id;
+  },
+
+  async delete(client: string, id: string): Promise<void> {
+    await kv.del(kSignageThemeSnap(client, id));
+    const ids = await kvSignageThemeSnapshot.listIds(client);
+    const nextIds = ids.filter((i) => i !== id);
+    await kv.set(kSignageThemeSnapList(client), nextIds);
   },
 };
 

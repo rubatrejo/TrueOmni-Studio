@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { kvSignageClient } from '@/lib/signage/kv-store';
+import { kvSignageClient, kvSignageThemeSnapshot } from '@/lib/signage/kv-store';
 import { SignageClientFileSchema } from '@/lib/signage/schema';
 
 export const runtime = 'nodejs';
@@ -59,6 +59,12 @@ export async function PUT(req: NextRequest, ctx: RouteContext) {
   }
 
   try {
+    // Snapshot del previo antes de sobrescribir (patrón git-like, mismo que
+    // display snapshots). FIFO cap 10 — el más viejo se purga.
+    const previous = await kvSignageClient.get(clientSlug);
+    if (previous) {
+      await kvSignageThemeSnapshot.create(clientSlug, previous);
+    }
     await kvSignageClient.set(clientSlug, parsed.data);
     await kvSignageClient.addToList(clientSlug);
   } catch (e) {

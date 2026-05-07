@@ -7,6 +7,7 @@ import { HslColorPicker, type HslColor } from 'react-colorful';
 import type { SignageClientResolved } from '@/lib/signage/schema';
 
 import { useThemeEditStore } from '../../_lib/theme-edit-store';
+import { SignageMediaField } from '../display/modules/SignageMediaField';
 
 /**
  * Tab `Branding` editable.
@@ -52,6 +53,7 @@ export function BrandingTab({ client, tokensCss }: BrandingTabProps) {
   const draft = useThemeEditStore((s) => s.draft);
   const setBrandingToken = useThemeEditStore((s) => s.setBrandingToken);
   const removeBrandingToken = useThemeEditStore((s) => s.removeBrandingToken);
+  const updateBranding = useThemeEditStore((s) => s.updateBranding);
 
   const baseTokensFromCss = useMemo(() => parseTokensCss(tokensCss), [tokensCss]);
   const draftTokens = draft?.branding.tokens ?? client.branding.tokens ?? {};
@@ -106,57 +108,68 @@ export function BrandingTab({ client, tokensCss }: BrandingTabProps) {
         </div>
       </section>
 
-      {/* Logos + fonts (read-only por ahora) */}
-      <section className="grid grid-cols-1 gap-6">
-        <Section title="Logos" subtitle="Asset paths relative to the theme folder">
-          <DataRow
-            label="Default"
-            value={
-              <code className="font-mono text-[12px]">
-                {draft?.branding.logos.default ?? client.branding.logos.default}
-              </code>
+      {/* Logos editables + fonts (read-only por ahora) */}
+      <Section
+        title="Logos"
+        subtitle="Sube SVG o PNG (≤ 5 MB). Versión dark se muestra cuando el header tiene fondo claro."
+      >
+        <SignageMediaField
+          label="Default logo"
+          hint="Logo principal del header (SVG/PNG). Path o Blob URL."
+          aspect="3/1"
+          kind="image"
+          value={draft?.branding.logos.default ?? client.branding.logos.default}
+          onChange={(next) => {
+            const current = draft?.branding.logos ?? client.branding.logos;
+            updateBranding({
+              logos: { ...current, default: next?.src ?? '' },
+            });
+          }}
+        />
+        <SignageMediaField
+          label="Dark logo (optional)"
+          hint="Variante para fondos claros. Cae al default si está vacío."
+          aspect="3/1"
+          kind="image"
+          value={draft?.branding.logos.dark ?? client.branding.logos.dark}
+          onChange={(next) => {
+            const current = draft?.branding.logos ?? client.branding.logos;
+            const nextLogos: { default: string; dark?: string } = {
+              ...current,
+              default: current.default,
+            };
+            if (next?.src) {
+              nextLogos.dark = next.src;
+            } else {
+              delete nextLogos.dark;
             }
-          />
-          <DataRow
-            label="Dark"
-            value={
-              draft?.branding.logos.dark ?? client.branding.logos.dark ? (
-                <code className="font-mono text-[12px]">
-                  {draft?.branding.logos.dark ?? client.branding.logos.dark}
-                </code>
-              ) : (
-                <EmptyHint>not configured</EmptyHint>
-              )
-            }
-          />
-          <p className="pt-2 text-[11px] italic text-zinc-400">
-            Upload visual aterriza con asset endpoint (Vercel Blob).
-          </p>
-        </Section>
+            updateBranding({ logos: nextLogos });
+          }}
+        />
+      </Section>
 
-        <Section title="Fonts">
-          <DataRow
-            label="Default"
-            value={
+      <Section title="Fonts" subtitle="Editor de fonts y custom upload — DSS-fix6.">
+        <DataRow
+          label="Default"
+          value={
+            <code className="font-mono text-[12px]">
+              {draft?.branding.fonts.default ?? client.branding.fonts.default}
+            </code>
+          }
+        />
+        <DataRow
+          label="Display"
+          value={
+            draft?.branding.fonts.display ?? client.branding.fonts.display ? (
               <code className="font-mono text-[12px]">
-                {draft?.branding.fonts.default ?? client.branding.fonts.default}
+                {draft?.branding.fonts.display ?? client.branding.fonts.display}
               </code>
-            }
-          />
-          <DataRow
-            label="Display"
-            value={
-              draft?.branding.fonts.display ?? client.branding.fonts.display ? (
-                <code className="font-mono text-[12px]">
-                  {draft?.branding.fonts.display ?? client.branding.fonts.display}
-                </code>
-              ) : (
-                <EmptyHint>not configured</EmptyHint>
-              )
-            }
-          />
-        </Section>
-      </section>
+            ) : (
+              <EmptyHint>not configured</EmptyHint>
+            )
+          }
+        />
+      </Section>
 
       {/* Otros tokens overrides */}
       <Section

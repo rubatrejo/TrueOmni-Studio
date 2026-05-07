@@ -21,6 +21,12 @@ export const kSignageSnap = (client: string, display: string, id: string): strin
 export const kSignageSnapList = (client: string, display: string): string =>
   `signage:cfgSnapList:${client}:${display}`;
 
+export const kSignageThemeSnap = (client: string, id: string): string =>
+  `signage:themeSnap:${client}:${id}`;
+
+export const kSignageThemeSnapList = (client: string): string =>
+  `signage:themeSnapList:${client}`;
+
 export const kSignageEvents = (client: string): string => `signage:events:${client}`;
 export const kSignageSocial = (client: string): string => `signage:social:${client}`;
 export const kSignageNews = (client: string): string => `signage:news:${client}`;

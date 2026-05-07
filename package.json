@@ -47,6 +47,7 @@
     "pdfjs-dist": "3.11.174",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
+    "react-colorful": "^5.7.0",
     "react-dom": "^19.0.0",
     "server-only": "^0.0.1",
     "tailwind-merge": "^3.5.0",

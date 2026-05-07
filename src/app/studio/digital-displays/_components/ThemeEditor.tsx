@@ -1,24 +1,21 @@
 'use client';
 
-import {
-  ChevronLeft,
-  ExternalLink,
-  History,
-  Languages,
-  LayoutPanelTop,
-  Monitor,
-  Palette,
-  Send,
-  type LucideIcon,
-} from 'lucide-react';
-import Link from 'next/link';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import type { SignageDisplayListEntry } from '@/lib/signage/config';
 import type { SignageClientResolved } from '@/lib/signage/schema';
 
-import { StudioPageHeader } from '../../_components/PageHeader';
+import { useDebouncedAutosave } from '../_lib/save-display';
+import { saveTheme } from '../_lib/save-theme';
+import { useThemeEditStore } from '../_lib/theme-edit-store';
+import { useSignageBridge } from '../_lib/use-signage-bridge';
 
+import { SignagePreviewPanel } from './shell/SignagePreviewPanel';
+import {
+  SignageSidebarTabs,
+  type SignageSectionKey,
+} from './shell/SignageSidebarTabs';
+import { SignageTopBar } from './shell/SignageTopBar';
 import { BrandingTab } from './tabs/BrandingTab';
 import { DisplaysTab } from './tabs/DisplaysTab';
 import { HeaderTab } from './tabs/HeaderTab';
@@ -27,22 +24,18 @@ import { PublishTab } from './tabs/PublishTab';
 import { VersionsTab } from './tabs/VersionsTab';
 
 /**
- * `<ThemeEditor>` — Editor del signage theme con tabs (DSS1).
+ * `<ThemeEditor>` — Editor del signage theme con shell pattern.
  *
- * Client component que orquesta:
- *  - `<StudioPageHeader>` del shell.
- *  - Breadcrumb de vuelta al dashboard.
- *  - Hero con name + slug + botón Preview (abre primer display en nueva tab).
- *  - Sidebar vertical de tabs (Branding · Header · Displays · Versions · Publish).
- *  - Content area que cambia según el tab activo.
+ * Mismo lenguaje visual que el editor del kiosk (`Shell.tsx`):
+ *  - `<SignageTopBar>` arriba (h-14, sticky).
+ *  - 3 paneles: `<SignageSidebarTabs>` | EditorPanel | `<SignagePreviewPanel>`.
+ *  - `<SignageSaveBar>` al pie del editor.
+ *  - `studio-shell` class activa el lock de scroll global del Studio.
  *
- * **Estado de los tabs (post-DSS7.5):**
- *  - i18n y Publish: editables.
- *  - Branding, Header, Displays, Versions: aún read-only o placeholder.
- *    Branding/Header se vuelven editables cuando aterrice el editor visual
- *    (paleta + tokens). Displays redirige al display editor dedicado.
- *    Versions del theme depende de snapshots theme-level (DSS6 solo cubrió
- *    display-level).
+ * El bridge `useSignageBridge` sigue al iframe del primer display y empuja
+ * `pushClient(...)` con debounce 120ms en cada cambio del draft. El runtime
+ * tiene `<SignageBridgeStyleApplier>` que aplica los token overrides al
+ * `:root` para preview live sin reload.
  */
 export interface ThemeEditorProps {
   client: SignageClientResolved;
@@ -50,160 +43,260 @@ export interface ThemeEditorProps {
   tokensCss: string;
 }
 
-type TabId = 'branding' | 'header' | 'displays' | 'i18n' | 'versions' | 'publish';
-
-interface TabDef {
-  id: TabId;
-  label: string;
-  icon: LucideIcon;
-  disabled?: boolean;
-  comingSoon?: string;
-}
-
-const TABS: readonly TabDef[] = [
-  { id: 'branding', label: 'Branding', icon: Palette },
-  { id: 'header', label: 'Header', icon: LayoutPanelTop },
-  { id: 'displays', label: 'Displays', icon: Monitor },
-  { id: 'i18n', label: 'i18n', icon: Languages },
-  { id: 'versions', label: 'Versions', icon: History },
-  { id: 'publish', label: 'Publish', icon: Send },
-] as const;
-
 export function ThemeEditor({ client, displays, tokensCss }: ThemeEditorProps) {
-  const [activeTab, setActiveTab] = useState<TabId>('branding');
+  const [activeTab, setActiveTab] = useState<SignageSectionKey>('branding');
+  const [previewKey, setPreviewKey] = useState(0);
   const firstDisplay = displays[0];
   const previewHref = firstDisplay
     ? `/signage/${client.slug}/${firstDisplay.slug}`
     : null;
 
+  const bridge = useSignageBridge();
+
+  const init = useThemeEditStore((s) => s.init);
+  const draft = useThemeEditStore((s) => s.draft);
+  const dirty = useThemeEditStore((s) => s.dirty);
+  const saving = useThemeEditStore((s) => s.saving);
+  const lastSavedAt = useThemeEditStore((s) => s.lastSavedAt);
+  const error = useThemeEditStore((s) => s.error);
+  const markSaving = useThemeEditStore((s) => s.markSaving);
+  const markSaved = useThemeEditStore((s) => s.markSaved);
+  const setError = useThemeEditStore((s) => s.setError);
+
+  // Init draft con el client recibido del server (file shape, sin events/social/news).
+  useEffect(() => {
+    init({
+      slug: client.slug,
+      name: client.name,
+      locale: client.locale,
+      timezone: client.timezone,
+      location: client.location,
+      website: client.website,
+      branding: client.branding,
+      header: client.header,
+      displays: client.displays,
+    });
+    return () => {
+      useThemeEditStore.getState().reset();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client.slug]);
+
+  // Push live al iframe en cada cambio del draft (debounce 120ms en hook).
+  useEffect(() => {
+    if (!draft) return;
+    bridge.pushClient({
+      branding: draft.branding,
+      header: draft.header,
+      name: draft.name,
+      website: draft.website,
+    });
+  }, [draft, bridge]);
+
+  // Autosave 1s después del último cambio.
+  const onAutosave = useCallback(async () => {
+    const current = useThemeEditStore.getState().draft;
+    if (!current) return;
+    markSaving(true);
+    const result = await saveTheme(current);
+    if (result.ok) {
+      markSaved();
+    } else {
+      setError(result.error ?? 'Save failed');
+    }
+  }, [markSaving, markSaved, setError]);
+
+  useDebouncedAutosave(draft, dirty, onAutosave);
+
+  const saveState: 'idle' | 'saving' | 'saved' | 'error' = error
+    ? 'error'
+    : saving
+      ? 'saving'
+      : dirty
+        ? 'idle'
+        : lastSavedAt
+          ? 'saved'
+          : 'idle';
+
+  const handleSave = useCallback(() => {
+    void onAutosave();
+  }, [onAutosave]);
+
+  const handleDiscard = useCallback(() => {
+    init({
+      slug: client.slug,
+      name: client.name,
+      locale: client.locale,
+      timezone: client.timezone,
+      location: client.location,
+      website: client.website,
+      branding: client.branding,
+      header: client.header,
+      displays: client.displays,
+    });
+    setPreviewKey((k) => k + 1);
+  }, [client, init]);
+
   return (
-    <main className="mx-auto flex min-h-screen max-w-[1280px] flex-col px-4 pb-24 pt-12 sm:px-8">
-      <StudioPageHeader />
+    <div className="studio-shell flex h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+      <SignageTopBar
+        slug={client.slug}
+        nombre={client.name}
+        saveState={saveState}
+        isDirty={dirty}
+        previewHref={previewHref}
+        onPublish={() => setActiveTab('publish')}
+      />
 
-      {/* Breadcrumb */}
-      <Link
-        href="/studio/digital-displays"
-        className="mb-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-zinc-500 transition hover:text-zinc-800 dark:text-zinc-500 dark:hover:text-zinc-200"
-      >
-        <ChevronLeft className="h-4 w-4" strokeWidth={2} />
-        All signage themes
-      </Link>
+      <div className="flex flex-1 overflow-hidden">
+        <SignageSidebarTabs
+          activeKey={activeTab}
+          onSelect={setActiveTab}
+          bridgeStatus={bridge.bridgeStatus}
+          onReloadPreview={() => setPreviewKey((k) => k + 1)}
+        />
 
-      {/* Hero */}
-      <section className="mb-10 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="mb-2 text-sm font-medium uppercase tracking-[0.18em] text-zinc-500">
-            Signage theme
-          </p>
-          <h1 className="font-display text-3xl font-bold leading-[1.1] tracking-tight text-zinc-900 sm:text-4xl dark:text-white">
-            {client.name}
-          </h1>
-          <p className="mt-2 flex items-center gap-2 text-sm text-zinc-500">
-            <span className="rounded bg-zinc-100 px-2 py-0.5 font-mono text-[12px] text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
-              {client.slug}
-            </span>
-            <span className="text-zinc-400 dark:text-zinc-600">·</span>
-            <span>
-              {displays.length} display{displays.length === 1 ? '' : 's'}
-            </span>
-            <span className="text-zinc-400 dark:text-zinc-600">·</span>
-            <span>
-              {client.locale.toUpperCase()} · {client.timezone}
-            </span>
-          </p>
-        </div>
-        {previewHref ? (
-          <a
-            href={previewHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/80"
-          >
-            <ExternalLink className="h-4 w-4" strokeWidth={1.75} />
-            Preview {firstDisplay?.slug}
-          </a>
-        ) : null}
-      </section>
-
-      {/* Estado de tabs */}
-      <section className="mb-8 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-[13px] leading-relaxed text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
-        <p className="font-semibold">Editor parcial</p>
-        <p className="mt-1 text-amber-800 dark:text-amber-300/90">
-          <span className="font-medium">i18n</span> y{' '}
-          <span className="font-medium">Publish</span> ya son editables.{' '}
-          <span className="font-medium">Branding</span> y{' '}
-          <span className="font-medium">Header</span> siguen read-only hasta que
-          aterrice el editor visual de paleta. La playlist y los módulos se
-          editan desde el display editor dedicado (tab{' '}
-          <span className="font-medium">Displays</span>).
-        </p>
-      </section>
-
-      {/* Sidebar + content */}
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-[220px_1fr]">
-        <nav
-          aria-label="Theme editor sections"
-          className="flex flex-row gap-1.5 overflow-x-auto rounded-xl border border-zinc-200 bg-white p-2 lg:flex-col lg:overflow-x-visible dark:border-zinc-800 dark:bg-zinc-950"
-        >
-          {TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            const baseClass =
-              'group flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] font-medium transition';
-            const activeClass = isActive
-              ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-900 dark:text-white'
-              : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900/60 dark:hover:text-zinc-100';
-            const disabledClass =
-              'cursor-not-allowed text-zinc-400 dark:text-zinc-600';
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                disabled={tab.disabled}
-                title={tab.comingSoon ? `Coming in ${tab.comingSoon}` : undefined}
-                onClick={() => !tab.disabled && setActiveTab(tab.id)}
-                className={`${baseClass} ${
-                  tab.disabled ? disabledClass : activeClass
-                } whitespace-nowrap`}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                <Icon
-                  className={`h-4 w-4 shrink-0 ${
-                    isActive ? 'text-zinc-900 dark:text-white' : 'text-zinc-400'
-                  }`}
-                  strokeWidth={1.75}
-                />
-                <span className="flex-1">{tab.label}</span>
-                {tab.comingSoon ? (
-                  <span className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-[10px] text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500">
-                    {tab.comingSoon}
-                  </span>
+        <main className="flex flex-1 overflow-hidden">
+          {/* Editor panel — 400-480px en lg+ */}
+          <div className="flex w-full shrink-0 flex-col overflow-hidden border-r border-zinc-200 dark:border-zinc-900 lg:w-[400px] xl:w-[480px]">
+            <div
+              key={activeTab}
+              className="studio-tab-fade flex min-h-0 flex-1 flex-col overflow-y-auto"
+            >
+              <div className="flex flex-1 flex-col gap-6 px-6 py-6">
+                {activeTab === 'branding' ? (
+                  <BrandingTab client={client} tokensCss={tokensCss} />
                 ) : null}
-              </button>
-            );
-          })}
-        </nav>
+                {activeTab === 'header' ? <HeaderTab client={client} /> : null}
+                {activeTab === 'displays' ? (
+                  <DisplaysTab clientSlug={client.slug} displays={displays} />
+                ) : null}
+                {activeTab === 'i18n' ? (
+                  <I18nTab clientSlug={client.slug} defaultLocale={client.locale} />
+                ) : null}
+                {activeTab === 'versions' ? <VersionsTab /> : null}
+                {activeTab === 'publish' ? (
+                  <PublishTab clientSlug={client.slug} />
+                ) : null}
+              </div>
+            </div>
+            <SignageSaveBar
+              saveState={saveState}
+              isDirty={dirty}
+              onSave={handleSave}
+              onDiscard={handleDiscard}
+            />
+          </div>
 
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-          {activeTab === 'branding' ? (
-            <BrandingTab client={client} tokensCss={tokensCss} />
-          ) : null}
-          {activeTab === 'header' ? <HeaderTab client={client} /> : null}
-          {activeTab === 'displays' ? (
-            <DisplaysTab clientSlug={client.slug} displays={displays} />
-          ) : null}
-          {activeTab === 'i18n' ? (
-            <I18nTab clientSlug={client.slug} defaultLocale={client.locale} />
-          ) : null}
-          {activeTab === 'versions' ? <VersionsTab /> : null}
-          {activeTab === 'publish' ? <PublishTab clientSlug={client.slug} /> : null}
-        </div>
-      </section>
+          {/* Preview — flex-1, ocupa el resto del viewport */}
+          <div className="relative flex w-full flex-1 items-center justify-center overflow-hidden">
+            <SignagePreviewPanel
+              clientSlug={client.slug}
+              displaySlug={firstDisplay?.slug ?? null}
+              displayName={firstDisplay?.name ?? null}
+              reloadKey={previewKey}
+              iframeRef={bridge.iframeRef}
+              onIframeLoad={bridge.onIframeLoad}
+              onReload={() => setPreviewKey((k) => k + 1)}
+            />
+          </div>
+        </main>
+      </div>
 
-      <footer className="mt-24 flex items-center justify-between border-t border-zinc-200 pt-6 text-xs text-zinc-500 dark:border-zinc-900 dark:text-zinc-600">
-        <span>© 2026 TrueOmni · Digital Displays · Studio v0.1</span>
-        <span>Local · main</span>
-      </footer>
-    </main>
+      <p className="sr-only" aria-live="polite">
+        {saveState === 'saving'
+          ? 'Saving changes'
+          : saveState === 'saved' && !dirty
+            ? 'All changes saved'
+            : dirty
+              ? 'You have unsaved changes'
+              : ''}
+      </p>
+    </div>
+  );
+}
+
+function SignageSaveBar({
+  saveState,
+  isDirty,
+  onSave,
+  onDiscard,
+}: {
+  saveState: 'idle' | 'saving' | 'saved' | 'error';
+  isDirty: boolean;
+  onSave: () => void;
+  onDiscard: () => void;
+}) {
+  return (
+    <div className="flex h-12 shrink-0 items-center justify-between border-t border-zinc-200 bg-white px-4 dark:border-zinc-900 dark:bg-zinc-950">
+      <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={onDiscard}
+          disabled={!isDirty}
+          className="grid h-8 w-8 place-items-center rounded-md text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 disabled:opacity-40 disabled:hover:bg-transparent dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+          aria-label="Discard changes"
+          title="Discard unsaved changes"
+        >
+          <DiscardGlyph />
+        </button>
+        <span className="ml-2 text-[11px] text-zinc-400 dark:text-zinc-600">
+          {isDirty ? 'Unsaved changes' : 'No pending changes'}
+        </span>
+      </div>
+
+      <button
+        type="button"
+        onClick={onSave}
+        disabled={saveState === 'saving' || !isDirty}
+        className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-50 disabled:hover:bg-zinc-900 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 dark:disabled:hover:bg-white"
+      >
+        <SaveGlyph />
+        {saveState === 'saving'
+          ? 'Saving…'
+          : saveState === 'saved' && !isDirty
+            ? 'Saved'
+            : 'Save'}
+      </button>
+    </div>
+  );
+}
+
+function SaveGlyph() {
+  return (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+      <polyline points="17 21 17 13 7 13 7 21" />
+      <polyline points="7 3 7 8 15 8" />
+    </svg>
+  );
+}
+
+function DiscardGlyph() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M3 7v6h6" />
+      <path d="M3 13a9 9 0 1 0 3-7.7L3 8" />
+    </svg>
   );
 }

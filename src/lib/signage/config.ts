@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
 import { cache } from 'react';
@@ -136,6 +136,83 @@ export const loadSignageDisplay = cache(
  * <style> en el server component del runtime para aplicar la paleta del cliente.
  * Fallback a default si no existe el archivo del cliente.
  */
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Listings (DSS0+) — usados por el Studio para el clients dashboard         */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export interface SignageClientListEntry {
+  slug: string;
+  name: string;
+  displaysCount: number;
+}
+
+export interface SignageDisplayListEntry {
+  slug: string;
+  name: string;
+  slidesCount: number;
+}
+
+/** Lista clients signage del fs (excluyendo `_template`). Solo lee `client.json`
+ *  para mantenerlo barato; no carga events/social/news. */
+export const listSignageClients = cache(async (): Promise<SignageClientListEntry[]> => {
+  const root = SIGNAGE_ROOT();
+  let entries: string[];
+  try {
+    entries = await readdir(root);
+  } catch {
+    return [];
+  }
+  const slugs = entries.filter((e) => !e.startsWith('_') && !e.startsWith('.'));
+  const out: SignageClientListEntry[] = [];
+  for (const slug of slugs) {
+    try {
+      const clientJsonPath = path.join(root, slug, 'client.json');
+      const raw = await readJson(clientJsonPath);
+      const parsed = SignageClientFileSchema.parse(raw);
+      out.push({
+        slug: parsed.slug,
+        name: parsed.name,
+        displaysCount: parsed.displays.length,
+      });
+    } catch {
+      // Skip clients inválidos (sin client.json o con shape rota).
+    }
+  }
+  return out.sort((a, b) => a.name.localeCompare(b.name));
+});
+
+/** Lista displays de un cliente signage (excluyendo `_template`). Lee
+ *  `display.json` de cada uno para mostrar slidesCount. */
+export const listSignageDisplays = cache(
+  async (clientSlug: string): Promise<SignageDisplayListEntry[]> => {
+    const root = SIGNAGE_ROOT();
+    const displaysDir = path.join(root, clientSlug, 'displays');
+    let entries: string[];
+    try {
+      entries = await readdir(displaysDir);
+    } catch {
+      return [];
+    }
+    const slugs = entries.filter((e) => !e.startsWith('_') && !e.startsWith('.'));
+    const out: SignageDisplayListEntry[] = [];
+    for (const slug of slugs) {
+      try {
+        const displayJsonPath = path.join(displaysDir, slug, 'display.json');
+        const raw = await readJson(displayJsonPath);
+        const parsed = SignageDisplayConfigSchema.parse(raw);
+        out.push({
+          slug: parsed.slug,
+          name: parsed.name,
+          slidesCount: parsed.playlist.length,
+        });
+      } catch {
+        // Skip displays inválidos.
+      }
+    }
+    return out.sort((a, b) => a.name.localeCompare(b.name));
+  },
+);
+
 export const loadSignageTokensCss = cache(async (slug: string): Promise<string> => {
   const root = SIGNAGE_ROOT();
   const clientPath = path.join(root, slug, 'tokens.css');

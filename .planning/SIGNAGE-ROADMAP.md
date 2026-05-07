@@ -67,7 +67,7 @@ aprobación visual entre ambos. Plan completo de diseño en
 
 ### Sub-fases
 
-- [ ] **DSS0** — Header dropdown (Kiosks ↔ Digital Displays) + rutas `/studio/displays/...` + clients dashboard + KV namespace `signage:*`.
+- [x] **DSS0** — Bootstrap Signage Studio (2026-05-07). Dropdown `digital-displays` activado como `live`. Página única `/studio/digital-displays` con clients dashboard fs-only (sin sub-URLs por decisión UX: cada theme se gestiona desde el dashboard, click → preview del primer display). Cards visualmente idénticas al ClientCard del kiosk (rounded-2xl + hero h-40 + body p-5). Layout dedicado inyecta tokens signage scoped. KV namespace `signage:*` (`kv-store.ts`) preparado pero no cableado runtime — DSS3 lo activa. Resumen en `.planning/DSS0-SUMMARY.md`.
 - [ ] **DSS1** — Client view tabs (Branding · Header · Displays · Versions · Publish).
 - [ ] **DSS2** — Display editor (sidebar + preview iframe).
 - [ ] **DSS3** — Bridge `signage:*` events live preview.

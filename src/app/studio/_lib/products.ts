@@ -89,14 +89,7 @@ export const STUDIO_PRODUCTS: readonly StudioProduct[] = [
     label: 'Digital Displays',
     href: '/studio/digital-displays',
     icon: Tv,
-    status: 'soon',
-    comingSoonCopy:
-      'Run scheduled content loops on lobby TVs, conference room screens and digital signage — same brand tokens, made for ambient playback.',
-    comingSoonFeatures: [
-      'Playlist editor with timed slides, video loops and live data tickers',
-      'Day-parting: show different content by hour, day of the week or special events',
-      'Push to any HDMI display via TrueOmni Player (Raspberry Pi, BrightSign, Chromecast)',
-    ],
+    status: 'live',
   },
   {
     id: 'video-walls',

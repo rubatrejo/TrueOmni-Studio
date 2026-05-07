@@ -7,6 +7,8 @@ import {
   kSignageClientList,
   kSignageDisplay,
   kSignageDisplayRaw,
+  kSignageSnap,
+  kSignageSnapList,
 } from './kv-keys';
 import {
   SignageClientFileSchema,
@@ -14,6 +16,8 @@ import {
   type SignageClientFile,
   type SignageDisplayConfig,
 } from './schema';
+
+const SNAPSHOT_CAP = 10;
 
 /**
  * Wrappers thin sobre `@/lib/studio/kv` para el namespace `signage:*`.
@@ -48,6 +52,93 @@ export const kvSignageClient = {
   },
   async delete(slug: string): Promise<void> {
     await kv.del(kSignageClient(slug));
+  },
+};
+
+export interface SignageSnapshotMeta {
+  /** ms epoch como ID estable. */
+  ts: number;
+  /** Optional: email del operador en DSS7+ con auth. */
+  savedBy?: string;
+  /** Optional: nota custom — DSS6.5. */
+  note?: string;
+}
+
+export interface SignageSnapshotEntry {
+  id: string;
+  meta: SignageSnapshotMeta;
+  data: SignageDisplayConfig;
+}
+
+interface StoredSnapshot {
+  meta: SignageSnapshotMeta;
+  data: unknown;
+}
+
+export const kvSignageSnapshot = {
+  /** Lista IDs de snapshots de un display, más reciente primero. */
+  async listIds(client: string, display: string): Promise<string[]> {
+    const raw = await kv.get<string[]>(kSignageSnapList(client, display));
+    return Array.isArray(raw) ? raw : [];
+  },
+
+  /** Lista snapshot entries (id + meta) sin la data completa. Para UI list. */
+  async listMeta(
+    client: string,
+    display: string,
+  ): Promise<{ id: string; meta: SignageSnapshotMeta }[]> {
+    const ids = await kvSignageSnapshot.listIds(client, display);
+    const out: { id: string; meta: SignageSnapshotMeta }[] = [];
+    for (const id of ids) {
+      const stored = await kv.get<StoredSnapshot>(kSignageSnap(client, display, id));
+      if (stored && stored.meta) out.push({ id, meta: stored.meta });
+    }
+    return out;
+  },
+
+  /** Lee un snapshot completo (data + meta). */
+  async get(
+    client: string,
+    display: string,
+    id: string,
+  ): Promise<SignageSnapshotEntry | null> {
+    const stored = await kv.get<StoredSnapshot>(kSignageSnap(client, display, id));
+    if (!stored) return null;
+    const parsed = SignageDisplayConfigSchema.safeParse(stored.data);
+    if (!parsed.success) return null;
+    return { id, meta: stored.meta, data: parsed.data };
+  },
+
+  /** Crea un snapshot. Devuelve el ID generado. Aplica FIFO cap. */
+  async create(
+    client: string,
+    display: string,
+    data: SignageDisplayConfig,
+    meta: Partial<SignageSnapshotMeta> = {},
+  ): Promise<string> {
+    const ts = meta.ts ?? Date.now();
+    const id = ts.toString();
+    const stored: StoredSnapshot = {
+      meta: { ts, savedBy: meta.savedBy, note: meta.note },
+      data,
+    };
+    await kv.set(kSignageSnap(client, display, id), stored);
+    const ids = await kvSignageSnapshot.listIds(client, display);
+    const nextIds = [id, ...ids.filter((i) => i !== id)].slice(0, SNAPSHOT_CAP);
+    // IDs that were trimmed off the cap: delete them from KV.
+    const trimmed = ids.filter((i) => !nextIds.includes(i));
+    await kv.set(kSignageSnapList(client, display), nextIds);
+    for (const trim of trimmed) {
+      await kv.del(kSignageSnap(client, display, trim));
+    }
+    return id;
+  },
+
+  async delete(client: string, display: string, id: string): Promise<void> {
+    await kv.del(kSignageSnap(client, display, id));
+    const ids = await kvSignageSnapshot.listIds(client, display);
+    const nextIds = ids.filter((i) => i !== id);
+    await kv.set(kSignageSnapList(client, display), nextIds);
   },
 };
 

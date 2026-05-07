@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { kvSignageDisplay } from '@/lib/signage/kv-store';
+import { kvSignageDisplay, kvSignageSnapshot } from '@/lib/signage/kv-store';
 import { SignageDisplayConfigSchema } from '@/lib/signage/schema';
 
 export const runtime = 'nodejs';
@@ -60,6 +60,20 @@ export async function PUT(req: NextRequest, ctx: RouteContext) {
   }
 
   try {
+    // DSS6: snapshot del state previo antes de overwrite. Si no hay
+    // previous (primera escritura desde fs), no hay snapshot.
+    const previous = await kvSignageDisplay.get(client, displaySlug).catch(() => null);
+    if (previous) {
+      try {
+        await kvSignageSnapshot.create(client, displaySlug, previous, {
+          ts: Date.now(),
+        });
+      } catch (snapErr) {
+        // eslint-disable-next-line no-console
+        console.warn('[signage:api] snapshot create failed (continúa con save)', snapErr);
+      }
+    }
+
     await kvSignageDisplay.set(client, displaySlug, parsed.data);
   } catch (e) {
     // eslint-disable-next-line no-console

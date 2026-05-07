@@ -17,6 +17,7 @@ import { useSignageBridge } from '../_lib/use-signage-bridge';
 import { DisplaySettingsPanel } from './display/DisplaySettingsPanel';
 import { PlaylistPanel } from './display/PlaylistPanel';
 import { PreviewFrame } from './display/PreviewFrame';
+import { VersionsPanel } from './display/VersionsPanel';
 
 /**
  * `<DisplayEditor>` — Editor del signage display (DSS4).
@@ -135,6 +136,11 @@ export function DisplayEditor({ client, display }: DisplayEditorProps) {
         <div className="flex flex-col gap-4">
           <DisplaySettingsPanel />
           <PlaylistPanel />
+          <VersionsPanel
+            clientSlug={client.slug}
+            displaySlug={draft.slug}
+            refreshTrigger={lastSavedAt}
+          />
         </div>
         <PreviewFrame
           clientSlug={client.slug}

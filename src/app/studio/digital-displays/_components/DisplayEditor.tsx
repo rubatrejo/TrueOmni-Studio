@@ -15,8 +15,10 @@ import { saveDisplay, useDebouncedAutosave } from '../_lib/save-display';
 import { useSignageBridge } from '../_lib/use-signage-bridge';
 
 import { DisplaySettingsPanel } from './display/DisplaySettingsPanel';
+import { KvSizeAdvisor } from './display/KvSizeAdvisor';
 import { PlaylistPanel } from './display/PlaylistPanel';
 import { PreviewFrame } from './display/PreviewFrame';
+import { PublishToolbar } from './display/PublishToolbar';
 import { VersionsPanel } from './display/VersionsPanel';
 
 /**
@@ -137,6 +139,12 @@ export function DisplayEditor({ client, display }: DisplayEditorProps) {
           <DisplaySettingsPanel />
           <PlaylistPanel />
           <VersionsPanel
+            clientSlug={client.slug}
+            displaySlug={draft.slug}
+            refreshTrigger={lastSavedAt}
+          />
+          <PublishToolbar clientSlug={client.slug} displaySlug={draft.slug} />
+          <KvSizeAdvisor
             clientSlug={client.slug}
             displaySlug={draft.slug}
             refreshTrigger={lastSavedAt}

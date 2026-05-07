@@ -34,7 +34,6 @@ import {
   Heart,
   Hotel,
   IceCream,
-  Image,
   Languages,
   Landmark,
   Leaf,
@@ -53,7 +52,6 @@ import {
   Pizza,
   Plane,
   Plus,
-  PlusSquare,
   RotateCcw,
   Sailboat,
   Scissors,
@@ -773,7 +771,6 @@ export function SystemModulesEditor({
             </div>
           ) : (
             listings.map((entry) => {
-              const Icon = LISTING_ICONS[entry.iconKey] ?? UtensilsCrossed;
               const itemCount = entry.catalog.listings.length;
               return (
                 <ListingModuleRow

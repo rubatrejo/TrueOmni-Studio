@@ -1,4 +1,8 @@
-import { normalizeIntlWhitespace } from '@/lib/signage/dates';
+import {
+  formatDayLabel,
+  formatTime,
+  wrapTitle,
+} from '@/lib/signage/text-helpers';
 
 import { registerTemplate } from './registry';
 import type { SignageTemplate, SignageTemplateRenderProps } from './types';
@@ -14,46 +18,6 @@ import type { SignageTemplate, SignageTemplateRenderProps } from './types';
  * extraídos en sub-fases anteriores: `video-image/pool.png` (DS5),
  * `ads/bottom-banner.jpg` (NEW DS6) y los `events/*.jpg` (DS3).
  */
-
-interface DayLabel {
-  weekday: string;
-  day: string;
-}
-
-function parseAsWallClock(iso: string): Date {
-  const hasTz = /Z|[+-]\d{2}:?\d{2}$/.test(iso);
-  return new Date(hasTz ? iso : iso + 'Z');
-}
-function formatDayLabel(iso: string, locale: string): DayLabel {
-  const date = parseAsWallClock(iso);
-  return {
-    weekday: normalizeIntlWhitespace(
-      new Intl.DateTimeFormat(locale, { weekday: 'long', timeZone: 'UTC' }).format(date),
-    ),
-    day: normalizeIntlWhitespace(
-      new Intl.DateTimeFormat(locale, { day: 'numeric', timeZone: 'UTC' }).format(date),
-    ),
-  };
-}
-function formatTime(iso: string, locale: string): string {
-  const date = parseAsWallClock(iso);
-  return normalizeIntlWhitespace(
-    new Intl.DateTimeFormat(locale, {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-      timeZone: 'UTC',
-    }).format(date),
-  )
-    .replace(' AM', ' am')
-    .replace(' PM', ' pm');
-}
-function wrapTitle(title: string, maxChars: number): [string, string] {
-  if (title.length <= maxChars) return [title, ''];
-  const breakIdx = title.lastIndexOf(' ', maxChars);
-  if (breakIdx === -1) return [title.slice(0, maxChars), title.slice(maxChars)];
-  return [title.slice(0, breakIdx), title.slice(breakIdx + 1)];
-}
 
 function getVideoUrl(clientSlug: string, slots: SignageTemplateRenderProps['slots']): string {
   const mod = slots.find((s) => s.module.kind === 'video-image');

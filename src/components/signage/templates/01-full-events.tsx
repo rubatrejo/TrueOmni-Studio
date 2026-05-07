@@ -1,4 +1,8 @@
-import { normalizeIntlWhitespace } from '@/lib/signage/dates';
+import {
+  formatDayLabel,
+  formatTime,
+  wrapTitle,
+} from '@/lib/signage/text-helpers';
 
 import { registerTemplate } from './registry';
 import type { SignageTemplate, SignageTemplateRenderProps } from './types';
@@ -26,67 +30,8 @@ import type { SignageTemplate, SignageTemplateRenderProps } from './types';
  * Día y mes se derivan de `event.startsAt` con locale del cliente.
  */
 
-interface DayLabel {
-  weekday: string;
-  day: string;
-}
-
-/**
- * Parsea un ISO local sin sufijo de timezone como wall-clock del cliente
- * (NO convierte zonas). El operador espera que `2026-05-09T11:00:00` se
- * muestre como `11:00 am` independientemente de la zona del servidor o del
- * navegador. Para lograrlo: parseamos como UTC y formateamos como UTC, y
- * lo que pintamos es la hora literal del ISO.
- */
-function parseAsWallClock(iso: string): Date {
-  // Si no tiene zona explícita, le añadimos Z (treat as UTC).
-  const hasTz = /Z|[+-]\d{2}:?\d{2}$/.test(iso);
-  return new Date(hasTz ? iso : iso + 'Z');
-}
-
-function formatDayLabel(iso: string, locale: string): DayLabel {
-  const date = parseAsWallClock(iso);
-  const weekday = normalizeIntlWhitespace(
-    new Intl.DateTimeFormat(locale, {
-      weekday: 'long',
-      timeZone: 'UTC',
-    }).format(date),
-  );
-  const day = normalizeIntlWhitespace(
-    new Intl.DateTimeFormat(locale, {
-      day: 'numeric',
-      timeZone: 'UTC',
-    }).format(date),
-  );
-  return { weekday, day };
-}
-
-function formatTime(iso: string, locale: string): string {
-  const date = parseAsWallClock(iso);
-  const text = normalizeIntlWhitespace(
-    new Intl.DateTimeFormat(locale, {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-      timeZone: 'UTC',
-    }).format(date),
-  );
-  return text.replace(' AM', ' am').replace(' PM', ' pm');
-}
-
 function buildAssetUrl(clientSlug: string, relPath: string): string {
   return `/signage-assets/${clientSlug}/${relPath}`;
-}
-
-/**
- * Wrap de un title corto a 2 líneas. Si cabe en `maxChars` queda 1 línea;
- * si no, parte en el último espacio antes de `maxChars`.
- */
-function wrapTitle(title: string, maxChars: number): [string, string] {
-  if (title.length <= maxChars) return [title, ''];
-  const breakIdx = title.lastIndexOf(' ', maxChars);
-  if (breakIdx === -1) return [title.slice(0, maxChars), title.slice(maxChars)];
-  return [title.slice(0, breakIdx), title.slice(breakIdx + 1)];
 }
 
 function Render({ client }: SignageTemplateRenderProps) {

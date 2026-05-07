@@ -21,6 +21,13 @@
       "slots": [],
       "durationMs": 8000,
       "schedule": { "kind": "always", "hideOutsideSchedule": true }
+    },
+    {
+      "id": "slide-video",
+      "templateId": "03-full-video-image",
+      "slots": [],
+      "durationMs": 8000,
+      "schedule": { "kind": "always", "hideOutsideSchedule": true }
     }
   ]
 }

@@ -19,7 +19,7 @@ aprobación visual entre ambos. Plan completo de diseño en
 - [x] **DS2** — `<SignagePlayer>` rotación básica (2026-05-06). Cut transition + 2 placeholder slides A/B + registry singleton + auto-load. Rotación confirmada cada 5s. Resumen en `.planning/DS2-SUMMARY.md`.
 - [x] **DS3** — Template `01-full-events` pixel-perfect (2026-05-06). 5 events con images extraídas del SVG verbatim, asset route signage, olive label centered, parseAsWallClock fix timezone, title wrap 2 lines. Resumen en `.planning/DS3-SUMMARY.md`.
 - [x] **DS4** — Template `02-full-ad` (2026-05-07). Single PNG fullscreen del SVG fuente, asset white-label en `clients-signage/<slug>/assets/ads/full-ad.png`, override per-slide opcional. Resumen en `.planning/DS4-SUMMARY.md`.
-- [ ] **DS5** — Template `03-full-video-image` pixel-perfect (incluye módulo Video/Image).
+- [x] **DS5** — Template `03-full-video-image` (2026-05-07). Image fullbleed con pattern verbatim del XD, viewBox clipea franja header, Play_Icon decorativo, soporte video via foreignObject. Resumen en `.planning/DS5-SUMMARY.md`.
 - [ ] **DS6** — Template `04-video-events-ad` (composed 3-zone).
 - [ ] **DS7** — Template `05-video-2ads` (composed 3-zone, 2 ads).
 - [ ] **DS8** — Template `06-video-news-ad` + módulo **News** (manual + RSS/API + slideshow rotation).

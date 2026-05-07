@@ -1,0 +1,11 @@
+{
+  "slug": "_template",
+  "name": "Display de plantilla",
+  "settings": {
+    "targetResolution": "1080p",
+    "audio": false,
+    "defaultDurationMs": 10000,
+    "defaultTransition": "cut"
+  },
+  "playlist": []
+}

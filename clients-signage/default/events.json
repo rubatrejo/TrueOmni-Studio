@@ -1,0 +1,42 @@
+[
+  {
+    "id": "evt-yoga-mornings",
+    "title": "Yoga Mornings For Moms",
+    "startsAt": "2026-05-09T11:00:00",
+    "location": "Location",
+    "image": "assets/events/yoga.jpg",
+    "category": "wellness"
+  },
+  {
+    "id": "evt-cubs-vs-giants",
+    "title": "Chicago Cubs at San Francisco Giants",
+    "startsAt": "2026-05-14T19:00:00",
+    "location": "Location",
+    "image": "assets/events/baseball.jpg",
+    "category": "sports"
+  },
+  {
+    "id": "evt-park-ski",
+    "title": "Park Ski Tournament",
+    "startsAt": "2026-05-17T23:00:00",
+    "location": "Location",
+    "image": "assets/events/ski.jpg",
+    "category": "sports"
+  },
+  {
+    "id": "evt-music-festival",
+    "title": "Big Music Festival in Downtown",
+    "startsAt": "2026-05-18T23:00:00",
+    "location": "Location",
+    "image": "assets/events/music.jpg",
+    "category": "music"
+  },
+  {
+    "id": "evt-walk-dog",
+    "title": "Walk Your Dog With Your Neighbors",
+    "startsAt": "2026-05-21T23:00:00",
+    "location": "Location",
+    "image": "assets/events/dog.jpg",
+    "category": "community"
+  }
+]

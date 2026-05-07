@@ -53,6 +53,38 @@ const config: Config = {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
         },
+        // ----------------------------------------------------------------
+        // Tokens del producto Digital Displays (signage). Aislados del kiosk.
+        // Consumidos exclusivamente por componentes de src/components/signage
+        // y src/app/(signage). Cero hardcoded — siempre vía hsl(var(--signage-*)).
+        // ----------------------------------------------------------------
+        signage: {
+          'brand-primary': 'hsl(var(--signage-brand-primary))',
+          'brand-secondary': 'hsl(var(--signage-brand-secondary))',
+          'brand-accent': 'hsl(var(--signage-brand-accent))',
+          'brand-neutral': 'hsl(var(--signage-brand-neutral))',
+          surface: 'hsl(var(--signage-surface))',
+          'surface-alt': 'hsl(var(--signage-surface-alt))',
+          'surface-dark': 'hsl(var(--signage-surface-dark))',
+          'stage-bg': 'hsl(var(--signage-stage-bg))',
+          text: 'hsl(var(--signage-text))',
+          'text-muted': 'hsl(var(--signage-text-muted))',
+          'text-on-brand': 'hsl(var(--signage-text-on-brand))',
+          'text-on-dark': 'hsl(var(--signage-text-on-dark))',
+          'header-bg': 'hsl(var(--signage-header-bg))',
+          'header-text': 'hsl(var(--signage-header-text))',
+          'events-accent': 'hsl(var(--signage-events-accent))',
+          'social-accent': 'hsl(var(--signage-social-accent))',
+          'news-accent': 'hsl(var(--signage-news-accent))',
+          'weather-accent': 'hsl(var(--signage-weather-accent))',
+          'ads-accent': 'hsl(var(--signage-ads-accent))',
+          'video-accent': 'hsl(var(--signage-video-accent))',
+          border: 'hsl(var(--signage-border))',
+          ring: 'hsl(var(--signage-ring))',
+          success: 'hsl(var(--signage-success))',
+          warning: 'hsl(var(--signage-warning))',
+          destructive: 'hsl(var(--signage-destructive))',
+        },
       },
       fontFamily: {
         sans: 'var(--font-sans)',

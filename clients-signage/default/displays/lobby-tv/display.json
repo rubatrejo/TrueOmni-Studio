@@ -1,0 +1,11 @@
+{
+  "slug": "lobby-tv",
+  "name": "Lobby TV",
+  "settings": {
+    "targetResolution": "1080p",
+    "audio": false,
+    "defaultDurationMs": 10000,
+    "defaultTransition": "cut"
+  },
+  "playlist": []
+}

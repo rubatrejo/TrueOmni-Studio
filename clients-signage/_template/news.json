@@ -1,0 +1,20 @@
+{
+  "source": {
+    "kind": "manual",
+    "items": [
+      {
+        "id": "news-tourist-center",
+        "title": "Breaking News",
+        "body": "The city welcomes tourists with the opening of a new, high-tech visitor center. This modern facility offers cutting-edge technology, interactive displays, and personalized assistance. It highlights the city's commitment to excellent hospitality and tourism.",
+        "publishedAt": "2026-05-06T08:00:00"
+      },
+      {
+        "id": "news-festival",
+        "title": "Festival Season",
+        "body": "Downtown gets ready for the spring festival season with concerts, food trucks and outdoor activities every weekend through June.",
+        "publishedAt": "2026-05-05T08:00:00"
+      }
+    ]
+  },
+  "rotationIntervalSec": 8
+}

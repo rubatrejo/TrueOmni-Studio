@@ -1,0 +1,32 @@
+{
+  "slug": "default",
+  "name": "Default Signage Client",
+  "locale": "en",
+  "timezone": "America/Phoenix",
+  "location": {
+    "city": "Phoenix",
+    "lat": 33.4484,
+    "lon": -112.074
+  },
+  "branding": {
+    "logos": {
+      "default": "assets/logo.svg"
+    },
+    "fonts": {
+      "default": "Open Sans"
+    }
+  },
+  "header": {
+    "position": "top",
+    "height": 80,
+    "layout": "logo-left",
+    "background": { "kind": "color", "color": "hsl(var(--signage-header-bg))" },
+    "showLogo": true,
+    "showWeather": true,
+    "showClock": true,
+    "clockFormat": "12h",
+    "weatherUnits": "imperial",
+    "forecastDays": 3
+  },
+  "displays": ["lobby-tv"]
+}

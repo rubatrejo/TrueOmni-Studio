@@ -1,21 +1,22 @@
 import { SignageHeader } from '@/components/signage/header/SignageHeader';
+import { SignagePlayer } from '@/components/signage/player/SignagePlayer';
 import { formatSignageClock, formatSignageDate } from '@/lib/signage/dates';
 import type { SignageClientResolved, SignageDisplayConfig } from '@/lib/signage/schema';
 import type { SignageHeaderWeather } from '@/lib/signage/weather-adapter';
 
 /**
- * Estado intermedio entre DS1 y DS3+. Renderea el header real (DS1) sobre un
- * body blanco vacío. El body se rellena cuando arranque DS3 con el primer
- * template (`01-full-events`). DS2 introduce el `<SignagePlayer>` que rotará
- * los templates conforme se vayan construyendo.
+ * `<SignageRuntime>` — composición server del header signage + el player.
+ *
+ * DS1 + DS2: header pixel-perfect arriba, player rotando slides debajo.
+ * DS11 cablea el toggle de header position (top↔bottom). Hoy asume top.
  */
-export interface SignagePlaceholderProps {
+export interface SignageRuntimeProps {
   client: SignageClientResolved;
   display: SignageDisplayConfig;
   weather: SignageHeaderWeather;
 }
 
-export function SignagePlaceholder({ client, weather }: SignagePlaceholderProps) {
+export function SignageRuntime({ client, display, weather }: SignageRuntimeProps) {
   const now = new Date();
   const initialClock = {
     clockText: formatSignageClock(now, client.locale, client.timezone, client.header.clockFormat),
@@ -25,8 +26,14 @@ export function SignagePlaceholder({ client, weather }: SignagePlaceholderProps)
   return (
     <div className="flex h-full w-full flex-col bg-signage-surface">
       <SignageHeader client={client} weather={weather} initialClock={initialClock} />
-      {/* Body vacío: los 8 templates aterrizan aquí en DS3..DS10. */}
-      <div className="flex-1" aria-hidden="true" />
+      <div className="flex-1 overflow-hidden">
+        <SignagePlayer
+          client={client}
+          display={display}
+          settings={display.settings}
+          playlist={display.playlist}
+        />
+      </div>
     </div>
   );
 }

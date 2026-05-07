@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { SignagePlaceholder } from '@/components/signage/runtime/SignagePlaceholder';
+import { SignageRuntime } from '@/components/signage/runtime/SignageRuntime';
 import { SignageStage } from '@/components/signage/stage/SignageStage';
 import { loadSignageClient, loadSignageDisplay } from '@/lib/signage/config';
 import { mapWeatherToHeader } from '@/lib/signage/weather-adapter';
@@ -46,7 +46,7 @@ export default async function SignageDisplayPage({ params, searchParams }: PageP
 
   return (
     <SignageStage debug={debug}>
-      <SignagePlaceholder client={clientCfg} display={displayCfg} weather={weather} />
+      <SignageRuntime client={clientCfg} display={displayCfg} weather={weather} />
     </SignageStage>
   );
 }

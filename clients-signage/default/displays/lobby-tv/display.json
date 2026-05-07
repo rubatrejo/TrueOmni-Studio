@@ -4,8 +4,23 @@
   "settings": {
     "targetResolution": "1080p",
     "audio": false,
-    "defaultDurationMs": 10000,
+    "defaultDurationMs": 5000,
     "defaultTransition": "cut"
   },
-  "playlist": []
+  "playlist": [
+    {
+      "id": "slide-a",
+      "templateId": "placeholder-a",
+      "slots": [],
+      "durationMs": 5000,
+      "schedule": { "kind": "always", "hideOutsideSchedule": true }
+    },
+    {
+      "id": "slide-b",
+      "templateId": "placeholder-b",
+      "slots": [],
+      "durationMs": 5000,
+      "schedule": { "kind": "always", "hideOutsideSchedule": true }
+    }
+  ]
 }

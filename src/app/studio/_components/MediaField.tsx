@@ -19,6 +19,13 @@ interface MediaFieldProps {
    *  (data URL ~2.7MB, encaja en el límite 4.5MB del body Vercel hobby).
    *  Para videos más grandes el operador puede pegar URL externa abajo. */
   maxVideoBytes?: number;
+  /** Producto target del path Blob. Default `kiosk` (paths `kiosks/<slug>/...`).
+   *  Pasar `signage` para `signage/<slug>/...`. */
+  product?: 'kiosk' | 'signage';
+  /** Override del slug del context (`useStudioSlug`). Si se pasa, gana sobre
+   *  el context — útil cuando el componente vive fuera del `StudioSlugProvider`
+   *  (e.g. dentro del editor signage). */
+  slug?: string;
   value?: string;
   kind?: 'image' | 'video';
   onChange: (next: { src: string; kind: 'image' | 'video' } | undefined) => void;
@@ -46,6 +53,8 @@ export function MediaField({
   aspect = '9/16',
   maxImageBytes = 5 * 1024 * 1024,
   maxVideoBytes = 2 * 1024 * 1024,
+  product = 'kiosk',
+  slug: slugProp,
   value,
   kind,
   onChange,
@@ -59,8 +68,21 @@ export function MediaField({
   const [bytes, setBytes] = useState<number | null>(null);
   const [urlInput, setUrlInput] = useState('');
   const [blobAvailable, setBlobAvailable] = useState<boolean | null>(null);
-  const slug = useStudioSlug();
-  const previewSrc = slug ? resolveStudioAsset(slug, value) : value;
+  const slugCtx = useStudioSlug();
+  const slug = slugProp ?? slugCtx;
+  // El resolver de paths relativos (`assets/foo.png`) solo aplica a kiosk
+  // (`/api/studio/clients/<slug>/<path>`). Para signage los paths relativos
+  // se resuelven contra `/signage-assets/<slug>/<path>` directamente.
+  const previewSrc =
+    product === 'signage'
+      ? value && (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/') || value.startsWith('data:'))
+        ? value
+        : slug && value
+          ? `/signage-assets/${slug}/${value}`
+          : value
+      : slug
+        ? resolveStudioAsset(slug, value)
+        : value;
 
   useEffect(() => {
     let cancelled = false;
@@ -112,7 +134,14 @@ export function MediaField({
     setBusy(true);
     try {
       if (useBlob && slug) {
-        const url = await uploadToBlob(file, slug, kindRes, (pct) => setProgress(pct), xhrRef);
+        const url = await uploadToBlob(
+          file,
+          slug,
+          kindRes,
+          product,
+          (pct) => setProgress(pct),
+          xhrRef,
+        );
         setBytes(file.size);
         onChange({ src: url, kind: kindRes });
         return;
@@ -350,6 +379,7 @@ function uploadToBlob(
   file: File,
   slug: string,
   kind: 'image' | 'video',
+  product: 'kiosk' | 'signage',
   onProgress: (pct: number) => void,
   xhrRef: React.MutableRefObject<XMLHttpRequest | null>,
 ): Promise<string> {
@@ -357,7 +387,7 @@ function uploadToBlob(
     const xhr = new XMLHttpRequest();
     xhrRef.current = xhr;
 
-    const params = new URLSearchParams({ slug, kind });
+    const params = new URLSearchParams({ slug, kind, product });
     xhr.open('POST', `/api/studio/upload?${params.toString()}`);
 
     xhr.upload.onprogress = (ev) => {

@@ -12,6 +12,7 @@ import type {
 import { StudioPageHeader } from '../../_components/PageHeader';
 import { useDisplayEditStore } from '../_lib/display-edit-store';
 import { saveDisplay, useDebouncedAutosave } from '../_lib/save-display';
+import { SignageEditorProvider } from '../_lib/signage-editor-context';
 import { useSignageBridge } from '../_lib/use-signage-bridge';
 
 import { DisplaySettingsPanel } from './display/DisplaySettingsPanel';
@@ -92,6 +93,7 @@ export function DisplayEditor({ client, display }: DisplayEditorProps) {
   }
 
   return (
+    <SignageEditorProvider clientSlug={client.slug}>
     <main className="mx-auto flex min-h-screen max-w-[1440px] flex-col px-4 pb-24 pt-12 sm:px-8">
       <StudioPageHeader />
 
@@ -165,6 +167,7 @@ export function DisplayEditor({ client, display }: DisplayEditorProps) {
         <span>Local · main</span>
       </footer>
     </main>
+    </SignageEditorProvider>
   );
 }
 

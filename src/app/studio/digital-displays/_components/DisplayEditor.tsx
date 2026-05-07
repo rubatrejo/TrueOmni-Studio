@@ -1,15 +1,13 @@
 'use client';
 
-import { ChevronLeft, Loader2 } from 'lucide-react';
-import Link from 'next/link';
-import { useCallback, useEffect } from 'react';
+import { History, ListVideo, Send, SlidersHorizontal } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 import type {
   SignageClientResolved,
   SignageDisplayConfig,
 } from '@/lib/signage/schema';
 
-import { StudioPageHeader } from '../../_components/PageHeader';
 import { useDisplayEditStore } from '../_lib/display-edit-store';
 import { saveDisplay, useDebouncedAutosave } from '../_lib/save-display';
 import { SignageEditorProvider } from '../_lib/signage-editor-context';
@@ -18,26 +16,56 @@ import { useSignageBridge } from '../_lib/use-signage-bridge';
 import { DisplaySettingsPanel } from './display/DisplaySettingsPanel';
 import { KvSizeAdvisor } from './display/KvSizeAdvisor';
 import { PlaylistPanel } from './display/PlaylistPanel';
-import { PreviewFrame } from './display/PreviewFrame';
 import { PublishToolbar } from './display/PublishToolbar';
 import { VersionsPanel } from './display/VersionsPanel';
+import { SignagePreviewPanel } from './shell/SignagePreviewPanel';
+import {
+  SignageSidebarTabs,
+  type SignageSection,
+} from './shell/SignageSidebarTabs';
+import { SignageTopBar } from './shell/SignageTopBar';
 
 /**
- * `<DisplayEditor>` — Editor del signage display (DSS4).
+ * `<DisplayEditor>` — Editor del signage display con shell pattern.
  *
- * Orquesta:
- *  - Working copy zustand del display draft (`useDisplayEditStore`).
- *  - Bridge editor↔iframe (`useSignageBridge`) — push live al iframe en
- *    cada change con debounce 120ms.
- *  - Autosave 1s después del último cambio (`useDebouncedAutosave` →
- *    `saveDisplay` → PUT al KV).
- *  - Dirty/Saving/Saved indicator en el header del editor.
- *
- * El runtime YA recibe `signage:display-update` desde DSS3 y popula su
- * store. La aplicación visual de los overrides en runtime aterriza en DSS5.
- * Por ahora el preview-iframe refleja los cambios tras el save al KV (la
- * próxima carga del runtime los leerá del KV).
+ * Mismo lenguaje visual que el `<ThemeEditor>`:
+ *  - `<SignageTopBar>` con breadcrumb hasta el display.
+ *  - `<SignageSidebarTabs>` con 4 secciones (Settings · Playlist · Versions · Publish).
+ *  - Editor panel 400-480px con el panel del tab activo.
+ *  - `<SignagePreviewPanel>` flex-1, 1920×1080 escalado, full screen.
+ *  - SaveBar al pie del editor.
+ *  - `<KvSizeAdvisor>` se muestra inline en cada tab cuando el payload se
+ *    acerca al cap.
  */
+type DisplaySectionKey = 'settings' | 'playlist' | 'versions' | 'publish';
+
+const DISPLAY_SECTIONS: ReadonlyArray<SignageSection<DisplaySectionKey>> = [
+  {
+    key: 'settings',
+    label: 'Settings',
+    title: 'Audio, sleep, transitions',
+    icon: SlidersHorizontal,
+  },
+  {
+    key: 'playlist',
+    label: 'Playlist',
+    title: 'Slides + scheduling',
+    icon: ListVideo,
+  },
+  {
+    key: 'versions',
+    label: 'Versions',
+    title: 'Display snapshots & restore',
+    icon: History,
+  },
+  {
+    key: 'publish',
+    label: 'Publish',
+    title: 'Open PR with this display',
+    icon: Send,
+  },
+];
+
 export interface DisplayEditorProps {
   client: SignageClientResolved;
   display: SignageDisplayConfig;
@@ -54,20 +82,22 @@ export function DisplayEditor({ client, display }: DisplayEditorProps) {
   const markSaved = useDisplayEditStore((s) => s.markSaved);
   const setError = useDisplayEditStore((s) => s.setError);
 
+  const [activeTab, setActiveTab] = useState<DisplaySectionKey>('playlist');
+  const [previewKey, setPreviewKey] = useState(0);
+
   const bridge = useSignageBridge();
 
   // Inicializa el draft con el display recibido del server. Solo cuando
   // cambia el slug del display (navegación) reseteamos.
   useEffect(() => {
     init(display);
-    // Reset al desmontar para que la próxima visita parta limpio.
     return () => {
       useDisplayEditStore.getState().reset();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [display.slug, client.slug]);
 
-  // Push live al iframe en cada cambio del draft (debounce 120ms ya en hook).
+  // Push live al iframe en cada cambio del draft (debounce 120ms en hook).
   useEffect(() => {
     if (!draft) return;
     bridge.pushDisplay(draft);
@@ -92,135 +122,185 @@ export function DisplayEditor({ client, display }: DisplayEditorProps) {
     return null;
   }
 
+  const saveState: 'idle' | 'saving' | 'saved' | 'error' = error
+    ? 'error'
+    : saving
+      ? 'saving'
+      : dirty
+        ? 'idle'
+        : lastSavedAt
+          ? 'saved'
+          : 'idle';
+
+  const previewHref = `/signage/${client.slug}/${draft.slug}`;
+
+  const handleSave = () => {
+    void onAutosave();
+  };
+
+  const handleDiscard = () => {
+    init(display);
+    setPreviewKey((k) => k + 1);
+  };
+
   return (
     <SignageEditorProvider clientSlug={client.slug}>
-    <main className="mx-auto flex min-h-screen max-w-[1440px] flex-col px-4 pb-24 pt-12 sm:px-8">
-      <StudioPageHeader />
-
-      {/* Breadcrumb */}
-      <Link
-        href={`/studio/digital-displays/${client.slug}`}
-        className="mb-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-zinc-500 transition hover:text-zinc-800 dark:text-zinc-500 dark:hover:text-zinc-200"
-      >
-        <ChevronLeft className="h-4 w-4" strokeWidth={2} />
-        {client.name}
-      </Link>
-
-      {/* Hero */}
-      <section className="mb-8 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="mb-2 text-sm font-medium uppercase tracking-[0.18em] text-zinc-500">
-            Display
-          </p>
-          <h1 className="font-display text-3xl font-bold leading-[1.1] tracking-tight text-zinc-900 sm:text-4xl dark:text-white">
-            {draft.name}
-          </h1>
-          <p className="mt-2 flex items-center gap-2 text-sm text-zinc-500">
-            <span className="rounded bg-zinc-100 px-2 py-0.5 font-mono text-[12px] text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
-              {draft.slug}
-            </span>
-            <span className="text-zinc-400 dark:text-zinc-600">·</span>
-            <span>
-              {draft.playlist.length} slide{draft.playlist.length === 1 ? '' : 's'}
-            </span>
-            <span className="text-zinc-400 dark:text-zinc-600">·</span>
-            <span>{draft.settings.targetResolution}</span>
-          </p>
-        </div>
-        <SaveStatusBadge
-          dirty={dirty}
-          saving={saving}
-          lastSavedAt={lastSavedAt}
-          error={error}
+      <div className="studio-shell flex h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+        <SignageTopBar
+          slug={`${client.slug} / ${draft.slug}`}
+          nombre={`${client.name} · ${draft.name}`}
+          saveState={saveState}
+          isDirty={dirty}
+          previewHref={previewHref}
+          onPublish={() => setActiveTab('publish')}
         />
-      </section>
 
-      {/* Layout 2-col: sidebar + preview */}
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-[420px_1fr]">
-        <div className="flex flex-col gap-4">
-          <DisplaySettingsPanel />
-          <PlaylistPanel />
-          <VersionsPanel
-            clientSlug={client.slug}
-            displaySlug={draft.slug}
-            refreshTrigger={lastSavedAt}
+        <div className="flex flex-1 overflow-hidden">
+          <SignageSidebarTabs<DisplaySectionKey>
+            sections={DISPLAY_SECTIONS}
+            ariaLabel="Display editor sections"
+            activeKey={activeTab}
+            onSelect={setActiveTab}
+            bridgeStatus={bridge.bridgeStatus}
+            onReloadPreview={() => setPreviewKey((k) => k + 1)}
           />
-          <PublishToolbar clientSlug={client.slug} displaySlug={draft.slug} />
-          <KvSizeAdvisor
-            clientSlug={client.slug}
-            displaySlug={draft.slug}
-            refreshTrigger={lastSavedAt}
-          />
+
+          <main className="flex flex-1 overflow-hidden">
+            {/* Editor panel */}
+            <div className="flex w-full shrink-0 flex-col overflow-hidden border-r border-zinc-200 dark:border-zinc-900 lg:w-[400px] xl:w-[480px]">
+              <div
+                key={activeTab}
+                className="studio-tab-fade flex min-h-0 flex-1 flex-col overflow-y-auto"
+              >
+                <div className="flex flex-1 flex-col gap-4 px-6 py-6">
+                  {activeTab === 'settings' ? <DisplaySettingsPanel /> : null}
+                  {activeTab === 'playlist' ? <PlaylistPanel /> : null}
+                  {activeTab === 'versions' ? (
+                    <VersionsPanel
+                      clientSlug={client.slug}
+                      displaySlug={draft.slug}
+                      refreshTrigger={lastSavedAt}
+                    />
+                  ) : null}
+                  {activeTab === 'publish' ? (
+                    <PublishToolbar
+                      clientSlug={client.slug}
+                      displaySlug={draft.slug}
+                    />
+                  ) : null}
+                  <KvSizeAdvisor
+                    clientSlug={client.slug}
+                    displaySlug={draft.slug}
+                    refreshTrigger={lastSavedAt}
+                  />
+                </div>
+              </div>
+              <DisplaySaveBar
+                saveState={saveState}
+                isDirty={dirty}
+                onSave={handleSave}
+                onDiscard={handleDiscard}
+              />
+            </div>
+
+            {/* Preview live, fullscreen-style */}
+            <div className="relative flex w-full flex-1 items-center justify-center overflow-hidden">
+              <SignagePreviewPanel
+                clientSlug={client.slug}
+                displaySlug={draft.slug}
+                displayName={draft.name}
+                reloadKey={previewKey}
+                iframeRef={bridge.iframeRef}
+                onIframeLoad={bridge.onIframeLoad}
+                onReload={() => setPreviewKey((k) => k + 1)}
+              />
+            </div>
+          </main>
         </div>
-        <PreviewFrame
-          clientSlug={client.slug}
-          displaySlug={draft.slug}
-          displayName={draft.name}
-          iframeRef={bridge.iframeRef}
-          onIframeLoad={bridge.onIframeLoad}
-          bridgeStatus={bridge.bridgeStatus}
-        />
-      </section>
 
-      <footer className="mt-24 flex items-center justify-between border-t border-zinc-200 pt-6 text-xs text-zinc-500 dark:border-zinc-900 dark:text-zinc-600">
-        <span>© 2026 TrueOmni · Digital Displays · Studio v0.1</span>
-        <span>Local · main</span>
-      </footer>
-    </main>
+        <p className="sr-only" aria-live="polite">
+          {saveState === 'saving'
+            ? 'Saving changes'
+            : saveState === 'saved' && !dirty
+              ? 'All changes saved'
+              : dirty
+                ? 'You have unsaved changes'
+                : ''}
+        </p>
+      </div>
     </SignageEditorProvider>
   );
 }
 
-function SaveStatusBadge({
-  dirty,
-  saving,
-  lastSavedAt,
-  error,
+function DisplaySaveBar({
+  saveState,
+  isDirty,
+  onSave,
+  onDiscard,
 }: {
-  dirty: boolean;
-  saving: boolean;
-  lastSavedAt: number | null;
-  error: string | null;
+  saveState: 'idle' | 'saving' | 'saved' | 'error';
+  isDirty: boolean;
+  onSave: () => void;
+  onDiscard: () => void;
 }) {
-  if (error) {
-    return (
-      <span
-        title={error}
-        className="inline-flex items-center gap-1.5 rounded-md bg-red-50 px-3 py-1.5 text-[12px] font-medium text-red-700 dark:bg-red-500/10 dark:text-red-400"
-      >
-        <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-        Save error
-      </span>
-    );
-  }
-  if (saving) {
-    return (
-      <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-50 px-3 py-1.5 text-[12px] font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
-        <Loader2 className="h-3 w-3 animate-spin" strokeWidth={2.5} />
-        Saving…
-      </span>
-    );
-  }
-  if (dirty) {
-    return (
-      <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-50 px-3 py-1.5 text-[12px] font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
-        <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-        Unsaved changes
-      </span>
-    );
-  }
-  if (lastSavedAt !== null) {
-    return (
-      <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-3 py-1.5 text-[12px] font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-        Saved
-      </span>
-    );
-  }
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-md bg-zinc-100 px-3 py-1.5 text-[12px] font-medium text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
-      <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
-      Synced
-    </span>
+    <div className="flex h-12 shrink-0 items-center justify-between border-t border-zinc-200 bg-white px-4 dark:border-zinc-900 dark:bg-zinc-950">
+      <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={onDiscard}
+          disabled={!isDirty}
+          className="grid h-8 w-8 place-items-center rounded-md text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 disabled:opacity-40 disabled:hover:bg-transparent dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+          aria-label="Discard changes"
+          title="Discard unsaved changes"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <path d="M3 7v6h6" />
+            <path d="M3 13a9 9 0 1 0 3-7.7L3 8" />
+          </svg>
+        </button>
+        <span className="ml-2 text-[11px] text-zinc-400 dark:text-zinc-600">
+          {isDirty ? 'Unsaved changes' : 'No pending changes'}
+        </span>
+      </div>
+
+      <button
+        type="button"
+        onClick={onSave}
+        disabled={saveState === 'saving' || !isDirty}
+        className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-50 disabled:hover:bg-zinc-900 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 dark:disabled:hover:bg-white"
+      >
+        <svg
+          width="13"
+          height="13"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+          <polyline points="17 21 17 13 7 13 7 21" />
+          <polyline points="7 3 7 8 15 8" />
+        </svg>
+        {saveState === 'saving'
+          ? 'Saving…'
+          : saveState === 'saved' && !isDirty
+            ? 'Saved'
+            : 'Save'}
+      </button>
+    </div>
   );
 }

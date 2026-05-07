@@ -22,9 +22,18 @@ import type { SignageBridgeStatus } from '../../_lib/use-signage-bridge';
  * arrow keys, layoutId active indicator (framer-motion), icon badge sky,
  * bridge status footer + Diagnostics link.
  *
- * Se usa scoped al `<ThemeEditor>` con sections fijas (Branding · Header ·
- * Displays · i18n · Versions · Publish).
+ * Generic: acepta `sections` como prop para reuso en ThemeEditor (6 tabs)
+ * y DisplayEditor (4 tabs). Cada section debe ser shape-compatible con
+ * `SignageSection`.
  */
+export interface SignageSection<K extends string = string> {
+  key: K;
+  label: string;
+  title: string;
+  icon: LucideIcon;
+}
+
+// Sections del theme editor (default export para retro-compat).
 export type SignageSectionKey =
   | 'branding'
   | 'header'
@@ -33,14 +42,7 @@ export type SignageSectionKey =
   | 'versions'
   | 'publish';
 
-export interface SignageSection {
-  key: SignageSectionKey;
-  label: string;
-  title: string;
-  icon: LucideIcon;
-}
-
-export const SIGNAGE_SECTIONS: readonly SignageSection[] = [
+export const SIGNAGE_SECTIONS: readonly SignageSection<SignageSectionKey>[] = [
   {
     key: 'branding',
     label: 'Branding',
@@ -79,30 +81,38 @@ export const SIGNAGE_SECTIONS: readonly SignageSection[] = [
   },
 ] as const;
 
-export interface SignageSidebarTabsProps {
-  activeKey: SignageSectionKey;
-  onSelect: (key: SignageSectionKey) => void;
+export interface SignageSidebarTabsProps<K extends string = string> {
+  sections?: ReadonlyArray<SignageSection<K>>;
+  activeKey: K;
+  onSelect: (key: K) => void;
+  ariaLabel?: string;
   bridgeStatus: SignageBridgeStatus;
   onReloadPreview?: () => void;
 }
 
-export function SignageSidebarTabs({
+export function SignageSidebarTabs<K extends string = string>({
+  sections,
   activeKey,
   onSelect,
+  ariaLabel = 'Signage editor sections',
   bridgeStatus,
   onReloadPreview,
-}: SignageSidebarTabsProps) {
+}: SignageSidebarTabsProps<K>) {
+  const items = (sections ??
+    (SIGNAGE_SECTIONS as unknown as ReadonlyArray<
+      SignageSection<K>
+    >)) as ReadonlyArray<SignageSection<K>>;
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   const focusAndSelect = (idx: number) => {
-    const section = SIGNAGE_SECTIONS[idx];
+    const section = items[idx];
     if (!section) return;
     onSelect(section.key);
     buttonRefs.current[idx]?.focus();
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>, currentIdx: number) => {
-    const len = SIGNAGE_SECTIONS.length;
+    const len = items.length;
     switch (e.key) {
       case 'ArrowDown':
       case 'ArrowRight':
@@ -130,10 +140,10 @@ export function SignageSidebarTabs({
       <div
         role="tablist"
         aria-orientation="vertical"
-        aria-label="Signage theme sections"
+        aria-label={ariaLabel}
         className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-3"
       >
-        {SIGNAGE_SECTIONS.map((section, idx) => {
+        {items.map((section, idx) => {
           const Icon = section.icon;
           const isActive = activeKey === section.key;
           return (

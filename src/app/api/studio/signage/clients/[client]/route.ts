@@ -1,7 +1,16 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { kvSignageClient, kvSignageThemeSnapshot } from '@/lib/signage/kv-store';
+import {
+  kvSignageClient,
+  kvSignageDisplay,
+  kvSignageI18n,
+  kvSignageSnapshot,
+  kvSignageThemeSnapshot,
+} from '@/lib/signage/kv-store';
 import { SignageClientFileSchema } from '@/lib/signage/schema';
+
+const RESERVED_SLUGS = new Set(['default']);
+const I18N_LOCALES = ['en', 'es', 'fr', 'de', 'pt', 'ja'] as const;
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -77,4 +86,69 @@ export async function PUT(req: NextRequest, ctx: RouteContext) {
   }
 
   return NextResponse.json({ ok: true, savedAt: Date.now() });
+}
+
+/**
+ * `DELETE /api/studio/signage/clients/[client]` — Borra el theme del KV.
+ *
+ * Borra: client.json, displays asociados, snapshots theme, snapshots
+ * display, i18n bags. NO toca el filesystem (`clients-signage/<slug>/`)
+ * porque esto vive en git — el unpublish requiere PR aparte.
+ *
+ * El slug `default` está reservado y no puede borrarse.
+ */
+export async function DELETE(_req: NextRequest, ctx: RouteContext) {
+  const { client } = await ctx.params;
+
+  if (RESERVED_SLUGS.has(client)) {
+    return NextResponse.json(
+      { error: `Cannot delete reserved slug "${client}".` },
+      { status: 400 },
+    );
+  }
+
+  const existing = await kvSignageClient.get(client).catch(() => null);
+  if (!existing) {
+    return NextResponse.json(
+      { error: `Theme "${client}" not found in KV.` },
+      { status: 404 },
+    );
+  }
+
+  try {
+    // Borra displays + sus snapshots.
+    for (const dSlug of existing.displays ?? []) {
+      const ids = await kvSignageSnapshot
+        .listIds(client, dSlug)
+        .catch(() => [] as string[]);
+      for (const id of ids) {
+        await kvSignageSnapshot.delete(client, dSlug, id);
+      }
+      await kvSignageDisplay.delete(client, dSlug);
+    }
+
+    // Borra snapshots theme-level.
+    const themeIds = await kvSignageThemeSnapshot
+      .listIds(client)
+      .catch(() => [] as string[]);
+    for (const id of themeIds) {
+      await kvSignageThemeSnapshot.delete(client, id);
+    }
+
+    // Borra i18n bags (todos los locales soportados).
+    for (const locale of I18N_LOCALES) {
+      await kvSignageI18n.delete(client, locale).catch(() => {});
+    }
+
+    // Finalmente, el client + remove from list.
+    await kvSignageClient.delete(client);
+    await kvSignageClient.removeFromList(client);
+  } catch (e) {
+    return NextResponse.json(
+      { error: `KV delete failed: ${(e as Error).message}` },
+      { status: 500 },
+    );
+  }
+
+  return NextResponse.json({ ok: true, deletedAt: Date.now() });
 }

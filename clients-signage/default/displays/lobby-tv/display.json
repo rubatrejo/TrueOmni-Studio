@@ -49,6 +49,13 @@
       "slots": [],
       "durationMs": 14000,
       "schedule": { "kind": "always", "hideOutsideSchedule": true }
+    },
+    {
+      "id": "slide-video-social-ad",
+      "templateId": "07-video-social-ad",
+      "slots": [],
+      "durationMs": 7000,
+      "schedule": { "kind": "always", "hideOutsideSchedule": true }
     }
   ]
 }

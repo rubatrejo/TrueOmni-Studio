@@ -17,6 +17,7 @@ import './03-full-video-image';
 import './04-video-events-ad';
 import './05-video-2ads';
 import './06-video-news-ad';
+import './07-video-social-ad';
 // Próximos:
 // import './02-full-ad';          // DS4
 // import './03-full-video-image'; // DS5

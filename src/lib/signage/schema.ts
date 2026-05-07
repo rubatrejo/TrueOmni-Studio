@@ -103,6 +103,7 @@ export const SignageFeaturedTweetSchema = z.object({
   network: z.enum(['x', 'instagram', 'facebook', 'tiktok']),
   hashtag: z.string().optional(),
   image: z.string().optional(),
+  avatar: z.string().optional(),
 });
 export type SignageFeaturedTweet = z.infer<typeof SignageFeaturedTweetSchema>;
 

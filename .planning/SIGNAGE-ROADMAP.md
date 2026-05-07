@@ -61,9 +61,13 @@ aprobación visual entre ambos. Plan completo de diseño en
 
 ---
 
-## Milestone Signage Studio
+## Milestone Signage Studio ✅ CERRADO 2026-05-07
 
 > Habilita el editor signage en el Studio. Solo arranca tras el gate del Local.
+>
+> **Cerrado 2026-05-07 con DSS9 entregado.** 10 sub-fases (DSS0..DSS9)
+> ejecutadas en una sola sesión continua. Producto end-to-end editable
+> con publish PR, snapshots, i18n, diagnostics y bridge live.
 
 ### Sub-fases
 
@@ -76,7 +80,7 @@ aprobación visual entre ambos. Plan completo de diseño en
 - [x] **DSS6** — Snapshots / Versions del display + restore (2026-05-07). Cada PUT crea snapshot del previo (FIFO cap 10). API endpoints GET list + POST restore. UI `<VersionsPanel>` collapsible con timestamp + restore button con confirm inline. Patrón git-like: restore crea snapshot del current pre-restore. Resumen en `.planning/DSS6-SUMMARY.md`.
 - [x] **DSS7** — Publish + JSON export/import + KV size advisor (2026-05-07). 4 endpoints API: publish (reusa github-publisher con autoMerge), export (`<a download>`), import (snapshot pre-import + Zod), size. UI `<PublishToolbar>` + `<KvSizeAdvisor>` (bar verde/amber/red). Solo `display.json` en publish; theme publish difere a DSS7.5. Resumen en `.planning/DSS7-SUMMARY.md`.
 - [x] **DSS8** — Diagnostics + i18n editor (2026-05-07). Página `/studio/digital-displays/diagnostics` con system info (clients/displays count, KV usage, GitHub config). i18n editor tab nuevo en theme editor (locale selector + keys editables + KV persistence). `loadSignageI18n` ahora KV-first. Onboarding tour deferido a DSS8.5. Resumen en `.planning/DSS8-SUMMARY.md`.
-- [ ] **DSS9** — Smoke E2E producción + doc paso a paso.
+- [x] **DSS9** — Smoke E2E + doc handoff (2026-05-07). Doc `.planning/2026-05-07-signage-studio-smoke-e2e.md` con checklist (A automático + B visual + C producción) + troubleshooting + architecture notes (KV namespace + aislamiento kiosk). Milestone Studio CERRADO. Resumen en `.planning/DSS9-SUMMARY.md`.
 
 ### Verificación
 

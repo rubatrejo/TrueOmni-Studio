@@ -168,9 +168,14 @@ aprobado por Rubén. Listo para Milestone Signage Studio (DSS0+).
 
 ---
 
-## Milestone Signage Studio (futuro, post-gate)
+## Milestone Signage Studio ✅ CERRADO 2026-05-07
 
-- [ ] **DSS0..DSS9** — Editor signage en Studio (dropdown del header, KV, bridge, playlist editor, módulos, snapshots, publish, smoke E2E producción).
+> Editor signage end-to-end en el Studio: dashboard + theme editor + display
+> editor + bridge live + snapshots + publish PR + i18n + diagnostics. 10
+> sub-fases (DSS0..DSS9) en una sesión continua.
+
+- [x] **DSS0..DSS9** — Editor signage completo (2026-05-07). Detalles
+  en `.planning/SIGNAGE-ROADMAP.md` y `.planning/2026-05-07-signage-studio-smoke-e2e.md`.
 
 ---
 

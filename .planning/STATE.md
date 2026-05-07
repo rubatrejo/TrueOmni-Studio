@@ -2620,6 +2620,67 @@ Audit panorámico — 8 hallazgos cerrados:
 
 ---
 
+### Sesión 2026-05-07 (Tarde-Noche) — Maratón Milestone Signage Studio · DSS0..DSS9 (10 sub-fases consecutivas)
+
+**Hecho (10 sub-fases en sesión continua, 10 commits atómicos):**
+
+- **DSS0** — Bootstrap Signage Studio. Dropdown `digital-displays` activado como `live`. Página única `/studio/digital-displays` con clients dashboard fs-only (decisión UX: sin sub-URLs; cada theme se gestiona desde la página única). Cards visualmente idénticas al ClientCard del kiosk (rounded-2xl + hero h-40). Layout dedicado inyecta `tokens signage` scoped. KV namespace `signage:*` (`kv-store.ts`) preparado.
+- **DSS1** — Theme editor con 5 tabs read-only (Branding · Header · Displays · Versions · Publish). Sidebar vertical. Card del dashboard navega al editor; Preview se mueve al header.
+- **DSS2** — Display editor `/studio/digital-displays/<slug>/displays/<displaySlug>`. Layout 2-col: sidebar settings + playlist read-only / iframe live 16:9 con Reload + New tab.
+- **DSS3** — Bridge editor↔iframe + loader híbrido KV→fs. `<SignageBridge>` runtime emite `signage:ready` + heartbeat 5s; `useSignageBridge` hook editor con `iframeRef` + `pushClient/pushDisplay` + `bridgeStatus` derivado. Status badge en `<PreviewFrame>`.
+- **DSS4** — Playlist editor editable. Working copy zustand + autosave 1s + bridge push 120ms. Settings editables. Drag-to-reorder HTML5 nativo. Edit inline duration/transition. Schedule popover always/hours. Add slide modal. Delete slide. PUT API valida con Zod. Dirty/Saving/Saved badge.
+- **DSS5** — Module editors per-slot + overrides reactivos runtime. Template catalog client-safe POJO. Slot configurator inline en playlist con chevron expand. 6 forms (Events/Social/VideoImage/Ads/News/Weather). `<SignagePlayer>` consume `useSignageBridgeStore` con shallow merge → push live se ve sin reload.
+- **DSS6** — Snapshots/Versions del display + restore. Cada PUT crea snapshot del previo (FIFO cap 10). API endpoints GET list + POST restore. Patrón git-like: restore crea snapshot del current pre-restore. UI `<VersionsPanel>` con timestamp + restore button con confirm inline.
+- **DSS7** — Publish + JSON export/import + KV size advisor. 4 endpoints API: publish (reusa `github-publisher.ts` del kiosk con autoMerge), export, import, size. UI `<PublishToolbar>` (Export/Import/Publish) + `<KvSizeAdvisor>` (bar verde/amber/red).
+- **DSS8** — Diagnostics + i18n editor. Página `/studio/digital-displays/diagnostics` con system info. i18n editor tab (KV-first override sobre fs). Onboarding tour deferido a DSS8.5.
+- **DSS9** — Smoke E2E + doc handoff. `.planning/2026-05-07-signage-studio-smoke-e2e.md` con checklist completo + troubleshooting + architecture notes. Milestone Studio CERRADO.
+
+**Verificado:**
+
+- `pnpm typecheck` ✅ limpio en cada sub-fase.
+- `pnpm exec eslint` archivos tocados ✅ limpio.
+- `pnpm kiosk:dev` arranca sin errores en cada commit.
+- 10 commits atómicos `feat(studio): DSSN ...` con mensaje detallado.
+- Smoke visual de cada sub-fase aprobado por Rubén.
+
+**Pendiente / siguiente:**
+
+1. **Primer cliente real signage** (paralelo Fase 4 kiosk): bloqueado por negocio.
+2. **DSS5.5** AI suggest hooks (Anthropic translate per-locale).
+3. **DSS7.5** theme publish completo (branding + tokens + i18n bag).
+4. **DSS8.5** onboarding tour signage cuando haya feedback usuario real.
+5. **Asset upload signage**: Vercel Blob para video/image sin copy-paste manual.
+6. **Tech debt post-Milestone Local** (definido DS15-SUMMARY): tokenizar `#1796d6`, factorar helpers duplicados, optimizar imágenes pesadas.
+7. **Lighthouse production ≥90 verification** + smoke E2E producción real cuando deploy.
+
+**Decisiones tomadas:**
+
+- **Sin sub-URLs en dashboard signage**: cada theme se gestiona desde la página única. Decisión UX explicita del usuario durante DSS0 review.
+- **Card dashboard idéntica al kiosk**: replicar `ClientCard` del kiosk garantiza consistencia visual cross-product en el Studio.
+- **HTML5 native drag-to-reorder** vs `@dnd-kit`: cero deps añadidas. Suficiente para N≤20 slides.
+- **Working copy zustand local** + autosave 1s + bridge push 120ms: separación clean de fetch inicial (Server) y mutación (Client).
+- **Loader híbrido KV-first con fs fallback** en TODOS los loaders signage: el editor escribe al KV; el runtime lee KV→fs sin tocar código.
+- **Snapshots wrapper `{ meta, data }`**: separar metadata estructural del display real. Schema strict en `data`, evolutiva en `meta`.
+- **Restore git-like**: crea snapshot del current pre-restore. Reversible sin tocar UI compleja de undo/redo.
+- **Reuso completo de `github-publisher.ts` del kiosk** para publish: cero deps nuevas, mismo approval gate.
+- **Solo `display.json` en publish DSS7**: simplifica. Theme publish (branding + tokens + i18n) difere a DSS7.5.
+- **Tour deferido a DSS8.5**: pragmatismo. Tour sin baseline de uso real es genérico y de bajo valor; el del kiosk fue iterado con feedback.
+- **AI suggest hooks deferidos a DSS5.5**: módulo translate Anthropic API requiere config + prompt engineering por kind; valor incremental moderado en DSS5.
+
+**Tokens nuevos:** ninguno (reuse de `--signage-*` y zinc/sky del Studio).
+
+**Deps añadidas:** ninguna.
+
+**Fase:** Milestone Signage Studio — **CERRADO 2026-05-07**. Próximos focos: primer cliente real, DSS5.5/7.5/8.5 si surge necesidad, asset upload, tech debt acumulado.
+
+**Resumen del día completo (2026-05-07):**
+- AM: Maratón Local DS1-DS10 (8 templates pixel-perfect).
+- Mediodía: DS11-DS15 (header position, transitions, dayparting, audio/sleep/i18n, GATE Local).
+- Tarde-Noche: DSS0-DSS9 (Milestone Studio completo end-to-end).
+- **Total**: 26 sub-fases ejecutadas + commits atómicos en una sola sesión continua. **2 milestones cerrados**: Signage Local + Signage Studio.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

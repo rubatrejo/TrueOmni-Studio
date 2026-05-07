@@ -1,6 +1,7 @@
 'use client';
 
 import { Monitor, Tv } from 'lucide-react';
+import Link from 'next/link';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 
@@ -41,17 +42,14 @@ export function ClientsDashboard({ clients }: ClientsDashboardProps) {
         </p>
       </section>
 
-      {/* DSS0 banner */}
+      {/* DSS1 banner */}
       <section className="mb-8 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-[13px] leading-relaxed text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
-        <p className="font-semibold">Editor coming soon (DSS1+)</p>
+        <p className="font-semibold">Editor read-only en DSS1</p>
         <p className="mt-1 text-amber-800 dark:text-amber-300/90">
-          The signage editor with branding, playlist drag-and-drop, module forms and
-          publish workflow ships in upcoming releases. For now click any theme card to
-          preview its first display — the runtime serves your{' '}
-          <code className="rounded bg-amber-100 px-1 py-0.5 font-mono text-[12px] dark:bg-amber-500/20">
-            clients-signage/&lt;slug&gt;/
-          </code>{' '}
-          fs configuration live.
+          La estructura del editor con tabs (Branding · Header · Displays · Versions ·
+          Publish) ya está aquí. Los formularios editables, playlist drag-to-reorder
+          y publish workflow aterrizan en DSS5..DSS7. Click en una card abre el editor
+          del theme.
         </p>
       </section>
 
@@ -115,10 +113,8 @@ export function ClientsDashboard({ clients }: ClientsDashboardProps) {
  * En DSS1+ el click llevará al editor real del signage theme.
  */
 function ThemeCard({ client }: { client: SignageClientWithDisplays }) {
+  const editorHref = `/studio/digital-displays/${client.slug}`;
   const firstDisplay = client.displays[0];
-  const previewHref = firstDisplay
-    ? `/signage/${client.slug}/${firstDisplay.slug}`
-    : null;
 
   const cardClasses =
     'group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md motion-reduce:hover:translate-y-0 dark:border-zinc-800 dark:bg-zinc-900/40 dark:shadow-none dark:hover:border-zinc-700 dark:hover:bg-zinc-900/80 dark:hover:shadow-[0_8px_24px_-12px_rgba(56,189,248,0.25)]';
@@ -180,16 +176,8 @@ function ThemeCard({ client }: { client: SignageClientWithDisplays }) {
         </div>
 
         <div className="mt-auto flex items-center justify-between pt-3 text-[11px] text-zinc-500">
-          <span>
-            {firstDisplay ? (
-              <>Preview <span className="font-mono text-zinc-400">{firstDisplay.slug}</span></>
-            ) : (
-              'No displays'
-            )}
-          </span>
-          <span className="font-mono text-zinc-400 dark:text-zinc-600">
-            {firstDisplay ? '↗' : '—'}
-          </span>
+          <span>Open editor</span>
+          <span className="font-mono text-zinc-400 dark:text-zinc-600">→</span>
         </div>
       </div>
 
@@ -197,23 +185,17 @@ function ThemeCard({ client }: { client: SignageClientWithDisplays }) {
     </>
   );
 
-  if (previewHref) {
-    return (
-      <a
-        href={previewHref}
-        target="_blank"
-        rel="noopener noreferrer"
-        title={`Preview ${client.name} (${firstDisplay?.slug})`}
-        className={cardClasses}
-      >
-        {inner}
-      </a>
-    );
-  }
-
   return (
-    <div className={cardClasses} aria-disabled="true">
+    <Link
+      href={editorHref}
+      title={
+        firstDisplay
+          ? `Open ${client.name} editor (preview ${firstDisplay.slug} from inside)`
+          : `Open ${client.name} editor`
+      }
+      className={cardClasses}
+    >
       {inner}
-    </div>
+    </Link>
   );
 }

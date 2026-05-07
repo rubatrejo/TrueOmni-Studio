@@ -1,31 +1,44 @@
 'use client';
 
 import { ExternalLink, RotateCw } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type RefObject } from 'react';
+
+import type { SignageBridgeStatus } from '../../_lib/use-signage-bridge';
 
 /**
- * `<PreviewFrame>` — Iframe wrapper con preview live del runtime signage (DSS2).
+ * `<PreviewFrame>` — Iframe wrapper con preview live del runtime signage.
  *
  * Embed `<iframe src="/signage/<client>/<display>" />` con aspect-video (16:9)
  * que escala al ancho disponible. El runtime internamente hace fit-contain
  * con letterbox vía `<SignageStage>`, así que la proporción siempre se preserva.
  *
  * Toolbar:
+ *  - Bridge status badge (DSS3): connecting · connected · stale · lost.
  *  - Reload: bump del `key` del iframe → desmonta + remonta. Más robusto que
  *    tocar `src` (algunos navegadores cachean).
  *  - Open in new tab: abre el runtime en una pestaña nueva.
  *
- * **DSS2:** sin bridge bidireccional. El iframe muestra el runtime tal cual,
- * leyendo desde fs. DSS3 introduce `postMessage` + KV para refrescar el iframe
- * cuando el editor cambia algo en el sidebar.
+ * **DSS3** introdujo el bridge bidireccional vía postMessage + KV. El
+ * `iframeRef` y el callback `onIframeLoad` los provee `useSignageBridge` desde
+ * el `<DisplayEditor>`.
  */
 export interface PreviewFrameProps {
   clientSlug: string;
   displaySlug: string;
   displayName: string;
+  iframeRef: RefObject<HTMLIFrameElement | null>;
+  onIframeLoad: () => void;
+  bridgeStatus: SignageBridgeStatus;
 }
 
-export function PreviewFrame({ clientSlug, displaySlug, displayName }: PreviewFrameProps) {
+export function PreviewFrame({
+  clientSlug,
+  displaySlug,
+  displayName,
+  iframeRef,
+  onIframeLoad,
+  bridgeStatus,
+}: PreviewFrameProps) {
   const runtimeUrl = `/signage/${clientSlug}/${displaySlug}`;
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -44,6 +57,7 @@ export function PreviewFrame({ clientSlug, displaySlug, displayName }: PreviewFr
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <BridgeStatusBadge status={bridgeStatus} />
           <button
             type="button"
             onClick={() => setReloadKey((k) => k + 1)}
@@ -71,14 +85,59 @@ export function PreviewFrame({ clientSlug, displaySlug, displayName }: PreviewFr
         style={{ aspectRatio: '16 / 9' }}
       >
         <iframe
+          ref={iframeRef}
           key={reloadKey}
           src={runtimeUrl}
           title={`Preview ${displayName}`}
           loading="lazy"
           allow="autoplay; fullscreen"
+          onLoad={onIframeLoad}
           className="absolute inset-0 h-full w-full border-0"
         />
       </div>
     </section>
+  );
+}
+
+function BridgeStatusBadge({ status }: { status: SignageBridgeStatus }) {
+  const variants = {
+    connecting: {
+      dotClass: 'bg-amber-400 animate-pulse',
+      textClass: 'text-amber-700 dark:text-amber-400',
+      bgClass: 'bg-amber-50 dark:bg-amber-500/10',
+      label: 'Connecting',
+      title: 'Esperando handshake del iframe…',
+    },
+    connected: {
+      dotClass: 'bg-emerald-500',
+      textClass: 'text-emerald-700 dark:text-emerald-400',
+      bgClass: 'bg-emerald-50 dark:bg-emerald-500/10',
+      label: 'Connected',
+      title: 'Bridge live · heartbeat OK',
+    },
+    stale: {
+      dotClass: 'bg-amber-500',
+      textClass: 'text-amber-700 dark:text-amber-400',
+      bgClass: 'bg-amber-50 dark:bg-amber-500/10',
+      label: 'Stale',
+      title: 'Sin heartbeat reciente · iframe pausado o throttling',
+    },
+    lost: {
+      dotClass: 'bg-red-500',
+      textClass: 'text-red-700 dark:text-red-400',
+      bgClass: 'bg-red-50 dark:bg-red-500/10',
+      label: 'Lost',
+      title: 'Bridge perdido · prueba con Reload',
+    },
+  } as const;
+  const v = variants[status];
+  return (
+    <span
+      title={v.title}
+      className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[11px] font-medium ${v.bgClass} ${v.textClass}`}
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${v.dotClass}`} aria-hidden="true" />
+      {v.label}
+    </span>
   );
 }

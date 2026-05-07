@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 
+import { SignageBridge } from '@/components/signage/runtime/SignageBridge';
 import { SignageRuntime } from '@/components/signage/runtime/SignageRuntime';
 import { SignageStage } from '@/components/signage/stage/SignageStage';
 import { loadSignageClient, loadSignageDisplay } from '@/lib/signage/config';
@@ -47,6 +48,7 @@ export default async function SignageDisplayPage({ params, searchParams }: PageP
 
   return (
     <SignageStage debug={debug}>
+      <SignageBridge clientSlug={clientCfg.slug} displaySlug={displayCfg.slug} />
       <SignageRuntime
         client={clientCfg}
         display={displayCfg}

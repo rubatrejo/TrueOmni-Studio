@@ -5,6 +5,7 @@ import path from 'node:path';
 
 import { cache } from 'react';
 
+import { kvSignageClient, kvSignageDisplay } from './kv-store';
 import {
   SignageClientFileSchema,
   SignageClientResolvedSchema,
@@ -65,10 +66,39 @@ async function readClientFiles(slug: string) {
 
 /**
  * Resuelve el cliente signage activo combinando client.json + events/social/news.
- * Si el slug no existe, hace fallback a "default" (cliente de plantilla del repo).
+ *
+ * **DSS3 — loader híbrido KV→fs**: primero consulta `kvSignageClient.get(slug)`.
+ * Si KV tiene el client (working copy o publicado por DSS5+), usa ese client
+ * file y combina con events/social/news del fs (DSS5 los moverá también a KV).
+ * Si KV miss → fs como antes.
+ *
+ * El KV está vacío hasta que DSS5 introduzca el flow de save. Hasta entonces
+ * el comportamiento es idéntico al de DS0..DS15 (fs-only).
+ *
+ * Si el slug no existe ni en KV ni en fs, fallback a "default".
  */
 export const loadSignageClient = cache(
   async (slug: string): Promise<SignageClientResolved | null> => {
+    // 1. Try KV first (DSS3+ when populated by DSS5 save).
+    try {
+      const kvClient = await kvSignageClient.get(slug);
+      if (kvClient) {
+        const fsFiles = await readClientFiles(slug).catch(() => null);
+        return SignageClientResolvedSchema.parse({
+          ...kvClient,
+          events: fsFiles?.events ?? [],
+          social: fsFiles?.social ?? { posts: [] },
+          news: fsFiles?.news ?? {
+            source: { kind: 'manual', items: [] },
+            rotationIntervalSec: 8,
+          },
+        });
+      }
+    } catch {
+      // KV unreachable o shape inválido: continuamos a fs.
+    }
+
+    // 2. Fallback fs.
     try {
       const files = await readClientFiles(slug);
       return SignageClientResolvedSchema.parse({
@@ -109,6 +139,15 @@ export const loadSignageClient = cache(
  */
 export const loadSignageDisplay = cache(
   async (clientSlug: string, displaySlug: string): Promise<SignageDisplayConfig | null> => {
+    // 1. KV first (DSS3+).
+    try {
+      const kvDisplay = await kvSignageDisplay.get(clientSlug, displaySlug);
+      if (kvDisplay) return kvDisplay;
+    } catch {
+      // KV unreachable: continuamos a fs.
+    }
+
+    // 2. Fallback fs.
     const root = SIGNAGE_ROOT();
     const displayPath = path.join(
       root,

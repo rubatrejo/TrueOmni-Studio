@@ -9,6 +9,7 @@ import type {
 } from '@/lib/signage/schema';
 
 import { StudioPageHeader } from '../../_components/PageHeader';
+import { useSignageBridge } from '../_lib/use-signage-bridge';
 
 import { DisplaySettingsPanel } from './display/DisplaySettingsPanel';
 import { PlaylistPanel } from './display/PlaylistPanel';
@@ -31,6 +32,7 @@ export interface DisplayEditorProps {
 }
 
 export function DisplayEditor({ client, display }: DisplayEditorProps) {
+  const bridge = useSignageBridge();
   return (
     <main className="mx-auto flex min-h-screen max-w-[1440px] flex-col px-4 pb-24 pt-12 sm:px-8">
       <StudioPageHeader />
@@ -91,6 +93,9 @@ export function DisplayEditor({ client, display }: DisplayEditorProps) {
           clientSlug={client.slug}
           displaySlug={display.slug}
           displayName={display.name}
+          iframeRef={bridge.iframeRef}
+          onIframeLoad={bridge.onIframeLoad}
+          bridgeStatus={bridge.bridgeStatus}
         />
       </section>
 

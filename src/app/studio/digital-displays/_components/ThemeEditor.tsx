@@ -36,9 +36,13 @@ import { VersionsTab } from './tabs/VersionsTab';
  *  - Sidebar vertical de tabs (Branding · Header · Displays · Versions · Publish).
  *  - Content area que cambia según el tab activo.
  *
- * **DSS1 es read-only.** Los tabs muestran configuración fs sin permitir
- * edición. Los formularios editables aterrizan en DSS5+ (Branding, Header,
- * Module editors), DSS6 (Versions), DSS7 (Publish).
+ * **Estado de los tabs (post-DSS7.5):**
+ *  - i18n y Publish: editables.
+ *  - Branding, Header, Displays, Versions: aún read-only o placeholder.
+ *    Branding/Header se vuelven editables cuando aterrice el editor visual
+ *    (paleta + tokens). Displays redirige al display editor dedicado.
+ *    Versions del theme depende de snapshots theme-level (DSS6 solo cubrió
+ *    display-level).
  */
 export interface ThemeEditorProps {
   client: SignageClientResolved;
@@ -121,13 +125,17 @@ export function ThemeEditor({ client, displays, tokensCss }: ThemeEditorProps) {
         ) : null}
       </section>
 
-      {/* Read-only banner */}
+      {/* Estado de tabs */}
       <section className="mb-8 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-[13px] leading-relaxed text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
-        <p className="font-semibold">Editor read-only en DSS1</p>
+        <p className="font-semibold">Editor parcial</p>
         <p className="mt-1 text-amber-800 dark:text-amber-300/90">
-          La estructura de tabs ya está aquí. Los formularios editables (Branding,
-          Header, módulos, playlist) aterrizan en DSS5+. Versions y Publish quedan
-          bloqueados hasta DSS6/DSS7.
+          <span className="font-medium">i18n</span> y{' '}
+          <span className="font-medium">Publish</span> ya son editables.{' '}
+          <span className="font-medium">Branding</span> y{' '}
+          <span className="font-medium">Header</span> siguen read-only hasta que
+          aterrice el editor visual de paleta. La playlist y los módulos se
+          editan desde el display editor dedicado (tab{' '}
+          <span className="font-medium">Displays</span>).
         </p>
       </section>
 

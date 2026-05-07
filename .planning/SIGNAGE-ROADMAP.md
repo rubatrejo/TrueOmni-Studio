@@ -69,7 +69,7 @@ aprobación visual entre ambos. Plan completo de diseño en
 
 - [x] **DSS0** — Bootstrap Signage Studio (2026-05-07). Dropdown `digital-displays` activado como `live`. Página única `/studio/digital-displays` con clients dashboard fs-only (sin sub-URLs por decisión UX: cada theme se gestiona desde el dashboard, click → preview del primer display). Cards visualmente idénticas al ClientCard del kiosk (rounded-2xl + hero h-40 + body p-5). Layout dedicado inyecta tokens signage scoped. KV namespace `signage:*` (`kv-store.ts`) preparado pero no cableado runtime — DSS3 lo activa. Resumen en `.planning/DSS0-SUMMARY.md`.
 - [x] **DSS1** — Theme editor con tabs read-only (2026-05-07). Reintroduce `/studio/digital-displays/<slug>` con sidebar de 5 tabs (Branding · Header · Displays · Versions · Publish). Branding/Header/Displays muestran configuración fs read-only. Versions/Publish placeholders DSS6/7. Card del dashboard ahora navega al editor; preview se mueve al header del editor. Resumen en `.planning/DSS1-SUMMARY.md`.
-- [ ] **DSS2** — Display editor (sidebar + preview iframe).
+- [x] **DSS2** — Display editor + preview iframe live (2026-05-07). Ruta `/studio/digital-displays/<slug>/displays/<displaySlug>`. Layout 2-col: sidebar settings + playlist read-only / iframe live 16:9 con Reload + Open-in-new-tab. Click en card del Displays tab navega aquí. Resumen en `.planning/DSS2-SUMMARY.md`.
 - [ ] **DSS3** — Bridge `signage:*` events live preview.
 - [ ] **DSS4** — Playlist editor (drag-to-reorder + Add slide wizard 3 pasos + dayparting popover).
 - [ ] **DSS5** — Module editors (6 forms: Events / SocialWall / VideoImage / Ads / News / Weather) + AI suggest hooks.

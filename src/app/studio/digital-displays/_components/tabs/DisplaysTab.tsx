@@ -1,6 +1,7 @@
 'use client';
 
 import { ExternalLink, Monitor } from 'lucide-react';
+import Link from 'next/link';
 
 import type { SignageDisplayListEntry } from '@/lib/signage/config';
 
@@ -28,7 +29,7 @@ export function DisplaysTab({ clientSlug, displays }: DisplaysTabProps) {
         </h3>
         <p className="mt-0.5 text-[12px] text-zinc-500">
           {displays.length} display{displays.length === 1 ? '' : 's'} configured ·
-          full editor in DSS2+
+          click to open editor
         </p>
       </header>
 
@@ -52,36 +53,41 @@ export function DisplaysTab({ clientSlug, displays }: DisplaysTabProps) {
       ) : (
         <ul className="flex flex-col gap-2">
           {displays.map((d) => {
+            const editorHref = `/studio/digital-displays/${clientSlug}/displays/${d.slug}`;
             const previewHref = `/signage/${clientSlug}/${d.slug}`;
             return (
-              <li
-                key={d.slug}
-                className="flex items-center justify-between gap-4 rounded-lg border border-zinc-200 bg-white px-4 py-3 transition hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="grid h-9 w-9 place-items-center rounded-md bg-zinc-100 text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
-                    <Monitor className="h-4 w-4" strokeWidth={1.75} />
-                  </div>
-                  <div>
-                    <p className="text-[13.5px] font-semibold text-zinc-900 dark:text-white">
-                      {d.name}
-                    </p>
-                    <p className="mt-0.5 text-[11.5px] text-zinc-500">
-                      <span className="font-mono">{d.slug}</span>
-                      <span className="mx-1.5 text-zinc-400 dark:text-zinc-600">·</span>
-                      {d.slidesCount} slide{d.slidesCount === 1 ? '' : 's'}
-                    </p>
-                  </div>
+              <li key={d.slug}>
+                <div className="flex items-center justify-between gap-4 rounded-lg border border-zinc-200 bg-white px-4 py-3 transition hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700">
+                  <Link
+                    href={editorHref}
+                    className="flex flex-1 items-center gap-3"
+                    title={`Open editor for ${d.name}`}
+                  >
+                    <div className="grid h-9 w-9 place-items-center rounded-md bg-zinc-100 text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+                      <Monitor className="h-4 w-4" strokeWidth={1.75} />
+                    </div>
+                    <div>
+                      <p className="text-[13.5px] font-semibold text-zinc-900 dark:text-white">
+                        {d.name}
+                      </p>
+                      <p className="mt-0.5 text-[11.5px] text-zinc-500">
+                        <span className="font-mono">{d.slug}</span>
+                        <span className="mx-1.5 text-zinc-400 dark:text-zinc-600">·</span>
+                        {d.slidesCount} slide{d.slidesCount === 1 ? '' : 's'}
+                      </p>
+                    </div>
+                  </Link>
+                  <a
+                    href={previewHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={`Preview ${d.name} in new tab`}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/80"
+                  >
+                    Preview
+                    <ExternalLink className="h-3 w-3" strokeWidth={2} />
+                  </a>
                 </div>
-                <a
-                  href={previewHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/80"
-                >
-                  Preview
-                  <ExternalLink className="h-3 w-3" strokeWidth={2} />
-                </a>
               </li>
             );
           })}

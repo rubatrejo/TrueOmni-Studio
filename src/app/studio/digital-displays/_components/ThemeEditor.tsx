@@ -17,6 +17,7 @@ import {
   type SignageSectionKey,
 } from './shell/SignageSidebarTabs';
 import { SignageTopBar } from './shell/SignageTopBar';
+import { SignageOnboardingTour } from './SignageOnboardingTour';
 import { BrandingTab } from './tabs/BrandingTab';
 import { DisplaysTab } from './tabs/DisplaysTab';
 import { HeaderTab } from './tabs/HeaderTab';
@@ -221,6 +222,7 @@ export function ThemeEditor({ client, displays, tokensCss }: ThemeEditorProps) {
               ? 'You have unsaved changes'
               : ''}
       </p>
+      <SignageOnboardingTour />
     </div>
     </SignageEditorProvider>
   );

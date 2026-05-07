@@ -2475,6 +2475,88 @@ Audit panorámico — 8 hallazgos cerrados:
 
 ---
 
+### Sesión 2026-05-06 — Nuevo producto Digital Displays · Brainstorming + DS0 (bootstrap)
+
+**Hecho:**
+
+- Brainstorming completo del producto **Digital Displays** (signage no-touch landscape 1920×1080) — plan vivo en `/Users/rubenramirez/.claude/plans/esta-vez-vamos-a-zesty-wilkinson.md`.
+- Catálogo aprobado: **8 templates** (3 fullscreen + 5 composed) cargados a `designs/signage/01..08-*.{svg,png}`.
+- **Milestone Signage Local** definido: DS0..DS15. **Milestone Signage Studio** futuro (DSS0..DSS9, post-gate).
+- **DS0 Bootstrap** (commit `e6becc8`): route group `(signage)`, ruta runtime `/signage/[client]/[display]`, schema Zod 6 módulos (events/social/video-image/ads/news/weather + NewsSourceSchema discriminated manual|rss|api), `<SignageStage>` responsive scale + letterbox tokenizado, loader fs-only, tailwind extension `signage-*` (24 tokens), tokens.css base, placeholder render diagnóstico.
+- Documentos planning: `SIGNAGE-PROJECT.md`, `SIGNAGE-ROADMAP.md`, `DS0-{PLAN,SUMMARY}.md`. Roadmap `.planning/ROADMAP.md` extendido con sección Milestone Signage Local + Studio.
+
+**Verificado:**
+
+- `pnpm typecheck && pnpm lint` limpios. `pnpm kiosk:dev` arranca limpio.
+- `GET /signage/default/lobby-tv` → HTTP 200 con tokens inyectados; 404 si display no existe.
+- Cero touch handlers en árbol signage. Cero hex hardcoded en JSX. Cero tokens del kiosk en signage.
+
+**Decisiones:**
+
+- **Producto independiente del kiosk** (folder `clients-signage/` paralelo, KV namespace `signage:*`, tokens `--signage-*` aislados). Editor signage en Studio será mismo UI que kiosk pero entidad/data separada.
+- **3 niveles navegación Studio futuro**: clients dashboard → client view tabs → display editor sidebar. URL runtime `/signage/<client>/<display>`.
+- **Header position toggle (top/bottom)** + **forecastDays 0|3|5** ya en schema desde DS0; runtime cablea en DS11.
+- **`text-anchor="middle"` en lugar de x-offsets hardcoded**: los SVGs tenían x-offsets calculados para texto literal específico, rompían con texto dinámico. Lección para todos los templates.
+- **Bug recurrente extracción imágenes embedded**: el orden de `<image>` en SVG no siempre coincide con la "lógica" del documento (las patterns en `<defs>` aparecen primero). Extraer desde el group específico (no del SVG completo).
+
+**Fase:** Milestone Signage Local — DS0 cerrado.
+
+---
+
+### Sesión 2026-05-07 — Maratón Milestone Signage Local · DS1..DS10 (8 templates pixel-perfect)
+
+**Hecho (10 commits, 8/8 templates del catálogo):**
+
+- **DS1 (`ce08f3b`)** `<SignageHeader>` pixel-perfect: SVG verbatim del XD, logo TrueOmni paths, current temp + 3 weather icons (sun-rays/sun+cloud/cloud-only) + dividers, 3 forecast cards FRI/SAT/SUN, clock + date right-aligned (`text-anchor="end"` x=1834). Live clock 1s. Open-Meteo API real (Phoenix). Header 80→155px.
+- **DS2 (`ab5143b`)** `<SignagePlayer>` rotación cut + 2 placeholder slides + registry singleton + `load-templates.ts` separado (evita dep circular ESM). `<SignageRuntime>` reemplaza SignagePlaceholder.
+- **DS3 (`ece696d`)** `01-full-events`: 5 imágenes embedded extraídas a `assets/events/`, asset route `/signage-assets/[client]/[...path]`, hero + sub-hero + 3 small cards con label olive `--signage-events-accent`, `parseAsWallClock` + `wrapTitle` + `text-anchor="middle"`.
+- **DS4 (`965b0d4`)** `02-full-ad`: PNG fullscreen 1398×782 extraído, override per-slide.
+- **DS5 (`40ca39f`)** `03-full-video-image`: pool fullbleed via pattern + Play_Icon. Soporte video con `<foreignObject>` + `<video autoPlay muted loop>`.
+- **DS6 (`a308d4b`)** `04-video-events-ad` (composed 3-zone): video top-izq + Booking ad bottom-izq + events column derecha (sub-hero + 3 smalls). Reusa events JPGs.
+- **DS7 (`4412bd5`)** `05-video-2ads`: video top-izq + Olympic vertical der + Pizza horizontal bottom-izq. Slot keys nombrados (`right-ad`, `bottom-ad`). Fix `.gitignore`: `/billboard-*.png` y `/b*-*.png` anclados a raíz para no atrapar assets de `clients-signage/`.
+- **DS8 (`dafedca`)** `06-video-news-ad` + módulo News core: `src/lib/signage/news.ts` con `resolveNewsItems` (manual + RSS regex + API JSON), `<SignageNewsTicker>` rotativo. Olympic ad clipeado via clipPath. Cache header asset route → `no-store, must-revalidate` en dev.
+- **DS9 (`2cefa49`)** `07-video-social-ad`: video + **Social Wall 3×3 grid** (decisión post-review: 9 tiles uniformes, no 6+tweet del SVG). 6 fotos del XD + 3 mock Unsplash. Patterns con `viewBox = dimensiones naturales del image` para fix slice sin letterbox lateral.
+- **DS10 (`dbc8fc4`)** `08-video-social` cierra catálogo + **redesign módulo News**: animación slide-in-right + visible + slide-out-left (CSS keyframes inline), badge categoría con halo pulsante, body line-clamp 3, date 18px medium, progress dots verticales, **QR code reemplaza icono periódico** (apunta a `client.website` nuevo en schema), "Local News" en lugar de "Breaking News".
+
+**Verificado:**
+
+- `pnpm typecheck && pnpm lint` limpios en cada commit.
+- `pnpm kiosk:dev` HTTP 200 en cada sub-fase. Kiosk regression `/` HTTP 200.
+- Aprobación visual de Rubén en cada template (con iteraciones puntuales: DS3 colors/timezone/wrap, DS9 patterns + 3×3 layout, DS10 News redesign).
+- 8/8 templates rotando en `/signage/default/lobby-tv` @ 7-18s/slide con header live + Phoenix weather real.
+
+**Pendiente / siguiente:**
+
+1. **DS11** — Header position toggle (top↔bottom) runtime: schema lo soporta desde DS0; falta cablear el body shift en `<SignageRuntime>` y aplicarlo en los 8 templates.
+2. **DS12** — Transitions reales (fade · slide-left · slide-up). Default por display. Reemplaza el `cut` instantáneo.
+3. **DS13** — Dayparting runtime: filter `effectivePlaylist` según `slide.schedule` cada minuto.
+4. **DS14** — Audio toggle global por display + sleep schedule + i18n strings de signage modules.
+5. **DS15** — Smoke E2E local + **GATE** del Milestone Local (aprobación visual 5 min sin leak).
+6. **Tech debt para post-DS15:**
+   - Tokenizar `#1796d6` (overlay band cyan) → `--signage-band-overlay`. Hardcoded en 4 templates.
+   - Helpers `parseAsWallClock` / `formatDayLabel` / `wrapTitle` duplicados en 01-full-events.tsx + 04-video-events-ad.tsx → factorar a `src/lib/signage/text-helpers.ts`.
+   - Imágenes pesadas (post-2.jpg 5MB, post-5.jpg 3MB) → optimizar.
+   - Re-activar cache `public, max-age=3600` del asset route en producción (sub-fase DSS).
+   - Refactor: extract events column (sub-hero + 3 smalls) shared component cuando se reutilice por 3er template.
+
+**Decisiones tomadas:**
+
+- **3×3 grid en social wall (DS9+DS10)** en lugar de 6+tweet del SVG fuente: más uniforme visualmente. Tweet destacado se reactivará como toggle independiente en DSS5.
+- **Pattern `viewBox` = dimensiones naturales del image** + `preserveAspectRatio="xMidYMid slice"` en el pattern: replicar el SVG fuente verbatim evita letterbox lateral del default `meet` en `<image>`.
+- **`parseAsWallClock`** (parse ISO sin TZ como UTC + format con `timeZone: 'UTC'`): el wall-clock del JSON aparece literal sin shift por timezone server/cliente.
+- **`text-anchor="middle"` universal en labels** (day/weekday): los x-offsets del SVG estaban tuneados para texto literal específico.
+- **Asset route cache `no-store` en dev**: `max-age=3600` retenía versiones obsoletas cuando re-extraje assets. Re-activar en producción.
+- **Redesign News > replicar verbatim**: a petición del usuario, animación slide cinematográfica + badge pulsante + line-clamp + QR. Mejora UX (atención periférica + accionable: scan → web cliente).
+- **QR a `client.website`**: schema gana campo opcional `website`. Reemplaza icono periódico estático del SVG fuente con elemento accionable.
+
+**Tokens nuevos:** ninguno (reutilizados los `--signage-*` de DS0).
+
+**Deps añadidas:** ninguna (qrcode.react ya estaba en el repo, reusado de share-screen.tsx del kiosk).
+
+**Fase:** Milestone Signage Local — DS10/15 cerrados (8 templates pixel-perfect ✅). Restan DS11..DS15.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

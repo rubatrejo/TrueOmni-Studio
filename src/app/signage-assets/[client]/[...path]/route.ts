@@ -59,7 +59,9 @@ export async function GET(
   return new NextResponse(new Uint8Array(data), {
     headers: {
       'Content-Type': contentType,
-      'Cache-Control': 'public, max-age=3600',
+      // Dev: cero cache para que cambios en assets se reflejen sin force-reload.
+      // En producción podemos reactivar `public, max-age=3600` (sub-fase tardía).
+      'Cache-Control': 'no-store, must-revalidate',
     },
   });
 }

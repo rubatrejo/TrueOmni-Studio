@@ -42,6 +42,13 @@
       "slots": [],
       "durationMs": 7000,
       "schedule": { "kind": "always", "hideOutsideSchedule": true }
+    },
+    {
+      "id": "slide-video-news-ad",
+      "templateId": "06-video-news-ad",
+      "slots": [],
+      "durationMs": 14000,
+      "schedule": { "kind": "always", "hideOutsideSchedule": true }
     }
   ]
 }

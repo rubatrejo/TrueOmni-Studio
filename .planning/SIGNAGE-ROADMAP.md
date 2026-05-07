@@ -22,7 +22,7 @@ aprobación visual entre ambos. Plan completo de diseño en
 - [x] **DS5** — Template `03-full-video-image` (2026-05-07). Image fullbleed con pattern verbatim del XD, viewBox clipea franja header, Play_Icon decorativo, soporte video via foreignObject. Resumen en `.planning/DS5-SUMMARY.md`.
 - [x] **DS6** — Template `04-video-events-ad` (2026-05-07). 3 zonas (video top-izq + ad bottom-izq + events column derecha). Reusa pool.png y events JPGs ya extraídos; nuevo bottom-banner.jpg. Resumen en `.planning/DS6-SUMMARY.md`.
 - [x] **DS7** — Template `05-video-2ads` (2026-05-07). Video top-izq + ad vertical der (World Health) + ad horizontal bottom-izq (Pizza). Slot keys nombrados (right-ad, bottom-ad). Resumen en `.planning/DS7-SUMMARY.md`.
-- [ ] **DS8** — Template `06-video-news-ad` + módulo **News** (manual + RSS/API + slideshow rotation).
+- [x] **DS8** — Template `06-video-news-ad` + módulo **News** (2026-05-07). Manual + RSS + API resolver, ticker rotativo en foreignObject, Olympic ad clipeado, header right-aligned, cache no-store en dev. Resumen en `.planning/DS8-SUMMARY.md`.
 - [ ] **DS9** — Template `07-video-social-ad` + módulo Social Wall.
 - [ ] **DS10** — Template `08-video-social` (composed 2-zone).
 - [ ] **DS11** — Header position runtime (top↔bottom + body shift) en los 8 templates.

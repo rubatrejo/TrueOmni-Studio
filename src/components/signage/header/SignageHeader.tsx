@@ -70,27 +70,30 @@ export function SignageHeader({ client, weather, initialClock }: SignageHeaderPr
       {/* Header_Background */}
       <rect width={HEADER_W} height={HEADER_H} fill="hsl(var(--signage-header-bg))" />
 
-      {/* Display_Time_Info — clock + date right (translate 1693, 29) */}
-      <g transform="translate(1693 29)">
+      {/* Display_Time_Info — clock + date right-aligned al edge derecho del SVG.
+          El SVG fuente posicionaba en (1693, 29) con anchor start; usamos
+          text-anchor="end" en x=1834 para que strings de longitud variable
+          (5:50 AM / 11:30 PM / Wed May 7 / Mon Apr 15) queden right-aligned. */}
+      <g transform="translate(1834 29)">
         <text
-          transform="translate(4)"
           fill="hsl(var(--signage-header-text))"
           fontSize="40"
           fontFamily="Montserrat-Bold, Montserrat"
           fontWeight="700"
+          textAnchor="end"
         >
-          <tspan x="6.88" y="39">
+          <tspan x="0" y="39">
             {clockText}
           </tspan>
         </text>
         <text
-          transform="translate(0 56)"
           fill="hsl(var(--signage-header-text))"
           fontSize="28"
           fontFamily="Montserrat-Medium, Montserrat"
           fontWeight="500"
+          textAnchor="end"
         >
-          <tspan x="18.844" y="27">
+          <tspan x="0" y="83">
             {dateText}
           </tspan>
         </text>

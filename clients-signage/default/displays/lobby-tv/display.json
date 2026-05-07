@@ -4,7 +4,7 @@
   "settings": {
     "targetResolution": "1080p",
     "audio": false,
-    "defaultDurationMs": 8000,
+    "defaultDurationMs": 7000,
     "defaultTransition": "cut"
   },
   "playlist": [
@@ -12,21 +12,28 @@
       "id": "slide-events",
       "templateId": "01-full-events",
       "slots": [],
-      "durationMs": 10000,
+      "durationMs": 7000,
       "schedule": { "kind": "always", "hideOutsideSchedule": true }
     },
     {
       "id": "slide-ad",
       "templateId": "02-full-ad",
       "slots": [],
-      "durationMs": 8000,
+      "durationMs": 7000,
       "schedule": { "kind": "always", "hideOutsideSchedule": true }
     },
     {
       "id": "slide-video",
       "templateId": "03-full-video-image",
       "slots": [],
-      "durationMs": 8000,
+      "durationMs": 7000,
+      "schedule": { "kind": "always", "hideOutsideSchedule": true }
+    },
+    {
+      "id": "slide-video-events-ad",
+      "templateId": "04-video-events-ad",
+      "slots": [],
+      "durationMs": 7000,
       "schedule": { "kind": "always", "hideOutsideSchedule": true }
     }
   ]

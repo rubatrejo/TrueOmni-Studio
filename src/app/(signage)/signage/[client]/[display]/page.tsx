@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { SignagePlaceholder } from '@/components/signage/runtime/SignagePlaceholder';
 import { SignageStage } from '@/components/signage/stage/SignageStage';
 import { loadSignageClient, loadSignageDisplay } from '@/lib/signage/config';
+import { mapWeatherToHeader } from '@/lib/signage/weather-adapter';
+import { fetchWeather } from '@/lib/weather';
 
 interface PageProps {
   params: Promise<{ client: string; display: string }>;
@@ -25,9 +27,26 @@ export default async function SignageDisplayPage({ params, searchParams }: PageP
     notFound();
   }
 
+  // Weather server-side (cacheado 10min via Next revalidate). Si falla, header
+  // muestra "--°" placeholders sin tirar la página.
+  let weatherData = null;
+  try {
+    weatherData = await fetchWeather(clientCfg.location.lat, clientCfg.location.lon);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn(`[signage] weather fetch falló para ${clientSlug}:`, (err as Error).message);
+  }
+
+  const weather = mapWeatherToHeader(
+    weatherData,
+    clientCfg.locale,
+    clientCfg.timezone,
+    clientCfg.header.forecastDays,
+  );
+
   return (
     <SignageStage debug={debug}>
-      <SignagePlaceholder client={clientCfg} display={displayCfg} />
+      <SignagePlaceholder client={clientCfg} display={displayCfg} weather={weather} />
     </SignageStage>
   );
 }

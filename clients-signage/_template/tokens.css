@@ -41,7 +41,7 @@
   /* ---------------------------------------------------------------------- */
   --signage-header-bg: var(--signage-brand-primary);
   --signage-header-text: var(--signage-text-on-brand);
-  --signage-header-height: 80px;
+  --signage-header-height: 155px;
 
   /* ---------------------------------------------------------------------- */
   /*  ACCENTS POR MÓDULO (defaults derivados — overrideables por cliente)   */

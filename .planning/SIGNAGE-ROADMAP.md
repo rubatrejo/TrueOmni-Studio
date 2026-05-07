@@ -15,7 +15,7 @@ aprobación visual entre ambos. Plan completo de diseño en
 ### Sub-fases
 
 - [x] **DS0** — Bootstrap (2026-05-06). Route group `(signage)`, ruta runtime `/signage/[client]/[display]`, `clients-signage/_template/` + `default/`, schema Zod base, `<SignageStage>` responsive (scale 1.0→2.0 + letterbox), loader fs-only, tailwind extension `signage-*`, tokens.css base, placeholder render. Resumen en `.planning/DS0-SUMMARY.md`.
-- [ ] **DS1** — `<SignageHeader>` pixel-perfect (logo + 5-day weather + clock). Position toggle (top/bottom) + body shift. Configurable a nivel cliente.
+- [x] **DS1** — `<SignageHeader>` pixel-perfect (2026-05-06). Logo TrueOmni verbatim + current temp + 3 weather icons (sun-rays / sun+cloud / cloud-only) + 3 forecast cards FRI/SAT/SUN con high/low + clock + date. Live updates cada 1s. Open-Meteo API real. Resumen en `.planning/DS1-SUMMARY.md`. Aprobación visual confirmada.
 - [ ] **DS2** — `<SignagePlayer>` rotación básica + transition `cut`. Sin dayparting. 2 placeholder slides para verificar el loop.
 - [ ] **DS3** — Template `01-full-events` pixel-perfect (incluye módulo Events).
 - [ ] **DS4** — Template `02-full-ad` pixel-perfect (incluye módulo Ads).

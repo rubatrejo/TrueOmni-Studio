@@ -15,6 +15,7 @@ import './01-full-events';
 import './02-full-ad';
 import './03-full-video-image';
 import './04-video-events-ad';
+import './05-video-2ads';
 // Próximos:
 // import './02-full-ad';          // DS4
 // import './03-full-video-image'; // DS5

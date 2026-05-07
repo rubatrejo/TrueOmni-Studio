@@ -53,8 +53,9 @@ coverage/
 .playwright-mcp/
 *-render.png
 # Screenshots dev scratchpad (billboard-*.png, b*-*.png)
-billboard-*.png
-b*-*.png
+# Anclados a la raíz para no atrapar assets en clients/, clients-signage/, etc.
+/billboard-*.png
+/b*-*.png
 
 # Debug screenshots de Playwright (transient)
 /*.png

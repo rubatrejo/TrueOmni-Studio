@@ -4,15 +4,15 @@
   "settings": {
     "targetResolution": "1080p",
     "audio": false,
-    "defaultDurationMs": 5000,
+    "defaultDurationMs": 8000,
     "defaultTransition": "cut"
   },
   "playlist": [
     {
-      "id": "slide-a",
-      "templateId": "placeholder-a",
+      "id": "slide-events",
+      "templateId": "01-full-events",
       "slots": [],
-      "durationMs": 5000,
+      "durationMs": 12000,
       "schedule": { "kind": "always", "hideOutsideSchedule": true }
     },
     {

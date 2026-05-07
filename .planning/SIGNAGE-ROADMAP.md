@@ -17,7 +17,7 @@ aprobación visual entre ambos. Plan completo de diseño en
 - [x] **DS0** — Bootstrap (2026-05-06). Route group `(signage)`, ruta runtime `/signage/[client]/[display]`, `clients-signage/_template/` + `default/`, schema Zod base, `<SignageStage>` responsive (scale 1.0→2.0 + letterbox), loader fs-only, tailwind extension `signage-*`, tokens.css base, placeholder render. Resumen en `.planning/DS0-SUMMARY.md`.
 - [x] **DS1** — `<SignageHeader>` pixel-perfect (2026-05-06). Logo TrueOmni verbatim + current temp + 3 weather icons (sun-rays / sun+cloud / cloud-only) + 3 forecast cards FRI/SAT/SUN con high/low + clock + date. Live updates cada 1s. Open-Meteo API real. Resumen en `.planning/DS1-SUMMARY.md`. Aprobación visual confirmada.
 - [x] **DS2** — `<SignagePlayer>` rotación básica (2026-05-06). Cut transition + 2 placeholder slides A/B + registry singleton + auto-load. Rotación confirmada cada 5s. Resumen en `.planning/DS2-SUMMARY.md`.
-- [ ] **DS3** — Template `01-full-events` pixel-perfect (incluye módulo Events).
+- [x] **DS3** — Template `01-full-events` pixel-perfect (2026-05-06). 5 events con images extraídas del SVG verbatim, asset route signage, olive label centered, parseAsWallClock fix timezone, title wrap 2 lines. Resumen en `.planning/DS3-SUMMARY.md`.
 - [ ] **DS4** — Template `02-full-ad` pixel-perfect (incluye módulo Ads).
 - [ ] **DS5** — Template `03-full-video-image` pixel-perfect (incluye módulo Video/Image).
 - [ ] **DS6** — Template `04-video-events-ad` (composed 3-zone).

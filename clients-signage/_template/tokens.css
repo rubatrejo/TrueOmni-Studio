@@ -46,7 +46,8 @@
   /* ---------------------------------------------------------------------- */
   /*  ACCENTS POR MÓDULO (defaults derivados — overrideables por cliente)   */
   /* ---------------------------------------------------------------------- */
-  --signage-events-accent: var(--signage-brand-secondary);
+  /* Olive #b9bd39 — color del label de eventos en el SVG fuente. */
+  --signage-events-accent: 62 53% 48%;
   --signage-social-accent: var(--signage-brand-secondary);
   --signage-news-accent: var(--signage-brand-accent);
   --signage-weather-accent: var(--signage-brand-secondary);

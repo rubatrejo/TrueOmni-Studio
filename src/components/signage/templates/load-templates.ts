@@ -11,8 +11,8 @@
 
 import './PlaceholderA';
 import './PlaceholderB';
+import './01-full-events';
 // Próximos:
-// import './01-full-events';      // DS3
 // import './02-full-ad';          // DS4
 // import './03-full-video-image'; // DS5
 // import './04-video-events-ad';  // DS6

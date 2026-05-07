@@ -6,6 +6,7 @@ import { HslColorPicker, type HslColor } from 'react-colorful';
 
 import type { SignageClientResolved } from '@/lib/signage/schema';
 
+import { FontSelector } from '../../../_components/FontSelector';
 import { useThemeEditStore } from '../../_lib/theme-edit-store';
 import { SignageMediaField } from '../display/modules/SignageMediaField';
 
@@ -148,26 +149,36 @@ export function BrandingTab({ client, tokensCss }: BrandingTabProps) {
         />
       </Section>
 
-      <Section title="Fonts" subtitle="Editor de fonts y custom upload — DSS-fix6.">
-        <DataRow
-          label="Default"
-          value={
-            <code className="font-mono text-[12px]">
-              {draft?.branding.fonts.default ?? client.branding.fonts.default}
-            </code>
-          }
+      <Section
+        title="Fonts"
+        subtitle="Google Fonts curados. Cambia y se carga live en el preview."
+      >
+        <FontSelector
+          kind="Body font"
+          value={draft?.branding.fonts.default ?? client.branding.fonts.default}
+          onChange={(next) => {
+            const fonts = draft?.branding.fonts ?? client.branding.fonts;
+            updateBranding({ fonts: { ...fonts, default: next } });
+          }}
         />
-        <DataRow
-          label="Display"
+        <FontSelector
+          kind="Display font (optional)"
           value={
-            draft?.branding.fonts.display ?? client.branding.fonts.display ? (
-              <code className="font-mono text-[12px]">
-                {draft?.branding.fonts.display ?? client.branding.fonts.display}
-              </code>
-            ) : (
-              <EmptyHint>not configured</EmptyHint>
-            )
+            draft?.branding.fonts.display ??
+            client.branding.fonts.display ??
+            (draft?.branding.fonts.default ?? client.branding.fonts.default)
           }
+          onChange={(next) => {
+            const fonts = draft?.branding.fonts ?? client.branding.fonts;
+            const fallback = fonts.default;
+            const nextFonts: { default: string; display?: string } = {
+              default: fonts.default,
+            };
+            if (next && next !== fallback) {
+              nextFonts.display = next;
+            }
+            updateBranding({ fonts: nextFonts });
+          }}
         />
       </Section>
 
@@ -407,21 +418,6 @@ function Section({
       </header>
       <div className="flex flex-col gap-2">{children}</div>
     </section>
-  );
-}
-
-function DataRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4 border-b border-zinc-100 pb-2 text-[13px] last:border-0 last:pb-0 dark:border-zinc-900">
-      <span className="text-zinc-500">{label}</span>
-      <span className="text-right text-zinc-800 dark:text-zinc-200">{value}</span>
-    </div>
   );
 }
 

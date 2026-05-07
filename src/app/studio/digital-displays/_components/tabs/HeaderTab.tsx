@@ -1,11 +1,15 @@
 'use client';
 
+import { HslColorPicker, type HslColor } from 'react-colorful';
+
 import type {
   SignageClientResolved,
   SignageHeader,
+  SignageHeaderBackground,
 } from '@/lib/signage/schema';
 
 import { useThemeEditStore } from '../../_lib/theme-edit-store';
+import { SignageMediaField } from '../display/modules/SignageMediaField';
 
 /**
  * Tab `Header` editable.
@@ -146,41 +150,228 @@ export function HeaderTab({ client }: HeaderTabProps) {
         </Field>
       </Section>
 
-      <Section title="Background" subtitle="Source de fondo del header">
-        <Field label="Kind">
-          <span className="rounded bg-zinc-100 px-2 py-1 font-mono text-[11.5px] text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
-            {h.background.kind}
-          </span>
-        </Field>
-        {h.background.kind === 'color' ? (
-          <Field label="Color">
-            <code className="font-mono text-[12px] text-zinc-700 dark:text-zinc-300">
-              {h.background.color}
-            </code>
-          </Field>
-        ) : null}
-        {h.background.kind === 'gradient' ? (
-          <>
-            <Field label="From">
-              <code className="font-mono text-[12px]">{h.background.from}</code>
-            </Field>
-            <Field label="To">
-              <code className="font-mono text-[12px]">{h.background.to}</code>
-            </Field>
-          </>
-        ) : null}
-        {h.background.kind === 'image' ? (
-          <Field label="Source">
-            <code className="truncate font-mono text-[12px]">{h.background.src}</code>
-          </Field>
-        ) : null}
-        <p className="text-[11px] italic text-zinc-400">
-          Editor visual de gradient + upload de imagen aterriza con el asset
-          endpoint.
-        </p>
+      <Section title="Background" subtitle="Color sólido, gradient, o imagen">
+        <BackgroundEditor
+          background={h.background}
+          onChange={(bg) => updateHeader({ background: bg })}
+        />
       </Section>
     </div>
   );
+}
+
+// ---------------------------------------------------------------------------
+//  Background editor
+// ---------------------------------------------------------------------------
+
+const BG_KINDS: ReadonlyArray<{
+  value: SignageHeaderBackground['kind'];
+  label: string;
+}> = [
+  { value: 'color', label: 'Color' },
+  { value: 'gradient', label: 'Gradient' },
+  { value: 'image', label: 'Image' },
+];
+
+function BackgroundEditor({
+  background,
+  onChange,
+}: {
+  background: SignageHeaderBackground;
+  onChange: (next: SignageHeaderBackground) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-4">
+      <Field label="Kind">
+        <SegmentedToggle
+          options={BG_KINDS.map((b) => ({ value: b.value, label: b.label }))}
+          value={background.kind}
+          onChange={(v) => {
+            if (v === background.kind) return;
+            if (v === 'color') {
+              onChange({
+                kind: 'color',
+                color:
+                  background.kind === 'gradient'
+                    ? background.from
+                    : 'hsl(211 100% 25%)',
+              });
+            } else if (v === 'gradient') {
+              onChange({
+                kind: 'gradient',
+                from:
+                  background.kind === 'color' ? background.color : 'hsl(211 100% 25%)',
+                to: 'hsl(200 100% 50%)',
+                angle:
+                  background.kind === 'gradient' ? background.angle ?? 90 : 90,
+              });
+            } else {
+              onChange({
+                kind: 'image',
+                src: background.kind === 'image' ? background.src : '',
+              });
+            }
+          }}
+        />
+      </Field>
+
+      {background.kind === 'color' ? (
+        <CssColorPickerField
+          label="Color"
+          value={background.color}
+          onChange={(v) => onChange({ kind: 'color', color: v })}
+        />
+      ) : null}
+
+      {background.kind === 'gradient' ? (
+        <>
+          <CssColorPickerField
+            label="From"
+            value={background.from}
+            onChange={(v) =>
+              onChange({
+                kind: 'gradient',
+                from: v,
+                to: background.to,
+                angle: background.angle,
+              })
+            }
+          />
+          <CssColorPickerField
+            label="To"
+            value={background.to}
+            onChange={(v) =>
+              onChange({
+                kind: 'gradient',
+                from: background.from,
+                to: v,
+                angle: background.angle,
+              })
+            }
+          />
+          <Field label={`Angle ${background.angle ?? 90}°`}>
+            <input
+              type="range"
+              min={0}
+              max={359}
+              value={background.angle ?? 90}
+              onChange={(e) =>
+                onChange({
+                  kind: 'gradient',
+                  from: background.from,
+                  to: background.to,
+                  angle: Number(e.target.value),
+                })
+              }
+              className="w-32 accent-zinc-700 dark:accent-zinc-300"
+            />
+          </Field>
+          <GradientPreview
+            from={background.from}
+            to={background.to}
+            angle={background.angle ?? 90}
+          />
+        </>
+      ) : null}
+
+      {background.kind === 'image' ? (
+        <SignageMediaField
+          label="Image"
+          hint="Imagen de fondo del header. Cae al color base si está vacío."
+          aspect="12/1"
+          kind="image"
+          value={background.src}
+          onChange={(next) =>
+            onChange({ kind: 'image', src: next?.src ?? '' })
+          }
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function GradientPreview({
+  from,
+  to,
+  angle,
+}: {
+  from: string;
+  to: string;
+  angle: number;
+}) {
+  return (
+    <div
+      className="h-12 w-full rounded-md border border-zinc-200 dark:border-zinc-800"
+      style={{
+        background: `linear-gradient(${angle}deg, ${from}, ${to})`,
+      }}
+      aria-hidden
+    />
+  );
+}
+
+/**
+ * Color picker para una CSS color string libre (`hsl(...)` o `#hex`). Detecta
+ * formato HSL y abre el HslColorPicker; si no, deja editar como texto.
+ */
+function CssColorPickerField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const hsl = parseCssHsl(value);
+  return (
+    <div className="flex flex-col gap-2 rounded-md border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900/40">
+      <div className="flex items-center justify-between gap-3 text-[12.5px]">
+        <span className="text-zinc-500">{label}</span>
+        <span className="flex items-center gap-2">
+          <span
+            className="h-6 w-6 rounded border border-zinc-200 dark:border-zinc-800"
+            style={{ backgroundColor: value || '#888' }}
+            aria-hidden
+          />
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-44 rounded border border-zinc-200 bg-white px-2 py-1 font-mono text-[11.5px] text-zinc-700 outline-none transition focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300"
+            placeholder="hsl(H S% L%) or #rrggbb"
+          />
+        </span>
+      </div>
+      {hsl ? (
+        <HslColorPicker
+          color={hsl}
+          onChange={(c: HslColor) => onChange(formatCssHsl(c))}
+          style={{ width: '100%', height: 130 }}
+        />
+      ) : (
+        <p className="text-[11px] italic text-zinc-500">
+          HSL formato `hsl(H S% L%)` activa el color picker visual.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function parseCssHsl(value: string): HslColor | null {
+  const m = value
+    .trim()
+    .match(/^hsl\(\s*(\d+(?:\.\d+)?)\s*[, ]\s*(\d+(?:\.\d+)?)%\s*[, ]\s*(\d+(?:\.\d+)?)%\s*\)$/i);
+  if (!m) return null;
+  return {
+    h: Math.round(Number(m[1])),
+    s: Math.round(Number(m[2])),
+    l: Math.round(Number(m[3])),
+  };
+}
+
+function formatCssHsl(c: HslColor): string {
+  return `hsl(${Math.round(c.h)} ${Math.round(c.s)}% ${Math.round(c.l)}%)`;
 }
 
 // ---------------------------------------------------------------------------

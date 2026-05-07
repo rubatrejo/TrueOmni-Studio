@@ -12,14 +12,14 @@
       "id": "slide-events",
       "templateId": "01-full-events",
       "slots": [],
-      "durationMs": 12000,
+      "durationMs": 10000,
       "schedule": { "kind": "always", "hideOutsideSchedule": true }
     },
     {
-      "id": "slide-b",
-      "templateId": "placeholder-b",
+      "id": "slide-ad",
+      "templateId": "02-full-ad",
       "slots": [],
-      "durationMs": 5000,
+      "durationMs": 8000,
       "schedule": { "kind": "always", "hideOutsideSchedule": true }
     }
   ]

@@ -1,3 +1,5 @@
+import { QRCodeSVG } from 'qrcode.react';
+
 import { SignageNewsTicker } from '@/components/signage/news/SignageNewsTicker';
 
 import { registerTemplate } from './registry';
@@ -56,47 +58,25 @@ function PlayIconOverlay({ x, y }: { x: number; y: number }) {
   );
 }
 
-function NewspaperIcon() {
-  // Path verbatim del SVG (Icon_core-newspaper) translate(48.875 871.937).
+/**
+ * QR code que enlaza a la web del cliente. Reemplaza el icono de periódico
+ * del SVG fuente — invita al usuario a escanear y visitar la página oficial.
+ * Renderea via foreignObject porque QRCodeSVG es HTML/SVG component externo.
+ */
+function NewsQrCode({ url }: { url: string }) {
   return (
-    <g transform="translate(48.875 871.937)">
-      <path
-        d="M25.561,5.063V112.311a6.788,6.788,0,1,1-13.576,0v-80.1H1.125v80.1a17.668,17.668,0,0,0,17.648,17.648H146.385a17.668,17.668,0,0,0,17.648-17.648V5.063ZM153.173,112.311a6.8,6.8,0,0,1-6.788,6.788H35.064a17.554,17.554,0,0,0,1.358-6.788V15.923H153.173Z"
-        fill="hsl(var(--signage-text-on-brand))"
-      />
-      <path
-        d="M52.376,21.94H46.013a4.527,4.527,0,1,0,0,9.055h6.363a4.527,4.527,0,1,0,0-9.055Z"
-        fill="hsl(var(--signage-text-on-brand))"
-      />
-      <path
-        d="M52.376,40.04H46.013a4.527,4.527,0,1,0,0,9.054h6.363a4.527,4.527,0,1,0,0-9.054Z"
-        fill="hsl(var(--signage-text-on-brand))"
-      />
-      <path
-        d="M52.376,58.14H46.013a4.527,4.527,0,1,0,0,9.054h6.363a4.527,4.527,0,1,0,0-9.054Z"
-        fill="hsl(var(--signage-text-on-brand))"
-      />
-      <path
-        d="M89.485,58.14H67.762a4.527,4.527,0,1,0,0,9.054H89.485a4.527,4.527,0,0,0,0-9.054Z"
-        fill="hsl(var(--signage-text-on-brand))"
-      />
-      <path
-        d="M129.62,21.94H68.214a4.527,4.527,0,1,0,0,9.055H129.62a4.527,4.527,0,1,0,0-9.055Z"
-        fill="hsl(var(--signage-text-on-brand))"
-      />
-      <path
-        d="M125.092,40.04H68.214a4.527,4.527,0,1,0,0,9.054h56.879a4.527,4.527,0,1,0,0-9.054Z"
-        fill="hsl(var(--signage-text-on-brand))"
-      />
-      <path
-        d="M129.62,76.24H46.013a4.527,4.527,0,1,0,0,9.055H129.62a4.527,4.527,0,1,0,0-9.055Z"
-        fill="hsl(var(--signage-text-on-brand))"
-      />
-      <path
-        d="M129.62,94.34H46.013a4.527,4.527,0,1,0,0,9.054H129.62a4.527,4.527,0,1,0,0-9.054Z"
-        fill="hsl(var(--signage-text-on-brand))"
-      />
-    </g>
+    <foreignObject x="48" y="850" width="180" height="180">
+      <div className="flex h-full w-full items-center justify-center rounded-[12px] bg-signage-text-on-brand p-3">
+        <QRCodeSVG
+          value={url}
+          size={156}
+          level="M"
+          bgColor="transparent"
+          fgColor="hsl(var(--signage-brand-primary))"
+          marginSize={0}
+        />
+      </div>
+    </foreignObject>
   );
 }
 
@@ -152,9 +132,10 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
         />
       </g>
 
-      {/* Bottom News — background rect cyan + icon + foreignObject con ticker */}
+      {/* Bottom News — background rect cyan + QR + foreignObject con ticker.
+          QR ocupa la franja izquierda donde antes iba el icono periódico. */}
       <rect width="1144" height="281" transform="translate(0 799)" fill="#1796d6" />
-      <NewspaperIcon />
+      <NewsQrCode url={client.website ?? 'https://trueomni.com'} />
       <foreignObject x="264" y="817" width="852" height="245">
         <SignageNewsTicker items={newsItems} intervalSec={newsInterval} />
       </foreignObject>

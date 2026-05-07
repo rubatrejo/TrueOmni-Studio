@@ -297,6 +297,8 @@ export const SignageClientFileSchema = z.object({
   locale: z.enum(['en', 'es', 'fr', 'de', 'pt', 'ja']),
   timezone: z.string().min(1),
   location: SignageLocationSchema,
+  /** URL pública del cliente (usado en QR codes que lleven al usuario a la web del cliente). */
+  website: z.string().url().optional(),
   branding: SignageBrandingSchema,
   header: SignageHeaderSchema,
   displays: z.array(z.string().min(1)),

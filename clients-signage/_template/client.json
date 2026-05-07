@@ -8,6 +8,7 @@
     "lat": 33.4484,
     "lon": -112.074
   },
+  "website": "https://example.com",
   "branding": {
     "logos": {
       "default": "assets/logo.svg"

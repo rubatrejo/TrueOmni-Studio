@@ -18,7 +18,8 @@ import './04-video-events-ad';
 import './05-video-2ads';
 import './06-video-news-ad';
 import './07-video-social-ad';
-// Próximos:
+import './08-video-social';
+// 8/8 templates registrados — catálogo completo del Milestone Signage Local.
 // import './02-full-ad';          // DS4
 // import './03-full-video-image'; // DS5
 // import './04-video-events-ad';  // DS6

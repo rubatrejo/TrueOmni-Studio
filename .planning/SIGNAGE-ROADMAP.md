@@ -24,7 +24,7 @@ aprobación visual entre ambos. Plan completo de diseño en
 - [x] **DS7** — Template `05-video-2ads` (2026-05-07). Video top-izq + ad vertical der (World Health) + ad horizontal bottom-izq (Pizza). Slot keys nombrados (right-ad, bottom-ad). Resumen en `.planning/DS7-SUMMARY.md`.
 - [x] **DS8** — Template `06-video-news-ad` + módulo **News** (2026-05-07). Manual + RSS + API resolver, ticker rotativo en foreignObject, Olympic ad clipeado, header right-aligned, cache no-store en dev. Resumen en `.planning/DS8-SUMMARY.md`.
 - [x] **DS9** — Template `07-video-social-ad` + módulo Social Wall (2026-05-07). 3×3 grid de 9 tiles (decisión post-review: layout uniforme en lugar de 6+tweet del SVG), gradient azul brand-primary, patterns verbatim con dimensiones naturales por image. 6 fotos del XD + 3 mock Unsplash. Resumen en `.planning/DS9-SUMMARY.md`.
-- [ ] **DS10** — Template `08-video-social` (composed 2-zone).
+- [x] **DS10** — Template `08-video-social` + redesign módulo News (2026-05-07). 8/8 templates del catálogo completos. News con animación slide-in/out, badge pulsante, line-clamp 3, QR a website del cliente, "Local News" labels. Resumen en `.planning/DS10-SUMMARY.md`.
 - [ ] **DS11** — Header position runtime (top↔bottom + body shift) en los 8 templates.
 - [ ] **DS12** — Transitions reales (fade · slide-left · slide-up). Default por display.
 - [ ] **DS13** — Dayparting runtime (filter por wall-clock cada minuto).

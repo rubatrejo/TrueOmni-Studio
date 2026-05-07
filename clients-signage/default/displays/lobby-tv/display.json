@@ -47,12 +47,19 @@
       "id": "slide-video-news-ad",
       "templateId": "06-video-news-ad",
       "slots": [],
-      "durationMs": 14000,
+      "durationMs": 18000,
       "schedule": { "kind": "always", "hideOutsideSchedule": true }
     },
     {
       "id": "slide-video-social-ad",
       "templateId": "07-video-social-ad",
+      "slots": [],
+      "durationMs": 7000,
+      "schedule": { "kind": "always", "hideOutsideSchedule": true }
+    },
+    {
+      "id": "slide-video-social",
+      "templateId": "08-video-social",
       "slots": [],
       "durationMs": 7000,
       "schedule": { "kind": "always", "hideOutsideSchedule": true }

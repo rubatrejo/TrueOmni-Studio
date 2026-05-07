@@ -20,7 +20,7 @@ import type { SignageTemplate, SignageTemplateRenderProps } from './types';
  * Tokens consumidos:
  *  - `--signage-events-accent` (label olive `#b9bd39` por default)
  *  - `--signage-text-on-brand` (textos blancos)
- *  - `#1796d6` overlay del bottom band — TODO tokenizar en sub-fase tardía
+ *  - Bottom band overlay tokenizado vía `--signage-band-overlay`.
  *    (es color del overlay, no brand del cliente).
  *
  * Día y mes se derivan de `event.startsAt` con locale del cliente.
@@ -185,7 +185,7 @@ function Render({ client }: SignageTemplateRenderProps) {
                 width="1144"
                 height="100"
                 transform="translate(-262.5 693.1)"
-                fill="#1796d6"
+                fill="hsl(var(--signage-band-overlay))"
                 fillOpacity="0.903"
               />
             </g>
@@ -247,7 +247,7 @@ function Render({ client }: SignageTemplateRenderProps) {
                 width="774"
                 height="100"
                 transform="translate(0 363)"
-                fill="#1796d6"
+                fill="hsl(var(--signage-band-overlay))"
                 fillOpacity="0.897"
               />
               <text
@@ -311,7 +311,7 @@ function Render({ client }: SignageTemplateRenderProps) {
                   width="258"
                   height="100"
                   transform="translate(-253.5 359.871)"
-                  fill="#1796d6"
+                  fill="hsl(var(--signage-band-overlay))"
                   fillOpacity="0.904"
                 />
               </g>
@@ -388,7 +388,7 @@ function Render({ client }: SignageTemplateRenderProps) {
                   width="258"
                   height="100"
                   transform="translate(-262.5 362)"
-                  fill="#1796d6"
+                  fill="hsl(var(--signage-band-overlay))"
                   fillOpacity="0.8"
                 />
               </g>
@@ -458,7 +458,7 @@ function Render({ client }: SignageTemplateRenderProps) {
                   width="258"
                   height="100"
                   transform="translate(-262.532 362)"
-                  fill="#1796d6"
+                  fill="hsl(var(--signage-band-overlay))"
                   fillOpacity="0.901"
                 />
               </g>

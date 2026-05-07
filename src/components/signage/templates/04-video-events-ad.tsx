@@ -202,7 +202,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               width="774"
               height="100"
               transform="translate(0 363)"
-              fill="#1796d6"
+              fill="hsl(var(--signage-band-overlay))"
               fillOpacity="0.897"
             />
             <text
@@ -263,7 +263,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
                 width="258"
                 height="100"
                 transform="translate(-253.5 359.871)"
-                fill="#1796d6"
+                fill="hsl(var(--signage-band-overlay))"
                 fillOpacity="0.904"
               />
             </g>
@@ -337,7 +337,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
                 width="258"
                 height="100"
                 transform="translate(-262.5 362)"
-                fill="#1796d6"
+                fill="hsl(var(--signage-band-overlay))"
                 fillOpacity="0.8"
               />
             </g>
@@ -404,7 +404,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
                 width="258"
                 height="100"
                 transform="translate(-262.532 362)"
-                fill="#1796d6"
+                fill="hsl(var(--signage-band-overlay))"
                 fillOpacity="0.901"
               />
             </g>

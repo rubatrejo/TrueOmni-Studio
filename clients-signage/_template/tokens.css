@@ -54,6 +54,9 @@
   --signage-ads-accent: var(--signage-brand-accent);
   --signage-video-accent: var(--signage-brand-primary);
 
+  /* Cyan band overlay — antes hardcoded #1796d6 en templates 01/04/06. */
+  --signage-band-overlay: 200 81% 47%;
+
   /* ---------------------------------------------------------------------- */
   /*  ESTADOS                                                               */
   /* ---------------------------------------------------------------------- */

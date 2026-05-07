@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import type { HealthResponse } from '@/app/api/health/route';
@@ -89,7 +90,7 @@ export function SystemStatusBadge({ className = '' }: { className?: string }) {
   })();
 
   return (
-    <a
+    <Link
       href="/studio/diagnostics"
       title={tooltip}
       aria-label={tooltip}
@@ -97,6 +98,6 @@ export function SystemStatusBadge({ className = '' }: { className?: string }) {
     >
       <span className={`block h-1.5 w-1.5 rounded-full ${dotClass}`} aria-hidden />
       {label}
-    </a>
+    </Link>
   );
 }

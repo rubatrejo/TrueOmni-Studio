@@ -6,8 +6,8 @@ import {
   CheckboxField,
   FieldStack,
   SelectField,
-  TextField,
 } from './module-form-primitives';
+import { SignageMediaField } from './SignageMediaField';
 
 type VideoImageModule = Extract<SignageModuleInstance, { kind: 'video-image' }>;
 
@@ -19,25 +19,22 @@ export interface VideoImageModuleFormProps {
 export function VideoImageModuleForm({ module, onChange }: VideoImageModuleFormProps) {
   return (
     <FieldStack>
-      <SelectField
-        label="Asset kind"
-        value={module.asset.kind}
-        options={[
-          { value: 'image', label: 'image' },
-          { value: 'video', label: 'video' },
-        ]}
-        onChange={(v) =>
+      <SignageMediaField
+        label="Asset"
+        hint="Imagen o video full-bleed. Sube un archivo (≤5MB) o pega un path/URL."
+        aspect="16/9"
+        kind={module.asset.kind}
+        value={module.asset.url}
+        onChange={(next) =>
           onChange({
             ...module,
-            asset: { ...module.asset, kind: v as 'image' | 'video' },
+            asset: {
+              ...module.asset,
+              url: next?.src ?? '',
+              kind: next?.kind ?? module.asset.kind,
+            },
           })
         }
-      />
-      <TextField
-        label="Asset URL"
-        value={module.asset.url}
-        placeholder="assets/video-image/pool.mp4"
-        onChange={(v) => onChange({ ...module, asset: { ...module.asset, url: v } })}
       />
       <CheckboxField
         label="Loop"

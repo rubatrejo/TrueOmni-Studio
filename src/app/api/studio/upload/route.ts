@@ -2,14 +2,16 @@ import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 
 /**
- * `POST /api/studio/upload?slug=<slug>&kind=image|video`
+ * `POST /api/studio/upload?slug=<slug>&kind=image|video&product=<kiosk|signage>`
  *
  * Sube un archivo a Vercel Blob storage con path determinístico
- * `kiosks/<slug>/<kind>/<timestamp>-<rand>.<ext>` y devuelve la URL pública.
+ * `<product>s/<slug>/<kind>/<timestamp>-<rand>.<ext>` y devuelve la URL pública.
+ * Si `product` se omite, default `kiosk` (compat con call sites previos).
  *
- * Pensado para hero/B0 backgrounds y cualquier asset > ~500KB que no
- * encaja en el cap del KV (950KB total por config). Reemplaza el flow
- * antiguo de `MediaField` que metía data URLs en el config.
+ * Pensado para hero/B0 backgrounds del kiosk y para video/image/ads del
+ * signage — cualquier asset > ~500KB que no encaja en el cap del KV
+ * (950KB total por config). Reemplaza el flow antiguo de `MediaField` que
+ * metía data URLs en el config.
  *
  * Auth: el middleware de NextAuth ya protege `/api/studio/*` con
  * allowlist de emails — aquí no hace falta gate adicional.
@@ -53,6 +55,7 @@ export async function POST(req: Request) {
   const url = new URL(req.url);
   const slug = url.searchParams.get('slug') ?? '';
   const kindParam = url.searchParams.get('kind') ?? '';
+  const productParam = url.searchParams.get('product') ?? 'kiosk';
 
   if (!SLUG_PATTERN.test(slug)) {
     return NextResponse.json({ error: 'Invalid slug' }, { status: 400 });
@@ -60,7 +63,11 @@ export async function POST(req: Request) {
   if (kindParam !== 'image' && kindParam !== 'video') {
     return NextResponse.json({ error: 'Invalid kind' }, { status: 400 });
   }
+  if (productParam !== 'kiosk' && productParam !== 'signage') {
+    return NextResponse.json({ error: 'Invalid product' }, { status: 400 });
+  }
   const kind = kindParam as 'image' | 'video';
+  const product = productParam as 'kiosk' | 'signage';
 
   let formData: FormData;
   try {
@@ -102,7 +109,9 @@ export async function POST(req: Request) {
       ? sanitizeFilename(filename, ext)
       : `${Date.now()}-${randomId()}.${ext}`;
 
-  const pathname = `kiosks/${slug}/${kind}/${safeName}`;
+  // `kiosks/<slug>/...` para kiosk (compat); `signage/<slug>/...` para signage.
+  const productPrefix = product === 'signage' ? 'signage' : 'kiosks';
+  const pathname = `${productPrefix}/${slug}/${kind}/${safeName}`;
 
   try {
     const blob = await put(pathname, file, {

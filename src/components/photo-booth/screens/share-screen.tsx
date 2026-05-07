@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-
 import { QRCodeSVG } from 'qrcode.react';
+import { useEffect, useState } from 'react';
+
 
 interface SocialHandles {
   x?: string;
@@ -111,11 +111,18 @@ function SocialQrModal({
   url: string;
   onClose: () => void;
 }) {
+  // Escape capturado a nivel de window para no acoplar listeners a un
+  // elemento no-interactivo (rule jsx-a11y/no-noninteractive-element-interactions).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
   return (
     <div
-      role="dialog"
-      aria-modal="true"
-      onClick={onClose}
       style={{
         position: 'absolute',
         inset: 0,
@@ -126,9 +133,25 @@ function SocialQrModal({
         zIndex: 50,
       }}
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
+      {/* Backdrop como botón invisible para no romper a11y. El click cierra
+          y Escape via onKeyDown del modal de abajo. */}
+      <button
+        type="button"
+        aria-label="Close"
+        onClick={onClose}
         style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'transparent',
+          border: 'none',
+          cursor: 'default',
+        }}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        style={{
+          position: 'relative',
           width: 720,
           background: '#fff',
           borderRadius: 24,

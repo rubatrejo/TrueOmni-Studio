@@ -6,8 +6,8 @@ import mapboxgl from 'mapbox-gl';
 import type { GeoJSONSource } from 'mapbox-gl';
 import { useEffect, useRef } from 'react';
 
-import { isCanonicalMapSource, type MapSource } from '@/lib/map-source';
 import type { MapItem } from '@/lib/map-item';
+import { isCanonicalMapSource, type MapSource } from '@/lib/map-source';
 
 import {
   customPinSvg,
@@ -299,6 +299,10 @@ export function MapCanvas({
 
   // Sync de iconos por categoría: regenera el data URI y reemplaza la
   // imagen en Mapbox sin reinicializar el mapa.
+  // Extraemos el icono "things-to-do" a una variable local porque
+  // `categoryIcons?.['things-to-do']` es una expresión computed que
+  // react-hooks/exhaustive-deps no sabe analizar estáticamente.
+  const iconThingsToDo = categoryIcons?.['things-to-do'];
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !readyRef.current) return;
@@ -318,7 +322,7 @@ export function MapCanvas({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     categoryIcons?.restaurants,
-    categoryIcons?.['things-to-do'],
+    iconThingsToDo,
     categoryIcons?.stay,
     categoryIcons?.events,
   ]);
@@ -363,7 +367,7 @@ export function MapCanvas({
       const color = resolveMapPinColor(item.source);
       // Para custom pins el iconKey viene en el item; para dinámicos viene
       // del listing entry; fallback a 'info'.
-      let iconKey = item.iconKey || dynBySource.get(item.source)?.iconKey || 'info';
+      const iconKey = item.iconKey || dynBySource.get(item.source)?.iconKey || 'info';
       const customIconUrl = dynBySource.get(item.source)?.customIcon;
       const w = Math.round(70 * pinScale);
       const h = Math.round(94 * pinScale);

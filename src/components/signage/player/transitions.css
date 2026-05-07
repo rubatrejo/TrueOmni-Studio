@@ -1,0 +1,104 @@
+/*
+ * DS12 — Keyframes para transitions del SignagePlayer.
+ *
+ * 4 transitions soportadas:
+ *  - `cut`        — instantánea (no usa este CSS).
+ *  - `fade`       — cross-fade 600ms.
+ *  - `slide-left` — incoming entra desde la derecha, outgoing sale a la izquierda (700ms).
+ *  - `slide-up`   — incoming entra desde abajo, outgoing sale hacia arriba (700ms).
+ *
+ * Las clases se aplican condicionalmente en SignagePlayer al wrapper de cada slide
+ * (`.signage-transition-host`). Cada wrapper es absolute-positioned dentro del player.
+ *
+ * `will-change` activa GPU compositing para 60fps en displays 4K. Solo aplica al host.
+ */
+
+.signage-transition-host {
+  position: absolute;
+  inset: 0;
+  will-change: transform, opacity;
+}
+
+/* fade --------------------------------------------------------------------- */
+
+@keyframes signage-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes signage-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.signage-anim-fade-in {
+  animation: signage-fade-in 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.signage-anim-fade-out {
+  animation: signage-fade-out 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* slide-left --------------------------------------------------------------- */
+
+@keyframes signage-slide-left-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes signage-slide-left-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.signage-anim-slide-left-in {
+  animation: signage-slide-left-in 700ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.signage-anim-slide-left-out {
+  animation: signage-slide-left-out 700ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* slide-up ----------------------------------------------------------------- */
+
+@keyframes signage-slide-up-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes signage-slide-up-out {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+.signage-anim-slide-up-in {
+  animation: signage-slide-up-in 700ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.signage-anim-slide-up-out {
+  animation: signage-slide-up-out 700ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}

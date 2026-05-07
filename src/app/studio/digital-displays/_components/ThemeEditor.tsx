@@ -188,7 +188,7 @@ export function ThemeEditor({ client, displays, tokensCss }: ThemeEditorProps) {
             <I18nTab clientSlug={client.slug} defaultLocale={client.locale} />
           ) : null}
           {activeTab === 'versions' ? <VersionsTab /> : null}
-          {activeTab === 'publish' ? <PublishTab /> : null}
+          {activeTab === 'publish' ? <PublishTab clientSlug={client.slug} /> : null}
         </div>
       </section>
 

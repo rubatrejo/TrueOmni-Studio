@@ -20,5 +20,10 @@
   "signage.modules.news.title": "News",
   "signage.modules.weather.title": "Weather",
   "signage.modules.ads.title": "Ads",
-  "signage.modules.video.title": "Video"
+  "signage.modules.video.title": "Video",
+  "signage.runtime.no_slides.title": "No slides configured",
+  "signage.runtime.no_slides.body": "Add slides to displays/{display}/display.json or via the editor (DSS4+).",
+  "signage.runtime.no_active.title": "No active slides at this time",
+  "signage.runtime.no_active.body": "All scheduled slides are outside their dayparting windows.",
+  "signage.runtime.unknown_template.title": "Unknown template"
 }

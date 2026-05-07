@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { SignageRuntime } from '@/components/signage/runtime/SignageRuntime';
 import { SignageStage } from '@/components/signage/stage/SignageStage';
 import { loadSignageClient, loadSignageDisplay } from '@/lib/signage/config';
+import { loadSignageI18n } from '@/lib/signage/i18n';
 import { mapWeatherToHeader } from '@/lib/signage/weather-adapter';
 import { fetchWeather } from '@/lib/weather';
 
@@ -27,15 +28,15 @@ export default async function SignageDisplayPage({ params, searchParams }: PageP
     notFound();
   }
 
-  // Weather server-side (cacheado 10min via Next revalidate). Si falla, header
-  // muestra "--°" placeholders sin tirar la página.
-  let weatherData = null;
-  try {
-    weatherData = await fetchWeather(clientCfg.location.lat, clientCfg.location.lon);
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.warn(`[signage] weather fetch falló para ${clientSlug}:`, (err as Error).message);
-  }
+  // i18n bag + weather en paralelo (server-side, cached).
+  const [i18nBag, weatherData] = await Promise.all([
+    loadSignageI18n(clientCfg.slug, clientCfg.locale),
+    fetchWeather(clientCfg.location.lat, clientCfg.location.lon).catch((err: unknown) => {
+      // eslint-disable-next-line no-console
+      console.warn(`[signage] weather fetch falló para ${clientSlug}:`, (err as Error).message);
+      return null;
+    }),
+  ]);
 
   const weather = mapWeatherToHeader(
     weatherData,
@@ -46,7 +47,12 @@ export default async function SignageDisplayPage({ params, searchParams }: PageP
 
   return (
     <SignageStage debug={debug}>
-      <SignageRuntime client={clientCfg} display={displayCfg} weather={weather} />
+      <SignageRuntime
+        client={clientCfg}
+        display={displayCfg}
+        weather={weather}
+        i18nBag={i18nBag}
+      />
     </SignageStage>
   );
 }

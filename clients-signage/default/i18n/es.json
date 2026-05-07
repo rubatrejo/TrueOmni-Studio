@@ -20,5 +20,10 @@
   "signage.modules.news.title": "Noticias",
   "signage.modules.weather.title": "Clima",
   "signage.modules.ads.title": "Anuncios",
-  "signage.modules.video.title": "Video"
+  "signage.modules.video.title": "Video",
+  "signage.runtime.no_slides.title": "Sin slides configurados",
+  "signage.runtime.no_slides.body": "Añade slides a displays/{display}/display.json o desde el editor (DSS4+).",
+  "signage.runtime.no_active.title": "Sin slides activos en este momento",
+  "signage.runtime.no_active.body": "Todos los slides programados están fuera de su ventana de dayparting.",
+  "signage.runtime.unknown_template.title": "Template desconocido"
 }

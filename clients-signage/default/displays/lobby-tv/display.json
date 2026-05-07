@@ -5,7 +5,12 @@
     "targetResolution": "1080p",
     "audio": false,
     "defaultDurationMs": 7000,
-    "defaultTransition": "cut"
+    "defaultTransition": "cut",
+    "sleepSchedule": {
+      "enabled": false,
+      "startTime": "23:00",
+      "endTime": "06:00"
+    }
   },
   "playlist": [
     {
@@ -13,56 +18,69 @@
       "templateId": "01-full-events",
       "slots": [],
       "durationMs": 7000,
-      "schedule": { "kind": "always", "hideOutsideSchedule": true }
+      "schedule": { "kind": "always", "hideOutsideSchedule": true },
+      "transition": "cut"
     },
     {
       "id": "slide-ad",
       "templateId": "02-full-ad",
       "slots": [],
       "durationMs": 7000,
-      "schedule": { "kind": "always", "hideOutsideSchedule": true }
+      "schedule": { "kind": "always", "hideOutsideSchedule": true },
+      "transition": "fade"
     },
     {
       "id": "slide-video",
       "templateId": "03-full-video-image",
       "slots": [],
       "durationMs": 7000,
-      "schedule": { "kind": "always", "hideOutsideSchedule": true }
+      "schedule": { "kind": "always", "hideOutsideSchedule": true },
+      "transition": "slide-left"
     },
     {
       "id": "slide-video-events-ad",
       "templateId": "04-video-events-ad",
       "slots": [],
       "durationMs": 7000,
-      "schedule": { "kind": "always", "hideOutsideSchedule": true }
+      "schedule": { "kind": "always", "hideOutsideSchedule": true },
+      "transition": "slide-up"
     },
     {
       "id": "slide-video-2ads",
       "templateId": "05-video-2ads",
       "slots": [],
       "durationMs": 7000,
-      "schedule": { "kind": "always", "hideOutsideSchedule": true }
+      "schedule": { "kind": "always", "hideOutsideSchedule": true },
+      "transition": "fade"
     },
     {
       "id": "slide-video-news-ad",
       "templateId": "06-video-news-ad",
       "slots": [],
       "durationMs": 18000,
-      "schedule": { "kind": "always", "hideOutsideSchedule": true }
+      "schedule": {
+        "kind": "hours",
+        "startTime": "09:00",
+        "endTime": "18:00",
+        "hideOutsideSchedule": true
+      },
+      "transition": "slide-left"
     },
     {
       "id": "slide-video-social-ad",
       "templateId": "07-video-social-ad",
       "slots": [],
       "durationMs": 7000,
-      "schedule": { "kind": "always", "hideOutsideSchedule": true }
+      "schedule": { "kind": "always", "hideOutsideSchedule": true },
+      "transition": "slide-up"
     },
     {
       "id": "slide-video-social",
       "templateId": "08-video-social",
       "slots": [],
       "durationMs": 7000,
-      "schedule": { "kind": "always", "hideOutsideSchedule": true }
+      "schedule": { "kind": "always", "hideOutsideSchedule": true },
+      "transition": "cut"
     }
   ]
 }

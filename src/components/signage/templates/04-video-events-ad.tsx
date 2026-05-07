@@ -1,3 +1,5 @@
+import { normalizeIntlWhitespace } from '@/lib/signage/dates';
+
 import { registerTemplate } from './registry';
 import type { SignageTemplate, SignageTemplateRenderProps } from './types';
 
@@ -25,19 +27,24 @@ function parseAsWallClock(iso: string): Date {
 function formatDayLabel(iso: string, locale: string): DayLabel {
   const date = parseAsWallClock(iso);
   return {
-    weekday: new Intl.DateTimeFormat(locale, { weekday: 'long', timeZone: 'UTC' }).format(date),
-    day: new Intl.DateTimeFormat(locale, { day: 'numeric', timeZone: 'UTC' }).format(date),
+    weekday: normalizeIntlWhitespace(
+      new Intl.DateTimeFormat(locale, { weekday: 'long', timeZone: 'UTC' }).format(date),
+    ),
+    day: normalizeIntlWhitespace(
+      new Intl.DateTimeFormat(locale, { day: 'numeric', timeZone: 'UTC' }).format(date),
+    ),
   };
 }
 function formatTime(iso: string, locale: string): string {
   const date = parseAsWallClock(iso);
-  return new Intl.DateTimeFormat(locale, {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-    timeZone: 'UTC',
-  })
-    .format(date)
+  return normalizeIntlWhitespace(
+    new Intl.DateTimeFormat(locale, {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'UTC',
+    }).format(date),
+  )
     .replace(' AM', ' am')
     .replace(' PM', ' pm');
 }

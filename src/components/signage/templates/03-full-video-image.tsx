@@ -53,13 +53,16 @@ function PlayIconOverlay() {
   );
 }
 
-function Render({ client, slots }: SignageTemplateRenderProps) {
+function Render({ client, display, slots }: SignageTemplateRenderProps) {
   const asset = getAsset(client.slug, slots);
+  const audioEnabled = display.settings.audio === true;
 
   if (asset.kind === 'video') {
     // Video: usamos foreignObject porque <video> es HTML, no SVG. El video
-    // reproduce muted+loop+autoplay (signage es view-only sin audio per-display
-    // en DS5 — el toggle global se aplica en DS14).
+    // reproduce autoplay+loop. `muted` se ata a `display.settings.audio` (DS14):
+    // por defecto false → video silenciado, lo que permite autoplay sin
+    // gesture. Si el cliente pone audio:true debe asegurar que el navegador
+    // del kiosko tenga la flag de autoplay con sonido habilitada.
     return (
       <svg
         viewBox="0 155 1920 925"
@@ -74,7 +77,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
           <video
             src={asset.url}
             autoPlay
-            muted
+            muted={!audioEnabled}
             loop
             playsInline
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}

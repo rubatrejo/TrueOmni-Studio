@@ -56,12 +56,18 @@ export async function GET(
   const ext = relPath.split('.').pop()?.toLowerCase() ?? '';
   const contentType = MIME_TYPES[ext] ?? 'application/octet-stream';
 
+  // Dev: cero cache para que cambios en assets se reflejen sin force-reload.
+  // Producción: caché agresiva del browser/edge — assets se sustituyen vía
+  // republish (path versionado por contenido en clients-signage/<slug>/).
+  const cacheControl =
+    process.env.NODE_ENV === 'production'
+      ? 'public, max-age=3600, stale-while-revalidate=86400'
+      : 'no-store, must-revalidate';
+
   return new NextResponse(new Uint8Array(data), {
     headers: {
       'Content-Type': contentType,
-      // Dev: cero cache para que cambios en assets se reflejen sin force-reload.
-      // En producción podemos reactivar `public, max-age=3600` (sub-fase tardía).
-      'Cache-Control': 'no-store, must-revalidate',
+      'Cache-Control': cacheControl,
     },
   });
 }

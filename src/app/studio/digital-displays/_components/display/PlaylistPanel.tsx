@@ -1,14 +1,19 @@
 'use client';
 
-import { GripVertical, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, GripVertical, Plus, Trash2 } from 'lucide-react';
 import { useRef, useState } from 'react';
 
-import type { SignageSlide, SignageSlideSchedule } from '@/lib/signage/schema';
+import type {
+  SignageSlide,
+  SignageSlideSchedule,
+  SignageSlotConfig,
+} from '@/lib/signage/schema';
 
 import { useDisplayEditStore } from '../../_lib/display-edit-store';
 
 import { AddSlideModal } from './AddSlideModal';
 import { SchedulePopover } from './SchedulePopover';
+import { SlideRowExpanded } from './SlideRowExpanded';
 
 /**
  * `<PlaylistPanel>` editable (DSS4).
@@ -39,6 +44,7 @@ export function PlaylistPanel() {
   const [showAdd, setShowAdd] = useState(false);
   const [scheduleOpenForId, setScheduleOpenForId] = useState<string | null>(null);
   const [scheduleAnchor, setScheduleAnchor] = useState<DOMRect | null>(null);
+  const [expandedSlideId, setExpandedSlideId] = useState<string | null>(null);
 
   function handleDragStart(idx: number) {
     setDragFromIdx(idx);
@@ -99,11 +105,16 @@ export function PlaylistPanel() {
               defaultTransition={defaultTransition}
               isDraggingThis={dragFromIdx === idx}
               isDragOver={dragOverIdx === idx && dragFromIdx !== null && dragFromIdx !== idx}
+              expanded={expandedSlideId === slide.id}
+              onToggleExpand={() =>
+                setExpandedSlideId(expandedSlideId === slide.id ? null : slide.id)
+              }
               onDragStart={() => handleDragStart(idx)}
               onDragOver={(e) => handleDragOver(idx, e)}
               onDrop={() => handleDrop(idx)}
               onDragEnd={handleDragEnd}
               onUpdate={(patch) => updateSlide(slide.id, patch)}
+              onUpdateSlots={(slots) => updateSlide(slide.id, { slots })}
               onRemove={() => removeSlide(slide.id)}
               onOpenSchedule={(rect) => {
                 setScheduleAnchor(rect);
@@ -141,11 +152,14 @@ interface SlideRowProps {
   defaultTransition: string;
   isDraggingThis: boolean;
   isDragOver: boolean;
+  expanded: boolean;
+  onToggleExpand: () => void;
   onDragStart: () => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: () => void;
   onDragEnd: () => void;
   onUpdate: (patch: Partial<SignageSlide>) => void;
+  onUpdateSlots: (slots: SignageSlotConfig[]) => void;
   onRemove: () => void;
   onOpenSchedule: (rect: DOMRect) => void;
 }
@@ -156,11 +170,14 @@ function SlideRow({
   defaultTransition,
   isDraggingThis,
   isDragOver,
+  expanded,
+  onToggleExpand,
   onDragStart,
   onDragOver,
   onDrop,
   onDragEnd,
   onUpdate,
+  onUpdateSlots,
   onRemove,
   onOpenSchedule,
 }: SlideRowProps) {
@@ -188,6 +205,19 @@ function SlideRow({
           className="h-3.5 w-3.5 cursor-grab text-zinc-400 active:cursor-grabbing dark:text-zinc-600"
           strokeWidth={2}
         />
+        <button
+          type="button"
+          onClick={onToggleExpand}
+          aria-label={expanded ? 'Collapse slot configurator' : 'Expand slot configurator'}
+          title={expanded ? 'Hide slots' : 'Configure slots'}
+          className="grid h-6 w-6 shrink-0 place-items-center rounded text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+        >
+          {expanded ? (
+            <ChevronDown className="h-3.5 w-3.5" strokeWidth={2} />
+          ) : (
+            <ChevronRight className="h-3.5 w-3.5" strokeWidth={2} />
+          )}
+        </button>
         <span className="grid h-6 w-6 shrink-0 place-items-center rounded bg-zinc-100 font-mono text-[10.5px] font-semibold text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
           {index}
         </span>
@@ -267,6 +297,16 @@ function SlideRow({
           {slide.schedule.kind === 'always' ? 'always' : (scheduleLabel ?? 'schedule')}
         </button>
       </div>
+
+      {expanded ? (
+        <div className="mt-3">
+          <SlideRowExpanded
+            templateId={slide.templateId}
+            slots={slide.slots}
+            onSlotsChange={onUpdateSlots}
+          />
+        </div>
+      ) : null}
     </li>
   );
 }

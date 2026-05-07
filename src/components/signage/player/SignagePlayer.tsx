@@ -15,6 +15,7 @@ import type {
 } from '@/lib/signage/schema';
 
 import { useSignageT } from '../i18n/SignageI18nProvider';
+import { useSignageBridgeStore } from '../runtime/signage-bridge-store';
 import '../templates/load-templates';
 import { getTemplate } from '../templates/registry';
 import './transitions.css';
@@ -66,8 +67,25 @@ function readSearchParams(): URLSearchParams | null {
   return new URLSearchParams(window.location.search);
 }
 
-export function SignagePlayer({ client, display, settings, playlist }: SignagePlayerProps) {
+export function SignagePlayer({
+  client,
+  display: serverDisplay,
+  settings: serverSettings,
+  playlist: serverPlaylist,
+}: SignagePlayerProps) {
   const t = useSignageT();
+
+  // DSS5: overrides reactivos del display vía bridge. Si el editor pushea
+  // `signage:display-update`, mergeamos shallow con la prop server. El
+  // editor envía siempre el draft completo, así que el merge funciona sin
+  // deep merge (settings + playlist son estructuras self-contained).
+  const displayPatch = useSignageBridgeStore((s) => s.displayPatch);
+  const display: SignageDisplayConfig = useMemo(
+    () => (displayPatch ? { ...serverDisplay, ...displayPatch } : serverDisplay),
+    [displayPatch, serverDisplay],
+  );
+  const settings: SignageDisplaySettings = display.settings ?? serverSettings;
+  const playlist: SignageSlide[] = display.playlist ?? serverPlaylist;
   // Dev override `?clock=HH:MM&day=YYYY-MM-DD`: lo leemos en mount (client-only).
   // SSR siempre arranca con `new Date()` real; el cliente sustituye en mount si
   // hay override. Es para QA del gate (DS15), no para producción.

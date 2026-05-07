@@ -2557,6 +2557,69 @@ Audit panorámico — 8 hallazgos cerrados:
 
 ---
 
+### Sesión 2026-05-07 (PM) — Cierre Milestone Signage Local · DS11..DS15
+
+**Hecho:**
+
+- **DS11** — Header position runtime (top↔bottom). `<SignageRuntime>` aplica `flex-col-reverse` cuando `client.header.position === 'bottom'`, preservando orden DOM. Templates intactos (cada uno renderiza un bloque autocontenido 1920×925 vía `viewBox="0 155 1920 925"`).
+- **DS12** — 4 transitions reales en `<SignagePlayer>`: `cut` instantáneo, `fade` 600ms, `slide-left` 700ms, `slide-up` 700ms. State machine 2-slide cancel-safe. Resolución `nextSlide.transition ?? settings.defaultTransition`. CSS keyframes en `transitions.css`. Hosts con `position:absolute; will-change:transform,opacity`.
+- **DS13** — Dayparting runtime. `src/lib/signage/schedule.ts` con `isSlideActive(schedule, now, timezone)` (always | hours | date-range, wrap medianoche, daysOfWeek). Re-eval cada minuto alineada al boundary HH:MM:00 vía `msUntilNextMinute`. Dev override `?clock=HH:MM&day=YYYY-MM-DD` client-only via `window.location.search` (evita Suspense boundary). Re-anclaje sin animación si current slide sale de schedule. Placeholder cuando 0 activos.
+- **DS14** — Audio toggle + Sleep schedule + i18n.
+  - `loadSignageI18n` server-only con cascada `slug+locale → slug+en → default+locale → default+en`.
+  - `<SignageI18nProvider>` client + hooks `useSignageT()` / `useSignageLocale()`.
+  - `<SignageSleepGate>` overlay z-50 evaluado por minuto, cubre header+body uniformemente.
+  - Audio del template 03 cableado: `muted={!display.settings.audio}`. Default false.
+  - **Fix hydration mismatch (locale `es`)** — `Intl.DateTimeFormat` devolvía caracteres Unicode whitespace distintos entre Node ICU (server) y browser ICU (client) en strings tipo "11:00 a. m." (NBSP U+00A0 vs narrow nbsp U+202F vs thin space U+2009). Helper `normalizeIntlWhitespace` aplicado en `dates.ts` + templates `01-full-events` y `04-video-events-ad`.
+- **DS15** — Smoke E2E + GATE aprobado por Rubén. 8/8 templates rotando pixel-perfect con header live, 4 transitions, dayparting, sleep gate, i18n. Heap estable 5min sin leak. Regression kiosk OK.
+
+**Verificado:**
+
+- `pnpm typecheck` ✅ limpio en cada sub-fase.
+- `pnpm exec eslint src/components/signage/ src/lib/signage/ 'src/app/(signage)/'` ✅ limpio.
+- `pnpm kiosk:dev` arranca <2s en cada commit.
+- `GET /signage/default/lobby-tv` → HTTP 200 con rotación normal.
+- `GET /` → HTTP 200 (regression kiosk).
+- 4 vectores QA via displays efímeros (creados y borrados al cierre):
+  - `/signage/default/lobby-tv` → DS11+12+13.
+  - `/signage/default/sleep-demo` → DS14 sleep gate (pantalla negra uniforme).
+  - `/signage/default/dayparting-demo` → DS14 i18n placeholder ES.
+  - `/signage/default/dayparting-demo?clock=23:52` → DS13 dev override.
+- Aprobación visual final del usuario.
+
+**Pendiente / siguiente:**
+
+1. **Milestone Signage Studio (DSS0..DSS9)** — editor signage en Studio con dropdown header (Kiosks ↔ Digital Displays), KV `signage:*`, bridge editor↔preview-iframe, playlist editor, 6 module editors, snapshots, publish, smoke E2E producción. Bloqueado por priorización.
+2. **B8 Audio toggle** — testeable solo con asset mp4 real subido por cliente. Validable cuando arranque Fase 4 (primer cliente real).
+3. **Tech debt para post-DS15** (definido en sesión 2026-05-07 maratón):
+   - Tokenizar `#1796d6` (overlay band cyan) → `--signage-band-overlay`.
+   - Helpers `parseAsWallClock` / `formatDayLabel` / `wrapTitle` duplicados en `01-full-events` + `04-video-events-ad` → factorar a `src/lib/signage/text-helpers.ts`.
+   - Imágenes pesadas (post-2.jpg 5MB, post-5.jpg 3MB) → optimizar.
+   - Re-activar cache `public, max-age=3600` del asset route en producción.
+   - Lint preexistentes en `map-canvas.tsx` + `share-screen.tsx` (commit `e61e834`, fuera de scope Signage).
+
+**Decisiones tomadas:**
+
+- **Override `?clock` NO afecta el reloj del header**: el reloj refleja la realidad del visitante. Si el cliente quiere otra hora, ajusta `client.timezone` en `client.json`. Justificación: en producción el override no existe; cuando un operador hace QA debe poder verificar visualmente que el slide aparece sin que el reloj le mienta.
+- **`flex-col-reverse` en lugar de swap condicional de children** (DS11): preserva orden DOM, una clase, sin React keys reordering ni remount.
+- **CSS keyframes inline vs Framer Motion** (DS12): cero deps añadidas; keyframes triviales (opacity / translateX / translateY); compatible con SSR sin "use client" extra.
+- **2 slides en DOM solo durante la animación** (DS12): outgoing entra al state cuando comienza el tick, sale tras la duración + 50ms guard. Cancel-safe ante ticks rápidos.
+- **`window.location.search` en mount vs `useSearchParams`** (DS13): evita el Suspense boundary que Next 15 exige. El override es de QA; diferencia arquitectónica con el camino "oficial" es mínima.
+- **Re-eval alineada al boundary del minuto exacto** (DS13/14): un slide programado para "11:00" cambia a las 11:00:00, no a las 11:00:23. `msUntilNextMinute` calcula el delay exacto.
+- **`hideOutsideSchedule: true` implícito en v1** (DS13): simplifica. Si v2 necesita "dimmed slide" o "next-event countdown", se cablea con UX nuevo.
+- **Whitespace normalization vs `suppressHydrationWarning`** (DS14): silenciar el warning dejaría bugs invisibles. Normalizar es predecible y no escala mal.
+- **Audio default false** (DS14): kiosko no-touch en lobby/airport no debe sorprender. Cliente con `audio:true` debe configurar el navegador del kiosko con flag de autoplay con sonido.
+- **Sleep gate como overlay z-50** (DS14): un display dormido es uniformemente negro, cubre header + body. Si v2 quiere "dimmed" o "next-event countdown", se cablea entonces.
+- **i18n bag plano `Record<string,string>`** (DS14): consistente con sistema del kiosk. Sin pluralización en v1. Fallback `t(key, fallback?) → bag[key] ?? fallback ?? key` evita excepción por traducción faltante.
+- **B8 audio deferred a Fase 4** (DS15): cableo verificado en código; comportamiento solo se mide con asset mp4 real del primer cliente. No bloquea el gate.
+
+**Tokens nuevos:** ninguno (DS11-15 reutilizan tokens existentes).
+
+**Deps añadidas:** ninguna.
+
+**Fase:** Milestone Signage Local — **CERRADO 2026-05-07**. Próximo milestone disponible: Signage Studio (DSS0+, post-priorización).
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

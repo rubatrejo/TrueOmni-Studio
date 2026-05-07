@@ -153,17 +153,18 @@ Fases:
 
 ---
 
-## Milestone Signage Local (en progreso)
+## Milestone Signage Local ✅ CERRADO 2026-05-07
 
 > Detalles completos en `.planning/SIGNAGE-PROJECT.md` y `.planning/SIGNAGE-ROADMAP.md`.
 
-Producto Digital Displays (signage no-touch landscape 1920×1080). Replica las
-8 pantallas del XD pixel-perfect con `clients-signage/default/` configurado por
-filesystem antes de habilitar editor en el Studio. Aprobación visual del usuario
-es el gate para Milestone Signage Studio.
+Producto Digital Displays (signage no-touch landscape 1920×1080). 8 templates
+pixel-perfect rotando con `clients-signage/default/` fs-only. GATE DS15
+aprobado por Rubén. Listo para Milestone Signage Studio (DSS0+).
 
-- [x] **DS0** — Bootstrap (route group + schema Zod + tokens + stage responsive + loader fs-only + placeholder) (2026-05-06).
-- [ ] **DS1..DS15** — Header, player, 8 templates, transitions, dayparting, audio, smoke E2E.
+- [x] **DS0** — Bootstrap (2026-05-06).
+- [x] **DS1..DS10** — Header, player, 8 templates pixel-perfect (2026-05-06/07).
+- [x] **DS11..DS14** — Header position runtime, 4 transitions, dayparting, audio toggle, sleep schedule, i18n + fix hydration (2026-05-07).
+- [x] **DS15** — Smoke E2E + GATE ✅ aprobado visualmente (2026-05-07).
 
 ---
 

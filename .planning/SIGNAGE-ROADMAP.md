@@ -6,11 +6,15 @@ aprobación visual entre ambos. Plan completo de diseño en
 
 ---
 
-## Milestone Signage Local
+## Milestone Signage Local ✅ CERRADO 2026-05-07
 
 > Replicar las 8 pantallas del usuario pixel-perfect en código, sin Studio, sin KV.
 > Configuradas por filesystem (`clients-signage/default/`). Aprobación visual
 > contigo es el gate para pasar al Milestone Studio.
+>
+> **Cerrado 2026-05-07 con GATE DS15 aprobado.** 16 sub-fases (DS0..DS15)
+> ejecutadas en 2 días (2026-05-06 + 2026-05-07). Listo para arrancar
+> Milestone Signage Studio (DSS0+) cuando se priorice.
 
 ### Sub-fases
 
@@ -25,11 +29,11 @@ aprobación visual entre ambos. Plan completo de diseño en
 - [x] **DS8** — Template `06-video-news-ad` + módulo **News** (2026-05-07). Manual + RSS + API resolver, ticker rotativo en foreignObject, Olympic ad clipeado, header right-aligned, cache no-store en dev. Resumen en `.planning/DS8-SUMMARY.md`.
 - [x] **DS9** — Template `07-video-social-ad` + módulo Social Wall (2026-05-07). 3×3 grid de 9 tiles (decisión post-review: layout uniforme en lugar de 6+tweet del SVG), gradient azul brand-primary, patterns verbatim con dimensiones naturales por image. 6 fotos del XD + 3 mock Unsplash. Resumen en `.planning/DS9-SUMMARY.md`.
 - [x] **DS10** — Template `08-video-social` + redesign módulo News (2026-05-07). 8/8 templates del catálogo completos. News con animación slide-in/out, badge pulsante, line-clamp 3, QR a website del cliente, "Local News" labels. Resumen en `.planning/DS10-SUMMARY.md`.
-- [ ] **DS11** — Header position runtime (top↔bottom + body shift) en los 8 templates.
-- [ ] **DS12** — Transitions reales (fade · slide-left · slide-up). Default por display.
-- [ ] **DS13** — Dayparting runtime (filter por wall-clock cada minuto).
-- [ ] **DS14** — Audio toggle global · sleep schedule · i18n strings de signage modules.
-- [ ] **DS15** — Smoke E2E local. Aprobación visual del usuario (**GATE**).
+- [x] **DS11** — Header position runtime (top↔bottom) en los 8 templates (2026-05-07). `<SignageRuntime>` aplica `flex-col-reverse` cuando `client.header.position === 'bottom'`, preservando orden DOM. Templates intactos (cada uno renderiza un bloque 1920×925 autocontenido). Resumen en `.planning/DS11-SUMMARY.md`.
+- [x] **DS12** — Transitions reales (2026-05-07). 4 modos (`cut` · `fade` 600ms · `slide-left` 700ms · `slide-up` 700ms). Resolución `slide.transition ?? settings.defaultTransition`. State machine 2-slide cancel-safe en `<SignagePlayer>`. CSS keyframes en `transitions.css`. Resumen en `.planning/DS12-SUMMARY.md`.
+- [x] **DS13** — Dayparting runtime (2026-05-07). `isSlideActive(schedule, now, timezone)` con soporte `always | hours | date-range` + wrap medianoche + `daysOfWeek`. Re-eval por minuto alineada al boundary. Dev override `?clock=HH:MM&day=YYYY-MM-DD` client-only. Placeholder cuando 0 activos. Resumen en `.planning/DS13-SUMMARY.md`.
+- [x] **DS14** — Audio toggle · Sleep schedule · i18n (2026-05-07). `loadSignageI18n` server-only con cascada de fallbacks + `<SignageI18nProvider>` client + hook `useSignageT()`. `<SignageSleepGate>` overlay z-50 evaluado por minuto. Audio cableado a `<video>` del template 03. Fix hydration mismatch (locale `es`) via `normalizeIntlWhitespace`. Resumen en `.planning/DS14-SUMMARY.md`.
+- [x] **DS15** — Smoke E2E local. Aprobación visual del usuario ✅ **GATE APROBADO** (2026-05-07). 8/8 templates rotando pixel-perfect con header live, 4 transitions, dayparting, sleep gate, i18n. Heap estable 5min sin leak. Regression kiosk OK. Resumen en `.planning/DS15-SUMMARY.md`.
 
 ### Verificación por sub-fase
 

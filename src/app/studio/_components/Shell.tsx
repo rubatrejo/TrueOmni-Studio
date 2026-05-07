@@ -60,17 +60,17 @@ import { STUDIO_SECTIONS, type StudioSectionKey } from '../_lib/sections';
 import { StudioSlugProvider } from '../_lib/slug-context';
 import { usePreviewBridge } from '../_lib/use-preview-bridge';
 
+import { CommandPalette } from './CommandPalette';
 import { EditorPanel } from './EditorPanel';
 import { MobileTabBar, type MobileEditorTab } from './MobileTabBar';
 import { PreviewPanel } from './PreviewPanel';
-import { CommandPalette } from './CommandPalette';
 import { PublishModal } from './PublishModal';
-import { useToast } from './Toast';
-import { UnsavedChangesModal } from './UnsavedChangesModal';
 import { SaveBar } from './SaveBar';
 import { ShortcutsModal } from './ShortcutsModal';
 import { SidebarTabs } from './SidebarTabs';
+import { useToast } from './Toast';
 import { TopBar } from './TopBar';
+import { UnsavedChangesModal } from './UnsavedChangesModal';
 
 export function Shell({
   initialConfig,

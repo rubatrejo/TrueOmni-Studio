@@ -17,13 +17,13 @@ import { useEffect, useState } from 'react';
 
 import type { HealthResponse } from '@/app/api/health/route';
 
+import { StudioPageHeader } from '../_components/PageHeader';
+import { SystemStatusBadge } from '../_components/SystemStatusBadge';
 import { listConfigs, type ConfigEntry } from '../_lib/api-client';
 import {
   getHistory,
   type LocalVersionEntry,
 } from '../_lib/local-version-history';
-import { StudioPageHeader } from '../_components/PageHeader';
-import { SystemStatusBadge } from '../_components/SystemStatusBadge';
 
 /**
  * Diagnostics page (audit F-48).

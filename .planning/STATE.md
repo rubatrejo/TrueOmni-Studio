@@ -6,7 +6,37 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Milestone Studio — **audit panorámico cerrado al 100% en código** (32/32 hallazgos). Studio en producción: `https://trueomni-studio.vercel.app`. Plus TODOs viejos del kiosk runtime cerrados (Ask AI LLM, Guestbook backend, voice lang, map aggregator trails, listing i18n).
+**Fase activa:** Iteración intensiva del **Signage Studio editor** — feedback loop en vivo con el usuario. 10 commits locales **NO pusheados** desde `8142487`. Pendiente: verificación visual del fix del bridge, posibles iteraciones más, push + deploy.
+
+**Sesión 2026-05-08 (madrugada→mediodía):**
+
+Refactor profundo del editor signage en respuesta a 5+ rondas de feedback iterativo:
+
+1. **CRUD de displays end-to-end** (commit `9a4485d`): backend POST/DELETE/clone + frontend wizards + fix click bug card del dashboard.
+2. **Editor de contenido** (`7626de6`): Events/Social/News tabs con CRUD inline + auto-save al KV. KV namespaces nuevos. `loadSignageClient` lee KV-first con fallback fs.
+3. **Refactor dashboard** (`9edf49b`): "1 card = 1 display" plano cross-clients. Add card en grid (patrón kiosk). Eliminado ThemeEditor — sus tabs (Branding/Header/Events/Social/News/i18n) consolidados en el DisplayEditor que ahora tiene 10 tabs.
+4. **UX feedback round 2** (`e3b8b5b`): accent olive `#B9BD39` (no naranja), format selector como tabs estilo kiosk (no dropdown), bridge live mergea `clientPatch.branding`, logo header alineado izquierda con custom logo via `<image>`, switches verdes → zinc tokens, hex input en color picker, fix VideoImage form bug.
+5. **Fonts kiosk-aligned + multi-playlist** (`ec9bda4`): schema `branding.fonts` cambió a `{ display, body, displayCustom?, bodyCustom? }` con defaults Montserrat/Open Sans, reusa `<CustomFontField>` del kiosk para upload .woff2/.woff/.ttf/.otf. `display.playlists[]` con activePlaylistId — UI con tabs `<PlaylistsBar>` Add/Rename/Delete.
+6. **Slide nav + " + " labels + fix template 06** (`d3a3b69`): "01-full-events" → "Full + Events". Bridge bidireccional: SignagePlayer emite `signage:slide-active`. Highlight slide row activo. Nav controls (prev/next). `manualOverrideRef` evita reset por dayparting cuando operator hace jump manual.
+7. **Nav controls reubicados** (`298db25`): movidos del top toolbar (saturado) a 80px debajo del iframe, gradient sky grande y colorido.
+8. **Default tab Branding + deps stable** (`95a7e51`): editor abre en Branding (no Playlist). useEffect deps sin `bridge` para evitar re-runs por tick del status.
+9. **Fix definitivo del bridge live** (`b6185e8`): identificado el bug — el SignageBridge Client Component dentro del iframe necesita hidratación React (~200-500ms en dev). Pushes que llegaban en ese gap se perdían. Fix: 1) primer push inmediato sin debounce, 2) `onIframeLoad` re-envía `lastClientRef`/`lastDisplayRef` en cascada (50/300/800/1500ms). SignageBridgeStyleApplier es idempotente.
+
+**Pendiente cuando arranque la próxima sesión:**
+
+1. **Verificar visualmente** que el fix del bridge resuelve los issues del feedback final del usuario:
+   - Cambiar color en BrandingTab → debe reflejarse live en el iframe.
+   - Cambiar logo (subir custom) → debe verse el logo nuevo en el header.
+   - Cambiar font (Montserrat/Open Sans/upload custom) → debe aplicarse a SVG `<text>` del runtime (ya tokenizados con `signage-font-display/body` en commit `d3a3b69`).
+   - Toggles del Header tab (Logo/Weather/Clock visible) → reflejar.
+   - Cambiar header position/height/layout → reflejar.
+
+2. **Issue conocido**: el indicador "N/total Template Label" del nav panel debajo del iframe puede quedar desfasado del slide visible. El `signage:slide-active` postMessage emite correctamente pero el receptor del editor (`useSignageBridge`) puede tardar en sincronizar el state. Debug en sesión nueva.
+
+3. **Push los 10 commits locales** una vez verificado:
+   `9a4485d`, `7626de6`, `9edf49b`, `e3b8b5b`, `ec9bda4`, `d3a3b69`, `298db25`, `95a7e51`, `b6185e8` (más cualquier nuevo de la próxima sesión).
+
+4. **Deploy a Vercel**: tarea #9 — pendiente cuando feedback esté cerrado.
 
 **Última fase cerrada:** sesión maratón 2026-05-06 — 9 deploys verdes en cadena. Audit Studio cerrado en código, OAuth structure preparada (pendiente credenciales), Ask AI con Claude Haiku 4.5, Guestbook backend KV, Fase 9 starters definidos.
 

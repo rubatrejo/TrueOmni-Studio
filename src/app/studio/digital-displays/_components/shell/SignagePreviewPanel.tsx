@@ -129,45 +129,6 @@ export function SignagePreviewPanel({
             ))}
           </div>
 
-          {/* Slide nav — prev / index / next + label del slide actual. */}
-          {onNavSlide ? (
-            <div className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-900 dark:bg-zinc-950">
-              <button
-                type="button"
-                onClick={() => onNavSlide('prev')}
-                aria-label="Previous slide"
-                title="Previous slide"
-                className="grid h-7 w-7 place-items-center rounded-md text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-              >
-                <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.5} />
-              </button>
-              <span className="inline-flex items-center gap-2 px-2 py-1 text-[11px]">
-                {activeSlide ? (
-                  <>
-                    <span className="font-mono font-semibold text-zinc-700 dark:text-zinc-300">
-                      {activeSlide.index + 1}/{activeSlide.total}
-                    </span>
-                    {activeSlide.templateId ? (
-                      <span className="text-zinc-500 dark:text-zinc-400">
-                        {labelFromTemplate(activeSlide.templateId)}
-                      </span>
-                    ) : null}
-                  </>
-                ) : (
-                  <span className="font-mono text-zinc-400">—</span>
-                )}
-              </span>
-              <button
-                type="button"
-                onClick={() => onNavSlide('next')}
-                aria-label="Next slide"
-                title="Next slide"
-                className="grid h-7 w-7 place-items-center rounded-md text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-              >
-                <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.5} />
-              </button>
-            </div>
-          ) : null}
         </div>
 
         <div className="flex items-center gap-1 text-[11px] text-zinc-500">
@@ -217,8 +178,8 @@ export function SignagePreviewPanel({
         </div>
       </div>
 
-      {/* Frame holder */}
-      <div className="flex flex-1 items-center justify-center overflow-hidden p-6">
+      {/* Frame holder + nav controls (80px below iframe) */}
+      <div className="flex flex-1 flex-col items-center justify-center overflow-hidden p-6">
         <div
           ref={containerRef}
           className="relative overflow-hidden rounded-lg shadow-2xl ring-1 ring-zinc-200 dark:ring-zinc-800"
@@ -258,6 +219,46 @@ export function SignagePreviewPanel({
             </div>
           ) : null}
         </div>
+
+        {/* Nav controls — 80px debajo del iframe, grande y colorido. */}
+        {onNavSlide ? (
+          <div className="mt-20 inline-flex items-center gap-3 rounded-2xl border border-sky-500/30 bg-gradient-to-r from-sky-500 to-sky-600 px-3 py-2 shadow-lg shadow-sky-500/20 dark:border-sky-400/40 dark:from-sky-500 dark:to-sky-700 dark:shadow-sky-500/30">
+            <button
+              type="button"
+              onClick={() => onNavSlide('prev')}
+              aria-label="Previous slide"
+              title="Previous slide"
+              className="grid h-10 w-10 place-items-center rounded-xl bg-white/15 text-white transition hover:bg-white/30 active:scale-95"
+            >
+              <ChevronLeft className="h-5 w-5" strokeWidth={2.5} />
+            </button>
+            <div className="flex min-w-[180px] flex-col items-center gap-0.5 px-3 text-center">
+              {activeSlide ? (
+                <>
+                  <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
+                    Slide {activeSlide.index + 1} / {activeSlide.total}
+                  </span>
+                  {activeSlide.templateId ? (
+                    <span className="font-display text-[14px] font-semibold leading-tight text-white">
+                      {labelFromTemplate(activeSlide.templateId)}
+                    </span>
+                  ) : null}
+                </>
+              ) : (
+                <span className="font-mono text-[12px] text-white/60">—</span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => onNavSlide('next')}
+              aria-label="Next slide"
+              title="Next slide"
+              className="grid h-10 w-10 place-items-center rounded-xl bg-white/15 text-white transition hover:bg-white/30 active:scale-95"
+            >
+              <ChevronRight className="h-5 w-5" strokeWidth={2.5} />
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {/* Footer caption */}

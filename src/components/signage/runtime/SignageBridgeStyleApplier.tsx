@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 
+import type { SignageCustomFont } from '@/lib/signage/schema';
+
 import { useSignageBridgeStore } from './signage-bridge-store';
 
 const injectedFonts = new Set<string>();
@@ -18,6 +20,33 @@ function injectGoogleFont(family: string) {
     family,
   )}:wght@400;500;600;700;800&display=swap`;
   document.head.appendChild(link);
+}
+
+const CSS_FORMAT_BY_EXT: Record<SignageCustomFont['format'], string> = {
+  woff2: 'woff2',
+  woff: 'woff',
+  ttf: 'truetype',
+  otf: 'opentype',
+};
+
+function injectCustomFontFace(font: SignageCustomFont) {
+  if (typeof document === 'undefined') return;
+  const id = `signage-custom-font-${font.name.replace(/\s+/g, '-').toLowerCase()}`;
+  const existing = document.getElementById(id) as HTMLStyleElement | null;
+  if (existing) {
+    if (existing.dataset.fontHash === font.dataUrl.length.toString()) return;
+    existing.remove();
+  }
+  const cssFormat = CSS_FORMAT_BY_EXT[font.format] ?? font.format;
+  const style = document.createElement('style');
+  style.id = id;
+  style.dataset.fontHash = font.dataUrl.length.toString();
+  style.textContent = `@font-face {
+  font-family: "${font.name}";
+  src: url(${font.dataUrl}) format("${cssFormat}");
+  font-display: swap;
+}`;
+  document.head.appendChild(style);
 }
 
 /**
@@ -55,22 +84,38 @@ export function SignageBridgeStyleApplier() {
       nextKeys.add(cssVar);
     }
 
-    // 2. Fonts.
+    // 2. Fonts (Google) + custom @font-face.
     const fonts = clientPatch?.branding?.fonts;
-    if (fonts?.default) {
-      injectGoogleFont(fonts.default);
-      const fam = `"${fonts.default}", system-ui, sans-serif`;
-      root.style.setProperty('--signage-font-body', fam);
-      document.body.style.fontFamily = fam;
-      nextKeys.add('--signage-font-body');
-    }
-    if (fonts?.display) {
-      injectGoogleFont(fonts.display);
-      root.style.setProperty(
-        '--signage-font-display',
-        `"${fonts.display}", system-ui, sans-serif`,
-      );
-      nextKeys.add('--signage-font-display');
+    if (fonts) {
+      // Custom display font tiene prioridad sobre Google display.
+      if (fonts.displayCustom) {
+        injectCustomFontFace(fonts.displayCustom);
+        const fam = `"${fonts.displayCustom.name}", system-ui, sans-serif`;
+        root.style.setProperty('--signage-font-display', fam);
+        nextKeys.add('--signage-font-display');
+      } else if (fonts.display) {
+        injectGoogleFont(fonts.display);
+        root.style.setProperty(
+          '--signage-font-display',
+          `"${fonts.display}", system-ui, sans-serif`,
+        );
+        nextKeys.add('--signage-font-display');
+      }
+
+      // Custom body font tiene prioridad sobre Google body.
+      if (fonts.bodyCustom) {
+        injectCustomFontFace(fonts.bodyCustom);
+        const fam = `"${fonts.bodyCustom.name}", system-ui, sans-serif`;
+        root.style.setProperty('--signage-font-body', fam);
+        document.body.style.fontFamily = fam;
+        nextKeys.add('--signage-font-body');
+      } else if (fonts.body) {
+        injectGoogleFont(fonts.body);
+        const fam = `"${fonts.body}", system-ui, sans-serif`;
+        root.style.setProperty('--signage-font-body', fam);
+        document.body.style.fontFamily = fam;
+        nextKeys.add('--signage-font-body');
+      }
     }
 
     // 3. Limpia las que estaban antes y ya no.

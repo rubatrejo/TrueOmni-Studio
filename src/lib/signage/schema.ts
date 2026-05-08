@@ -21,15 +21,46 @@ export const SignageLocationSchema = z.object({
 });
 export type SignageLocation = z.infer<typeof SignageLocationSchema>;
 
+/**
+ * Custom font subido por el operator (mismo schema que kiosk).
+ * Si está presente, sobreescribe `fonts.display` o `fonts.body` y se inyecta
+ * vía `@font-face`. El `name` se usa en `font-family`.
+ */
+export const SignageCustomFontSchema = z.object({
+  name: z.string().min(1).max(64),
+  dataUrl: z.string(),
+  format: z.enum(['woff2', 'woff', 'ttf', 'otf']),
+});
+export type SignageCustomFont = z.infer<typeof SignageCustomFontSchema>;
+
 export const SignageBrandingSchema = z.object({
   logos: z.object({
     default: z.string().min(1),
     dark: z.string().optional(),
   }),
-  fonts: z.object({
-    default: z.string().min(1),
-    display: z.string().optional(),
-  }),
+  fonts: z
+    .object({
+      /** Fuente para titulares y headers (h1, weather, clock, etc). */
+      display: z.string().default('Montserrat'),
+      /** Fuente para body (texto general, descriptions, captions). */
+      body: z.string().default('Open Sans'),
+      /** Custom font subida para Display (overrides `display`). */
+      displayCustom: SignageCustomFontSchema.optional(),
+      /** Custom font subida para Body (overrides `body`). */
+      bodyCustom: SignageCustomFontSchema.optional(),
+      // Compat retro: el shape viejo era `{ default: string, display? }`.
+      // Si llega con esa shape lo aceptamos pero los lectores deben mirar
+      // `body` (o `default` como fallback).
+      default: z.string().optional(),
+    })
+    .partial()
+    .transform((f) => ({
+      // Migra `default` (legacy) → `body`. Si `body` ya está set, gana `body`.
+      display: f.display ?? 'Montserrat',
+      body: f.body ?? f.default ?? 'Open Sans',
+      displayCustom: f.displayCustom,
+      bodyCustom: f.bodyCustom,
+    })),
   /** Overrides puntuales de tokens CSS (key: nombre sin --signage-, value: HSL "H S% L%"). */
   tokens: z.record(z.string(), z.string()).optional(),
 });
@@ -318,6 +349,21 @@ export const SignageDisplayConfigSchema = z.object({
   slug: z.string().min(1),
   name: z.string().min(1),
   settings: SignageDisplaySettingsSchema,
+  /** Playlist única (legacy). Si hay `playlists[]`, se ignora. Lectores
+   *  preferirán la playlist activa de `playlists` cuando esté presente. */
   playlist: z.array(SignageSlideSchema),
+  /** Múltiples playlists con un activo. El operator puede agrupar slides
+   *  por contexto (Mañana / Tarde / Holidays) y cambiar entre ellos. */
+  playlists: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        name: z.string().min(1),
+        slides: z.array(SignageSlideSchema),
+      }),
+    )
+    .optional(),
+  /** ID de la playlist activa cuando `playlists.length > 0`. */
+  activePlaylistId: z.string().optional(),
 });
 export type SignageDisplayConfig = z.infer<typeof SignageDisplayConfigSchema>;

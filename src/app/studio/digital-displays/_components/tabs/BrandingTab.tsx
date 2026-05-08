@@ -6,6 +6,7 @@ import { HslColorPicker, type HslColor } from 'react-colorful';
 
 import type { SignageClientResolved } from '@/lib/signage/schema';
 
+import { CustomFontField } from '../../../_components/CustomFontField';
 import { FontSelector } from '../../../_components/FontSelector';
 import { useThemeEditStore } from '../../_lib/theme-edit-store';
 import { SignageMediaField } from '../display/modules/SignageMediaField';
@@ -151,32 +152,60 @@ export function BrandingTab({ client, tokensCss }: BrandingTabProps) {
 
       <Section
         title="Fonts"
-        subtitle="Google Fonts curados. Cambia y se carga live en el preview."
+        subtitle="Google Fonts curados o tu propia tipografía custom (.woff2/.woff/.ttf/.otf, ≤600KB)."
       >
+        {/* Display font — Montserrat default. */}
         <FontSelector
-          kind="Body font"
-          value={draft?.branding.fonts.default ?? client.branding.fonts.default}
-          onChange={(next) => {
-            const fonts = draft?.branding.fonts ?? client.branding.fonts;
-            updateBranding({ fonts: { ...fonts, default: next } });
-          }}
-        />
-        <FontSelector
-          kind="Display font (optional)"
+          kind="Display font"
           value={
-            draft?.branding.fonts.display ??
+            draft?.branding.fonts?.display ??
             client.branding.fonts.display ??
-            (draft?.branding.fonts.default ?? client.branding.fonts.default)
+            'Montserrat'
           }
           onChange={(next) => {
             const fonts = draft?.branding.fonts ?? client.branding.fonts;
-            const fallback = fonts.default;
-            const nextFonts: { default: string; display?: string } = {
-              default: fonts.default,
-            };
-            if (next && next !== fallback) {
-              nextFonts.display = next;
-            }
+            updateBranding({ fonts: { ...fonts, display: next } });
+          }}
+        />
+        <CustomFontField
+          slot="display"
+          value={
+            draft?.branding.fonts?.displayCustom ??
+            client.branding.fonts.displayCustom
+          }
+          onChange={(next) => {
+            const fonts = draft?.branding.fonts ?? client.branding.fonts;
+            const nextFonts = { ...fonts };
+            if (next) nextFonts.displayCustom = next;
+            else delete nextFonts.displayCustom;
+            updateBranding({ fonts: nextFonts });
+          }}
+        />
+
+        {/* Body font — Open Sans default. */}
+        <FontSelector
+          kind="Body font"
+          value={
+            draft?.branding.fonts?.body ??
+            client.branding.fonts.body ??
+            'Open Sans'
+          }
+          onChange={(next) => {
+            const fonts = draft?.branding.fonts ?? client.branding.fonts;
+            updateBranding({ fonts: { ...fonts, body: next } });
+          }}
+        />
+        <CustomFontField
+          slot="body"
+          value={
+            draft?.branding.fonts?.bodyCustom ??
+            client.branding.fonts.bodyCustom
+          }
+          onChange={(next) => {
+            const fonts = draft?.branding.fonts ?? client.branding.fonts;
+            const nextFonts = { ...fonts };
+            if (next) nextFonts.bodyCustom = next;
+            else delete nextFonts.bodyCustom;
             updateBranding({ fonts: nextFonts });
           }}
         />

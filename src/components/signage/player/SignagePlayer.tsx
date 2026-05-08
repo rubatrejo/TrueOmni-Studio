@@ -107,7 +107,17 @@ export function SignagePlayer({
     };
   }, [clientPatch, serverClient]);
   const settings: SignageDisplaySettings = display.settings ?? serverSettings;
-  const playlist: SignageSlide[] = display.playlist ?? serverPlaylist;
+  // Playlist activa: si hay `playlists[]`, leer la activa; si no, fallback a
+  // `playlist` legacy o al server.
+  const playlist: SignageSlide[] = useMemo(() => {
+    if (display.playlists && display.playlists.length > 0) {
+      const active =
+        display.playlists.find((p) => p.id === display.activePlaylistId) ??
+        display.playlists[0];
+      return active?.slides ?? [];
+    }
+    return display.playlist ?? serverPlaylist;
+  }, [display.playlists, display.activePlaylistId, display.playlist, serverPlaylist]);
   // Dev override `?clock=HH:MM&day=YYYY-MM-DD`: lo leemos en mount (client-only).
   // SSR siempre arranca con `new Date()` real; el cliente sustituye en mount si
   // hay override. Es para QA del gate (DS15), no para producción.

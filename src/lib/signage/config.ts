@@ -220,29 +220,41 @@ export const listSignageClients = cache(async (): Promise<SignageClientListEntry
   return out.sort((a, b) => a.name.localeCompare(b.name));
 });
 
-/** Lista displays de un cliente signage (excluyendo `_template`). Lee
- *  `display.json` de cada uno para mostrar slidesCount. */
+/** Lista displays de un cliente signage (excluyendo `_template`).
+ *
+ * Merge KV + fs: la fuente de verdad para "qué displays existen" es
+ * `client.displays` (que ya viene resuelto KV→fs en `loadSignageClient`).
+ * Para cada slug intenta resolver el display config con `loadSignageDisplay`
+ * (KV→fs fallback) y deriva `slidesCount`. Slugs inválidos se descartan.
+ */
 export const listSignageDisplays = cache(
   async (clientSlug: string): Promise<SignageDisplayListEntry[]> => {
-    const root = SIGNAGE_ROOT();
-    const displaysDir = path.join(root, clientSlug, 'displays');
-    let entries: string[];
-    try {
-      entries = await readdir(displaysDir);
-    } catch {
-      return [];
+    const client = await loadSignageClient(clientSlug).catch(() => null);
+    const declared = client?.displays ?? [];
+
+    // Compat: si el client no declara displays, leemos el filesystem como
+    // fallback (caso edge de clients muy antiguos sin migrar).
+    let slugs: string[] = declared;
+    if (slugs.length === 0) {
+      const root = SIGNAGE_ROOT();
+      const displaysDir = path.join(root, clientSlug, 'displays');
+      try {
+        const entries = await readdir(displaysDir);
+        slugs = entries.filter((e) => !e.startsWith('_') && !e.startsWith('.'));
+      } catch {
+        return [];
+      }
     }
-    const slugs = entries.filter((e) => !e.startsWith('_') && !e.startsWith('.'));
+
     const out: SignageDisplayListEntry[] = [];
     for (const slug of slugs) {
       try {
-        const displayJsonPath = path.join(displaysDir, slug, 'display.json');
-        const raw = await readJson(displayJsonPath);
-        const parsed = SignageDisplayConfigSchema.parse(raw);
+        const display = await loadSignageDisplay(clientSlug, slug);
+        if (!display) continue;
         out.push({
-          slug: parsed.slug,
-          name: parsed.name,
-          slidesCount: parsed.playlist.length,
+          slug: display.slug,
+          name: display.name,
+          slidesCount: display.playlist.length,
         });
       } catch {
         // Skip displays inválidos.

@@ -5,9 +5,10 @@ import { AlertTriangle, Copy, Loader2, Plus, Trash2, X } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
-const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
+export const SIGNAGE_SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
+const SLUG_REGEX = SIGNAGE_SLUG_REGEX;
 
-function slugify(input: string): string {
+export function slugify(input: string): string {
   return input
     .toLowerCase()
     .normalize('NFKD')
@@ -30,7 +31,7 @@ interface BaseModalProps {
   children: ReactNode;
 }
 
-function BaseModal({
+export function BaseModal({
   open,
   onClose,
   title,
@@ -387,7 +388,7 @@ export function DeleteSignageThemeModal({
 //  Primitives
 // ---------------------------------------------------------------------------
 
-function Field({
+export function Field({
   label,
   hint,
   children,
@@ -409,7 +410,7 @@ function Field({
   );
 }
 
-function ErrorMessage({ children }: { children: ReactNode }) {
+export function ErrorMessage({ children }: { children: ReactNode }) {
   return (
     <p className="rounded-md bg-red-50 px-3 py-2 text-[12px] text-red-700 dark:bg-red-500/10 dark:text-red-400">
       {children}
@@ -417,7 +418,7 @@ function ErrorMessage({ children }: { children: ReactNode }) {
   );
 }
 
-function ModalActions({
+export function ModalActions({
   primaryLabel,
   primaryDisabled,
   primaryBusy,

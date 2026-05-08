@@ -172,7 +172,7 @@ function ThemeCard({
       <Link
         href={editorHref}
         title={`Open ${client.name} editor`}
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-10"
         aria-label={`Open ${client.name} editor`}
       />
       <div
@@ -268,7 +268,7 @@ function CardMenu({
   }, [open]);
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative z-20">
       <button
         type="button"
         onClick={(e) => {

@@ -136,35 +136,44 @@ export function ClientView({
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-[1280px] flex-col gap-12 px-4 py-10 sm:px-8">
+      <main className="mx-auto flex max-w-[1280px] flex-col gap-10 px-4 py-10 sm:px-8">
         <section>
           <h1 className="font-display text-3xl font-bold text-zinc-900 dark:text-white">
             {branding.name}
           </h1>
           <p className="mt-2 text-[13.5px] text-zinc-500">
-            Configura el branding una sola vez y todos los productos del cliente lo heredan.
+            Set the branding once — every product the client uses inherits it automatically.
           </p>
         </section>
 
         <section>
           <SectionHeading
             title="Branding & info"
-            subtitle="Nombre, ubicación, colores, logos, fuentes y media. Cambios autosave en ~1s."
+            subtitle="Name, location, colors, logos, fonts and media. Changes autosave after ~1s."
           />
           <BrandingForm value={branding} onChange={handleChange} />
         </section>
 
-        <section>
-          <SectionHeading
-            title="Productos"
-            subtitle="Activa o entra al editor del producto. El branding del cliente se aplica automáticamente."
-          />
+        <section className="rounded-2xl border border-zinc-200 bg-gradient-to-br from-white to-zinc-50 p-6 shadow-sm dark:border-zinc-800 dark:from-zinc-900/60 dark:to-zinc-950">
+          <div className="mb-6 flex items-end justify-between">
+            <div>
+              <h2 className="font-display text-2xl font-bold text-zinc-900 dark:text-white">
+                Products
+              </h2>
+              <p className="mt-1 text-[13px] text-zinc-500">
+                Open the editor of each active product or activate a new one. The client's branding is applied automatically.
+              </p>
+            </div>
+            <span className="rounded-full bg-zinc-900 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white dark:bg-white dark:text-zinc-950">
+              {activeCount(initialManifest.products)} active
+            </span>
+          </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <ProductCard
               slug={slug}
               segment="kiosk"
               label="Kiosks"
-              description="Pantallas táctiles verticales con módulos interactivos."
+              description="Vertical touch screens with interactive modules."
               icon={Monitor}
               status="live"
               active={initialManifest.products.kiosks}
@@ -173,7 +182,7 @@ export function ClientView({
               slug={slug}
               segment="digital-displays"
               label="Digital Displays"
-              description="Signage no-touch landscape rotando playlists."
+              description="Landscape no-touch signage rotating playlists."
               icon={Tv}
               status="live"
               active={initialManifest.products.digitalDisplays}
@@ -182,7 +191,7 @@ export function ClientView({
               slug={slug}
               segment="mobile-pwa"
               label="Mobile PWA"
-              description="Progressive Web App heredando branding del cliente."
+              description="Progressive Web App that inherits the client's branding."
               icon={Smartphone}
               status="soon"
               active={initialManifest.products.mobilePwa}
@@ -191,7 +200,7 @@ export function ClientView({
               slug={slug}
               segment="video-walls"
               label="Video Walls"
-              description="Composiciones sincronizadas multi-pantalla."
+              description="Multi-screen synchronized compositions."
               icon={LayoutGrid}
               status="soon"
               active={initialManifest.products.videoWalls}
@@ -200,7 +209,7 @@ export function ClientView({
               slug={slug}
               segment="tablets"
               label="Tablets"
-              description="Experiencias táctiles para tablets en sala / piso."
+              description="Touch-first tablet experiences for the floor."
               icon={Tablet}
               status="soon"
               active={initialManifest.products.tablets}
@@ -210,6 +219,10 @@ export function ClientView({
       </main>
     </div>
   );
+}
+
+function activeCount(products: ClientManifest['products']): number {
+  return Object.values(products).filter(Boolean).length;
 }
 
 function SectionHeading({ title, subtitle }: { title: string; subtitle: string }) {

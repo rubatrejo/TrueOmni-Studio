@@ -179,9 +179,8 @@ export default function StudioHome() {
           One client. Every product.
         </h1>
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-pretty text-zinc-600 dark:text-zinc-400">
-          Sube el branding una sola vez y aliméntalo a todos los productos
-          del cliente — kiosks, digital displays, y los próximos PWA, video
-          walls y tablets.
+          Upload the branding once and feed it to every product the client uses —
+          kiosks, digital displays, and the upcoming PWA, video walls and tablets.
         </p>
       </section>
 
@@ -369,7 +368,7 @@ function ClientCard({
           <div className="mt-3 flex flex-wrap items-center gap-1.5">
             {activeProducts.length === 0 ? (
               <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10.5px] font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500">
-                Sin productos activos
+                No products active
               </span>
             ) : (
               activeProducts.map(({ key, label, Icon }) => (

@@ -103,6 +103,19 @@ export function useSignageBridge() {
     [sendDisplayNow],
   );
 
+  /** Salta a un slide específico en el preview iframe. Sin debounce — la
+   *  acción es discreta y el operator espera feedback inmediato. */
+  const jumpToSlide = useCallback((slideId: string) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'signage:jump-slide', slideId }, '*');
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('[signage:bridge:editor] jump postMessage failed', e);
+    }
+  }, []);
+
   const onIframeLoad = useCallback(() => {
     setIsReady(false);
     setLastAckAt(null);
@@ -124,6 +137,7 @@ export function useSignageBridge() {
     iframeRef,
     pushClient,
     pushDisplay,
+    jumpToSlide,
     onIframeLoad,
     isReady,
     bridgeStatus,

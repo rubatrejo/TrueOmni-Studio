@@ -325,10 +325,44 @@ export function SignageHeader({ client, weather, initialClock }: SignageHeaderPr
         ) : null}
       </g>
 
-      {/* Group_12 — TrueOmni logo at translate(18, -15.67) */}
-      <g transform="translate(18 -15.67)">
-        <g transform="translate(32 64)">
-          <g clipPath="url(#sig-clip-logo)">
+      {/* Logo — alineado a la izquierda. Si el cliente subió un logo custom
+          (`branding.logos.default`), se renderiza vía <image>; si no, fallback
+          al SVG paths del isotipo TrueOmni hardcoded. Soporta cliente personalizado
+          sin tocar este archivo. */}
+      {(() => {
+        const logoRel = client.branding.logos?.default ?? '';
+        const isCustomUploaded =
+          logoRel &&
+          (logoRel.startsWith('http') ||
+            logoRel.startsWith('/') ||
+            // Si el cliente subió un logo distinto al de TrueOmni hardcoded,
+            // usar <image>. Heurística simple: si el path NO es exactamente el
+            // template `assets/logo.svg`, asumimos custom.
+            logoRel !== 'assets/logo.svg');
+        const resolvedSrc = isCustomUploaded
+          ? logoRel.startsWith('http') || logoRel.startsWith('/')
+            ? logoRel
+            : `/signage-assets/${client.slug}/${logoRel}`
+          : null;
+
+        if (resolvedSrc) {
+          // Logo custom — left-aligned, max height ~60px (matches isotipo size).
+          return (
+            <image
+              href={resolvedSrc}
+              x={50}
+              y={47}
+              width="280"
+              height="60"
+              preserveAspectRatio="xMinYMid meet"
+            />
+          );
+        }
+        // Fallback isotipo TrueOmni hardcoded paths (igual que antes).
+        return (
+          <g transform="translate(18 -15.67)">
+            <g transform="translate(32 64)">
+              <g clipPath="url(#sig-clip-logo)">
             <path
               d="M209.257,30.981h-11.8V61.61h-7.124V30.981h.069V24.688h18.86Z"
               transform="translate(-103.941 -13.483)"
@@ -401,9 +435,11 @@ export function SignageHeader({ client, weather, initialClock }: SignageHeaderPr
               transform="translate(-370.822 -13.519)"
               fill="#0088ce"
             />
+              </g>
+            </g>
           </g>
-        </g>
-      </g>
+        );
+      })()}
     </svg>
   );
 }

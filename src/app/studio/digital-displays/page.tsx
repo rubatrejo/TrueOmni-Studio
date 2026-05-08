@@ -72,7 +72,7 @@ export default async function DigitalDisplaysPage() {
         slidesCount: d.slidesCount,
         brandPrimary: `hsl(${tok('brand-primary', '211 100% 25%')})`,
         brandSecondary: `hsl(${tok('brand-secondary', '200 100% 50%')})`,
-        brandAccent: `hsl(${tok('brand-accent', '35 92% 55%')})`,
+        brandAccent: `hsl(${tok('brand-accent', '62 53% 48%')})`,
         logoUrl,
         isReserved: c.slug === 'default' && d.slug === 'lobby-tv',
       });

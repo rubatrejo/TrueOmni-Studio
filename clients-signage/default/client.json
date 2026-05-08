@@ -14,7 +14,8 @@
       "default": "assets/logo.svg"
     },
     "fonts": {
-      "default": "Open Sans"
+      "default": "Montserrat",
+      "display": "Montserrat"
     }
   },
   "header": {

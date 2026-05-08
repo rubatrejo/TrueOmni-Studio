@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  ChevronDown,
   ExternalLink,
   Maximize,
   Minus,
@@ -108,10 +107,18 @@ export function SignagePreviewPanel({
     <div className="flex h-full w-full flex-col">
       {/* Toolbar */}
       <div className="flex shrink-0 items-center justify-between px-6 pb-3 pt-4">
-        <FormatSelector
-          activeKey={formatKey}
-          onSelect={(k) => setFormatKey(k)}
-        />
+        <div className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-900 dark:bg-zinc-950">
+          {DEVICE_FORMATS.map((f) => (
+            <DeviceTab
+              key={f.key}
+              active={formatKey === f.key}
+              onClick={() => setFormatKey(f.key)}
+              icon={f.glyph === 'tv' ? <TvGlyph /> : <KioskGlyph />}
+              label={`${f.label} · ${f.width}×${f.height}`}
+              badge={!f.available ? 'Soon' : undefined}
+            />
+          ))}
+        </div>
 
         <div className="flex items-center gap-1 text-[11px] text-zinc-500">
           <button
@@ -340,86 +347,37 @@ function FullScreenPreview({
   );
 }
 
-function FormatSelector({
-  activeKey,
-  onSelect,
+function DeviceTab({
+  active,
+  onClick,
+  icon,
+  label,
+  badge,
 }: {
-  activeKey: DeviceFormat['key'];
-  onSelect: (key: DeviceFormat['key']) => void;
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+  badge?: string;
 }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const active =
-    DEVICE_FORMATS.find((f) => f.key === activeKey) ?? DEVICE_FORMATS[0];
-
-  useEffect(() => {
-    if (!open) return;
-    const onClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
-  }, [open]);
-
   return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-[11px] font-medium text-zinc-900 shadow-sm transition hover:border-zinc-300 dark:border-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:border-zinc-800"
-      >
-        {active.glyph === 'tv' ? <TvGlyph /> : <KioskGlyph />}
-        <span>
-          {active.label} · {active.width}×{active.height}
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] transition ${
+        active
+          ? 'bg-zinc-100 text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-zinc-100'
+          : 'text-zinc-500 hover:text-zinc-800 dark:text-zinc-500 dark:hover:text-zinc-300'
+      }`}
+    >
+      {icon}
+      <span>{label}</span>
+      {badge ? (
+        <span className="rounded bg-zinc-200 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
+          {badge}
         </span>
-        <ChevronDown className="h-3 w-3 text-zinc-400" />
-      </button>
-      {open ? (
-        <div
-          role="menu"
-          className="absolute left-0 top-9 z-30 flex w-56 flex-col gap-0.5 rounded-md border border-zinc-200 bg-white p-1 shadow-lg dark:border-zinc-800 dark:bg-zinc-950"
-        >
-          {DEVICE_FORMATS.map((f) => {
-            const isActive = f.key === activeKey;
-            return (
-              <button
-                key={f.key}
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  onSelect(f.key);
-                  setOpen(false);
-                }}
-                className={`flex items-center justify-between gap-2 rounded px-2.5 py-1.5 text-left text-[12px] transition ${
-                  isActive
-                    ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white'
-                    : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  {f.glyph === 'tv' ? <TvGlyph /> : <KioskGlyph />}
-                  <span>
-                    {f.label}
-                    <span className="ml-1 font-mono text-[10.5px] text-zinc-400">
-                      {f.width}×{f.height}
-                    </span>
-                  </span>
-                </span>
-                {!f.available ? (
-                  <span className="rounded bg-zinc-200 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-                    Soon
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
       ) : null}
-    </div>
+    </button>
   );
 }
 

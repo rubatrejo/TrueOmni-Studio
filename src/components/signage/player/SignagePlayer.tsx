@@ -68,7 +68,7 @@ function readSearchParams(): URLSearchParams | null {
 }
 
 export function SignagePlayer({
-  client,
+  client: serverClient,
   display: serverDisplay,
   settings: serverSettings,
   playlist: serverPlaylist,
@@ -80,10 +80,32 @@ export function SignagePlayer({
   // editor envía siempre el draft completo, así que el merge funciona sin
   // deep merge (settings + playlist son estructuras self-contained).
   const displayPatch = useSignageBridgeStore((s) => s.displayPatch);
+  const clientPatch = useSignageBridgeStore((s) => s.clientPatch);
   const display: SignageDisplayConfig = useMemo(
     () => (displayPatch ? { ...serverDisplay, ...displayPatch } : serverDisplay),
     [displayPatch, serverDisplay],
   );
+  // Merge cliente: branding (logos, fonts) y header se actualizan live cuando
+  // el editor pushea changes. Los tokens CSS los aplica `<SignageBridgeStyleApplier>`
+  // directo al :root; aquí mergeamos los campos no-tokenizados (logos, fonts,
+  // header layout, name, website) para que el SignageHeader y otros consumers
+  // los lean del client patcheado.
+  const client: SignageClientResolved = useMemo(() => {
+    if (!clientPatch) return serverClient;
+    return {
+      ...serverClient,
+      ...(clientPatch.name ? { name: clientPatch.name } : null),
+      ...(clientPatch.website !== undefined
+        ? { website: clientPatch.website }
+        : null),
+      branding: clientPatch.branding
+        ? { ...serverClient.branding, ...clientPatch.branding }
+        : serverClient.branding,
+      header: clientPatch.header
+        ? { ...serverClient.header, ...clientPatch.header }
+        : serverClient.header,
+    };
+  }, [clientPatch, serverClient]);
   const settings: SignageDisplaySettings = display.settings ?? serverSettings;
   const playlist: SignageSlide[] = display.playlist ?? serverPlaylist;
   // Dev override `?clock=HH:MM&day=YYYY-MM-DD`: lo leemos en mount (client-only).
@@ -106,6 +128,30 @@ export function SignagePlayer({
 
   const cleanupTimerRef = useRef<number | null>(null);
   const tickTimerRef = useRef<number | null>(null);
+
+  // Listener para jump-slide del editor (signage:jump-slide). Permite que el
+  // operator click en un slide de la playlist y el preview salte ahí sin
+  // esperar al ciclo natural. Sin animación de transición — es navegación.
+  useEffect(() => {
+    function handler(event: MessageEvent) {
+      const data = event.data as
+        | { type?: string; slideId?: string }
+        | null;
+      if (!data || data.type !== 'signage:jump-slide' || !data.slideId) return;
+      const idx = playlist.findIndex((s) => s.id === data.slideId);
+      if (idx >= 0) {
+        if (cleanupTimerRef.current !== null) {
+          window.clearTimeout(cleanupTimerRef.current);
+          cleanupTimerRef.current = null;
+        }
+        setOutgoingIdx(null);
+        setTransitionKind('cut');
+        setCurrentIdx(idx);
+      }
+    }
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, [playlist]);
 
   // Re-evaluación cada minuto del wall-clock. Aligned al boundary del minuto
   // exacto para evitar drift de 30s. Si hay dev override la evaluación se

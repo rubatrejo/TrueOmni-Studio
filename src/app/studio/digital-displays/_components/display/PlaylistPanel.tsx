@@ -10,6 +10,7 @@ import type {
 } from '@/lib/signage/schema';
 
 import { useDisplayEditStore } from '../../_lib/display-edit-store';
+import { useSignageJumpToSlide } from '../../_lib/signage-editor-context';
 
 import { AddSlideModal } from './AddSlideModal';
 import { SchedulePopover } from './SchedulePopover';
@@ -38,6 +39,7 @@ export function PlaylistPanel() {
   const removeSlide = useDisplayEditStore((s) => s.removeSlide);
   const updateSlide = useDisplayEditStore((s) => s.updateSlide);
   const addSlide = useDisplayEditStore((s) => s.addSlide);
+  const jumpToSlide = useSignageJumpToSlide();
 
   const [dragFromIdx, setDragFromIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
@@ -109,6 +111,9 @@ export function PlaylistPanel() {
               onToggleExpand={() =>
                 setExpandedSlideId(expandedSlideId === slide.id ? null : slide.id)
               }
+              onJumpToPreview={
+                jumpToSlide ? () => jumpToSlide(slide.id) : undefined
+              }
               onDragStart={() => handleDragStart(idx)}
               onDragOver={(e) => handleDragOver(idx, e)}
               onDrop={() => handleDrop(idx)}
@@ -154,6 +159,7 @@ interface SlideRowProps {
   isDragOver: boolean;
   expanded: boolean;
   onToggleExpand: () => void;
+  onJumpToPreview?: () => void;
   onDragStart: () => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: () => void;
@@ -172,6 +178,7 @@ function SlideRow({
   isDragOver,
   expanded,
   onToggleExpand,
+  onJumpToPreview,
   onDragStart,
   onDragOver,
   onDrop,
@@ -221,9 +228,20 @@ function SlideRow({
         <span className="grid h-6 w-6 shrink-0 place-items-center rounded bg-zinc-100 font-mono text-[10.5px] font-semibold text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
           {index}
         </span>
-        <code className="flex-1 truncate font-mono text-[11.5px] text-zinc-800 dark:text-zinc-200">
-          {slide.templateId}
-        </code>
+        {onJumpToPreview ? (
+          <button
+            type="button"
+            onClick={onJumpToPreview}
+            title={`Jump preview to ${formatTemplateLabel(slide.templateId)}`}
+            className="flex-1 truncate text-left text-[12.5px] font-medium text-zinc-800 transition hover:text-sky-600 dark:text-zinc-200 dark:hover:text-sky-400"
+          >
+            {formatTemplateLabel(slide.templateId)}
+          </button>
+        ) : (
+          <span className="flex-1 truncate text-[12.5px] font-medium text-zinc-800 dark:text-zinc-200">
+            {formatTemplateLabel(slide.templateId)}
+          </span>
+        )}
         <button
           type="button"
           onClick={onRemove}
@@ -309,6 +327,21 @@ function SlideRow({
       ) : null}
     </li>
   );
+}
+
+/**
+ * Formatea el `templateId` técnico (`01-full-events`, `06-video-news-ad`) en un
+ * label amigable: "Full Events", "Video News Ad". Quita el prefijo numérico,
+ * los guiones y capitaliza cada palabra.
+ */
+function formatTemplateLabel(templateId: string): string {
+  const stripped = templateId.replace(/^\d+[-_]?/, '');
+  if (!stripped) return templateId;
+  return stripped
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
 }
 
 function describeSchedule(schedule: SignageSlideSchedule): string | null {

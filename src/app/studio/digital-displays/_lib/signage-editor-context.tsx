@@ -3,25 +3,31 @@
 import { createContext, useContext, type ReactNode } from 'react';
 
 /**
- * Context que expone el `clientSlug` del signage que se está editando.
+ * Context que expone el `clientSlug` y el bridge.jumpToSlide del editor
+ * signage activo.
  *
- * Necesario para que componentes profundos (module forms, asset uploaders)
- * puedan resolver paths relativos a `/signage-assets/<slug>/...` y mandar
- * uploads al endpoint Blob con `?product=signage&slug=<slug>` sin que cada
- * llamada los reciba como prop. Es el equivalente de `useStudioSlug` del
- * kiosk pero scoped al producto signage.
+ * El clientSlug lo consumen module forms y asset uploaders para resolver
+ * paths relativos. El `jumpToSlide` lo consume PlaylistPanel para hacer
+ * que clickear un slide salte al runtime preview en ese slide.
  */
-const SignageEditorContext = createContext<string | null>(null);
+interface SignageEditorContextValue {
+  clientSlug: string;
+  jumpToSlide?: (slideId: string) => void;
+}
+
+const SignageEditorContext = createContext<SignageEditorContextValue | null>(null);
 
 export function SignageEditorProvider({
   clientSlug,
+  jumpToSlide,
   children,
 }: {
   clientSlug: string;
+  jumpToSlide?: (slideId: string) => void;
   children: ReactNode;
 }) {
   return (
-    <SignageEditorContext.Provider value={clientSlug}>
+    <SignageEditorContext.Provider value={{ clientSlug, jumpToSlide }}>
       {children}
     </SignageEditorContext.Provider>
   );
@@ -30,5 +36,10 @@ export function SignageEditorProvider({
 /** Devuelve el clientSlug activo del editor signage, o null si no está
  *  bajo el provider (e.g. componente cargado fuera de `<DisplayEditor>`). */
 export function useSignageClientSlug(): string | null {
-  return useContext(SignageEditorContext);
+  return useContext(SignageEditorContext)?.clientSlug ?? null;
+}
+
+/** Devuelve la función jumpToSlide del bridge, o null si no está disponible. */
+export function useSignageJumpToSlide(): ((slideId: string) => void) | null {
+  return useContext(SignageEditorContext)?.jumpToSlide ?? null;
 }

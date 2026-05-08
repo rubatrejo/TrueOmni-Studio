@@ -12,7 +12,7 @@ import {
   Upload,
   X,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   publishToFilesystem,
@@ -20,6 +20,7 @@ import {
   type PublishPrInfo,
 } from '../_lib/api-client';
 import { recordPublish as recordPublishLocal } from '../_lib/local-version-history';
+import { useEscapeClose, useFocusTrap } from '../_lib/use-modal-a11y';
 
 interface PublishModalProps {
   open: boolean;
@@ -67,14 +68,10 @@ export function PublishModal({ open, slug, onClose, currentVersion = 0, editor =
       });
   }, [open, slug]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  // Hallazgos S-28 / S-29: Escape + focus trap unificados.
+  useEscapeClose(open, onClose);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(open, dialogRef);
 
   // Auto-close on done: countdown 3 → 0 segundos. El operador puede
   // cancelar el auto-close cualquier interacción (clicks Cancel/Close).
@@ -134,6 +131,7 @@ export function PublishModal({ open, slug, onClose, currentVersion = 0, editor =
           />
           <motion.div
             key="modal"
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="publish-modal-title"

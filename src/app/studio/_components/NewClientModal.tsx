@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
+import { useEscapeClose, useFocusTrap } from '../_lib/use-modal-a11y';
+
 const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
 // "City, ST" — ciudad alfabética con espacios/puntos/guiones, coma, estado de
 // 2 letras mayúsculas (US states). Acepta sufijos opcionales tipo " 12345".
@@ -75,16 +77,14 @@ export function NewClientModal({
     setSlug(slugify(nombre));
   }, [nombre, slugTouched]);
 
-  // Escape cierra el modal (audit F-35 — los otros 3 modales del Studio
-  // ya lo hacían; este faltaba).
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  // Escape cierra el modal — hallazgo S-28 del audit panorámico v2,
+  // ahora unificado vía hook reusable. El hook se aplica a TODOS los
+  // modales del Studio en este sprint.
+  useEscapeClose(open, onClose);
+  // Focus trap: hallazgo S-29 — Tab/Shift+Tab no escapa al body mientras
+  // el modal está abierto. Restaura foco al cerrar.
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(open, dialogRef);
 
   const validateSlug = (): string | null => {
     if (!slug) return 'Slug is required';
@@ -156,6 +156,7 @@ export function NewClientModal({
           <div className="pointer-events-none fixed inset-0 z-50 grid place-items-center p-4">
           <motion.div
             key="modal"
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="new-client-title"

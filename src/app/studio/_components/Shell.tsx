@@ -59,6 +59,7 @@ import { recordSave as recordSaveLocal } from '../_lib/local-version-history';
 import { STUDIO_SECTIONS, type StudioSectionKey } from '../_lib/sections';
 import { StudioSlugProvider } from '../_lib/slug-context';
 import { usePreviewBridge } from '../_lib/use-preview-bridge';
+import { useStudioBridgeSync } from '../_lib/use-studio-bridge-sync';
 
 import { BrandingSyncBanner } from './BrandingSyncBanner';
 import { CommandPalette } from './CommandPalette';
@@ -295,30 +296,59 @@ export function Shell({
     onIframeLoad,
   } = usePreviewBridge();
 
-  useEffect(() => {
-    pushBranding({
-      primary: branding.primary,
-      secondary: branding.secondary,
-      tertiary: branding.tertiary,
-      logo: branding.logo,
-      idleLogo: branding.idleLogo,
-      footerLogo: branding.footerLogo,
-      favicon: branding.favicon,
-      fonts: branding.fonts,
-      homeHero: branding.homeHero,
-      heroGradient: branding.heroGradient,
+  // Hallazgos S-32 / S-33: los 18 useEffects individuales que empujaban
+  // cada slot del state al iframe vivían aquí inflando Shell.tsx y
+  // disparando un postMessage por slot al primer mount. Consolidados en
+  // `useStudioBridgeSync` (archivo separado) con diff por referencia —
+  // solo emite los slots que realmente cambiaron.
+  useStudioBridgeSync(
+    {
+      branding,
+      modules,
+      billboard,
+      aiAvatar,
+      survey,
+      deals,
+      photoBooth,
+      brochures,
+      socialWall,
+      guestbook,
+      listings,
+      events,
+      tickets,
+      passes,
+      trails,
+      map,
+      itinerary,
+      ads,
+      integrations,
+    },
+    {
+      pushBranding,
+      pushModules,
+      pushBillboard,
+      pushAiAvatar,
+      pushSurvey,
+      pushDeals,
+      pushPhotoBooth,
+      pushBrochures,
+      pushSocialWall,
+      pushGuestbook,
+      pushListings,
+      pushEvents,
+      pushTickets,
+      pushPasses,
+      pushTrails,
+      pushMap,
+      pushItinerary,
+      pushAds,
+      pushIntegrations,
+    },
+    {
       clientName: initialConfig.nombre,
       clientCoords: initialConfig.clientInfo?.coords,
-    });
-  }, [branding, pushBranding, initialConfig.nombre, initialConfig.clientInfo?.coords]);
-
-  useEffect(() => {
-    pushModules(modules);
-  }, [modules, pushModules]);
-
-  useEffect(() => {
-    pushBillboard(billboard);
-  }, [billboard, pushBillboard]);
+    },
+  );
 
   // Si la tab activa pertenece a un módulo que se acaba de apagar en Modules,
   // saltamos automáticamente a la tab Modules para evitar quedarse en una
@@ -330,72 +360,6 @@ export function Shell({
       setActiveTab('modules');
     }
   }, [modules.systemModules, activeTab]);
-
-  useEffect(() => {
-    pushAiAvatar(aiAvatar);
-  }, [aiAvatar, pushAiAvatar]);
-
-  useEffect(() => {
-    pushSurvey(survey);
-  }, [survey, pushSurvey]);
-
-  useEffect(() => {
-    pushDeals(deals);
-  }, [deals, pushDeals]);
-
-  useEffect(() => {
-    pushPhotoBooth(photoBooth);
-  }, [photoBooth, pushPhotoBooth]);
-
-  useEffect(() => {
-    pushBrochures(brochures);
-  }, [brochures, pushBrochures]);
-
-  useEffect(() => {
-    pushSocialWall(socialWall);
-  }, [socialWall, pushSocialWall]);
-
-  useEffect(() => {
-    pushGuestbook(guestbook);
-  }, [guestbook, pushGuestbook]);
-
-  useEffect(() => {
-    pushListings(listings);
-  }, [listings, pushListings]);
-
-  useEffect(() => {
-    pushEvents(events);
-  }, [events, pushEvents]);
-
-  useEffect(() => {
-    pushTickets(tickets);
-  }, [tickets, pushTickets]);
-
-  useEffect(() => {
-    pushPasses(passes);
-  }, [passes, pushPasses]);
-
-  useEffect(() => {
-    pushTrails(trails);
-  }, [trails, pushTrails]);
-  useEffect(() => {
-    pushMap(map);
-  }, [map, pushMap]);
-
-  useEffect(() => {
-    pushItinerary(itinerary);
-  }, [itinerary, pushItinerary]);
-
-  useEffect(() => {
-    pushAds(ads);
-  }, [ads, pushAds]);
-
-  // Hallazgo #14 del audit: live preview reactivo de integrations (Mapbox
-  // token + weather provider/city/units + GA4 id). El bridge filtra los
-  // apiKeys sensibles para que NO crucen al iframe.
-  useEffect(() => {
-    pushIntegrations(integrations);
-  }, [integrations, pushIntegrations]);
 
   const brandingDirty = useMemo(
     () => !shallowEqualBranding(branding, savedBranding),

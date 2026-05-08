@@ -89,15 +89,20 @@ export function SystemStatusBadge({ className = '' }: { className?: string }) {
     ].join('\n');
   })();
 
+  // Hallazgo S-26: aria-label antes embebía las métricas verbosas
+  // ("KV: ok (cloud, 591ms) Filesystem: ok (4ms) Checked 12:34:56") — el
+  // screen reader recitaba números cada 60s. Ahora aria-label es el label
+  // visible (status humano) y el tooltip + métricas viven en `title` para
+  // sighted users. Los detalles completos siguen en /studio/diagnostics.
   return (
     <Link
       href="/studio/diagnostics"
       title={tooltip}
-      aria-label={tooltip}
+      aria-label={`${label}. Open diagnostics for details.`}
       className={`flex items-center gap-1.5 rounded-md px-1 py-0.5 transition hover:text-zinc-700 dark:hover:text-zinc-300 ${className}`}
     >
       <span className={`block h-1.5 w-1.5 rounded-full ${dotClass}`} aria-hidden />
-      {label}
+      <span>{label}</span>
     </Link>
   );
 }

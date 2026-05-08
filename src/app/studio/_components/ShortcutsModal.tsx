@@ -2,7 +2,9 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Keyboard, X } from 'lucide-react';
-import { useEffect } from 'react';
+import { useRef } from 'react';
+
+import { useEscapeClose, useFocusTrap } from '../_lib/use-modal-a11y';
 
 /**
  * Modal con la lista de shortcuts del Studio (audit F-44).
@@ -15,14 +17,10 @@ import { useEffect } from 'react';
  * existan — para evitar prometer features que no llegan.
  */
 export function ShortcutsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  // Hallazgos S-28 / S-29: Escape + focus trap unificados.
+  useEscapeClose(open, onClose);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(open, dialogRef);
 
   return (
     <AnimatePresence>
@@ -39,6 +37,7 @@ export function ShortcutsModal({ open, onClose }: { open: boolean; onClose: () =
           />
           <motion.div
             key="modal"
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="shortcuts-modal-title"

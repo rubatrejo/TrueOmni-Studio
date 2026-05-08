@@ -2,13 +2,14 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2, Sparkles, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   type AiSuggestKind,
   type AiSuggestedItem,
   suggestContent,
 } from '../_lib/api-client';
+import { useEscapeClose, useFocusTrap } from '../_lib/use-modal-a11y';
 
 import { useToast } from './Toast';
 
@@ -54,14 +55,10 @@ export function AiSuggestModal({
     setCount(5);
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  // Hallazgos S-28 / S-29: Escape + focus trap unificados.
+  useEscapeClose(open, onClose);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(open, dialogRef);
 
   const parseLocation = (raw: string): { city: string; state: string } | null => {
     const m = raw.match(/^([^,]+),\s*([A-Z]{2})/);
@@ -142,6 +139,7 @@ export function AiSuggestModal({
           <div className="pointer-events-none fixed inset-0 z-[61] grid place-items-center p-4">
             <motion.div
               key="modal"
+              ref={dialogRef}
               role="dialog"
               aria-modal="true"
               aria-labelledby="ai-suggest-title"

@@ -239,5 +239,15 @@ export async function POST(_req: Request, { params }: RouteParams) {
     lastEditedAt: new Date().toISOString(),
   });
 
+  // Hallazgo S-37: invalidar cache para reflejar el cambio de productos.
+  try {
+    const { invalidateAutoMigrateCache } = await import(
+      '@/lib/studio/auto-migrate-clients'
+    );
+    invalidateAutoMigrateCache();
+  } catch {
+    /* noop */
+  }
+
   return NextResponse.json({ ok: true, productId });
 }

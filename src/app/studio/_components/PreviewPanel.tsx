@@ -58,6 +58,25 @@ export function PreviewPanel({
   const [fullScreen, setFullScreen] = useState(false);
   const [locale, setLocale] = useState<string>('en');
 
+  // Hallazgo S-35: al desmontar el editor (navegación a /studio o a otro
+  // producto), el iframe queda vivo en memoria del browser hasta que
+  // garbage-collect lo recolecte. Forzamos `iframe.src='about:blank'` para
+  // soltar el contexto kiosk inmediatamente — libera audio/video, mediapipe
+  // streams del Photo Booth, polling de Mapbox, etc.
+  useEffect(() => {
+    const ref = iframeRef;
+    return () => {
+      const node = ref.current;
+      if (node) {
+        try {
+          node.src = 'about:blank';
+        } catch {
+          /* ignore — node may already be detached */
+        }
+      }
+    };
+  }, [iframeRef]);
+
   const { w, h } = ORIENTATION_DIMS[orientation];
 
   // Default 40% pero auto-fit hacia abajo si el panel es muy estrecho (lg @1024

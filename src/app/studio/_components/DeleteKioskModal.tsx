@@ -2,7 +2,9 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle } from 'lucide-react';
-import { useEffect } from 'react';
+import { useRef } from 'react';
+
+import { useEscapeClose, useFocusTrap } from '../_lib/use-modal-a11y';
 
 interface DeleteKioskModalProps {
   open: boolean;
@@ -29,14 +31,10 @@ export function DeleteKioskModal({
   onCancel,
   onConfirm,
 }: DeleteKioskModalProps) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCancel();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onCancel]);
+  // Hallazgos S-28 / S-29: Escape + focus trap unificados via hook.
+  useEscapeClose(open, onCancel);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(open, dialogRef);
 
   return (
     <AnimatePresence>
@@ -54,6 +52,7 @@ export function DeleteKioskModal({
           <div className="pointer-events-none fixed inset-0 z-[61] grid place-items-center p-4">
             <motion.div
               key="modal"
+              ref={dialogRef}
               role="alertdialog"
               aria-modal="true"
               aria-labelledby="delete-kiosk-title"

@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Copy, Loader2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
+import { useEscapeClose, useFocusTrap } from '../_lib/use-modal-a11y';
+
 interface DuplicateKioskModalProps {
   open: boolean;
   /** Nombre legible del kiosk fuente — mostrado al operador para confirmar
@@ -44,14 +46,10 @@ export function DuplicateKioskModal({
     return () => clearTimeout(id);
   }, [open, sourceNombre]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCancel();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onCancel]);
+  // Hallazgos S-28 / S-29: Escape + focus trap unificados.
+  useEscapeClose(open, onCancel);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(open, dialogRef);
 
   const slug = slugify(name);
   const slugConflict = existingSlugs.includes(slug);
@@ -73,6 +71,7 @@ export function DuplicateKioskModal({
           <div className="pointer-events-none fixed inset-0 z-[61] grid place-items-center p-4">
             <motion.div
               key="modal"
+              ref={dialogRef}
               role="dialog"
               aria-modal="true"
               aria-labelledby="duplicate-kiosk-title"

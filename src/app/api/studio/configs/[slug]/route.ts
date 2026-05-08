@@ -626,6 +626,17 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
       console.warn('[api/studio/configs/[slug] DELETE] unified cleanup failed', syncErr);
     }
 
+    // Hallazgo S-37: invalidar cache para que el dashboard refleje el delete
+    // sin esperar el TTL.
+    try {
+      const { invalidateAutoMigrateCache } = await import(
+        '@/lib/studio/auto-migrate-clients'
+      );
+      invalidateAutoMigrateCache();
+    } catch {
+      /* noop */
+    }
+
     return NextResponse.json({ slug, deleted: true });
   } catch (error) {
     console.error('[api/studio/configs/[slug] DELETE]', error);

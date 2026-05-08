@@ -61,7 +61,31 @@ export interface MigrationReport {
   }>;
 }
 
-export async function autoMigrateClients(): Promise<MigrationReport> {
+/**
+ * Hallazgo S-37: cache TTL para evitar re-escanear FS + KV cada GET de
+ * /api/studio/clients (tipo 5–10× por minuto cuando el dashboard está
+ * abierto). Memoizamos el último report durante 60s; el siguiente GET
+ * recibe la copia cacheada en lugar de re-correr.
+ *
+ * Bypass disponible vía `autoMigrateClients({ force: true })` para flujos
+ * que necesitan certeza (post-create, post-delete).
+ */
+const MIGRATION_CACHE_TTL_MS = 60_000;
+let cachedReport: MigrationReport | null = null;
+let cachedAt = 0;
+
+export async function autoMigrateClients(
+  options: { force?: boolean } = {},
+): Promise<MigrationReport> {
+  const now = Date.now();
+  if (
+    !options.force &&
+    cachedReport &&
+    now - cachedAt < MIGRATION_CACHE_TTL_MS
+  ) {
+    return cachedReport;
+  }
+
   const report: MigrationReport = {
     scanned: 0,
     migrated: 0,
@@ -73,33 +97,51 @@ export async function autoMigrateClients(): Promise<MigrationReport> {
   const slugs = await collectAllSlugs();
   report.scanned = slugs.size;
 
-  for (const slug of slugs) {
-    try {
-      const existing = await loadClientManifest(slug);
-      if (existing) {
-        report.alreadyMigrated += 1;
-        report.details.push({
-          slug,
-          status: 'already-migrated',
-          products: productNamesFromManifest(existing),
-          source: 'none',
+  // Hallazgo S-34: paralelizar con concurrency limit. Antes el loop era
+  // secuencial (await migrateOne uno por uno). Con N=20 clientes y un
+  // round-trip de ~200ms cada uno → 4s de wait. Con concurrency 5 baja a
+  // ~800ms. No usamos `Promise.all` directo porque queremos contención
+  // razonable contra Upstash (rate limits).
+  const slugList = [...slugs];
+  const CONCURRENCY = 5;
+  const results: Array<MigrationReport['details'][number]> = [];
+  for (let i = 0; i < slugList.length; i += CONCURRENCY) {
+    const batch = slugList.slice(i, i + CONCURRENCY);
+    const settled = await Promise.allSettled(
+      batch.map(async (slug) => {
+        const existing = await loadClientManifest(slug);
+        if (existing) {
+          return {
+            slug,
+            status: 'already-migrated' as const,
+            products: productNamesFromManifest(existing),
+            source: 'none' as const,
+          };
+        }
+        const migrated = await migrateOne(slug);
+        return { slug, status: 'migrated' as const, ...migrated };
+      }),
+    );
+    settled.forEach((s, idx) => {
+      if (s.status === 'fulfilled') {
+        results.push(s.value);
+      } else {
+        results.push({
+          slug: batch[idx],
+          status: 'failed' as const,
+          products: [],
+          source: 'none' as const,
+          error: s.reason instanceof Error ? s.reason.message : String(s.reason),
         });
-        continue;
       }
+    });
+  }
 
-      const migrated = await migrateOne(slug);
-      report.migrated += 1;
-      report.details.push({ slug, status: 'migrated', ...migrated });
-    } catch (e) {
-      report.failed += 1;
-      report.details.push({
-        slug,
-        status: 'failed',
-        products: [],
-        source: 'none',
-        error: e instanceof Error ? e.message : String(e),
-      });
-    }
+  for (const r of results) {
+    report.details.push(r);
+    if (r.status === 'migrated') report.migrated += 1;
+    else if (r.status === 'already-migrated') report.alreadyMigrated += 1;
+    else report.failed += 1;
   }
 
   // Asegurar que `client:list` existe (set de top-level con todos los slugs
@@ -111,7 +153,16 @@ export async function autoMigrateClients(): Promise<MigrationReport> {
     }
   }
 
+  cachedReport = report;
+  cachedAt = now;
+
   return report;
+}
+
+/** Invalida la cache de auto-migrate. Llamar tras crear/borrar un cliente. */
+export function invalidateAutoMigrateCache(): void {
+  cachedReport = null;
+  cachedAt = 0;
 }
 
 // ---------------------------------------------------------------------------

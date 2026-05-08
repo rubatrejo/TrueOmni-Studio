@@ -2,13 +2,15 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, Search, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   groupCatalogByRegion,
   type LocaleEntry,
   type LocaleRegion,
 } from '@/lib/studio/locale-catalog';
+
+import { useEscapeClose, useFocusTrap } from '../_lib/use-modal-a11y';
 
 interface AddLanguageModalProps {
   open: boolean;
@@ -38,12 +40,12 @@ export function AddLanguageModal({
   useEffect(() => {
     if (!open) return;
     setSearch('');
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  }, [open]);
+
+  // Hallazgos S-28 / S-29: Escape + focus trap unificados.
+  useEscapeClose(open, onClose);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(open, dialogRef);
 
   const groups = useMemo(() => groupCatalogByRegion(), []);
 
@@ -96,6 +98,7 @@ export function AddLanguageModal({
           />
           <motion.div
             key="modal"
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="add-language-modal-title"

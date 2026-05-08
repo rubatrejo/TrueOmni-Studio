@@ -1,12 +1,18 @@
 'use client';
 
 import { Image as ImageIcon, Layers, Palette, Settings, Type } from 'lucide-react';
-import { useEffect, useId, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useId, useRef, useState } from 'react';
 import { HslColorPicker, type HslColor } from 'react-colorful';
 
 import type { UnifiedClientBranding } from '@/lib/studio/client-branding-sync';
 
 import { TabStrip, type TabStripItem } from '../../_components/TabStrip';
+
+// Hallazgo S-31: contexto del id del Field para que TextInput / FontSelect
+// lean el id auto-generado y lo apliquen al input concreto. Antes el Field
+// envolvía con `<label>` (válido HTML pero menos robusto en SR — VoiceOver
+// con form controls anidados a veces no asocia el name correcto).
+const FieldIdContext = createContext<string | null>(null);
 
 /**
  * `<BrandingForm>` — unified branding editor with horizontal tabs.
@@ -219,18 +225,32 @@ function Panel({ children }: { children: React.ReactNode }) {
 }
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+  // Hallazgo S-31: id auto-generado + htmlFor explícito. Los hijos
+  // (TextInput / FontSelect) leen el id del FieldIdContext.
+  const fieldId = useId();
+  const hintId = hint ? `${fieldId}-hint` : undefined;
   return (
-    <label className="flex flex-col gap-1.5 text-[12.5px]">
-      <span className="font-medium text-zinc-700 dark:text-zinc-300">{label}</span>
-      {children}
-      {hint ? <span className="text-[11px] text-zinc-500">{hint}</span> : null}
-    </label>
+    <FieldIdContext.Provider value={fieldId}>
+      <div className="flex flex-col gap-1.5 text-[12.5px]">
+        <label htmlFor={fieldId} className="font-medium text-zinc-700 dark:text-zinc-300">
+          {label}
+        </label>
+        {children}
+        {hint ? (
+          <span id={hintId} className="text-[11px] text-zinc-500">
+            {hint}
+          </span>
+        ) : null}
+      </div>
+    </FieldIdContext.Provider>
   );
 }
 
 function TextInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const id = useContext(FieldIdContext) ?? undefined;
   return (
     <input
+      id={id}
       type="text"
       value={value}
       onChange={(e) => onChange(e.target.value)}
@@ -241,8 +261,10 @@ function TextInput({ value, onChange, placeholder }: { value: string; onChange: 
 }
 
 function FontSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const id = useContext(FieldIdContext) ?? undefined;
   return (
     <select
+      id={id}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       className="h-9 w-full rounded-md border border-zinc-200 bg-white px-2.5 text-[12.5px] outline-none transition focus:border-sky-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200"

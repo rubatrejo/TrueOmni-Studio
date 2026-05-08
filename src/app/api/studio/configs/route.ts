@@ -422,6 +422,17 @@ export async function POST(request: Request) {
       console.warn('[api/studio/configs POST] unified sync failed', syncErr);
     }
 
+    // Hallazgo S-37: invalidar la cache de auto-migrate para que el siguiente
+    // GET /api/studio/clients vea el nuevo cliente sin esperar el TTL.
+    try {
+      const { invalidateAutoMigrateCache } = await import(
+        '@/lib/studio/auto-migrate-clients'
+      );
+      invalidateAutoMigrateCache();
+    } catch {
+      /* noop */
+    }
+
     return NextResponse.json({ slug: body.slug, config: parsed.data, meta }, { status: 201 });
   } catch (error) {
     console.error('[api/studio/configs POST]', error);

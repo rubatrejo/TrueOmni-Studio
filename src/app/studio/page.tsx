@@ -428,9 +428,18 @@ function ClientCard({
     >
       <Link
         href={`/studio/${client.slug}`}
+        // Hallazgo S-25: aria-label conciso reemplaza la concatenación de
+        // logo alt + slug + heading + product badges + timestamp + editor.
+        // El subcontenido decorativo lleva aria-hidden para evitar duplicar.
+        aria-label={
+          activeProducts.length === 0
+            ? `Open client ${client.name}, no products active`
+            : `Open client ${client.name}, ${activeProducts.length} product${activeProducts.length === 1 ? '' : 's'} active`
+        }
         className="relative flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md motion-reduce:hover:translate-y-0 dark:border-zinc-800 dark:bg-zinc-900/40 dark:shadow-none dark:hover:border-zinc-700 dark:hover:bg-zinc-900/80 dark:hover:shadow-[0_8px_24px_-12px_rgba(56,189,248,0.25)]"
       >
         <div
+          aria-hidden
           className="relative grid h-40 w-full place-items-center overflow-hidden"
           style={{
             background: `linear-gradient(135deg, ${client.brandPrimaryHex} 0%, ${client.brandSecondaryHex} 100%)`,
@@ -439,12 +448,10 @@ function ClientCard({
           <div
             className="absolute -right-12 -top-12 h-44 w-44 rounded-full opacity-30 blur-2xl"
             style={{ background: client.brandAccentHex }}
-            aria-hidden
           />
           <div
             className="absolute -bottom-16 -left-16 h-44 w-44 rounded-full opacity-20 blur-2xl"
             style={{ background: client.brandAccentHex }}
-            aria-hidden
           />
 
           <div className="relative flex items-center justify-center">
@@ -454,7 +461,11 @@ function ClientCard({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={client.logoUrl}
-                alt={`${client.name} logo`}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                width={200}
+                height={48}
                 className="h-10 w-auto max-w-[60%] object-contain drop-shadow"
               />
             ) : (
@@ -469,7 +480,7 @@ function ClientCard({
           </div>
         </div>
 
-        <div className="flex flex-1 flex-col p-5">
+        <div aria-hidden className="flex flex-1 flex-col p-5">
           <h3 className="font-display text-[16px] font-semibold leading-tight text-zinc-900 dark:text-white">
             {client.name}
           </h3>
@@ -577,13 +588,20 @@ function ClientCard({
 }
 
 function NewClientCard({ onClick }: { onClick: () => void }) {
+  // Hallazgo S-24: aria-label distinto del botón header — el screen reader
+  // anunciaba "+ New client, button" dos veces seguidas. Aquí distinguimos
+  // el card-CTA inline al final del grid del botón pill del header.
   return (
     <button
       type="button"
       onClick={onClick}
+      aria-label="Create a new client (inline shortcut)"
       className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50/40 px-6 py-12 text-zinc-500 transition hover:border-sky-400 hover:bg-sky-50/40 hover:text-sky-700 dark:border-zinc-800 dark:bg-zinc-900/20 dark:text-zinc-500 dark:hover:border-sky-500/60 dark:hover:bg-sky-500/5 dark:hover:text-sky-300"
     >
-      <span className="grid h-10 w-10 place-items-center rounded-full bg-zinc-100 text-2xl font-light dark:bg-zinc-800">
+      <span
+        aria-hidden
+        className="grid h-10 w-10 place-items-center rounded-full bg-zinc-100 text-2xl font-light dark:bg-zinc-800"
+      >
         +
       </span>
       <span className="text-sm font-medium">New client</span>
@@ -592,13 +610,15 @@ function NewClientCard({ onClick }: { onClick: () => void }) {
 }
 
 function NewClientButton({ onClick }: { onClick: () => void }) {
+  // Hallazgo S-24: aria-label específico del botón pill del header.
   return (
     <button
       type="button"
       onClick={onClick}
+      aria-label="Create a new client"
       className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3.5 py-2 text-[13px] font-semibold text-white shadow-sm transition hover:bg-zinc-700 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
     >
-      <span className="text-base leading-none">+</span> New client
+      <span aria-hidden className="text-base leading-none">+</span> New client
     </button>
   );
 }

@@ -1,15 +1,37 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
-import { autoMigrateClients } from '@/lib/studio/auto-migrate-clients';
+import { kSignageClient, kSignageClientList } from '@/lib/signage/kv-keys';
+import { loadSignageClient } from '@/lib/signage/config';
 import {
+  SignageClientFileSchema,
+  type SignageClientFile,
+} from '@/lib/signage/schema';
+import { autoMigrateClients } from '@/lib/studio/auto-migrate-clients';
+import { bootstrapStudioFromFs, readClientFs } from '@/lib/studio/bootstrap-from-fs';
+import {
+  kioskToUnifiedBranding,
   loadUnifiedBranding,
+  saveUnifiedBrandingOnly,
   toHex,
+  type UnifiedClientBranding,
 } from '@/lib/studio/client-branding-sync';
 import {
+  ClientProductsSchema,
+  defaultClientProducts,
   listClientSlugs,
   loadClientManifest,
+  makeBlankManifest,
+  saveClientManifest,
   type ClientManifest,
 } from '@/lib/studio/client-manifest';
+import { kv, kvKeys } from '@/lib/studio/kv';
+import {
+  KioskConfigSchema,
+  makeBlankConfig,
+  type ConfigMeta,
+  type KioskConfig,
+} from '@/lib/studio/schema';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,32 +39,24 @@ export interface ClientSummary {
   slug: string;
   name: string;
   products: ClientManifest['products'];
-  /** Hex derivado del unified branding HSL — útil para gradient hero del card. */
   brandPrimaryHex: string;
   brandSecondaryHex: string;
   brandAccentHex: string;
-  /** Logo principal (path o data URL). Vacío si el cliente no subió logo. */
   logoUrl: string;
-  /** Última edición — del manifest. */
   lastEditedAt: string;
   lastEditor?: string;
 }
 
+const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
+const TEMPLATE_SLUG = 'default';
+
 /**
  * `GET /api/studio/clients` — lista de clientes unificados (post-Fase 2).
- *
- * Auto-migra clientes pre-refactor antes de servir la respuesta. Devuelve
- * un summary listo para renderizar las cards del dashboard `/studio`.
- *
- * Idempotente: re-correrlo no afecta clientes ya migrados.
- *
- * Plan: `~/.claude/plans/ok-listo-ahora-quiero-wondrous-sphinx.md`.
+ * Auto-migra clientes pre-refactor antes de servir la respuesta.
  */
 export async function GET() {
-  // 1. Auto-migración lazy. Idempotente.
   await autoMigrateClients();
 
-  // 2. Recuperar lista canónica + manifests en paralelo.
   const slugs = await listClientSlugs();
   const summaries = await Promise.all(
     slugs.map(async (slug): Promise<ClientSummary | null> => {
@@ -68,11 +82,226 @@ export async function GET() {
   const clients = summaries
     .filter((s): s is ClientSummary => s !== null)
     .sort((a, b) => {
-      // `default` siempre primero.
       if (a.slug === 'default') return -1;
       if (b.slug === 'default') return 1;
       return a.name.localeCompare(b.name);
     });
 
   return NextResponse.json({ clients });
+}
+
+// ---------------------------------------------------------------------------
+//  POST — crear cliente unificado (Fase 4)
+// ---------------------------------------------------------------------------
+
+const CreateClientBodySchema = z.object({
+  slug: z.string().min(1).regex(SLUG_REGEX, 'kebab-case slug required'),
+  name: z.string().min(1).max(120),
+  website: z.string().max(2048).optional(),
+  location: z
+    .object({
+      city: z.string().max(120).optional(),
+      lat: z.number().optional(),
+      lon: z.number().optional(),
+    })
+    .partial()
+    .optional(),
+  products: ClientProductsSchema.partial().default({ kiosks: true }),
+});
+
+/**
+ * `POST /api/studio/clients` body `{ slug, name, website?, location?, products }`.
+ *
+ * Crea un cliente unificado:
+ *  1. Valida que el slug no exista (en `client:list` ni en KV legacy).
+ *  2. Clona configs de los productos seleccionados desde el template `default`:
+ *     - kiosks → `cfg:{slug}` con bootstrap del filesystem.
+ *     - digitalDisplays → `signage:client:{slug}` con clone del template.
+ *  3. Crea unified branding como source of truth (`client:{slug}:branding`)
+ *     derivando del kiosk template (o defaults TrueOmni si no hay kiosk).
+ *  4. Crea manifest (`client:{slug}:manifest`) con los productos activos.
+ *  5. Añade el slug a `client:list` + listas legacy de cada producto activo.
+ *
+ * Falla con 409 si el slug ya existe.
+ */
+export async function POST(request: Request) {
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'invalid JSON body' }, { status: 400 });
+  }
+
+  const parsed = CreateClientBodySchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: 'validation failed', details: parsed.error.flatten() },
+      { status: 400 },
+    );
+  }
+  const { slug, name } = parsed.data;
+  if (slug === TEMPLATE_SLUG) {
+    return NextResponse.json(
+      { error: `"${TEMPLATE_SLUG}" is reserved for the system template.` },
+      { status: 400 },
+    );
+  }
+
+  const products = { ...defaultClientProducts(), ...parsed.data.products };
+
+  // Conflict check: slug ya tiene manifest, kiosk config o signage client.
+  const [existingManifest, existingKiosk, existingSignage] = await Promise.all([
+    loadClientManifest(slug),
+    kv.get(kvKeys.cfg(slug)),
+    kv.get(kSignageClient(slug)),
+  ]);
+  if (existingManifest || existingKiosk || existingSignage) {
+    return NextResponse.json(
+      { error: `slug "${slug}" already exists` },
+      { status: 409 },
+    );
+  }
+
+  // 1. Clonar kiosk si toca.
+  let kioskConfig: KioskConfig | null = null;
+  if (products.kiosks) {
+    try {
+      const fsTemplate = await readClientFs(TEMPLATE_SLUG);
+      let cfg = makeBlankConfig(slug, name, 'portrait');
+      if (fsTemplate.config) {
+        cfg = bootstrapStudioFromFs(cfg, fsTemplate.config, fsTemplate.tokensCss);
+        cfg.slug = slug;
+        cfg.nombre = name;
+        cfg.currentVersion = 0;
+      }
+      const trimmedLocation = parsed.data.location?.city ?? '';
+      const trimmedWebsite = parsed.data.website ?? '';
+      if (trimmedWebsite || trimmedLocation || parsed.data.location?.lat != null) {
+        cfg.clientInfo = {
+          website: trimmedWebsite,
+          location: trimmedLocation,
+          ...(parsed.data.location?.lat != null && parsed.data.location?.lon != null
+            ? { coords: { lat: parsed.data.location.lat, lng: parsed.data.location.lon } }
+            : {}),
+        };
+      }
+      const validated = KioskConfigSchema.safeParse(cfg);
+      if (!validated.success) {
+        return NextResponse.json(
+          { error: 'kiosk config validation failed', issues: validated.error.issues },
+          { status: 500 },
+        );
+      }
+      kioskConfig = validated.data;
+      const created = await kv.set(kvKeys.cfg(slug), kioskConfig, { nx: true });
+      if (created !== 'OK') {
+        return NextResponse.json(
+          { error: `kiosk slug "${slug}" already exists` },
+          { status: 409 },
+        );
+      }
+      const meta: ConfigMeta = {
+        slug,
+        createdAt: new Date().toISOString(),
+        lastEditedAt: new Date().toISOString(),
+        currentVersion: 0,
+      };
+      await kv.set(kvKeys.cfgMeta(slug), meta);
+      await kv.sadd(kvKeys.clientsList, slug);
+    } catch (e) {
+      return NextResponse.json(
+        { error: 'failed to create kiosk', message: (e as Error).message },
+        { status: 500 },
+      );
+    }
+  }
+
+  // 2. Clonar signage si toca.
+  if (products.digitalDisplays) {
+    try {
+      const template = await loadSignageClient(TEMPLATE_SLUG);
+      if (!template) {
+        return NextResponse.json(
+          { error: `signage template "${TEMPLATE_SLUG}" not available` },
+          { status: 500 },
+        );
+      }
+      const clone: SignageClientFile = {
+        slug,
+        name,
+        locale: template.locale,
+        timezone: template.timezone,
+        location: {
+          ...template.location,
+          ...(parsed.data.location?.city ? { city: parsed.data.location.city } : null),
+          ...(parsed.data.location?.lat != null ? { lat: parsed.data.location.lat } : null),
+          ...(parsed.data.location?.lon != null ? { lon: parsed.data.location.lon } : null),
+        },
+        website: parsed.data.website ?? template.website,
+        branding: structuredClone(template.branding),
+        header: structuredClone(template.header),
+        displays: [],
+      };
+      const validated = SignageClientFileSchema.safeParse(clone);
+      if (!validated.success) {
+        return NextResponse.json(
+          { error: 'signage clone validation failed', issues: validated.error.issues },
+          { status: 500 },
+        );
+      }
+      await kv.set(kSignageClient(slug), validated.data);
+      // Set legacy de signage clients (sadd, no overwrite).
+      await kv.sadd(kSignageClientList, slug);
+    } catch (e) {
+      return NextResponse.json(
+        { error: 'failed to create signage client', message: (e as Error).message },
+        { status: 500 },
+      );
+    }
+  }
+
+  // 3. Unified branding como source of truth.
+  let unified: UnifiedClientBranding;
+  if (kioskConfig) {
+    unified = kioskToUnifiedBranding(kioskConfig.branding, {
+      nombre: kioskConfig.nombre,
+      website: kioskConfig.clientInfo?.website,
+      location: kioskConfig.clientInfo?.location,
+      coords: kioskConfig.clientInfo?.coords,
+    });
+  } else {
+    // Solo signage o ningún producto — defaults TrueOmni.
+    unified = {
+      name,
+      website: parsed.data.website ?? '',
+      location: {
+        city: parsed.data.location?.city ?? '',
+        lat: parsed.data.location?.lat,
+        lon: parsed.data.location?.lon,
+      },
+      brand: {
+        primary: '211 100% 25%',
+        secondary: '200 100% 50%',
+        accent: '62 53% 48%',
+        neutral: '0 0% 7%',
+      },
+      logos: { default: '', dark: '', idle: '', footer: '' },
+      fonts: { display: 'Montserrat', body: 'Open Sans' },
+      favicon: '',
+    };
+  }
+  await saveUnifiedBrandingOnly(slug, unified);
+
+  // 4. Manifest.
+  const manifest = makeBlankManifest(slug, name, products);
+  await saveClientManifest(manifest);
+
+  return NextResponse.json(
+    {
+      slug,
+      manifest,
+      branding: unified,
+    },
+    { status: 201 },
+  );
 }

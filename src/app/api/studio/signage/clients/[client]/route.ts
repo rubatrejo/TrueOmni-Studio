@@ -85,6 +85,24 @@ export async function PUT(req: NextRequest, ctx: RouteContext) {
     );
   }
 
+  // Sync hook (Fase 4 del refactor cliente-primero): propaga branding del
+  // signage al unified + kiosk. Best-effort: errores no abortan el save
+  // del signage. Solo se ejecuta si el cliente ya tiene manifest unificado;
+  // si todavía no migró, este save es el legacy puro.
+  try {
+    const { syncFromSignageSave } = await import(
+      '@/lib/studio/client-branding-sync'
+    );
+    const { loadClientManifest } = await import('@/lib/studio/client-manifest');
+    const manifest = await loadClientManifest(clientSlug);
+    if (manifest) {
+      await syncFromSignageSave(clientSlug, parsed.data);
+    }
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn('[signage:api] client sync hook failed', e);
+  }
+
   return NextResponse.json({ ok: true, savedAt: Date.now() });
 }
 

@@ -533,6 +533,37 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       await kv.set(kvKeys.cfgMeta(slug), updatedMeta);
     }
 
+    // Sync hook (Fase 4 del refactor cliente-primero): si el PATCH tocó
+    // `branding`, `nombre` o `clientInfo`, propaga al unified branding +
+    // signage. Best-effort: errores no abortan el save del kiosk. Solo
+    // se ejecuta si el cliente ya tiene manifest unificado.
+    const bodyShape = body as {
+      branding?: unknown;
+      nombre?: unknown;
+      clientInfo?: unknown;
+    };
+    const touchedSyncableField =
+      bodyShape.branding != null ||
+      bodyShape.nombre != null ||
+      bodyShape.clientInfo != null;
+    if (touchedSyncableField) {
+      try {
+        const { syncFromKioskSave } = await import(
+          '@/lib/studio/client-branding-sync'
+        );
+        const { loadClientManifest } = await import(
+          '@/lib/studio/client-manifest'
+        );
+        const manifest = await loadClientManifest(slug);
+        if (manifest) {
+          await syncFromKioskSave(slug, validated.data);
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('[api/studio/configs/[slug] PATCH] sync hook failed', e);
+      }
+    }
+
     return NextResponse.json({ config: validated.data });
   } catch (error) {
     console.error('[api/studio/configs/[slug] PATCH]', error);

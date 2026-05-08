@@ -47,9 +47,22 @@ function detectEmbedded(): boolean {
 
 export function KioskCanvas({ children }: { children: ReactNode }) {
   const [scale, setScale] = useState(1);
-  // Lazy init: en cliente la primera evaluación ya sabe si está en iframe.
-  const [embedded] = useState(detectEmbedded);
-  const [isPwa] = useState(detectPwaViewport);
+  // Hydration safety: SSR no conoce `window.parent` ni `?viewport=`. Si
+  // hacemos lazy-init con `useState(detectEmbedded)`, el primer render
+  // client diverge del SSR (server: false → dev-view; client en iframe:
+  // true → embedded view) y React tira "Hydration failed" — el atributo
+  // `data-kiosk-canvas` queda en distinto div server vs client.
+  // Hallazgo S-01 del audit panorámico v2 (2026-05-08).
+  // Fix: arrancamos en `false`/`false` (mismo que SSR) y leemos el valor
+  // real tras mount. El primer paint coincide con SSR; luego un re-render
+  // aplica embedded/PWA. El flash es invisible al operador (el iframe del
+  // Studio arranca opaco hasta que React commitea).
+  const [embedded, setEmbedded] = useState(false);
+  const [isPwa, setIsPwa] = useState(false);
+  useEffect(() => {
+    setEmbedded(detectEmbedded());
+    setIsPwa(detectPwaViewport());
+  }, []);
   const W = isPwa ? PWA_WIDTH_PX : KIOSK_WIDTH_PX;
   const H = isPwa ? PWA_HEIGHT_PX : KIOSK_HEIGHT_PX;
 
@@ -65,7 +78,7 @@ export function KioskCanvas({ children }: { children: ReactNode }) {
     updateScale();
     window.addEventListener('resize', updateScale);
     return () => window.removeEventListener('resize', updateScale);
-  }, [embedded]);
+  }, [embedded, W, H]);
 
   // Modo embedded (iframe): canvas a 1080×1920 reales, ocupando 100% del
   // viewport del iframe. Sin padding, sin bg gris, sin shadow.

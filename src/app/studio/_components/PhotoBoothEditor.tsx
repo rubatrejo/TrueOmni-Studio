@@ -992,7 +992,7 @@ function ChromaPreview({ photoBooth }: { photoBooth: PhotoBoothConfig }) {
           >
             <svg
               viewBox="0 0 120 200"
-              preserveAspectRatio="xMidYEnd meet"
+              preserveAspectRatio="xMidYMax meet"
               className="h-[92%] w-full"
             >
               <defs>

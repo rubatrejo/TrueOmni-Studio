@@ -79,6 +79,11 @@ export default async function KioskEditorPage({
           if (branding) {
             cfg.branding = { ...cfg.branding, ...unifiedToKioskBranding(branding) };
           }
+          // Persistir la materialización en KV para que la próxima carga no
+          // vuelva a hacer drift recovery, y registrar en `clientsList` para
+          // que las APIs legacy (clone, configs list) lo encuentren.
+          await kv.set(kvKeys.cfg(slug), cfg);
+          await kv.sadd(kvKeys.clientsList, slug);
           raw = cfg;
         }
       }

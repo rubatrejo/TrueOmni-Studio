@@ -577,6 +577,55 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
     await kv.del(kvKeys.cfg(slug));
     await kv.del(kvKeys.cfgMeta(slug));
     await kv.srem(kvKeys.clientsList, slug);
+
+    // Sync al modelo unified: si el cliente tiene manifest, marcar `kiosks`
+    // como inactivo. Si tras eso ya no quedan productos activos (ningún
+    // signage / mobile-pwa / etc.), purgar también el cliente unified
+    // entero (manifest + unified branding + entry en `client:list`) para
+    // que no queden "fantasmas" en el dashboard. Hallazgo S-03 del audit.
+    try {
+      const { kSignageClient } = await import('@/lib/signage/kv-keys');
+      const { clientKeys, CLIENT_LIST_KEY, loadClientManifest, saveClientManifest } =
+        await import('@/lib/studio/client-manifest');
+      const manifest = await loadClientManifest(slug);
+      if (manifest) {
+        const updatedProducts = { ...manifest.products, kiosks: false };
+        const stillHasProducts = Object.values(updatedProducts).some(Boolean);
+
+        if (!stillHasProducts) {
+          // El cliente queda sin productos activos. Si tampoco hay signage
+          // KV residual, purgar todo el cliente unified.
+          const signageStillExists = await kv.get(kSignageClient(slug));
+          if (!signageStillExists) {
+            await kv.del(clientKeys.manifest(slug));
+            await kv.del(clientKeys.branding(slug));
+            const list = (await kv.get<string[]>(CLIENT_LIST_KEY)) ?? [];
+            if (Array.isArray(list)) {
+              await kv.set(
+                CLIENT_LIST_KEY,
+                list.filter((s) => s !== slug),
+              );
+            }
+          } else {
+            // Hay signage pero el manifest no lo refleja — corrige + flip.
+            await saveClientManifest({
+              ...manifest,
+              products: { ...updatedProducts, digitalDisplays: true },
+              lastEditedAt: new Date().toISOString(),
+            });
+          }
+        } else {
+          await saveClientManifest({
+            ...manifest,
+            products: updatedProducts,
+            lastEditedAt: new Date().toISOString(),
+          });
+        }
+      }
+    } catch (syncErr) {
+      console.warn('[api/studio/configs/[slug] DELETE] unified cleanup failed', syncErr);
+    }
+
     return NextResponse.json({ slug, deleted: true });
   } catch (error) {
     console.error('[api/studio/configs/[slug] DELETE]', error);

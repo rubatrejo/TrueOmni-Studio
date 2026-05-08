@@ -25,6 +25,18 @@ import type {
 } from '@/lib/studio/schema';
 
 /**
+ * Origin específico del iframe del kiosk preview. El kiosk se carga desde
+ * el mismo origin que el Studio (Next sirve `/k/<slug>` en el mismo dominio),
+ * así que `window.location.origin` es el target correcto. Reemplaza el
+ * uso anterior de `'*'`, que permitía a cualquier ventana receptora
+ * (incluyendo posibles hijacks cross-origin) leer el branding/config.
+ *
+ * Hallazgo S-02 del audit panorámico v2 (2026-05-08).
+ */
+const IFRAME_TARGET_ORIGIN =
+  typeof window !== 'undefined' ? window.location.origin : '/';
+
+/**
  * Hook que coordina el bridge Studio → kiosk-iframe.
  *
  * Responsabilidades:
@@ -119,6 +131,25 @@ export function usePreviewBridge() {
   // `studio:ready` al montar y cada 5s como heartbeat (ver `StudioBridge`).
   const [lastAckAt, setLastAckAt] = useState<number | null>(null);
   const [mountAt, setMountAt] = useState<number>(() => Date.now());
+  // Counter de postMessage fallidos consecutivos. Si el iframe está dead-
+  // locked o detached el postMessage tira; antes esos errores solo iban a
+  // `console.warn` (silencioso para el operador). Hallazgo S-04 del audit
+  // panorámico v2: si pasamos un threshold lo expone como `postBroken`
+  // para que el Shell muestre un banner "Live preview disconnected".
+  const postFailureRef = useRef(0);
+  const [postBroken, setPostBroken] = useState(false);
+  const recordPostFailure = useCallback((e: unknown) => {
+    postFailureRef.current += 1;
+    // eslint-disable-next-line no-console
+    console.warn('[bridge:postMessage]', e);
+    if (postFailureRef.current >= 5) setPostBroken(true);
+  }, []);
+  const recordPostSuccess = useCallback(() => {
+    if (postFailureRef.current > 0) {
+      postFailureRef.current = 0;
+      setPostBroken(false);
+    }
+  }, []);
   // Ticker que fuerza re-render cada segundo para que el `bridgeStatus`
   // derivado refleje el paso del tiempo (sin esto se quedaría obsoleto).
   const [, setNowTick] = useState(0);
@@ -149,49 +180,55 @@ export function usePreviewBridge() {
             clientCoords: branding.clientCoords,
           },
         },
-        '*',
+        IFRAME_TARGET_ORIGIN,
       );
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendModulesNow = useCallback((modules: ModulesConfig) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:modules-update', modules }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:modules-update', modules }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendBillboardNow = useCallback((billboard: BillboardConfig) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:billboard-update', billboard }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:billboard-update', billboard }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const openBillboardPreview = useCallback(() => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:billboard-open-preview' }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:billboard-open-preview' }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const openHomeDashboardPreview = useCallback(() => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:home-dashboard-open-preview' }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:home-dashboard-open-preview' }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const openAiAvatarPreview = useCallback(() => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:ai-avatar-open-preview' }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:ai-avatar-open-preview' }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendAiNow = useCallback((aiAvatar: AiAvatarConfig) => {
@@ -206,16 +243,18 @@ export function usePreviewBridge() {
         greeting: aiAvatar.greeting,
         suggestedQuestions: aiAvatar.suggestedQuestions,
       };
-      win.postMessage({ type: 'studio:ai-avatar-update', aiAvatar: safe }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:ai-avatar-update', aiAvatar: safe }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendSurveyNow = useCallback((survey: SurveyConfig) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:survey-update', survey }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:survey-update', survey }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   /**
@@ -226,16 +265,18 @@ export function usePreviewBridge() {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:survey-open-preview' }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:survey-open-preview' }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendDealsNow = useCallback((deals: DealsModuleConfig) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:deals-update', deals }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:deals-update', deals }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   /**
@@ -246,176 +287,198 @@ export function usePreviewBridge() {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:deals-open-preview' }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:deals-open-preview' }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendPhotoBoothNow = useCallback((photoBooth: PhotoBoothConfig) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:photo-booth-update', photoBooth }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:photo-booth-update', photoBooth }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const openPhotoBoothPreview = useCallback(() => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:photo-booth-open-preview' }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:photo-booth-open-preview' }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendBrochuresNow = useCallback((brochures: BrochuresModuleConfig) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:brochures-update', brochures }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:brochures-update', brochures }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const openBrochuresPreview = useCallback(() => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:brochures-open-preview' }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:brochures-open-preview' }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendSocialWallNow = useCallback((socialWall: SocialWallConfig) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:social-wall-update', socialWall }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:social-wall-update', socialWall }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const openSocialWallPreview = useCallback(() => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:social-wall-open-preview' }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:social-wall-open-preview' }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendGuestbookNow = useCallback((guestbook: GuestbookConfig) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:guestbook-update', guestbook }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:guestbook-update', guestbook }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const openGuestbookPreview = useCallback(() => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:guestbook-open-preview' }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:guestbook-open-preview' }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendListingsNow = useCallback((listings: ListingsModule) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:listings-update', listings }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:listings-update', listings }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendEventsNow = useCallback((events: EventsModule) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:events-update', events }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:events-update', events }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const openEventsPreview = useCallback(() => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:events-open-preview' }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:events-open-preview' }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendTicketsNow = useCallback((tickets: TicketsModule) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:tickets-update', tickets }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:tickets-update', tickets }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const openTicketsPreview = useCallback(() => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:tickets-open-preview' }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:tickets-open-preview' }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendPassesNow = useCallback((passes: PassesModule) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:passes-update', passes }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:passes-update', passes }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const openPassesPreview = useCallback(() => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:passes-open-preview' }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:passes-open-preview' }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendTrailsNow = useCallback((trails: TrailsModule) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:trails-update', trails }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:trails-update', trails }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const openTrailsPreview = useCallback(() => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:trails-open-preview' }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:trails-open-preview' }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendItineraryNow = useCallback((itineraryBuilder: ItineraryBuilderConfig) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:itinerary-update', itineraryBuilder }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:itinerary-update', itineraryBuilder }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const openItineraryPreview = useCallback(() => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:itinerary-open-preview' }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:itinerary-open-preview' }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendAdsNow = useCallback((ads: AdsModule) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:ads-update', ads }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:ads-update', ads }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const sendMapNow = useCallback((map: MapConfig) => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:map-update', map }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:map-update', map }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   /** Push del IntegrationsConfig al iframe. Hallazgo #14 del audit — antes
@@ -437,16 +500,18 @@ export function usePreviewBridge() {
         },
         analytics: { gaId: integrations.analytics.gaId },
       };
-      win.postMessage({ type: 'studio:integrations-update', integrations: safe }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:integrations-update', integrations: safe }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   const openMapPreview = useCallback(() => {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:map-open-preview' }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:map-open-preview' }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   // Listener del handshake studio:ready desde el iframe.
@@ -678,8 +743,9 @@ export function usePreviewBridge() {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'studio:locale-update', locale }, '*');
-    } catch (e) { console.warn('[bridge:postMessage]', e); }
+      win.postMessage({ type: 'studio:locale-update', locale }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) { recordPostFailure(e); }
   }, []);
 
   // Cuando el iframe re-monta, resetea ready para forzar un nuevo handshake.
@@ -745,6 +811,10 @@ export function usePreviewBridge() {
     pushLocale,
     isReady,
     bridgeStatus,
+    /** True si han fallado 5+ postMessage consecutivos. Útil para mostrar
+     *  un banner "Live preview disconnected — reload" en el Shell.
+     *  Hallazgo S-04 del audit panorámico v2. */
+    postBroken,
     onIframeLoad,
   };
 }

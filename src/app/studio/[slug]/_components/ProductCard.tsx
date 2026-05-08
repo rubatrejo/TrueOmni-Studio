@@ -1,7 +1,7 @@
 'use client';
 
 import type { LucideIcon } from 'lucide-react';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -25,6 +25,10 @@ export interface ProductCardProps {
   icon: LucideIcon;
   status: 'live' | 'soon';
   active: boolean;
+  /** Timeline para productos `soon`: "In design · Q3 2026", "On roadmap",
+   *  "Exploring", etc. Reemplaza el badge genérico "Coming soon". Hallazgo
+   *  S-19 del audit panorámico v2. */
+  soonTimeline?: string;
 }
 
 export function ProductCard({
@@ -36,6 +40,7 @@ export function ProductCard({
   icon: Icon,
   status,
   active,
+  soonTimeline,
 }: ProductCardProps) {
   const isComingSoon = status === 'soon';
   const href = `/studio/${slug}/${segment}`;
@@ -80,12 +85,18 @@ export function ProductCard({
           <h3 className="font-display text-[15px] font-semibold leading-tight text-zinc-900 dark:text-white">
             {label}
           </h3>
-          <ProductBadge status={status} active={active} />
+          <ProductBadge status={status} active={active} soonTimeline={soonTimeline} />
         </div>
       </div>
       <p className="text-[12.5px] leading-relaxed text-zinc-500">{description}</p>
       {!isComingSoon && (
-        <div className="mt-4 flex items-center gap-1 text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
+        <div
+          className={`mt-4 flex items-center gap-1.5 text-[12px] font-medium ${
+            active
+              ? 'text-zinc-700 dark:text-zinc-300'
+              : 'text-sky-700 dark:text-sky-300'
+          }`}
+        >
           {active ? (
             <>
               Open editor <ArrowRight className="h-3.5 w-3.5" />
@@ -97,8 +108,11 @@ export function ProductCard({
             </>
           ) : (
             <>
-              Activate (clones from default){' '}
-              <ArrowRight className="h-3.5 w-3.5" />
+              {/* S-20: Activate usa icono distinto (Sparkles) y tono sky
+                  para diferenciarse visualmente de "Open editor" (gris +
+                  ArrowRight). Es operación pesada (clone desde default). */}
+              <Sparkles className="h-3.5 w-3.5" />
+              Activate · clones from default
             </>
           )}
         </div>
@@ -141,11 +155,22 @@ export function ProductCard({
   );
 }
 
-function ProductBadge({ status, active }: { status: 'live' | 'soon'; active: boolean }) {
+function ProductBadge({
+  status,
+  active,
+  soonTimeline,
+}: {
+  status: 'live' | 'soon';
+  active: boolean;
+  soonTimeline?: string;
+}) {
   if (status === 'soon') {
     return (
-      <span className="mt-0.5 inline-flex rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500">
-        Coming soon
+      <span
+        className="mt-0.5 inline-flex rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500"
+        title={soonTimeline ?? 'Roadmap timing pending'}
+      >
+        {soonTimeline ?? 'Coming soon'}
       </span>
     );
   }

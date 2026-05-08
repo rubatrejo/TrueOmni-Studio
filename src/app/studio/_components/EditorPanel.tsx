@@ -124,6 +124,7 @@ export function EditorPanel({
   lastEditor,
   kioskLocation,
   onPublish,
+  topSlot,
 }: {
   sectionKey: StudioSectionKey;
   branding: Branding;
@@ -187,6 +188,14 @@ export function EditorPanel({
   /** Location del kiosk ("Davenport, FL"), usado por AI suggest (#26). */
   kioskLocation?: string;
   onPublish: () => void;
+  /**
+   * Contenido opcional renderizado dentro del scrollable area del panel
+   * (encima del editor de la sección activa). Hallazgo S-21: el banner
+   * "Branding sincronizado" antes vivía fuera del scroll y robaba altura
+   * permanente; ahora viaja con el contenido y libera espacio del primer
+   * Field en viewports cortos (<900px).
+   */
+  topSlot?: React.ReactNode;
 }) {
   const section =
     sectionKey === 'versions'
@@ -256,6 +265,7 @@ export function EditorPanel({
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+        {topSlot}
         {sectionKey === 'branding' && (
           <BrandingEditor branding={branding} onChange={onBrandingChange} />
         )}

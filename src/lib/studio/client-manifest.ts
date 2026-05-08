@@ -43,6 +43,10 @@ export const ClientManifestSchema = z.object({
   createdAt: z.string(),
   lastEditor: z.string().email().optional(),
   lastEditedAt: z.string(),
+  /** Operador marcó este cliente como prioritario. Pinned aparecen al
+   *  inicio del dashboard, por encima de `default` y antes del orden
+   *  alfabético/recencia. Hallazgo S-13 del audit panorámico v2. */
+  pinned: z.boolean().optional().default(false),
 });
 export type ClientManifest = z.infer<typeof ClientManifestSchema>;
 
@@ -120,5 +124,6 @@ export function makeBlankManifest(
     products: { ...defaultClientProducts(), ...products },
     createdAt: now,
     lastEditedAt: now,
+    pinned: false,
   };
 }

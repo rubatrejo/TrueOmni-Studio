@@ -1,10 +1,12 @@
 'use client';
 
 import { Image as ImageIcon, Layers, Palette, Settings, Type } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { HslColorPicker, type HslColor } from 'react-colorful';
 
 import type { UnifiedClientBranding } from '@/lib/studio/client-branding-sync';
+
+import { TabStrip, type TabStripItem } from '../../_components/TabStrip';
 
 /**
  * `<BrandingForm>` — unified branding editor with horizontal tabs.
@@ -24,12 +26,12 @@ export interface BrandingFormProps {
 
 type TabKey = 'general' | 'brand' | 'logos' | 'fonts' | 'media';
 
-const TABS: ReadonlyArray<{ key: TabKey; label: string; icon: typeof Settings }> = [
-  { key: 'general', label: 'General', icon: Settings },
-  { key: 'brand', label: 'Brand colors', icon: Palette },
-  { key: 'logos', label: 'Logos', icon: Layers },
-  { key: 'fonts', label: 'Fonts', icon: Type },
-  { key: 'media', label: 'Media', icon: ImageIcon },
+const TABS: ReadonlyArray<TabStripItem<TabKey>> = [
+  { key: 'general', label: 'General', icon: Settings, title: 'Client metadata and location' },
+  { key: 'brand', label: 'Brand colors', icon: Palette, title: 'Primary, secondary, accent and text/background tokens' },
+  { key: 'logos', label: 'Logos', icon: Layers, title: 'Default and dark logo paths' },
+  { key: 'fonts', label: 'Fonts', icon: Type, title: 'Display and body typefaces' },
+  { key: 'media', label: 'Media', icon: ImageIcon, title: 'Hero image and brand video' },
 ];
 
 const GOOGLE_FONTS = [
@@ -47,6 +49,9 @@ const GOOGLE_FONTS = [
 
 export function BrandingForm({ value, onChange }: BrandingFormProps) {
   const [tab, setTab] = useState<TabKey>('general');
+  // Hallazgo S-15: TabStrip reutilizable + role=tablist. El idBase asocia
+  // cada `<button role="tab">` con su `<div role="tabpanel">` por aria.
+  const tabsId = useId();
 
   function setField<K extends keyof UnifiedClientBranding>(
     key: K,
@@ -57,34 +62,22 @@ export function BrandingForm({ value, onChange }: BrandingFormProps) {
 
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40">
-      {/* Tab strip */}
-      <div className="flex items-center gap-1 overflow-x-auto border-b border-zinc-200 px-3 dark:border-zinc-800">
-        {TABS.map(({ key, label, icon: Icon }) => {
-          const active = tab === key;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setTab(key)}
-              aria-current={active ? 'page' : undefined}
-              className={`relative inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-3 text-[13px] font-medium transition ${
-                active
-                  ? 'text-zinc-900 dark:text-white'
-                  : 'text-zinc-500 hover:text-zinc-800 dark:text-zinc-500 dark:hover:text-zinc-300'
-              }`}
-            >
-              <Icon className="h-3.5 w-3.5" strokeWidth={2} />
-              {label}
-              {active ? (
-                <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-zinc-900 dark:bg-white" aria-hidden />
-              ) : null}
-            </button>
-          );
-        })}
-      </div>
+      <TabStrip<TabKey>
+        items={TABS}
+        active={tab}
+        onChange={setTab}
+        idBase={tabsId}
+        ariaLabel="Branding sections"
+        className="px-3"
+      />
 
       {/* Active panel */}
-      <div className="p-6">
+      <div
+        role="tabpanel"
+        id={`${tabsId}-panel-${tab}`}
+        aria-labelledby={`${tabsId}-tab-${tab}`}
+        className="p-6"
+      >
         {tab === 'general' ? (
           <Panel>
             <Field label="Name">
@@ -109,24 +102,44 @@ export function BrandingForm({ value, onChange }: BrandingFormProps) {
               />
             </Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Latitude">
+              <Field
+                label="Latitude"
+                hint={
+                  value.location?.lat != null && Math.abs(value.location.lat) > 90
+                    ? '⚠ Out of range (-90 to 90)'
+                    : undefined
+                }
+              >
                 <TextInput
                   value={value.location?.lat?.toString() ?? ''}
                   onChange={(v) => {
                     const num = v === '' ? undefined : Number(v);
                     if (v !== '' && Number.isNaN(num)) return;
-                    setField('location', { ...value.location, lat: num });
+                    // S-18: clamp suave a rango válido de latitud.
+                    const clamped =
+                      num != null ? Math.max(-90, Math.min(90, num)) : undefined;
+                    setField('location', { ...value.location, lat: clamped });
                   }}
                   placeholder="33.4484"
                 />
               </Field>
-              <Field label="Longitude">
+              <Field
+                label="Longitude"
+                hint={
+                  value.location?.lon != null && Math.abs(value.location.lon) > 180
+                    ? '⚠ Out of range (-180 to 180)'
+                    : undefined
+                }
+              >
                 <TextInput
                   value={value.location?.lon?.toString() ?? ''}
                   onChange={(v) => {
                     const num = v === '' ? undefined : Number(v);
                     if (v !== '' && Number.isNaN(num)) return;
-                    setField('location', { ...value.location, lon: num });
+                    // S-18: clamp suave a rango válido de longitud.
+                    const clamped =
+                      num != null ? Math.max(-180, Math.min(180, num)) : undefined;
+                    setField('location', { ...value.location, lon: clamped });
                   }}
                   placeholder="-112.0740"
                 />
@@ -246,8 +259,33 @@ function FontSelect({ value, onChange }: { value: string; onChange: (v: string) 
 function ColorRow({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   const [open, setOpen] = useState(false);
   const hsl = parseHsl(value);
+  // S-17: click-outside / Escape cierran el picker. Antes solo "Done" o
+  // re-toggle del swatch lo cerraban — el operador no tenía pista.
+  const popoverRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onClickOutside = (e: MouseEvent) => {
+      if (!popoverRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    // setTimeout para no capturar el mismo click que abrió el picker.
+    const id = setTimeout(() => {
+      document.addEventListener('mousedown', onClickOutside);
+      document.addEventListener('keydown', onKey);
+    }, 0);
+    return () => {
+      clearTimeout(id);
+      document.removeEventListener('mousedown', onClickOutside);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
   return (
-    <div className="relative flex items-center justify-between gap-3 rounded-md border border-zinc-200 bg-white p-2 dark:border-zinc-800 dark:bg-zinc-950">
+    <div
+      ref={popoverRef}
+      className="relative flex items-center justify-between gap-3 rounded-md border border-zinc-200 bg-white p-2 dark:border-zinc-800 dark:bg-zinc-950"
+    >
       <span className="text-[12.5px] font-medium text-zinc-700 dark:text-zinc-300">{label}</span>
       <span className="flex items-center gap-2">
         <button

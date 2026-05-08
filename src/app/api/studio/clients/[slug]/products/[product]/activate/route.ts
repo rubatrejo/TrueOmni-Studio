@@ -11,6 +11,7 @@ import {
   loadUnifiedBranding,
   unifiedToKioskBranding,
   unifiedToSignageBranding,
+  type UnifiedClientBranding,
 } from '@/lib/studio/client-branding-sync';
 import {
   loadClientManifest,
@@ -32,6 +33,56 @@ const TEMPLATE_SLUG = 'default';
 function normalizeUrl(value: string | undefined): string | undefined {
   const trimmed = value?.trim();
   return trimmed && trimmed.length > 0 ? trimmed : undefined;
+}
+
+/**
+ * Fallback blank signage cuando el template `default` no está disponible
+ * (filesystem corrupto + KV vacío). Hallazgo S-09 del audit panorámico v2.
+ * Genera el shape mínimo válido para que el editor abra; el operador
+ * configura header/playlist/etc desde la UI.
+ */
+function makeBlankSignageClient(
+  slug: string,
+  name: string,
+  branding: UnifiedClientBranding,
+): SignageClientFile {
+  return {
+    slug,
+    name,
+    locale: 'en',
+    timezone: 'America/Phoenix',
+    location: {
+      city: branding.location?.city ?? '',
+      lat: branding.location?.lat ?? 0,
+      lon: branding.location?.lon ?? 0,
+    },
+    website: normalizeUrl(branding.website),
+    branding: {
+      ...unifiedToSignageBranding(branding),
+      logos: { default: branding.logos.default || 'assets/logo.svg' },
+      fonts: {
+        display: branding.fonts.display ?? 'Montserrat',
+        body: branding.fonts.body ?? 'Open Sans',
+        displayCustom: undefined,
+        bodyCustom: undefined,
+      },
+    },
+    header: {
+      position: 'top',
+      height: 100,
+      layout: 'logo-left',
+      weatherPlacement: 'center',
+      clockPlacement: 'right',
+      background: { kind: 'color', color: '#0b1f3a' },
+      showLogo: true,
+      showWeather: true,
+      showClock: true,
+      clockFormat: '12h',
+      weatherUnits: 'imperial',
+      forecastDays: 1,
+    },
+    displays: [],
+  };
 }
 
 const VALID_PRODUCTS: readonly ProductId[] = [
@@ -143,31 +194,32 @@ export async function POST(_req: Request, { params }: RouteParams) {
     await kv.sadd(kvKeys.clientsList, slug);
   } else if (productId === 'digitalDisplays') {
     const template = await loadSignageClient(TEMPLATE_SLUG);
-    if (!template) {
-      return NextResponse.json(
-        { error: `signage template "${TEMPLATE_SLUG}" not available` },
-        { status: 500 },
-      );
-    }
-    const clone: SignageClientFile = {
-      slug,
-      name: manifest.name,
-      locale: template.locale,
-      timezone: template.timezone,
-      location: {
-        ...template.location,
-        ...(branding.location?.city ? { city: branding.location.city } : null),
-        ...(branding.location?.lat != null ? { lat: branding.location.lat } : null),
-        ...(branding.location?.lon != null ? { lon: branding.location.lon } : null),
-      },
-      website: normalizeUrl(branding.website) ?? normalizeUrl(template.website),
-      branding: {
-        ...structuredClone(template.branding),
-        ...unifiedToSignageBranding(branding),
-      },
-      header: structuredClone(template.header),
-      displays: [],
-    };
+    // Hallazgo S-09: si el template `default` no existe (KV reset + fs
+    // corrupto, edge case), fallback a un blank signage con defaults
+    // TrueOmni en lugar de 500. Permite al operador configurar el signage
+    // a mano desde la Vista de Cliente sin necesidad de restaurar el
+    // template primero.
+    const clone: SignageClientFile = template
+      ? {
+          slug,
+          name: manifest.name,
+          locale: template.locale,
+          timezone: template.timezone,
+          location: {
+            ...template.location,
+            ...(branding.location?.city ? { city: branding.location.city } : null),
+            ...(branding.location?.lat != null ? { lat: branding.location.lat } : null),
+            ...(branding.location?.lon != null ? { lon: branding.location.lon } : null),
+          },
+          website: normalizeUrl(branding.website) ?? normalizeUrl(template.website),
+          branding: {
+            ...structuredClone(template.branding),
+            ...unifiedToSignageBranding(branding),
+          },
+          header: structuredClone(template.header),
+          displays: [],
+        }
+      : makeBlankSignageClient(slug, manifest.name, branding);
     const validated = SignageClientFileSchema.safeParse(clone);
     if (!validated.success) {
       return NextResponse.json(

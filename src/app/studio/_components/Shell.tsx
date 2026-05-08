@@ -863,12 +863,18 @@ export function Shell({
                 key={activeTab}
                 className="studio-tab-fade flex min-h-0 flex-1 flex-col overflow-hidden"
               >
-                {activeTab === 'branding' ? (
-                  <div className="px-4 pt-3">
-                    <BrandingSyncBanner slug={initialConfig.slug} product="kiosk" />
-                  </div>
-                ) : null}
+                {/* Hallazgo S-21: el banner se renderiza dentro del scroll
+                    del EditorPanel (a través de su prop `topSlot`) en lugar
+                    de fuera. Antes el banner quedaba sobre el panel y robaba
+                    altura permanente al scrollable; en viewport <900px
+                    cubría el primer Field. Ahora se scrollea junto al
+                    contenido y deja la altura útil completa para los inputs. */}
                   <EditorPanel
+                    topSlot={
+                      activeTab === 'branding' ? (
+                        <BrandingSyncBanner slug={initialConfig.slug} product="kiosk" />
+                      ) : null
+                    }
                     sectionKey={activeTab}
                     branding={branding}
                     onBrandingChange={setBranding}

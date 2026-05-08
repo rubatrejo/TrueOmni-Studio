@@ -27,6 +27,7 @@ export function NewClientModal({
     website: string;
     location: string;
     emptyMode: boolean;
+    activateDigitalDisplays: boolean;
   }) => Promise<void>;
 }) {
   const [nombre, setNombre] = useState('');
@@ -43,6 +44,10 @@ export function NewClientModal({
   // trails/itinerary local_listings/social-wall posts). Útil cuando el cliente
   // quiere poblar todo a mano y no heredar el contenido demo de TrueOmni.
   const [emptyMode, setEmptyMode] = useState(false);
+  // S-10: activar Digital Displays junto al kiosk en el create. Si está
+  // marcado, tras el create se llama al endpoint activate de DD. Saves a
+  // round-trip y un reload manual.
+  const [activateDigitalDisplays, setActivateDigitalDisplays] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const nombreRef = useRef<HTMLInputElement>(null);
@@ -56,6 +61,7 @@ export function NewClientModal({
     setSlugTouched(false);
     setOrientation('portrait');
     setEmptyMode(false);
+    setActivateDigitalDisplays(false);
     setError(null);
     setSubmitting(false);
     // Auto-focus al abrir.
@@ -126,6 +132,7 @@ export function NewClientModal({
         website: trimmedWebsite,
         location: trimmedLocation,
         emptyMode,
+        activateDigitalDisplays,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create');
@@ -310,6 +317,26 @@ export function NewClientModal({
                   {error}
                 </p>
               )}
+
+              {/* Activar Digital Displays junto al kiosk. Hallazgo S-10. */}
+              <div className="flex items-start gap-3 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-[12px] leading-relaxed text-zinc-700 transition hover:border-zinc-300 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-900">
+                <input
+                  id="kiosk-activate-dd"
+                  type="checkbox"
+                  checked={activateDigitalDisplays}
+                  onChange={(e) => setActivateDigitalDisplays(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 text-sky-600 focus:ring-sky-500/40 dark:border-zinc-600"
+                />
+                <label htmlFor="kiosk-activate-dd" className="flex cursor-pointer flex-col gap-0.5">
+                  <span className="font-medium text-zinc-800 dark:text-zinc-200">
+                    Also activate Digital Displays
+                  </span>
+                  <span className="text-[11px] text-zinc-500 dark:text-zinc-500">
+                    Clones the signage default (header, weather, clock, branding) and
+                    creates an empty playlist. You can add displays from the editor.
+                  </span>
+                </label>
+              </div>
 
               {/* Empty mode toggle: arranca sin mock data (listings/events/etc.) */}
               <div className="flex items-start gap-3 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-[12px] leading-relaxed text-zinc-700 transition hover:border-zinc-300 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-900">

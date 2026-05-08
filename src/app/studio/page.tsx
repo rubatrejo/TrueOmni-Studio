@@ -1,9 +1,18 @@
 'use client';
 
-import { Loader2, Monitor, Smartphone, Tablet, Tv, LayoutGrid } from 'lucide-react';
+import {
+  LayoutGrid,
+  Loader2,
+  Monitor,
+  Search,
+  Smartphone,
+  Tablet,
+  Tv,
+  X,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 
@@ -50,6 +59,7 @@ interface ClientSummary {
   logoUrl: string;
   lastEditedAt: string;
   lastEditor?: string;
+  pinned: boolean;
 }
 
 async function fetchClients(): Promise<ClientSummary[]> {
@@ -64,6 +74,10 @@ export default function StudioHome() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showNewModal, setShowNewModal] = useState(false);
+  // S-07: search filter local. No round-trip — el dataset es pequeño y el
+  // filtro corre sobre `clients` ya en memoria. Match contra slug + name +
+  // products activos (e.g. "kiosks", "displays").
+  const [search, setSearch] = useState('');
 
   const refresh = useCallback(async () => {
     setError(null);
@@ -94,6 +108,23 @@ export default function StudioHome() {
   const router = useRouter();
   const [creatingClient, setCreatingClient] = useState<string | null>(null);
 
+  const filteredClients = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return clients;
+    return clients.filter((c) => {
+      if (c.slug.toLowerCase().includes(q)) return true;
+      if (c.name.toLowerCase().includes(q)) return true;
+      // Match contra "kiosks", "displays", "pwa", etc.
+      const productLabels: string[] = [];
+      if (c.products.kiosks) productLabels.push('kiosks');
+      if (c.products.digitalDisplays) productLabels.push('displays');
+      if (c.products.mobilePwa) productLabels.push('pwa');
+      if (c.products.videoWalls) productLabels.push('walls');
+      if (c.products.tablets) productLabels.push('tablets');
+      return productLabels.some((p) => p.includes(q));
+    });
+  }, [clients, search]);
+
   const handleCreate = async (input: {
     slug: string;
     nombre: string;
@@ -101,6 +132,7 @@ export default function StudioHome() {
     website?: string;
     location?: string;
     emptyMode?: boolean;
+    activateDigitalDisplays?: boolean;
   }) => {
     setCreatingClient(input.nombre);
     try {
@@ -108,6 +140,20 @@ export default function StudioHome() {
       // el resultado en un cliente unificado al regresar al dashboard. El
       // endpoint /api/studio/clients POST llega en Fase 4.
       await createConfig(input);
+      // S-10: si el operador marcó "Also activate Digital Displays", llamar
+      // al endpoint activate del producto DD. Best-effort: si falla, el
+      // cliente ya existe con el kiosk; el operador puede activar DD luego
+      // desde la Vista de Cliente.
+      if (input.activateDigitalDisplays) {
+        try {
+          await fetch(
+            `/api/studio/clients/${input.slug}/products/digital-displays/activate`,
+            { method: 'POST' },
+          );
+        } catch (ddErr) {
+          console.warn('[studio] DD activation failed during create', ddErr);
+        }
+      }
       setShowNewModal(false);
       router.push(`/studio/${input.slug}`);
     } catch (err) {
@@ -131,6 +177,21 @@ export default function StudioHome() {
     if (!target) return;
     setCloningSource({ slug, nombre: target.name });
   };
+
+  // S-13: toggle pin del cliente. Optimistic UI: actualiza la lista local
+  // inmediatamente y refetch en background para reflejar el orden nuevo.
+  const handlePinToggle = useCallback(
+    async (slug: string) => {
+      try {
+        const res = await fetch(`/api/studio/clients/${slug}/pin`, { method: 'POST' });
+        if (!res.ok) throw new Error(`pin failed: ${res.status}`);
+        await refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Pin failed');
+      }
+    },
+    [refresh],
+  );
   const submitClone = async (newNombre: string) => {
     if (!cloningSource) return;
     const trimmed = newNombre.trim();
@@ -185,7 +246,7 @@ export default function StudioHome() {
       </section>
 
       <section className="flex-1">
-        <div className="mb-6 flex items-end justify-between">
+        <div className="mb-6 flex flex-wrap items-end gap-4 justify-between">
           <div>
             <h2 className="font-display text-xl font-semibold text-zinc-900 dark:text-white">
               Your clients
@@ -193,10 +254,39 @@ export default function StudioHome() {
             <p className="mt-1 text-sm text-zinc-500">
               {loading
                 ? 'Loading…'
-                : `${clients.length} client${clients.length === 1 ? '' : 's'}`}
+                : search
+                  ? `${filteredClients.length} of ${clients.length} client${clients.length === 1 ? '' : 's'}`
+                  : `${clients.length} client${clients.length === 1 ? '' : 's'}`}
             </p>
           </div>
-          <NewClientButton onClick={() => setShowNewModal(true)} />
+          <div className="flex items-center gap-3">
+            {/* S-07: search local con clear button. */}
+            <div className="relative">
+              <Search
+                aria-hidden
+                className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400"
+              />
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search clients…"
+                aria-label="Search clients by name, slug or product"
+                className="h-9 w-56 rounded-lg border border-zinc-200 bg-white pl-8 pr-8 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-600"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  aria-label="Clear search"
+                  className="absolute right-1.5 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+            <NewClientButton onClick={() => setShowNewModal(true)} />
+          </div>
         </div>
 
         {error && (
@@ -207,15 +297,32 @@ export default function StudioHome() {
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {!loading &&
-            clients.map((client) => (
+            filteredClients.map((client) => (
               <ClientCard
                 key={client.slug}
                 client={client}
                 onDelete={handleDelete}
                 onClone={handleClone}
+                onPinToggle={handlePinToggle}
               />
             ))}
-          {!loading && <NewClientCard onClick={() => setShowNewModal(true)} />}
+          {!loading && !search && (
+            <NewClientCard onClick={() => setShowNewModal(true)} />
+          )}
+          {!loading && search && filteredClients.length === 0 && (
+            <div className="col-span-full rounded-xl border border-dashed border-zinc-300 bg-zinc-50/40 px-6 py-10 text-center dark:border-zinc-800 dark:bg-zinc-900/20">
+              <p className="text-[13px] text-zinc-500">
+                No clients match &quot;{search}&quot;.
+              </p>
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="mt-3 text-[12px] font-medium text-sky-600 underline-offset-2 hover:underline dark:text-sky-400"
+              >
+                Clear search
+              </button>
+            </div>
+          )}
           {loading && (
             <>
               <SkeletonCard />
@@ -237,7 +344,7 @@ export default function StudioHome() {
             Replay tour
           </button>
           <SystemStatusBadge />
-          <span>Local · main</span>
+          <EnvironmentBadge />
         </div>
       </footer>
 
@@ -303,10 +410,12 @@ function ClientCard({
   client,
   onDelete,
   onClone,
+  onPinToggle,
 }: {
   client: ClientSummary;
   onDelete: (slug: string) => void;
   onClone: (slug: string) => void;
+  onPinToggle: (slug: string) => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const activeProducts = PRODUCT_BADGES.filter((p) => client.products[p.key]);
@@ -396,8 +505,39 @@ function ClientCard({
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-sky-400/50 to-transparent opacity-0 transition group-hover:opacity-100" />
       </Link>
 
+      {/* Pin badge siempre visible si está pinned (sin hover). S-13. */}
+      {client.pinned && (
+        <span
+          className="pointer-events-none absolute left-3 top-3 z-10 grid h-6 w-6 place-items-center rounded-full bg-amber-400/95 text-zinc-900 shadow-sm"
+          title="Pinned"
+          aria-label="Pinned"
+        >
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <path d="M16 4l4 4-5 5 1 5-2 2-5-5-5 1-2-2 5-5-1-5 2-2 5 1 3-3z" />
+          </svg>
+        </span>
+      )}
+
       {hovered && client.slug !== 'default' && (
         <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              onPinToggle(client.slug);
+            }}
+            title={client.pinned ? 'Unpin' : 'Pin to top'}
+            className={`grid h-7 w-7 place-items-center rounded-md shadow-sm ring-1 backdrop-blur transition ${
+              client.pinned
+                ? 'bg-amber-100 text-amber-700 ring-amber-300 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800/50'
+                : 'bg-white/90 text-zinc-700 ring-zinc-200 hover:bg-white hover:text-zinc-900 dark:bg-zinc-900/90 dark:text-zinc-300 dark:ring-zinc-800 dark:hover:bg-zinc-900'
+            }`}
+            aria-label={client.pinned ? `Unpin ${client.name}` : `Pin ${client.name} to top`}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill={client.pinned ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M16 4l4 4-5 5 1 5-2 2-5-5-5 1-2-2 5-5-1-5 2-2 5 1 3-3z" />
+            </svg>
+          </button>
           <button
             type="button"
             onClick={(e) => {
@@ -461,6 +601,25 @@ function NewClientButton({ onClick }: { onClick: () => void }) {
       <span className="text-base leading-none">+</span> New client
     </button>
   );
+}
+
+/**
+ * Footer badge con el environment + branch dinámico. Reemplaza el "Local ·
+ * main" hardcoded — hallazgo S-16 del audit panorámico v2. Vercel inyecta
+ * `NEXT_PUBLIC_VERCEL_ENV` (production/preview/development) y
+ * `NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF` (branch) en build time. En local
+ * ambos son undefined → fallback "Local · main".
+ */
+function EnvironmentBadge() {
+  const env = process.env.NEXT_PUBLIC_VERCEL_ENV;
+  const branch = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF ?? 'main';
+  const label = (() => {
+    if (env === 'production') return `Production · ${branch}`;
+    if (env === 'preview') return `Preview · ${branch}`;
+    if (env === 'development') return `Vercel dev · ${branch}`;
+    return `Local · ${branch}`;
+  })();
+  return <span title={`Studio environment · ${label}`}>{label}</span>;
 }
 
 function SkeletonCard() {

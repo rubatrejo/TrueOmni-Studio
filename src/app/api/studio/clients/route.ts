@@ -45,6 +45,7 @@ export interface ClientSummary {
   logoUrl: string;
   lastEditedAt: string;
   lastEditor?: string;
+  pinned: boolean;
 }
 
 const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
@@ -75,15 +76,22 @@ export async function GET() {
         logoUrl: branding.logos.default ?? '',
         lastEditedAt: manifest.lastEditedAt,
         lastEditor: manifest.lastEditor,
+        pinned: manifest.pinned ?? false,
       };
     }),
   );
 
+  // Sort: pinned > default > recientes (por lastEditedAt) > alfabético.
+  // Hallazgo S-13 del audit panorámico v2.
   const clients = summaries
     .filter((s): s is ClientSummary => s !== null)
     .sort((a, b) => {
-      if (a.slug === 'default') return -1;
-      if (b.slug === 'default') return 1;
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+      if (a.slug === 'default' && !b.pinned) return -1;
+      if (b.slug === 'default' && !a.pinned) return 1;
+      const recencyDiff =
+        new Date(b.lastEditedAt).getTime() - new Date(a.lastEditedAt).getTime();
+      if (Math.abs(recencyDiff) > 60_000) return recencyDiff; // > 1 min de diff
       return a.name.localeCompare(b.name);
     });
 

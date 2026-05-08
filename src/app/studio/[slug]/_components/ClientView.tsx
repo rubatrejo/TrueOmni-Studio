@@ -161,7 +161,7 @@ export function ClientView({
                 Products
               </h2>
               <p className="mt-1 text-[13px] text-zinc-500">
-                Open the editor of each active product or activate a new one. The client's branding is applied automatically.
+                Open the editor of each active product or activate a new one. The client&apos;s branding is applied automatically.
               </p>
             </div>
             <span className="rounded-full bg-zinc-900 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white dark:bg-white dark:text-zinc-950">
@@ -172,6 +172,7 @@ export function ClientView({
             <ProductCard
               slug={slug}
               segment="kiosk"
+              productSegment="kiosks"
               label="Kiosks"
               description="Vertical touch screens with interactive modules."
               icon={Monitor}
@@ -181,6 +182,7 @@ export function ClientView({
             <ProductCard
               slug={slug}
               segment="digital-displays"
+              productSegment="digital-displays"
               label="Digital Displays"
               description="Landscape no-touch signage rotating playlists."
               icon={Tv}
@@ -190,6 +192,7 @@ export function ClientView({
             <ProductCard
               slug={slug}
               segment="mobile-pwa"
+              productSegment="mobile-pwa"
               label="Mobile PWA"
               description="Progressive Web App that inherits the client's branding."
               icon={Smartphone}
@@ -199,6 +202,7 @@ export function ClientView({
             <ProductCard
               slug={slug}
               segment="video-walls"
+              productSegment="video-walls"
               label="Video Walls"
               description="Multi-screen synchronized compositions."
               icon={LayoutGrid}
@@ -208,6 +212,7 @@ export function ClientView({
             <ProductCard
               slug={slug}
               segment="tablets"
+              productSegment="tablets"
               label="Tablets"
               description="Touch-first tablet experiences for the floor."
               icon={Tablet}

@@ -86,7 +86,7 @@ export function NewClientModal({
       return 'Slug must be lowercase letters, digits and hyphens (1–64 chars).';
     }
     if (existingSlugs.includes(slug)) {
-      return `A kiosk with slug "${slug}" already exists`;
+      return `A client with slug "${slug}" already exists`;
     }
     return null;
   };
@@ -151,7 +151,7 @@ export function NewClientModal({
             key="modal"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="new-kiosk-title"
+            aria-labelledby="new-client-title"
             initial={{ opacity: 0, y: 12, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
@@ -160,10 +160,10 @@ export function NewClientModal({
           >
             <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5 dark:border-zinc-800">
               <h2
-                id="new-kiosk-title"
+                id="new-client-title"
                 className="font-display text-[15px] font-semibold text-zinc-900 dark:text-white"
               >
-                New kiosk
+                New client
               </h2>
               <button
                 type="button"
@@ -351,7 +351,7 @@ export function NewClientModal({
                   disabled={submitting || !nombre.trim() || !slug}
                   className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
                 >
-                  {submitting ? 'Creating…' : 'Create kiosk'}
+                  {submitting ? 'Creating…' : 'Create client'}
                 </button>
               </div>
             </form>

@@ -3,7 +3,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { listSignageDisplays, loadSignageClient } from '@/lib/signage/config';
+import { kSignageClient, kSignageClientList } from '@/lib/signage/kv-keys';
+import { SignageClientFileSchema, type SignageClientFile } from '@/lib/signage/schema';
+import {
+  loadUnifiedBranding,
+  unifiedToSignageBranding,
+} from '@/lib/studio/client-branding-sync';
 import { loadClientManifest } from '@/lib/studio/client-manifest';
+import { kv } from '@/lib/studio/kv';
 
 import { StudioBrand } from '../../_components/StudioBrand';
 import { ThemeToggle } from '../../_components/ThemeToggle';
@@ -25,12 +32,58 @@ interface PageProps {
  */
 export default async function ClientDisplaysPage({ params }: PageProps) {
   const { slug } = await params;
-  const [manifest, signageClient, displays] = await Promise.all([
+  const [manifest, signageClientInitial] = await Promise.all([
     loadClientManifest(slug),
     loadSignageClient(slug),
-    listSignageDisplays(slug),
   ]);
-  if (!manifest || !signageClient) notFound();
+  if (!manifest) notFound();
+
+  // Drift recovery: manifest existe + digitalDisplays activo, pero el
+  // signage client se perdió (mismo síntoma que el editor kiosk). Clonar
+  // desde el signage `default` aplicando branding unificado y persistir.
+  // El KV guarda el shape raw del file (sin events/social/news, que
+  // `loadSignageClient` resuelve desde sus propios KVs/archivos).
+  let signageClient = signageClientInitial;
+  if (!signageClient && manifest.products.digitalDisplays) {
+    const template = await loadSignageClient('default');
+    const branding = await loadUnifiedBranding(slug);
+    if (template) {
+      const fileShape: SignageClientFile = {
+        slug,
+        name: manifest.name,
+        locale: template.locale,
+        timezone: template.timezone,
+        location: {
+          ...template.location,
+          ...(branding?.location?.city ? { city: branding.location.city } : null),
+          ...(branding?.location?.lat != null ? { lat: branding.location.lat } : null),
+          ...(branding?.location?.lon != null ? { lon: branding.location.lon } : null),
+        },
+        website:
+          (branding?.website && branding.website.trim().length > 0
+            ? branding.website.trim()
+            : undefined) ??
+          (template.website && template.website.trim().length > 0
+            ? template.website.trim()
+            : undefined),
+        branding: {
+          ...structuredClone(template.branding),
+          ...(branding ? unifiedToSignageBranding(branding) : {}),
+        },
+        header: structuredClone(template.header),
+        displays: [],
+      };
+      const validated = SignageClientFileSchema.safeParse(fileShape);
+      if (validated.success) {
+        await kv.set(kSignageClient(slug), validated.data);
+        await kv.sadd(kSignageClientList, slug);
+        signageClient = await loadSignageClient(slug);
+      }
+    }
+  }
+  if (!signageClient) notFound();
+
+  const displays = await listSignageDisplays(slug);
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">

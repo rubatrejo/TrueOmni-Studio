@@ -6,6 +6,12 @@ import type { SignageClientFile } from '@/lib/signage/schema';
 
 import { readClientFs } from './bootstrap-from-fs';
 import {
+  kioskToUnifiedBranding,
+  saveUnifiedBrandingOnly,
+  signageToUnifiedBranding,
+  type UnifiedClientBranding,
+} from './client-branding-sync';
+import {
   CLIENT_LIST_KEY,
   clientKeys,
   loadClientManifest,
@@ -13,12 +19,6 @@ import {
   saveClientManifest,
   type ClientManifest,
 } from './client-manifest';
-import {
-  kioskToUnifiedBranding,
-  saveUnifiedBrandingOnly,
-  signageToUnifiedBranding,
-  type UnifiedClientBranding,
-} from './client-branding-sync';
 import { kv, kvKeys } from './kv';
 import type { KioskConfig } from './schema';
 

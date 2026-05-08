@@ -1,9 +1,7 @@
 import { notFound } from 'next/navigation';
 
-import {
-  loadUnifiedBranding,
-} from '@/lib/studio/client-branding-sync';
 import { autoMigrateClients } from '@/lib/studio/auto-migrate-clients';
+import { loadUnifiedBranding } from '@/lib/studio/client-branding-sync';
 import { loadClientManifest } from '@/lib/studio/client-manifest';
 
 import { ClientView } from './_components/ClientView';

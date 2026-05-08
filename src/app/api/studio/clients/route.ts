@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { kSignageClient, kSignageClientList } from '@/lib/signage/kv-keys';
 import { loadSignageClient } from '@/lib/signage/config';
+import { kSignageClient, kSignageClientList } from '@/lib/signage/kv-keys';
 import {
   SignageClientFileSchema,
   type SignageClientFile,
@@ -237,7 +237,13 @@ export async function POST(request: Request) {
           ...(parsed.data.location?.lat != null ? { lat: parsed.data.location.lat } : null),
           ...(parsed.data.location?.lon != null ? { lon: parsed.data.location.lon } : null),
         },
-        website: parsed.data.website ?? template.website,
+        website:
+          (parsed.data.website && parsed.data.website.trim().length > 0
+            ? parsed.data.website.trim()
+            : undefined) ??
+          (template.website && template.website.trim().length > 0
+            ? template.website.trim()
+            : undefined),
         branding: structuredClone(template.branding),
         header: structuredClone(template.header),
         displays: [],

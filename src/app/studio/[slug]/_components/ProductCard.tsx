@@ -1,18 +1,25 @@
 'use client';
 
-import { ArrowRight } from 'lucide-react';
-import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 /**
  * Card de un producto bajo el cliente. Si está activo, click → editor.
- * Si está coming-soon o inactivo, queda deshabilitado con badge.
+ * Si está live pero no activo, click → POST /products/[product]/activate y
+ * luego redirige al editor. Si es coming-soon, queda deshabilitado.
  *
  * Plan: `~/.claude/plans/ok-listo-ahora-quiero-wondrous-sphinx.md`.
  */
 export interface ProductCardProps {
   slug: string;
+  /** Segmento del editor (`kiosk`, `digital-displays`, ...). */
   segment: string;
+  /** Segmento del endpoint activate (`kiosks`, `digital-displays`, ...).
+   *  Diferente del editor `kiosk` (singular) → activate `kiosks` (plural). */
+  productSegment: string;
   label: string;
   description: string;
   icon: LucideIcon;
@@ -23,6 +30,7 @@ export interface ProductCardProps {
 export function ProductCard({
   slug,
   segment,
+  productSegment,
   label,
   description,
   icon: Icon,
@@ -31,6 +39,30 @@ export function ProductCard({
 }: ProductCardProps) {
   const isComingSoon = status === 'soon';
   const href = `/studio/${slug}/${segment}`;
+  const router = useRouter();
+  const [activating, setActivating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleActivate = async () => {
+    if (activating) return;
+    setActivating(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/studio/clients/${slug}/products/${productSegment}/activate`,
+        { method: 'POST' },
+      );
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(body.error ?? `activate failed: ${res.status}`);
+      }
+      router.push(href);
+      router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Activation failed');
+      setActivating(false);
+    }
+  };
 
   const card = (
     <article
@@ -58,6 +90,11 @@ export function ProductCard({
             <>
               Open editor <ArrowRight className="h-3.5 w-3.5" />
             </>
+          ) : activating ? (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Activating…
+            </>
           ) : (
             <>
               Activate (clones from default){' '}
@@ -65,6 +102,14 @@ export function ProductCard({
             </>
           )}
         </div>
+      )}
+      {error && (
+        <p
+          role="alert"
+          className="mt-2 rounded-md border border-red-200 bg-red-50 px-2 py-1 text-[11px] text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300"
+        >
+          {error}
+        </p>
       )}
     </article>
   );
@@ -76,10 +121,23 @@ export function ProductCard({
       </div>
     );
   }
+  if (active) {
+    return (
+      <Link href={href} className="group">
+        {card}
+      </Link>
+    );
+  }
   return (
-    <Link href={href} className="group">
+    <button
+      type="button"
+      onClick={() => void handleActivate()}
+      disabled={activating}
+      className="group text-left disabled:cursor-progress"
+      aria-label={`Activate ${label}`}
+    >
       {card}
-    </Link>
+    </button>
   );
 }
 

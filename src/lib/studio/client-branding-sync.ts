@@ -9,8 +9,8 @@ import type {
   SignageClientFile,
 } from '@/lib/signage/schema';
 
-import { hexToHsl, hslToHex } from './hex-to-hsl';
 import { clientKeys } from './client-manifest';
+import { hexToHsl, hslToHex } from './hex-to-hsl';
 import { kv, kvKeys } from './kv';
 import { CustomFontSchema } from './schema';
 import type { Branding, KioskConfig } from './schema';

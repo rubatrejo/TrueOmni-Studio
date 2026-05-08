@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
-import { kSignageClient, kSignageClientList } from '@/lib/signage/kv-keys';
 import { loadSignageClient } from '@/lib/signage/config';
+import { kSignageClient, kSignageClientList } from '@/lib/signage/kv-keys';
 import {
   SignageClientFileSchema,
   type SignageClientFile,
@@ -27,6 +27,12 @@ import {
 export const dynamic = 'force-dynamic';
 
 const TEMPLATE_SLUG = 'default';
+
+/** `z.string().url()` rechaza "" — normalizar a undefined. */
+function normalizeUrl(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : undefined;
+}
 
 const VALID_PRODUCTS: readonly ProductId[] = [
   'kiosks',
@@ -154,7 +160,7 @@ export async function POST(_req: Request, { params }: RouteParams) {
         ...(branding.location?.lat != null ? { lat: branding.location.lat } : null),
         ...(branding.location?.lon != null ? { lon: branding.location.lon } : null),
       },
-      website: branding.website ?? template.website,
+      website: normalizeUrl(branding.website) ?? normalizeUrl(template.website),
       branding: {
         ...structuredClone(template.branding),
         ...unifiedToSignageBranding(branding),

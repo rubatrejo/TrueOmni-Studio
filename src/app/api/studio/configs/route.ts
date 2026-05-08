@@ -395,6 +395,33 @@ export async function POST(request: Request) {
     await kv.set(kvKeys.cfgMeta(body.slug), meta);
     await kv.sadd(kvKeys.clientsList, body.slug);
 
+    // Sync inmediato al modelo unified: crear manifest + unified branding
+    // sin esperar a la auto-migración del próximo GET /api/studio/clients.
+    // Best-effort: errores se loguean pero no abortan la creación del kiosk.
+    try {
+      const { kioskToUnifiedBranding, saveUnifiedBrandingOnly } = await import(
+        '@/lib/studio/client-branding-sync'
+      );
+      const { saveClientManifest, makeBlankManifest, loadClientManifest } = await import(
+        '@/lib/studio/client-manifest'
+      );
+      const existingManifest = await loadClientManifest(body.slug);
+      if (!existingManifest) {
+        const unified = kioskToUnifiedBranding(parsed.data.branding, {
+          nombre: parsed.data.nombre,
+          website: parsed.data.clientInfo?.website,
+          location: parsed.data.clientInfo?.location,
+          coords: parsed.data.clientInfo?.coords,
+        });
+        await saveUnifiedBrandingOnly(body.slug, unified);
+        await saveClientManifest(
+          makeBlankManifest(body.slug, parsed.data.nombre, { kiosks: true }),
+        );
+      }
+    } catch (syncErr) {
+      console.warn('[api/studio/configs POST] unified sync failed', syncErr);
+    }
+
     return NextResponse.json({ slug: body.slug, config: parsed.data, meta }, { status: 201 });
   } catch (error) {
     console.error('[api/studio/configs POST]', error);

@@ -1,6 +1,11 @@
 import { notFound } from 'next/navigation';
 
 import { bootstrapStudioFromFs, readClientFs } from '@/lib/studio/bootstrap-from-fs';
+import {
+  loadUnifiedBranding,
+  unifiedToKioskBranding,
+} from '@/lib/studio/client-branding-sync';
+import { loadClientManifest } from '@/lib/studio/client-manifest';
 import { kv, kvKeys } from '@/lib/studio/kv';
 import {
   DEFAULT_AI_AVATAR,
@@ -52,8 +57,33 @@ export default async function KioskEditorPage({
   // bootstrap-from-fs. El KV se rellena al primer save del operador.
   if (!raw) {
     const fsProbe = await readClientFs(slug);
-    if (!fsProbe.config) notFound();
-    raw = makeBlankConfig(slug, fsProbe.config.client?.nombre ?? slug);
+    if (fsProbe.config) {
+      raw = makeBlankConfig(slug, fsProbe.config.client?.nombre ?? slug);
+    } else {
+      // Drift recovery: cliente unificado existe (manifest + branding) pero
+      // su `cfg:slug` legacy se perdió (KV reset, deploy nuevo, sesión
+      // distinta). Si el manifest dice que kiosks está activo, materializar
+      // un config desde el template `default` aplicando la identidad del
+      // cliente. Bug observable cuando el dashboard listaba el cliente y al
+      // entrar al editor daba 404.
+      const manifest = await loadClientManifest(slug);
+      if (manifest?.products.kiosks) {
+        const branding = await loadUnifiedBranding(slug);
+        const fsTemplate = await readClientFs('default');
+        if (fsTemplate.config) {
+          let cfg = makeBlankConfig(slug, manifest.name, 'portrait');
+          cfg = bootstrapStudioFromFs(cfg, fsTemplate.config, fsTemplate.tokensCss);
+          cfg.slug = slug;
+          cfg.nombre = manifest.name;
+          cfg.currentVersion = 0;
+          if (branding) {
+            cfg.branding = { ...cfg.branding, ...unifiedToKioskBranding(branding) };
+          }
+          raw = cfg;
+        }
+      }
+      if (!raw) notFound();
+    }
   }
 
   // Backfill defensivo: clientes pre-S2 pueden no tener modules / billboard /

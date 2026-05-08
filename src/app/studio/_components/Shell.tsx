@@ -60,6 +60,7 @@ import { STUDIO_SECTIONS, type StudioSectionKey } from '../_lib/sections';
 import { StudioSlugProvider } from '../_lib/slug-context';
 import { usePreviewBridge } from '../_lib/use-preview-bridge';
 
+import { BrandingSyncBanner } from './BrandingSyncBanner';
 import { CommandPalette } from './CommandPalette';
 import { EditorPanel } from './EditorPanel';
 import { MobileTabBar, type MobileEditorTab } from './MobileTabBar';
@@ -862,6 +863,11 @@ export function Shell({
                 key={activeTab}
                 className="studio-tab-fade flex min-h-0 flex-1 flex-col overflow-hidden"
               >
+                {activeTab === 'branding' ? (
+                  <div className="px-4 pt-3">
+                    <BrandingSyncBanner slug={initialConfig.slug} product="kiosk" />
+                  </div>
+                ) : null}
                   <EditorPanel
                     sectionKey={activeTab}
                     branding={branding}

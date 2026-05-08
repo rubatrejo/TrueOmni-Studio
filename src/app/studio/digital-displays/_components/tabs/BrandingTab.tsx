@@ -6,6 +6,7 @@ import { HslColorPicker, type HslColor } from 'react-colorful';
 
 import type { SignageClientResolved } from '@/lib/signage/schema';
 
+import { BrandingSyncBanner } from '../../../_components/BrandingSyncBanner';
 import { CustomFontField } from '../../../_components/CustomFontField';
 import { FontSelector } from '../../../_components/FontSelector';
 import { useThemeEditStore } from '../../_lib/theme-edit-store';
@@ -66,6 +67,7 @@ export function BrandingTab({ client, tokensCss }: BrandingTabProps) {
 
   return (
     <div className="flex flex-col gap-8">
+      <BrandingSyncBanner slug={client.slug} product="signage" />
       <header>
         <h2 className="font-display text-lg font-semibold text-zinc-900 dark:text-white">
           Branding

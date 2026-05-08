@@ -28,6 +28,21 @@ import type { SignageClientFile, SignageDisplayConfig } from '@/lib/signage/sche
  */
 type ReadyAck = { type: 'signage:ready'; clientSlug?: string; displaySlug?: string };
 
+type SlideActiveEvent = {
+  type: 'signage:slide-active';
+  slideId: string;
+  index: number;
+  total: number;
+  templateId?: string;
+};
+
+export interface SignageActiveSlide {
+  slideId: string;
+  index: number;
+  total: number;
+  templateId?: string;
+}
+
 export type SignageBridgeStatus = 'connecting' | 'connected' | 'stale' | 'lost';
 
 export function useSignageBridge() {
@@ -41,6 +56,7 @@ export function useSignageBridge() {
   const [lastAckAt, setLastAckAt] = useState<number | null>(null);
   const [mountAt, setMountAt] = useState(() => Date.now());
   const [, setNowTick] = useState(0);
+  const [activeSlide, setActiveSlide] = useState<SignageActiveSlide | null>(null);
 
   // Ticker 1s para que el bridgeStatus refleje el paso del tiempo.
   useEffect(() => {
@@ -70,16 +86,28 @@ export function useSignageBridge() {
     }
   }, []);
 
-  // Listener del handshake/heartbeat del runtime.
+  // Listener del handshake/heartbeat del runtime + slide-active events.
   useEffect(() => {
     function handler(event: MessageEvent) {
-      const data = event.data as ReadyAck | null;
-      if (!data || data.type !== 'signage:ready') return;
-      setIsReady(true);
-      setLastAckAt(Date.now());
-      // Resendear pushes pendientes (race).
-      if (lastClientRef.current) sendClientNow(lastClientRef.current);
-      if (lastDisplayRef.current) sendDisplayNow(lastDisplayRef.current);
+      const data = event.data as
+        | ReadyAck
+        | SlideActiveEvent
+        | null;
+      if (!data) return;
+      if (data.type === 'signage:ready') {
+        setIsReady(true);
+        setLastAckAt(Date.now());
+        // Resendear pushes pendientes (race).
+        if (lastClientRef.current) sendClientNow(lastClientRef.current);
+        if (lastDisplayRef.current) sendDisplayNow(lastDisplayRef.current);
+      } else if (data.type === 'signage:slide-active') {
+        setActiveSlide({
+          slideId: data.slideId,
+          index: data.index,
+          total: data.total,
+          templateId: data.templateId,
+        });
+      }
     }
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
@@ -116,6 +144,18 @@ export function useSignageBridge() {
     }
   }, []);
 
+  /** Avanza al siguiente / anterior slide del preview iframe. */
+  const navSlide = useCallback((direction: 'prev' | 'next') => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'signage:nav-slide', direction }, '*');
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('[signage:bridge:editor] nav postMessage failed', e);
+    }
+  }, []);
+
   const onIframeLoad = useCallback(() => {
     setIsReady(false);
     setLastAckAt(null);
@@ -138,6 +178,8 @@ export function useSignageBridge() {
     pushClient,
     pushDisplay,
     jumpToSlide,
+    navSlide,
+    activeSlide,
     onIframeLoad,
     isReady,
     bridgeStatus,

@@ -78,7 +78,7 @@ export function SignageHeader({ client, weather, initialClock }: SignageHeaderPr
         <text
           fill="hsl(var(--signage-header-text))"
           fontSize="40"
-          fontFamily="Montserrat-Bold, Montserrat"
+          className="signage-font-display"
           fontWeight="700"
           textAnchor="end"
         >
@@ -89,7 +89,7 @@ export function SignageHeader({ client, weather, initialClock }: SignageHeaderPr
         <text
           fill="hsl(var(--signage-header-text))"
           fontSize="28"
-          fontFamily="Montserrat-Medium, Montserrat"
+          className="signage-font-display"
           fontWeight="500"
           textAnchor="end"
         >
@@ -106,7 +106,7 @@ export function SignageHeader({ client, weather, initialClock }: SignageHeaderPr
           transform="translate(201 104)"
           fill="hsl(var(--signage-header-text))"
           fontSize="70"
-          fontFamily="OpenSans-Semibold, Open Sans"
+          className="signage-font-body"
           fontWeight="600"
         >
           <tspan x="0" y="0">
@@ -194,7 +194,7 @@ export function SignageHeader({ client, weather, initialClock }: SignageHeaderPr
                 transform="translate(713.75 26)"
                 fill="hsl(var(--signage-header-text))"
                 fontSize="40"
-                fontFamily="Montserrat-Bold, Montserrat"
+                className="signage-font-display"
                 fontWeight="700"
               >
                 <tspan x="-34.04" y="0">
@@ -205,7 +205,7 @@ export function SignageHeader({ client, weather, initialClock }: SignageHeaderPr
                 transform="translate(670.25 77)"
                 fill="hsl(var(--signage-header-text))"
                 fontSize="22"
-                fontFamily="Montserrat-Bold, Montserrat"
+                className="signage-font-display"
                 fontWeight="700"
               >
                 <tspan x="0" y="0">
@@ -216,7 +216,7 @@ export function SignageHeader({ client, weather, initialClock }: SignageHeaderPr
                 transform="translate(722.25 77)"
                 fill="hsl(var(--signage-header-text))"
                 fontSize="22"
-                fontFamily="Montserrat-Light, Montserrat"
+                className="signage-font-display"
                 fontWeight="300"
               >
                 <tspan x="0" y="0">
@@ -238,7 +238,7 @@ export function SignageHeader({ client, weather, initialClock }: SignageHeaderPr
                 transform="translate(781.36 95)"
                 fill="hsl(var(--signage-header-text))"
                 fontSize="40"
-                fontFamily="Montserrat-Bold, Montserrat"
+                className="signage-font-display"
                 fontWeight="700"
               >
                 <tspan x="-39.74" y="0">
@@ -249,7 +249,7 @@ export function SignageHeader({ client, weather, initialClock }: SignageHeaderPr
                 transform="translate(737.86 146)"
                 fill="hsl(var(--signage-header-text))"
                 fontSize="22"
-                fontFamily="Montserrat-Bold, Montserrat"
+                className="signage-font-display"
                 fontWeight="700"
               >
                 <tspan x="0" y="0">
@@ -260,7 +260,7 @@ export function SignageHeader({ client, weather, initialClock }: SignageHeaderPr
                 transform="translate(789.86 146)"
                 fill="hsl(var(--signage-header-text))"
                 fontSize="22"
-                fontFamily="Montserrat-Light, Montserrat"
+                className="signage-font-display"
                 fontWeight="300"
               >
                 <tspan x="0" y="0">
@@ -282,7 +282,7 @@ export function SignageHeader({ client, weather, initialClock }: SignageHeaderPr
                 transform="translate(884.75 127.5)"
                 fill="hsl(var(--signage-header-text))"
                 fontSize="40"
-                fontFamily="Montserrat-Bold, Montserrat"
+                className="signage-font-display"
                 fontWeight="700"
               >
                 <tspan x="-44.68" y="0">
@@ -294,7 +294,7 @@ export function SignageHeader({ client, weather, initialClock }: SignageHeaderPr
                   transform="translate(841 181.5)"
                   fill="hsl(var(--signage-header-text))"
                   fontSize="22"
-                  fontFamily="Montserrat-Bold, Montserrat"
+                  className="signage-font-display"
                   fontWeight="700"
                 >
                   <tspan x="0" y="0">
@@ -305,7 +305,7 @@ export function SignageHeader({ client, weather, initialClock }: SignageHeaderPr
                   transform="translate(893 181.5)"
                   fill="hsl(var(--signage-header-text))"
                   fontSize="22"
-                  fontFamily="Montserrat-Light, Montserrat"
+                  className="signage-font-display"
                   fontWeight="300"
                 >
                   <tspan x="0" y="0">

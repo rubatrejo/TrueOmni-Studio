@@ -13,6 +13,8 @@ import { createContext, useContext, type ReactNode } from 'react';
 interface SignageEditorContextValue {
   clientSlug: string;
   jumpToSlide?: (slideId: string) => void;
+  navSlide?: (direction: 'prev' | 'next') => void;
+  activeSlideId?: string | null;
 }
 
 const SignageEditorContext = createContext<SignageEditorContextValue | null>(null);
@@ -20,14 +22,20 @@ const SignageEditorContext = createContext<SignageEditorContextValue | null>(nul
 export function SignageEditorProvider({
   clientSlug,
   jumpToSlide,
+  navSlide,
+  activeSlideId,
   children,
 }: {
   clientSlug: string;
   jumpToSlide?: (slideId: string) => void;
+  navSlide?: (direction: 'prev' | 'next') => void;
+  activeSlideId?: string | null;
   children: ReactNode;
 }) {
   return (
-    <SignageEditorContext.Provider value={{ clientSlug, jumpToSlide }}>
+    <SignageEditorContext.Provider
+      value={{ clientSlug, jumpToSlide, navSlide, activeSlideId }}
+    >
       {children}
     </SignageEditorContext.Provider>
   );
@@ -42,4 +50,9 @@ export function useSignageClientSlug(): string | null {
 /** Devuelve la función jumpToSlide del bridge, o null si no está disponible. */
 export function useSignageJumpToSlide(): ((slideId: string) => void) | null {
   return useContext(SignageEditorContext)?.jumpToSlide ?? null;
+}
+
+/** Devuelve el slideId actualmente visible en el iframe preview, o null. */
+export function useSignageActiveSlideId(): string | null {
+  return useContext(SignageEditorContext)?.activeSlideId ?? null;
 }

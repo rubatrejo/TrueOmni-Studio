@@ -173,7 +173,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               transform="translate(30 380)"
               fill="hsl(var(--signage-text-on-brand))"
               fontSize="22"
-              fontFamily="OpenSans-Bold, Open Sans"
+              className="signage-font-body"
               fontWeight="700"
             >
               <tspan x="0" y="24">{e1.title}</tspan>
@@ -182,7 +182,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               transform="translate(30 420)"
               fill="hsl(var(--signage-text-on-brand))"
               fontSize="20"
-              fontFamily="OpenSans, Open Sans"
+              className="signage-font-body"
             >
               <tspan x="0" y="21">
                 {times[0]} - {e1.location ?? 'Location'}
@@ -200,7 +200,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               transform="translate(80 96.5)"
               fill="hsl(var(--signage-text-on-brand))"
               fontSize="24"
-              fontFamily="Montserrat-Medium, Montserrat"
+              className="signage-font-display"
               fontWeight="500"
               textAnchor="middle"
             >
@@ -210,7 +210,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               transform="translate(80 170.5)"
               fill="hsl(var(--signage-text-on-brand))"
               fontSize="68"
-              fontFamily="OpenSans, Open Sans"
+              className="signage-font-body"
               textAnchor="middle"
             >
               <tspan x="0" y="0">{labels[0]?.day}</tspan>
@@ -235,7 +235,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               transform="translate(30 446)"
               fill="hsl(var(--signage-text-on-brand))"
               fontSize="16"
-              fontFamily="OpenSans, Open Sans"
+              className="signage-font-body"
             >
               <tspan x="0" y="0">
                 {times[1]} - {e2.location ?? 'Location'}
@@ -245,7 +245,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               transform="translate(30 390)"
               fill="hsl(var(--signage-text-on-brand))"
               fontSize="18"
-              fontFamily="OpenSans-Bold, Open Sans"
+              className="signage-font-body"
               fontWeight="700"
             >
               <tspan x="0" y="0">{t2line1}</tspan>
@@ -267,7 +267,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               transform="translate(65 357.5)"
               fill="hsl(var(--signage-text-on-brand))"
               fontSize="20"
-              fontFamily="Montserrat-Medium, Montserrat"
+              className="signage-font-display"
               fontWeight="500"
               textAnchor="middle"
             >
@@ -277,7 +277,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               transform="translate(65 411.5)"
               fill="hsl(var(--signage-text-on-brand))"
               fontSize="50"
-              fontFamily="OpenSans, Open Sans"
+              className="signage-font-body"
               textAnchor="middle"
             >
               <tspan x="0" y="0">{labels[1]?.day}</tspan>
@@ -309,7 +309,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               transform="translate(29 390)"
               fill="hsl(var(--signage-text-on-brand))"
               fontSize="18"
-              fontFamily="OpenSans-Bold, Open Sans"
+              className="signage-font-body"
               fontWeight="700"
             >
               <tspan x="0" y="0">{t3line1}</tspan>
@@ -323,7 +323,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               transform="translate(29 440)"
               fill="hsl(var(--signage-text-on-brand))"
               fontSize="16"
-              fontFamily="OpenSans, Open Sans"
+              className="signage-font-body"
             >
               <tspan x="0" y="0">
                 {times[2]} - {e3.location ?? 'Location'}
@@ -341,7 +341,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               transform="translate(65 680.5)"
               fill="hsl(var(--signage-text-on-brand))"
               fontSize="20"
-              fontFamily="Montserrat-Medium, Montserrat"
+              className="signage-font-display"
               fontWeight="500"
               textAnchor="middle"
             >
@@ -351,7 +351,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               transform="translate(65 734.5)"
               fill="hsl(var(--signage-text-on-brand))"
               fontSize="50"
-              fontFamily="OpenSans, Open Sans"
+              className="signage-font-body"
               textAnchor="middle"
             >
               <tspan x="0" y="0">{labels[2]?.day}</tspan>
@@ -376,7 +376,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               transform="translate(26 392)"
               fill="hsl(var(--signage-text-on-brand))"
               fontSize="18"
-              fontFamily="OpenSans-Bold, Open Sans"
+              className="signage-font-body"
               fontWeight="700"
             >
               <tspan x="0" y="0">{t4line1}</tspan>
@@ -390,7 +390,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               transform="translate(26 445)"
               fill="hsl(var(--signage-text-on-brand))"
               fontSize="16"
-              fontFamily="OpenSans, Open Sans"
+              className="signage-font-body"
             >
               <tspan x="0" y="0">
                 {times[3]} - {e4.location ?? 'Location'}
@@ -408,7 +408,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               transform="translate(65 945.5)"
               fill="hsl(var(--signage-text-on-brand))"
               fontSize="20"
-              fontFamily="Montserrat-Medium, Montserrat"
+              className="signage-font-display"
               fontWeight="500"
               textAnchor="middle"
             >
@@ -418,7 +418,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
               transform="translate(65 999.5)"
               fill="hsl(var(--signage-text-on-brand))"
               fontSize="50"
-              fontFamily="OpenSans, Open Sans"
+              className="signage-font-body"
               textAnchor="middle"
             >
               <tspan x="0" y="0">{labels[3]?.day}</tspan>

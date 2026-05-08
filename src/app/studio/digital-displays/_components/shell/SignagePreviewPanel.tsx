@@ -1,6 +1,8 @@
 'use client';
 
 import {
+  ChevronLeft,
+  ChevronRight,
   ExternalLink,
   Maximize,
   Minus,
@@ -11,6 +13,8 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState, type RefObject } from 'react';
+
+import type { SignageActiveSlide } from '../../_lib/use-signage-bridge';
 
 interface DeviceFormat {
   key: 'digital-display' | 'kiosk-portrait';
@@ -61,6 +65,8 @@ export interface SignagePreviewPanelProps {
   iframeRef: RefObject<HTMLIFrameElement | null>;
   onIframeLoad: () => void;
   onReload: () => void;
+  activeSlide?: SignageActiveSlide | null;
+  onNavSlide?: (direction: 'prev' | 'next') => void;
 }
 
 export function SignagePreviewPanel({
@@ -71,6 +77,8 @@ export function SignagePreviewPanel({
   iframeRef,
   onIframeLoad,
   onReload,
+  activeSlide,
+  onNavSlide,
 }: SignagePreviewPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
@@ -106,18 +114,60 @@ export function SignagePreviewPanel({
   return (
     <div className="flex h-full w-full flex-col">
       {/* Toolbar */}
-      <div className="flex shrink-0 items-center justify-between px-6 pb-3 pt-4">
-        <div className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-900 dark:bg-zinc-950">
-          {DEVICE_FORMATS.map((f) => (
-            <DeviceTab
-              key={f.key}
-              active={formatKey === f.key}
-              onClick={() => setFormatKey(f.key)}
-              icon={f.glyph === 'tv' ? <TvGlyph /> : <KioskGlyph />}
-              label={`${f.label} · ${f.width}×${f.height}`}
-              badge={!f.available ? 'Soon' : undefined}
-            />
-          ))}
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 px-6 pb-3 pt-4">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-900 dark:bg-zinc-950">
+            {DEVICE_FORMATS.map((f) => (
+              <DeviceTab
+                key={f.key}
+                active={formatKey === f.key}
+                onClick={() => setFormatKey(f.key)}
+                icon={f.glyph === 'tv' ? <TvGlyph /> : <KioskGlyph />}
+                label={`${f.label} · ${f.width}×${f.height}`}
+                badge={!f.available ? 'Soon' : undefined}
+              />
+            ))}
+          </div>
+
+          {/* Slide nav — prev / index / next + label del slide actual. */}
+          {onNavSlide ? (
+            <div className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-900 dark:bg-zinc-950">
+              <button
+                type="button"
+                onClick={() => onNavSlide('prev')}
+                aria-label="Previous slide"
+                title="Previous slide"
+                className="grid h-7 w-7 place-items-center rounded-md text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.5} />
+              </button>
+              <span className="inline-flex items-center gap-2 px-2 py-1 text-[11px]">
+                {activeSlide ? (
+                  <>
+                    <span className="font-mono font-semibold text-zinc-700 dark:text-zinc-300">
+                      {activeSlide.index + 1}/{activeSlide.total}
+                    </span>
+                    {activeSlide.templateId ? (
+                      <span className="text-zinc-500 dark:text-zinc-400">
+                        {labelFromTemplate(activeSlide.templateId)}
+                      </span>
+                    ) : null}
+                  </>
+                ) : (
+                  <span className="font-mono text-zinc-400">—</span>
+                )}
+              </span>
+              <button
+                type="button"
+                onClick={() => onNavSlide('next')}
+                aria-label="Next slide"
+                title="Next slide"
+                className="grid h-7 w-7 place-items-center rounded-md text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+              >
+                <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+              </button>
+            </div>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-1 text-[11px] text-zinc-500">
@@ -345,6 +395,23 @@ function FullScreenPreview({
       </span>
     </div>
   );
+}
+
+/** "01-full-events" → "Full + Events" — mismo estilo que el playlist row. */
+function labelFromTemplate(templateId: string): string {
+  const stripped = templateId.replace(/^\d+[-_]?/, '');
+  if (!stripped) return templateId;
+  return stripped
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((w) => {
+      const m = w.match(/^(\d+)([a-z].+)$/i);
+      if (m) {
+        return `${m[1]} ${m[2].charAt(0).toUpperCase() + m[2].slice(1).toLowerCase()}`;
+      }
+      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    })
+    .join(' + ');
 }
 
 function DeviceTab({

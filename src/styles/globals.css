@@ -157,3 +157,18 @@ body {
     animation: none !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Signage runtime — font helpers tokenizados                                  */
+/*                                                                             */
+/* `--signage-font-body` y `--signage-font-display` los aplica el bridge       */
+/* (SignageBridgeStyleApplier) cuando el cliente cambia su font. Permite       */
+/* tokenizar font-family de los componentes SVG signage sin perder live        */
+/* preview en el editor.                                                       */
+/* ─────────────────────────────────────────────────────────────────────────── */
+.signage-font-body {
+  font-family: var(--signage-font-body, 'Open Sans', sans-serif);
+}
+.signage-font-display {
+  font-family: var(--signage-font-display, 'Montserrat', sans-serif);
+}

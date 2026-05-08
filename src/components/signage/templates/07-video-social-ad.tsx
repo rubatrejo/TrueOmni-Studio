@@ -176,7 +176,7 @@ function SocialTile({
         transform="translate(20 282)"
         fill="hsl(var(--signage-text-on-brand))"
         fontSize="20"
-        fontFamily="OpenSans-Bold, Open Sans"
+        className="signage-font-body"
         fontWeight="700"
         letterSpacing="0.026em"
       >

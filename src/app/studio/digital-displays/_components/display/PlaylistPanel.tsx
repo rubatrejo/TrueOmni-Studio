@@ -19,7 +19,10 @@ import type {
 } from '@/lib/signage/schema';
 
 import { useDisplayEditStore } from '../../_lib/display-edit-store';
-import { useSignageJumpToSlide } from '../../_lib/signage-editor-context';
+import {
+  useSignageActiveSlideId,
+  useSignageJumpToSlide,
+} from '../../_lib/signage-editor-context';
 
 import { AddSlideModal } from './AddSlideModal';
 import { SchedulePopover } from './SchedulePopover';
@@ -57,6 +60,7 @@ export function PlaylistPanel() {
   const renamePlaylist = useDisplayEditStore((s) => s.renamePlaylist);
   const removePlaylistFn = useDisplayEditStore((s) => s.removePlaylist);
   const jumpToSlide = useSignageJumpToSlide();
+  const activeSlideId = useSignageActiveSlideId();
 
   const [dragFromIdx, setDragFromIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
@@ -134,6 +138,7 @@ export function PlaylistPanel() {
               defaultTransition={defaultTransition}
               isDraggingThis={dragFromIdx === idx}
               isDragOver={dragOverIdx === idx && dragFromIdx !== null && dragFromIdx !== idx}
+              isActiveInPreview={activeSlideId === slide.id}
               expanded={expandedSlideId === slide.id}
               onToggleExpand={() =>
                 setExpandedSlideId(expandedSlideId === slide.id ? null : slide.id)
@@ -184,6 +189,7 @@ interface SlideRowProps {
   defaultTransition: string;
   isDraggingThis: boolean;
   isDragOver: boolean;
+  isActiveInPreview: boolean;
   expanded: boolean;
   onToggleExpand: () => void;
   onJumpToPreview?: () => void;
@@ -203,6 +209,7 @@ function SlideRow({
   defaultTransition,
   isDraggingThis,
   isDragOver,
+  isActiveInPreview,
   expanded,
   onToggleExpand,
   onJumpToPreview,
@@ -231,7 +238,9 @@ function SlideRow({
           ? 'border-zinc-400 opacity-50 dark:border-zinc-600'
           : isDragOver
             ? 'border-sky-400 ring-2 ring-sky-200 dark:border-sky-500 dark:ring-sky-500/30'
-            : 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700'
+            : isActiveInPreview
+              ? 'border-sky-500 bg-sky-50/40 ring-2 ring-sky-500/20 dark:border-sky-400 dark:bg-sky-500/10 dark:ring-sky-400/20'
+              : 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700'
       }`}
     >
       <div className="flex items-center gap-2">
@@ -358,8 +367,11 @@ function SlideRow({
 
 /**
  * Formatea el `templateId` técnico (`01-full-events`, `06-video-news-ad`) en un
- * label amigable: "Full Events", "Video News Ad". Quita el prefijo numérico,
- * los guiones y capitaliza cada palabra.
+ * label amigable: "Full + Events", "Video + News + Ad". Quita el prefijo
+ * numérico, capitaliza cada palabra y une con " + " para que el operator vea
+ * de un vistazo qué módulos componen el slide.
+ *
+ * "2ads" se trata como "2 Ads" para legibilidad ("Video + 2 Ads").
  */
 function formatTemplateLabel(templateId: string): string {
   const stripped = templateId.replace(/^\d+[-_]?/, '');
@@ -367,8 +379,15 @@ function formatTemplateLabel(templateId: string): string {
   return stripped
     .split(/[-_\s]+/)
     .filter(Boolean)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(' ');
+    .map((w) => {
+      // Caso especial: "2ads" → "2 Ads"
+      const m = w.match(/^(\d+)([a-z].+)$/i);
+      if (m) {
+        return `${m[1]} ${m[2].charAt(0).toUpperCase() + m[2].slice(1).toLowerCase()}`;
+      }
+      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    })
+    .join(' + ');
 }
 
 function describeSchedule(schedule: SignageSlideSchedule): string | null {

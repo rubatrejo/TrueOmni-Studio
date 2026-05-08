@@ -260,6 +260,8 @@ export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps
     <SignageEditorProvider
       clientSlug={client.slug}
       jumpToSlide={bridge.jumpToSlide}
+      navSlide={bridge.navSlide}
+      activeSlideId={bridge.activeSlide?.slideId ?? null}
     >
       <div className="studio-shell flex h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
         <SignageTopBar
@@ -357,6 +359,8 @@ export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps
                 iframeRef={bridge.iframeRef}
                 onIframeLoad={bridge.onIframeLoad}
                 onReload={() => setPreviewKey((k) => k + 1)}
+                activeSlide={bridge.activeSlide}
+                onNavSlide={bridge.navSlide}
               />
             </div>
           </main>

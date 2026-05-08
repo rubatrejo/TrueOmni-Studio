@@ -135,6 +135,11 @@ export function SignagePlayer({
   const [currentIdx, setCurrentIdx] = useState(0);
   const [outgoingIdx, setOutgoingIdx] = useState<number | null>(null);
   const [transitionKind, setTransitionKind] = useState<TransitionKind>('cut');
+  /** Cuando es true, los effects de dayparting/filter no resetean el
+   *  currentIdx automáticamente — el operator está navegando manualmente
+   *  desde el editor y queremos respetarlo aunque el slide esté fuera de
+   *  schedule. Se desactiva al primer auto-advance natural. */
+  const manualOverrideRef = useRef(false);
 
   const cleanupTimerRef = useRef<number | null>(null);
   const tickTimerRef = useRef<number | null>(null);
@@ -145,23 +150,69 @@ export function SignagePlayer({
   useEffect(() => {
     function handler(event: MessageEvent) {
       const data = event.data as
-        | { type?: string; slideId?: string }
+        | { type?: string; slideId?: string; direction?: 'prev' | 'next' }
         | null;
-      if (!data || data.type !== 'signage:jump-slide' || !data.slideId) return;
-      const idx = playlist.findIndex((s) => s.id === data.slideId);
-      if (idx >= 0) {
+      if (!data) return;
+      if (data.type === 'signage:jump-slide' && data.slideId) {
+        const idx = playlist.findIndex((s) => s.id === data.slideId);
+        if (idx >= 0) {
+          if (cleanupTimerRef.current !== null) {
+            window.clearTimeout(cleanupTimerRef.current);
+            cleanupTimerRef.current = null;
+          }
+          manualOverrideRef.current = true;
+          setOutgoingIdx(null);
+          setTransitionKind('cut');
+          setCurrentIdx(idx);
+        }
+      } else if (data.type === 'signage:nav-slide' && data.direction) {
         if (cleanupTimerRef.current !== null) {
           window.clearTimeout(cleanupTimerRef.current);
           cleanupTimerRef.current = null;
         }
+        manualOverrideRef.current = true;
         setOutgoingIdx(null);
         setTransitionKind('cut');
-        setCurrentIdx(idx);
+        setCurrentIdx((idx) => {
+          const len = playlist.length;
+          if (len === 0) return 0;
+          return data.direction === 'next'
+            ? (idx + 1) % len
+            : (idx - 1 + len) % len;
+        });
       }
     }
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
   }, [playlist]);
+
+  // Emite `signage:slide-active` al parent cuando cambia el slide activo.
+  // Solo se dispara cuando el slideId / index / total realmente cambian
+  // (comparación por valor primitivo, no por referencia del slide object,
+  // que se recrea en cada render por el merge clientPatch/displayPatch).
+  const currentSlide = playlist[currentIdx];
+  const activeSlideId = currentSlide?.id ?? null;
+  const activeTemplateId = currentSlide?.templateId ?? null;
+  const playlistLength = playlist.length;
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.parent === window) return;
+    if (!activeSlideId) return;
+    try {
+      window.parent.postMessage(
+        {
+          type: 'signage:slide-active',
+          slideId: activeSlideId,
+          index: currentIdx,
+          total: playlistLength,
+          templateId: activeTemplateId,
+        },
+        '*',
+      );
+    } catch {
+      // ignored
+    }
+  }, [activeSlideId, currentIdx, playlistLength, activeTemplateId]);
 
   // Re-evaluación cada minuto del wall-clock. Aligned al boundary del minuto
   // exacto para evitar drift de 30s. Si hay dev override la evaluación se
@@ -203,6 +254,9 @@ export function SignagePlayer({
   // su índice haya cambiado por filtrado.
   const currentSlideId = playlist[currentIdx]?.id;
   useEffect(() => {
+    // Operator manual override (jump/nav desde editor): respetar siempre,
+    // aunque el slide esté fuera de schedule.
+    if (manualOverrideRef.current) return;
     if (effectivePlaylist.length === 0) {
       if (currentIdx !== 0) setCurrentIdx(0);
       return;
@@ -229,8 +283,12 @@ export function SignagePlayer({
   const duration = slide?.durationMs ?? settings.defaultDurationMs;
 
   // Avance automático del slide. Solo agenda si hay 2+ slides activos.
+  // Cuando hay manual override (jump del editor), pausa el auto-advance
+  // hasta que el operator vuelva a navegar — facilita el preview/QA del
+  // slide concreto sin que se vaya solo.
   useEffect(() => {
     if (effectivePlaylist.length <= 1) return;
+    if (manualOverrideRef.current) return;
     const tickId = window.setTimeout(() => {
       // Buscar el siguiente slide ACTIVO en la playlist original, partiendo
       // del current. Esto preserva el orden original entre slides activos.

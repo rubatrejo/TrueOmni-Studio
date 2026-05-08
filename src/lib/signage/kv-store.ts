@@ -7,17 +7,26 @@ import {
   kSignageClientList,
   kSignageDisplay,
   kSignageDisplayRaw,
+  kSignageEvents,
   kSignageI18n,
+  kSignageNews,
   kSignageSnap,
   kSignageSnapList,
+  kSignageSocial,
   kSignageThemeSnap,
   kSignageThemeSnapList,
 } from './kv-keys';
 import {
   SignageClientFileSchema,
   SignageDisplayConfigSchema,
+  SignageEventSchema,
+  SignageNewsConfigSchema,
+  SignageSocialDataSchema,
   type SignageClientFile,
   type SignageDisplayConfig,
+  type SignageEvent,
+  type SignageNewsConfig,
+  type SignageSocialData,
 } from './schema';
 
 const SNAPSHOT_CAP = 10;
@@ -236,6 +245,51 @@ export const kvSignageI18n = {
   },
   async delete(client: string, locale: string): Promise<void> {
     await kv.del(kSignageI18n(client, locale));
+  },
+};
+
+export const kvSignageEvents = {
+  async get(client: string): Promise<SignageEvent[] | null> {
+    const raw = await kv.get<unknown>(kSignageEvents(client));
+    if (!raw) return null;
+    const parsed = SignageEventSchema.array().safeParse(raw);
+    return parsed.success ? parsed.data : null;
+  },
+  async set(client: string, data: SignageEvent[]): Promise<void> {
+    await kv.set(kSignageEvents(client), data);
+  },
+  async delete(client: string): Promise<void> {
+    await kv.del(kSignageEvents(client));
+  },
+};
+
+export const kvSignageSocial = {
+  async get(client: string): Promise<SignageSocialData | null> {
+    const raw = await kv.get<unknown>(kSignageSocial(client));
+    if (!raw) return null;
+    const parsed = SignageSocialDataSchema.safeParse(raw);
+    return parsed.success ? parsed.data : null;
+  },
+  async set(client: string, data: SignageSocialData): Promise<void> {
+    await kv.set(kSignageSocial(client), data);
+  },
+  async delete(client: string): Promise<void> {
+    await kv.del(kSignageSocial(client));
+  },
+};
+
+export const kvSignageNews = {
+  async get(client: string): Promise<SignageNewsConfig | null> {
+    const raw = await kv.get<unknown>(kSignageNews(client));
+    if (!raw) return null;
+    const parsed = SignageNewsConfigSchema.safeParse(raw);
+    return parsed.success ? parsed.data : null;
+  },
+  async set(client: string, data: SignageNewsConfig): Promise<void> {
+    await kv.set(kSignageNews(client), data);
+  },
+  async delete(client: string): Promise<void> {
+    await kv.del(kSignageNews(client));
   },
 };
 

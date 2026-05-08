@@ -5,7 +5,13 @@ import path from 'node:path';
 
 import { cache } from 'react';
 
-import { kvSignageClient, kvSignageDisplay } from './kv-store';
+import {
+  kvSignageClient,
+  kvSignageDisplay,
+  kvSignageEvents,
+  kvSignageNews,
+  kvSignageSocial,
+} from './kv-store';
 import {
   SignageClientFileSchema,
   SignageClientResolvedSchema,
@@ -84,28 +90,43 @@ export const loadSignageClient = cache(
       const kvClient = await kvSignageClient.get(slug);
       if (kvClient) {
         const fsFiles = await readClientFiles(slug).catch(() => null);
+        // Para events/social/news: KV-first con fallback fs (mismo patrón
+        // que el client). Esto permite editar contenido vía Studio sin
+        // tocar el filesystem.
+        const [kvEvents, kvSocial, kvNews] = await Promise.all([
+          kvSignageEvents.get(slug).catch(() => null),
+          kvSignageSocial.get(slug).catch(() => null),
+          kvSignageNews.get(slug).catch(() => null),
+        ]);
         return SignageClientResolvedSchema.parse({
           ...kvClient,
-          events: fsFiles?.events ?? [],
-          social: fsFiles?.social ?? { posts: [] },
-          news: fsFiles?.news ?? {
-            source: { kind: 'manual', items: [] },
-            rotationIntervalSec: 8,
-          },
+          events: kvEvents ?? fsFiles?.events ?? [],
+          social: kvSocial ?? fsFiles?.social ?? { posts: [] },
+          news:
+            kvNews ??
+            fsFiles?.news ?? {
+              source: { kind: 'manual', items: [] },
+              rotationIntervalSec: 8,
+            },
         });
       }
     } catch {
       // KV unreachable o shape inválido: continuamos a fs.
     }
 
-    // 2. Fallback fs.
+    // 2. Fallback fs (con events/social/news leídos KV-first).
     try {
       const files = await readClientFiles(slug);
+      const [kvEvents, kvSocial, kvNews] = await Promise.all([
+        kvSignageEvents.get(slug).catch(() => null),
+        kvSignageSocial.get(slug).catch(() => null),
+        kvSignageNews.get(slug).catch(() => null),
+      ]);
       return SignageClientResolvedSchema.parse({
         ...files.client,
-        events: files.events,
-        social: files.social,
-        news: files.news,
+        events: kvEvents ?? files.events,
+        social: kvSocial ?? files.social,
+        news: kvNews ?? files.news,
       });
     } catch (err) {
       // Fallback a default si el slug no resolvió.

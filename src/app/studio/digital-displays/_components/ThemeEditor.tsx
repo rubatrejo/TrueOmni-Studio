@@ -20,9 +20,12 @@ import { SignageTopBar } from './shell/SignageTopBar';
 import { SignageOnboardingTour } from './SignageOnboardingTour';
 import { BrandingTab } from './tabs/BrandingTab';
 import { DisplaysTab } from './tabs/DisplaysTab';
+import { EventsTab } from './tabs/EventsTab';
 import { HeaderTab } from './tabs/HeaderTab';
 import { I18nTab } from './tabs/I18nTab';
+import { NewsTab } from './tabs/NewsTab';
 import { PublishTab } from './tabs/PublishTab';
+import { SocialTab } from './tabs/SocialTab';
 import { VersionsTab } from './tabs/VersionsTab';
 
 /**
@@ -178,6 +181,21 @@ export function ThemeEditor({ client, displays, tokensCss }: ThemeEditorProps) {
                 {activeTab === 'header' ? <HeaderTab client={client} /> : null}
                 {activeTab === 'displays' ? (
                   <DisplaysTab clientSlug={client.slug} displays={displays} />
+                ) : null}
+                {activeTab === 'events' ? (
+                  <EventsTab
+                    clientSlug={client.slug}
+                    initialEvents={client.events}
+                  />
+                ) : null}
+                {activeTab === 'social' ? (
+                  <SocialTab
+                    clientSlug={client.slug}
+                    initialSocial={client.social}
+                  />
+                ) : null}
+                {activeTab === 'news' ? (
+                  <NewsTab clientSlug={client.slug} initialNews={client.news} />
                 ) : null}
                 {activeTab === 'i18n' ? (
                   <I18nTab clientSlug={client.slug} defaultLocale={client.locale} />

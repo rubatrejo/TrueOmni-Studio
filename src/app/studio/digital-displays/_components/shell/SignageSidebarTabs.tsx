@@ -2,13 +2,16 @@
 
 import { motion } from 'framer-motion';
 import {
+  CalendarDays,
   History,
   Languages,
   LayoutPanelTop,
   Monitor,
+  Newspaper,
   Palette,
   RotateCcw,
   Send,
+  Share2,
   type LucideIcon,
 } from 'lucide-react';
 import { useRef, type KeyboardEvent } from 'react';
@@ -38,6 +41,9 @@ export type SignageSectionKey =
   | 'branding'
   | 'header'
   | 'displays'
+  | 'events'
+  | 'social'
+  | 'news'
   | 'i18n'
   | 'versions'
   | 'publish';
@@ -60,6 +66,24 @@ export const SIGNAGE_SECTIONS: readonly SignageSection<SignageSectionKey>[] = [
     label: 'Displays',
     title: 'Manage displays in this theme',
     icon: Monitor,
+  },
+  {
+    key: 'events',
+    label: 'Events',
+    title: 'Events shown across the theme',
+    icon: CalendarDays,
+  },
+  {
+    key: 'social',
+    label: 'Social',
+    title: 'Social posts and featured tweet',
+    icon: Share2,
+  },
+  {
+    key: 'news',
+    label: 'News',
+    title: 'News source and items',
+    icon: Newspaper,
   },
   {
     key: 'i18n',

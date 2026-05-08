@@ -6,7 +6,7 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** Iteración intensiva del **Signage Studio editor** — feedback loop en vivo con el usuario. 10 commits locales **NO pusheados** desde `8142487`. Pendiente: verificación visual del fix del bridge, posibles iteraciones más, push + deploy.
+**Fase activa:** **Refactor cliente-primero del Studio** — 6 fases (1→6) cerradas + UI tweaks finales. 7 commits locales **NO pusheados** desde el último deploy del signage header (`a95a5e5`, ya en producción Vercel `dpl_MMUUrFnHXJ4SGZbKgsoXNRfzzz9w`). Pendiente: validación E2E manual local + push + deploy.
 
 **Sesión 2026-05-08 (madrugada→mediodía):**
 
@@ -2708,6 +2708,119 @@ Audit panorámico — 8 hallazgos cerrados:
 - Mediodía: DS11-DS15 (header position, transitions, dayparting, audio/sleep/i18n, GATE Local).
 - Tarde-Noche: DSS0-DSS9 (Milestone Studio completo end-to-end).
 - **Total**: 26 sub-fases ejecutadas + commits atómicos en una sola sesión continua. **2 milestones cerrados**: Signage Local + Signage Studio.
+
+---
+
+### Sesión 2026-05-08 — Refactor cliente-primero del Studio + signage header rewrite
+
+**Hecho:**
+
+- **Header signage rewrite end-to-end** (commit `a95a5e5`, deployado a Vercel
+  como `dpl_MMUUrFnHXJ4SGZbKgsoXNRfzzz9w` READY): HTML/CSS + SVG icons en
+  lugar del SVG monolítico de 1920×155. 3 zonas absolutamente posicionadas
+  con placement independiente (logo/weather/clock left/center/right). Altura
+  fija a 155px (medida del SVG original; no editable). Forecast 1/3/5 days
+  con scale 0.65 al 5. Brand colors cascadean a templates (`events-accent`
+  y `band-overlay` derivan de brand tokens). Weather card con layout `[DAY
+  + icon] / [high low]`. Bridge live editor↔iframe + sync hooks.
+- **Refactor cliente-primero del Studio** (6 fases consecutivas):
+  - **Fase 1** (`b01f63e`): routing — `/studio/[client]/{kiosk,digital-displays/[d],
+    mobile-pwa,video-walls,tablets}`. Redirects desde URLs viejas. Stubs
+    Coming Soon. Eliminado `<ProductDropdown>` (la jerarquía ahora vive en
+    la URL). Catálogo de productos: 5 (kiosks, digital-displays live + 3
+    coming soon).
+  - **Fase 2** (`0007bd6`): data layer — `UnifiedClientBrandingSchema`,
+    `ClientManifestSchema`, KV keys `client:{slug}:{manifest,branding,
+    sync-errors,migrating}` + `client:list`. Sync layer con
+    `kioskToUnifiedBranding` ↔ `signageToUnifiedBranding`. Auto-migrador
+    idempotente lazy on-load.
+  - **Fase 3** (`8f0f737`): UI — `/studio` lista clientes (no kiosks),
+    `/studio/[slug]` Vista de Cliente con BrandingForm + 5 product cards.
+    Endpoints `GET/POST /api/studio/clients` + `GET/PATCH /api/studio/
+    clients/[slug]/branding` con autosave 1s.
+  - **Fase 4** (`e7ae4d1`): APIs unificadas — `POST /api/studio/clients`
+    crea cliente con productos seleccionados (clona kiosk + signage desde
+    `default`). `POST /api/studio/clients/[slug]/products/[product]/activate`
+    para activar producto en cliente existente. Sync hooks bidireccionales
+    en `PATCH /api/studio/configs/[slug]` y `PUT /api/studio/signage/clients/
+    [client]`.
+  - **Fase 5** (`57d771d`): `<BrandingSyncBanner>` en kiosk Shell (sobre
+    EditorPanel cuando `activeTab='branding'`) y signage `BrandingTab` con
+    link a la Vista de Cliente.
+  - **Fase 6** (`a238b06`): `/studio/[slug]/digital-displays` lista scoped
+    de displays del cliente, breadcrumb `Clients > {client} > Digital
+    Displays`.
+- **UI feedback final** (`6c00948`): BrandingForm con tabs horizontales
+  (General · Brand colors · Logos · Fonts · Media — solo el panel activo
+  se renderiza, sin scroll). Products section wrap en card con gradient +
+  badge "N active". Toda la copy traducida a inglés.
+
+**Verificado:**
+
+- Header signage: deployado en producción Vercel (~2:19 build), validado en
+  `https://trueomni-studio.vercel.app`.
+- Auto-migración idempotente: 1ª corrida 2 migrados, 2ª 0 (`alreadyMigrated:
+  2`). `default` → kiosks+digitalDisplays (source kv-kiosk), `demo-cliente-a`
+  → kiosks (fallback por shape legacy de branding pre-S1).
+- Sync E2E: `POST /api/studio/clients` con `test-fase4` → 201 con manifest
+  + branding inherited del kiosk template. `PATCH /api/studio/configs/test-
+  fase4 { branding.primary: '#ff8800' }` → unified.brand.primary = "32 100%
+  50%" (HSL del naranja), signage.branding.tokens['brand-primary'] = "32
+  100% 50%". Sync bidireccional confirmado.
+- Dashboard de clientes: 2 clientes existentes (`Arizona`, `demo-cliente-a`)
+  con product badges correctos.
+- Vista de Cliente `/studio/default`: BrandingForm renderiza con tabs, Products
+  section con 5 cards (2 active + 3 coming soon).
+- `pnpm typecheck` limpio en cada fase.
+
+**Pendiente / siguiente:**
+
+1. **Push** los 7 commits del Studio refactor (`b01f63e`, `0007bd6`,
+   `8f0f737`, `e7ae4d1`, `57d771d`, `a238b06`, `6c00948`) → triggers Vercel
+   deploy.
+2. **Validación E2E manual** del flujo completo en local antes del push:
+   crear cliente nuevo desde dashboard, editar branding desde Vista de
+   Cliente, abrir kiosk + digital-displays editores y confirmar que el
+   branding propagó.
+3. **Cablear el flujo de creación** al endpoint nuevo `POST /api/studio/
+   clients` (hoy `<NewClientModal>` sigue usando el `POST /api/studio/
+   configs` legacy, la auto-migración los convierte después). Refactor
+   menor pero útil para que los clientes nuevos arranquen con manifest +
+   unified branding directo.
+4. **Cablear el botón "Activate"** del ProductCard al endpoint
+   `POST /api/studio/clients/[slug]/products/[product]/activate` (hoy es
+   solo un link al editor que falla si el producto no existe).
+5. **Eliminar el endpoint diag** `/api/studio/diag/migrate-clients` cuando
+   el flujo unified ya esté estable.
+6. **New Display creation** desde el editor signage (Fase 6 dejó placeholder
+   "Coming Soon" en el grid).
+7. **Demo-cliente-a** quedó migrado con branding fallback (defaults
+   TrueOmni) por shape legacy. Si Rubén lo va a usar de verdad, re-configurar
+   manualmente desde la Vista de Cliente.
+
+**Decisiones:**
+
+- **Source of truth única**: `client:{slug}:branding` en KV, HSL canónico.
+  Hex derivado on-demand al leer kiosk config (evita drift por round-trip
+  hex↔HSL).
+- **Sync bidireccional best-effort**: errores en hook NO abortan el save
+  del producto. Logueados a `client:{slug}:sync-errors` para diagnóstico
+  (cap 10).
+- **Header signage 155px fijo**: control de altura retirado del editor.
+  Coincide con el viewBox original de los SVGs de Adobe XD. Tamaños
+  internos calibrados directamente (sin escalar por heightScale).
+- **Hooks lazy con `await import`** (`syncFromKioskSave`/`syncFromSignageSave`)
+  para evitar circular deps + no penalizar PATCHes de clientes pre-migrados.
+  Solo se ejecutan si `client:{slug}:manifest` existe.
+- **Banner informativo, no lock**: el plan original proponía branding tab
+  read-only en los editores. Cambié a banner que avisa del sync y linkea
+  a la Vista de Cliente, dejando edición libre porque los hooks ya
+  propagan bidireccional.
+- **Auto-migración lazy on-load** en `/studio/page.tsx` (vía `GET /api/
+  studio/clients`). Idempotente con guard por `loadClientManifest`. Sin
+  background jobs ni migrations explícitas.
+
+**Fase:** Studio cliente-primero (6/6 fases cerradas).
 
 ---
 

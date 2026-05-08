@@ -153,7 +153,7 @@ export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps
   const themeDraft = useThemeEditStore((s) => s.draft);
   const themeDirty = useThemeEditStore((s) => s.dirty);
 
-  const [activeTab, setActiveTab] = useState<DisplaySectionKey>('playlist');
+  const [activeTab, setActiveTab] = useState<DisplaySectionKey>('branding');
   const [previewKey, setPreviewKey] = useState(0);
 
   const bridge = useSignageBridge();
@@ -187,12 +187,15 @@ export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps
   }, [client.slug]);
 
   // Push display al iframe (debounce 120ms en hook).
+  // Dep: solo `draft` — `bridge.pushDisplay` es estable (useCallback []).
   useEffect(() => {
     if (!draft) return;
     bridge.pushDisplay(draft);
-  }, [draft, bridge]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft]);
 
   // Push theme branding/header al iframe.
+  // Dep: solo `themeDraft` — `bridge.pushClient` es estable (useCallback []).
   useEffect(() => {
     if (!themeDraft) return;
     bridge.pushClient({
@@ -201,7 +204,8 @@ export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps
       name: themeDraft.name,
       website: themeDraft.website,
     });
-  }, [themeDraft, bridge]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [themeDraft]);
 
   // Autosave display 1s después del último cambio.
   const onAutosave = useCallback(async () => {

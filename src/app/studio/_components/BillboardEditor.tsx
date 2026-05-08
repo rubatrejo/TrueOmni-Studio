@@ -236,10 +236,14 @@ export function BillboardEditor({
 
           {/* Touch Here button — texto */}
           <div className="space-y-1.5">
-            <label className="block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+            <label
+              htmlFor="billboard-touchhere-label"
+              className="block text-[12px] font-medium text-zinc-800 dark:text-zinc-200"
+            >
               Touch Here label
             </label>
             <input
+              id="billboard-touchhere-label"
               type="text"
               value={b0.touchHere.label}
               onChange={(e) =>

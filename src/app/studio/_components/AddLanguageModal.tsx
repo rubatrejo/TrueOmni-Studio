@@ -135,6 +135,7 @@ export function AddLanguageModal({
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
                 <input
                   type="text"
+                  // eslint-disable-next-line jsx-a11y/no-autofocus -- modal abierto por click; foco esperado en search.
                   autoFocus
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -153,7 +154,7 @@ export function AddLanguageModal({
             <div className="flex-1 overflow-y-auto px-2 py-2">
               {totalFiltered === 0 ? (
                 <p className="px-3 py-8 text-center text-[12px] italic text-zinc-500">
-                  No languages match "{search}".
+                  No languages match &quot;{search}&quot;.
                 </p>
               ) : (
                 Object.entries(filtered).map(([region, entries]) => {

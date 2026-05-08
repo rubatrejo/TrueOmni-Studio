@@ -91,14 +91,24 @@ export const SignageHeaderSchema = z.object({
   /** top default; bottom mueve el header al fondo y el body content al área superior. */
   position: z.enum(['top', 'bottom']),
   height: z.union([z.literal(80), z.literal(100), z.literal(120)]),
+  /** Placement del logo (legacy `layout`). */
   layout: z.enum(['logo-left', 'logo-center', 'logo-right']),
+  /** Placement del bloque weather (temp + iconos + forecast). Default `center`
+   *  para preservar la composición histórica en datos sin este campo. */
+  weatherPlacement: z.enum(['left', 'center', 'right']).optional().default('center'),
+  /** Placement del bloque clock + date. Default `right` (composición original). */
+  clockPlacement: z.enum(['left', 'center', 'right']).optional().default('right'),
   background: SignageHeaderBackgroundSchema,
   showLogo: z.boolean(),
   showWeather: z.boolean(),
   showClock: z.boolean(),
   clockFormat: z.enum(['12h', '24h']),
   weatherUnits: z.enum(['metric', 'imperial']),
-  forecastDays: z.union([z.literal(0), z.literal(3), z.literal(5)]),
+  /** 1, 3 ó 5 forecast cards. Datos legacy con `0` se migran a `1`. */
+  forecastDays: z.preprocess(
+    (v) => (v === 0 ? 1 : v),
+    z.union([z.literal(1), z.literal(3), z.literal(5)]),
+  ),
 });
 export type SignageHeader = z.infer<typeof SignageHeaderSchema>;
 

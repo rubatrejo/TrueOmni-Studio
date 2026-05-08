@@ -77,8 +77,9 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
   return (
     <svg
       viewBox="0 155 1920 925"
-      width="1920"
-      height="925"
+      width="100%"
+      height="100%"
+      preserveAspectRatio="xMidYMid slice"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
       className="block"

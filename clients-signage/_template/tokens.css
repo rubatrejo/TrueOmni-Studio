@@ -47,7 +47,7 @@
   /*  ACCENTS POR MÓDULO (defaults derivados — overrideables por cliente)   */
   /* ---------------------------------------------------------------------- */
   /* Olive #b9bd39 — color del label de eventos en el SVG fuente. */
-  --signage-events-accent: 62 53% 48%;
+  --signage-events-accent: var(--signage-brand-accent);
   --signage-social-accent: var(--signage-brand-secondary);
   --signage-news-accent: var(--signage-brand-accent);
   --signage-weather-accent: var(--signage-brand-secondary);
@@ -55,7 +55,7 @@
   --signage-video-accent: var(--signage-brand-primary);
 
   /* Cyan band overlay — antes hardcoded #1796d6 en templates 01/04/06. */
-  --signage-band-overlay: 200 81% 47%;
+  --signage-band-overlay: var(--signage-brand-secondary);
 
   /* ---------------------------------------------------------------------- */
   /*  ESTADOS                                                               */

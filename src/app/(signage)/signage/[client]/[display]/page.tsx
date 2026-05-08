@@ -40,11 +40,14 @@ export default async function SignageDisplayPage({ params, searchParams }: PageP
     }),
   ]);
 
+  // Siempre pedimos 5 forecast cards al adapter para que el editor pueda
+  // alternar entre 1/3/5 días en vivo sin re-fetch. El header slicea según
+  // el patch del bridge.
   const weather = mapWeatherToHeader(
     weatherData,
     clientCfg.locale,
     clientCfg.timezone,
-    clientCfg.header.forecastDays,
+    5,
   );
 
   return (

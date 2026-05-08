@@ -21,15 +21,14 @@ export interface SignageHeaderWeather {
 }
 
 /**
- * Genera un placeholder con celdas vacías para cuando el API de weather falla
- * o el cliente tiene `forecastDays === 0`.
+ * Genera un placeholder con celdas vacías para cuando el API de weather falla.
+ * Mínimo 1 card (la opción "None" del editor fue retirada — ahora 1/3/5).
  */
-function buildFallback(forecastDays: 0 | 3 | 5): SignageHeaderWeather {
-  const slots = forecastDays === 0 ? 0 : forecastDays;
+function buildFallback(forecastDays: 1 | 3 | 5): SignageHeaderWeather {
   return {
     currentTempText: '--°',
     currentWeatherCode: null,
-    forecast: Array.from({ length: slots }, () => ({
+    forecast: Array.from({ length: forecastDays }, () => ({
       dayLabel: '---',
       highText: '--°',
       lowText: '--°',
@@ -49,23 +48,14 @@ export function mapWeatherToHeader(
   data: WeatherData | null,
   locale: string,
   timezone: string,
-  forecastDays: 0 | 3 | 5,
+  forecastDays: 1 | 3 | 5,
 ): SignageHeaderWeather {
   if (!data) {
     return buildFallback(forecastDays);
   }
 
-  const slots = forecastDays === 0 ? 0 : forecastDays;
-  if (slots === 0) {
-    return {
-      currentTempText: `${data.currentTempF}°`,
-      currentWeatherCode: data.weatherCode,
-      forecast: [],
-    };
-  }
-
   const today = new Date();
-  const forecast = Array.from({ length: slots }, (_, i) => {
+  const forecast = Array.from({ length: forecastDays }, (_, i) => {
     const offset = i + 1;
     const date = new Date(today);
     date.setDate(today.getDate() + offset);

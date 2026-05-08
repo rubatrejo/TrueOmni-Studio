@@ -42,7 +42,7 @@ export async function fetchWeather(lat = DEFAULT_LAT, lng = DEFAULT_LNG): Promis
     `&current_weather=true` +
     `&daily=weather_code,temperature_2m_max,temperature_2m_min` +
     `&temperature_unit=fahrenheit` +
-    `&timezone=auto&forecast_days=5`;
+    `&timezone=auto&forecast_days=6`;
 
   const res = await fetch(url, { next: { revalidate: 600 } });
   if (!res.ok) throw new Error(`open-meteo ${res.status}`);

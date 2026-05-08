@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { HslColorPicker, type HslColor } from 'react-colorful';
 
 import type {
@@ -57,22 +58,6 @@ export function HeaderTab({ client }: HeaderTabProps) {
           />
         </Field>
 
-        <Field label="Height">
-          <SegmentedToggle
-            options={[
-              { value: '80', label: '80px' },
-              { value: '100', label: '100px' },
-              { value: '120', label: '120px' },
-            ]}
-            value={String(h.height)}
-            onChange={(v) =>
-              updateHeader({
-                height: Number(v) as SignageHeader['height'],
-              })
-            }
-          />
-        </Field>
-
         <Field label="Logo placement">
           <SegmentedToggle
             options={[
@@ -82,6 +67,38 @@ export function HeaderTab({ client }: HeaderTabProps) {
             ]}
             value={h.layout}
             onChange={(v) => updateHeader({ layout: v as SignageHeader['layout'] })}
+          />
+        </Field>
+
+        <Field label="Weather placement">
+          <SegmentedToggle
+            options={[
+              { value: 'left', label: 'Left' },
+              { value: 'center', label: 'Center' },
+              { value: 'right', label: 'Right' },
+            ]}
+            value={h.weatherPlacement ?? 'center'}
+            onChange={(v) =>
+              updateHeader({
+                weatherPlacement: v as SignageHeader['weatherPlacement'],
+              })
+            }
+          />
+        </Field>
+
+        <Field label="Clock placement">
+          <SegmentedToggle
+            options={[
+              { value: 'left', label: 'Left' },
+              { value: 'center', label: 'Center' },
+              { value: 'right', label: 'Right' },
+            ]}
+            value={h.clockPlacement ?? 'right'}
+            onChange={(v) =>
+              updateHeader({
+                clockPlacement: v as SignageHeader['clockPlacement'],
+              })
+            }
           />
         </Field>
       </Section>
@@ -136,11 +153,11 @@ export function HeaderTab({ client }: HeaderTabProps) {
         <Field label="Forecast days">
           <SegmentedToggle
             options={[
-              { value: '0', label: 'None' },
+              { value: '1', label: '1 day' },
               { value: '3', label: '3 days' },
               { value: '5', label: '5 days' },
             ]}
-            value={String(h.forecastDays)}
+            value={String((h.forecastDays as 0 | 1 | 3 | 5) === 0 ? 1 : h.forecastDays)}
             onChange={(v) =>
               updateHeader({
                 forecastDays: Number(v) as SignageHeader['forecastDays'],
@@ -191,10 +208,13 @@ function BackgroundEditor({
             if (v === 'color') {
               onChange({
                 kind: 'color',
+                // Default a referencia al brand token: el header sigue
+                // automáticamente los cambios de Branding tab a menos que
+                // el operator escriba un color custom.
                 color:
                   background.kind === 'gradient'
                     ? background.from
-                    : 'hsl(211 100% 25%)',
+                    : 'hsl(var(--signage-header-bg))',
               });
             } else if (v === 'gradient') {
               onChange({
@@ -216,11 +236,22 @@ function BackgroundEditor({
       </Field>
 
       {background.kind === 'color' ? (
-        <CssColorPickerField
-          label="Color"
-          value={background.color}
-          onChange={(v) => onChange({ kind: 'color', color: v })}
-        />
+        <>
+          <CssColorPickerField
+            label="Color"
+            value={background.color}
+            onChange={(v) => onChange({ kind: 'color', color: v })}
+          />
+          <button
+            type="button"
+            onClick={() =>
+              onChange({ kind: 'color', color: 'hsl(var(--signage-header-bg))' })
+            }
+            className="self-start text-[11.5px] font-medium text-zinc-500 underline-offset-2 transition hover:text-zinc-800 hover:underline dark:text-zinc-400 dark:hover:text-zinc-200"
+          >
+            Sincronizar con brand-primary (auto-update con Branding tab)
+          </button>
+        </>
       ) : null}
 
       {background.kind === 'gradient' ? (
@@ -311,8 +342,11 @@ function GradientPreview({
 }
 
 /**
- * Color picker para una CSS color string libre (`hsl(...)` o `#hex`). Detecta
- * formato HSL y abre el HslColorPicker; si no, deja editar como texto.
+ * Color picker para una CSS color string libre (`hsl(...)` o `#hex`).
+ *
+ * El swatch es el toggle del popover: click abre, click fuera lo cierra. Esto
+ * evita que el HslColorPicker sature el sidebar permanentemente y permite al
+ * operator cerrar el panel cuando termina de afinar.
  */
 function CssColorPickerField({
   label,
@@ -324,15 +358,42 @@ function CssColorPickerField({
   onChange: (v: string) => void;
 }) {
   const hsl = parseCssHsl(value);
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Cierra al click fuera + tecla Escape.
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (!containerRef.current) return;
+      if (!containerRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [open]);
+
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900/40">
+    <div
+      ref={containerRef}
+      className="relative flex flex-col gap-2 rounded-md border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900/40"
+    >
       <div className="flex items-center justify-between gap-3 text-[12.5px]">
         <span className="text-zinc-500">{label}</span>
         <span className="flex items-center gap-2">
-          <span
-            className="h-6 w-6 rounded border border-zinc-200 dark:border-zinc-800"
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-label={open ? `Cerrar selector de ${label}` : `Abrir selector de ${label}`}
+            aria-expanded={open}
+            className="h-6 w-6 rounded border border-zinc-200 transition hover:scale-110 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-800"
             style={{ backgroundColor: value || '#888' }}
-            aria-hidden
           />
           <input
             type="text"
@@ -343,17 +404,30 @@ function CssColorPickerField({
           />
         </span>
       </div>
-      {hsl ? (
-        <HslColorPicker
-          color={hsl}
-          onChange={(c: HslColor) => onChange(formatCssHsl(c))}
-          style={{ width: '100%', height: 130 }}
-        />
-      ) : (
-        <p className="text-[11px] italic text-zinc-500">
-          HSL formato `hsl(H S% L%)` activa el color picker visual.
-        </p>
-      )}
+      {open ? (
+        <div className="absolute right-3 top-12 z-20 flex flex-col gap-2 rounded-md border border-zinc-200 bg-white p-3 shadow-lg dark:border-zinc-800 dark:bg-zinc-950">
+          {hsl ? (
+            <>
+              <HslColorPicker
+                color={hsl}
+                onChange={(c: HslColor) => onChange(formatCssHsl(c))}
+                style={{ width: 200, height: 150 }}
+              />
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="w-full rounded border border-zinc-200 bg-zinc-50 px-2 py-1 text-[11px] font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              >
+                Done
+              </button>
+            </>
+          ) : (
+            <p className="max-w-[200px] text-[11px] italic text-zinc-500">
+              HSL formato `hsl(H S% L%)` activa el color picker visual.
+            </p>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }

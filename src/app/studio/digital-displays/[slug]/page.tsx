@@ -1,12 +1,6 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
-import {
-  listSignageDisplays,
-  loadSignageClient,
-  loadSignageTokensCss,
-} from '@/lib/signage/config';
-
-import { ThemeEditor } from '../_components/ThemeEditor';
+import { listSignageDisplays } from '@/lib/signage/config';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,30 +8,18 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps) {
-  const { slug } = await params;
-  return {
-    title: `${slug} · Digital Displays · TrueOmni Studio`,
-  };
-}
-
 /**
- * `/studio/digital-displays/[slug]` — Editor del signage theme (DSS1).
+ * `/studio/digital-displays/[slug]` — Compat redirect al primer display.
  *
- * Server component que carga client + displays + tokens en paralelo. Pasa todo
- * al `<ThemeEditor>` (client) que orquesta los 5 tabs. **DSS1 es read-only**:
- * muestra la configuración del theme tal como vive en `clients-signage/<slug>/`.
- * Los formularios editables aterrizan en DSS5+.
+ * El theme editor anterior se ha consolidado dentro del display editor:
+ * branding, header, events, social, news, i18n y settings se editan ahora
+ * por display (con los datos del client subyacente compartidos entre
+ * displays del mismo cliente). Las URLs viejas redirigen al primer display
+ * disponible para no romper bookmarks.
  */
-export default async function ThemeEditorPage({ params }: PageProps) {
+export default async function ThemeRedirectPage({ params }: PageProps) {
   const { slug } = await params;
-  const [client, displays, tokensCss] = await Promise.all([
-    loadSignageClient(slug),
-    listSignageDisplays(slug),
-    loadSignageTokensCss(slug).catch(() => ''),
-  ]);
-
-  if (!client) notFound();
-
-  return <ThemeEditor client={client} displays={displays} tokensCss={tokensCss} />;
+  const displays = await listSignageDisplays(slug);
+  if (displays.length === 0) notFound();
+  redirect(`/studio/digital-displays/${slug}/displays/${displays[0].slug}`);
 }

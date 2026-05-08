@@ -229,7 +229,8 @@ const ModuleSocial = z.object({
 const ModuleVideoImage = z.object({
   kind: z.literal('video-image'),
   asset: z.object({
-    url: z.string().min(1),
+    // Permite vacío durante edición; runtime hace fallback a placeholder.
+    url: z.string(),
     kind: z.enum(['video', 'image']),
   }),
   loop: z.boolean().default(true),
@@ -239,7 +240,7 @@ const ModuleVideoImage = z.object({
 const ModuleAds = z.object({
   kind: z.literal('ads'),
   asset: z.object({
-    url: z.string().min(1),
+    url: z.string(),
     kind: z.enum(['image', 'video']).default('image'),
   }),
   link: z.string().optional(),

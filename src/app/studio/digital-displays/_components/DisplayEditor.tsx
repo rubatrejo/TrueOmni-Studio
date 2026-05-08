@@ -1,6 +1,17 @@
 'use client';
 
-import { History, ListVideo, Send, SlidersHorizontal } from 'lucide-react';
+import {
+  CalendarDays,
+  History,
+  Languages,
+  LayoutPanelTop,
+  ListVideo,
+  Newspaper,
+  Palette,
+  Send,
+  Share2,
+  SlidersHorizontal,
+} from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 import type {
@@ -10,7 +21,9 @@ import type {
 
 import { useDisplayEditStore } from '../_lib/display-edit-store';
 import { saveDisplay, useDebouncedAutosave } from '../_lib/save-display';
+import { saveTheme } from '../_lib/save-theme';
 import { SignageEditorProvider } from '../_lib/signage-editor-context';
+import { useThemeEditStore } from '../_lib/theme-edit-store';
 import { useSignageBridge } from '../_lib/use-signage-bridge';
 
 import { DisplaySettingsPanel } from './display/DisplaySettingsPanel';
@@ -24,6 +37,12 @@ import {
   type SignageSection,
 } from './shell/SignageSidebarTabs';
 import { SignageTopBar } from './shell/SignageTopBar';
+import { BrandingTab } from './tabs/BrandingTab';
+import { EventsTab } from './tabs/EventsTab';
+import { HeaderTab } from './tabs/HeaderTab';
+import { I18nTab } from './tabs/I18nTab';
+import { NewsTab } from './tabs/NewsTab';
+import { SocialTab } from './tabs/SocialTab';
 
 /**
  * `<DisplayEditor>` — Editor del signage display con shell pattern.
@@ -37,9 +56,31 @@ import { SignageTopBar } from './shell/SignageTopBar';
  *  - `<KvSizeAdvisor>` se muestra inline en cada tab cuando el payload se
  *    acerca al cap.
  */
-type DisplaySectionKey = 'settings' | 'playlist' | 'versions' | 'publish';
+type DisplaySectionKey =
+  | 'branding'
+  | 'header'
+  | 'settings'
+  | 'playlist'
+  | 'events'
+  | 'social'
+  | 'news'
+  | 'i18n'
+  | 'versions'
+  | 'publish';
 
 const DISPLAY_SECTIONS: ReadonlyArray<SignageSection<DisplaySectionKey>> = [
+  {
+    key: 'branding',
+    label: 'Branding',
+    title: 'Brand colors, logos, fonts',
+    icon: Palette,
+  },
+  {
+    key: 'header',
+    label: 'Header',
+    title: 'Header position, weather, clock',
+    icon: LayoutPanelTop,
+  },
   {
     key: 'settings',
     label: 'Settings',
@@ -51,6 +92,30 @@ const DISPLAY_SECTIONS: ReadonlyArray<SignageSection<DisplaySectionKey>> = [
     label: 'Playlist',
     title: 'Slides + scheduling',
     icon: ListVideo,
+  },
+  {
+    key: 'events',
+    label: 'Events',
+    title: 'Events shown on the display',
+    icon: CalendarDays,
+  },
+  {
+    key: 'social',
+    label: 'Social',
+    title: 'Social posts and featured tweet',
+    icon: Share2,
+  },
+  {
+    key: 'news',
+    label: 'News',
+    title: 'News source and items',
+    icon: Newspaper,
+  },
+  {
+    key: 'i18n',
+    label: 'Languages',
+    title: 'i18n bag editor',
+    icon: Languages,
   },
   {
     key: 'versions',
@@ -69,9 +134,10 @@ const DISPLAY_SECTIONS: ReadonlyArray<SignageSection<DisplaySectionKey>> = [
 export interface DisplayEditorProps {
   client: SignageClientResolved;
   display: SignageDisplayConfig;
+  tokensCss: string;
 }
 
-export function DisplayEditor({ client, display }: DisplayEditorProps) {
+export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps) {
   const init = useDisplayEditStore((s) => s.init);
   const draft = useDisplayEditStore((s) => s.draft);
   const dirty = useDisplayEditStore((s) => s.dirty);
@@ -82,13 +148,17 @@ export function DisplayEditor({ client, display }: DisplayEditorProps) {
   const markSaved = useDisplayEditStore((s) => s.markSaved);
   const setError = useDisplayEditStore((s) => s.setError);
 
+  // Theme draft (branding/header) — compartido entre displays del mismo client.
+  const initTheme = useThemeEditStore((s) => s.init);
+  const themeDraft = useThemeEditStore((s) => s.draft);
+  const themeDirty = useThemeEditStore((s) => s.dirty);
+
   const [activeTab, setActiveTab] = useState<DisplaySectionKey>('playlist');
   const [previewKey, setPreviewKey] = useState(0);
 
   const bridge = useSignageBridge();
 
-  // Inicializa el draft con el display recibido del server. Solo cuando
-  // cambia el slug del display (navegación) reseteamos.
+  // Init draft display.
   useEffect(() => {
     init(display);
     return () => {
@@ -97,13 +167,43 @@ export function DisplayEditor({ client, display }: DisplayEditorProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [display.slug, client.slug]);
 
-  // Push live al iframe en cada cambio del draft (debounce 120ms en hook).
+  // Init draft theme (branding/header).
+  useEffect(() => {
+    initTheme({
+      slug: client.slug,
+      name: client.name,
+      locale: client.locale,
+      timezone: client.timezone,
+      location: client.location,
+      website: client.website,
+      branding: client.branding,
+      header: client.header,
+      displays: client.displays,
+    });
+    return () => {
+      useThemeEditStore.getState().reset();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client.slug]);
+
+  // Push display al iframe (debounce 120ms en hook).
   useEffect(() => {
     if (!draft) return;
     bridge.pushDisplay(draft);
   }, [draft, bridge]);
 
-  // Autosave 1s después del último cambio.
+  // Push theme branding/header al iframe.
+  useEffect(() => {
+    if (!themeDraft) return;
+    bridge.pushClient({
+      branding: themeDraft.branding,
+      header: themeDraft.header,
+      name: themeDraft.name,
+      website: themeDraft.website,
+    });
+  }, [themeDraft, bridge]);
+
+  // Autosave display 1s después del último cambio.
   const onAutosave = useCallback(async () => {
     const current = useDisplayEditStore.getState().draft;
     if (!current) return;
@@ -116,7 +216,20 @@ export function DisplayEditor({ client, display }: DisplayEditorProps) {
     }
   }, [client.slug, markSaving, markSaved, setError]);
 
+  // Autosave theme 1s después del último cambio en branding/header.
+  const onThemeAutosave = useCallback(async () => {
+    const current = useThemeEditStore.getState().draft;
+    if (!current) return;
+    const result = await saveTheme(current);
+    if (result.ok) {
+      useThemeEditStore.getState().markSaved();
+    } else {
+      useThemeEditStore.getState().setError(result.error ?? 'Save failed');
+    }
+  }, []);
+
   useDebouncedAutosave(draft, dirty, onAutosave, 1000);
+  useDebouncedAutosave(themeDraft, themeDirty, onThemeAutosave, 1000);
 
   if (!draft) {
     return null;
@@ -173,8 +286,36 @@ export function DisplayEditor({ client, display }: DisplayEditorProps) {
                 className="studio-tab-fade flex min-h-0 flex-1 flex-col overflow-y-auto"
               >
                 <div className="flex flex-1 flex-col gap-4 px-6 py-6">
+                  {activeTab === 'branding' ? (
+                    <BrandingTab client={client} tokensCss={tokensCss} />
+                  ) : null}
+                  {activeTab === 'header' ? <HeaderTab client={client} /> : null}
                   {activeTab === 'settings' ? <DisplaySettingsPanel /> : null}
                   {activeTab === 'playlist' ? <PlaylistPanel /> : null}
+                  {activeTab === 'events' ? (
+                    <EventsTab
+                      clientSlug={client.slug}
+                      initialEvents={client.events}
+                    />
+                  ) : null}
+                  {activeTab === 'social' ? (
+                    <SocialTab
+                      clientSlug={client.slug}
+                      initialSocial={client.social}
+                    />
+                  ) : null}
+                  {activeTab === 'news' ? (
+                    <NewsTab
+                      clientSlug={client.slug}
+                      initialNews={client.news}
+                    />
+                  ) : null}
+                  {activeTab === 'i18n' ? (
+                    <I18nTab
+                      clientSlug={client.slug}
+                      defaultLocale={client.locale}
+                    />
+                  ) : null}
                   {activeTab === 'versions' ? (
                     <VersionsPanel
                       clientSlug={client.slug}

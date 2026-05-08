@@ -359,15 +359,45 @@ function CssColorPickerField({
 }
 
 function parseCssHsl(value: string): HslColor | null {
-  const m = value
-    .trim()
-    .match(/^hsl\(\s*(\d+(?:\.\d+)?)\s*[, ]\s*(\d+(?:\.\d+)?)%\s*[, ]\s*(\d+(?:\.\d+)?)%\s*\)$/i);
-  if (!m) return null;
-  return {
-    h: Math.round(Number(m[1])),
-    s: Math.round(Number(m[2])),
-    l: Math.round(Number(m[3])),
-  };
+  const trimmed = value.trim();
+  // hsl(H S% L%) or hsl(H, S%, L%)
+  const hslMatch = trimmed.match(
+    /^hsl\(\s*(\d+(?:\.\d+)?)\s*[, ]\s*(\d+(?:\.\d+)?)%\s*[, ]\s*(\d+(?:\.\d+)?)%\s*\)$/i,
+  );
+  if (hslMatch) {
+    return {
+      h: Math.round(Number(hslMatch[1])),
+      s: Math.round(Number(hslMatch[2])),
+      l: Math.round(Number(hslMatch[3])),
+    };
+  }
+  // #RGB or #RRGGBB
+  const hexMatch = trimmed.match(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/);
+  if (hexMatch) {
+    let v = hexMatch[1];
+    if (v.length === 3)
+      v = v
+        .split('')
+        .map((c) => c + c)
+        .join('');
+    const r = parseInt(v.slice(0, 2), 16) / 255;
+    const g = parseInt(v.slice(2, 4), 16) / 255;
+    const b = parseInt(v.slice(4, 6), 16) / 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const l = (max + min) / 2;
+    let h = 0;
+    let s = 0;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) * 60;
+      else if (max === g) h = ((b - r) / d + 2) * 60;
+      else h = ((r - g) / d + 4) * 60;
+    }
+    return { h: Math.round(h), s: Math.round(s * 100), l: Math.round(l * 100) };
+  }
+  return null;
 }
 
 function formatCssHsl(c: HslColor): string {
@@ -475,13 +505,15 @@ function SwitchRow({
       <span
         className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
           on
-            ? 'bg-emerald-500 dark:bg-emerald-400'
+            ? 'bg-zinc-900 dark:bg-white'
             : 'bg-zinc-200 dark:bg-zinc-800'
         }`}
       >
         <span
-          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
-            on ? 'translate-x-[18px]' : 'translate-x-[2px]'
+          className={`inline-block h-4 w-4 transform rounded-full shadow-sm transition-transform ${
+            on
+              ? 'translate-x-[18px] bg-white dark:bg-zinc-900'
+              : 'translate-x-[2px] bg-white dark:bg-zinc-300'
           }`}
         />
       </span>

@@ -1,6 +1,10 @@
 import { notFound } from 'next/navigation';
 
-import { loadSignageClient, loadSignageDisplay } from '@/lib/signage/config';
+import {
+  loadSignageClient,
+  loadSignageDisplay,
+  loadSignageTokensCss,
+} from '@/lib/signage/config';
 
 import { DisplayEditor } from '../../../_components/DisplayEditor';
 
@@ -29,12 +33,15 @@ export async function generateMetadata({ params }: PageProps) {
  */
 export default async function DisplayEditorPage({ params }: PageProps) {
   const { slug, displaySlug } = await params;
-  const [client, display] = await Promise.all([
+  const [client, display, tokensCss] = await Promise.all([
     loadSignageClient(slug),
     loadSignageDisplay(slug, displaySlug),
+    loadSignageTokensCss(slug).catch(() => ''),
   ]);
 
   if (!client || !display) notFound();
 
-  return <DisplayEditor client={client} display={display} />;
+  return (
+    <DisplayEditor client={client} display={display} tokensCss={tokensCss} />
+  );
 }

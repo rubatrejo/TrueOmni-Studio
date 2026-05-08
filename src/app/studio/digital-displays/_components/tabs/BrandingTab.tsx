@@ -1,7 +1,7 @@
 'use client';
 
 import { RotateCcw } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { HslColorPicker, type HslColor } from 'react-colorful';
 
 import type { SignageClientResolved } from '@/lib/signage/schema';
@@ -330,18 +330,33 @@ function BrandTokenCard({
             onChange={(c: HslColor) => onChange(formatHsl(c))}
             style={{ width: '100%', height: 160 }}
           />
-          <div className="flex w-full items-center gap-2">
-            <input
-              type="text"
-              value={currentHsl}
-              onChange={(e) => {
-                const trimmed = e.target.value.trim();
-                if (parseHslString(trimmed)) onChange(trimmed);
-              }}
-              className="flex-1 rounded border border-zinc-200 bg-white px-2 py-1 font-mono text-[11.5px] text-zinc-700 outline-none transition focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300"
-              placeholder="H S% L%"
-              aria-label={`HSL value for ${label}`}
-            />
+          <div className="flex w-full flex-col gap-1.5">
+            <div className="flex items-center gap-2">
+              <span className="w-10 shrink-0 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                Hex
+              </span>
+              <HexInput
+                hsl={hslObj}
+                onChange={(c) => onChange(formatHsl(c))}
+                ariaLabel={`Hex value for ${label}`}
+              />
+            </div>
+            <label className="flex items-center gap-2">
+              <span className="w-10 shrink-0 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                HSL
+              </span>
+              <input
+                type="text"
+                value={currentHsl}
+                onChange={(e) => {
+                  const trimmed = e.target.value.trim();
+                  if (parseHslString(trimmed)) onChange(trimmed);
+                }}
+                className="flex-1 rounded border border-zinc-200 bg-white px-2 py-1 font-mono text-[11.5px] text-zinc-700 outline-none transition focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300"
+                placeholder="H S% L%"
+                aria-label={`HSL value for ${label}`}
+              />
+            </label>
           </div>
         </div>
       ) : null}
@@ -391,6 +406,105 @@ function parseHslString(value: string): HslColor | null {
 
 function formatHsl(c: HslColor): string {
   return `${Math.round(c.h)} ${Math.round(c.s)}% ${Math.round(c.l)}%`;
+}
+
+/**
+ * `<HexInput>` — input controlado que muestra el HSL como #RRGGBB y actualiza
+ * el HSL parent cuando el operator pega un hex válido. Mantiene un draft local
+ * para que el operator pueda tipear sin que cada keypress reformatee.
+ */
+function HexInput({
+  hsl,
+  onChange,
+  ariaLabel,
+}: {
+  hsl: HslColor;
+  onChange: (c: HslColor) => void;
+  ariaLabel: string;
+}) {
+  const computed = hslToHex(hsl);
+  const [draft, setDraft] = useState(computed);
+  const lastSyncRef = useRef(computed);
+  // Sync draft cuando el HSL externo cambia (picker, reset, hsl input).
+  // Compara contra last-synced — no re-sincronizar si el draft sigue válido y
+  // genera el mismo HSL, así el operator puede tipear sin interrupciones.
+  if (computed !== lastSyncRef.current) {
+    lastSyncRef.current = computed;
+    setDraft(computed);
+  }
+  return (
+    <input
+      type="text"
+      value={draft}
+      onChange={(e) => {
+        const v = e.target.value;
+        setDraft(v);
+        const parsed = hexToHsl(v);
+        if (parsed) onChange(parsed);
+      }}
+      onBlur={() => {
+        // Si el blur deja un draft inválido, restauramos al actual.
+        if (!hexToHsl(draft)) setDraft(computed);
+      }}
+      placeholder="#RRGGBB"
+      aria-label={ariaLabel}
+      className="flex-1 rounded border border-zinc-200 bg-white px-2 py-1 font-mono text-[11.5px] uppercase text-zinc-700 outline-none transition focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300"
+    />
+  );
+}
+
+/** Convierte HSL (0-360, 0-100, 0-100) a HEX uppercase #RRGGBB. */
+export function hslToHex({ h, s, l }: HslColor): string {
+  const sat = s / 100;
+  const lig = l / 100;
+  const c = (1 - Math.abs(2 * lig - 1)) * sat;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = lig - c / 2;
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  if (h < 60) [r, g, b] = [c, x, 0];
+  else if (h < 120) [r, g, b] = [x, c, 0];
+  else if (h < 180) [r, g, b] = [0, c, x];
+  else if (h < 240) [r, g, b] = [0, x, c];
+  else if (h < 300) [r, g, b] = [x, 0, c];
+  else [r, g, b] = [c, 0, x];
+  const to255 = (n: number) =>
+    Math.round((n + m) * 255)
+      .toString(16)
+      .padStart(2, '0');
+  return `#${to255(r)}${to255(g)}${to255(b)}`.toUpperCase();
+}
+
+/** Parsea hex (#RGB | #RRGGBB) a HSL (0-360, 0-100, 0-100). null si inválido. */
+export function hexToHsl(hex: string): HslColor | null {
+  let v = hex.trim().replace(/^#/, '');
+  if (v.length === 3)
+    v = v
+      .split('')
+      .map((c) => c + c)
+      .join('');
+  if (!/^[0-9a-fA-F]{6}$/.test(v)) return null;
+  const r = parseInt(v.slice(0, 2), 16) / 255;
+  const g = parseInt(v.slice(2, 4), 16) / 255;
+  const b = parseInt(v.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  let h = 0;
+  let s = 0;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) * 60;
+    else if (max === g) h = ((b - r) / d + 2) * 60;
+    else h = ((r - g) / d + 4) * 60;
+  }
+  return {
+    h: Math.round(h),
+    s: Math.round(s * 100),
+    l: Math.round(l * 100),
+  };
 }
 
 // ---------------------------------------------------------------------------

@@ -1,10 +1,45 @@
 'use client';
 
-import { ExternalLink, Maximize, Minus, Monitor, Plus, RotateCcw, X } from 'lucide-react';
+import {
+  ChevronDown,
+  ExternalLink,
+  Maximize,
+  Minus,
+  Monitor,
+  Plus,
+  RotateCcw,
+  Smartphone,
+  X,
+} from 'lucide-react';
 import { useEffect, useRef, useState, type RefObject } from 'react';
 
-const TV_W = 1920;
-const TV_H = 1080;
+interface DeviceFormat {
+  key: 'digital-display' | 'kiosk-portrait';
+  label: string;
+  width: number;
+  height: number;
+  glyph: 'tv' | 'kiosk';
+  available: boolean;
+}
+
+const DEVICE_FORMATS: DeviceFormat[] = [
+  {
+    key: 'digital-display',
+    label: 'Digital Display',
+    width: 1920,
+    height: 1080,
+    glyph: 'tv',
+    available: true,
+  },
+  {
+    key: 'kiosk-portrait',
+    label: 'Kiosk Portrait',
+    width: 1080,
+    height: 1920,
+    glyph: 'kiosk',
+    available: false, // se habilita cuando esté el runtime portrait.
+  },
+];
 
 /**
  * `<SignagePreviewPanel>` — preview live del runtime signage en landscape
@@ -41,6 +76,10 @@ export function SignagePreviewPanel({
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
   const [fullScreen, setFullScreen] = useState(false);
+  const [formatKey, setFormatKey] =
+    useState<DeviceFormat['key']>('digital-display');
+  const format =
+    DEVICE_FORMATS.find((f) => f.key === formatKey) ?? DEVICE_FORMATS[0];
 
   useEffect(() => {
     const holder = containerRef.current?.parentElement;
@@ -50,14 +89,14 @@ export function SignagePreviewPanel({
       const availW = holder.clientWidth - padding * 2;
       const availH = holder.clientHeight - padding * 2;
       if (availW <= 0 || availH <= 0) return;
-      const fit = Math.min(availW / TV_W, availH / TV_H);
+      const fit = Math.min(availW / format.width, availH / format.height);
       setScale(Math.min(0.6, Math.max(0.15, fit)));
     };
     compute();
     const ro = new ResizeObserver(compute);
     ro.observe(holder);
     return () => ro.disconnect();
-  }, []);
+  }, [format.width, format.height]);
 
   if (!displaySlug) {
     return <NoDisplaysState clientSlug={clientSlug} />;
@@ -69,12 +108,10 @@ export function SignagePreviewPanel({
     <div className="flex h-full w-full flex-col">
       {/* Toolbar */}
       <div className="flex shrink-0 items-center justify-between px-6 pb-3 pt-4">
-        <div className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-900 dark:bg-zinc-950">
-          <span className="inline-flex items-center gap-1.5 rounded-md bg-zinc-100 px-2.5 py-1 text-[11px] text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-zinc-100">
-            <TvGlyph />
-            Digital Display · {TV_W}×{TV_H}
-          </span>
-        </div>
+        <FormatSelector
+          activeKey={formatKey}
+          onSelect={(k) => setFormatKey(k)}
+        />
 
         <div className="flex items-center gap-1 text-[11px] text-zinc-500">
           <button
@@ -129,20 +166,20 @@ export function SignagePreviewPanel({
           ref={containerRef}
           className="relative overflow-hidden rounded-lg shadow-2xl ring-1 ring-zinc-200 dark:ring-zinc-800"
           style={{
-            width: TV_W * scale,
-            height: TV_H * scale,
+            width: format.width * scale,
+            height: format.height * scale,
             backgroundColor: '#000',
           }}
         >
           <iframe
             ref={iframeRef}
-            key={`${clientSlug}-${displaySlug}-${reloadKey}`}
+            key={`${clientSlug}-${displaySlug}-${reloadKey}-${formatKey}`}
             src={runtimeUrl}
             title={`${displayName ?? displaySlug} live preview`}
             className="absolute left-0 top-0 block border-0"
             style={{
-              width: TV_W,
-              height: TV_H,
+              width: format.width,
+              height: format.height,
               transform: `scale(${scale})`,
               transformOrigin: '0 0',
             }}
@@ -150,6 +187,19 @@ export function SignagePreviewPanel({
             loading="eager"
             onLoad={onIframeLoad}
           />
+          {!format.available ? (
+            <div className="absolute inset-0 grid place-items-center bg-zinc-950/90 text-center">
+              <div className="max-w-[320px] px-6">
+                <Smartphone className="mx-auto h-10 w-10 text-zinc-500" strokeWidth={1.5} />
+                <p className="mt-3 font-display text-[15px] font-semibold text-white">
+                  Kiosk Portrait coming soon
+                </p>
+                <p className="mt-1 text-[12.5px] text-zinc-400">
+                  El runtime portrait 1080×1920 está en desarrollo. Mientras tanto, puedes editar el contenido y publicarlo — al activarse, se renderizará automáticamente en kioskos verticales.
+                </p>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -221,7 +271,7 @@ function FullScreenPreview({
       const padding = 80;
       const availH = window.innerHeight - padding * 2;
       const availW = window.innerWidth - padding * 2;
-      setScale(Math.min(availH / TV_H, availW / TV_W, 1));
+      setScale(Math.min(availH / DEVICE_FORMATS[0].height, availW / DEVICE_FORMATS[0].width, 1));
     }
     fit();
     window.addEventListener('resize', fit);
@@ -266,15 +316,15 @@ function FullScreenPreview({
       <div
         ref={wrapRef}
         className="relative overflow-hidden shadow-2xl"
-        style={{ width: TV_W * scale, height: TV_H * scale, backgroundColor: '#000' }}
+        style={{ width: DEVICE_FORMATS[0].width * scale, height: DEVICE_FORMATS[0].height * scale, backgroundColor: '#000' }}
       >
         <iframe
           src={url}
           title={`${label} full screen`}
           className="absolute left-0 top-0 block border-0"
           style={{
-            width: TV_W,
-            height: TV_H,
+            width: DEVICE_FORMATS[0].width,
+            height: DEVICE_FORMATS[0].height,
             transform: `scale(${scale})`,
             transformOrigin: '0 0',
           }}
@@ -284,9 +334,110 @@ function FullScreenPreview({
       </div>
 
       <span className="absolute bottom-6 left-1/2 -translate-x-1/2 font-mono text-[11.5px] text-zinc-500 dark:text-zinc-500">
-        {label} · {TV_W}×{TV_H} · {Math.round(scale * 100)}% · ESC to close
+        {label} · {DEVICE_FORMATS[0].width}×{DEVICE_FORMATS[0].height} · {Math.round(scale * 100)}% · ESC to close
       </span>
     </div>
+  );
+}
+
+function FormatSelector({
+  activeKey,
+  onSelect,
+}: {
+  activeKey: DeviceFormat['key'];
+  onSelect: (key: DeviceFormat['key']) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const active =
+    DEVICE_FORMATS.find((f) => f.key === activeKey) ?? DEVICE_FORMATS[0];
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-[11px] font-medium text-zinc-900 shadow-sm transition hover:border-zinc-300 dark:border-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:border-zinc-800"
+      >
+        {active.glyph === 'tv' ? <TvGlyph /> : <KioskGlyph />}
+        <span>
+          {active.label} · {active.width}×{active.height}
+        </span>
+        <ChevronDown className="h-3 w-3 text-zinc-400" />
+      </button>
+      {open ? (
+        <div
+          role="menu"
+          className="absolute left-0 top-9 z-30 flex w-56 flex-col gap-0.5 rounded-md border border-zinc-200 bg-white p-1 shadow-lg dark:border-zinc-800 dark:bg-zinc-950"
+        >
+          {DEVICE_FORMATS.map((f) => {
+            const isActive = f.key === activeKey;
+            return (
+              <button
+                key={f.key}
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  onSelect(f.key);
+                  setOpen(false);
+                }}
+                className={`flex items-center justify-between gap-2 rounded px-2.5 py-1.5 text-left text-[12px] transition ${
+                  isActive
+                    ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white'
+                    : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  {f.glyph === 'tv' ? <TvGlyph /> : <KioskGlyph />}
+                  <span>
+                    {f.label}
+                    <span className="ml-1 font-mono text-[10.5px] text-zinc-400">
+                      {f.width}×{f.height}
+                    </span>
+                  </span>
+                </span>
+                {!f.available ? (
+                  <span className="rounded bg-zinc-200 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                    Soon
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function KioskGlyph() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="4.5" y="1.5" width="7" height="13" rx="1" />
+      <line x1="7" y1="13" x2="9" y2="13" />
+    </svg>
   );
 }
 

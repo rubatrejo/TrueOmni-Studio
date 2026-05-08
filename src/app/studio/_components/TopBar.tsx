@@ -7,7 +7,6 @@ import { useRef } from 'react';
 import { downloadConfigExport, importConfig } from '../_lib/api-client';
 
 import { FaviconBadge } from './FaviconBadge';
-import { ProductDropdown } from './ProductDropdown';
 import { StudioBrand } from './StudioBrand';
 import { ThemeToggle } from './ThemeToggle';
 import { useToast } from './Toast';
@@ -47,16 +46,15 @@ export function TopBar({
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-5 dark:border-zinc-900 dark:bg-zinc-950">
       <div className="flex items-center gap-4">
         <StudioBrand />
-        <ProductDropdown />
         <span className="block h-5 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden="true" />
         <nav className="flex items-center gap-1.5 text-[13px] text-zinc-500">
-          {/* "Kiosks >" prefix redundant con el ProductDropdown — solo se muestra
-              en xl+ donde sobra ancho. <xl muestra solo el kiosk activo. */}
+          {/* Breadcrumb dinámico: "Clients > {client} > kiosk" en xl+, solo el
+              cliente en pantallas más estrechas. */}
           <Link
             href="/studio"
             className="hidden transition hover:text-zinc-800 xl:inline dark:hover:text-zinc-300"
           >
-            Kiosks
+            Clients
           </Link>
           <ChevronRight
             className="hidden h-3.5 w-3.5 text-zinc-400 xl:block dark:text-zinc-700"

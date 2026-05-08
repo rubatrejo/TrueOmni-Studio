@@ -1,7 +1,12 @@
-import { ComingSoon } from '../_components/ComingSoon';
-import { STUDIO_PRODUCTS } from '../_lib/products';
+import { redirect } from 'next/navigation';
 
-export default function VideoWallsPage() {
-  const product = STUDIO_PRODUCTS.find((p) => p.id === 'video-walls')!;
-  return <ComingSoon product={product} />;
+export const dynamic = 'force-dynamic';
+
+/**
+ * Refactor cliente-primero: Video Walls ahora vive bajo cada cliente en
+ * `/studio/[slug]/video-walls`. La URL antigua redirige al dashboard de
+ * clientes.
+ */
+export default function VideoWallsRootRedirect() {
+  redirect('/studio');
 }

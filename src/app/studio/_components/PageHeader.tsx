@@ -5,27 +5,26 @@ import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { useEffect, useRef, useState } from 'react';
 
-import { ProductDropdown } from './ProductDropdown';
 import { StudioBrand } from './StudioBrand';
 import { ThemeToggle } from './ThemeToggle';
 
 /**
- * Header reusado por las páginas content del Studio (home, docs,
- * coming-soon). DRY del patrón antes inlineado en 3 archivos. Soporta:
+ * Header reusado por las páginas content del Studio (home, docs).
+ * DRY del patrón antes inlineado en varios archivos. Soporta:
  *
  * - `docsActive`: marca el link "Documentation" como activo (fondo azul).
- * - `showProductDropdown`: muestra el dropdown de productos junto al
- *   wordmark (true en home + coming-soon, false en docs).
  *
- * Responsive:
- * - En mobile (`<sm`), Documentation se reduce a icono BookOpen sin
- *   texto, y la user pill esconde el email completo dejando solo el
- *   avatar circle. Esto evita que el header se desborde en viewports
- *   pequeños (<400px) sin sacrificar la identidad de la marca.
+ * El antiguo `ProductDropdown` se eliminó cuando el Studio pasó al modelo
+ * cliente-primero (la jerarquía vive en la URL `/studio/[client]/[product]`).
+ *
+ * Responsive: en mobile (`<sm`) Documentation se reduce a icono BookOpen sin
+ * texto, y la user pill esconde el email completo dejando solo el avatar.
  */
 export function StudioPageHeader({
   docsActive = false,
-  showProductDropdown = true,
+  // Mantenido para compat con callers que pasaban `showProductDropdown={false}`,
+  // ya no afecta render. Eliminar en una limpieza futura.
+  showProductDropdown: _showProductDropdown = true,
 }: {
   docsActive?: boolean;
   showProductDropdown?: boolean;
@@ -40,7 +39,6 @@ export function StudioPageHeader({
     <header className="mb-16 flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-3 sm:gap-4">
         <StudioBrand />
-        {showProductDropdown && <ProductDropdown />}
       </div>
       <div className="flex items-center gap-2 sm:gap-3">
         <Link href="/studio/docs" className={docsClass} aria-label="Documentation">

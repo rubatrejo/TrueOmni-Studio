@@ -1,6 +1,4 @@
-import { notFound, redirect } from 'next/navigation';
-
-import { listSignageDisplays } from '@/lib/signage/config';
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,17 +7,13 @@ interface PageProps {
 }
 
 /**
- * `/studio/digital-displays/[slug]` — Compat redirect al primer display.
- *
- * El theme editor anterior se ha consolidado dentro del display editor:
- * branding, header, events, social, news, i18n y settings se editan ahora
- * por display (con los datos del client subyacente compartidos entre
- * displays del mismo cliente). Las URLs viejas redirigen al primer display
- * disponible para no romper bookmarks.
+ * Redirect compat: la URL antigua `/studio/digital-displays/[slug]` redirigía
+ * al primer display. Tras el refactor de cliente unificado, esa funcionalidad
+ * vive en `/studio/[slug]/digital-displays`. Aquí solo redirigimos a la vista
+ * del cliente para evitar romper bookmarks; la lista scoped por cliente
+ * aterriza en Fase 6.
  */
 export default async function ThemeRedirectPage({ params }: PageProps) {
   const { slug } = await params;
-  const displays = await listSignageDisplays(slug);
-  if (displays.length === 0) notFound();
-  redirect(`/studio/digital-displays/${slug}/displays/${displays[0].slug}`);
+  redirect(`/studio/${slug}`);
 }

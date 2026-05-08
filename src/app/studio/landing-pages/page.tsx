@@ -1,7 +1,11 @@
-import { ComingSoon } from '../_components/ComingSoon';
-import { STUDIO_PRODUCTS } from '../_lib/products';
+import { redirect } from 'next/navigation';
 
-export default function LandingPagesPage() {
-  const product = STUDIO_PRODUCTS.find((p) => p.id === 'landing-pages')!;
-  return <ComingSoon product={product} />;
+export const dynamic = 'force-dynamic';
+
+/**
+ * Refactor cliente-primero: las top-level coming-soon pages se eliminaron.
+ * Landing Pages ya no aparece en la lista de productos del Studio.
+ */
+export default function LandingPagesRedirect() {
+  redirect('/studio');
 }

@@ -3,7 +3,6 @@
 import { ChevronRight, Eye, Send } from 'lucide-react';
 import Link from 'next/link';
 
-import { ProductDropdown } from '../../../_components/ProductDropdown';
 import { StudioBrand } from '../../../_components/StudioBrand';
 import { ThemeToggle } from '../../../_components/ThemeToggle';
 
@@ -20,6 +19,9 @@ import { ThemeToggle } from '../../../_components/ThemeToggle';
  */
 export interface SignageTopBarProps {
   slug: string;
+  /** Slug del cliente (sin el display). Se usa para el breadcrumb y para
+   *  enlazar de regreso a la Vista de Cliente. */
+  clientSlug: string;
   nombre: string;
   saveState: 'idle' | 'saving' | 'saved' | 'error';
   isDirty: boolean;
@@ -29,6 +31,7 @@ export interface SignageTopBarProps {
 
 export function SignageTopBar({
   slug,
+  clientSlug,
   nombre,
   saveState,
   isDirty,
@@ -39,14 +42,23 @@ export function SignageTopBar({
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-5 dark:border-zinc-900 dark:bg-zinc-950">
       <div className="flex items-center gap-4">
         <StudioBrand />
-        <ProductDropdown />
         <span
           className="block h-5 w-px bg-zinc-200 dark:bg-zinc-800"
           aria-hidden="true"
         />
         <nav className="flex items-center gap-1.5 text-[13px] text-zinc-500">
           <Link
-            href="/studio/digital-displays"
+            href="/studio"
+            className="hidden transition hover:text-zinc-800 xl:inline dark:hover:text-zinc-300"
+          >
+            Clients
+          </Link>
+          <ChevronRight
+            className="hidden h-3.5 w-3.5 text-zinc-400 xl:block dark:text-zinc-700"
+            aria-hidden="true"
+          />
+          <Link
+            href={`/studio/${clientSlug}`}
             className="hidden transition hover:text-zinc-800 xl:inline dark:hover:text-zinc-300"
           >
             Digital Displays

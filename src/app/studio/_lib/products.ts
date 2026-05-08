@@ -1,135 +1,98 @@
-import {
-  LayoutGrid,
-  LayoutTemplate,
-  Monitor,
-  Package,
-  Presentation,
-  Tv,
-} from 'lucide-react';
+import { LayoutGrid, Monitor, Smartphone, Tablet, Tv } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 /**
- * Catálogo de productos del Studio. Renderizado por el `<ProductDropdown>`
- * al lado del logo "TrueOmni Studio" en el header. Por ahora solo `kiosks`
- * es funcional; las demás categorías muestran "Coming soon".
+ * Catálogo de productos del Studio. Cada cliente puede activar uno o más
+ * productos desde su Vista de Cliente (`/studio/[slug]`); el branding se
+ * comparte vía la layer de sync en `src/lib/studio/client-branding-sync.ts`.
+ *
+ * Refactor 2026-05-08: el `<ProductDropdown>` desapareció; los productos
+ * ahora son cards en la vista del cliente. La jerarquía vive en la URL:
+ *   `/studio/[client]/kiosk`
+ *   `/studio/[client]/digital-displays`
+ *   `/studio/[client]/mobile-pwa`     (coming soon)
+ *   `/studio/[client]/video-walls`    (coming soon)
+ *   `/studio/[client]/tablets`        (coming soon)
  */
 
 export type ProductStatus = 'live' | 'soon';
 
 export interface StudioProduct {
-  /** ID estable usado por el active state. */
-  id: string;
-  /** Texto visible en el botón del dropdown y en el hero de la page. */
+  /** ID estable usado por manifest, URLs y active state. */
+  id: 'kiosks' | 'digital-displays' | 'mobile-pwa' | 'video-walls' | 'tablets';
+  /** Texto visible en cards y breadcrumbs. */
   label: string;
-  /** Ruta absoluta. `usePathname()` la matchea por prefijo. */
-  href: string;
-  /** Icono lucide a 14px en el dropdown y a 44px en la coming-soon page. */
+  /** Sub-segmento bajo `/studio/[slug]/`. */
+  segment: string;
+  /** Icono lucide. */
   icon: LucideIcon;
-  /** `live` = página real implementada. `soon` = placeholder. */
+  /** `live` = página real implementada. `soon` = stub Coming Soon. */
   status: ProductStatus;
   /** Subtítulo del coming-soon (solo se usa cuando status === 'soon'). */
   comingSoonCopy?: string;
-  /** 3 bullets describiendo el value prop específico (audit F-45 — los
-   *  coming-soon eran demasiado genéricos). Solo aplica si status='soon'. */
-  comingSoonFeatures?: readonly string[];
 }
 
 export const STUDIO_PRODUCTS: readonly StudioProduct[] = [
   {
     id: 'kiosks',
     label: 'Kiosks',
-    href: '/studio',
+    segment: 'kiosk',
     icon: Monitor,
     status: 'live',
   },
   {
-    id: 'champion-decks',
-    label: 'Champion Decks',
-    href: '/studio/champion-decks',
-    icon: Presentation,
-    status: 'soon',
-    comingSoonCopy:
-      'Build interactive sales decks for retail champions — drag-and-drop slides, live data widgets, branded exports.',
-    comingSoonFeatures: [
-      'Slides with live KPI widgets that pull from your actual sales data',
-      'Brand tokens shared with your kiosks — change colors once, update everywhere',
-      'Export to PDF, Keynote or share a private URL with one click',
-    ],
-  },
-  {
-    id: 'hardware-wraps',
-    label: 'Hardware Wraps',
-    href: '/studio/hardware-wraps',
-    icon: Package,
-    status: 'soon',
-    comingSoonCopy:
-      'Design vinyl wraps for kiosk enclosures, totems and walls — preview them on real device renders before printing.',
-    comingSoonFeatures: [
-      'Real-device 3D mockups for the most common kiosk enclosures (Pyramid, Slab, Pedestal)',
-      'Drag artwork onto each face with bleed marks, safe areas and cut paths baked in',
-      'Print-ready PDF/AI export with ICC profile and dimensions per panel',
-    ],
-  },
-  {
-    id: 'landing-pages',
-    label: 'Landing Pages',
-    href: '/studio/landing-pages',
-    icon: LayoutTemplate,
-    status: 'soon',
-    comingSoonCopy:
-      'Generate marketing landing pages from the same brand tokens as your kiosks. Publish to a TrueOmni subdomain in one click.',
-    comingSoonFeatures: [
-      'Section-based builder (Hero / Features / CTA) that inherits brand tokens automatically',
-      'Mobile-first responsive — every section ships with a tested mobile/tablet/desktop variant',
-      'Publish to {your-slug}.kiosks.trueomni.com with HTTPS and analytics out of the box',
-    ],
-  },
-  {
     id: 'digital-displays',
     label: 'Digital Displays',
-    href: '/studio/digital-displays',
+    segment: 'digital-displays',
     icon: Tv,
     status: 'live',
   },
   {
+    id: 'mobile-pwa',
+    label: 'Mobile PWA',
+    segment: 'mobile-pwa',
+    icon: Smartphone,
+    status: 'soon',
+    comingSoonCopy:
+      'Editor del Progressive Web App heredando branding del cliente. Disponible en próximas versiones.',
+  },
+  {
     id: 'video-walls',
     label: 'Video Walls',
-    href: '/studio/video-walls',
+    segment: 'video-walls',
     icon: LayoutGrid,
     status: 'soon',
     comingSoonCopy:
       'Compose synchronized content across a grid of displays. Layout-aware editing so a hero asset can span multiple screens or stay per-tile.',
-    comingSoonFeatures: [
-      'Grid composer (2×2, 3×3, custom) with snapping and bezel-aware safe areas',
-      'Per-tile or spanning content with frame-accurate sync between players',
-      'Stress-test renderer to preview how a video wall behaves before installing it on-site',
-    ],
+  },
+  {
+    id: 'tablets',
+    label: 'Tablets',
+    segment: 'tablets',
+    icon: Tablet,
+    status: 'soon',
+    comingSoonCopy:
+      'Editor de Tablets para experiencias touch heredando branding del cliente. Disponible en próximas versiones.',
   },
 ] as const;
 
 /**
- * Devuelve el producto activo según el pathname. Match por prefijo: la
- * home `/studio` se queda en `kiosks` aunque entres a `/studio/{slug}`.
- *
- * Casos:
- *  - `/studio`                       → kiosks
- *  - `/studio/{slug}`                → kiosks (sigue siendo el editor)
- *  - `/studio/champion-decks`        → champion-decks
- *  - `/studio/champion-decks/foo`    → champion-decks
- *  - `/studio/docs`                  → kiosks (docs es feature transversal)
+ * Devuelve el producto activo según el pathname.
+ * Match por el segmento que sigue al `[slug]`:
+ *   /studio/[slug]                       → null (Vista de Cliente)
+ *   /studio/[slug]/kiosk                 → kiosks
+ *   /studio/[slug]/digital-displays/...  → digital-displays
+ *   /studio/[slug]/mobile-pwa            → mobile-pwa
+ *   /studio                              → null (Clients dashboard)
+ *   /studio/docs                         → null
  */
-export function getActiveProduct(pathname: string): StudioProduct {
-  const reserved = new Set(['docs']);
+export function getActiveProduct(pathname: string): StudioProduct | null {
   const trimmed = pathname.replace(/\/+$/, '');
   const segs = trimmed.split('/').filter(Boolean);
-
-  if (segs.length >= 2 && segs[0] === 'studio') {
-    const second = segs[1]!;
-    if (!reserved.has(second)) {
-      const direct = STUDIO_PRODUCTS.find((p) => p.id === second);
-      if (direct) return direct;
-    }
+  // `/studio/[slug]/[product]/...` → segs = ['studio', slug, product, ...]
+  if (segs.length >= 3 && segs[0] === 'studio') {
+    const product = segs[2]!;
+    return STUDIO_PRODUCTS.find((p) => p.segment === product) ?? null;
   }
-  // `/studio`, `/studio/{slug}`, `/studio/docs` → Kiosks por default.
-  return STUDIO_PRODUCTS[0]!;
+  return null;
 }

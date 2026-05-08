@@ -1,7 +1,11 @@
-import { ComingSoon } from '../_components/ComingSoon';
-import { STUDIO_PRODUCTS } from '../_lib/products';
+import { redirect } from 'next/navigation';
 
-export default function HardwareWrapsPage() {
-  const product = STUDIO_PRODUCTS.find((p) => p.id === 'hardware-wraps')!;
-  return <ComingSoon product={product} />;
+export const dynamic = 'force-dynamic';
+
+/**
+ * Refactor cliente-primero: las top-level coming-soon pages se eliminaron.
+ * Hardware Wraps ya no aparece en la lista de productos del Studio.
+ */
+export default function HardwareWrapsRedirect() {
+  redirect('/studio');
 }

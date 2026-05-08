@@ -270,6 +270,7 @@ export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps
       <div className="studio-shell flex h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
         <SignageTopBar
           slug={`${client.slug} / ${draft.slug}`}
+          clientSlug={client.slug}
           nombre={`${client.name} · ${draft.name}`}
           saveState={saveState}
           isDirty={dirty}

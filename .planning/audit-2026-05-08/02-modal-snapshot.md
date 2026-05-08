@@ -1,0 +1,172 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - main [ref=e4]:
+      - generic [ref=e5]:
+        - link "TrueOmni Studio" [ref=e7] [cursor=pointer]:
+          - /url: /studio
+          - img "TrueOmni" [ref=e8]
+          - generic [ref=e24]: Studio
+        - generic [ref=e25]:
+          - link "Documentation" [ref=e26] [cursor=pointer]:
+            - /url: /studio/docs
+            - img [ref=e27]
+            - generic [ref=e29]: Documentation
+          - button "Switch to dark mode" [ref=e74] [cursor=pointer]:
+            - img [ref=e76]
+          - button "R ruben@trueomni.com" [ref=e35] [cursor=pointer]:
+            - generic [ref=e36]: R
+            - generic [ref=e37]: ruben@trueomni.com
+            - img [ref=e38]
+      - generic [ref=e40]:
+        - paragraph [ref=e41]: White-label studio
+        - heading "One client. Every product." [level=1] [ref=e42]
+        - paragraph [ref=e43]: Upload the branding once and feed it to every product the client uses — kiosks, digital displays, and the upcoming PWA, video walls and tablets.
+      - generic [ref=e44]:
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - heading "Your clients" [level=2] [ref=e47]
+            - paragraph [ref=e48]: 4 clients
+          - button "+ New client" [ref=e49] [cursor=pointer]:
+            - generic [ref=e50]: +
+            - text: New client
+        - generic [ref=e51]:
+          - link "TrueOmni default Arizona Kiosks Displays Edited 1h ago ruben" [ref=e83] [cursor=pointer]:
+            - /url: /studio/default
+            - generic [ref=e84]:
+              - img "TrueOmni" [ref=e88]
+              - generic [ref=e103]: default
+            - generic [ref=e104]:
+              - heading "Arizona" [level=3] [ref=e105]
+              - generic [ref=e106]:
+                - generic [ref=e107]:
+                  - img [ref=e108]
+                  - text: Kiosks
+                - generic [ref=e110]:
+                  - img [ref=e111]
+                  - text: Displays
+              - generic [ref=e114]:
+                - generic [ref=e115]:
+                  - text: Edited
+                  - time [ref=e116]: 1h ago
+                - generic [ref=e117]: ruben
+          - link "demo-cliente-a demo-cliente-a demo-cliente-a Kiosks Edited 1h ago ruben" [ref=e119] [cursor=pointer]:
+            - /url: /studio/demo-cliente-a
+            - generic [ref=e120]:
+              - generic [ref=e124]: demo-cliente-a
+              - generic [ref=e125]: demo-cliente-a
+            - generic [ref=e126]:
+              - heading "demo-cliente-a" [level=3] [ref=e127]
+              - generic [ref=e129]:
+                - img [ref=e130]
+                - text: Kiosks
+              - generic [ref=e132]:
+                - generic [ref=e133]:
+                  - text: Edited
+                  - time [ref=e134]: 1h ago
+                - generic [ref=e135]: ruben
+          - link "E2E Final logo e2e-final E2E Final Kiosks Displays Edited 23m ago ruben" [ref=e185] [cursor=pointer]:
+            - /url: /studio/e2e-final
+            - generic [ref=e138]:
+              - img "E2E Final logo" [ref=e142]
+              - generic [ref=e143]: e2e-final
+            - generic [ref=e144]:
+              - heading "E2E Final" [level=3] [ref=e145]
+              - generic [ref=e146]:
+                - generic [ref=e147]:
+                  - img [ref=e148]
+                  - text: Kiosks
+                - generic [ref=e150]:
+                  - img [ref=e151]
+                  - text: Displays
+              - generic [ref=e154]:
+                - generic [ref=e155]:
+                  - text: Edited
+                  - time [ref=e156]: 23m ago
+                - generic [ref=e157]: ruben
+          - link "Test Fase 4 test-fase4 Test Fase 4 Kiosks Displays Edited 1h ago ruben" [ref=e159] [cursor=pointer]:
+            - /url: /studio/test-fase4
+            - generic [ref=e160]:
+              - generic [ref=e164]: Test Fase 4
+              - generic [ref=e165]: test-fase4
+            - generic [ref=e166]:
+              - heading "Test Fase 4" [level=3] [ref=e167]
+              - generic [ref=e168]:
+                - generic [ref=e169]:
+                  - img [ref=e170]
+                  - text: Kiosks
+                - generic [ref=e172]:
+                  - img [ref=e173]
+                  - text: Displays
+              - generic [ref=e176]:
+                - generic [ref=e177]:
+                  - text: Edited
+                  - time [ref=e178]: 1h ago
+                - generic [ref=e179]: ruben
+          - button "+ New client" [ref=e180] [cursor=pointer]:
+            - generic [ref=e181]: +
+            - generic [ref=e182]: New client
+      - generic [ref=e67]:
+        - generic [ref=e68]: © 2026 TrueOmni · Kiosk Studio v0.1
+        - generic [ref=e69]:
+          - button "Replay tour" [ref=e70] [cursor=pointer]
+          - 'link "KV: ok (cloud, 479ms) Filesystem: ok (3ms) Checked 2:48:48 PM" [ref=e246] [cursor=pointer]':
+            - /url: /studio/diagnostics
+            - text: All systems operational
+          - generic [ref=e73]: Local · main
+      - dialog "New client" [ref=e187]:
+        - generic [ref=e188]:
+          - heading "New client" [level=2] [ref=e189]
+          - button "Close" [ref=e190] [cursor=pointer]:
+            - img [ref=e191]
+        - generic [ref=e194]:
+          - generic [ref=e195]:
+            - generic [ref=e196]: Name
+            - textbox "Name" [active] [ref=e197]:
+              - /placeholder: e.g. Phoenix Convention Center
+            - paragraph [ref=e198]: Display name shown on the kiosk and in the studio list.
+          - generic [ref=e199]:
+            - generic [ref=e200]: Slug
+            - textbox "Slug" [ref=e201]:
+              - /placeholder: phoenix-convention-center
+            - paragraph [ref=e202]: "Used in URLs and in the file system: clients/<slug>/. Auto-generated from name."
+          - generic [ref=e203]:
+            - generic [ref=e204]:
+              - generic [ref=e205]: Website
+              - textbox "Website" [ref=e206]:
+                - /placeholder: https://visitcentralflorida.org
+              - paragraph [ref=e207]: Used in footer + share modals.
+            - generic [ref=e208]:
+              - generic [ref=e209]: Location
+              - textbox "Location" [ref=e210]:
+                - /placeholder: Davenport, FL
+              - paragraph [ref=e211]: City + state. Used as default address for mock listings and to center the map module.
+          - generic [ref=e212]:
+            - generic [ref=e213]: Orientation
+            - generic [ref=e214]:
+              - button "Portrait 1080 × 1920" [pressed] [ref=e215] [cursor=pointer]:
+                - img [ref=e217]
+                - generic [ref=e219]:
+                  - generic [ref=e220]: Portrait
+                  - generic [ref=e221]: 1080 × 1920
+              - button "Landscape 1920 × 1080" [ref=e222] [cursor=pointer]:
+                - img [ref=e224]
+                - generic [ref=e226]:
+                  - generic [ref=e227]: Landscape
+                  - generic [ref=e228]: 1920 × 1080
+              - button "Mobile PWA 390 × 844" [ref=e229] [cursor=pointer]:
+                - img [ref=e231]
+                - generic [ref=e233]:
+                  - generic [ref=e234]: Mobile PWA
+                  - generic [ref=e235]: 390 × 844
+            - paragraph [ref=e236]: This is the primary view that opens in the editor. All three formats (Portrait, Landscape, Mobile PWA) are generated automatically — you can switch between them inside the editor and export any of them at publish time.
+          - generic [ref=e237]:
+            - checkbox "Start empty (no demo content) Skip the listings, events, passes, deals, trails, social-wall posts and Trip Planner local listings from the TrueOmni template. Branding and module structure are still inherited." [ref=e238]
+            - generic [ref=e239] [cursor=pointer]:
+              - generic [ref=e240]: Start empty (no demo content)
+              - generic [ref=e241]: Skip the listings, events, passes, deals, trails, social-wall posts and Trip Planner local listings from the TrueOmni template. Branding and module structure are still inherited.
+          - paragraph [ref=e242]: "Cloning the TrueOmni Default kiosk: brand palette, modules, and full mock content (listings, events, passes, deals, trails). You can change anything in the editor afterwards."
+          - generic [ref=e243]:
+            - button "Cancel" [ref=e244] [cursor=pointer]
+            - button "Create client" [disabled] [ref=e245]
+    - region "Notifications"
+  - alert [ref=e184]

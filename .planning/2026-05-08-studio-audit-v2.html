@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TrueOmni Studio · Audit panorámico v2 · 2026-05-08</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'media',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+          },
+          colors: {
+            sev: {
+              bug: '#ef4444',       // red — Bugs
+              gap: '#f97316',       // orange — Gaps
+              ux: '#eab308',        // yellow — UX
+              a11y: '#a855f7',      // purple — Accesibilidad
+              perf: '#10b981',      // emerald — Performance
+              auto: '#3b82f6',      // blue — Automatización
+              infra: '#71717a',     // zinc — Infra externa
+            },
+            prio: {
+              p0: '#dc2626',
+              p1: '#f59e0b',
+              p2: '#0ea5e9',
+              p3: '#71717a',
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; font-feature-settings: "ss01", "cv11"; }
+    code, pre, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-thumb { background: rgba(127,127,127,.25); border-radius: 8px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(127,127,127,.5); }
+    h2[id], h3[id], section[id] { scroll-margin-top: 80px; }
+    details > summary { cursor: pointer; list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    details[open] > summary .chev { transform: rotate(90deg); }
+    .chev { transition: transform .15s ease; }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; color: black !important; }
+      .card { break-inside: avoid; box-shadow: none !important; border: 1px solid #ddd !important; }
+      a { color: inherit !important; text-decoration: none !important; }
+      details > summary { pointer-events: none; }
+      details:not([open]) { display: none; }
+    }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 999px; vertical-align: middle; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1.4; }
+    .filter-btn[data-on="false"] { opacity: .35; }
+    img.shot { max-width: 100%; height: auto; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.05); }
+    .dark img.shot { box-shadow: 0 1px 3px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.06); }
+  </style>
+</head>
+<body class="bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
+
+<!-- ===== TOP NAV ===== -->
+<nav class="no-print sticky top-0 z-50 border-b border-zinc-200 bg-white/85 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/85">
+  <div class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-3">
+    <a href="#top" class="flex items-center gap-2.5">
+      <span class="grid h-7 w-7 place-items-center rounded-md bg-zinc-900 text-white dark:bg-white dark:text-zinc-900">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M9 9h6v6H9z"/></svg>
+      </span>
+      <span class="font-semibold tracking-tight">Studio Audit v2</span>
+      <span class="hidden text-[11.5px] text-zinc-500 sm:inline">2026-05-08</span>
+    </a>
+    <div class="hidden items-center gap-4 text-[12.5px] text-zinc-600 dark:text-zinc-400 lg:flex">
+      <a href="#estado" class="hover:text-zinc-900 dark:hover:text-zinc-100">Estado</a>
+      <a href="#hallazgos" class="hover:text-zinc-900 dark:hover:text-zinc-100">Hallazgos (47)</a>
+      <a href="#bugs" class="hover:text-zinc-900 dark:hover:text-zinc-100">🔴 Bugs</a>
+      <a href="#gaps" class="hover:text-zinc-900 dark:hover:text-zinc-100">🟠 Gaps</a>
+      <a href="#ux" class="hover:text-zinc-900 dark:hover:text-zinc-100">🟡 UX</a>
+      <a href="#a11y" class="hover:text-zinc-900 dark:hover:text-zinc-100">🟣 a11y</a>
+      <a href="#perf" class="hover:text-zinc-900 dark:hover:text-zinc-100">🟢 Perf</a>
+      <a href="#auto" class="hover:text-zinc-900 dark:hover:text-zinc-100">🔵 Auto</a>
+      <a href="#infra" class="hover:text-zinc-900 dark:hover:text-zinc-100">⚪ Infra</a>
+      <a href="#walk" class="hover:text-zinc-900 dark:hover:text-zinc-100">Walk visual</a>
+      <a href="#roadmap" class="hover:text-zinc-900 dark:hover:text-zinc-100">Roadmap</a>
+    </div>
+  </div>
+</nav>
+
+<main id="top" class="mx-auto max-w-7xl px-6 pb-32">
+
+<!-- ===== HERO ===== -->
+<header class="pt-12 pb-8">
+  <p class="text-[11.5px] font-semibold uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Audit panorámico · v2 · pre-deploy</p>
+  <h1 class="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">TrueOmni Studio — auditoría post-refactor cliente-primero, pre-deploy a Vercel.</h1>
+  <p class="mt-4 max-w-3xl text-[15px] leading-relaxed text-zinc-600 dark:text-zinc-300">
+    Recorrido completo del Studio antes de pushear los 10 commits del refactor cliente-primero (fases 1-6 del 2026-05-08 + cierre de backlog de hoy: drift recovery, Activate cableado, sync hook al POST legacy, eliminación de diag endpoint, normalización de URL). 48 screenshots Playwright + lectura focalizada de 6 archivos densos. <strong>47 hallazgos</strong> agrupados por categoría: 6 bugs · 8 gaps · 9 friction UX · 8 a11y · 6 performance · 6 automatización · 4 infra externa.
+  </p>
+
+  <!-- Stats grid -->
+  <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+    <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div class="text-[11.5px] font-medium uppercase tracking-wide text-zinc-500">Rutas auditadas</div>
+      <div class="mt-1 text-3xl font-bold tabular-nums">12</div>
+      <div class="mt-1 text-[11.5px] text-zinc-500">+22 tabs kiosk · +10 tabs signage</div>
+    </div>
+    <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div class="text-[11.5px] font-medium uppercase tracking-wide text-zinc-500">Hallazgos</div>
+      <div class="mt-1 text-3xl font-bold tabular-nums">47</div>
+      <div class="mt-1 text-[11.5px] text-zinc-500">P0:1 · P1:9 · P2:20 · P3:17</div>
+    </div>
+    <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div class="text-[11.5px] font-medium uppercase tracking-wide text-zinc-500">Screenshots</div>
+      <div class="mt-1 text-3xl font-bold tabular-nums">48</div>
+      <div class="mt-1 text-[11.5px] text-zinc-500">Light + dark · viewport + full</div>
+    </div>
+    <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div class="text-[11.5px] font-medium uppercase tracking-wide text-zinc-500">Líneas leídas</div>
+      <div class="mt-1 text-3xl font-bold tabular-nums">2,915</div>
+      <div class="mt-1 text-[11.5px] text-zinc-500">Shell · bridge · sync · auto-migrate</div>
+    </div>
+    <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div class="text-[11.5px] font-medium uppercase tracking-wide text-zinc-500">Ship-blockers</div>
+      <div class="mt-1 text-3xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">0</div>
+      <div class="mt-1 text-[11.5px] text-zinc-500">Recomendado push hoy</div>
+    </div>
+    <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div class="text-[11.5px] font-medium uppercase tracking-wide text-zinc-500">Backlog cerrado hoy</div>
+      <div class="mt-1 text-3xl font-bold tabular-nums">5</div>
+      <div class="mt-1 text-[11.5px] text-zinc-500">Drift · Activate · Modal · sync · diag</div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== ESTADO ACTUAL ===== -->
+<section id="estado" class="mt-12">
+  <h2 class="text-2xl font-bold tracking-tight">Estado por flujo</h2>
+  <p class="mt-2 max-w-3xl text-[14px] leading-relaxed text-zinc-600 dark:text-zinc-400">
+    Validación E2E de los flujos críticos del refactor cliente-primero. Cada card refleja lo verificado con Playwright durante esta sesión.
+  </p>
+
+  <div class="mt-6 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+    <div class="card rounded-xl border border-emerald-200/70 bg-emerald-50/40 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+      <div class="flex items-center gap-2"><span class="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">✅ OK</span><span class="text-[12.5px] font-semibold">Dashboard de clientes</span></div>
+      <p class="mt-2 text-[12.5px] text-zinc-700 dark:text-zinc-300">4 clientes listados con product badges. Ordenamiento default-first + alfabético. KV/FS health badge funcional.</p>
+    </div>
+    <div class="card rounded-xl border border-emerald-200/70 bg-emerald-50/40 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+      <div class="flex items-center gap-2"><span class="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">✅ OK</span><span class="text-[12.5px] font-semibold">Crear cliente nuevo</span></div>
+      <p class="mt-2 text-[12.5px] text-zinc-700 dark:text-zinc-300">Modal "New client" → POST /api/studio/configs legacy → sync hook crea manifest + unified branding inmediato → redirect a Vista de Cliente. Geocoding via Nominatim funcional.</p>
+    </div>
+    <div class="card rounded-xl border border-emerald-200/70 bg-emerald-50/40 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+      <div class="flex items-center gap-2"><span class="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">✅ OK</span><span class="text-[12.5px] font-semibold">Vista de Cliente unificada</span></div>
+      <p class="mt-2 text-[12.5px] text-zinc-700 dark:text-zinc-300">BrandingForm con tabs General/Brand colors/Logos/Fonts/Media. Autosave 1s. Products section con 5 cards (kiosks/DD live + 3 coming soon).</p>
+    </div>
+    <div class="card rounded-xl border border-emerald-200/70 bg-emerald-50/40 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+      <div class="flex items-center gap-2"><span class="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">✅ OK</span><span class="text-[12.5px] font-semibold">Activate Digital Displays</span></div>
+      <p class="mt-2 text-[12.5px] text-zinc-700 dark:text-zinc-300">ProductCard inactivo → POST /products/digital-displays/activate → clone signage default + branding unified → redirect a editor. Manifest persiste, badge "2 ACTIVE" en header.</p>
+    </div>
+    <div class="card rounded-xl border border-emerald-200/70 bg-emerald-50/40 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+      <div class="flex items-center gap-2"><span class="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">✅ OK</span><span class="text-[12.5px] font-semibold">Drift recovery</span></div>
+      <p class="mt-2 text-[12.5px] text-zinc-700 dark:text-zinc-300">test-fase4 (manifest sin cfg) ahora carga editor en lugar de 404. Materializa cfg desde template default + unified branding aplicado.</p>
+    </div>
+    <div class="card rounded-xl border border-amber-200/70 bg-amber-50/40 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+      <div class="flex items-center gap-2"><span class="badge bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">🟡 Hallazgos</span><span class="text-[12.5px] font-semibold">Editor kiosk (22 tabs)</span></div>
+      <p class="mt-2 text-[12.5px] text-zinc-700 dark:text-zinc-300">Hydration mismatch en cada carga (S-01). Photo Booth tab dispara console errors (S-05). Resto funcional.</p>
+    </div>
+    <div class="card rounded-xl border border-amber-200/70 bg-amber-50/40 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+      <div class="flex items-center gap-2"><span class="badge bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">🟡 Hallazgos</span><span class="text-[12.5px] font-semibold">Editor signage (10 tabs)</span></div>
+      <p class="mt-2 text-[12.5px] text-zinc-700 dark:text-zinc-300">Live preview funcional. postMessage con target '*' (S-02). Sync con Languages tab dispara console warnings benignos.</p>
+    </div>
+    <div class="card rounded-xl border border-amber-200/70 bg-amber-50/40 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+      <div class="flex items-center gap-2"><span class="badge bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">🟡 Hallazgos</span><span class="text-[12.5px] font-semibold">Stubs Coming Soon</span></div>
+      <p class="mt-2 text-[12.5px] text-zinc-700 dark:text-zinc-300">/mobile-pwa, /video-walls, /tablets renderizan placeholders sin contenido informativo. Oportunidad UX (S-14).</p>
+    </div>
+    <div class="card rounded-xl border border-emerald-200/70 bg-emerald-50/40 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+      <div class="flex items-center gap-2"><span class="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">✅ OK</span><span class="text-[12.5px] font-semibold">Diagnostics + Docs</span></div>
+      <p class="mt-2 text-[12.5px] text-zinc-700 dark:text-zinc-300">Health checks visibles. Docs renderiza changelog manual. Sin errores.</p>
+    </div>
+    <div class="card rounded-xl border border-emerald-200/70 bg-emerald-50/40 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+      <div class="flex items-center gap-2"><span class="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">✅ OK</span><span class="text-[12.5px] font-semibold">Routing legacy</span></div>
+      <p class="mt-2 text-[12.5px] text-zinc-700 dark:text-zinc-300">/studio/digital-displays, /hardware-wraps, /landing-pages, /champion-decks → redirigen a /studio. Confirmado.</p>
+    </div>
+    <div class="card rounded-xl border border-emerald-200/70 bg-emerald-50/40 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+      <div class="flex items-center gap-2"><span class="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">✅ OK</span><span class="text-[12.5px] font-semibold">Dark mode toggle</span></div>
+      <p class="mt-2 text-[12.5px] text-zinc-700 dark:text-zinc-300">Persiste en localStorage. Aplicado consistentemente al dashboard, vista de cliente, editor kiosk y signage.</p>
+    </div>
+    <div class="card rounded-xl border border-emerald-200/70 bg-emerald-50/40 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+      <div class="flex items-center gap-2"><span class="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">✅ OK</span><span class="text-[12.5px] font-semibold">Quality gates</span></div>
+      <p class="mt-2 text-[12.5px] text-zinc-700 dark:text-zinc-300">pnpm typecheck limpio · pnpm lint 0 errores · 10 commits listos · author email vinculado a Vercel.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== HALLAZGOS — TABLA RESUMEN ===== -->
+<section id="hallazgos" class="mt-14">
+  <h2 class="text-2xl font-bold tracking-tight">Hallazgos · 47 totales</h2>
+  <p class="mt-2 max-w-3xl text-[14px] leading-relaxed text-zinc-600 dark:text-zinc-400">
+    Cada hallazgo tiene ID `S-NN`, categoría y severidad. Click en la fila para expandir contexto + fix propuesto. Cards detalladas más abajo agrupadas por categoría.
+  </p>
+
+  <div class="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <table class="w-full text-left text-[12.5px]">
+      <thead class="border-b border-zinc-200 bg-zinc-50 text-[11.5px] uppercase tracking-wider text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950/40">
+        <tr><th class="px-4 py-2.5">ID</th><th class="px-4 py-2.5">Categoría</th><th class="px-4 py-2.5">Sev.</th><th class="px-4 py-2.5">Título</th><th class="px-4 py-2.5">Área</th></tr>
+      </thead>
+      <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800/60">
+        <!-- Bugs -->
+        <tr><td class="px-4 py-2 font-mono">S-01</td><td class="px-4 py-2"><span class="dot bg-sev-bug"></span> Bug</td><td class="px-4 py-2 font-semibold text-prio-p0">P0</td><td class="px-4 py-2"><a href="#S-01" class="hover:underline">Hydration mismatch en editor kiosk</a></td><td class="px-4 py-2 text-zinc-500">Editor kiosk</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-02</td><td class="px-4 py-2"><span class="dot bg-sev-bug"></span> Bug</td><td class="px-4 py-2 font-semibold text-prio-p1">P1</td><td class="px-4 py-2"><a href="#S-02" class="hover:underline">postMessage con target '*'</a></td><td class="px-4 py-2 text-zinc-500">Bridge preview</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-03</td><td class="px-4 py-2"><span class="dot bg-sev-bug"></span> Bug</td><td class="px-4 py-2 font-semibold text-prio-p1">P1</td><td class="px-4 py-2"><a href="#S-03" class="hover:underline">client:list no se limpia al borrar</a></td><td class="px-4 py-2 text-zinc-500">Backend KV</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-04</td><td class="px-4 py-2"><span class="dot bg-sev-bug"></span> Bug</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-04" class="hover:underline">Console errors silenciosos en bridge</a></td><td class="px-4 py-2 text-zinc-500">Bridge preview</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-05</td><td class="px-4 py-2"><span class="dot bg-sev-bug"></span> Bug</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-05" class="hover:underline">Photo Booth tab errors</a></td><td class="px-4 py-2 text-zinc-500">Editor kiosk</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-06</td><td class="px-4 py-2"><span class="dot bg-sev-bug"></span> Bug</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-06" class="hover:underline">Drift recovery no rellena client:list</a></td><td class="px-4 py-2 text-zinc-500">Editor kiosk</td></tr>
+        <!-- Gaps -->
+        <tr><td class="px-4 py-2 font-mono">S-07</td><td class="px-4 py-2"><span class="dot bg-sev-gap"></span> Gap</td><td class="px-4 py-2 font-semibold text-prio-p1">P1</td><td class="px-4 py-2"><a href="#S-07" class="hover:underline">No hay search en dashboard</a></td><td class="px-4 py-2 text-zinc-500">Dashboard</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-08</td><td class="px-4 py-2"><span class="dot bg-sev-gap"></span> Gap</td><td class="px-4 py-2 font-semibold text-prio-p1">P1</td><td class="px-4 py-2"><a href="#S-08" class="hover:underline">No hay rollback de unified branding</a></td><td class="px-4 py-2 text-zinc-500">Vista cliente</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-09</td><td class="px-4 py-2"><span class="dot bg-sev-gap"></span> Gap</td><td class="px-4 py-2 font-semibold text-prio-p1">P1</td><td class="px-4 py-2"><a href="#S-09" class="hover:underline">Activate falla si default no existe</a></td><td class="px-4 py-2 text-zinc-500">Activate flow</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-10</td><td class="px-4 py-2"><span class="dot bg-sev-gap"></span> Gap</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-10" class="hover:underline">Modal NewClient sin DD checkbox</a></td><td class="px-4 py-2 text-zinc-500">Modal</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-11</td><td class="px-4 py-2"><span class="dot bg-sev-gap"></span> Gap</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-11" class="hover:underline">No hay diff pre-publish unificado</a></td><td class="px-4 py-2 text-zinc-500">Vista cliente</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-12</td><td class="px-4 py-2"><span class="dot bg-sev-gap"></span> Gap</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-12" class="hover:underline">Duplicate solo clona kiosk</a></td><td class="px-4 py-2 text-zinc-500">Dashboard</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-13</td><td class="px-4 py-2"><span class="dot bg-sev-gap"></span> Gap</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-13" class="hover:underline">Sin recently edited / pinning</a></td><td class="px-4 py-2 text-zinc-500">Dashboard</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-14</td><td class="px-4 py-2"><span class="dot bg-sev-gap"></span> Gap</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-14" class="hover:underline">Stubs Coming Soon sin contenido</a></td><td class="px-4 py-2 text-zinc-500">Stubs</td></tr>
+        <!-- UX -->
+        <tr><td class="px-4 py-2 font-mono">S-15</td><td class="px-4 py-2"><span class="dot bg-sev-ux"></span> UX</td><td class="px-4 py-2 font-semibold text-prio-p1">P1</td><td class="px-4 py-2"><a href="#S-15" class="hover:underline">Tres patrones de tabs distintos</a></td><td class="px-4 py-2 text-zinc-500">Componentes</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-16</td><td class="px-4 py-2"><span class="dot bg-sev-ux"></span> UX</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-16" class="hover:underline">Footer "Local · main" hardcoded</a></td><td class="px-4 py-2 text-zinc-500">Dashboard</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-17</td><td class="px-4 py-2"><span class="dot bg-sev-ux"></span> UX</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-17" class="hover:underline">Color picker sin click-outside</a></td><td class="px-4 py-2 text-zinc-500">BrandingForm</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-18</td><td class="px-4 py-2"><span class="dot bg-sev-ux"></span> UX</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-18" class="hover:underline">No valida rangos lat/lon</a></td><td class="px-4 py-2 text-zinc-500">BrandingForm</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-19</td><td class="px-4 py-2"><span class="dot bg-sev-ux"></span> UX</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-19" class="hover:underline">"Coming soon" sin diferenciación</a></td><td class="px-4 py-2 text-zinc-500">Stubs</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-20</td><td class="px-4 py-2"><span class="dot bg-sev-ux"></span> UX</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-20" class="hover:underline">Activate visualmente igual a Open</a></td><td class="px-4 py-2 text-zinc-500">ProductCard</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-21</td><td class="px-4 py-2"><span class="dot bg-sev-ux"></span> UX</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-21" class="hover:underline">Sticky header overlapa first field</a></td><td class="px-4 py-2 text-zinc-500">Editor kiosk</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-22</td><td class="px-4 py-2"><span class="dot bg-sev-ux"></span> UX</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-22" class="hover:underline">Status pill "Idle" confuso</a></td><td class="px-4 py-2 text-zinc-500">Vista cliente</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-23</td><td class="px-4 py-2"><span class="dot bg-sev-ux"></span> UX</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-23" class="hover:underline">Cancel sin confirm en BrandingForm</a></td><td class="px-4 py-2 text-zinc-500">Vista cliente</td></tr>
+        <!-- a11y -->
+        <tr><td class="px-4 py-2 font-mono">S-24</td><td class="px-4 py-2"><span class="dot bg-sev-a11y"></span> a11y</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-24" class="hover:underline">2 botones "+ New client" iguales</a></td><td class="px-4 py-2 text-zinc-500">Dashboard</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-25</td><td class="px-4 py-2"><span class="dot bg-sev-a11y"></span> a11y</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-25" class="hover:underline">Accessible names verbosos</a></td><td class="px-4 py-2 text-zinc-500">Dashboard</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-26</td><td class="px-4 py-2"><span class="dot bg-sev-a11y"></span> a11y</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-26" class="hover:underline">Status badge con métricas en aria</a></td><td class="px-4 py-2 text-zinc-500">Dashboard</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-27</td><td class="px-4 py-2"><span class="dot bg-sev-a11y"></span> a11y</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-27" class="hover:underline">BrandingForm tabs sin role tablist</a></td><td class="px-4 py-2 text-zinc-500">BrandingForm</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-28</td><td class="px-4 py-2"><span class="dot bg-sev-a11y"></span> a11y</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-28" class="hover:underline">Escape inconsistente en modales</a></td><td class="px-4 py-2 text-zinc-500">Modales</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-29</td><td class="px-4 py-2"><span class="dot bg-sev-a11y"></span> a11y</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-29" class="hover:underline">Sin focus trap en modales</a></td><td class="px-4 py-2 text-zinc-500">Modales</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-30</td><td class="px-4 py-2"><span class="dot bg-sev-a11y"></span> a11y</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-30" class="hover:underline">aria-live faltante en SaveStatusPill</a></td><td class="px-4 py-2 text-zinc-500">Vista cliente</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-31</td><td class="px-4 py-2"><span class="dot bg-sev-a11y"></span> a11y</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-31" class="hover:underline">Inputs sin htmlFor explícito</a></td><td class="px-4 py-2 text-zinc-500">BrandingForm</td></tr>
+        <!-- Perf -->
+        <tr><td class="px-4 py-2 font-mono">S-32</td><td class="px-4 py-2"><span class="dot bg-sev-perf"></span> Perf</td><td class="px-4 py-2 font-semibold text-prio-p1">P1</td><td class="px-4 py-2"><a href="#S-32" class="hover:underline">25 useEffects en Shell.tsx</a></td><td class="px-4 py-2 text-zinc-500">Editor kiosk</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-33</td><td class="px-4 py-2"><span class="dot bg-sev-perf"></span> Perf</td><td class="px-4 py-2 font-semibold text-prio-p1">P1</td><td class="px-4 py-2"><a href="#S-33" class="hover:underline">Shell.tsx 1072 líneas — render N×</a></td><td class="px-4 py-2 text-zinc-500">Editor kiosk</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-34</td><td class="px-4 py-2"><span class="dot bg-sev-perf"></span> Perf</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-34" class="hover:underline">Auto-migrate loop secuencial</a></td><td class="px-4 py-2 text-zinc-500">Backend</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-35</td><td class="px-4 py-2"><span class="dot bg-sev-perf"></span> Perf</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-35" class="hover:underline">Iframe no se desmonta al salir</a></td><td class="px-4 py-2 text-zinc-500">Editor kiosk</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-36</td><td class="px-4 py-2"><span class="dot bg-sev-perf"></span> Perf</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-36" class="hover:underline">Logos sin loading="lazy"</a></td><td class="px-4 py-2 text-zinc-500">Dashboard</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-37</td><td class="px-4 py-2"><span class="dot bg-sev-perf"></span> Perf</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-37" class="hover:underline">Auto-migrate corre cada GET</a></td><td class="px-4 py-2 text-zinc-500">Backend</td></tr>
+        <!-- Auto -->
+        <tr><td class="px-4 py-2 font-mono">S-38</td><td class="px-4 py-2"><span class="dot bg-sev-auto"></span> Auto</td><td class="px-4 py-2 font-semibold text-prio-p1">P1</td><td class="px-4 py-2"><a href="#S-38" class="hover:underline">Sync hook fail silencioso</a></td><td class="px-4 py-2 text-zinc-500">Backend</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-39</td><td class="px-4 py-2"><span class="dot bg-sev-auto"></span> Auto</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-39" class="hover:underline">Sin tests E2E del flujo</a></td><td class="px-4 py-2 text-zinc-500">Tests</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-40</td><td class="px-4 py-2"><span class="dot bg-sev-auto"></span> Auto</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-40" class="hover:underline">format:check con drift histórico</a></td><td class="px-4 py-2 text-zinc-500">DX</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-41</td><td class="px-4 py-2"><span class="dot bg-sev-auto"></span> Auto</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-41" class="hover:underline">Docs/changelog hardcoded</a></td><td class="px-4 py-2 text-zinc-500">Docs</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-42</td><td class="px-4 py-2"><span class="dot bg-sev-auto"></span> Auto</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-42" class="hover:underline">client:list sin observability</a></td><td class="px-4 py-2 text-zinc-500">Backend</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-43</td><td class="px-4 py-2"><span class="dot bg-sev-auto"></span> Auto</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-43" class="hover:underline">Auto-migrate sin report visible</a></td><td class="px-4 py-2 text-zinc-500">Backend</td></tr>
+        <!-- Infra -->
+        <tr><td class="px-4 py-2 font-mono">S-44</td><td class="px-4 py-2"><span class="dot bg-sev-infra"></span> Infra</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-44" class="hover:underline">New Display creation pendiente</a></td><td class="px-4 py-2 text-zinc-500">Signage</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-45</td><td class="px-4 py-2"><span class="dot bg-sev-infra"></span> Infra</td><td class="px-4 py-2 font-semibold text-prio-p2">P2</td><td class="px-4 py-2"><a href="#S-45" class="hover:underline">Integrations keys sin tests</a></td><td class="px-4 py-2 text-zinc-500">Integrations</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-46</td><td class="px-4 py-2"><span class="dot bg-sev-infra"></span> Infra</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-46" class="hover:underline">Custom domain pendiente</a></td><td class="px-4 py-2 text-zinc-500">Vercel</td></tr>
+        <tr><td class="px-4 py-2 font-mono">S-47</td><td class="px-4 py-2"><span class="dot bg-sev-infra"></span> Infra</td><td class="px-4 py-2 font-semibold text-prio-p3">P3</td><td class="px-4 py-2"><a href="#S-47" class="hover:underline">Mobile PWA orientation no aplica</a></td><td class="px-4 py-2 text-zinc-500">Modal</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== HALLAZGOS DETALLE — BUGS ===== -->
+<section id="bugs" class="mt-14">
+  <h2 class="flex items-center gap-2 text-2xl font-bold tracking-tight"><span class="dot bg-sev-bug" style="width:14px;height:14px"></span> Bugs <span class="text-base font-medium text-zinc-500">(6)</span></h2>
+  <p class="mt-2 max-w-3xl text-[14px] leading-relaxed text-zinc-600 dark:text-zinc-400">Rompen funcionalidad, regresiones, crashes. Click en cada card para detalles.</p>
+
+  <div class="mt-6 grid grid-cols-1 gap-3">
+
+    <details id="S-01" class="card group rounded-xl border border-zinc-200 bg-white p-5 shadow-sm transition open:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+      <summary class="flex items-center justify-between gap-3">
+        <span class="flex items-center gap-3">
+          <span class="font-mono text-[11.5px] text-zinc-500">S-01</span>
+          <span class="badge bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300">P0 ship-blocker</span>
+          <span class="text-[14.5px] font-semibold">Hydration mismatch en editor kiosk</span>
+        </span>
+        <svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </summary>
+      <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div class="lg:col-span-2 space-y-3 text-[13px] leading-relaxed text-zinc-700 dark:text-zinc-300">
+          <p><strong>Síntoma.</strong> Devtools console muestra "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client" en cada carga del editor kiosk. El árbol del error apunta a <code class="mono text-[11.5px]">&lt;RedirectErrorBoundary&gt;</code> de Next.</p>
+          <p><strong>Repro.</strong> Abrir cualquier <code class="mono text-[11.5px]">/studio/&lt;slug&gt;/kiosk</code> con devtools abierta. Reproducible 100%.</p>
+          <p><strong>Impacto.</strong> React regenera el árbol entero client-side → flash de re-render visible → Lighthouse CLS/LCP cae → pueden surgir bugs sutiles en componentes con state client (ColorPicker, modales, autosave).</p>
+          <p><strong>Fix propuesto.</strong> Auditar <code class="mono text-[11.5px]">bootstrapStudioFromFs</code> en SSR vs client; tipar timestamps que cambian entre passes (`Date.now()`, `new Date().toISOString()`). Probar a aislar a `<Shell>` con `'use client'` puro y server component padre que solo pase props deterministas.</p>
+        </div>
+        <div class="text-[12px]">
+          <div class="text-[11px] uppercase tracking-wider text-zinc-500 mb-1">Archivo</div>
+          <code class="mono text-[11.5px]">src/app/studio/[slug]/kiosk/page.tsx</code>
+          <div class="mt-3 text-[11px] uppercase tracking-wider text-zinc-500 mb-1">Evidencia</div>
+          <a href="audit-2026-05-08/screenshots/08-kiosk-branding.png" target="_blank"><img src="audit-2026-05-08/screenshots/08-kiosk-branding.png" class="shot" alt="Editor kiosk Branding tab" /></a>
+        </div>
+      </div>
+    </details>
+
+    <details id="S-02" class="card group rounded-xl border border-zinc-200 bg-white p-5 shadow-sm transition open:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+      <summary class="flex items-center justify-between gap-3">
+        <span class="flex items-center gap-3">
+          <span class="font-mono text-[11.5px] text-zinc-500">S-02</span>
+          <span class="badge bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">P1 alta</span>
+          <span class="text-[14.5px] font-semibold">postMessage con target origin <code class="mono">'*'</code></span>
+        </span>
+        <svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </summary>
+      <div class="mt-4 space-y-3 text-[13px] leading-relaxed text-zinc-700 dark:text-zinc-300">
+        <p><strong>Síntoma.</strong> Las 30+ funciones <code class="mono text-[11.5px]">sendXNow</code> de <code class="mono text-[11.5px]">use-preview-bridge.ts</code> usan <code class="mono text-[11.5px]">win.postMessage(payload, '*')</code>.</p>
+        <p><strong>Impacto seguridad.</strong> Si el iframe carga otra origin (rare en local pero posible en preview cross-domain o si el preview Vercel deploy tiene URL distinta), cualquier ventana puede leer branding/config sensibles. Best practice: target origin específico.</p>
+        <p><strong>Fix propuesto.</strong> Constante <code class="mono text-[11.5px]">IFRAME_ORIGIN</code> = <code class="mono">window.location.origin</code> (mismo origin local) o configurable via env. Reemplazar todos los <code class="mono">'*'</code>.</p>
+        <p><strong>Archivo.</strong> <code class="mono text-[11.5px]">src/app/studio/_lib/use-preview-bridge.ts</code> líneas 130-394 (71 ocurrencias de <code>postMessage</code>).</p>
+      </div>
+    </details>
+
+    <details id="S-03" class="card group rounded-xl border border-zinc-200 bg-white p-5 shadow-sm transition open:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+      <summary class="flex items-center justify-between gap-3">
+        <span class="flex items-center gap-3">
+          <span class="font-mono text-[11.5px] text-zinc-500">S-03</span>
+          <span class="badge bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">P1 alta</span>
+          <span class="text-[14.5px] font-semibold">client:list no se limpia al borrar cliente</span>
+        </span>
+        <svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </summary>
+      <div class="mt-4 space-y-3 text-[13px] leading-relaxed text-zinc-700 dark:text-zinc-300">
+        <p><strong>Síntoma observado.</strong> En la sesión inicial, <code class="mono">test-fase4</code> aparecía en dashboard con manifest pero sin <code class="mono">cfg:test-fase4</code>. La drift recovery (S-06) ya resuelve el caso GET, pero no purga <code class="mono">client:list</code> cuando un producto se borra parcialmente.</p>
+        <p><strong>Impacto.</strong> Dashboard muestra clientes "fantasma". Si template <code class="mono">default</code> deja de existir, los fantasmas dan 404 permanente.</p>
+        <p><strong>Fix propuesto.</strong> En <code class="mono">DELETE /api/studio/configs/[slug]</code>, verificar manifest y purgar <code class="mono">client:list</code> + <code class="mono">client:{slug}:branding</code> + <code class="mono">client:{slug}:manifest</code> cuando ya no quedan productos activos.</p>
+      </div>
+    </details>
+
+    <details id="S-04" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <summary class="flex items-center justify-between gap-3">
+        <span class="flex items-center gap-3">
+          <span class="font-mono text-[11.5px] text-zinc-500">S-04</span>
+          <span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2 media</span>
+          <span class="text-[14.5px] font-semibold">Console errors silenciosos en bridge</span>
+        </span>
+        <svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </summary>
+      <div class="mt-4 space-y-3 text-[13px] leading-relaxed text-zinc-700 dark:text-zinc-300">
+        <p>30+ <code class="mono">try { postMessage } catch (e) { console.warn('[bridge:postMessage]', e) }</code> idénticos. Si el iframe está dead-locked, el operador no ve feedback visible. Solo en devtools.</p>
+        <p><strong>Fix.</strong> Helper <code class="mono">postToIframe(type, payload)</code>; si 5+ fallos consecutivos, banner "Live preview disconnected — reload" arriba del iframe.</p>
+      </div>
+    </details>
+
+    <details id="S-05" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <summary class="flex items-center justify-between gap-3">
+        <span class="flex items-center gap-3">
+          <span class="font-mono text-[11.5px] text-zinc-500">S-05</span>
+          <span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2 media</span>
+          <span class="text-[14.5px] font-semibold">Photo Booth tab dispara console errors</span>
+        </span>
+        <svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </summary>
+      <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div class="lg:col-span-2 space-y-3 text-[13px] leading-relaxed text-zinc-700 dark:text-zinc-300">
+          <p><strong>Repro.</strong> Editor kiosk → click Photo Booth tab. Devtools muestra +3 console errors.</p>
+          <p><strong>Fix.</strong> Investigar PhotoBoothEditor; posible cleanup de stream MediaPipe missing al unmount.</p>
+        </div>
+        <a href="audit-2026-05-08/screenshots/15-kiosk-photo-booth.png" target="_blank"><img src="audit-2026-05-08/screenshots/15-kiosk-photo-booth.png" class="shot" alt="Photo Booth tab" /></a>
+      </div>
+    </details>
+
+    <details id="S-06" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <summary class="flex items-center justify-between gap-3">
+        <span class="flex items-center gap-3">
+          <span class="font-mono text-[11.5px] text-zinc-500">S-06</span>
+          <span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3 nice-to-have</span>
+          <span class="text-[14.5px] font-semibold">Drift recovery no rellena client:list</span>
+        </span>
+        <svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </summary>
+      <div class="mt-4 space-y-3 text-[13px] leading-relaxed text-zinc-700 dark:text-zinc-300">
+        <p>Mi commit <code class="mono">d3fd17f</code> hace <code class="mono">kv.set(cfg)</code> pero no <code class="mono">kv.sadd(clientsList)</code>. Auto-migrate corrige en el siguiente GET → convergente, pero hay ventana donde el dashboard no lo lista.</p>
+        <p><strong>Fix.</strong> Añadir <code class="mono">await kv.sadd(kvKeys.clientsList, slug)</code> tras la materialización en <code class="mono">/studio/[slug]/kiosk/page.tsx</code> y <code class="mono">/studio/[slug]/digital-displays/page.tsx</code>.</p>
+      </div>
+    </details>
+
+  </div>
+</section>
+
+<!-- ===== HALLAZGOS DETALLE — GAPS ===== -->
+<section id="gaps" class="mt-14">
+  <h2 class="flex items-center gap-2 text-2xl font-bold tracking-tight"><span class="dot bg-sev-gap" style="width:14px;height:14px"></span> Gaps funcionales <span class="text-base font-medium text-zinc-500">(8)</span></h2>
+  <div class="mt-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
+
+    <details id="S-07" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-07</span><span class="badge bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">P1</span><span class="text-[14px] font-semibold">No hay search en dashboard</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Con 4 clientes ya escala mal. Añadir <code class="mono">&lt;input type="search"&gt;</code> arriba del grid + filter local. Pattern: similar al search del modal Languages.</div></details>
+
+    <details id="S-08" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-08</span><span class="badge bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">P1</span><span class="text-[14px] font-semibold">No hay rollback de unified branding</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Branding autosave 1s después del cambio. Si el operador rompe el primary sin querer no hay "Discard". Solo undo del editor kiosk individual. Fix: botón "Restore" que recargue de KV o snapshots paralelos a kiosk.</div></details>
+
+    <details id="S-09" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-09</span><span class="badge bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">P1</span><span class="text-[14px] font-semibold">Activate falla si default no existe</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Activate clona desde <code class="mono">default</code>. Si lo borran por error, todo activate falla. Fix: marcar <code class="mono">default</code> reservado/inmutable; o fallback a empty config + warning.</div></details>
+
+    <details id="S-10" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-10</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">Modal NewClient sin DD checkbox</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Modal solo crea kiosk. Para tener cliente con DD desde el inicio hay que crear y luego activar. Fix: checkboxes "Activate kiosks (default)" + "Activate digital displays" antes de submit.</div></details>
+
+    <details id="S-11" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-11</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">No hay diff pre-publish unificado</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Publish está en kiosk + signage por separado. La Vista de Cliente no consolida un "Publish all products" con diff de qué cambia. Fix: sección "Pending changes" en <code class="mono">/studio/[slug]</code>.</div></details>
+
+    <details id="S-12" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-12</span><span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3</span><span class="text-[14px] font-semibold">Duplicate solo clona kiosk</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Hover muestra Duplicate; endpoint <code class="mono">/clone</code> solo clona el kiosk. Manifest + signage + unified branding no se replican. Fix: <code class="mono">POST /api/studio/clients/[slug]/clone</code> que clone toda la entidad.</div></details>
+
+    <details id="S-13" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-13</span><span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3</span><span class="text-[14px] font-semibold">Sin pinning / recently edited</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Dashboard ordena alfabético + default primero. Sin pin/star para clientes top. Fix: flag <code class="mono">pinned</code> en manifest + sort por pinned &gt; recent &gt; alpha.</div></details>
+
+    <details id="S-14" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-14</span><span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3</span><span class="text-[14px] font-semibold">Stubs Coming Soon sin contenido</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">/mobile-pwa, /video-walls, /tablets renderizan placeholder. Sin teaser, lista waitlist, link a roadmap. Fix: card con descripción + link a doc + opción "Notify me when ready".</div></details>
+
+  </div>
+</section>
+
+<!-- ===== HALLAZGOS DETALLE — UX ===== -->
+<section id="ux" class="mt-14">
+  <h2 class="flex items-center gap-2 text-2xl font-bold tracking-tight"><span class="dot bg-sev-ux" style="width:14px;height:14px"></span> Friction UX <span class="text-base font-medium text-zinc-500">(9)</span></h2>
+  <div class="mt-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
+
+    <details id="S-15" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-15</span><span class="badge bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">P1</span><span class="text-[14px] font-semibold">Tres patrones de tabs distintos</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300"><p>BrandingForm usa <code class="mono">&lt;button aria-current&gt;</code> sin tablist. Editor kiosk usa <code class="mono">role=tablist</code>+<code class="mono">role=tab</code>. Editor signage usa el mismo patrón que kiosk. Visual también difiere (chip vs underline vs glow).</p><p class="mt-2"><strong>Fix.</strong> Componente <code class="mono">&lt;TabStrip&gt;</code> reutilizable con role=tablist + variants visuales.</p></div></details>
+
+    <details id="S-16" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-16</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">Footer "Local · main" hardcoded</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">En producción Vercel mostraría lo mismo. Confuso. Fix: derivar de <code class="mono">VERCEL_ENV</code> + <code class="mono">VERCEL_GIT_COMMIT_REF</code>.</div></details>
+
+    <details id="S-17" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-17</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">Color picker sin click-outside</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">BrandingForm Brand colors → click swatch → picker abre. Solo cierra con "Done" o re-toggle. Fix: <code class="mono">useClickOutside</code> ref que dispatcha <code class="mono">setOpen(false)</code>.</div></details>
+
+    <details id="S-18" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-18</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">No valida rangos lat/lon</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Latitude acepta -200, Longitude 999. Solo number-check. Fix: clamp a [-90,90] / [-180,180] con error en helper text.</div></details>
+
+    <details id="S-19" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-19</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">"Coming soon" sin diferenciación</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">PWA / Walls / Tablets / "Add display" usan badge idéntico pero con timelines distintas. Fix: variants — "Coming soon · Q3 2026", "In development", "Next sprint".</div></details>
+
+    <details id="S-20" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-20</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">Activate visualmente igual a Open</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Ambos usan flecha →. Activate clona desde default (operación pesada) — debería sentirse distinto. Fix: estilo "ghost" + icon Plus para Activate, ArrowRight para Open editor.</div></details>
+
+    <details id="S-21" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-21</span><span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3</span><span class="text-[14px] font-semibold">Sticky header overlapa first field</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">En viewport &lt;900px el sticky banner cubre el primer Field. Fix: padding-top dinámico en el panel.</div></details>
+
+    <details id="S-22" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-22</span><span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3</span><span class="text-[14px] font-semibold">Status pill "Idle" confuso</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Vista de Cliente muestra "Idle" cuando no hay cambios — confuso ("editor is idle" vs "I should do something"). Fix: copy "Saved" si hay branding persisted, "—" si vacío.</div></details>
+
+    <details id="S-23" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-23</span><span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3</span><span class="text-[14px] font-semibold">Cancel sin confirm en BrandingForm</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">ClientView tiene <code class="mono">beforeunload</code> para cierre completo. Pero navegación interna (link a /studio o /kiosk) no dispara confirmación. Fix: Next router beforePopState o link interceptor.</div></details>
+
+  </div>
+</section>
+
+<!-- ===== HALLAZGOS DETALLE — A11Y ===== -->
+<section id="a11y" class="mt-14">
+  <h2 class="flex items-center gap-2 text-2xl font-bold tracking-tight"><span class="dot bg-sev-a11y" style="width:14px;height:14px"></span> Accesibilidad <span class="text-base font-medium text-zinc-500">(8)</span></h2>
+  <div class="mt-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
+
+    <details id="S-24" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-24</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">2 botones "+ New client" idénticos</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Header pill + card dashed al final del grid. Strict mode de Playwright lo detecta. Fix: <code class="mono">aria-label</code> distinto en cada uno.</div></details>
+
+    <details id="S-25" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-25</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">Accessible names verbosos en cards</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">"TrueOmni default Arizona Kiosks Displays Edited 1h ago ruben" — concatena logo alt + slug + heading + badges + timestamp. Fix: subcontenido <code class="mono">aria-hidden="true"</code>; <code class="mono">aria-label="Open client {name}, {N} products active"</code> al Link.</div></details>
+
+    <details id="S-26" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-26</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">Status badge con métricas en aria</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">"All systems operational" link tiene <code class="mono">aria-label="KV: ok (cloud, 591ms) Filesystem: ok (4ms)..."</code> — métricas embebidas. Fix: texto visible + <code class="mono">aria-hidden</code> en detalles.</div></details>
+
+    <details id="S-27" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-27</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">BrandingForm tabs sin role tablist</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Screen reader anuncia "button" en lugar de "tab N of 5". Fix: convertir a <code class="mono">role="tablist"</code> + <code class="mono">role="tab"</code> consistente con editor kiosk/signage.</div></details>
+
+    <details id="S-28" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-28</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">Escape inconsistente en modales</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Audit anterior F-35 lo abrió. Hoy NewClientModal sí cierra con Escape; falta verificar DeleteKiosk, DuplicateKiosk, AiSuggest, Publish, AddLanguage. Fix: extraer <code class="mono">useEscapeClose</code> hook + aplicar a todos.</div></details>
+
+    <details id="S-29" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-29</span><span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3</span><span class="text-[14px] font-semibold">Sin focus trap en modales</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Tab/Shift+Tab dentro del modal puede salir al body. Fix: <code class="mono">&lt;FocusTrap&gt;</code> wrapper para todos los modales del Studio.</div></details>
+
+    <details id="S-30" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-30</span><span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3</span><span class="text-[14px] font-semibold">aria-live faltante en SaveStatusPill</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">"Saving…/Saved/Idle/Error" cambian sin notificar a screen readers. Fix: wrapper <code class="mono">aria-live="polite"</code> o <code class="mono">role="status"</code>.</div></details>
+
+    <details id="S-31" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-31</span><span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3</span><span class="text-[14px] font-semibold">Inputs sin htmlFor explícito</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">BrandingForm <code class="mono">&lt;Field&gt;</code> envuelve <code class="mono">&lt;input&gt;</code> en <code class="mono">&lt;label&gt;</code>. Válido por wrapping pero menos robusto. Fix: <code class="mono">useId()</code> + <code class="mono">htmlFor</code> explícito.</div></details>
+
+  </div>
+</section>
+
+<!-- ===== HALLAZGOS DETALLE — PERF ===== -->
+<section id="perf" class="mt-14">
+  <h2 class="flex items-center gap-2 text-2xl font-bold tracking-tight"><span class="dot bg-sev-perf" style="width:14px;height:14px"></span> Performance <span class="text-base font-medium text-zinc-500">(6)</span></h2>
+  <div class="mt-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
+
+    <details id="S-32" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-32</span><span class="badge bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">P1</span><span class="text-[14px] font-semibold">25 useEffects en Shell.tsx</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Cada sección del config tiene <code class="mono">useEffect(() =&gt; pushX(X), [X, pushX])</code>. Cualquier cambio dispara su effect → 25 postMessages individuales al iframe. Fix: single useEffect con diff o store-driven con selectors.</div></details>
+
+    <details id="S-33" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-33</span><span class="badge bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">P1</span><span class="text-[14px] font-semibold">Shell.tsx 1072 líneas — render N×</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Componente monolítico con state global. React re-renders todo Shell en cada cambio. Fix: split en <code class="mono">&lt;EditorPanels&gt;</code> (per-tab) memoized + <code class="mono">&lt;PreviewPanel&gt;</code> con su propio store.</div></details>
+
+    <details id="S-34" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-34</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">Auto-migrate loop secuencial</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">GET /api/studio/clients hace <code class="mono">Promise.all</code> para summaries. Pero antes corre auto-migrate con loop secuencial (line 76 de auto-migrate-clients.ts). Fix: <code class="mono">Promise.allSettled</code> con concurrency limit (e.g. 5).</div></details>
+
+    <details id="S-35" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-35</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">Iframe no se desmonta al salir</a></span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Navegar de <code class="mono">/studio/default/kiosk</code> a <code class="mono">/studio</code> mantiene memoria del iframe. Fix: <code class="mono">useEffect cleanup</code> que pone <code class="mono">iframe.src = 'about:blank'</code>.</div></details>
+
+    <details id="S-36" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-36</span><span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3</span><span class="text-[14px] font-semibold">Logos sin loading="lazy"</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Dashboard muestra logos como <code class="mono">&lt;img&gt;</code> sin loading="lazy" ni dimensiones. Fix: <code class="mono">loading="lazy"</code> + <code class="mono">decoding="async"</code> + width/height para CLS.</div></details>
+
+    <details id="S-37" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-37</span><span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3</span><span class="text-[14px] font-semibold">Auto-migrate corre cada GET</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Lazy on-load, idempotente, pero costoso (escanea FS + KV cada vez). Fix: cache TTL 60s en <code class="mono">kv.get('migration:lastRun')</code>.</div></details>
+
+  </div>
+</section>
+
+<!-- ===== HALLAZGOS DETALLE — AUTO ===== -->
+<section id="auto" class="mt-14">
+  <h2 class="flex items-center gap-2 text-2xl font-bold tracking-tight"><span class="dot bg-sev-auto" style="width:14px;height:14px"></span> Automatización / DX <span class="text-base font-medium text-zinc-500">(6)</span></h2>
+  <div class="mt-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
+
+    <details id="S-38" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-38</span><span class="badge bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">P1</span><span class="text-[14px] font-semibold">Sync hook fail silencioso</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Mi commit añadió try/catch que loguea pero no aborta el create. Si falla, cliente queda sin manifest → auto-migrate lo recupera al siguiente GET. Intencional pero invisible. Fix: logger estructurado + alerta si falla &gt; 1 vez.</div></details>
+
+    <details id="S-39" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-39</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">Sin tests E2E del flujo</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Validación manual con Playwright esta sesión. No hay test commiteado. Fix: <code class="mono">tests/e2e/studio-create-client.spec.ts</code> con Playwright + setup de KV mock.</div></details>
+
+    <details id="S-40" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-40</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">format:check con drift histórico</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">331 archivos con drift de prettier acumulado. Fix: commit one-shot <code class="mono">pnpm format</code> + bloquear via pre-commit hook.</div></details>
+
+    <details id="S-41" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-41</span><span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3</span><span class="text-[14px] font-semibold">Docs/changelog hardcoded</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Mismo hallazgo del audit anterior — entries hardcoded; no genera desde GitHub Releases. Diferido a S7.2.</div></details>
+
+    <details id="S-42" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-42</span><span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3</span><span class="text-[14px] font-semibold">client:list sin observability</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Sin logs estructurados de mutaciones (add/remove). Difícil debug del drift de S-03. Fix: wrapper <code class="mono">addClientToList</code> con <code class="mono">logger.info({event:'client.added',slug,by})</code>.</div></details>
+
+    <details id="S-43" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-43</span><span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3</span><span class="text-[14px] font-semibold">Auto-migrate sin report visible</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300"><code class="mono">MigrationReport</code> se devuelve pero solo se loguea en server. Operador no ve "2 clientes migrados". Fix: banner toast + sección en <code class="mono">/studio/diagnostics</code>.</div></details>
+
+  </div>
+</section>
+
+<!-- ===== HALLAZGOS DETALLE — INFRA ===== -->
+<section id="infra" class="mt-14">
+  <h2 class="flex items-center gap-2 text-2xl font-bold tracking-tight"><span class="dot bg-sev-infra" style="width:14px;height:14px"></span> Infra externa <span class="text-base font-medium text-zinc-500">(4)</span></h2>
+  <div class="mt-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
+
+    <details id="S-44" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-44</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">New Display creation pendiente</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Card "Add display COMING SOON" en lista signage scoped. Marcado pendiente desde 2026-05-08. Diferido al milestone S2.</div></details>
+
+    <details id="S-45" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-45</span><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">P2</span><span class="text-[14px] font-semibold">Integrations keys sin tests</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Tab Integrations tiene check button por integración pero no se cron-monitorea. Audit anterior #28-32 ya lo abrió.</div></details>
+
+    <details id="S-46" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-46</span><span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3</span><span class="text-[14px] font-semibold">Custom domain pendiente</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300"><code class="mono">studio.trueomni.com</code> pendiente. Después del push de hoy → DNS + Vercel.</div></details>
+
+    <details id="S-47" class="card rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><summary class="flex items-center justify-between gap-3"><span class="flex items-center gap-3"><span class="font-mono text-[11.5px] text-zinc-500">S-47</span><span class="badge bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">P3</span><span class="text-[14px] font-semibold">Mobile PWA orientation no aplica</span></span><svg class="chev h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></summary><div class="mt-3 text-[13px] text-zinc-700 dark:text-zinc-300">Modal NewClient permite "Mobile PWA" orientation pero el producto es Coming Soon. Fix: ocultar opción hasta que el producto esté live.</div></details>
+
+  </div>
+</section>
+
+<!-- ===== WALK VISUAL ===== -->
+<section id="walk" class="mt-14">
+  <h2 class="text-2xl font-bold tracking-tight">Walk visual · 48 capturas</h2>
+  <p class="mt-2 max-w-3xl text-[14px] leading-relaxed text-zinc-600 dark:text-zinc-400">Recorrido completo del Studio con Playwright. Click en cada imagen para abrir tamaño completo en nueva pestaña.</p>
+
+  <div class="mt-6 space-y-10">
+    <div>
+      <h3 id="walk-dashboard" class="text-lg font-semibold">Dashboard + Vista de Cliente (light + dark)</h3>
+      <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <a href="audit-2026-05-08/screenshots/01-dashboard.png" target="_blank"><img src="audit-2026-05-08/screenshots/01-dashboard.png" class="shot" alt="Dashboard light"/><span class="block mt-1 text-[11px] text-zinc-500">01 · Dashboard</span></a>
+        <a href="audit-2026-05-08/screenshots/02-new-client-modal.png" target="_blank"><img src="audit-2026-05-08/screenshots/02-new-client-modal.png" class="shot" alt="Modal"/><span class="block mt-1 text-[11px] text-zinc-500">02 · New client modal</span></a>
+        <a href="audit-2026-05-08/screenshots/03-client-view-general.png" target="_blank"><img src="audit-2026-05-08/screenshots/03-client-view-general.png" class="shot" alt="General"/><span class="block mt-1 text-[11px] text-zinc-500">03 · Vista cliente · General</span></a>
+        <a href="audit-2026-05-08/screenshots/04-client-view-brand-colors.png" target="_blank"><img src="audit-2026-05-08/screenshots/04-client-view-brand-colors.png" class="shot" alt="Brand colors"/><span class="block mt-1 text-[11px] text-zinc-500">04 · Brand colors</span></a>
+        <a href="audit-2026-05-08/screenshots/05-client-view-logos.png" target="_blank"><img src="audit-2026-05-08/screenshots/05-client-view-logos.png" class="shot" alt="Logos"/><span class="block mt-1 text-[11px] text-zinc-500">05 · Logos</span></a>
+        <a href="audit-2026-05-08/screenshots/06-client-view-fonts.png" target="_blank"><img src="audit-2026-05-08/screenshots/06-client-view-fonts.png" class="shot" alt="Fonts"/><span class="block mt-1 text-[11px] text-zinc-500">06 · Fonts</span></a>
+        <a href="audit-2026-05-08/screenshots/07-client-view-media.png" target="_blank"><img src="audit-2026-05-08/screenshots/07-client-view-media.png" class="shot" alt="Media"/><span class="block mt-1 text-[11px] text-zinc-500">07 · Media</span></a>
+        <a href="audit-2026-05-08/screenshots/47-dashboard-dark.png" target="_blank"><img src="audit-2026-05-08/screenshots/47-dashboard-dark.png" class="shot" alt="Dark"/><span class="block mt-1 text-[11px] text-zinc-500">47 · Dashboard dark</span></a>
+        <a href="audit-2026-05-08/screenshots/48-card-hover-actions.png" target="_blank"><img src="audit-2026-05-08/screenshots/48-card-hover-actions.png" class="shot" alt="Hover"/><span class="block mt-1 text-[11px] text-zinc-500">48 · Card hover (delete/duplicate)</span></a>
+      </div>
+    </div>
+
+    <div>
+      <h3 id="walk-kiosk" class="text-lg font-semibold">Editor kiosk · 22 tabs</h3>
+      <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <a href="audit-2026-05-08/screenshots/08-kiosk-branding.png" target="_blank"><img src="audit-2026-05-08/screenshots/08-kiosk-branding.png" class="shot" alt="Branding"/><span class="block mt-1 text-[11px] text-zinc-500">08 · Branding</span></a>
+        <a href="audit-2026-05-08/screenshots/09-kiosk-modules.png" target="_blank"><img src="audit-2026-05-08/screenshots/09-kiosk-modules.png" class="shot" alt="Modules"/><span class="block mt-1 text-[11px] text-zinc-500">09 · Modules</span></a>
+        <a href="audit-2026-05-08/screenshots/10-kiosk-billboard.png" target="_blank"><img src="audit-2026-05-08/screenshots/10-kiosk-billboard.png" class="shot" alt="Billboard"/><span class="block mt-1 text-[11px] text-zinc-500">10 · Idle / Billboard</span></a>
+        <a href="audit-2026-05-08/screenshots/11-kiosk-home-dashboard.png" target="_blank"><img src="audit-2026-05-08/screenshots/11-kiosk-home-dashboard.png" class="shot" alt="Home"/><span class="block mt-1 text-[11px] text-zinc-500">11 · Home Dashboard</span></a>
+        <a href="audit-2026-05-08/screenshots/12-kiosk-ai-avatar.png" target="_blank"><img src="audit-2026-05-08/screenshots/12-kiosk-ai-avatar.png" class="shot" alt="AI Avatar"/><span class="block mt-1 text-[11px] text-zinc-500">12 · AI Avatar</span></a>
+        <a href="audit-2026-05-08/screenshots/13-kiosk-survey.png" target="_blank"><img src="audit-2026-05-08/screenshots/13-kiosk-survey.png" class="shot" alt="Survey"/><span class="block mt-1 text-[11px] text-zinc-500">13 · Survey</span></a>
+        <a href="audit-2026-05-08/screenshots/14-kiosk-deals.png" target="_blank"><img src="audit-2026-05-08/screenshots/14-kiosk-deals.png" class="shot" alt="Deals"/><span class="block mt-1 text-[11px] text-zinc-500">14 · Deals</span></a>
+        <a href="audit-2026-05-08/screenshots/15-kiosk-photo-booth.png" target="_blank"><img src="audit-2026-05-08/screenshots/15-kiosk-photo-booth.png" class="shot" alt="Photo Booth"/><span class="block mt-1 text-[11px] text-zinc-500">15 · Photo Booth ⚠️</span></a>
+        <a href="audit-2026-05-08/screenshots/16-kiosk-digital-brochure.png" target="_blank"><img src="audit-2026-05-08/screenshots/16-kiosk-digital-brochure.png" class="shot" alt="Brochure"/><span class="block mt-1 text-[11px] text-zinc-500">16 · Digital Brochure</span></a>
+        <a href="audit-2026-05-08/screenshots/17-kiosk-social-wall.png" target="_blank"><img src="audit-2026-05-08/screenshots/17-kiosk-social-wall.png" class="shot" alt="Social Wall"/><span class="block mt-1 text-[11px] text-zinc-500">17 · Social Wall</span></a>
+        <a href="audit-2026-05-08/screenshots/18-kiosk-guestbook.png" target="_blank"><img src="audit-2026-05-08/screenshots/18-kiosk-guestbook.png" class="shot" alt="Guestbook"/><span class="block mt-1 text-[11px] text-zinc-500">18 · Guestbook</span></a>
+        <a href="audit-2026-05-08/screenshots/19-kiosk-listings.png" target="_blank"><img src="audit-2026-05-08/screenshots/19-kiosk-listings.png" class="shot" alt="Listings"/><span class="block mt-1 text-[11px] text-zinc-500">19 · Listings</span></a>
+        <a href="audit-2026-05-08/screenshots/20-kiosk-events.png" target="_blank"><img src="audit-2026-05-08/screenshots/20-kiosk-events.png" class="shot" alt="Events"/><span class="block mt-1 text-[11px] text-zinc-500">20 · Events</span></a>
+        <a href="audit-2026-05-08/screenshots/21-kiosk-tickets.png" target="_blank"><img src="audit-2026-05-08/screenshots/21-kiosk-tickets.png" class="shot" alt="Tickets"/><span class="block mt-1 text-[11px] text-zinc-500">21 · Tickets</span></a>
+        <a href="audit-2026-05-08/screenshots/22-kiosk-passes.png" target="_blank"><img src="audit-2026-05-08/screenshots/22-kiosk-passes.png" class="shot" alt="Passes"/><span class="block mt-1 text-[11px] text-zinc-500">22 · Passes</span></a>
+        <a href="audit-2026-05-08/screenshots/23-kiosk-trails.png" target="_blank"><img src="audit-2026-05-08/screenshots/23-kiosk-trails.png" class="shot" alt="Trails"/><span class="block mt-1 text-[11px] text-zinc-500">23 · Trails</span></a>
+        <a href="audit-2026-05-08/screenshots/24-kiosk-map.png" target="_blank"><img src="audit-2026-05-08/screenshots/24-kiosk-map.png" class="shot" alt="Map"/><span class="block mt-1 text-[11px] text-zinc-500">24 · Map</span></a>
+        <a href="audit-2026-05-08/screenshots/25-kiosk-trip-planner.png" target="_blank"><img src="audit-2026-05-08/screenshots/25-kiosk-trip-planner.png" class="shot" alt="Trip Planner"/><span class="block mt-1 text-[11px] text-zinc-500">25 · Trip Planner</span></a>
+        <a href="audit-2026-05-08/screenshots/26-kiosk-languages.png" target="_blank"><img src="audit-2026-05-08/screenshots/26-kiosk-languages.png" class="shot" alt="Languages"/><span class="block mt-1 text-[11px] text-zinc-500">26 · Languages</span></a>
+        <a href="audit-2026-05-08/screenshots/27-kiosk-ads.png" target="_blank"><img src="audit-2026-05-08/screenshots/27-kiosk-ads.png" class="shot" alt="Ads"/><span class="block mt-1 text-[11px] text-zinc-500">27 · Ads</span></a>
+        <a href="audit-2026-05-08/screenshots/28-kiosk-integrations.png" target="_blank"><img src="audit-2026-05-08/screenshots/28-kiosk-integrations.png" class="shot" alt="Integrations"/><span class="block mt-1 text-[11px] text-zinc-500">28 · Integrations</span></a>
+        <a href="audit-2026-05-08/screenshots/29-kiosk-publish.png" target="_blank"><img src="audit-2026-05-08/screenshots/29-kiosk-publish.png" class="shot" alt="Publish"/><span class="block mt-1 text-[11px] text-zinc-500">29 · Publish</span></a>
+      </div>
+    </div>
+
+    <div>
+      <h3 id="walk-signage" class="text-lg font-semibold">Editor signage · 10 tabs + lista</h3>
+      <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <a href="audit-2026-05-08/screenshots/30-displays-list.png" target="_blank"><img src="audit-2026-05-08/screenshots/30-displays-list.png" class="shot" alt="Displays list"/><span class="block mt-1 text-[11px] text-zinc-500">30 · Lista displays</span></a>
+        <a href="audit-2026-05-08/screenshots/31-display-editor-branding.png" target="_blank"><img src="audit-2026-05-08/screenshots/31-display-editor-branding.png" class="shot" alt="Branding"/><span class="block mt-1 text-[11px] text-zinc-500">31 · Branding</span></a>
+        <a href="audit-2026-05-08/screenshots/32-display-editor-header.png" target="_blank"><img src="audit-2026-05-08/screenshots/32-display-editor-header.png" class="shot" alt="Header"/><span class="block mt-1 text-[11px] text-zinc-500">32 · Header</span></a>
+        <a href="audit-2026-05-08/screenshots/33-display-editor-settings.png" target="_blank"><img src="audit-2026-05-08/screenshots/33-display-editor-settings.png" class="shot" alt="Settings"/><span class="block mt-1 text-[11px] text-zinc-500">33 · Settings</span></a>
+        <a href="audit-2026-05-08/screenshots/34-display-editor-playlist.png" target="_blank"><img src="audit-2026-05-08/screenshots/34-display-editor-playlist.png" class="shot" alt="Playlist"/><span class="block mt-1 text-[11px] text-zinc-500">34 · Playlist</span></a>
+        <a href="audit-2026-05-08/screenshots/35-display-editor-events.png" target="_blank"><img src="audit-2026-05-08/screenshots/35-display-editor-events.png" class="shot" alt="Events"/><span class="block mt-1 text-[11px] text-zinc-500">35 · Events</span></a>
+        <a href="audit-2026-05-08/screenshots/36-display-editor-social.png" target="_blank"><img src="audit-2026-05-08/screenshots/36-display-editor-social.png" class="shot" alt="Social"/><span class="block mt-1 text-[11px] text-zinc-500">36 · Social</span></a>
+        <a href="audit-2026-05-08/screenshots/37-display-editor-news.png" target="_blank"><img src="audit-2026-05-08/screenshots/37-display-editor-news.png" class="shot" alt="News"/><span class="block mt-1 text-[11px] text-zinc-500">37 · News</span></a>
+        <a href="audit-2026-05-08/screenshots/38-display-editor-languages.png" target="_blank"><img src="audit-2026-05-08/screenshots/38-display-editor-languages.png" class="shot" alt="Languages"/><span class="block mt-1 text-[11px] text-zinc-500">38 · Languages</span></a>
+        <a href="audit-2026-05-08/screenshots/39-display-editor-versions.png" target="_blank"><img src="audit-2026-05-08/screenshots/39-display-editor-versions.png" class="shot" alt="Versions"/><span class="block mt-1 text-[11px] text-zinc-500">39 · Versions</span></a>
+        <a href="audit-2026-05-08/screenshots/40-display-editor-publish.png" target="_blank"><img src="audit-2026-05-08/screenshots/40-display-editor-publish.png" class="shot" alt="Publish"/><span class="block mt-1 text-[11px] text-zinc-500">40 · Publish</span></a>
+      </div>
+    </div>
+
+    <div>
+      <h3 id="walk-stubs" class="text-lg font-semibold">Stubs Coming Soon + utilities</h3>
+      <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <a href="audit-2026-05-08/screenshots/41-stub-mobile-pwa.png" target="_blank"><img src="audit-2026-05-08/screenshots/41-stub-mobile-pwa.png" class="shot" alt="Mobile PWA"/><span class="block mt-1 text-[11px] text-zinc-500">41 · Mobile PWA</span></a>
+        <a href="audit-2026-05-08/screenshots/42-stub-video-walls.png" target="_blank"><img src="audit-2026-05-08/screenshots/42-stub-video-walls.png" class="shot" alt="Video Walls"/><span class="block mt-1 text-[11px] text-zinc-500">42 · Video Walls</span></a>
+        <a href="audit-2026-05-08/screenshots/43-stub-tablets.png" target="_blank"><img src="audit-2026-05-08/screenshots/43-stub-tablets.png" class="shot" alt="Tablets"/><span class="block mt-1 text-[11px] text-zinc-500">43 · Tablets</span></a>
+        <a href="audit-2026-05-08/screenshots/44-diagnostics.png" target="_blank"><img src="audit-2026-05-08/screenshots/44-diagnostics.png" class="shot" alt="Diagnostics"/><span class="block mt-1 text-[11px] text-zinc-500">44 · Diagnostics</span></a>
+        <a href="audit-2026-05-08/screenshots/45-docs.png" target="_blank"><img src="audit-2026-05-08/screenshots/45-docs.png" class="shot" alt="Docs"/><span class="block mt-1 text-[11px] text-zinc-500">45 · Docs</span></a>
+        <a href="audit-2026-05-08/screenshots/46-sign-in.png" target="_blank"><img src="audit-2026-05-08/screenshots/46-sign-in.png" class="shot" alt="Sign in"/><span class="block mt-1 text-[11px] text-zinc-500">46 · Sign in</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ROADMAP ===== -->
+<section id="roadmap" class="mt-16">
+  <h2 class="text-2xl font-bold tracking-tight">Roadmap propuesto</h2>
+  <p class="mt-2 max-w-3xl text-[14px] leading-relaxed text-zinc-600 dark:text-zinc-400">
+    Orden de cierre. <strong>Recomendado push hoy</strong> con los 10 commits actuales — ningún hallazgo es ship-blocker absoluto. Los siguientes sprints atacan en orden de payoff/risk.
+  </p>
+
+  <div class="mt-6 space-y-4">
+    <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-5 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+      <h3 class="font-semibold flex items-center gap-2"><span class="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">Hoy</span> Push a Vercel</h3>
+      <p class="mt-2 text-[13px] text-zinc-700 dark:text-zinc-300">10 commits del refactor cliente-primero + cierre de backlog (drift recovery, Activate, sync hook, diag delete, URL normalize, lint clean). Studio funcional E2E (validado con Playwright esta sesión).</p>
+    </div>
+
+    <div class="rounded-xl border border-amber-200 bg-amber-50/40 p-5 dark:border-amber-900/40 dark:bg-amber-950/20">
+      <h3 class="font-semibold flex items-center gap-2"><span class="badge bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">Sprint 1 · pre-cliente real</span> Top 5 fixes críticos</h3>
+      <ul class="mt-2 list-disc pl-5 text-[13px] text-zinc-700 dark:text-zinc-300 space-y-1">
+        <li><strong>S-01</strong> · Hydration mismatch en editor kiosk (P0 — afecta UX visible)</li>
+        <li><strong>S-02</strong> · postMessage('*') → origin específico (P1 — security)</li>
+        <li><strong>S-03</strong> · client:list cleanup en DELETE (P1 — drift permanente)</li>
+        <li><strong>S-09</strong> · Activate falla si default no existe (P1 — robustez)</li>
+        <li><strong>S-32 / S-33</strong> · Shell.tsx split + useEffects consolidation (P1 — perf)</li>
+      </ul>
+    </div>
+
+    <div class="rounded-xl border border-sky-200 bg-sky-50/40 p-5 dark:border-sky-900/40 dark:bg-sky-950/20">
+      <h3 class="font-semibold flex items-center gap-2"><span class="badge bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300">Sprint 2 · UX polish</span> Search, tabs unificados, picker</h3>
+      <ul class="mt-2 list-disc pl-5 text-[13px] text-zinc-700 dark:text-zinc-300 space-y-1">
+        <li><strong>S-07</strong> · Search en dashboard</li>
+        <li><strong>S-15</strong> · Componente <code class="mono">&lt;TabStrip&gt;</code> unificado (BrandingForm + kiosk + signage)</li>
+        <li><strong>S-17</strong> · Color picker click-outside</li>
+        <li><strong>S-08</strong> · Rollback / Restore de unified branding</li>
+        <li><strong>S-10</strong> · Modal NewClient con DD checkbox</li>
+      </ul>
+    </div>
+
+    <div class="rounded-xl border border-purple-200 bg-purple-50/40 p-5 dark:border-purple-900/40 dark:bg-purple-950/20">
+      <h3 class="font-semibold flex items-center gap-2"><span class="badge bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300">Sprint 3 · a11y</span> Accessible names + focus trap</h3>
+      <ul class="mt-2 list-disc pl-5 text-[13px] text-zinc-700 dark:text-zinc-300 space-y-1">
+        <li><strong>S-24</strong> · 2 botones "+ New client" diferenciar</li>
+        <li><strong>S-25, S-26</strong> · Accessible names refactor (cards + status)</li>
+        <li><strong>S-27</strong> · BrandingForm tabs role tablist (lo cubre S-15 si se hace antes)</li>
+        <li><strong>S-28</strong> · Escape consistency en todos los modales</li>
+        <li><strong>S-29, S-30</strong> · Focus trap + aria-live</li>
+      </ul>
+    </div>
+
+    <div class="rounded-xl border border-zinc-200 bg-zinc-50/40 p-5 dark:border-zinc-800 dark:bg-zinc-900/40">
+      <h3 class="font-semibold flex items-center gap-2"><span class="badge bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">Sprint 4 · DX + infra</span> Tests, observability, signage display creation</h3>
+      <ul class="mt-2 list-disc pl-5 text-[13px] text-zinc-700 dark:text-zinc-300 space-y-1">
+        <li><strong>S-39</strong> · Tests E2E commiteados</li>
+        <li><strong>S-40</strong> · format:check limpio + pre-commit hook</li>
+        <li><strong>S-42, S-43</strong> · Logger estructurado + report visible de auto-migrate</li>
+        <li><strong>S-44</strong> · New Display creation flow</li>
+        <li><strong>S-46</strong> · Custom domain DNS</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer class="mt-16 border-t border-zinc-200 pt-8 text-[12px] text-zinc-500 dark:border-zinc-800">
+  <div class="flex items-center justify-between gap-4">
+    <span>Generado por Claude Code · 2026-05-08 · TrueOmni Studio Audit v2 · 47 hallazgos · 48 screenshots</span>
+    <span class="font-mono">commits b01f63e..d3fd17f (10 ahead)</span>
+  </div>
+</footer>
+
+</main>
+
+</body>
+</html>

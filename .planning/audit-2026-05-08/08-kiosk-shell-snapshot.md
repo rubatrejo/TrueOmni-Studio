@@ -1,0 +1,29 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - banner [ref=e5]:
+        - generic [ref=e6]:
+          - link "TrueOmni Studio" [ref=e7] [cursor=pointer]:
+            - /url: /studio
+          - navigation [ref=e26]
+        - generic [ref=e30]:
+          - button "Versions & Changelog" [ref=e31] [cursor=pointer]
+          - generic "All changes saved" [ref=e36]
+          - button "Undo" [ref=e40] [cursor=pointer]
+          - button "Redo" [ref=e44] [cursor=pointer]
+          - button "Switch to dark mode" [ref=e536] [cursor=pointer]
+          - button "Export config JSON" [ref=e53] [cursor=pointer]
+          - button "Import config JSON" [ref=e57] [cursor=pointer]
+          - link "Open kiosk at /k/default" [ref=e61] [cursor=pointer]:
+            - /url: /k/default
+          - button "Publish (filesystem in dev, GitHub PR in production)" [ref=e65] [cursor=pointer]
+      - generic [ref=e69]:
+        - complementary [ref=e71]:
+          - tablist "Studio sections" [ref=e72]
+          - generic [ref=e238]
+        - main [ref=e251]:
+          - generic [ref=e252]
+          - generic [ref=e496]
+      - paragraph [ref=e535]: All changes saved
+    - region "Notifications"
+  - alert [ref=e544]

@@ -1,0 +1,117 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - main [ref=e4]:
+      - generic [ref=e5]:
+        - link "TrueOmni Studio" [ref=e7] [cursor=pointer]:
+          - /url: /studio
+          - img "TrueOmni" [ref=e8]
+          - generic [ref=e24]: Studio
+        - generic [ref=e25]:
+          - link "Documentation" [ref=e26] [cursor=pointer]:
+            - /url: /studio/docs
+            - img [ref=e27]
+            - generic [ref=e29]: Documentation
+          - button "Switch to dark mode" [ref=e74] [cursor=pointer]:
+            - img [ref=e76]
+          - button "R ruben@trueomni.com" [ref=e35] [cursor=pointer]:
+            - generic [ref=e36]: R
+            - generic [ref=e37]: ruben@trueomni.com
+            - img [ref=e38]
+      - generic [ref=e40]:
+        - paragraph [ref=e41]: White-label studio
+        - heading "One client. Every product." [level=1] [ref=e42]
+        - paragraph [ref=e43]: Upload the branding once and feed it to every product the client uses — kiosks, digital displays, and the upcoming PWA, video walls and tablets.
+      - generic [ref=e44]:
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - heading "Your clients" [level=2] [ref=e47]
+            - paragraph [ref=e48]: 4 clients
+          - button "+ New client" [ref=e49] [cursor=pointer]:
+            - generic [ref=e50]: +
+            - text: New client
+        - generic [ref=e51]:
+          - link "TrueOmni default Arizona Kiosks Displays Edited 1h ago ruben" [ref=e83] [cursor=pointer]:
+            - /url: /studio/default
+            - generic [ref=e84]:
+              - img "TrueOmni" [ref=e88]
+              - generic [ref=e103]: default
+            - generic [ref=e104]:
+              - heading "Arizona" [level=3] [ref=e105]
+              - generic [ref=e106]:
+                - generic [ref=e107]:
+                  - img [ref=e108]
+                  - text: Kiosks
+                - generic [ref=e110]:
+                  - img [ref=e111]
+                  - text: Displays
+              - generic [ref=e114]:
+                - generic [ref=e115]:
+                  - text: Edited
+                  - time [ref=e116]: 1h ago
+                - generic [ref=e117]: ruben
+          - link "demo-cliente-a demo-cliente-a demo-cliente-a Kiosks Edited 1h ago ruben" [ref=e119] [cursor=pointer]:
+            - /url: /studio/demo-cliente-a
+            - generic [ref=e120]:
+              - generic [ref=e124]: demo-cliente-a
+              - generic [ref=e125]: demo-cliente-a
+            - generic [ref=e126]:
+              - heading "demo-cliente-a" [level=3] [ref=e127]
+              - generic [ref=e129]:
+                - img [ref=e130]
+                - text: Kiosks
+              - generic [ref=e132]:
+                - generic [ref=e133]:
+                  - text: Edited
+                  - time [ref=e134]: 1h ago
+                - generic [ref=e135]: ruben
+          - link "E2E Final logo e2e-final E2E Final Kiosks Displays Edited 22m ago ruben" [ref=e137] [cursor=pointer]:
+            - /url: /studio/e2e-final
+            - generic [ref=e138]:
+              - img "E2E Final logo" [ref=e142]
+              - generic [ref=e143]: e2e-final
+            - generic [ref=e144]:
+              - heading "E2E Final" [level=3] [ref=e145]
+              - generic [ref=e146]:
+                - generic [ref=e147]:
+                  - img [ref=e148]
+                  - text: Kiosks
+                - generic [ref=e150]:
+                  - img [ref=e151]
+                  - text: Displays
+              - generic [ref=e154]:
+                - generic [ref=e155]:
+                  - text: Edited
+                  - time [ref=e156]: 22m ago
+                - generic [ref=e157]: ruben
+          - link "Test Fase 4 test-fase4 Test Fase 4 Kiosks Displays Edited 1h ago ruben" [ref=e159] [cursor=pointer]:
+            - /url: /studio/test-fase4
+            - generic [ref=e160]:
+              - generic [ref=e164]: Test Fase 4
+              - generic [ref=e165]: test-fase4
+            - generic [ref=e166]:
+              - heading "Test Fase 4" [level=3] [ref=e167]
+              - generic [ref=e168]:
+                - generic [ref=e169]:
+                  - img [ref=e170]
+                  - text: Kiosks
+                - generic [ref=e172]:
+                  - img [ref=e173]
+                  - text: Displays
+              - generic [ref=e176]:
+                - generic [ref=e177]:
+                  - text: Edited
+                  - time [ref=e178]: 1h ago
+                - generic [ref=e179]: ruben
+          - button "+ New client" [ref=e180] [cursor=pointer]:
+            - generic [ref=e181]: +
+            - generic [ref=e182]: New client
+      - generic [ref=e67]:
+        - generic [ref=e68]: © 2026 TrueOmni · Kiosk Studio v0.1
+        - generic [ref=e69]:
+          - button "Replay tour" [ref=e70] [cursor=pointer]
+          - 'link "KV: ok (cloud, 591ms) Filesystem: ok (4ms) Checked 2:47:48 PM" [ref=e183] [cursor=pointer]':
+            - /url: /studio/diagnostics
+            - text: All systems operational
+          - generic [ref=e73]: Local · main
+    - region "Notifications"
+  - alert [ref=e184]

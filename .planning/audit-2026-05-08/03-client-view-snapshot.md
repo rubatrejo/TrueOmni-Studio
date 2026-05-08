@@ -1,0 +1,121 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - banner [ref=e5]:
+        - generic [ref=e6]:
+          - link "TrueOmni Studio" [ref=e7] [cursor=pointer]:
+            - /url: /studio
+            - img "TrueOmni" [ref=e8]
+            - generic [ref=e24]: Studio
+          - navigation [ref=e26]:
+            - link "Clients" [ref=e27] [cursor=pointer]:
+              - /url: /studio
+            - img [ref=e28]
+            - generic [ref=e30]: Arizona
+        - generic [ref=e31]:
+          - generic "Idle" [ref=e32]:
+            - generic [ref=e34]: Idle
+          - button "Switch to dark mode" [ref=e159] [cursor=pointer]:
+            - img [ref=e161]
+      - main [ref=e39]:
+        - generic [ref=e40]:
+          - heading "Arizona" [level=1] [ref=e41]
+          - paragraph [ref=e42]: Set the branding once — every product the client uses inherits it automatically.
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - heading "Branding & info" [level=2] [ref=e45]
+            - paragraph [ref=e46]: Name, location, colors, logos, fonts and media. Changes autosave after ~1s.
+          - generic [ref=e47]:
+            - generic [ref=e48]:
+              - button "General" [ref=e49] [cursor=pointer]:
+                - img [ref=e50]
+                - text: General
+              - button "Brand colors" [ref=e54] [cursor=pointer]:
+                - img [ref=e55]
+                - text: Brand colors
+              - button "Logos" [ref=e61] [cursor=pointer]:
+                - img [ref=e62]
+                - text: Logos
+              - button "Fonts" [ref=e66] [cursor=pointer]:
+                - img [ref=e67]
+                - text: Fonts
+              - button "Media" [ref=e69] [cursor=pointer]:
+                - img [ref=e70]
+                - text: Media
+            - generic [ref=e75]:
+              - generic [ref=e76]:
+                - generic [ref=e77]: Name
+                - textbox "Name" [ref=e78]:
+                  - /placeholder: TrueOmni Theme
+                  - text: Arizona
+              - generic [ref=e79]:
+                - generic [ref=e80]: Website
+                - textbox "Website" [ref=e81]:
+                  - /placeholder: https://
+              - generic [ref=e82]:
+                - generic [ref=e83]: City
+                - textbox "City" [ref=e84]:
+                  - /placeholder: Phoenix, AZ
+              - generic [ref=e85]:
+                - generic [ref=e86]:
+                  - generic [ref=e87]: Latitude
+                  - textbox "Latitude" [ref=e88]:
+                    - /placeholder: "33.4484"
+                - generic [ref=e89]:
+                  - generic [ref=e90]: Longitude
+                  - textbox "Longitude" [ref=e91]:
+                    - /placeholder: "-112.0740"
+        - generic [ref=e92]:
+          - generic [ref=e93]:
+            - generic [ref=e94]:
+              - heading "Products" [level=2] [ref=e95]
+              - paragraph [ref=e96]: Open the editor of each active product or activate a new one. The client's branding is applied automatically.
+            - generic [ref=e97]: 2 active
+          - generic [ref=e98]:
+            - link [ref=e99] [cursor=pointer]:
+              - /url: /studio/default/kiosk
+              - article [ref=e100]:
+                - generic [ref=e101]:
+                  - img [ref=e103]
+                  - generic [ref=e105]:
+                    - heading "Kiosks" [level=3] [ref=e106]
+                    - generic [ref=e107]: Active
+                - paragraph [ref=e108]: Vertical touch screens with interactive modules.
+                - generic [ref=e109]:
+                  - text: Open editor
+                  - img [ref=e110]
+            - link [ref=e112] [cursor=pointer]:
+              - /url: /studio/default/digital-displays
+              - article [ref=e113]:
+                - generic [ref=e114]:
+                  - img [ref=e116]
+                  - generic [ref=e119]:
+                    - heading "Digital Displays" [level=3] [ref=e120]
+                    - generic [ref=e121]: Active
+                - paragraph [ref=e122]: Landscape no-touch signage rotating playlists.
+                - generic [ref=e123]:
+                  - text: Open editor
+                  - img [ref=e124]
+            - article [ref=e127]:
+              - generic [ref=e128]:
+                - img [ref=e130]
+                - generic [ref=e132]:
+                  - heading "Mobile PWA" [level=3] [ref=e133]
+                  - generic [ref=e134]: Coming soon
+              - paragraph [ref=e135]: Progressive Web App that inherits the client's branding.
+            - article [ref=e137]:
+              - generic [ref=e138]:
+                - img [ref=e140]
+                - generic [ref=e145]:
+                  - heading "Video Walls" [level=3] [ref=e146]
+                  - generic [ref=e147]: Coming soon
+              - paragraph [ref=e148]: Multi-screen synchronized compositions.
+            - article [ref=e150]:
+              - generic [ref=e151]:
+                - img [ref=e153]
+                - generic [ref=e155]:
+                  - heading "Tablets" [level=3] [ref=e156]
+                  - generic [ref=e157]: Coming soon
+              - paragraph [ref=e158]: Touch-first tablet experiences for the floor.
+    - region "Notifications"
+  - alert [ref=e167]

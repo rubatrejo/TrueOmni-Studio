@@ -115,18 +115,30 @@ export function useSignageBridge() {
 
   const pushClient = useCallback(
     (client: Partial<SignageClientFile>) => {
+      const wasFirstPush = lastClientRef.current === null;
       lastClientRef.current = client;
       if (clientDebounceRef.current) clearTimeout(clientDebounceRef.current);
-      clientDebounceRef.current = setTimeout(() => sendClientNow(client), 120);
+      // Primer push: inmediato (sin debounce) para que el iframe reciba el
+      // estado inicial sin delay perceptible. Subsecuentes: debounce 120ms.
+      if (wasFirstPush) {
+        sendClientNow(client);
+      } else {
+        clientDebounceRef.current = setTimeout(() => sendClientNow(client), 120);
+      }
     },
     [sendClientNow],
   );
 
   const pushDisplay = useCallback(
     (display: Partial<SignageDisplayConfig>) => {
+      const wasFirstPush = lastDisplayRef.current === null;
       lastDisplayRef.current = display;
       if (displayDebounceRef.current) clearTimeout(displayDebounceRef.current);
-      displayDebounceRef.current = setTimeout(() => sendDisplayNow(display), 120);
+      if (wasFirstPush) {
+        sendDisplayNow(display);
+      } else {
+        displayDebounceRef.current = setTimeout(() => sendDisplayNow(display), 120);
+      }
     },
     [sendDisplayNow],
   );
@@ -160,6 +172,40 @@ export function useSignageBridge() {
     setIsReady(false);
     setLastAckAt(null);
     setMountAt(Date.now());
+    // Re-enviar los últimos pushes después del load. El SignageBridge del
+    // iframe se monta como Client Component que necesita hidratación; entre
+    // que el iframe dispatcha `load` y que React hidrata el listener pueden
+    // pasar varios cientos de ms. Reenviamos en una secuencia escalonada
+    // (50ms, 300ms, 800ms, 1500ms) para asegurar que al menos uno llega
+    // post-hidratación. El SignageBridge guarda el último patch en zustand,
+    // así que repeticiones son idempotentes.
+    const winRef = () => iframeRef.current?.contentWindow;
+    [50, 300, 800, 1500].forEach((delay) => {
+      setTimeout(() => {
+        const win = winRef();
+        if (!win) return;
+        if (lastClientRef.current) {
+          try {
+            win.postMessage(
+              { type: 'signage:client-update', client: lastClientRef.current },
+              '*',
+            );
+          } catch {
+            // ignored
+          }
+        }
+        if (lastDisplayRef.current) {
+          try {
+            win.postMessage(
+              { type: 'signage:display-update', display: lastDisplayRef.current },
+              '*',
+            );
+          } catch {
+            // ignored
+          }
+        }
+      }, delay);
+    });
   }, []);
 
   const bridgeStatus: SignageBridgeStatus = (() => {

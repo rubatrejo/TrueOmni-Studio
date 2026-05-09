@@ -40,6 +40,7 @@ yarn-error.log*
 
 # Claude local state (si aparece)
 .claude/*.local.*
+.claude/scheduled_tasks.lock
 
 # Test / coverage
 coverage/

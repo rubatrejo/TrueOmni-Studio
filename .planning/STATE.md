@@ -6,41 +6,21 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ## Estado actual
 
-**Fase activa:** **Refactor cliente-primero del Studio** — 6 fases (1→6) cerradas + UI tweaks finales. 7 commits locales **NO pusheados** desde el último deploy del signage header (`a95a5e5`, ya en producción Vercel `dpl_MMUUrFnHXJ4SGZbKgsoXNRfzzz9w`). Pendiente: validación E2E manual local + push + deploy.
+**Fase activa:** **Audit panorámico v2 cerrado al 96% en producción** (45/47 hallazgos). Studio + signage operativos en `https://trueomni-studio.vercel.app` con allowlist GitHub OAuth + super-admin hardcoded (`ruba.trejo@gmail.com`). Working tree limpio (excepto `.claude/scheduled_tasks.lock` artefacto de tooling, no debe commitearse).
 
-**Sesión 2026-05-08 (madrugada→mediodía):**
+**Último deploy verde en producción:** `dpl_2uWYhJMokKJTQCbnqnUUyijmSpo1` — commit `9d7cfd3` (fix Pending Changes falso positivo).
 
-Refactor profundo del editor signage en respuesta a 5+ rondas de feedback iterativo:
+**Pendiente real:**
 
-1. **CRUD de displays end-to-end** (commit `9a4485d`): backend POST/DELETE/clone + frontend wizards + fix click bug card del dashboard.
-2. **Editor de contenido** (`7626de6`): Events/Social/News tabs con CRUD inline + auto-save al KV. KV namespaces nuevos. `loadSignageClient` lee KV-first con fallback fs.
-3. **Refactor dashboard** (`9edf49b`): "1 card = 1 display" plano cross-clients. Add card en grid (patrón kiosk). Eliminado ThemeEditor — sus tabs (Branding/Header/Events/Social/News/i18n) consolidados en el DisplayEditor que ahora tiene 10 tabs.
-4. **UX feedback round 2** (`e3b8b5b`): accent olive `#B9BD39` (no naranja), format selector como tabs estilo kiosk (no dropdown), bridge live mergea `clientPatch.branding`, logo header alineado izquierda con custom logo via `<image>`, switches verdes → zinc tokens, hex input en color picker, fix VideoImage form bug.
-5. **Fonts kiosk-aligned + multi-playlist** (`ec9bda4`): schema `branding.fonts` cambió a `{ display, body, displayCustom?, bodyCustom? }` con defaults Montserrat/Open Sans, reusa `<CustomFontField>` del kiosk para upload .woff2/.woff/.ttf/.otf. `display.playlists[]` con activePlaylistId — UI con tabs `<PlaylistsBar>` Add/Rename/Delete.
-6. **Slide nav + " + " labels + fix template 06** (`d3a3b69`): "01-full-events" → "Full + Events". Bridge bidireccional: SignagePlayer emite `signage:slide-active`. Highlight slide row activo. Nav controls (prev/next). `manualOverrideRef` evita reset por dayparting cuando operator hace jump manual.
-7. **Nav controls reubicados** (`298db25`): movidos del top toolbar (saturado) a 80px debajo del iframe, gradient sky grande y colorido.
-8. **Default tab Branding + deps stable** (`95a7e51`): editor abre en Branding (no Playlist). useEffect deps sin `bridge` para evitar re-runs por tick del status.
-9. **Fix definitivo del bridge live** (`b6185e8`): identificado el bug — el SignageBridge Client Component dentro del iframe necesita hidratación React (~200-500ms en dev). Pushes que llegaban en ese gap se perdían. Fix: 1) primer push inmediato sin debounce, 2) `onIframeLoad` re-envía `lastClientRef`/`lastDisplayRef` en cascada (50/300/800/1500ms). SignageBridgeStyleApplier es idempotente.
+1. **Verificar `STUDIO_ADMIN_EMAILS`** en Vercel dashboard (tooling no permite gestión de env vars desde aquí).
+2. **S-46 custom domain `studio.trueomni.com`** — DNS externo, sin acceso al provider.
+3. **Pre-commit hook** (Husky + lint-staged) — sub-fase Sprint 5.
+4. **Test E2E ejecutable** — instalar `@playwright/test` + mover spec documentado a `tests/e2e/`.
+5. **Fase 4 — primer cliente real** — bloqueada por negocio.
 
-**Pendiente cuando arranque la próxima sesión:**
+**Última sesión (2026-05-08 tarde-noche):** Audit panorámico v2 cerrado al 96% en producción (45/47 hallazgos). 9 commits + 5 deploys verdes consecutivos: 4 sprints del audit + format histórico Prettier + maintenance mode sign-in + super-admin hardcoded + fix Pending Changes deep-equal. Detalles completos abajo en historial de sesiones.
 
-1. **Verificar visualmente** que el fix del bridge resuelve los issues del feedback final del usuario:
-   - Cambiar color en BrandingTab → debe reflejarse live en el iframe.
-   - Cambiar logo (subir custom) → debe verse el logo nuevo en el header.
-   - Cambiar font (Montserrat/Open Sans/upload custom) → debe aplicarse a SVG `<text>` del runtime (ya tokenizados con `signage-font-display/body` en commit `d3a3b69`).
-   - Toggles del Header tab (Logo/Weather/Clock visible) → reflejar.
-   - Cambiar header position/height/layout → reflejar.
-
-2. **Issue conocido**: el indicador "N/total Template Label" del nav panel debajo del iframe puede quedar desfasado del slide visible. El `signage:slide-active` postMessage emite correctamente pero el receptor del editor (`useSignageBridge`) puede tardar en sincronizar el state. Debug en sesión nueva.
-
-3. **Push los 10 commits locales** una vez verificado:
-   `9a4485d`, `7626de6`, `9edf49b`, `e3b8b5b`, `ec9bda4`, `d3a3b69`, `298db25`, `95a7e51`, `b6185e8` (más cualquier nuevo de la próxima sesión).
-
-4. **Deploy a Vercel**: tarea #9 — pendiente cuando feedback esté cerrado.
-
-**Última fase cerrada:** sesión maratón 2026-05-06 — 9 deploys verdes en cadena. Audit Studio cerrado en código, OAuth structure preparada (pendiente credenciales), Ask AI con Claude Haiku 4.5, Guestbook backend KV, Fase 9 starters definidos.
-
-**Siguiente acción concreta:** **Fase 4 — primer cliente real** (bloqueado por negocio: necesita cliente firmado). Mientras tanto, los TODOs operativos pendientes: DNS `studio.trueomni.com` (sin acceso provider — pospuesto), `DEEPL_API_KEY` (Anthropic ya hace fallback automático), credenciales OAuth de las 4 plataformas social (cuando llegue cliente con Social Wall — ver `.planning/2026-05-06-oauth-architecture-decision.md`). UI de starters en NewClientModal pendiente como sub-fase S (~1-2h).
+**Siguiente acción concreta:** **Fase 4 — primer cliente real** (bloqueada por negocio: necesita cliente firmado). Mientras tanto, los pendientes operativos del audit cerrado: verificar `STUDIO_ADMIN_EMAILS` en Vercel + DNS `studio.trueomni.com` (sin acceso provider) + setup pre-commit hook + ejecutar test E2E spec.
 
 **Bloqueos:**
 
@@ -2840,6 +2820,47 @@ studio/clients`). Idempotente con guard por `loadClientManifest`. Sin
   background jobs ni migrations explícitas.
 
 **Fase:** Studio cliente-primero (6/6 fases cerradas).
+
+---
+
+### Sesión 2026-05-08 (tarde-noche) — Audit panorámico v2 cerrado 96% + allowlist hardcoded + producción
+
+**Hecho:**
+
+- **Audit panorámico v2 al 96% en producción** (45/47 hallazgos cerrados). 6 commits del audit en cadena:
+  - `8dc957d` 6 bugs P0/P1 (hydration, postMessage origin, client:list cleanup, Photo Booth errors, drift recovery).
+  - `95c9a72` Sprint 2 — 14 hallazgos (TabStrip unificado, PendingChanges panel, ComingSoon rico con timeline+features+waitlist, search+pin dashboard, Activate visual diff, lat/lon clamp, click-outside picker, EnvironmentBadge dinámico).
+  - `e7fbd65` Sprint 3 a11y + perf — 12 hallazgos (`useEscapeClose`/`useFocusTrap` aplicados a 7 modales, Shell.tsx split via `useStudioBridgeSync` con diff por referencia, auto-migrate concurrency 5, iframe cleanup, lazy logos, htmlFor explícito).
+  - `928cf33` Sprint 4 DX/infra — 8 hallazgos (logger estructurado, smoke integrations endpoint, NewDisplay creation flow real, migration report visible en diagnostics, Mobile PWA orientation hidden, test E2E spec documentado).
+  - `e8e1d77` Format del drift histórico — Prettier 3.6 sobre 345 archivos (sin cambios de código, neto −3511 líneas).
+- **Push masivo a Vercel** — 16 commits acumulados (refactor cliente-primero + signage header + audit completo) deployados en `dpl_8xUxzpcT8ASsDKXgB4dphzaYDj9T` READY 140s.
+- **Allowlist + maintenance mode** post-push:
+  - `15df873` banner sign-in en mantenimiento (rojo → amber, sin email contacto).
+  - `226bf21` super-admin hardcoded `ruba.trejo@gmail.com` en `auth.ts` — garantía de acceso del owner aunque `STUDIO_ADMIN_EMAILS` quede vacía.
+  - `9d7cfd3` fix Pending Changes falso positivo (deep-equal JSON en lugar de string-compare en `computeChange` + `diffSignage` — Prettier vs JSON.stringify diferían por whitespace y reportaba "13 files pending" sin haber tocado nada).
+
+**Verificado:**
+
+- Smoke E2E producción: `/studio` redirect a sign-in OK · `/api/health` KV cloud 78ms / fs 8ms · sign-in render 0 console errors / 0 warnings (S-01 hydration confirmado cerrado en prod) · banner amber visible tras `?error=AccessDenied`.
+- 9 deploys consecutivos verdes (1 push masivo + 4 push individuales: maintenance, super-admin, pending fix). `pnpm typecheck` + `pnpm lint` limpios en cada commit.
+- `STUDIO_ADMIN_EMAILS` env var: pendiente que el operador la verifique manualmente en Vercel dashboard (tooling Vercel MCP no expone gestión de env vars). El super-admin hardcoded blinda contra cualquier miss-config.
+
+**Pendiente / siguiente:**
+
+1. **Verificar STUDIO_ADMIN_EMAILS** en https://vercel.com/rubatrejo-gmailcoms-projects/trueomni-studio/settings/environment-variables — debe contener solo `ruba.trejo@gmail.com` (o vaciarla si quieres que solo entre el super-admin).
+2. **2 hallazgos del audit aún abiertos**: S-46 custom domain `studio.trueomni.com` (DNS Vercel — externo al repo, sin acceso al provider) + pre-commit hook (sub-fase Sprint 5: `pnpm add -D husky lint-staged` + script `prepare`).
+3. **Sprint 5 técnico futuro**: instalar `@playwright/test` + mover `.planning/tests/studio-create-client.e2e.md` a `tests/e2e/`, GitHub Action `e2e.yml` que corra en PRs.
+4. **Fase 4 — primer cliente real**: bloqueada por negocio (cliente firmado).
+
+**Decisiones:**
+
+- **Super-admin hardcoded en código** (no solo env): evita lockout permanente del Studio si se pierde la env var. El SUPER_ADMIN_EMAIL solo se revoca con un commit explícito al repo.
+- **Pending Changes deep-equal solo para `.json`**: otros formatos (.css, .md, binarios) siguen con string-compare exacto. Solo JSON tiene drift de formatting (Prettier vs JSON.stringify) y solo ahí aparecía el falso positivo.
+- **Banner amber, no rojo**: refleja "estado temporal" (mantenimiento) en lugar de "rechazo definitivo". Sin email de contacto público para no exponer la lógica de allowlist.
+- **JSON keep diff `safeJsonKeyDiff` se mantiene**: cuando el contenido sí difiere semánticamente (action=update real), el operador sigue viendo qué keys cambiaron en el publish modal.
+- **Helper `deepEqual` duplicado intencionalmente**: una copia en `publish/[slug]/route.ts` y otra en `pending/route.ts`. Extraer a `_lib/deep-equal.ts` será un refactor menor cuando un tercer call-site lo necesite.
+
+**Fase:** Audit panorámico v2 cerrado en producción (45/47, 96%) · próxima fase: Fase 4 primer cliente real (bloqueada por negocio).
 
 ---
 

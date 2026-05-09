@@ -1,4 +1,4 @@
-import { ChevronRight, Plus, Tv } from 'lucide-react';
+import { ChevronRight, Tv } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -14,6 +14,8 @@ import { kv } from '@/lib/studio/kv';
 
 import { StudioBrand } from '../../_components/StudioBrand';
 import { ThemeToggle } from '../../_components/ThemeToggle';
+
+import { NewDisplayCard } from './_components/NewDisplayCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -154,28 +156,16 @@ export default async function ClientDisplaysPage({ params }: PageProps) {
             </Link>
           ))}
 
-          <NewDisplayCard slug={slug} />
+          {/* Hallazgo S-44: el placeholder "Coming soon" reemplazado por
+              un flujo real de creación. Reusa el endpoint existente
+              `POST /api/studio/signage/displays/[client]` que clona desde
+              `default/lobby-tv`. */}
+          <NewDisplayCard
+            clientSlug={slug}
+            existingSlugs={displays.map((d) => d.slug)}
+          />
         </div>
       </main>
-    </div>
-  );
-}
-
-function NewDisplayCard({ slug }: { slug: string }) {
-  // Por ahora, "Add display" lleva al display editor con un slug placeholder
-  // que el editor signage detecta como "new" (cuando aterrice ese flujo).
-  // Mientras tanto, esto es un placeholder visual.
-  return (
-    <div
-      title="Crear display nuevo (próximamente)"
-      className="flex cursor-not-allowed flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50/40 px-6 py-12 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900/20 dark:text-zinc-600"
-      aria-label={`Add display to ${slug}`}
-    >
-      <span className="grid h-10 w-10 place-items-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-        <Plus className="h-5 w-5" strokeWidth={1.75} />
-      </span>
-      <span className="text-sm font-medium">Add display</span>
-      <span className="text-[10.5px] uppercase tracking-wider">Coming soon</span>
     </div>
   );
 }

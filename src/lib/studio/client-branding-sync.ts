@@ -12,6 +12,7 @@ import type {
 import { clientKeys } from './client-manifest';
 import { hexToHsl, hslToHex } from './hex-to-hsl';
 import { kv, kvKeys } from './kv';
+import { studioLog } from './logger';
 import { CustomFontSchema } from './schema';
 import type { Branding, KioskConfig } from './schema';
 
@@ -425,20 +426,50 @@ export async function saveUnifiedBranding(
     result.signage = 'skipped';
   }
 
-  // 4. Si hubo errores, persistir últimos 10 para diagnóstico.
+  // 4. Si hubo errores, persistir últimos 10 para diagnóstico + log
+  // estructurado. Hallazgo S-38: antes los errores se guardaban en KV
+  // pero el operador no los veía a menos que abriera /studio/diagnostics.
+  // Ahora también van al logger con level=alert si superan el threshold
+  // de fallos consecutivos para que `vercel logs --follow` los muestre.
   if (result.errors.length > 0) {
+    let priorErrorCount = 0;
     try {
       const log = await kv.get<Array<{ at: string; errors: SyncResult['errors'] }>>(
         clientKeys.syncErrors(slug),
       );
+      const prior = Array.isArray(log) ? log : [];
+      priorErrorCount = prior.length;
       const next = [
         { at: new Date().toISOString(), errors: result.errors },
-        ...(Array.isArray(log) ? log : []),
+        ...prior,
       ].slice(0, 10);
       await kv.set(clientKeys.syncErrors(slug), next);
     } catch {
-      // ignoramos: el log es nice-to-have.
+      // ignoramos: la persistencia del log es nice-to-have.
     }
+
+    // Threshold: 1er fallo = warn, 2+ consecutivos = alert (señal para
+    // alarmar a oncall en logs aggregators).
+    studioLog(priorErrorCount >= 1 ? 'alert' : 'warn', {
+      event: 'sync.failed',
+      slug,
+      message: `branding sync failed (${result.errors.length} target${
+        result.errors.length === 1 ? '' : 's'
+      }, ${priorErrorCount + 1} consecutive)`,
+      details: {
+        unified: result.unified,
+        kiosk: result.kiosk,
+        signage: result.signage,
+        errors: result.errors,
+        priorErrorCount,
+      },
+    });
+  } else if (result.unified === 'ok') {
+    studioLog.info({
+      event: 'sync.ok',
+      slug,
+      details: { kiosk: result.kiosk, signage: result.signage },
+    });
   }
 
   return result;

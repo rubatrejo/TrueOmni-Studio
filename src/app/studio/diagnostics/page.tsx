@@ -8,6 +8,8 @@ import {
   Database,
   Folder,
   HardDrive,
+  Plug,
+  Repeat,
   RotateCcw,
   Save,
   Send,
@@ -63,6 +65,14 @@ export default function DiagnosticsPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <HealthSection />
         <RecentActivitySection />
+      </div>
+
+      <div className="mt-6">
+        <MigrationReportSection />
+      </div>
+
+      <div className="mt-6">
+        <IntegrationsSmokeSection />
       </div>
 
       <div className="mt-6">
@@ -321,6 +331,328 @@ function RecentActivitySection() {
             </li>
           ))}
         </ol>
+      )}
+    </section>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Migration report                                                         */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+interface MigrationReportPayload {
+  scanned: number;
+  migrated: number;
+  alreadyMigrated: number;
+  failed: number;
+  details: Array<{
+    slug: string;
+    status: 'migrated' | 'already-migrated' | 'failed';
+    products: string[];
+    source: string;
+    error?: string;
+  }>;
+}
+
+interface LastMigrationResponse {
+  report: MigrationReportPayload | null;
+  computedAt: string | null;
+  ageMs: number | null;
+}
+
+/**
+ * Hallazgo S-43 del audit panorámico v2: el `MigrationReport` se calculaba
+ * al primer GET /api/studio/clients pero solo se logueaba server-side.
+ * Aquí lo exponemos al operador con counts y desglose por slug.
+ */
+function MigrationReportSection() {
+  const [data, setData] = useState<LastMigrationResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const refresh = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/studio/migration/last-report', {
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setData((await res.json()) as LastMigrationResponse);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void refresh();
+  }, []);
+
+  return (
+    <section className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-900 dark:bg-zinc-950">
+      <header className="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <h2 className="flex items-center gap-2 font-display text-[15px] font-semibold text-zinc-900 dark:text-white">
+            <Repeat className="h-4 w-4 text-emerald-500" />
+            Auto-migration
+          </h2>
+          <p className="mt-0.5 text-[12px] text-zinc-500 dark:text-zinc-500">
+            Lazy migrator that converts legacy clients (kiosk-only or signage-only)
+            to the unified manifest model. Runs on first dashboard load.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={refresh}
+          disabled={loading}
+          className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[11.5px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-800"
+        >
+          <RotateCcw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
+          Re-fetch
+        </button>
+      </header>
+
+      {error ? (
+        <div className="rounded-md border border-red-200 bg-red-50/60 p-3 text-[12px] text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+          <strong>Failed to load:</strong> {error}
+        </div>
+      ) : !data ? (
+        <p className="text-[12px] text-zinc-500">Loading…</p>
+      ) : !data.report ? (
+        <p className="rounded-md border border-zinc-200 bg-zinc-50/40 p-3 text-[12px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/20 dark:text-zinc-400">
+          No migration has run yet in this server instance. Visit{' '}
+          <code className="font-mono">/studio</code> to trigger the lazy
+          migrator.
+        </p>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <ReportStat label="Scanned" value={data.report.scanned} tone="neutral" />
+            <ReportStat label="Migrated" value={data.report.migrated} tone="success" />
+            <ReportStat
+              label="Already migrated"
+              value={data.report.alreadyMigrated}
+              tone="neutral"
+            />
+            <ReportStat label="Failed" value={data.report.failed} tone="danger" />
+          </div>
+          <p className="mt-3 text-[11.5px] text-zinc-500">
+            Last computed{' '}
+            {data.computedAt ? relativeTime(data.computedAt) : '—'}{' '}
+            {data.ageMs != null && data.ageMs < 60_000 ? '(cache fresh)' : '(cache may be stale)'}
+          </p>
+          {data.report.details.length > 0 && (
+            <details className="mt-4 rounded-md border border-zinc-200 dark:border-zinc-800">
+              <summary className="cursor-pointer px-3 py-2 text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
+                Detail by client ({data.report.details.length})
+              </summary>
+              <ul className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
+                {data.report.details.map((d) => (
+                  <li
+                    key={d.slug}
+                    className="flex items-center justify-between gap-3 px-3 py-2 text-[12px]"
+                  >
+                    <span className="flex items-center gap-2">
+                      <code className="font-mono text-zinc-800 dark:text-zinc-200">
+                        {d.slug}
+                      </code>
+                      <span className="text-zinc-500">{d.products.join(', ') || '—'}</span>
+                    </span>
+                    <span
+                      className={
+                        d.status === 'migrated'
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : d.status === 'failed'
+                            ? 'text-red-600 dark:text-red-400'
+                            : 'text-zinc-500'
+                      }
+                    >
+                      {d.status === 'migrated'
+                        ? `migrated (source: ${d.source})`
+                        : d.status === 'failed'
+                          ? `failed: ${d.error?.slice(0, 60) ?? 'unknown'}`
+                          : 'already migrated'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
+function ReportStat({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: 'neutral' | 'success' | 'danger';
+}) {
+  const toneClass =
+    tone === 'success'
+      ? 'text-emerald-600 dark:text-emerald-400'
+      : tone === 'danger'
+        ? 'text-red-600 dark:text-red-400'
+        : 'text-zinc-700 dark:text-zinc-300';
+  return (
+    <div className="rounded-md border border-zinc-200 bg-zinc-50/60 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900/20">
+      <p className="text-[10.5px] font-medium uppercase tracking-wider text-zinc-500">
+        {label}
+      </p>
+      <p className={`mt-0.5 font-display text-2xl font-bold tabular-nums ${toneClass}`}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Integrations smoke check                                                 */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+interface IntegrationsSmokePayload {
+  computedAt: string;
+  totals: { clients: number; ok: number; failed: number; skipped: number };
+  clients: Array<{
+    slug: string;
+    name?: string;
+    error?: string;
+    integrations: Array<{
+      kind: string;
+      status: 'ok' | 'failed' | 'skipped';
+      message?: string;
+    }>;
+  }>;
+}
+
+/**
+ * Hallazgo S-45 del audit panorámico v2: el Integrations tab del editor
+ * tenía un botón "Check" por integración pero no había vista batch para
+ * monitorear que TODAS las llaves de TODOS los clientes seguían vivas.
+ * Esta sección dispara el smoke check al request del operador.
+ */
+function IntegrationsSmokeSection() {
+  const [data, setData] = useState<IntegrationsSmokePayload | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const run = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/studio/integrations/smoke', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setData((await res.json()) as IntegrationsSmokePayload);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Smoke check failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <section className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-900 dark:bg-zinc-950">
+      <header className="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <h2 className="flex items-center gap-2 font-display text-[15px] font-semibold text-zinc-900 dark:text-white">
+            <Plug className="h-4 w-4 text-violet-500" />
+            Integrations smoke check
+          </h2>
+          <p className="mt-0.5 text-[12px] text-zinc-500 dark:text-zinc-500">
+            Pings every configured integration (Mapbox, OpenWeather, Tavus,
+            Satisfi, etc.) of every kiosk and reports OK/failed/skipped.
+            Skipped means no credentials are stored.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={run}
+          disabled={loading}
+          className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-2.5 py-1 text-[11.5px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+        >
+          {loading ? (
+            <RotateCcw className="h-3 w-3 animate-spin" />
+          ) : (
+            <Plug className="h-3 w-3" />
+          )}
+          Run smoke check
+        </button>
+      </header>
+
+      {error && (
+        <div className="rounded-md border border-red-200 bg-red-50/60 p-3 text-[12px] text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+          <strong>Smoke failed:</strong> {error}
+        </div>
+      )}
+
+      {!error && !data && !loading && (
+        <p className="rounded-md border border-zinc-200 bg-zinc-50/40 p-3 text-[12px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/20 dark:text-zinc-400">
+          Click <strong>Run smoke check</strong> to fan out probes against
+          every integration of every kiosk. Takes a few seconds for large
+          workspaces.
+        </p>
+      )}
+
+      {data && (
+        <>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <ReportStat label="Clients" value={data.totals.clients} tone="neutral" />
+            <ReportStat label="OK" value={data.totals.ok} tone="success" />
+            <ReportStat label="Failed" value={data.totals.failed} tone="danger" />
+            <ReportStat label="Skipped" value={data.totals.skipped} tone="neutral" />
+          </div>
+          <p className="mt-3 text-[11.5px] text-zinc-500">
+            Last run {relativeTime(data.computedAt)}
+          </p>
+          <div className="mt-4 space-y-2">
+            {data.clients.map((c) => (
+              <div
+                key={c.slug}
+                className="rounded-md border border-zinc-200 bg-zinc-50/40 p-3 dark:border-zinc-800 dark:bg-zinc-900/20"
+              >
+                <div className="mb-2 flex items-center gap-2 text-[12.5px]">
+                  <span className="font-mono text-zinc-800 dark:text-zinc-200">
+                    {c.slug}
+                  </span>
+                  {c.name && <span className="text-zinc-500">{c.name}</span>}
+                  {c.error && (
+                    <span className="text-red-600 dark:text-red-400">
+                      ({c.error})
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {c.integrations.map((i) => (
+                    <span
+                      key={i.kind}
+                      title={i.message}
+                      className={
+                        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-medium ' +
+                        (i.status === 'ok'
+                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300'
+                          : i.status === 'failed'
+                            ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                            : 'bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-500')
+                      }
+                    >
+                      {i.kind}
+                      <span className="text-[9.5px] opacity-70">
+                        {i.status === 'ok' ? '✓' : i.status === 'failed' ? '✕' : '—'}
+                      </span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </section>
   );

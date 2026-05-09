@@ -288,19 +288,14 @@ export function NewClientModal({
                       </svg>
                     }
                   />
-                  <OrientationOption
-                    active={orientation === 'mobile-pwa'}
-                    onClick={() => setOrientation('mobile-pwa')}
-                    label="Mobile PWA"
-                    sub="390 × 844"
-                    glyph={
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="8" y="2" width="8" height="20" rx="2" />
-                        <line x1="11" y1="18.5" x2="13" y2="18.5" />
-                        <line x1="10" y1="4.5" x2="14" y2="4.5" />
-                      </svg>
-                    }
-                  />
+                  {/* Hallazgo S-47: la opción "Mobile PWA" estaba aquí
+                      visible aunque el producto sigue en estado "Coming
+                      soon · Q3 2026". Confunde al operador (cree que el
+                      producto existe). La ocultamos hasta que el editor
+                      Mobile PWA aterrice (Sprint S8 en el roadmap). El
+                      tipo Orientation 'mobile-pwa' se mantiene en el
+                      schema para no romper kiosks viejos que ya lo
+                      tengan persistido. */}
                 </div>
                 <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-500">
                   This is the primary view that opens in the editor. All three formats

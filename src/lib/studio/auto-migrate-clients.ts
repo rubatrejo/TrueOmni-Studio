@@ -165,6 +165,24 @@ export function invalidateAutoMigrateCache(): void {
   cachedAt = 0;
 }
 
+/**
+ * Devuelve el último report cacheado + su timestamp para diagnostics.
+ * Hallazgo S-43 del audit panorámico v2: el operador no veía "2 clientes
+ * migrados" cuando el dashboard cargaba — solo aparecía en server logs.
+ * Esta función expone el cache al endpoint /api/studio/migration/last-report.
+ */
+export function getLastMigrationReport(): {
+  report: MigrationReport | null;
+  computedAt: string | null;
+  ageMs: number | null;
+} {
+  return {
+    report: cachedReport,
+    computedAt: cachedAt > 0 ? new Date(cachedAt).toISOString() : null,
+    ageMs: cachedAt > 0 ? Date.now() - cachedAt : null,
+  };
+}
+
 // ---------------------------------------------------------------------------
 //  Helpers
 // ---------------------------------------------------------------------------

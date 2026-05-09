@@ -3,6 +3,7 @@ import 'server-only';
 import { z } from 'zod';
 
 import { kv } from './kv';
+import { studioLog } from './logger';
 
 /**
  * Manifest del cliente unificado — describe qué productos del Studio
@@ -69,17 +70,35 @@ export async function listClientSlugs(): Promise<string[]> {
   return Array.isArray(raw) ? raw : [];
 }
 
-export async function addClientToList(slug: string): Promise<void> {
+/**
+ * Hallazgo S-42: cada mutación de `client:list` se loguea estructurado
+ * para que el drift entre KV y dashboard sea diagnosticable. Antes era
+ * un set silencioso — debug del audit S-03 llevó horas porque no había
+ * historial de quién añadió/quitó qué slug ni cuándo.
+ */
+export async function addClientToList(slug: string, by?: string): Promise<void> {
   const current = await listClientSlugs();
   if (current.includes(slug)) return;
   await kv.set(CLIENT_LIST_KEY, [...current, slug].sort());
+  studioLog.info({
+    event: 'client.added',
+    slug,
+    by,
+    details: { listSizeBefore: current.length, listSizeAfter: current.length + 1 },
+  });
 }
 
-export async function removeClientFromList(slug: string): Promise<void> {
+export async function removeClientFromList(slug: string, by?: string): Promise<void> {
   const current = await listClientSlugs();
   const next = current.filter((s) => s !== slug);
   if (next.length === current.length) return;
   await kv.set(CLIENT_LIST_KEY, next);
+  studioLog.info({
+    event: 'client.removed',
+    slug,
+    by,
+    details: { listSizeBefore: current.length, listSizeAfter: next.length },
+  });
 }
 
 // ---------------------------------------------------------------------------

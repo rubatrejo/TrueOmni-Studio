@@ -10,15 +10,28 @@ import GitHub from 'next-auth/providers/github';
  * necesario.
  *
  * El gate del Studio NO es "estás logueado en GitHub" — es "tu email está
- * en STUDIO_ADMIN_EMAILS". El callback `signIn` rechaza cualquier login
- * que no esté en la allowlist; el middleware bloquea sesiones inexistentes.
+ * en STUDIO_ADMIN_EMAILS o eres el SUPER_ADMIN_EMAIL". El callback
+ * `signIn` rechaza cualquier login que no esté en la allowlist; el
+ * middleware bloquea sesiones inexistentes.
+ *
+ * Super-admin: `ruba.trejo@gmail.com` (cuenta GitHub de Rubén) está
+ * hardcoded como fallback. Garantiza acceso del owner aunque la env var
+ * `STUDIO_ADMIN_EMAILS` quede vacía o mal configurada por accidente —
+ * evita lockout permanente del Studio. Para añadir otros operadores
+ * usar la env var (CSV).
  *
  * Variables de entorno necesarias:
  *   - AUTH_GITHUB_ID, AUTH_GITHUB_SECRET (OAuth App)
  *   - AUTH_SECRET (firmado JWT)
  *   - AUTH_TRUST_HOST (Vercel preview/prod URLs distintas a localhost)
- *   - STUDIO_ADMIN_EMAILS (CSV de emails con acceso)
+ *   - STUDIO_ADMIN_EMAILS (CSV de emails adicionales con acceso, opcional)
  */
+
+/**
+ * Super-admin hardcoded del Studio. Owner del proyecto, no se borra ni se
+ * cambia desde env var. Para revocarlo se necesita un commit explícito.
+ */
+const SUPER_ADMIN_EMAIL = 'ruba.trejo@gmail.com';
 
 function parseAdminEmails(): string[] {
   const raw = process.env.STUDIO_ADMIN_EMAILS;
@@ -27,6 +40,12 @@ function parseAdminEmails(): string[] {
     .split(',')
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
+}
+
+function isAuthorizedEmail(email: string): boolean {
+  const normalized = email.toLowerCase().trim();
+  if (normalized === SUPER_ADMIN_EMAIL) return true;
+  return parseAdminEmails().includes(normalized);
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -45,16 +64,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async signIn({ profile }) {
-      const allow = parseAdminEmails();
-      // Si la allowlist está vacía, no permitimos NINGÚN login — el Studio
-      // queda inaccesible hasta que se configure la env. Falla cerrada.
-      if (allow.length === 0) {
-        console.warn('[auth] STUDIO_ADMIN_EMAILS is empty — denying all logins.');
-        return false;
-      }
       const email = profile?.email?.toLowerCase().trim();
       if (!email) return false;
-      return allow.includes(email);
+      // El super-admin SIEMPRE pasa, incluso si STUDIO_ADMIN_EMAILS está
+      // vacía. Cualquier otro email tiene que estar en la env var (CSV).
+      // Falla cerrada para todos los demás.
+      if (!isAuthorizedEmail(email)) {
+        if (parseAdminEmails().length === 0) {
+          console.warn(
+            '[auth] STUDIO_ADMIN_EMAILS is empty — only the super-admin can sign in.',
+          );
+        }
+        return false;
+      }
+      return true;
     },
     async session({ session, token }) {
       // Propagar el email del token al session.user.email para que las API

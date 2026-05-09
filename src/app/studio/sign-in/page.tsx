@@ -109,20 +109,21 @@ function SignInContent() {
           </p>
 
           {error === 'AccessDenied' ? (
+            // Hallazgo S-26.5 (post-audit, 2026-05-08 noche): mensaje de
+            // mantenimiento en lugar del antiguo "this account isn't
+            // authorized". El Studio queda en single-operator mode mientras
+            // se prepara onboarding multi-cliente. La allowlist real vive en
+            // STUDIO_ADMIN_EMAILS (Vercel env) — solo `ruba.trejo@gmail.com`
+            // pasa el callback signIn de auth.ts.
             <div
               role="alert"
-              className="flex items-start gap-2.5 rounded-lg border border-red-400/30 bg-red-500/10 px-3.5 py-3 text-[12.5px] text-white backdrop-blur-sm"
+              className="flex items-start gap-2.5 rounded-lg border border-amber-400/30 bg-amber-500/10 px-3.5 py-3 text-[12.5px] text-white backdrop-blur-sm"
             >
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-300" />
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
               <span>
-                This account isn&apos;t authorized for the Studio. Contact{' '}
-                <a
-                  href="mailto:ruben@trueomni.com"
-                  className="font-medium underline decoration-white/40 underline-offset-2 hover:decoration-white"
-                >
-                  ruben@trueomni.com
-                </a>{' '}
-                if you think this is a mistake.
+                The login process is currently under maintenance. The Studio
+                is temporarily restricted while we finalize multi-client
+                onboarding. Please try again later.
               </span>
             </div>
           ) : null}

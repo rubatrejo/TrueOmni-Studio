@@ -2,10 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 import { loadSignageClient, loadSignageDisplay } from '@/lib/signage/config';
 import { kvSignageClient, kvSignageDisplay } from '@/lib/signage/kv-store';
-import {
-  SignageClientFileSchema,
-  type SignageClientFile,
-} from '@/lib/signage/schema';
+import { SignageClientFileSchema, type SignageClientFile } from '@/lib/signage/schema';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -40,35 +37,23 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
   const newName = typeof body?.newName === 'string' ? body.newName.trim() : '';
 
   if (!newSlug || !newName) {
-    return NextResponse.json(
-      { error: 'newSlug and newName are required' },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: 'newSlug and newName are required' }, { status: 400 });
   }
   if (!SLUG_REGEX.test(newSlug)) {
     return NextResponse.json({ error: 'Invalid newSlug' }, { status: 400 });
   }
   if (newSlug === source) {
-    return NextResponse.json(
-      { error: 'newSlug must differ from source' },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: 'newSlug must differ from source' }, { status: 400 });
   }
 
   const existing = await kvSignageClient.get(newSlug).catch(() => null);
   if (existing) {
-    return NextResponse.json(
-      { error: `Theme "${newSlug}" already exists.` },
-      { status: 409 },
-    );
+    return NextResponse.json({ error: `Theme "${newSlug}" already exists.` }, { status: 409 });
   }
 
   const sourceClient = await loadSignageClient(source);
   if (!sourceClient) {
-    return NextResponse.json(
-      { error: `Source theme "${source}" not found.` },
-      { status: 404 },
-    );
+    return NextResponse.json({ error: `Source theme "${source}" not found.` }, { status: 404 });
   }
 
   const cloned: SignageClientFile = {

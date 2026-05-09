@@ -157,8 +157,7 @@ export function Shell({
 
   const initialItinerary =
     initialConfig.itineraryBuilder ?? structuredClone(DEFAULT_ITINERARY_BUILDER);
-  const [savedItinerary, setSavedItinerary] =
-    useState<ItineraryBuilderConfig>(initialItinerary);
+  const [savedItinerary, setSavedItinerary] = useState<ItineraryBuilderConfig>(initialItinerary);
   const [itinerary, setItinerary] = useState<ItineraryBuilderConfig>(initialItinerary);
 
   const initialAds = initialConfig.ads ?? defaultAds();
@@ -418,10 +417,7 @@ export function Shell({
     () => JSON.stringify(trails) !== JSON.stringify(savedTrails),
     [trails, savedTrails],
   );
-  const mapDirty = useMemo(
-    () => JSON.stringify(map) !== JSON.stringify(savedMap),
-    [map, savedMap],
-  );
+  const mapDirty = useMemo(() => JSON.stringify(map) !== JSON.stringify(savedMap), [map, savedMap]);
   const itineraryDirty = useMemo(
     () => JSON.stringify(itinerary) !== JSON.stringify(savedItinerary),
     [itinerary, savedItinerary],
@@ -693,7 +689,12 @@ export function Shell({
       if (/^https?:\/\//.test(href) && !href.startsWith(window.location.origin)) return;
       // Excluir: links que apuntan al editor actual (no son "salir").
       const editorPath = `/studio/${initialConfig.slug}`;
-      if (href === editorPath || href.startsWith(`${editorPath}?`) || href.startsWith(`${editorPath}#`)) return;
+      if (
+        href === editorPath ||
+        href.startsWith(`${editorPath}?`) ||
+        href.startsWith(`${editorPath}#`)
+      )
+        return;
       e.preventDefault();
       setPendingNavHref(href);
     };
@@ -792,11 +793,7 @@ export function Shell({
         {/* Mobile tab bar — visible solo `<lg`. En `lg+` los 3 paneles
             (sidebar/editor/preview) coexisten side-by-side y este bar se
             oculta. */}
-        <MobileTabBar
-          active={mobileTab}
-          onChange={setMobileTab}
-          className="lg:hidden"
-        />
+        <MobileTabBar active={mobileTab} onChange={setMobileTab} className="lg:hidden" />
 
         <div className="flex flex-1 overflow-hidden">
           <div
@@ -833,74 +830,74 @@ export function Shell({
                     altura permanente al scrollable; en viewport <900px
                     cubría el primer Field. Ahora se scrollea junto al
                     contenido y deja la altura útil completa para los inputs. */}
-                  <EditorPanel
-                    topSlot={
-                      activeTab === 'branding' ? (
-                        <BrandingSyncBanner slug={initialConfig.slug} product="kiosk" />
-                      ) : null
-                    }
-                    sectionKey={activeTab}
-                    branding={branding}
-                    onBrandingChange={setBranding}
-                    modules={modules}
-                    onModulesChange={setModules}
-                    billboard={billboard}
-                    onBillboardChange={setBillboard}
-                    onBillboardPreview={openBillboardPreview}
-                    onHomeDashboardPreview={openHomeDashboardPreview}
-                    aiAvatar={aiAvatar}
-                    onAiAvatarChange={setAiAvatar}
-                    onAiAvatarPreview={openAiAvatarPreview}
-                    survey={survey}
-                    onSurveyChange={setSurvey}
-                    onSurveyPreview={openSurveyPreview}
-                    deals={deals}
-                    onDealsChange={setDeals}
-                    onDealsPreview={openDealsPreview}
-                    photoBooth={photoBooth}
-                    onPhotoBoothChange={setPhotoBooth}
-                    onPhotoBoothPreview={openPhotoBoothPreview}
-                    brochures={brochures}
-                    onBrochuresChange={setBrochures}
-                    onBrochuresPreview={openBrochuresPreview}
-                    socialWall={socialWall}
-                    onSocialWallChange={setSocialWall}
-                    onSocialWallPreview={openSocialWallPreview}
-                    guestbook={guestbook}
-                    onGuestbookChange={setGuestbook}
-                    onGuestbookPreview={openGuestbookPreview}
-                    listings={listings}
-                    onListingsChange={setListings}
-                    events={events}
-                    onEventsChange={setEvents}
-                    onEventsPreview={openEventsPreview}
-                    tickets={tickets}
-                    onTicketsChange={setTickets}
-                    onTicketsPreview={openTicketsPreview}
-                    passes={passes}
-                    onPassesChange={setPasses}
-                    onPassesPreview={openPassesPreview}
-                    trails={trails}
-                    onTrailsChange={setTrails}
-                    onTrailsPreview={openTrailsPreview}
-                    map={map}
-                    onMapChange={setMap}
-                    onMapPreview={openMapPreview}
-                    itinerary={itinerary}
-                    onItineraryChange={setItinerary}
-                    onItineraryPreview={openItineraryPreview}
-                    i18nBundle={i18nBundle}
-                    onI18nBundleChange={setI18nBundle}
-                    ads={ads}
-                    onAdsChange={setAds}
-                    integrations={integrations}
-                    onIntegrationsChange={setIntegrations}
-                    currentVersion={initialConfig.currentVersion ?? 0}
-                    lastPublishedAt={initialMeta?.lastEditedAt}
-                    lastEditor={initialMeta?.lastEditor}
-                    kioskLocation={initialConfig.clientInfo?.location ?? ''}
-                    onPublish={() => setPublishOpen(true)}
-                  />
+                <EditorPanel
+                  topSlot={
+                    activeTab === 'branding' ? (
+                      <BrandingSyncBanner slug={initialConfig.slug} product="kiosk" />
+                    ) : null
+                  }
+                  sectionKey={activeTab}
+                  branding={branding}
+                  onBrandingChange={setBranding}
+                  modules={modules}
+                  onModulesChange={setModules}
+                  billboard={billboard}
+                  onBillboardChange={setBillboard}
+                  onBillboardPreview={openBillboardPreview}
+                  onHomeDashboardPreview={openHomeDashboardPreview}
+                  aiAvatar={aiAvatar}
+                  onAiAvatarChange={setAiAvatar}
+                  onAiAvatarPreview={openAiAvatarPreview}
+                  survey={survey}
+                  onSurveyChange={setSurvey}
+                  onSurveyPreview={openSurveyPreview}
+                  deals={deals}
+                  onDealsChange={setDeals}
+                  onDealsPreview={openDealsPreview}
+                  photoBooth={photoBooth}
+                  onPhotoBoothChange={setPhotoBooth}
+                  onPhotoBoothPreview={openPhotoBoothPreview}
+                  brochures={brochures}
+                  onBrochuresChange={setBrochures}
+                  onBrochuresPreview={openBrochuresPreview}
+                  socialWall={socialWall}
+                  onSocialWallChange={setSocialWall}
+                  onSocialWallPreview={openSocialWallPreview}
+                  guestbook={guestbook}
+                  onGuestbookChange={setGuestbook}
+                  onGuestbookPreview={openGuestbookPreview}
+                  listings={listings}
+                  onListingsChange={setListings}
+                  events={events}
+                  onEventsChange={setEvents}
+                  onEventsPreview={openEventsPreview}
+                  tickets={tickets}
+                  onTicketsChange={setTickets}
+                  onTicketsPreview={openTicketsPreview}
+                  passes={passes}
+                  onPassesChange={setPasses}
+                  onPassesPreview={openPassesPreview}
+                  trails={trails}
+                  onTrailsChange={setTrails}
+                  onTrailsPreview={openTrailsPreview}
+                  map={map}
+                  onMapChange={setMap}
+                  onMapPreview={openMapPreview}
+                  itinerary={itinerary}
+                  onItineraryChange={setItinerary}
+                  onItineraryPreview={openItineraryPreview}
+                  i18nBundle={i18nBundle}
+                  onI18nBundleChange={setI18nBundle}
+                  ads={ads}
+                  onAdsChange={setAds}
+                  integrations={integrations}
+                  onIntegrationsChange={setIntegrations}
+                  currentVersion={initialConfig.currentVersion ?? 0}
+                  lastPublishedAt={initialMeta?.lastEditedAt}
+                  lastEditor={initialMeta?.lastEditor}
+                  kioskLocation={initialConfig.clientInfo?.location ?? ''}
+                  onPublish={() => setPublishOpen(true)}
+                />
               </div>
               <SaveBar
                 saveState={effectiveSaveState}
@@ -995,9 +992,7 @@ function shallowEqualBranding(a: Branding, b: Branding): boolean {
   if ((a.fonts?.displayCustom?.name ?? '') !== (b.fonts?.displayCustom?.name ?? '')) return false;
   if ((a.fonts?.bodyCustom?.name ?? '') !== (b.fonts?.bodyCustom?.name ?? '')) return false;
   if (JSON.stringify(a.homeHero ?? null) !== JSON.stringify(b.homeHero ?? null)) return false;
-  if (
-    JSON.stringify(a.heroGradient ?? null) !== JSON.stringify(b.heroGradient ?? null)
-  )
+  if (JSON.stringify(a.heroGradient ?? null) !== JSON.stringify(b.heroGradient ?? null))
     return false;
   return true;
 }

@@ -35,7 +35,13 @@ interface PublishModalProps {
 
 type Phase = 'preview' | 'preview-loading' | 'publishing' | 'done' | 'error';
 
-export function PublishModal({ open, slug, onClose, currentVersion = 0, editor = 'ruben@trueomni.com' }: PublishModalProps) {
+export function PublishModal({
+  open,
+  slug,
+  onClose,
+  currentVersion = 0,
+  editor = 'ruben@trueomni.com',
+}: PublishModalProps) {
   const [phase, setPhase] = useState<Phase>('preview-loading');
   const [files, setFiles] = useState<PublishFileChange[]>([]);
   const [mode, setMode] = useState<'fs' | 'pr'>('fs');
@@ -162,9 +168,8 @@ export function PublishModal({ open, slug, onClose, currentVersion = 0, editor =
                 <p className="mt-0.5 text-[11px] text-zinc-500">
                   {mode === 'pr' ? (
                     <>
-                      Opens a PR against <span className="font-mono">main</span> with the
-                      diff of <span className="font-mono">clients/{slug}/</span>. Merge the
-                      PR to redeploy.
+                      Opens a PR against <span className="font-mono">main</span> with the diff of{' '}
+                      <span className="font-mono">clients/{slug}/</span>. Merge the PR to redeploy.
                     </>
                   ) : (
                     <>
@@ -226,9 +231,7 @@ export function PublishModal({ open, slug, onClose, currentVersion = 0, editor =
                       Filesystem is already up-to-date with KV. Nothing to publish.
                     </div>
                   ) : null}
-                  {changes.length > 0 ? (
-                    <FileList title="Changes" files={changes} />
-                  ) : null}
+                  {changes.length > 0 ? <FileList title="Changes" files={changes} /> : null}
                   {unchanged.length > 0 ? (
                     <details className="text-[11.5px]">
                       <summary className="cursor-pointer text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
@@ -270,9 +273,7 @@ export function PublishModal({ open, slug, onClose, currentVersion = 0, editor =
                   type="button"
                   onClick={handleConfirm}
                   disabled={
-                    phase === 'preview-loading' ||
-                    phase === 'publishing' ||
-                    changes.length === 0
+                    phase === 'preview-loading' || phase === 'publishing' || changes.length === 0
                   }
                   className="inline-flex items-center gap-1.5 rounded-md bg-sky-600 px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition hover:bg-sky-500 disabled:opacity-40 dark:bg-sky-500 dark:hover:bg-sky-400"
                 >
@@ -305,13 +306,7 @@ export function PublishModal({ open, slug, onClose, currentVersion = 0, editor =
   );
 }
 
-function SummaryRow({
-  files,
-  written,
-}: {
-  files: PublishFileChange[];
-  written?: number;
-}) {
+function SummaryRow({ files, written }: { files: PublishFileChange[]; written?: number }) {
   const created = files.filter((f) => f.action === 'create').length;
   const updated = files.filter((f) => f.action === 'update').length;
   const unchanged = files.filter((f) => f.action === 'unchanged').length;
@@ -372,9 +367,7 @@ function FileList({
   return (
     <div className="space-y-1">
       {title ? (
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-          {title}
-        </p>
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">{title}</p>
       ) : null}
       <ul className="space-y-0.5">
         {files.map((f) => (
@@ -391,20 +384,14 @@ function FileList({
               }`}
             >
               <FileText className="h-3 w-3 shrink-0" />
-              <span className="flex-1 truncate font-mono text-[10.5px]">
-                {shortenPath(f.path)}
-              </span>
-              <span className="shrink-0 font-mono text-[10px] uppercase">
-                {f.action}
-              </span>
+              <span className="flex-1 truncate font-mono text-[10.5px]">{shortenPath(f.path)}</span>
+              <span className="shrink-0 font-mono text-[10px] uppercase">{f.action}</span>
               {f.action === 'update' && f.sizeBefore !== undefined ? (
                 <span className="shrink-0 font-mono text-[10px] text-zinc-500">
                   {f.sizeBefore} → {f.sizeAfter}B
                 </span>
               ) : (
-                <span className="shrink-0 font-mono text-[10px] text-zinc-500">
-                  {f.sizeAfter}B
-                </span>
+                <span className="shrink-0 font-mono text-[10px] text-zinc-500">{f.sizeAfter}B</span>
               )}
             </div>
             {/* JSON key diff (#8 audit) — desplegable solo si el backend
@@ -413,8 +400,8 @@ function FileList({
             {!compact && f.changedKeys && f.changedKeys.length > 0 ? (
               <details className="ml-6 mt-1">
                 <summary className="cursor-pointer text-[10.5px] text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
-                  {f.changedKeys.length === 50 ? '50+' : f.changedKeys.length} JSON{' '}
-                  key{f.changedKeys.length === 1 ? '' : 's'} changed
+                  {f.changedKeys.length === 50 ? '50+' : f.changedKeys.length} JSON key
+                  {f.changedKeys.length === 1 ? '' : 's'} changed
                 </summary>
                 <ul className="mt-1 space-y-0.5">
                   {f.changedKeys.map((k) => (

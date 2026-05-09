@@ -33,10 +33,7 @@ export function CountdownOverlay({ value, totalSeconds }: CountdownOverlayProps)
   const dashoffset = RING_CIRCUMFERENCE * (1 - progress);
 
   return (
-    <div
-      className="pointer-events-none absolute inset-0"
-      style={{ width: 1080, height: 1920 }}
-    >
+    <div className="pointer-events-none absolute inset-0" style={{ width: 1080, height: 1920 }}>
       <svg
         width={1080}
         height={1920}

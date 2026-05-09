@@ -52,9 +52,7 @@ export function Billboard1() {
   // touchHere.width/height NO aplican en B1 (texto plain dentro del card,
   // no botón). Solo label/twoLines/fontSize.
   const rawTouchLabel =
-    touchHere.label.trim().length > 0
-      ? touchHere.label
-      : (t.billboard_touch_here ?? 'Touch\nHere');
+    touchHere.label.trim().length > 0 ? touchHere.label : (t.billboard_touch_here ?? 'Touch\nHere');
   const touchLabel = touchHere.twoLines
     ? rawTouchLabel.replace(/\s+/, '\n')
     : rawTouchLabel.replace(/\n+/g, ' ');
@@ -289,11 +287,7 @@ export function Billboard1() {
           />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={heroSrc}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-          />
+          <img src={heroSrc} alt="" className="absolute inset-0 h-full w-full object-cover" />
         )}
         {/* Overlay base de identidad (legibilidad del TOUCH TO START sobre la
             foto). Encima, OverlayLayer aplica el overlay configurable del
@@ -363,10 +357,7 @@ export function Billboard1() {
           paddingRight: '59px',
         }}
       >
-        <span
-          className="flex items-center"
-          style={{ height: footerLogoH }}
-        >
+        <span className="flex items-center" style={{ height: footerLogoH }}>
           <TrueOmniLogo slot="footer" className="h-full w-auto text-white" />
         </span>
         <AccessibilityIcon size={80} color="#fff" />

@@ -45,14 +45,7 @@ export function DragGhost({ payload, cursor }: DragGhostProps) {
       }}
     >
       {image ? (
-        <Image
-          src={image}
-          alt=""
-          fill
-          sizes="200px"
-          className="object-cover"
-          unoptimized
-        />
+        <Image src={image} alt="" fill sizes="200px" className="object-cover" unoptimized />
       ) : null}
       <div
         style={{

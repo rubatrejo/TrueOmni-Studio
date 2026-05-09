@@ -54,21 +54,15 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
   const slug = typeof body?.slug === 'string' ? body.slug.trim() : '';
   const name = typeof body?.name === 'string' ? body.name.trim() : '';
   const sourceDisplaySlug =
-    typeof body?.sourceDisplaySlug === 'string'
-      ? body.sourceDisplaySlug.trim()
-      : '';
+    typeof body?.sourceDisplaySlug === 'string' ? body.sourceDisplaySlug.trim() : '';
 
   if (!slug || !name) {
-    return NextResponse.json(
-      { error: 'slug and name are required' },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: 'slug and name are required' }, { status: 400 });
   }
   if (!SLUG_REGEX.test(slug)) {
     return NextResponse.json(
       {
-        error:
-          'Invalid slug. Use lowercase letters, digits and dashes (kebab-case).',
+        error: 'Invalid slug. Use lowercase letters, digits and dashes (kebab-case).',
       },
       { status: 400 },
     );
@@ -76,10 +70,7 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
 
   const clientFile = await loadSignageClient(client).catch(() => null);
   if (!clientFile) {
-    return NextResponse.json(
-      { error: `Theme "${client}" not found.` },
-      { status: 404 },
-    );
+    return NextResponse.json({ error: `Theme "${client}" not found.` }, { status: 404 });
   }
 
   if ((clientFile.displays ?? []).includes(slug)) {
@@ -98,9 +89,7 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
 
   let template: SignageDisplayConfig | null = null;
   for (const c of candidates) {
-    const found = await loadSignageDisplay(c.client, c.display).catch(
-      () => null,
-    );
+    const found = await loadSignageDisplay(c.client, c.display).catch(() => null);
     if (found) {
       template = found;
       break;
@@ -168,9 +157,7 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
     slug,
     sourceClient: candidates[0]?.client === client ? client : TEMPLATE_CLIENT,
     sourceDisplay:
-      sourceDisplaySlug && candidates[0]?.client === client
-        ? sourceDisplaySlug
-        : TEMPLATE_DISPLAY,
+      sourceDisplaySlug && candidates[0]?.client === client ? sourceDisplaySlug : TEMPLATE_DISPLAY,
     savedAt: Date.now(),
   });
 }

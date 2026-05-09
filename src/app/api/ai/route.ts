@@ -112,14 +112,10 @@ export async function POST(req: Request) {
 
     // Extraer texto del primer content block.
     const block = completion.content[0];
-    const responseText =
-      block && block.type === 'text' ? block.text.trim() : '';
+    const responseText = block && block.type === 'text' ? block.text.trim() : '';
 
     if (!responseText) {
-      return NextResponse.json(
-        { error: 'Empty response from AI provider.' },
-        { status: 502 },
-      );
+      return NextResponse.json({ error: 'Empty response from AI provider.' }, { status: 502 });
     }
 
     return NextResponse.json({

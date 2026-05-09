@@ -52,10 +52,7 @@ export interface AiResultScreenProps {
 
 const formatTabDay = (tpl: string, n: number) => tpl.replace('{n}', String(n));
 
-const haversineMi = (
-  a: { lat: number; lng: number },
-  b: { lat: number; lng: number },
-): number => {
+const haversineMi = (a: { lat: number; lng: number }, b: { lat: number; lng: number }): number => {
   const R = 3958.8;
   const toRad = (d: number) => (d * Math.PI) / 180;
   const dLat = toRad(b.lat - a.lat);
@@ -108,10 +105,7 @@ export function AiResultScreen(props: AiResultScreenProps) {
           <TrueOmniLogo className="h-[70px] w-auto text-white" />
         </div>
         {props.weather ? (
-          <div
-            className="absolute"
-            style={{ left: 744, top: 40, width: 300, height: 85 }}
-          >
+          <div className="absolute" style={{ left: 744, top: 40, width: 300, height: 85 }}>
             <WeatherClock
               initialWeather={props.weather}
               locale={props.locale ?? 'en-US'}
@@ -161,7 +155,7 @@ export function AiResultScreen(props: AiResultScreenProps) {
          *  horizontal de las cards, los pills (Start/Stop N) siguen alineados
          *  con sus cards debajo. */}
         <div
-          className="overflow-x-auto border-t border-zinc-200 pt-5 pb-4 [&::-webkit-scrollbar]:hidden"
+          className="overflow-x-auto border-t border-zinc-200 pb-4 pt-5 [&::-webkit-scrollbar]:hidden"
           style={{ scrollbarWidth: 'none', paddingLeft: 16, paddingRight: 16 }}
         >
           <div className="flex flex-col" style={{ gap: 14 }}>
@@ -249,8 +243,9 @@ export function AiResultScreen(props: AiResultScreenProps) {
             {/* Row 2: cards 290×163 (16:9) */}
             <div className="flex" style={{ gap: 10 }}>
               {carouselItems.map((item) => {
-                const dist =
-                  props.clientCoords ? haversineMi(item.coords, props.clientCoords).toFixed(1) : null;
+                const dist = props.clientCoords
+                  ? haversineMi(item.coords, props.clientCoords).toFixed(1)
+                  : null;
                 return (
                   <div
                     key={`${item.kind}:${item.slug}`}

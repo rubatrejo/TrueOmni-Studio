@@ -43,23 +43,13 @@ export default async function SignageDisplayPage({ params, searchParams }: PageP
   // Siempre pedimos 5 forecast cards al adapter para que el editor pueda
   // alternar entre 1/3/5 días en vivo sin re-fetch. El header slicea según
   // el patch del bridge.
-  const weather = mapWeatherToHeader(
-    weatherData,
-    clientCfg.locale,
-    clientCfg.timezone,
-    5,
-  );
+  const weather = mapWeatherToHeader(weatherData, clientCfg.locale, clientCfg.timezone, 5);
 
   return (
     <SignageStage debug={debug}>
       <SignageBridge clientSlug={clientCfg.slug} displaySlug={displayCfg.slug} />
       <SignageBridgeStyleApplier />
-      <SignageRuntime
-        client={clientCfg}
-        display={displayCfg}
-        weather={weather}
-        i18nBag={i18nBag}
-      />
+      <SignageRuntime client={clientCfg} display={displayCfg} weather={weather} i18nBag={i18nBag} />
     </SignageStage>
   );
 }

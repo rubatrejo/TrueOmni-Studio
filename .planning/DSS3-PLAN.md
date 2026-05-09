@@ -115,8 +115,8 @@ real que aterriza en DSS4-DSS5.
 ## Notas de diseño
 
 - **DSS3 valida la INFRAESTRUCTURA**: el bridge funciona end-to-end (handshake
-  + push silencioso) pero no hay edición real que pushear. DSS4-5 conectarán
-  los formularios → pushClient/pushDisplay del hook.
+  - push silencioso) pero no hay edición real que pushear. DSS4-5 conectarán
+    los formularios → pushClient/pushDisplay del hook.
 - **`signage:*` types** mantienen consistencia con el namespace KV. El kiosk
   usa `studio:*` y `kiosk:*`. Por aislamiento de productos, signage usa
   `signage:*`.

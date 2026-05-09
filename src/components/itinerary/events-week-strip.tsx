@@ -56,10 +56,7 @@ export function EventsWeekStrip(props: EventsWeekStripProps) {
       }}
     >
       {/* Row 1 — chevron + label + chevron */}
-      <div
-        className="flex items-center justify-center"
-        style={{ height: 78, paddingTop: 14 }}
-      >
+      <div className="flex items-center justify-center" style={{ height: 78, paddingTop: 14 }}>
         <button
           type="button"
           onClick={onPrevWeek}

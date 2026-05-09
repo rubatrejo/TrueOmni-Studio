@@ -56,6 +56,7 @@
 
     Type exports: `ListingItem`, `EventItem`, `PassItem`, `TrailItem`, etc. para
     consumo desde editores.
+
   </action>
 </task>
 
@@ -84,6 +85,7 @@
     Cap de tamaño: si `JSON.stringify(body).length > 480_000` (480 KB),
     PATCH responde 413 con `{ error: 'Config too large for KV (cap 512KB).
     Reduce image sizes or use external URLs.' }`.
+
   </action>
 </task>
 
@@ -113,6 +115,7 @@
 
     Añadir tipado discriminado en `BridgeMessage` para que TypeScript valide
     los 5 nuevos types.
+
   </action>
 </task>
 
@@ -143,6 +146,7 @@
 
     Verificación: el provider sólo se monta cuando `window.parent !== window`
     (estamos en iframe) — en producción el cliente no paga el coste.
+
   </action>
 </task>
 
@@ -171,6 +175,7 @@
     Botón "Open in Maps" → `window.open('https://maps.google.com/?q=' + lat + ',' + lng)`.
 
     Los 3 componentes consumen tokens del Studio CSS — cero hex hardcoded.
+
   </action>
 </task>
 
@@ -204,6 +209,7 @@
     Convención de slugs: si el usuario crea un item nuevo, `slug` se genera
     desde `title` con `kebab-case(title)`. Si edita el title, ofrecer botón
     "Sync slug" (no auto-rename — los favoritos del kiosk persisten por slug).
+
   </action>
 </task>
 
@@ -248,6 +254,7 @@
     `'Untitled'`, demás campos vacíos.
 
     Llama `onChange(updatedListingsModule)` en cada mutation.
+
   </action>
 </task>
 
@@ -285,6 +292,7 @@
     Order: la lista soporta drag-reorder pero también añadir un sort secundario
     "Sort by date asc" toggle en el toolbar (no destructivo — solo afecta
     visualización del editor; el orden persiste).
+
   </action>
 </task>
 
@@ -314,6 +322,7 @@
 
     Al final: panel informativo con conteo de tickets visibles (derivado live):
     `"X tickets visible across N categories"`.
+
   </action>
 </task>
 
@@ -342,6 +351,7 @@
     - qrLogo (image — opcional, helpText "Centered on the share QR")
 
     `addPass()`: nuevo con `type: 'day'` por default.
+
   </action>
 </task>
 
@@ -373,6 +383,7 @@
       al item).
 
     `addTrail()`: nuevo con `difficulty: 'easy'`, polyline `''`.
+
   </action>
 </task>
 
@@ -406,6 +417,7 @@
 
     Al saving: dispatcha PATCH con sólo las secciones dirty (objeto sparse).
     En éxito: `savedX ← x` para cada sección dirty.
+
   </action>
 </task>
 
@@ -442,9 +454,9 @@
 
 ## Out of scope (registro)
 
-| Feature | Fase futura |
-|---|---|
-| Bulk import CSV/JSON | S3.8 |
-| Vercel Blob para imágenes | S5/S6 |
-| Mapbox picker visual | S6 |
-| Edición i18n por item | S4 |
+| Feature                   | Fase futura |
+| ------------------------- | ----------- |
+| Bulk import CSV/JSON      | S3.8        |
+| Vercel Blob para imágenes | S5/S6       |
+| Mapbox picker visual      | S6          |
+| Edición i18n por item     | S4          |

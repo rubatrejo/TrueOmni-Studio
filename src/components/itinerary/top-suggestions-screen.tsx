@@ -57,10 +57,7 @@ export interface TopSuggestionsScreenProps {
   onFinish: () => void;
 }
 
-const haversineMi = (
-  a: { lat: number; lng: number },
-  b: { lat: number; lng: number },
-): number => {
+const haversineMi = (a: { lat: number; lng: number }, b: { lat: number; lng: number }): number => {
   const R = 3958.8;
   const toRad = (d: number) => (d * Math.PI) / 180;
   const dLat = toRad(b.lat - a.lat);
@@ -97,10 +94,7 @@ export function TopSuggestionsScreen(props: TopSuggestionsScreenProps) {
           <TrueOmniLogo className="h-[70px] w-auto text-white" />
         </div>
         {props.weather ? (
-          <div
-            className="absolute"
-            style={{ left: 744, top: 40, width: 300, height: 85 }}
-          >
+          <div className="absolute" style={{ left: 744, top: 40, width: 300, height: 85 }}>
             <WeatherClock
               initialWeather={props.weather}
               locale={props.locale ?? 'en-US'}
@@ -137,13 +131,11 @@ export function TopSuggestionsScreen(props: TopSuggestionsScreenProps) {
 
         {/* Tabs row (text + underline para activo) */}
         <div className="mt-8 flex items-center justify-center gap-12 border-b border-zinc-200">
-          {(
-            [
-              { key: 'things' as TabKey, label: textos.tabThingsToDo },
-              { key: 'events' as TabKey, label: textos.tabEvents },
-              { key: 'restaurants' as TabKey, label: textos.tabRestaurants },
-            ]
-          ).map((t) => {
+          {[
+            { key: 'things' as TabKey, label: textos.tabThingsToDo },
+            { key: 'events' as TabKey, label: textos.tabEvents },
+            { key: 'restaurants' as TabKey, label: textos.tabRestaurants },
+          ].map((t) => {
             const isActive = activeTab === t.key;
             return (
               <button
@@ -187,9 +179,7 @@ export function TopSuggestionsScreen(props: TopSuggestionsScreenProps) {
               const dist = props.clientCoords
                 ? haversineMi(item.coords, props.clientCoords).toFixed(1)
                 : null;
-              const distLabel = dist
-                ? props.textos.distanceTemplate.replace('{n}', dist)
-                : null;
+              const distLabel = dist ? props.textos.distanceTemplate.replace('{n}', dist) : null;
               const inRail = props.isInRail(item);
               const city = item.address?.split(',').slice(-2, -1)[0]?.trim() ?? '';
               const stateMatch = item.address?.match(/,\s*([A-Z]{2})\s/)?.[1] ?? '';
@@ -220,7 +210,8 @@ export function TopSuggestionsScreen(props: TopSuggestionsScreenProps) {
                       <div
                         className="flex h-full w-full items-center justify-center text-white"
                         style={{
-                          background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%)',
+                          background:
+                            'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%)',
                           fontSize: 18,
                           fontWeight: 700,
                           padding: 12,

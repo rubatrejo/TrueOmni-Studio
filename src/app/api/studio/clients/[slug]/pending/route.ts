@@ -50,18 +50,14 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
   };
 
   if (manifest.products.kiosks) {
-    summary.products.kiosks = readOnly
-      ? { unsupported: true }
-      : await diffKiosk(slug, req);
+    summary.products.kiosks = readOnly ? { unsupported: true } : await diffKiosk(slug, req);
     if (summary.products.kiosks.changed) {
       summary.totalChanged += summary.products.kiosks.changed;
     }
   }
 
   if (manifest.products.digitalDisplays) {
-    summary.products.digitalDisplays = readOnly
-      ? { unsupported: true }
-      : await diffSignage(slug);
+    summary.products.digitalDisplays = readOnly ? { unsupported: true } : await diffSignage(slug);
     if (summary.products.digitalDisplays.changed) {
       summary.totalChanged += summary.products.digitalDisplays.changed;
     }
@@ -91,10 +87,7 @@ interface PendingProductError {
   unsupported?: undefined;
 }
 
-type PendingProductResult =
-  | PendingProductOk
-  | PendingProductUnsupported
-  | PendingProductError;
+type PendingProductResult = PendingProductOk | PendingProductUnsupported | PendingProductError;
 
 export interface PendingSummary {
   slug: string;
@@ -114,10 +107,7 @@ interface KioskDryRunFile {
   changedKeys?: string[];
 }
 
-async function diffKiosk(
-  slug: string,
-  req: NextRequest,
-): Promise<PendingProductResult> {
+async function diffKiosk(slug: string, req: NextRequest): Promise<PendingProductResult> {
   // Loopback al endpoint existente. Reusa todo el merger + computeChange.
   const origin = new URL(req.url).origin;
   const url = `${origin}/api/studio/publish/${encodeURIComponent(slug)}?dryRun=1&mode=fs`;

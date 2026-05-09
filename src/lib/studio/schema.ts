@@ -2017,10 +2017,7 @@ export type KioskOrientation = (typeof KIOSK_ORIENTATIONS)[number];
  * Dimensiones canónicas de cada orientación. Usadas por el PreviewPanel del
  * Studio y por el KioskCanvas del runtime para enforcer el viewport.
  */
-export const ORIENTATION_DIMENSIONS: Record<
-  KioskOrientation,
-  { w: number; h: number }
-> = {
+export const ORIENTATION_DIMENSIONS: Record<KioskOrientation, { w: number; h: number }> = {
   portrait: { w: 1080, h: 1920 },
   landscape: { w: 1920, h: 1080 },
   // iPhone 14 Pro estándar (393×852 → redondeado). El runtime PWA es

@@ -82,10 +82,12 @@ function jitterCoords(
   const fineAmp = 0.001; // ~110m random por slug
   // Para sources no canónicos: bias direccional derivado del hash del key
   // (cada categoría dinámica tiene su propio offset estable).
-  const bias = SOURCE_BIAS[source] ?? (() => {
-    const angle = (h1 % 360) * (Math.PI / 180);
-    return { dLat: Math.sin(angle) * 0.0022, dLng: Math.cos(angle) * 0.0022 };
-  })();
+  const bias =
+    SOURCE_BIAS[source] ??
+    (() => {
+      const angle = (h1 % 360) * (Math.PI / 180);
+      return { dLat: Math.sin(angle) * 0.0022, dLng: Math.cos(angle) * 0.0022 };
+    })();
   void ZERO_BIAS;
   return {
     lat: coords.lat + bias.dLat + nx * fineAmp,

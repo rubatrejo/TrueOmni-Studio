@@ -21,9 +21,7 @@ export function NewsModuleForm({ module, onChange }: NewsModuleFormProps) {
           { value: 'icon-headline-body', label: 'icon-headline-body' },
           { value: 'card', label: 'card' },
         ]}
-        onChange={(v) =>
-          onChange({ ...module, layout: v as NewsModule['layout'] })
-        }
+        onChange={(v) => onChange({ ...module, layout: v as NewsModule['layout'] })}
       />
       <NumberField
         label="Max items"

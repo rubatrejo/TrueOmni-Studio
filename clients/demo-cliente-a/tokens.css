@@ -146,7 +146,8 @@
   --font-display:
     var(--font-montserrat, 'Montserrat'), var(--font-noto-jp, 'Noto Sans JP'), system-ui,
     -apple-system, 'Segoe UI', sans-serif;
-  --font-sans: var(--font-open-sans, 'Open Sans'), var(--font-noto-jp, 'Noto Sans JP'), system-ui,
+  --font-sans:
+    var(--font-open-sans, 'Open Sans'), var(--font-noto-jp, 'Noto Sans JP'), system-ui,
     -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 

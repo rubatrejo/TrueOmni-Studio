@@ -77,13 +77,10 @@ export function SurveyEditor({
 
   const updateQuestion = (id: string, patch: Partial<SurveyQuestion>) =>
     setQuestions(
-      survey.questions.map((q) =>
-        q.id === id ? ({ ...q, ...patch } as SurveyQuestion) : q,
-      ),
+      survey.questions.map((q) => (q.id === id ? ({ ...q, ...patch } as SurveyQuestion) : q)),
     );
 
-  const removeQuestion = (id: string) =>
-    setQuestions(survey.questions.filter((q) => q.id !== id));
+  const removeQuestion = (id: string) => setQuestions(survey.questions.filter((q) => q.id !== id));
 
   const addQuestion = (type: SurveyQuestionType) => {
     const base = {
@@ -114,7 +111,12 @@ export function SurveyEditor({
   const changeType = (id: string, type: SurveyQuestionType) => {
     const old = survey.questions.find((q) => q.id === id);
     if (!old) return;
-    const carry = { id: old.id, prompt: old.prompt, subtitle: old.subtitle, optional: old.optional };
+    const carry = {
+      id: old.id,
+      prompt: old.prompt,
+      subtitle: old.subtitle,
+      optional: old.optional,
+    };
     let next: SurveyQuestion;
     switch (type) {
       case 'nps':
@@ -153,7 +155,9 @@ export function SurveyEditor({
         <Field label="Title">
           <input
             value={survey.intro.title}
-            onChange={(e) => onChange({ ...survey, intro: { ...survey.intro, title: e.target.value } })}
+            onChange={(e) =>
+              onChange({ ...survey, intro: { ...survey.intro, title: e.target.value } })
+            }
             className={inputCls}
             maxLength={160}
           />
@@ -226,16 +230,11 @@ export function SurveyEditor({
           ))}
         </Reorder.Group>
 
-        {survey.questions.length < 20 && (
-          <AddQuestionMenu onAdd={addQuestion} />
-        )}
+        {survey.questions.length < 20 && <AddQuestionMenu onAdd={addQuestion} />}
       </section>
 
       {/* Contact capture */}
-      <Group
-        title="Contact capture"
-        hint="Optional extra step asking for email and/or phone."
-      >
+      <Group title="Contact capture" hint="Optional extra step asking for email and/or phone.">
         <ToggleRow
           label="Ask for contact info"
           enabled={survey.contactCapture?.enabled ?? false}
@@ -519,9 +518,7 @@ function QuestionRow({
             <Field label="Options">
               <OptionsList
                 options={question.options}
-                onChange={(opts) =>
-                  onUpdate({ options: opts } as Partial<SurveyQuestion>)
-                }
+                onChange={(opts) => onUpdate({ options: opts } as Partial<SurveyQuestion>)}
               />
             </Field>
           )}
@@ -705,9 +702,7 @@ function ToggleRow({
       <span
         className={
           'relative flex h-5 w-9 shrink-0 items-center rounded-full transition ' +
-          (enabled
-            ? 'bg-sky-500/90'
-            : 'bg-zinc-200 dark:bg-zinc-800')
+          (enabled ? 'bg-sky-500/90' : 'bg-zinc-200 dark:bg-zinc-800')
         }
       >
         <span

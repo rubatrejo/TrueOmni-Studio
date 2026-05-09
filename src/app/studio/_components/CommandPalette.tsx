@@ -57,9 +57,29 @@ const SECTION_ICON_OVERRIDE: Partial<Record<StudioSectionKey, LucideIcon>> = {
  * migrar a `cmdk` + shadcn `<Command>`.
  */
 export type CommandAction =
-  | { kind: 'section'; key: StudioSectionKey; label: string; description?: string; icon?: LucideIcon }
-  | { kind: 'navigate'; href: string; label: string; description?: string; icon?: LucideIcon; external?: boolean }
-  | { kind: 'callback'; id: string; label: string; description?: string; icon?: LucideIcon; onSelect: () => void };
+  | {
+      kind: 'section';
+      key: StudioSectionKey;
+      label: string;
+      description?: string;
+      icon?: LucideIcon;
+    }
+  | {
+      kind: 'navigate';
+      href: string;
+      label: string;
+      description?: string;
+      icon?: LucideIcon;
+      external?: boolean;
+    }
+  | {
+      kind: 'callback';
+      id: string;
+      label: string;
+      description?: string;
+      icon?: LucideIcon;
+      onSelect: () => void;
+    };
 
 export function CommandPalette({
   open,
@@ -269,7 +289,7 @@ export function CommandPalette({
                 onKeyDown={handleKeyDown}
                 className="flex-1 bg-transparent text-[14px] text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:text-zinc-100 dark:placeholder:text-zinc-600"
               />
-              <kbd className="hidden rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-[10.5px] text-zinc-500 sm:inline dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500">
+              <kbd className="hidden rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-[10.5px] text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500 sm:inline">
                 Esc
               </kbd>
             </div>

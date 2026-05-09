@@ -42,10 +42,10 @@ export async function generateMetadata(): Promise<Metadata> {
       ? [
           {
             rel: 'icon',
-            url: config.branding.favicon.startsWith('/') ||
-              config.branding.favicon.startsWith('http')
-              ? config.branding.favicon
-              : `/${config.branding.favicon}`,
+            url:
+              config.branding.favicon.startsWith('/') || config.branding.favicon.startsWith('http')
+                ? config.branding.favicon
+                : `/${config.branding.favicon}`,
           },
         ]
       : undefined,

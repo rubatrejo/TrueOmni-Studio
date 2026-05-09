@@ -3,11 +3,7 @@
 import { ChevronDown, ChevronUp, Loader2, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type {
-  SignageNewsConfig,
-  SignageNewsItem,
-  SignageNewsSource,
-} from '@/lib/signage/schema';
+import type { SignageNewsConfig, SignageNewsItem, SignageNewsSource } from '@/lib/signage/schema';
 
 import { saveSignageNews } from '../../_lib/save-content';
 
@@ -39,7 +35,7 @@ function nextId(): string {
 export function NewsTab({ clientSlug, initialNews }: NewsTabProps) {
   const [news, setNews] = useState<SignageNewsConfig>(structuredClone(initialNews));
   const [expanded, setExpanded] = useState<string | null>(
-    news.source.kind === 'manual' ? news.source.items[0]?.id ?? null : null,
+    news.source.kind === 'manual' ? (news.source.items[0]?.id ?? null) : null,
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -108,9 +104,7 @@ export function NewsTab({ clientSlug, initialNews }: NewsTabProps) {
   function updateItem(id: string, patch: Partial<SignageNewsItem>) {
     setData((prev) => {
       if (prev.source.kind !== 'manual') return prev;
-      const items = prev.source.items.map((i) =>
-        i.id === id ? { ...i, ...patch } : i,
-      );
+      const items = prev.source.items.map((i) => (i.id === id ? { ...i, ...patch } : i));
       return { ...prev, source: { ...prev.source, items } };
     });
   }
@@ -166,9 +160,7 @@ export function NewsTab({ clientSlug, initialNews }: NewsTabProps) {
         <h3 className="font-display text-[15px] font-semibold text-zinc-900 dark:text-white">
           News
         </h3>
-        <p className="mt-0.5 text-[12px] text-zinc-500">
-          Source feed for the news rotator slide.
-        </p>
+        <p className="mt-0.5 text-[12px] text-zinc-500">Source feed for the news rotator slide.</p>
       </header>
 
       {/* Source kind selector */}
@@ -320,17 +312,13 @@ export function NewsTab({ clientSlug, initialNews }: NewsTabProps) {
                           label="Source"
                           value={item.source ?? ''}
                           placeholder="(optional)"
-                          onChange={(v) =>
-                            updateItem(item.id, { source: v || undefined })
-                          }
+                          onChange={(v) => updateItem(item.id, { source: v || undefined })}
                         />
                         <FieldText
                           label="URL"
                           value={item.url ?? ''}
                           placeholder="https://..."
-                          onChange={(v) =>
-                            updateItem(item.id, { url: v || undefined })
-                          }
+                          onChange={(v) => updateItem(item.id, { url: v || undefined })}
                         />
                       </div>
                     ) : null}

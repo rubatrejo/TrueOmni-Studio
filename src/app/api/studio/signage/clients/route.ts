@@ -2,10 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 import { loadSignageClient } from '@/lib/signage/config';
 import { kvSignageClient } from '@/lib/signage/kv-store';
-import {
-  SignageClientFileSchema,
-  type SignageClientFile,
-} from '@/lib/signage/schema';
+import { SignageClientFileSchema, type SignageClientFile } from '@/lib/signage/schema';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -21,10 +18,7 @@ export async function GET() {
     const slugs = await kvSignageClient.list();
     return NextResponse.json({ slugs });
   } catch (e) {
-    return NextResponse.json(
-      { error: `KV read failed: ${(e as Error).message}` },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: `KV read failed: ${(e as Error).message}` }, { status: 500 });
   }
 }
 
@@ -50,16 +44,12 @@ export async function POST(req: NextRequest) {
   const name = typeof body?.name === 'string' ? body.name.trim() : '';
 
   if (!slug || !name) {
-    return NextResponse.json(
-      { error: 'slug and name are required' },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: 'slug and name are required' }, { status: 400 });
   }
   if (!SLUG_REGEX.test(slug)) {
     return NextResponse.json(
       {
-        error:
-          'Invalid slug. Use lowercase letters, digits and dashes (kebab-case).',
+        error: 'Invalid slug. Use lowercase letters, digits and dashes (kebab-case).',
       },
       { status: 400 },
     );
@@ -74,10 +64,7 @@ export async function POST(req: NextRequest) {
   // Conflict check.
   const existing = await kvSignageClient.get(slug).catch(() => null);
   if (existing) {
-    return NextResponse.json(
-      { error: `Theme "${slug}" already exists.` },
-      { status: 409 },
-    );
+    return NextResponse.json({ error: `Theme "${slug}" already exists.` }, { status: 409 });
   }
 
   // Clone from default template (KV first, fs fallback).

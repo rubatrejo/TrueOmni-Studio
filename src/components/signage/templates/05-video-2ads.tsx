@@ -59,7 +59,12 @@ function PlayIconOverlay({ x, y }: { x: number; y: number }) {
 function Render({ client, slots }: SignageTemplateRenderProps) {
   const videoUrl = getVideoUrl(client.slug, slots);
   const rightAdUrl = getSlotAdUrl(client.slug, slots, 'right-ad', 'assets/ads/right-vertical.png');
-  const bottomAdUrl = getSlotAdUrl(client.slug, slots, 'bottom-ad', 'assets/ads/bottom-banner-pizza.png');
+  const bottomAdUrl = getSlotAdUrl(
+    client.slug,
+    slots,
+    'bottom-ad',
+    'assets/ads/bottom-banner-pizza.png',
+  );
 
   return (
     <svg

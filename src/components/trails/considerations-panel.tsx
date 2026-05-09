@@ -191,8 +191,21 @@ function DifficultyIcon({ level }: { level: 'Easy' | 'Moderate' | 'Hard' }) {
 function ClockIcon() {
   return (
     <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden>
-      <circle cx="12" cy="12" r="9" fill="none" stroke="hsl(var(--brand-primary))" strokeWidth="2" />
-      <path d="M12 7v5l3 2" stroke="hsl(var(--brand-primary))" strokeWidth="2" strokeLinecap="round" fill="none" />
+      <circle
+        cx="12"
+        cy="12"
+        r="9"
+        fill="none"
+        stroke="hsl(var(--brand-primary))"
+        strokeWidth="2"
+      />
+      <path
+        d="M12 7v5l3 2"
+        stroke="hsl(var(--brand-primary))"
+        strokeWidth="2"
+        strokeLinecap="round"
+        fill="none"
+      />
     </svg>
   );
 }
@@ -209,7 +222,14 @@ function TypeIcon({ type }: { type: 'Loop' | 'Out & Back' | 'Point to Point' }) 
   if (type === 'Loop') {
     return (
       <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden>
-        <circle cx="12" cy="12" r="7" fill="none" stroke="hsl(var(--brand-primary))" strokeWidth="2" />
+        <circle
+          cx="12"
+          cy="12"
+          r="7"
+          fill="none"
+          stroke="hsl(var(--brand-primary))"
+          strokeWidth="2"
+        />
       </svg>
     );
   }
@@ -231,7 +251,12 @@ function TypeIcon({ type }: { type: 'Loop' | 'Out & Back' | 'Point to Point' }) 
   return (
     <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden>
       <circle cx="5" cy="12" r="2.5" fill="hsl(var(--brand-primary))" />
-      <path d="M7.5 12h9" stroke="hsl(var(--brand-primary))" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M7.5 12h9"
+        stroke="hsl(var(--brand-primary))"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
       <circle cx="19" cy="12" r="2.5" fill="hsl(var(--brand-primary))" />
     </svg>
   );

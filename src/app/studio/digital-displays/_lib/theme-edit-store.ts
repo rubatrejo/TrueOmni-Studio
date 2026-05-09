@@ -2,11 +2,7 @@
 
 import { create } from 'zustand';
 
-import type {
-  SignageBranding,
-  SignageClientFile,
-  SignageHeader,
-} from '@/lib/signage/schema';
+import type { SignageBranding, SignageClientFile, SignageHeader } from '@/lib/signage/schema';
 
 /**
  * Working copy zustand del editor de theme signage.
@@ -133,7 +129,6 @@ export const useThemeEditStore = create<ThemeEditState>((set, get) => ({
   },
 
   markSaving: (saving) => set({ saving }),
-  markSaved: () =>
-    set({ saving: false, dirty: false, lastSavedAt: Date.now(), error: null }),
+  markSaved: () => set({ saving: false, dirty: false, lastSavedAt: Date.now(), error: null }),
   setError: (err) => set({ error: err, saving: false }),
 }));

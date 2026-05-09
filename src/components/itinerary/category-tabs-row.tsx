@@ -14,13 +14,7 @@ export interface CategoryTabsRowProps {
  */
 function FilterFunnelIcon() {
   return (
-    <svg
-      width="24"
-      height="25"
-      viewBox="0 0 24 25"
-      aria-hidden="true"
-      fill="currentColor"
-    >
+    <svg width="24" height="25" viewBox="0 0 24 25" aria-hidden="true" fill="currentColor">
       <path d="M14.71,25h-.074a.339.339,0,0,1-.234-.051L9.26,21.688a.576.576,0,0,1-.271-.493V12.99h6.229V24.457a.575.575,0,0,1-.271.492A.438.438,0,0,1,14.71,25Zm-.036-13.043H9.239a.582.582,0,0,1-.374-.17L.17,2.547A.487.487,0,0,1,0,2.174V.544A.515.515,0,0,1,.544,0H23.37a.515.515,0,0,1,.544.544v1.63a.487.487,0,0,1-.17.374l-8.7,9.239A.489.489,0,0,1,14.674,11.957Z" />
     </svg>
   );

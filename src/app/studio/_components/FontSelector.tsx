@@ -54,9 +54,7 @@ export function FontSelector({
             {value}
           </span>
         </span>
-        <ChevronDown
-          className={`h-4 w-4 text-zinc-500 transition ${open ? 'rotate-180' : ''}`}
-        />
+        <ChevronDown className={`h-4 w-4 text-zinc-500 transition ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (

@@ -40,12 +40,7 @@ import { AiResultScreen } from './ai-result-screen';
 import { AiWizard, type AiAnswers } from './ai-wizard';
 import { CategoryTabsRow } from './category-tabs-row';
 import { DragGhost } from './drag-ghost';
-import {
-  EventsWeekStrip,
-  getWeekStart,
-  isoDate,
-  shiftWeek,
-} from './events-week-strip';
+import { EventsWeekStrip, getWeekStart, isoDate, shiftWeek } from './events-week-strip';
 import { ItineraryFinishedPopup } from './itinerary-finished-popup';
 import { ItineraryHeader } from './itinerary-header';
 import { ItineraryMap } from './itinerary-map';
@@ -82,10 +77,7 @@ export interface ItineraryBuilderModuleProps {
 const WELCOME_STORAGE_KEY = 'kiosk_itinerary_welcomed';
 
 function fmt(template: string, vars: Record<string, string>) {
-  return Object.entries(vars).reduce(
-    (acc, [k, v]) => acc.replaceAll(`{${k}}`, v),
-    template ?? '',
-  );
+  return Object.entries(vars).reduce((acc, [k, v]) => acc.replaceAll(`{${k}}`, v), template ?? '');
 }
 
 /**
@@ -112,7 +104,7 @@ function mergeStudioItineraryOverride(
       ? s.wizardHeroImage
       : (base.ai.questions[0]?.hero_image ?? '');
   const questions = Array.isArray(s.questions)
-    ? s.questions
+    ? (s.questions
         .map((q) => {
           if (!q || typeof q !== 'object') return null;
           const o = q as Record<string, unknown>;
@@ -165,7 +157,7 @@ function mergeStudioItineraryOverride(
           if (typeof o.subtitle === 'string') result.subtitle = o.subtitle;
           return result;
         })
-        .filter(Boolean) as ItineraryConfig['ai']['questions']
+        .filter(Boolean) as ItineraryConfig['ai']['questions'])
     : null;
 
   const localListings = Array.isArray(s.localListings)
@@ -216,9 +208,9 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
   // `kiosk:client-coords-override` cuando se edita un kiosk con location
   // distinta. Centra el mapa del Itinerary en la nueva location y
   // actualiza el sort por distancia.
-  const [reactiveCoords, setReactiveCoords] = useState<
-    { lat: number; lng: number } | undefined
-  >(() => getCachedClientCoords() ?? client.coords);
+  const [reactiveCoords, setReactiveCoords] = useState<{ lat: number; lng: number } | undefined>(
+    () => getCachedClientCoords() ?? client.coords,
+  );
   useEffect(() => {
     const onOverride = (event: Event) => {
       const detail = (event as CustomEvent<{ coords?: { lat: number; lng: number } }>).detail;
@@ -269,7 +261,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
   const isLocalListingsTab = activeTab?.slug === LOCAL_LISTINGS_TAB_SLUG;
   const [previewSlug, setPreviewSlug] = useState<string | null>(null);
   const previewItinerary = previewSlug
-    ? config.local_listings.find((it) => it.slug === previewSlug) ?? null
+    ? (config.local_listings.find((it) => it.slug === previewSlug) ?? null)
     : null;
   const [aiAnswers, setAiAnswers] = useState<AiAnswers | null>(null);
   const [aiResult, setAiResult] = useState<GeneratedItinerary | null>(null);
@@ -288,10 +280,13 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
   // React 18 batchea ambos setState dentro de un mismo evento, evitando un
   // render intermedio donde se mostraría el bubble con CONTENIDO nuevo en
   // POSICIÓN vieja (causa principal del "flash" raro al cambiar de pin).
-  const setSelectedSlug = useCallback((slug: string | null | ((prev: string | null) => string | null)) => {
-    setSelectedSlugRaw(slug);
-    setPinPos(null);
-  }, []);
+  const setSelectedSlug = useCallback(
+    (slug: string | null | ((prev: string | null) => string | null)) => {
+      setSelectedSlugRaw(slug);
+      setPinPos(null);
+    },
+    [],
+  );
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [detailKey, setDetailKey] = useState<string | null>(null);
   const detailLookup = useMemo(() => buildItineraryDetailLookup(fullConfig), [fullConfig]);
@@ -361,8 +356,8 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
   // Reactive client name: en el preview del Studio, el bridge dispatcha
   // override cuando se edita el nombre del kiosk. Sin esto el welcome
   // popup y otros textos seguían diciendo "Arizona".
-  const [reactiveClientName, setReactiveClientName] = useState<string | null>(
-    () => getCachedClientName(),
+  const [reactiveClientName, setReactiveClientName] = useState<string | null>(() =>
+    getCachedClientName(),
   );
   useEffect(() => {
     const onName = (event: Event) => {
@@ -382,11 +377,17 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
     const sortByPop = (a: ItineraryCatalogItem, b: ItineraryCatalogItem) =>
       (b.popularity ?? 0) - (a.popularity ?? 0);
     const things = allCatalog
-      .filter((it) => it.kind === 'listing' && it.moduleSlug !== 'restaurants' && it.moduleSlug !== 'stay')
+      .filter(
+        (it) =>
+          it.kind === 'listing' && it.moduleSlug !== 'restaurants' && it.moduleSlug !== 'stay',
+      )
       .concat(allCatalog.filter((it) => it.kind === 'trail'))
       .sort(sortByPop)
       .slice(0, 8);
-    const evts = allCatalog.filter((it) => it.kind === 'event').sort(sortByPop).slice(0, 8);
+    const evts = allCatalog
+      .filter((it) => it.kind === 'event')
+      .sort(sortByPop)
+      .slice(0, 8);
     const rests = allCatalog
       .filter((it) => it.kind === 'listing' && it.moduleSlug === 'restaurants')
       .sort(sortByPop)
@@ -586,7 +587,10 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
                   const it = catalogIndex.get(`${s.kind}:${s.slug}`);
                   return it ? { entry: s, coords: it.coords } : null;
                 })
-                .filter((x): x is { entry: ItineraryRailEntry; coords: { lat: number; lng: number } } => x !== null);
+                .filter(
+                  (x): x is { entry: ItineraryRailEntry; coords: { lat: number; lng: number } } =>
+                    x !== null,
+                );
               if (stopsWithCoords.length < 3) return;
               const visited = new Set<number>();
               const order: number[] = [0];
@@ -645,9 +649,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
               textos.itinerary_caption_drag_more ??
               'To add more items to your day,\njust drag more listings\ninto this day'
             }
-            removeAriaLabelTemplate={
-              textos.itinerary_slot_remove_aria ?? 'Remove stop {n}'
-            }
+            removeAriaLabelTemplate={textos.itinerary_slot_remove_aria ?? 'Remove stop {n}'}
             distanceTemplate={textos.itinerary_distance_away ?? '{n} mi away'}
             computeDistance={computeDistance}
             onSlotDragStart={(entry, item, fromIndex, ev) =>
@@ -667,9 +669,10 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
 
           {selectedSlug && pinPos
             ? (() => {
-                const item = catalogIndex.get(`listing:${selectedSlug}`)
-                  ?? catalogIndex.get(`event:${selectedSlug}`)
-                  ?? catalogIndex.get(`trail:${selectedSlug}`);
+                const item =
+                  catalogIndex.get(`listing:${selectedSlug}`) ??
+                  catalogIndex.get(`event:${selectedSlug}`) ??
+                  catalogIndex.get(`trail:${selectedSlug}`);
                 if (!item) return null;
                 const source: MapSource =
                   item.kind === 'event'
@@ -824,75 +827,79 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
           onStartOver={() => setLeaveWarning('result')}
           onFinish={() => {
             const count = aiResult.days.reduce((acc, d) => acc + d.entries.length, 0);
-            aiResult.days.forEach((d) =>
-              d.entries.forEach((e) => rail.add(e.slug, e.itemKind)),
-            );
+            aiResult.days.forEach((d) => d.entries.forEach((e) => rail.add(e.slug, e.itemKind)));
             setShowFinishedPopup({ count });
           }}
         />
       )}
 
-      {phase === 'ai-result' && aiPath === 'top-suggestions' && (() => {
-        // Auto-like: cuando se entra a Top Suggestions, todos los items
-        // sugeridos se añaden al rail automáticamente. El usuario puede
-        // quitar el like de los que no le gusten.
-        // (Se ejecuta inline en la IIFE — el useEffect de abajo lo dispara
-        // una sola vez por entrada al screen via `aiPath` dep.)
-        // Top Suggestions: top items por popularity de cada bucket
-        const sortByPopularity = (a: ItineraryCatalogItem, b: ItineraryCatalogItem) =>
-          (b.popularity ?? 0) - (a.popularity ?? 0);
-        const things = allCatalog
-          .filter((it) => it.kind === 'listing' && it.moduleSlug !== 'restaurants' && it.moduleSlug !== 'stay')
-          .concat(allCatalog.filter((it) => it.kind === 'trail'))
-          .sort(sortByPopularity)
-          .slice(0, 8);
-        const evts = allCatalog
-          .filter((it) => it.kind === 'event')
-          .sort(sortByPopularity)
-          .slice(0, 8);
-        const rests = allCatalog
-          .filter((it) => it.kind === 'listing' && it.moduleSlug === 'restaurants')
-          .sort(sortByPopularity)
-          .slice(0, 8);
-        return (
-          <TopSuggestionsScreen
-            thingsToDo={things}
-            events={evts}
-            restaurants={rests}
-            textos={{
-              title: textos.itinerary_top_title ?? 'Top Suggestions',
-              subtitle:
-                textos.itinerary_top_subtitle ??
-                'Top curated ideas.\nJust choose, save, or start over!',
-              scanLabel:
-                textos.itinerary_top_scan_label ?? 'Scan QR and send\nit to your phone',
-              tabThingsToDo: textos.itinerary_top_tab_things ?? 'Things to do',
-              tabEvents: textos.itinerary_top_tab_events ?? 'Events',
-              tabRestaurants: textos.itinerary_top_tab_restaurants ?? 'Restaurants',
-              moreInfo: textos.itinerary_top_more_info ?? 'More info',
-              directions: textos.itinerary_top_directions ?? 'Directions',
-              startOver: textos.itinerary_ai_start_over ?? 'Start Over',
-              finish: textos.itinerary_ai_finish_cta ?? 'Finish',
-              distanceTemplate: textos.itinerary_distance_away ?? '{n} mi away',
-              openUntilPrefix: textos.map_open_until_prefix ?? 'Open until',
-            }}
-            weather={props.weather}
-            locale={client.locale ?? 'en-US'}
-            timezone={client.timezone}
-            clientCoords={effectiveClientCoords}
-            qrUrl={`https://share.${client.slug}.kiosk.example/itinerary/preview`}
-            onMoreInfo={(item) => setDetailKey(`${item.kind}:${item.slug}`)}
-            onToggleFavorite={(item) =>
-              rail.has(item.slug, item.kind)
-                ? rail.remove(item.slug, item.kind)
-                : rail.add(item.slug, item.kind)
-            }
-            isInRail={(item) => rail.has(item.slug, item.kind)}
-            onStartOver={() => setLeaveWarning('result')}
-            onFinish={() => setPhase('manual')}
-          />
-        );
-      })()}
+      {phase === 'ai-result' &&
+        aiPath === 'top-suggestions' &&
+        (() => {
+          // Auto-like: cuando se entra a Top Suggestions, todos los items
+          // sugeridos se añaden al rail automáticamente. El usuario puede
+          // quitar el like de los que no le gusten.
+          // (Se ejecuta inline en la IIFE — el useEffect de abajo lo dispara
+          // una sola vez por entrada al screen via `aiPath` dep.)
+          // Top Suggestions: top items por popularity de cada bucket
+          const sortByPopularity = (a: ItineraryCatalogItem, b: ItineraryCatalogItem) =>
+            (b.popularity ?? 0) - (a.popularity ?? 0);
+          const things = allCatalog
+            .filter(
+              (it) =>
+                it.kind === 'listing' &&
+                it.moduleSlug !== 'restaurants' &&
+                it.moduleSlug !== 'stay',
+            )
+            .concat(allCatalog.filter((it) => it.kind === 'trail'))
+            .sort(sortByPopularity)
+            .slice(0, 8);
+          const evts = allCatalog
+            .filter((it) => it.kind === 'event')
+            .sort(sortByPopularity)
+            .slice(0, 8);
+          const rests = allCatalog
+            .filter((it) => it.kind === 'listing' && it.moduleSlug === 'restaurants')
+            .sort(sortByPopularity)
+            .slice(0, 8);
+          return (
+            <TopSuggestionsScreen
+              thingsToDo={things}
+              events={evts}
+              restaurants={rests}
+              textos={{
+                title: textos.itinerary_top_title ?? 'Top Suggestions',
+                subtitle:
+                  textos.itinerary_top_subtitle ??
+                  'Top curated ideas.\nJust choose, save, or start over!',
+                scanLabel: textos.itinerary_top_scan_label ?? 'Scan QR and send\nit to your phone',
+                tabThingsToDo: textos.itinerary_top_tab_things ?? 'Things to do',
+                tabEvents: textos.itinerary_top_tab_events ?? 'Events',
+                tabRestaurants: textos.itinerary_top_tab_restaurants ?? 'Restaurants',
+                moreInfo: textos.itinerary_top_more_info ?? 'More info',
+                directions: textos.itinerary_top_directions ?? 'Directions',
+                startOver: textos.itinerary_ai_start_over ?? 'Start Over',
+                finish: textos.itinerary_ai_finish_cta ?? 'Finish',
+                distanceTemplate: textos.itinerary_distance_away ?? '{n} mi away',
+                openUntilPrefix: textos.map_open_until_prefix ?? 'Open until',
+              }}
+              weather={props.weather}
+              locale={client.locale ?? 'en-US'}
+              timezone={client.timezone}
+              clientCoords={effectiveClientCoords}
+              qrUrl={`https://share.${client.slug}.kiosk.example/itinerary/preview`}
+              onMoreInfo={(item) => setDetailKey(`${item.kind}:${item.slug}`)}
+              onToggleFavorite={(item) =>
+                rail.has(item.slug, item.kind)
+                  ? rail.remove(item.slug, item.kind)
+                  : rail.add(item.slug, item.kind)
+              }
+              isInRail={(item) => rail.has(item.slug, item.kind)}
+              onStartOver={() => setLeaveWarning('result')}
+              onFinish={() => setPhase('manual')}
+            />
+          );
+        })()}
 
       {smartRouteAlreadyOptimal && (
         <div
@@ -1018,8 +1025,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
         <ItineraryFinishedPopup
           title={textos.itinerary_finished_title ?? 'Itinerary saved!'}
           body={(
-            textos.itinerary_finished_body ??
-            "We've added the {count} stops to your day."
+            textos.itinerary_finished_body ?? "We've added the {count} stops to your day."
           ).replace('{count}', String(showFinishedPopup.count))}
           onClose={() => {
             setShowFinishedPopup(null);
@@ -1074,7 +1080,8 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
           textos={{
             intro: textos.itinerary_welcome_intro ?? 'DISCOVER YOUR PERFECT VISIT',
             title: fmt(
-              textos.itinerary_welcome_title ?? "WELCOME TO {client_name}'S\nOFFICIAL TRIP PLANNER.",
+              textos.itinerary_welcome_title ??
+                "WELCOME TO {client_name}'S\nOFFICIAL TRIP PLANNER.",
               interp,
             ),
             body:

@@ -168,9 +168,7 @@ function FieldRenderer<T>({
 
     case 'latlng': {
       const coords =
-        raw && typeof raw === 'object'
-          ? (raw as { lat: number; lng: number })
-          : { lat: 0, lng: 0 };
+        raw && typeof raw === 'object' ? (raw as { lat: number; lng: number }) : { lat: 0, lng: 0 };
       return (
         <LatLngField
           label={field.label}

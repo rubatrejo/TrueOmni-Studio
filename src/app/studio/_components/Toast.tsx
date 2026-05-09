@@ -167,10 +167,7 @@ function ToastViewport({
   );
 }
 
-const VARIANT_STYLES: Record<
-  ToastVariant,
-  { ring: string; icon: ReactNode; iconBg: string }
-> = {
+const VARIANT_STYLES: Record<ToastVariant, { ring: string; icon: ReactNode; iconBg: string }> = {
   info: {
     ring: 'ring-zinc-200 dark:ring-zinc-800',
     icon: <Info className="h-4 w-4" />,

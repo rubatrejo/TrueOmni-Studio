@@ -76,7 +76,7 @@ function Tab({
       aria-selected={active}
       aria-controls={`mobile-panel-${id}`}
       onClick={onClick}
-      className={`inline-flex h-8 flex-1 max-w-[140px] items-center justify-center gap-1.5 rounded-md text-[12.5px] font-medium transition ${
+      className={`inline-flex h-8 max-w-[140px] flex-1 items-center justify-center gap-1.5 rounded-md text-[12.5px] font-medium transition ${
         active
           ? 'bg-zinc-100 text-zinc-900 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:text-zinc-100 dark:ring-zinc-800'
           : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-900/60 dark:hover:text-zinc-300'

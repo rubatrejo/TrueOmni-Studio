@@ -22,13 +22,7 @@ type HostState =
  * → sent confirmation. Re-usa `SendToPhoneModal` / `SendToEmailModal` /
  * `SendConfirmationPopup` de listings.
  */
-export function DealRedeemHost({
-  deals,
-  qrLogo,
-}: {
-  deals: readonly Deal[];
-  qrLogo?: string;
-}) {
+export function DealRedeemHost({ deals, qrLogo }: { deals: readonly Deal[]; qrLogo?: string }) {
   const [state, setState] = useState<HostState>({ stage: 'closed' });
 
   useEffect(() => {

@@ -20,10 +20,7 @@ export interface ListingsColumnProps {
   emptySearchBody?: string;
   /** Plantilla del label de distancia, ej. "{n} mi away". */
   distanceTemplate: string;
-  onCardDragStart?: (
-    item: ItineraryCatalogItem,
-    ev: React.PointerEvent<HTMLDivElement>,
-  ) => void;
+  onCardDragStart?: (item: ItineraryCatalogItem, ev: React.PointerEvent<HTMLDivElement>) => void;
   /** Tap en card → abre bubble del mapa en su coord. */
   onCardTap?: (item: ItineraryCatalogItem) => void;
   /** Y inicial del sidebar (default 340). En tab Events se baja a 470 para
@@ -40,10 +37,7 @@ const COLUMN_BOTTOM = 310; // queda contra la base del map toolbar
 const TOGGLE_W = 44;
 const TOGGLE_H = 437;
 
-const haversineMi = (
-  a: { lat: number; lng: number },
-  b: { lat: number; lng: number },
-): number => {
+const haversineMi = (a: { lat: number; lng: number }, b: { lat: number; lng: number }): number => {
   const R = 3958.8;
   const toRad = (d: number) => (d * Math.PI) / 180;
   const dLat = toRad(b.lat - a.lat);
@@ -56,13 +50,7 @@ const haversineMi = (
 
 /** Botón close/open del sidebar — verbatim del SVG `Close-Open-Sidebar.svg`.
  *  Tab semicircular azul claro hsl(var(--brand-secondary)) con chevron blanco al centro. */
-function SidebarToggle({
-  collapsed,
-  onToggle,
-}: {
-  collapsed: boolean;
-  onToggle: () => void;
-}) {
+function SidebarToggle({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   // Cuando expandido (visible) → chevron LEFT (colapsa al click).
   // Cuando colapsado → chevron RIGHT (expande al click).
   const chevronD = collapsed
@@ -131,14 +119,9 @@ export function ListingsColumn(props: ListingsColumnProps) {
       >
         {items.length === 0 ? (
           props.isSearching && props.emptySearchTitle && props.emptySearchBody ? (
-            <EmptySearchState
-              title={props.emptySearchTitle}
-              body={props.emptySearchBody}
-            />
+            <EmptySearchState title={props.emptySearchTitle} body={props.emptySearchBody} />
           ) : (
-            <div className="mt-8 text-center text-[15px] text-muted-foreground">
-              {emptyLabel}
-            </div>
+            <div className="mt-8 text-center text-[15px] text-muted-foreground">{emptyLabel}</div>
           )
         ) : (
           items.map((item) => (

@@ -41,8 +41,8 @@ export function SlideRowExpanded({ templateId, slots, onSlotsChange }: SlideRowE
   if (!descriptor) {
     return (
       <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11.5px] text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300">
-        Unknown template <code className="font-mono">{templateId}</code>. Slots
-        no se pueden configurar.
+        Unknown template <code className="font-mono">{templateId}</code>. Slots no se pueden
+        configurar.
       </div>
     );
   }

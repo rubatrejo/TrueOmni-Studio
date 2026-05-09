@@ -95,7 +95,10 @@ export function NewDisplayCard({
         aria-label={`Add a new display to ${clientSlug}`}
         className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50/40 px-6 py-12 text-zinc-500 transition hover:border-sky-400 hover:bg-sky-50/40 hover:text-sky-700 dark:border-zinc-800 dark:bg-zinc-900/20 dark:text-zinc-500 dark:hover:border-sky-500/60 dark:hover:bg-sky-500/5 dark:hover:text-sky-300"
       >
-        <span aria-hidden className="grid h-10 w-10 place-items-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+        <span
+          aria-hidden
+          className="grid h-10 w-10 place-items-center rounded-full bg-zinc-100 dark:bg-zinc-800"
+        >
           <Plus className="h-5 w-5" strokeWidth={1.75} />
         </span>
         <span className="text-sm font-medium">Add display</span>
@@ -183,7 +186,8 @@ export function NewDisplayCard({
                     <p className="text-[11px] text-red-600 dark:text-red-400">{slugError}</p>
                   ) : (
                     <p className="text-[11px] text-zinc-500">
-                      URL-safe identifier. Auto-generated from the name; edit if you need it different.
+                      URL-safe identifier. Auto-generated from the name; edit if you need it
+                      different.
                     </p>
                   )}
                 </div>

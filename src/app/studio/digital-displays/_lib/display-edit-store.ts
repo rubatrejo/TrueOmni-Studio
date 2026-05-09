@@ -62,9 +62,7 @@ function normalize(display: SignageDisplayConfig): SignageDisplayConfig {
   const cloned = structuredClone(display);
   if (!cloned.playlists || cloned.playlists.length === 0) {
     const id = 'main';
-    cloned.playlists = [
-      { id, name: 'Main', slides: cloned.playlist ?? [] },
-    ];
+    cloned.playlists = [{ id, name: 'Main', slides: cloned.playlist ?? [] }];
     cloned.activePlaylistId = id;
   } else if (
     !cloned.activePlaylistId ||
@@ -92,9 +90,7 @@ function withActiveSlides(
 }
 
 function getActiveSlides(draft: SignageDisplayConfig): SignageSlide[] {
-  const active = (draft.playlists ?? []).find(
-    (p) => p.id === draft.activePlaylistId,
-  );
+  const active = (draft.playlists ?? []).find((p) => p.id === draft.activePlaylistId);
   return active?.slides ?? draft.playlist ?? [];
 }
 
@@ -182,9 +178,7 @@ export const useDisplayEditStore = create<DisplayEditState>((set, get) => ({
     set({
       draft: withActiveSlides(
         draft,
-        getActiveSlides(draft).map((s) =>
-          s.id === slideId ? { ...s, ...patch } : s,
-        ),
+        getActiveSlides(draft).map((s) => (s.id === slideId ? { ...s, ...patch } : s)),
       ),
       dirty: true,
       error: null,
@@ -211,10 +205,7 @@ export const useDisplayEditStore = create<DisplayEditState>((set, get) => ({
     if (!draft) return '';
     const id = genPlaylistId();
     const trimmed = name.trim() || `Playlist ${(draft.playlists?.length ?? 0) + 1}`;
-    const playlists = [
-      ...(draft.playlists ?? []),
-      { id, name: trimmed, slides: [] },
-    ];
+    const playlists = [...(draft.playlists ?? []), { id, name: trimmed, slides: [] }];
     set({
       draft: { ...draft, playlists, activePlaylistId: id, playlist: [] },
       dirty: true,
@@ -257,7 +248,6 @@ export const useDisplayEditStore = create<DisplayEditState>((set, get) => ({
   },
 
   markSaving: (saving) => set({ saving }),
-  markSaved: () =>
-    set({ saving: false, dirty: false, lastSavedAt: Date.now(), error: null }),
+  markSaved: () => set({ saving: false, dirty: false, lastSavedAt: Date.now(), error: null }),
   setError: (err) => set({ saving: false, error: err }),
 }));

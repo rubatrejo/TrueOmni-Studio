@@ -215,8 +215,11 @@ export function bootstrapStudioFromFs(
       // por `billboard_background`, usarlo; si no, hoist del `b1.background`
       // legacy para preservar la imagen previa; último recurso, default.
       const sharedBgRaw =
-        (fsConfig.features as { billboard_background?: { type?: string; src?: string } } | undefined)
-          ?.billboard_background ?? fsConfig.features?.billboard_b1_background;
+        (
+          fsConfig.features as
+            | { billboard_background?: { type?: string; src?: string } }
+            | undefined
+        )?.billboard_background ?? fsConfig.features?.billboard_b1_background;
       const sharedBg =
         sharedBgRaw && typeof sharedBgRaw.src === 'string' && sharedBgRaw.src.length > 0
           ? {
@@ -352,10 +355,8 @@ export function bootstrapStudioFromFs(
   // Nota: el bloque vive en `features.home.itinerary` (top-level), NO bajo
   // `features.home.modules.itinerary`. Los demás módulos sí están bajo
   // modules, pero itinerary es legacy y nunca se migró.
-  next.itineraryBuilder = takeFsIfDefault(
-    next.itineraryBuilder,
-    DEFAULT_ITINERARY_BUILDER,
-    () => parseItineraryFromFs(fsConfig.features?.home?.itinerary),
+  next.itineraryBuilder = takeFsIfDefault(next.itineraryBuilder, DEFAULT_ITINERARY_BUILDER, () =>
+    parseItineraryFromFs(fsConfig.features?.home?.itinerary),
   );
 
   // ── photoBooth, survey, aiAvatar ──

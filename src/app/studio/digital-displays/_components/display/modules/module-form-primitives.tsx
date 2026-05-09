@@ -91,11 +91,7 @@ export function SelectField({
   return (
     <label className="flex flex-col gap-1 text-[11px] text-zinc-500">
       <span>{label}</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={inputBase}
-      >
+      <select value={value} onChange={(e) => onChange(e.target.value)} className={inputBase}>
         {options.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}

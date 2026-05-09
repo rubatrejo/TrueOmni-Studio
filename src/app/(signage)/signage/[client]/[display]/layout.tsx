@@ -56,10 +56,7 @@ export default async function SignageDisplayLayout({
         <style data-signage-tokens dangerouslySetInnerHTML={{ __html: tokensCss }} />
       ) : null}
       {overridesCss ? (
-        <style
-          data-signage-token-overrides
-          dangerouslySetInnerHTML={{ __html: overridesCss }}
-        />
+        <style data-signage-token-overrides dangerouslySetInnerHTML={{ __html: overridesCss }} />
       ) : null}
       {children}
     </>

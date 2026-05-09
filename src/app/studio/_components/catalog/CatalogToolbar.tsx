@@ -83,9 +83,7 @@ export function CatalogToolbar({
         </select>
       ) : null}
 
-      {onExport ? (
-        <ExportButton onExport={onExport} disabled={!exportEnabled} />
-      ) : null}
+      {onExport ? <ExportButton onExport={onExport} disabled={!exportEnabled} /> : null}
 
       {onImport ? (
         <button

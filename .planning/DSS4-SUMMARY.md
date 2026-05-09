@@ -14,7 +14,7 @@ nueva. Primer flow real de edición del editor signage.
 - **`display-edit-store.ts`** (nuevo) — store del draft con state
   `{ draft, dirty, saving, lastSavedAt, error }` y actions
   `init / updateSettings / addSlide / removeSlide / reorderSlides /
-  updateSlide / markSaving / markSaved / setError / reset`. `structuredClone`
+updateSlide / markSaving / markSaved / setError / reset`. `structuredClone`
   del display al inicializar para no mutar la prop server.
 
 ### Persistence layer
@@ -56,7 +56,7 @@ nueva. Primer flow real de edición del editor signage.
 
 - Modal Radix-style propio: select template (8 opciones), duration default 7s,
   transition default `cut`. Confirm → `addSlide({ id: nanoid-like, templateId,
-  durationMs, schedule:'always', slots: [], transition })`.
+durationMs, schedule:'always', slots: [], transition })`.
 - Cierra con Esc / click outside.
 
 ### SchedulePopover
@@ -89,18 +89,18 @@ nueva. Primer flow real de edición del editor signage.
 
 ## Archivos tocados
 
-| Archivo | Tipo |
-|---|---|
-| `src/app/studio/digital-displays/_lib/display-edit-store.ts` | NUEVO |
-| `src/app/studio/digital-displays/_lib/save-display.ts` | NUEVO |
-| `src/app/api/studio/signage/displays/[client]/[displaySlug]/route.ts` | NUEVO |
-| `src/app/studio/digital-displays/_components/display/DisplaySettingsPanel.tsx` | read-only → editable |
-| `src/app/studio/digital-displays/_components/display/PlaylistPanel.tsx` | read-only → editable + DnD |
-| `src/app/studio/digital-displays/_components/display/AddSlideModal.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/display/SchedulePopover.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/DisplayEditor.tsx` | store + autosave + bridge push + dirty badge |
-| `.planning/DSS4-PLAN.md` | NUEVO |
-| `.planning/DSS4-SUMMARY.md` | NUEVO |
+| Archivo                                                                        | Tipo                                         |
+| ------------------------------------------------------------------------------ | -------------------------------------------- |
+| `src/app/studio/digital-displays/_lib/display-edit-store.ts`                   | NUEVO                                        |
+| `src/app/studio/digital-displays/_lib/save-display.ts`                         | NUEVO                                        |
+| `src/app/api/studio/signage/displays/[client]/[displaySlug]/route.ts`          | NUEVO                                        |
+| `src/app/studio/digital-displays/_components/display/DisplaySettingsPanel.tsx` | read-only → editable                         |
+| `src/app/studio/digital-displays/_components/display/PlaylistPanel.tsx`        | read-only → editable + DnD                   |
+| `src/app/studio/digital-displays/_components/display/AddSlideModal.tsx`        | NUEVO                                        |
+| `src/app/studio/digital-displays/_components/display/SchedulePopover.tsx`      | NUEVO                                        |
+| `src/app/studio/digital-displays/_components/DisplayEditor.tsx`                | store + autosave + bridge push + dirty badge |
+| `.planning/DSS4-PLAN.md`                                                       | NUEVO                                        |
+| `.planning/DSS4-SUMMARY.md`                                                    | NUEVO                                        |
 
 ## Verificado
 

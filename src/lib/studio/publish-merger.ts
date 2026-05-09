@@ -99,7 +99,10 @@ export function buildFilesystemConfig(
     // como `billboard_bN_background` para que el runtime fs los lea
     // (en este momento el runtime de variants 1/2/3 ya respeta el override
     // del bridge en vivo; al publicar persistimos para post-redeploy).
-    const variantBgs: Array<{ key: string; v: { background?: { type: 'image' | 'video'; src: string } } | undefined }> = [
+    const variantBgs: Array<{
+      key: string;
+      v: { background?: { type: 'image' | 'video'; src: string } } | undefined;
+    }> = [
       { key: 'billboard_b1_background', v: studio.billboard.b1 },
       { key: 'billboard_b2_background', v: studio.billboard.b2 },
       { key: 'billboard_b3_background', v: studio.billboard.b3 },
@@ -224,13 +227,9 @@ export function buildFilesystemConfig(
           ? existing.welcome_always_visible
           : true,
       show_driving_default:
-        typeof existing.show_driving_default === 'boolean'
-          ? existing.show_driving_default
-          : true,
+        typeof existing.show_driving_default === 'boolean' ? existing.show_driving_default : true,
       hide_markers_default:
-        typeof existing.hide_markers_default === 'boolean'
-          ? existing.hide_markers_default
-          : false,
+        typeof existing.hide_markers_default === 'boolean' ? existing.hide_markers_default : false,
       max_stops: typeof existing.max_stops === 'number' ? existing.max_stops : 12,
       local_listings: it.localListings,
       ai: {

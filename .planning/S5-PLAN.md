@@ -27,6 +27,7 @@
     - Importar `AdsModuleSchema, defaultAds`.
     - `hydrateConfig` añade `ads: cfg.ads ?? defaultAds()`.
     - Añadir branch `if (body.ads !== undefined)` con `AdsModuleSchema.safeParse`.
+
   </action>
   <verify>
     `pnpm typecheck` limpio.
@@ -61,6 +62,7 @@
     - Filtro por kind (dropdown).
 
     Bulk import opcional: por ahora NO (los ads son pocos por cliente, edit a mano). S5.1 si se necesita.
+
   </action>
   <verify>
     `pnpm typecheck && pnpm lint` limpios.
@@ -100,6 +102,7 @@
     - Add ad → aparece en lista.
     - Cambiar kind → filtro lo refleja.
     - Save → reload → persiste.
+
   </action>
   <verify>
     `pnpm typecheck && pnpm lint` limpios.

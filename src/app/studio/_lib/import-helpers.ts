@@ -439,9 +439,7 @@ export interface NormalizeOptions<K extends ImportKind> {
   existing: ImportItem<K>[];
 }
 
-export function normalizeImport<K extends ImportKind>(
-  opts: NormalizeOptions<K>,
-): ImportResult<K> {
+export function normalizeImport<K extends ImportKind>(opts: NormalizeOptions<K>): ImportResult<K> {
   const { kind, text, format, existing } = opts;
   const errors: ImportRowError[] = [];
   const items: ImportItem<K>[] = [];
@@ -502,8 +500,7 @@ export function normalizeImport<K extends ImportKind>(
 
   // dedupe por primary key dentro del payload (último gana). pk = slug | id.
   const pk = PK_FIELD[kind];
-  const pkOf = (item: ImportItem<K>): string =>
-    (item as unknown as Record<string, string>)[pk];
+  const pkOf = (item: ImportItem<K>): string => (item as unknown as Record<string, string>)[pk];
 
   const dedupedMap = new Map<string, ImportItem<K>>();
   for (const it of items) {
@@ -635,10 +632,7 @@ function serializeValue(value: unknown, coerce: FieldSpec['coerce']): string {
   }
 }
 
-export function serializeCsv<K extends ImportKind>(
-  kind: K,
-  items: ImportItem<K>[],
-): string {
+export function serializeCsv<K extends ImportKind>(kind: K, items: ImportItem<K>[]): string {
   const spec = SPECS[kind];
   const cols = Object.keys(spec);
   const lines: string[] = [cols.join(',')];
@@ -653,10 +647,7 @@ export function serializeCsv<K extends ImportKind>(
   return lines.join('\n') + '\n';
 }
 
-export function serializeJson<K extends ImportKind>(
-  kind: K,
-  items: ImportItem<K>[],
-): string {
+export function serializeJson<K extends ImportKind>(kind: K, items: ImportItem<K>[]): string {
   return JSON.stringify({ [kind]: items }, null, 2) + '\n';
 }
 

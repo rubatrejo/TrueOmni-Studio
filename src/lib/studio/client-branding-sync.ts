@@ -4,10 +4,7 @@ import { z } from 'zod';
 
 import { kSignageClient } from '@/lib/signage/kv-keys';
 import { SignageClientFileSchema } from '@/lib/signage/schema';
-import type {
-  SignageBranding,
-  SignageClientFile,
-} from '@/lib/signage/schema';
+import type { SignageBranding, SignageClientFile } from '@/lib/signage/schema';
 
 import { clientKeys } from './client-manifest';
 import { hexToHsl, hslToHex } from './hex-to-hsl';
@@ -126,9 +123,10 @@ export function toHsl(value: string): string {
 /** Devuelve el value normalizado a hex `#RRGGBB`. Idempotente. */
 export function toHex(value: string): string {
   const trimmed = value.trim();
-  if (/^#/.test(trimmed)) return trimmed.length === 4
-    ? `#${trimmed[1]}${trimmed[1]}${trimmed[2]}${trimmed[2]}${trimmed[3]}${trimmed[3]}`
-    : trimmed;
+  if (/^#/.test(trimmed))
+    return trimmed.length === 4
+      ? `#${trimmed[1]}${trimmed[1]}${trimmed[2]}${trimmed[2]}${trimmed[3]}${trimmed[3]}`
+      : trimmed;
   return hslToHex(trimmed);
 }
 
@@ -213,9 +211,7 @@ export function kioskToUnifiedBranding(
  * tokens HSL records y logos object (default + dark). Los campos kiosk-only
  * (idle, footer, homeHero, heroGradient, favicon) no se propagan a signage.
  */
-export function unifiedToSignageBranding(
-  unified: UnifiedClientBranding,
-): SignageBranding {
+export function unifiedToSignageBranding(unified: UnifiedClientBranding): SignageBranding {
   const tokens: Record<string, string> = {
     'brand-primary': toHsl(unified.brand.primary),
     'brand-secondary': toHsl(unified.brand.secondary),
@@ -243,9 +239,7 @@ export function unifiedToSignageBranding(
  * Deriva el unified branding desde un signage client (full file). Usado
  * durante migración cuando solo existe signage (no kiosk).
  */
-export function signageToUnifiedBranding(
-  signageClient: SignageClientFile,
-): UnifiedClientBranding {
+export function signageToUnifiedBranding(signageClient: SignageClientFile): UnifiedClientBranding {
   const t = signageClient.branding.tokens ?? {};
   return UnifiedClientBrandingSchema.parse({
     name: signageClient.name,
@@ -280,9 +274,7 @@ export function signageToUnifiedBranding(
 //  KV CRUD del unified branding
 // ---------------------------------------------------------------------------
 
-export async function loadUnifiedBranding(
-  slug: string,
-): Promise<UnifiedClientBranding | null> {
+export async function loadUnifiedBranding(slug: string): Promise<UnifiedClientBranding | null> {
   const raw = await kv.get<unknown>(clientKeys.branding(slug));
   if (!raw) return null;
   const parsed = UnifiedClientBrandingSchema.safeParse(raw);
@@ -388,15 +380,9 @@ export async function saveUnifiedBranding(
             website: branding.website ?? parsed.data.website,
             location: {
               ...parsed.data.location,
-              ...(branding.location?.city
-                ? { city: branding.location.city }
-                : null),
-              ...(branding.location?.lat != null
-                ? { lat: branding.location.lat }
-                : null),
-              ...(branding.location?.lon != null
-                ? { lon: branding.location.lon }
-                : null),
+              ...(branding.location?.city ? { city: branding.location.city } : null),
+              ...(branding.location?.lat != null ? { lat: branding.location.lat } : null),
+              ...(branding.location?.lon != null ? { lon: branding.location.lon } : null),
             },
             branding: {
               ...parsed.data.branding,
@@ -439,10 +425,7 @@ export async function saveUnifiedBranding(
       );
       const prior = Array.isArray(log) ? log : [];
       priorErrorCount = prior.length;
-      const next = [
-        { at: new Date().toISOString(), errors: result.errors },
-        ...prior,
-      ].slice(0, 10);
+      const next = [{ at: new Date().toISOString(), errors: result.errors }, ...prior].slice(0, 10);
       await kv.set(clientKeys.syncErrors(slug), next);
     } catch {
       // ignoramos: la persistencia del log es nice-to-have.
@@ -479,10 +462,7 @@ export async function saveUnifiedBranding(
  * Hook desde el editor del kiosk: el operator guardó cambios en la sección
  * `branding` del kiosk; reconstruimos el unified y propagamos al signage.
  */
-export async function syncFromKioskSave(
-  slug: string,
-  kioskCfg: KioskConfig,
-): Promise<SyncResult> {
+export async function syncFromKioskSave(slug: string, kioskCfg: KioskConfig): Promise<SyncResult> {
   const unified = kioskToUnifiedBranding(kioskCfg.branding, {
     nombre: kioskCfg.nombre,
     website: kioskCfg.clientInfo?.website,

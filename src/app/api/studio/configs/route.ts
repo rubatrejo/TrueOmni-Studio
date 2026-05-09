@@ -85,16 +85,56 @@ function rewriteAddressesInPlace(config: KioskConfig, location: string): void {
 // US state ST → full name lookup. Usado para reemplazar referencias al
 // state hardcoded del template ("Arizona") por el state del cliente nuevo.
 const US_STATE_NAMES: Record<string, string> = {
-  AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California',
-  CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', FL: 'Florida', GA: 'Georgia',
-  HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa',
-  KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland',
-  MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri',
-  MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey',
-  NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio',
-  OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina',
-  SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont',
-  VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
+  AL: 'Alabama',
+  AK: 'Alaska',
+  AZ: 'Arizona',
+  AR: 'Arkansas',
+  CA: 'California',
+  CO: 'Colorado',
+  CT: 'Connecticut',
+  DE: 'Delaware',
+  FL: 'Florida',
+  GA: 'Georgia',
+  HI: 'Hawaii',
+  ID: 'Idaho',
+  IL: 'Illinois',
+  IN: 'Indiana',
+  IA: 'Iowa',
+  KS: 'Kansas',
+  KY: 'Kentucky',
+  LA: 'Louisiana',
+  ME: 'Maine',
+  MD: 'Maryland',
+  MA: 'Massachusetts',
+  MI: 'Michigan',
+  MN: 'Minnesota',
+  MS: 'Mississippi',
+  MO: 'Missouri',
+  MT: 'Montana',
+  NE: 'Nebraska',
+  NV: 'Nevada',
+  NH: 'New Hampshire',
+  NJ: 'New Jersey',
+  NM: 'New Mexico',
+  NY: 'New York',
+  NC: 'North Carolina',
+  ND: 'North Dakota',
+  OH: 'Ohio',
+  OK: 'Oklahoma',
+  OR: 'Oregon',
+  PA: 'Pennsylvania',
+  RI: 'Rhode Island',
+  SC: 'South Carolina',
+  SD: 'South Dakota',
+  TN: 'Tennessee',
+  TX: 'Texas',
+  UT: 'Utah',
+  VT: 'Vermont',
+  VA: 'Virginia',
+  WA: 'Washington',
+  WV: 'West Virginia',
+  WI: 'Wisconsin',
+  WY: 'Wyoming',
   DC: 'Washington',
 };
 
@@ -102,8 +142,16 @@ const US_STATE_NAMES: Record<string, string> = {
 // con la ciudad del cliente nuevo. Lista cerrada para no reemplazar palabras
 // que casualmente coincidan con un nombre de ciudad en otros contextos.
 const ARIZONA_CITIES = [
-  'North Phoenix', 'Phoenix', 'Mesa', 'Glendale', 'Chandler', 'Scottsdale',
-  'Tempe', 'Gilbert', 'Peoria', 'Surprise',
+  'North Phoenix',
+  'Phoenix',
+  'Mesa',
+  'Glendale',
+  'Chandler',
+  'Scottsdale',
+  'Tempe',
+  'Gilbert',
+  'Peoria',
+  'Surprise',
 ];
 
 /**
@@ -117,10 +165,7 @@ const ARIZONA_CITIES = [
  * - Mock data específico ("Arizona Science Center", "Arizona Boardwalk") se
  *   reemplaza también — el operador edita esos titles después.
  */
-function rewriteContentInPlace(
-  config: KioskConfig,
-  location: string,
-): void {
+function rewriteContentInPlace(config: KioskConfig, location: string): void {
   if (!location) return;
   const m = location.match(/^([^,]+),\s*([A-Z]{2})\s*$/);
   if (!m) return;
@@ -131,8 +176,18 @@ function rewriteContentInPlace(
   if (newStateAbbrev === 'AZ') return;
 
   const STRING_FIELDS = [
-    'title', 'description', 'shortDescription', 'longDescription', 'headline',
-    'subtitle', 'label', 'subcategory', 'category', 'name', 'body', 'cta',
+    'title',
+    'description',
+    'shortDescription',
+    'longDescription',
+    'headline',
+    'subtitle',
+    'label',
+    'subcategory',
+    'category',
+    'name',
+    'body',
+    'cta',
     'tagline',
     // Eventos: venue ("Phoenix Convention Center" → "Davenport Convention
     // Center"). Se visita como cualquier listing del template.
@@ -223,8 +278,7 @@ function rewriteContentInPlace(
     for (const moduleConfig of Object.values(homeModules)) {
       if (!moduleConfig) continue;
       visit(moduleConfig);
-      const welcomeCopy = (moduleConfig as { welcomeCopy?: Record<string, unknown> })
-        .welcomeCopy;
+      const welcomeCopy = (moduleConfig as { welcomeCopy?: Record<string, unknown> }).welcomeCopy;
       if (welcomeCopy && typeof welcomeCopy === 'object') visit(welcomeCopy);
     }
   }
@@ -399,12 +453,10 @@ export async function POST(request: Request) {
     // sin esperar a la auto-migración del próximo GET /api/studio/clients.
     // Best-effort: errores se loguean pero no abortan la creación del kiosk.
     try {
-      const { kioskToUnifiedBranding, saveUnifiedBrandingOnly } = await import(
-        '@/lib/studio/client-branding-sync'
-      );
-      const { saveClientManifest, makeBlankManifest, loadClientManifest } = await import(
-        '@/lib/studio/client-manifest'
-      );
+      const { kioskToUnifiedBranding, saveUnifiedBrandingOnly } =
+        await import('@/lib/studio/client-branding-sync');
+      const { saveClientManifest, makeBlankManifest, loadClientManifest } =
+        await import('@/lib/studio/client-manifest');
       const existingManifest = await loadClientManifest(body.slug);
       if (!existingManifest) {
         const unified = kioskToUnifiedBranding(parsed.data.branding, {
@@ -425,9 +477,7 @@ export async function POST(request: Request) {
     // Hallazgo S-37: invalidar la cache de auto-migrate para que el siguiente
     // GET /api/studio/clients vea el nuevo cliente sin esperar el TTL.
     try {
-      const { invalidateAutoMigrateCache } = await import(
-        '@/lib/studio/auto-migrate-clients'
-      );
+      const { invalidateAutoMigrateCache } = await import('@/lib/studio/auto-migrate-clients');
       invalidateAutoMigrateCache();
     } catch {
       /* noop */

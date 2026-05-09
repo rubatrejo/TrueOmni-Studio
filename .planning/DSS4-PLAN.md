@@ -2,8 +2,9 @@
 
 Atomic plan ejecutable en sesión fresca. Convierte el `<DisplayEditor>` de
 read-only (DSS2) a **editable** con working copy local + push live al iframe
-+ save al KV via API. Cubre settings + playlist (drag-to-reorder, edit,
-delete, add) + schedule popover (`always` | `hours`).
+
+- save al KV via API. Cubre settings + playlist (drag-to-reorder, edit,
+  delete, add) + schedule popover (`always` | `hours`).
 
 ```xml
 <task type="auto">

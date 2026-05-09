@@ -92,10 +92,7 @@ export function Billboard4() {
           paddingRight: '59px',
         }}
       >
-        <span
-          className="flex items-center"
-          style={{ height: footerLogoH }}
-        >
+        <span className="flex items-center" style={{ height: footerLogoH }}>
           <TrueOmniLogo slot="footer" className="h-full w-auto text-white" />
         </span>
         <AccessibilityIcon size={80} color="#fff" />

@@ -30,7 +30,10 @@ for (const rel of FILES) {
     console.log(`[skip] ${rel}: no events`);
     continue;
   }
-  const dates = events.map((e) => e.date).filter(Boolean).sort();
+  const dates = events
+    .map((e) => e.date)
+    .filter(Boolean)
+    .sort();
   const minDate = dates[0];
   const shift = diffDays(TODAY, minDate);
   let changed = 0;

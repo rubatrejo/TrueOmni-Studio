@@ -45,11 +45,7 @@ export interface ClientViewProps {
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
-export function ClientView({
-  slug,
-  initialManifest,
-  initialBranding,
-}: ClientViewProps) {
+export function ClientView({ slug, initialManifest, initialBranding }: ClientViewProps) {
   const [branding, setBranding] = useState<UnifiedClientBranding>(initialBranding);
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -145,9 +141,7 @@ export function ClientView({
       } catch {
         return;
       }
-      const ok = window.confirm(
-        'You have unsaved branding changes. Leave anyway?',
-      );
+      const ok = window.confirm('You have unsaved branding changes. Leave anyway?');
       if (!ok) {
         e.preventDefault();
         e.stopPropagation();
@@ -171,9 +165,7 @@ export function ClientView({
               Clients
             </Link>
             <ChevronRight className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-700" aria-hidden />
-            <span className="font-medium text-zinc-900 dark:text-zinc-100">
-              {branding.name}
-            </span>
+            <span className="font-medium text-zinc-900 dark:text-zinc-100">{branding.name}</span>
           </nav>
         </div>
         <div className="flex items-center gap-3">
@@ -233,7 +225,8 @@ export function ClientView({
                 Products
               </h2>
               <p className="mt-1 text-[13px] text-zinc-500">
-                Open the editor of each active product or activate a new one. The client&apos;s branding is applied automatically.
+                Open the editor of each active product or activate a new one. The client&apos;s
+                branding is applied automatically.
               </p>
             </div>
             <span className="rounded-full bg-zinc-900 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white dark:bg-white dark:text-zinc-950">
@@ -308,9 +301,7 @@ function activeCount(products: ClientManifest['products']): number {
 function SectionHeading({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className="mb-5">
-      <h2 className="font-display text-xl font-semibold text-zinc-900 dark:text-white">
-        {title}
-      </h2>
+      <h2 className="font-display text-xl font-semibold text-zinc-900 dark:text-white">{title}</h2>
       <p className="mt-1 text-[12.5px] text-zinc-500">{subtitle}</p>
     </div>
   );
@@ -318,9 +309,24 @@ function SectionHeading({ title, subtitle }: { title: string; subtitle: string }
 
 function SaveStatusPill({ state, error }: { state: SaveState; error: string | null }) {
   const label = (() => {
-    if (state === 'saving') return { text: 'Saving…', dot: 'bg-amber-400 animate-pulse', color: 'text-amber-600 dark:text-amber-300' };
-    if (state === 'error') return { text: error ?? 'Save failed', dot: 'bg-red-500', color: 'text-red-600 dark:text-red-400' };
-    if (state === 'saved') return { text: 'All changes saved', dot: 'bg-emerald-500', color: 'text-emerald-600 dark:text-emerald-400' };
+    if (state === 'saving')
+      return {
+        text: 'Saving…',
+        dot: 'bg-amber-400 animate-pulse',
+        color: 'text-amber-600 dark:text-amber-300',
+      };
+    if (state === 'error')
+      return {
+        text: error ?? 'Save failed',
+        dot: 'bg-red-500',
+        color: 'text-red-600 dark:text-red-400',
+      };
+    if (state === 'saved')
+      return {
+        text: 'All changes saved',
+        dot: 'bg-emerald-500',
+        color: 'text-emerald-600 dark:text-emerald-400',
+      };
     // Hallazgo S-22: "Idle" era ambiguo. En reposo no hay estado que comunicar
     // — el branding ya está persistido en KV (cargado del manifest unified).
     return { text: 'Up to date', dot: 'bg-zinc-400 dark:bg-zinc-600', color: 'text-zinc-500' };
@@ -360,13 +366,7 @@ interface PendingResponse {
  * `GET /api/studio/clients/[slug]/pending` que orquesta el dry-run del
  * publish kiosk + comparación lightweight del signage.
  */
-function PendingChangesPanel({
-  slug,
-  manifest,
-}: {
-  slug: string;
-  manifest: ClientManifest;
-}) {
+function PendingChangesPanel({ slug, manifest }: { slug: string; manifest: ClientManifest }) {
   const [data, setData] = useState<PendingResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -430,8 +430,8 @@ function PendingChangesPanel({
 
       {!err && data && !data.fsAvailable && (
         <p className="rounded-md bg-sky-50 px-3 py-2 text-[12.5px] text-sky-800 dark:bg-sky-950/30 dark:text-sky-300">
-          Filesystem read-only in this environment — diff is computed by
-          GitHub when you click <strong>Publish</strong> in each product editor.
+          Filesystem read-only in this environment — diff is computed by GitHub when you click{' '}
+          <strong>Publish</strong> in each product editor.
         </p>
       )}
 
@@ -484,22 +484,16 @@ function PendingProductRow({
           <Icon className="h-4 w-4" />
         </span>
         <div className="flex flex-col">
-          <span className="text-[13px] font-semibold text-zinc-900 dark:text-white">
-            {label}
-          </span>
+          <span className="text-[13px] font-semibold text-zinc-900 dark:text-white">{label}</span>
           {hasError ? (
             <span className="inline-flex items-center gap-1 text-[11.5px] text-red-600 dark:text-red-400">
               <CircleAlert className="h-3 w-3" aria-hidden />
               {detail?.error?.slice(0, 60)}
             </span>
           ) : isUnsupported ? (
-            <span className="text-[11.5px] text-zinc-500">
-              Diff via GitHub on publish
-            </span>
+            <span className="text-[11.5px] text-zinc-500">Diff via GitHub on publish</span>
           ) : changed === 0 ? (
-            <span className="text-[11.5px] text-emerald-600 dark:text-emerald-400">
-              In sync
-            </span>
+            <span className="text-[11.5px] text-emerald-600 dark:text-emerald-400">In sync</span>
           ) : (
             <span className="inline-flex items-center gap-1 text-[11.5px] text-amber-700 dark:text-amber-400">
               <FileEdit className="h-3 w-3" aria-hidden />

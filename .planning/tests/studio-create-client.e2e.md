@@ -104,9 +104,7 @@ test.describe('Studio · create client + activate DD + edit branding', () => {
       data: { ...branding, brand: { ...branding.brand, primary: '32 100% 50%' } },
     });
 
-    const kioskCfg = await request
-      .get(`/api/studio/configs/${TEST_SLUG}`)
-      .then((r) => r.json());
+    const kioskCfg = await request.get(`/api/studio/configs/${TEST_SLUG}`).then((r) => r.json());
     expect(kioskCfg.branding.primary).toBe('32 100% 50%');
 
     // 7. Pending changes panel (S-11) muestra que kiosk + signage van a
@@ -116,9 +114,7 @@ test.describe('Studio · create client + activate DD + edit branding', () => {
     await expect(pending).toBeVisible();
 
     // 8. Activate DD card debe estar Active (S-44 + S-09).
-    await expect(
-      page.getByRole('link', { name: /Open editor.*Digital Displays/i }),
-    ).toBeVisible();
+    await expect(page.getByRole('link', { name: /Open editor.*Digital Displays/i })).toBeVisible();
   });
 
   test('Escape cierra NewClientModal (S-28)', async ({ page }) => {

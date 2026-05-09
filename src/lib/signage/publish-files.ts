@@ -53,9 +53,7 @@ export function buildSignageDisplayPublishFiles(
  *
  * Lanza si el cliente no existe ni en KV ni en fs.
  */
-export async function buildSignageThemePublishFiles(
-  clientSlug: string,
-): Promise<PublishFile[]> {
+export async function buildSignageThemePublishFiles(clientSlug: string): Promise<PublishFile[]> {
   const files: PublishFile[] = [];
 
   const clientFile = await resolveClientFile(clientSlug);
@@ -89,10 +87,7 @@ export async function buildSignageThemePublishFiles(
  * concatena un bloque `:root` con los overrides de `branding.tokens`. Si no
  * hay base ni overrides, devuelve cadena vacía (no se publica el archivo).
  */
-async function buildTokensCss(
-  clientSlug: string,
-  clientFile: SignageClientFile,
-): Promise<string> {
+async function buildTokensCss(clientSlug: string, clientFile: SignageClientFile): Promise<string> {
   let baseCss = '';
   const candidates = [
     path.join(process.cwd(), 'clients-signage', clientSlug, 'tokens.css'),
@@ -108,9 +103,7 @@ async function buildTokensCss(
   }
 
   const tokens = clientFile.branding.tokens ?? {};
-  const decls = Object.entries(tokens).map(
-    ([k, v]) => `  --signage-${k}: ${v};`,
-  );
+  const decls = Object.entries(tokens).map(([k, v]) => `  --signage-${k}: ${v};`);
 
   if (!baseCss && decls.length === 0) return '';
 

@@ -34,6 +34,7 @@ Cero archivos eliminados. Cero cambios en schemas, persistencia, editor del Stud
 Convertir el `<svg>` inline del slot 2 actual de `billboard-1.tsx` (icono "ruta" del Itinerary Builder) en un componente reusable con interface `{ size, color }`. Paths copiados literalmente del SVG actual.
 
 **Files:**
+
 - Create: `src/components/billboard/icons/route-icon.tsx`
 
 - [ ] **Step 1: Crear el componente**
@@ -98,6 +99,7 @@ git commit -m "feat(billboard): extrae RouteIcon como componente reusable"
 Convertir el `<svg>` inline del slot 3 actual de `billboard-1.tsx` (icono "cámara" del Photo Booth) en un componente reusable.
 
 **Files:**
+
 - Create: `src/components/billboard/icons/camera-icon.tsx`
 
 - [ ] **Step 1: Crear el componente**
@@ -161,6 +163,7 @@ git commit -m "feat(billboard): extrae CameraIcon como componente reusable"
 Añadir `icon` y `accentColor` al tipo, popular las 15 entradas del catálogo (2 verbatim + 13 lucide), y crear los 2 resolvers nuevos. Esta tarea no consume aún el catálogo nuevo — eso pasa en Task 4.
 
 **Files:**
+
 - Modify: `src/components/billboard/module-info.ts`
 
 - [ ] **Step 1: Reemplazar el archivo entero**
@@ -442,6 +445,7 @@ git commit -m "feat(billboard): catálogo extendido con icon + accentColor por m
 Reemplazar el `backgroundColor: '#b9bd39'` y el SVG inline del slot 2 por los resolvers nuevos. Mantener el resto del slot intacto (label/labelLine2 ya reactivo, posición, padding, tamaño del icono).
 
 **Files:**
+
 - Modify: `src/components/billboard/billboard-1.tsx`
 
 - [ ] **Step 1: Actualizar imports**
@@ -484,10 +488,12 @@ const slot2Accent = resolveSlotAccent(modules?.[2], '#b9bd39');
 Buscar el comentario `{/* Slot 2 — original SVG: ITINERARY BUILDER (495×208 @ 30, 1250) olive #b9bd39 */}` y reemplazar el bloque entero del `<Link>` (desde ese comentario hasta el `</Link>` correspondiente) por:
 
 ```tsx
-{/* Slot 2 — original SVG: ITINERARY BUILDER (495×208 @ 30, 1250) olive #b9bd39.
+{
+  /* Slot 2 — original SVG: ITINERARY BUILDER (495×208 @ 30, 1250) olive #b9bd39.
     v2.1: color e icono se resuelven desde el catálogo MODULE_BILLBOARD_INFO si
     el operador asigna un módulo distinto al hardcoded del SVG. Fallback al
-    olive + RouteIcon original. */}
+    olive + RouteIcon original. */
+}
 <Link
   href={resolveSlotHref(modules?.[2])}
   className="absolute flex items-center overflow-hidden"
@@ -521,7 +527,7 @@ Buscar el comentario `{/* Slot 2 — original SVG: ITINERARY BUILDER (495×208 @
       return <Icon size={120} color="#fff" />;
     })()}
   </div>
-</Link>
+</Link>;
 ```
 
 (El wrapper `ml-auto` reemplaza al `className="ml-auto"` que tenía el `<svg>` inline. La IIFE `(() => { const Icon = slot2Icon; return <Icon /> })()` permite usar el componente como JSX — alternativa más limpia es renombrar la variable a PascalCase, pero en TS strict React requiere variable PascalCase para JSX, por eso uso la IIFE local. Alternativa válida: sacar el `const Icon2 = slot2Icon` justo encima del `return` del componente.)
@@ -554,6 +560,7 @@ Expected: sin errores nuevos.
 - [ ] **Step 6: Smoke en navegador**
 
 Asegurar que `pnpm kiosk:dev` está corriendo (si no, levantarlo con `pnpm kiosk:dev` en background). Abrir `http://localhost:3000/billboard/1` en navegador. Validar visualmente:
+
 - Default state (sin Studio): slot 2 sigue olive con route icon a la derecha y label "Itinerary Builder". Idéntico al SVG.
 - Con Studio override (en otra pestaña, abrir `/studio/default` → editor → Billboard tab → asignar `survey` al slot 2): slot 2 pasa a indigo `#5c6bc0` + ClipboardList icon + label "Survey". HMR debe reflejarlo en vivo.
 
@@ -573,6 +580,7 @@ git commit -m "feat(billboard): B1 slot 2 reactivo a módulo asignado (color + i
 Espejo del slot 2 con orden invertido (icono primero, label `ml-auto`). Mantiene el fallback `CameraIcon` + `#1796d6`.
 
 **Files:**
+
 - Modify: `src/components/billboard/billboard-1.tsx`
 
 - [ ] **Step 1: Resolver icono y color del slot 3**
@@ -589,9 +597,11 @@ const slot3Accent = resolveSlotAccent(modules?.[3], '#1796d6');
 Buscar el comentario `{/* Slot 3 — original SVG: PHOTO BOOTH (495×208 @ 30, 1488) blue #1796d6 */}` y reemplazar el bloque entero del `<Link>` por:
 
 ```tsx
-{/* Slot 3 — original SVG: PHOTO BOOTH (495×208 @ 30, 1488) blue #1796d6.
+{
+  /* Slot 3 — original SVG: PHOTO BOOTH (495×208 @ 30, 1488) blue #1796d6.
     v2.1: color e icono reactivos al módulo asignado (catálogo MODULE_BILLBOARD_INFO).
-    Fallback al azul + CameraIcon original. */}
+    Fallback al azul + CameraIcon original. */
+}
 <Link
   href={resolveSlotHref(modules?.[3])}
   className="absolute flex items-center overflow-hidden"
@@ -620,7 +630,7 @@ Buscar el comentario `{/* Slot 3 — original SVG: PHOTO BOOTH (495×208 @ 30, 1
       </>
     ) : null}
   </div>
-</Link>
+</Link>;
 ```
 
 - [ ] **Step 3: Verificar typecheck**
@@ -636,6 +646,7 @@ Expected: sin errores nuevos.
 - [ ] **Step 5: Smoke en navegador**
 
 Abrir `http://localhost:3000/billboard/1`. Validar:
+
 - Default: slot 3 sigue azul con cámara y label "Photo Booth". Idéntico al SVG.
 - Override desde Studio (asignar `map` al slot 3): slot 3 pasa a verde `#43a047` + MapPin + label "Map". HMR refleja en vivo.
 
@@ -720,6 +731,7 @@ No commitear cambios de STATE.md aquí — eso lo dispara el comando `/terminar`
 ## Self-Review
 
 **Spec coverage:**
+
 - Modelo de datos extendido (`icon` + `accentColor`) → Task 3 ✓
 - Resolvers nuevos (`resolveSlotIcon`, `resolveSlotAccent`) → Task 3 ✓
 - Componentes verbatim (`RouteIcon`, `CameraIcon`) → Tasks 1 y 2 ✓
@@ -732,6 +744,7 @@ No commitear cambios de STATE.md aquí — eso lo dispara el comando `/terminar`
 - Schema persistencia NO se toca → confirmed ✓
 
 **Type consistency:**
+
 - `BillboardIcon = ComponentType<{ size: number; color: string }>` definido en Task 3, consumido en Tasks 4 y 5 con misma signature ✓
 - `RouteIcon` y `CameraIcon` exportados con misma interface ✓
 - Resolvers retornan tipos consistentes con catálogo ✓

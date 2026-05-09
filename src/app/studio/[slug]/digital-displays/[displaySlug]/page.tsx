@@ -1,10 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import {
-  loadSignageClient,
-  loadSignageDisplay,
-  loadSignageTokensCss,
-} from '@/lib/signage/config';
+import { loadSignageClient, loadSignageDisplay, loadSignageTokensCss } from '@/lib/signage/config';
 
 import { DisplayEditor } from '../../../digital-displays/_components/DisplayEditor';
 
@@ -39,7 +35,5 @@ export default async function DisplayEditorPage({ params }: PageProps) {
 
   if (!client || !display) notFound();
 
-  return (
-    <DisplayEditor client={client} display={display} tokensCss={tokensCss} />
-  );
+  return <DisplayEditor client={client} display={display} tokensCss={tokensCss} />;
 }

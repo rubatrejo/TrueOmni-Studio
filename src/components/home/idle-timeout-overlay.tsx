@@ -117,46 +117,46 @@ export function IdleTimeoutOverlay({
               }}
               onClick={(e) => e.stopPropagation()}
             >
-            {/* Countdown ring */}
-            <CountdownRing total={warningSeconds} value={secondsLeft} />
+              {/* Countdown ring */}
+              <CountdownRing total={warningSeconds} value={secondsLeft} />
 
-            <h2
-              id="idle-warning-title"
-              className="font-display font-bold text-zinc-900"
-              style={{ fontSize: '52px', lineHeight: 1.1, marginTop: '40px' }}
-            >
-              {title}
-            </h2>
-            <p
-              className="text-zinc-600"
-              style={{ fontSize: '28px', lineHeight: 1.4, marginTop: '20px', maxWidth: '560px' }}
-            >
-              {body}
-            </p>
-            <p
-              className="font-mono text-zinc-500"
-              style={{ fontSize: '22px', marginTop: '24px' }}
-              aria-live="polite"
-            >
-              {countdownText}
-            </p>
+              <h2
+                id="idle-warning-title"
+                className="font-display font-bold text-zinc-900"
+                style={{ fontSize: '52px', lineHeight: 1.1, marginTop: '40px' }}
+              >
+                {title}
+              </h2>
+              <p
+                className="text-zinc-600"
+                style={{ fontSize: '28px', lineHeight: 1.4, marginTop: '20px', maxWidth: '560px' }}
+              >
+                {body}
+              </p>
+              <p
+                className="font-mono text-zinc-500"
+                style={{ fontSize: '22px', marginTop: '24px' }}
+                aria-live="polite"
+              >
+                {countdownText}
+              </p>
 
-            <button
-              type="button"
-              onClick={dismiss}
-              className="font-display font-bold text-white"
-              style={{
-                marginTop: '40px',
-                padding: '20px 56px',
-                fontSize: '30px',
-                background: 'hsl(var(--brand-secondary))',
-                borderRadius: '16px',
-                border: 'none',
-                boxShadow: '0 12px 24px -8px rgba(0,0,0,0.25)',
-              }}
-            >
-              {continueLabel}
-            </button>
+              <button
+                type="button"
+                onClick={dismiss}
+                className="font-display font-bold text-white"
+                style={{
+                  marginTop: '40px',
+                  padding: '20px 56px',
+                  fontSize: '30px',
+                  background: 'hsl(var(--brand-secondary))',
+                  borderRadius: '16px',
+                  border: 'none',
+                  boxShadow: '0 12px 24px -8px rgba(0,0,0,0.25)',
+                }}
+              >
+                {continueLabel}
+              </button>
             </motion.div>
           </div>
         </>

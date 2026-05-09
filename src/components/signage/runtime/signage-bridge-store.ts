@@ -34,6 +34,5 @@ export const useSignageBridgeStore = create<SignageBridgeState>((set) => ({
   lastUpdateAt: null,
   setClientPatch: (patch) => set({ clientPatch: patch, lastUpdateAt: Date.now() }),
   setDisplayPatch: (patch) => set({ displayPatch: patch, lastUpdateAt: Date.now() }),
-  reset: () =>
-    set({ clientPatch: null, displayPatch: null, lastUpdateAt: null }),
+  reset: () => set({ clientPatch: null, displayPatch: null, lastUpdateAt: null }),
 }));

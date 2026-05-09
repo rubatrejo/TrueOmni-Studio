@@ -27,8 +27,7 @@ export async function POST(_req: NextRequest, ctx: RouteContext) {
   if (!config) {
     return NextResponse.json(
       {
-        error:
-          'GitHub publish not configured. Set STUDIO_GITHUB_TOKEN / OWNER / REPO env.',
+        error: 'GitHub publish not configured. Set STUDIO_GITHUB_TOKEN / OWNER / REPO env.',
       },
       { status: 503 },
     );
@@ -38,10 +37,7 @@ export async function POST(_req: NextRequest, ctx: RouteContext) {
   try {
     files = await buildSignageThemePublishFiles(client);
   } catch (e) {
-    return NextResponse.json(
-      { error: (e as Error).message },
-      { status: 404 },
-    );
+    return NextResponse.json({ error: (e as Error).message }, { status: 404 });
   }
 
   try {
@@ -57,9 +53,6 @@ export async function POST(_req: NextRequest, ctx: RouteContext) {
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error('[signage:api] theme publish failed', e);
-    return NextResponse.json(
-      { error: `Publish failed: ${(e as Error).message}` },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: `Publish failed: ${(e as Error).message}` }, { status: 500 });
   }
 }

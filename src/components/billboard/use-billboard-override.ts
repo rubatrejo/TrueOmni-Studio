@@ -139,11 +139,15 @@ function withDefaults(
 export function useBillboardSettings(variant: 0 | 1 | 2 | 3): BillboardB0Config {
   const override = useBillboardOverride();
   const slot =
-    variant === 0 ? override.b0 : variant === 1 ? override.b1 : variant === 2 ? override.b2 : override.b3;
+    variant === 0
+      ? override.b0
+      : variant === 1
+        ? override.b1
+        : variant === 2
+          ? override.b2
+          : override.b3;
   const base = withDefaults(slot, variant);
-  return override.background
-    ? { ...base, background: override.background }
-    : base;
+  return override.background ? { ...base, background: override.background } : base;
 }
 
 /**

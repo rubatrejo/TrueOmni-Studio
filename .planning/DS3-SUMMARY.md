@@ -29,17 +29,17 @@
 
 ## Verificado
 
-| Check | Resultado |
-|---|---|
-| `pnpm typecheck && pnpm lint` | ✅ limpios |
-| GET `/signage/default/lobby-tv` | ✅ HTTP 200 |
-| GET `/signage-assets/default/assets/events/yoga.jpg` | ✅ HTTP 200 image/jpeg |
-| Render del template muestra 5 events con imágenes correctas | ✅ |
-| Hora coincide con events.json (11:00 am, 7:00 pm, 11:00 pm) | ✅ corregido tras parseAsWallClock |
-| Titles de small cards en 2 líneas | ✅ |
-| Labels olive (no cyan) | ✅ corregido tras token update |
-| Day y weekday centrados en el label | ✅ corregido tras text-anchor="middle" |
-| Aprobación visual de Rubén | ✅ |
+| Check                                                       | Resultado                              |
+| ----------------------------------------------------------- | -------------------------------------- |
+| `pnpm typecheck && pnpm lint`                               | ✅ limpios                             |
+| GET `/signage/default/lobby-tv`                             | ✅ HTTP 200                            |
+| GET `/signage-assets/default/assets/events/yoga.jpg`        | ✅ HTTP 200 image/jpeg                 |
+| Render del template muestra 5 events con imágenes correctas | ✅                                     |
+| Hora coincide con events.json (11:00 am, 7:00 pm, 11:00 pm) | ✅ corregido tras parseAsWallClock     |
+| Titles de small cards en 2 líneas                           | ✅                                     |
+| Labels olive (no cyan)                                      | ✅ corregido tras token update         |
+| Day y weekday centrados en el label                         | ✅ corregido tras text-anchor="middle" |
+| Aprobación visual de Rubén                                  | ✅                                     |
 
 ---
 

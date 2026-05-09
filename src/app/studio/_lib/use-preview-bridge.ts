@@ -33,8 +33,7 @@ import type {
  *
  * Hallazgo S-02 del audit panorámico v2 (2026-05-08).
  */
-const IFRAME_TARGET_ORIGIN =
-  typeof window !== 'undefined' ? window.location.origin : '/';
+const IFRAME_TARGET_ORIGIN = typeof window !== 'undefined' ? window.location.origin : '/';
 
 /**
  * Hook que coordina el bridge Studio → kiosk-iframe.
@@ -183,7 +182,9 @@ export function usePreviewBridge() {
         IFRAME_TARGET_ORIGIN,
       );
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendModulesNow = useCallback((modules: ModulesConfig) => {
@@ -192,7 +193,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:modules-update', modules }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendBillboardNow = useCallback((billboard: BillboardConfig) => {
@@ -201,7 +204,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:billboard-update', billboard }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const openBillboardPreview = useCallback(() => {
@@ -210,7 +215,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:billboard-open-preview' }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const openHomeDashboardPreview = useCallback(() => {
@@ -219,7 +226,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:home-dashboard-open-preview' }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const openAiAvatarPreview = useCallback(() => {
@@ -228,7 +237,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:ai-avatar-open-preview' }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendAiNow = useCallback((aiAvatar: AiAvatarConfig) => {
@@ -245,7 +256,9 @@ export function usePreviewBridge() {
       };
       win.postMessage({ type: 'studio:ai-avatar-update', aiAvatar: safe }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendSurveyNow = useCallback((survey: SurveyConfig) => {
@@ -254,7 +267,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:survey-update', survey }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   /**
@@ -267,7 +282,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:survey-open-preview' }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendDealsNow = useCallback((deals: DealsModuleConfig) => {
@@ -276,7 +293,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:deals-update', deals }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   /**
@@ -289,7 +308,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:deals-open-preview' }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendPhotoBoothNow = useCallback((photoBooth: PhotoBoothConfig) => {
@@ -298,7 +319,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:photo-booth-update', photoBooth }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const openPhotoBoothPreview = useCallback(() => {
@@ -307,7 +330,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:photo-booth-open-preview' }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendBrochuresNow = useCallback((brochures: BrochuresModuleConfig) => {
@@ -316,7 +341,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:brochures-update', brochures }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const openBrochuresPreview = useCallback(() => {
@@ -325,7 +352,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:brochures-open-preview' }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendSocialWallNow = useCallback((socialWall: SocialWallConfig) => {
@@ -334,7 +363,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:social-wall-update', socialWall }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const openSocialWallPreview = useCallback(() => {
@@ -343,7 +374,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:social-wall-open-preview' }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendGuestbookNow = useCallback((guestbook: GuestbookConfig) => {
@@ -352,7 +385,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:guestbook-update', guestbook }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const openGuestbookPreview = useCallback(() => {
@@ -361,7 +396,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:guestbook-open-preview' }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendListingsNow = useCallback((listings: ListingsModule) => {
@@ -370,7 +407,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:listings-update', listings }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendEventsNow = useCallback((events: EventsModule) => {
@@ -379,7 +418,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:events-update', events }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const openEventsPreview = useCallback(() => {
@@ -388,7 +429,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:events-open-preview' }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendTicketsNow = useCallback((tickets: TicketsModule) => {
@@ -397,7 +440,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:tickets-update', tickets }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const openTicketsPreview = useCallback(() => {
@@ -406,7 +451,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:tickets-open-preview' }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendPassesNow = useCallback((passes: PassesModule) => {
@@ -415,7 +462,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:passes-update', passes }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const openPassesPreview = useCallback(() => {
@@ -424,7 +473,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:passes-open-preview' }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendTrailsNow = useCallback((trails: TrailsModule) => {
@@ -433,7 +484,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:trails-update', trails }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const openTrailsPreview = useCallback(() => {
@@ -442,7 +495,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:trails-open-preview' }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendItineraryNow = useCallback((itineraryBuilder: ItineraryBuilderConfig) => {
@@ -451,7 +506,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:itinerary-update', itineraryBuilder }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const openItineraryPreview = useCallback(() => {
@@ -460,7 +517,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:itinerary-open-preview' }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendAdsNow = useCallback((ads: AdsModule) => {
@@ -469,7 +528,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:ads-update', ads }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const sendMapNow = useCallback((map: MapConfig) => {
@@ -478,7 +539,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:map-update', map }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   /** Push del IntegrationsConfig al iframe. Hallazgo #14 del audit — antes
@@ -500,9 +563,14 @@ export function usePreviewBridge() {
         },
         analytics: { gaId: integrations.analytics.gaId },
       };
-      win.postMessage({ type: 'studio:integrations-update', integrations: safe }, IFRAME_TARGET_ORIGIN);
+      win.postMessage(
+        { type: 'studio:integrations-update', integrations: safe },
+        IFRAME_TARGET_ORIGIN,
+      );
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   const openMapPreview = useCallback(() => {
@@ -511,7 +579,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:map-open-preview' }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   // Listener del handshake studio:ready desde el iframe.
@@ -745,7 +815,9 @@ export function usePreviewBridge() {
     try {
       win.postMessage({ type: 'studio:locale-update', locale }, IFRAME_TARGET_ORIGIN);
       recordPostSuccess();
-    } catch (e) { recordPostFailure(e); }
+    } catch (e) {
+      recordPostFailure(e);
+    }
   }, []);
 
   // Cuando el iframe re-monta, resetea ready para forzar un nuevo handshake.

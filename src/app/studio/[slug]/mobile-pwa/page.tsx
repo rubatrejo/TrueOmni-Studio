@@ -4,11 +4,7 @@ export const metadata = {
   title: 'Mobile PWA · TrueOmni Studio',
 };
 
-export default async function MobilePwaStub({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function MobilePwaStub({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   return (
     <ComingSoon

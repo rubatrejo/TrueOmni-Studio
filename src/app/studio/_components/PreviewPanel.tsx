@@ -453,9 +453,9 @@ function OrientationComingSoon({
           body: (
             <>
               A 1920×1080 horizontal kiosk experience for{' '}
-              <span className="font-semibold text-white">TrueOmni</span> is in design.
-              Switch back to <span className="text-sky-300">Kiosk · 1080×1920</span> to
-              keep editing the portrait experience.
+              <span className="font-semibold text-white">TrueOmni</span> is in design. Switch back
+              to <span className="text-sky-300">Kiosk · 1080×1920</span> to keep editing the
+              portrait experience.
             </>
           ),
           dimsLabel: '1920 × 1080',
@@ -467,10 +467,10 @@ function OrientationComingSoon({
           body: (
             <>
               A 390×844 mobile PWA experience for{' '}
-              <span className="font-semibold text-white">TrueOmni</span> is in design.
-              Switch back to <span className="text-sky-300">Kiosk · 1080×1920</span> to
-              keep editing the portrait experience. The PWA bundle is still generated
-              at publish time alongside the kiosk.
+              <span className="font-semibold text-white">TrueOmni</span> is in design. Switch back
+              to <span className="text-sky-300">Kiosk · 1080×1920</span> to keep editing the
+              portrait experience. The PWA bundle is still generated at publish time alongside the
+              kiosk.
             </>
           ),
           dimsLabel: '390 × 844',
@@ -497,8 +497,7 @@ function OrientationComingSoon({
           backgroundImage:
             'linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)',
           backgroundSize: '120px 120px',
-          maskImage:
-            'radial-gradient(ellipse 70% 70% at 50% 50%, rgba(0,0,0,1), transparent 90%)',
+          maskImage: 'radial-gradient(ellipse 70% 70% at 50% 50%, rgba(0,0,0,1), transparent 90%)',
           WebkitMaskImage:
             'radial-gradient(ellipse 70% 70% at 50% 50%, rgba(0,0,0,1), transparent 90%)',
         }}
@@ -565,7 +564,16 @@ function OrientationComingSoon({
 
 function KioskGlyph() {
   return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="4" y="1.5" width="8" height="13" rx="1.2" />
       <line x1="6.8" y1="13" x2="9.2" y2="13" />
     </svg>
@@ -574,7 +582,16 @@ function KioskGlyph() {
 
 function LandscapeGlyph() {
   return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="1.5" y="4" width="13" height="8" rx="1.2" />
       <line x1="13" y1="6.8" x2="13" y2="9.2" />
     </svg>
@@ -583,7 +600,16 @@ function LandscapeGlyph() {
 
 function MobilePwaGlyph() {
   return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="5" y="1.5" width="6" height="13" rx="1.2" />
       <line x1="7" y1="12.6" x2="9" y2="12.6" />
       <line x1="6.5" y1="3.2" x2="9.5" y2="3.2" />

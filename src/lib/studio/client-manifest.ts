@@ -105,18 +105,14 @@ export async function removeClientFromList(slug: string, by?: string): Promise<v
 //  CRUD del manifest individual
 // ---------------------------------------------------------------------------
 
-export async function loadClientManifest(
-  slug: string,
-): Promise<ClientManifest | null> {
+export async function loadClientManifest(slug: string): Promise<ClientManifest | null> {
   const raw = await kv.get<unknown>(clientKeys.manifest(slug));
   if (!raw) return null;
   const parsed = ClientManifestSchema.safeParse(raw);
   return parsed.success ? parsed.data : null;
 }
 
-export async function saveClientManifest(
-  manifest: ClientManifest,
-): Promise<void> {
+export async function saveClientManifest(manifest: ClientManifest): Promise<void> {
   await kv.set(clientKeys.manifest(manifest.slug), manifest);
   await addClientToList(manifest.slug);
 }

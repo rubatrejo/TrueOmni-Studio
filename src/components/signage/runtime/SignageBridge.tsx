@@ -44,10 +44,7 @@ export function SignageBridge({ clientSlug, displaySlug }: SignageBridgeProps) {
 
     function emitReady() {
       try {
-        target.postMessage(
-          { type: 'signage:ready', clientSlug, displaySlug, ts: Date.now() },
-          '*',
-        );
+        target.postMessage({ type: 'signage:ready', clientSlug, displaySlug, ts: Date.now() }, '*');
       } catch (e) {
         // eslint-disable-next-line no-console
         console.warn('[signage:bridge] postMessage failed', e);
@@ -60,13 +57,11 @@ export function SignageBridge({ clientSlug, displaySlug }: SignageBridgeProps) {
     const heartbeat = window.setInterval(emitReady, 5000);
 
     function onMessage(event: MessageEvent) {
-      const data = event.data as
-        | {
-            type?: string;
-            client?: Partial<SignageClientFile>;
-            display?: Partial<SignageDisplayConfig>;
-          }
-        | null;
+      const data = event.data as {
+        type?: string;
+        client?: Partial<SignageClientFile>;
+        display?: Partial<SignageDisplayConfig>;
+      } | null;
       if (!data || typeof data.type !== 'string') return;
 
       if (data.type === 'signage:client-update' && data.client) {

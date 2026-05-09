@@ -38,9 +38,7 @@ export function HeaderTab({ client }: HeaderTabProps) {
   return (
     <div className="flex flex-col gap-8">
       <header>
-        <h2 className="font-display text-lg font-semibold text-zinc-900 dark:text-white">
-          Header
-        </h2>
+        <h2 className="font-display text-lg font-semibold text-zinc-900 dark:text-white">Header</h2>
         <p className="mt-1 text-[13px] text-zinc-500">
           Position, visibility y settings de reloj/clima del header del runtime.
         </p>
@@ -104,11 +102,7 @@ export function HeaderTab({ client }: HeaderTabProps) {
       </Section>
 
       <Section title="Visible elements">
-        <SwitchRow
-          label="Logo"
-          on={h.showLogo}
-          onChange={(v) => updateHeader({ showLogo: v })}
-        />
+        <SwitchRow label="Logo" on={h.showLogo} onChange={(v) => updateHeader({ showLogo: v })} />
         <SwitchRow
           label="Weather"
           on={h.showWeather}
@@ -129,9 +123,7 @@ export function HeaderTab({ client }: HeaderTabProps) {
               { value: '24h', label: '24 h' },
             ]}
             value={h.clockFormat}
-            onChange={(v) =>
-              updateHeader({ clockFormat: v as SignageHeader['clockFormat'] })
-            }
+            onChange={(v) => updateHeader({ clockFormat: v as SignageHeader['clockFormat'] })}
           />
         </Field>
 
@@ -219,11 +211,9 @@ function BackgroundEditor({
             } else if (v === 'gradient') {
               onChange({
                 kind: 'gradient',
-                from:
-                  background.kind === 'color' ? background.color : 'hsl(211 100% 25%)',
+                from: background.kind === 'color' ? background.color : 'hsl(211 100% 25%)',
                 to: 'hsl(200 100% 50%)',
-                angle:
-                  background.kind === 'gradient' ? background.angle ?? 90 : 90,
+                angle: background.kind === 'gradient' ? (background.angle ?? 90) : 90,
               });
             } else {
               onChange({
@@ -244,9 +234,7 @@ function BackgroundEditor({
           />
           <button
             type="button"
-            onClick={() =>
-              onChange({ kind: 'color', color: 'hsl(var(--signage-header-bg))' })
-            }
+            onClick={() => onChange({ kind: 'color', color: 'hsl(var(--signage-header-bg))' })}
             className="self-start text-[11.5px] font-medium text-zinc-500 underline-offset-2 transition hover:text-zinc-800 hover:underline dark:text-zinc-400 dark:hover:text-zinc-200"
           >
             Sincronizar con brand-primary (auto-update con Branding tab)
@@ -312,24 +300,14 @@ function BackgroundEditor({
           aspect="12/1"
           kind="image"
           value={background.src}
-          onChange={(next) =>
-            onChange({ kind: 'image', src: next?.src ?? '' })
-          }
+          onChange={(next) => onChange({ kind: 'image', src: next?.src ?? '' })}
         />
       ) : null}
     </div>
   );
 }
 
-function GradientPreview({
-  from,
-  to,
-  angle,
-}: {
-  from: string;
-  to: string;
-  angle: number;
-}) {
+function GradientPreview({ from, to, angle }: { from: string; to: string; angle: number }) {
   return (
     <div
       className="h-12 w-full rounded-md border border-zinc-200 dark:border-zinc-800"
@@ -497,22 +475,14 @@ function Section({
         <h3 className="font-display text-[15px] font-semibold text-zinc-900 dark:text-white">
           {title}
         </h3>
-        {subtitle ? (
-          <p className="mt-0.5 text-[12px] text-zinc-500">{subtitle}</p>
-        ) : null}
+        {subtitle ? <p className="mt-0.5 text-[12px] text-zinc-500">{subtitle}</p> : null}
       </header>
       <div className="flex flex-col gap-3">{children}</div>
     </section>
   );
 }
 
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4 text-[13px]">
       <span className="text-zinc-500">{label}</span>
@@ -578,9 +548,7 @@ function SwitchRow({
       <span className="text-zinc-700 dark:text-zinc-300">{label}</span>
       <span
         className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
-          on
-            ? 'bg-zinc-900 dark:bg-white'
-            : 'bg-zinc-200 dark:bg-zinc-800'
+          on ? 'bg-zinc-900 dark:bg-white' : 'bg-zinc-200 dark:bg-zinc-800'
         }`}
       >
         <span

@@ -65,7 +65,6 @@ export const CameraFeed = forwardRef<CameraFeedHandle, CameraFeedProps>(function
     play();
   }, [stream]);
 
-
   // Aplicar el `zoom` configurado al stream usando MediaTrack constraints
   // cuando la cámara lo soporta (Chrome con webcam compatible). Para zoom-out
   // <1 esto requiere una cámara wide-angle / PTZ; si no soporta, fail silently

@@ -49,13 +49,7 @@ function FlagIcon() {
   );
 }
 
-function Pill({
-  label,
-  circleContent,
-}: {
-  label: string;
-  circleContent: React.ReactNode;
-}) {
+function Pill({ label, circleContent }: { label: string; circleContent: React.ReactNode }) {
   return (
     <div
       style={{
@@ -241,8 +235,7 @@ export function StopsRail(props: StopsRailProps) {
         <div className="flex items-start">
           {slots.map((entry, i) => {
             const item = entry ? props.resolveItem(entry) : null;
-            const distance =
-              item && props.computeDistance ? props.computeDistance(item) : null;
+            const distance = item && props.computeDistance ? props.computeDistance(item) : null;
             const isStart = i === 0;
             const stopNumber = i;
             const slotKey = entry ? `${entry.kind}:${entry.slug}` : `empty-${i}`;
@@ -266,10 +259,7 @@ export function StopsRail(props: StopsRailProps) {
                     index={i + 1}
                     item={item}
                     onRemove={entry ? () => props.onRemove(entry) : undefined}
-                    removeAriaLabel={props.removeAriaLabelTemplate.replace(
-                      '{n}',
-                      String(i + 1),
-                    )}
+                    removeAriaLabel={props.removeAriaLabelTemplate.replace('{n}', String(i + 1))}
                     distanceLabel={
                       distance != null
                         ? props.distanceTemplate.replace('{n}', distance.toFixed(1))

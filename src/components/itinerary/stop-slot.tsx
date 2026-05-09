@@ -66,15 +66,12 @@ export function StopSlot({
             className="pointer-events-none absolute inset-x-0 bottom-0"
             style={{
               height: 70,
-              background:
-                'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.78) 100%)',
+              background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.78) 100%)',
             }}
           />
           <div className="absolute inset-x-3 bottom-2 text-white">
             <p className="line-clamp-1 text-[14px] font-semibold">{item.title}</p>
-            {distanceLabel ? (
-              <p className="text-[11px] opacity-90">{distanceLabel}</p>
-            ) : null}
+            {distanceLabel ? <p className="text-[11px] opacity-90">{distanceLabel}</p> : null}
           </div>
           <button
             type="button"

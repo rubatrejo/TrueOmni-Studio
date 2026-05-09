@@ -99,7 +99,12 @@ export function AiPopup({ textos, onStart, onTopSuggestions, onClose }: AiPopupP
           className="absolute right-7 top-7 flex h-14 w-14 items-center justify-center rounded-full bg-foreground/85 text-white"
         >
           <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
-            <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+            <path
+              d="M5 5l10 10M15 5L5 15"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
           </svg>
         </button>
         <h2 className="text-center text-[40px] font-bold leading-tight tracking-wide text-foreground">

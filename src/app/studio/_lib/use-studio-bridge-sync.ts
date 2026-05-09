@@ -184,10 +184,5 @@ export function useStudioBridgeSync(
     }
 
     previousRef.current = state;
-  }, [
-    state,
-    pushers,
-    ctx.clientName,
-    ctx.clientCoords,
-  ]);
+  }, [state, pushers, ctx.clientName, ctx.clientCoords]);
 }

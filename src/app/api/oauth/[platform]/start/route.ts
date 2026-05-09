@@ -26,10 +26,7 @@ function parseEmailList(raw: string | undefined): string[] {
     .filter(Boolean);
 }
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ platform: string }> },
-) {
+export async function POST(req: Request, { params }: { params: Promise<{ platform: string }> }) {
   const { platform } = await params;
 
   if (!isSocialPlatform(platform)) {

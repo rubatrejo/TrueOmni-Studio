@@ -37,12 +37,7 @@ interface DraftState {
   transition: 'cut' | 'fade' | 'slide-left' | 'slide-up';
 }
 
-export function AddSlideModal({
-  open,
-  defaultTransition,
-  onClose,
-  onConfirm,
-}: AddSlideModalProps) {
+export function AddSlideModal({ open, defaultTransition, onClose, onConfirm }: AddSlideModalProps) {
   const [draft, setDraft] = useState<DraftState>({
     templateId: '01-full-events',
     durationS: 7,
@@ -104,8 +99,8 @@ export function AddSlideModal({
             Add slide
           </h3>
           <p className="mt-0.5 text-[12px] text-zinc-500">
-            Select a template and basic settings. Module slots are configured
-            after creation in DSS5.
+            Select a template and basic settings. Module slots are configured after creation in
+            DSS5.
           </p>
         </header>
 

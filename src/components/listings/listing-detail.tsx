@@ -115,9 +115,9 @@ export function ListingDetail({
   // MapboxMap usan estas coords para origin de la ruta y centro de mapa.
   // Sin esto, "Get Directions" en un kiosk de Florida seguía centrando
   // en Phoenix.
-  const [reactiveCoords, setReactiveCoords] = useState<
-    { lat: number; lng: number } | undefined
-  >(() => getCachedClientCoords() ?? clientCoords);
+  const [reactiveCoords, setReactiveCoords] = useState<{ lat: number; lng: number } | undefined>(
+    () => getCachedClientCoords() ?? clientCoords,
+  );
   useEffect(() => {
     const onOverride = (event: Event) => {
       const detail = (event as CustomEvent<{ coords?: { lat: number; lng: number } }>).detail;
@@ -435,7 +435,8 @@ function HeroImage({
           aria-hidden
           className="h-full w-full"
           style={{
-            background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%)',
+            background:
+              'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%)',
           }}
         />
       ) : (
@@ -636,7 +637,9 @@ function ActionRow({
           letterSpacing: '0.02em',
         }}
       >
-        {t('listing_action_website') === 'listing_action_website' ? 'WEBSITE' : t('listing_action_website')}
+        {t('listing_action_website') === 'listing_action_website'
+          ? 'WEBSITE'
+          : t('listing_action_website')}
       </a>
 
       {/* Segundo botón: RESERVE NOW o CTA configurable (GET TICKETS). */}
@@ -707,7 +710,8 @@ function SecondaryCtaButton({
 
 function ReserveNowButton({ href }: { href: string }) {
   const t = useTextos();
-  const label = t('listing_reserve_now') === 'listing_reserve_now' ? 'RESERVE NOW' : t('listing_reserve_now');
+  const label =
+    t('listing_reserve_now') === 'listing_reserve_now' ? 'RESERVE NOW' : t('listing_reserve_now');
   return (
     <a
       href={href}

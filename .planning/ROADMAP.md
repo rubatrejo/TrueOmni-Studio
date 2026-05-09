@@ -81,6 +81,7 @@ Subfases cerradas:
 - [x] 3.18 — Multi-idioma (6 idiomas: en/es/fr/de/pt/ja) + teclado iOS-style + DraggableKeyboard + seed data refresh — adelantado desde Fase 6 (v2) como pre-requisito de Fase 4 (commit `b201a51`, 2026-04-28).
 
 Pendientes:
+
 - [ ] Map aggregator integration para trails (follow-up de 3.13).
 - [ ] Backend real para Guestbook (Fase 5+).
 - [ ] LLM real para Ask AI (endpoint `/api/ai` con Anthropic Claude — Fase 5+).
@@ -175,7 +176,7 @@ aprobado por Rubén. Listo para Milestone Signage Studio (DSS0+).
 > sub-fases (DSS0..DSS9) en una sesión continua.
 
 - [x] **DSS0..DSS9** — Editor signage completo (2026-05-07). Detalles
-  en `.planning/SIGNAGE-ROADMAP.md` y `.planning/2026-05-07-signage-studio-smoke-e2e.md`.
+      en `.planning/SIGNAGE-ROADMAP.md` y `.planning/2026-05-07-signage-studio-smoke-e2e.md`.
 
 ---
 

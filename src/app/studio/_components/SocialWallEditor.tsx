@@ -79,22 +79,16 @@ export function SocialWallEditor({
     onChange({ ...socialWall, handles });
   };
 
-  const setHighlights = (list: SocialHighlight[]) =>
-    onChange({ ...socialWall, highlights: list });
+  const setHighlights = (list: SocialHighlight[]) => onChange({ ...socialWall, highlights: list });
 
   const updateHighlight = (id: string, patch: Partial<SocialHighlight>) =>
-    setHighlights(
-      socialWall.highlights.map((h) => (h.id === id ? { ...h, ...patch } : h)),
-    );
+    setHighlights(socialWall.highlights.map((h) => (h.id === id ? { ...h, ...patch } : h)));
 
   const removeHighlight = (id: string) =>
     setHighlights(socialWall.highlights.filter((h) => h.id !== id));
 
   const addHighlight = () =>
-    setHighlights([
-      ...socialWall.highlights,
-      { id: newSocialId('hl'), image: '', label: '' },
-    ]);
+    setHighlights([...socialWall.highlights, { id: newSocialId('hl'), image: '', label: '' }]);
 
   const setPosts = (list: SocialPost[]) => onChange({ ...socialWall, posts: list });
 
@@ -108,11 +102,7 @@ export function SocialWallEditor({
     if (idx < 0) return;
     const orig = socialWall.posts[idx];
     const copy: SocialPost = { ...orig, id: newSocialId('post') };
-    setPosts([
-      ...socialWall.posts.slice(0, idx + 1),
-      copy,
-      ...socialWall.posts.slice(idx + 1),
-    ]);
+    setPosts([...socialWall.posts.slice(0, idx + 1), copy, ...socialWall.posts.slice(idx + 1)]);
   };
 
   const addPost = (source: SocialSource) =>
@@ -502,9 +492,7 @@ function PostRow({
             <Field label="Author name">
               <input
                 value={post.author.name}
-                onChange={(e) =>
-                  onUpdate({ author: { ...post.author, name: e.target.value } })
-                }
+                onChange={(e) => onUpdate({ author: { ...post.author, name: e.target.value } })}
                 className={inputCls}
                 maxLength={120}
               />
@@ -537,9 +525,7 @@ function PostRow({
             label="Author avatar"
             hint="Square · 1:1"
             value={post.author.avatar || undefined}
-            onChange={(v) =>
-              onUpdate({ author: { ...post.author, avatar: v ?? '' } })
-            }
+            onChange={(v) => onUpdate({ author: { ...post.author, avatar: v ?? '' } })}
             accept="image/jpeg,image/png,image/webp"
             maxBytes={300 * 1024}
           />
@@ -561,9 +547,7 @@ function PostRow({
               hint={post.type === 'image' ? 'JPG/PNG' : 'Cover for the video'}
               value={(post.type === 'image' ? post.mediaUrl : post.videoPoster) || undefined}
               onChange={(v) =>
-                post.type === 'image'
-                  ? onUpdate({ mediaUrl: v })
-                  : onUpdate({ videoPoster: v })
+                post.type === 'image' ? onUpdate({ mediaUrl: v }) : onUpdate({ videoPoster: v })
               }
               accept="image/jpeg,image/png,image/webp"
               maxBytes={1.5 * 1024 * 1024}
@@ -716,7 +700,11 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
  */
 function OAuthConnectGroup() {
   const slug = useStudioSlug();
-  const platforms: { key: 'instagram' | 'facebook' | 'tiktok' | 'x'; label: string; icon: LucideIcon }[] = [
+  const platforms: {
+    key: 'instagram' | 'facebook' | 'tiktok' | 'x';
+    label: string;
+    icon: LucideIcon;
+  }[] = [
     { key: 'instagram', label: 'Instagram', icon: SOURCE_ICON.instagram },
     { key: 'facebook', label: 'Facebook', icon: SOURCE_ICON.facebook },
     { key: 'tiktok', label: 'TikTok', icon: SOURCE_ICON.tiktok },
@@ -785,9 +773,9 @@ function OAuthConnectGroup() {
         })}
       </div>
       <p className="mt-1.5 text-[10.5px] leading-relaxed text-zinc-500 dark:text-zinc-500">
-        Setup details for each provider in{' '}
-        <code>.planning/2026-05-06-social-oauth-handoff.md</code>. Without OAuth, posts are
-        managed manually below or via CrowdRiff API key in <em>Integrations</em>.
+        Setup details for each provider in <code>.planning/2026-05-06-social-oauth-handoff.md</code>
+        . Without OAuth, posts are managed manually below or via CrowdRiff API key in{' '}
+        <em>Integrations</em>.
       </p>
     </Group>
   );

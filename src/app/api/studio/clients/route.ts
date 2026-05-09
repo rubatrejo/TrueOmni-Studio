@@ -3,10 +3,7 @@ import { z } from 'zod';
 
 import { loadSignageClient } from '@/lib/signage/config';
 import { kSignageClient, kSignageClientList } from '@/lib/signage/kv-keys';
-import {
-  SignageClientFileSchema,
-  type SignageClientFile,
-} from '@/lib/signage/schema';
+import { SignageClientFileSchema, type SignageClientFile } from '@/lib/signage/schema';
 import { autoMigrateClients } from '@/lib/studio/auto-migrate-clients';
 import { bootstrapStudioFromFs, readClientFs } from '@/lib/studio/bootstrap-from-fs';
 import {
@@ -89,8 +86,7 @@ export async function GET() {
       if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
       if (a.slug === 'default' && !b.pinned) return -1;
       if (b.slug === 'default' && !a.pinned) return 1;
-      const recencyDiff =
-        new Date(b.lastEditedAt).getTime() - new Date(a.lastEditedAt).getTime();
+      const recencyDiff = new Date(b.lastEditedAt).getTime() - new Date(a.lastEditedAt).getTime();
       if (Math.abs(recencyDiff) > 60_000) return recencyDiff; // > 1 min de diff
       return a.name.localeCompare(b.name);
     });
@@ -164,10 +160,7 @@ export async function POST(request: Request) {
     kv.get(kSignageClient(slug)),
   ]);
   if (existingManifest || existingKiosk || existingSignage) {
-    return NextResponse.json(
-      { error: `slug "${slug}" already exists` },
-      { status: 409 },
-    );
+    return NextResponse.json({ error: `slug "${slug}" already exists` }, { status: 409 });
   }
 
   // 1. Clonar kiosk si toca.
@@ -203,10 +196,7 @@ export async function POST(request: Request) {
       kioskConfig = validated.data;
       const created = await kv.set(kvKeys.cfg(slug), kioskConfig, { nx: true });
       if (created !== 'OK') {
-        return NextResponse.json(
-          { error: `kiosk slug "${slug}" already exists` },
-          { status: 409 },
-        );
+        return NextResponse.json({ error: `kiosk slug "${slug}" already exists` }, { status: 409 });
       }
       const meta: ConfigMeta = {
         slug,

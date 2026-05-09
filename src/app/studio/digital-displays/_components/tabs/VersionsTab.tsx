@@ -88,8 +88,7 @@ export function VersionsTab({ clientSlug }: VersionsTabProps) {
             Versions
           </h2>
           <p className="mt-1 text-[13px] text-zinc-500">
-            Cada save crea snapshot del estado previo. Cap 10. Restore es
-            reversible.
+            Cada save crea snapshot del estado previo. Cap 10. Restore es reversible.
           </p>
         </div>
         <button
@@ -98,10 +97,7 @@ export function VersionsTab({ clientSlug }: VersionsTabProps) {
           disabled={loading}
           className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:opacity-40 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/80"
         >
-          <RotateCcw
-            className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`}
-            strokeWidth={2}
-          />
+          <RotateCcw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} strokeWidth={2} />
           Refresh
         </button>
       </header>
@@ -142,9 +138,7 @@ export function VersionsTab({ clientSlug }: VersionsTabProps) {
                     ) : null}
                   </div>
                   {entry.meta.note ? (
-                    <p className="mt-0.5 truncate text-[11.5px] text-zinc-500">
-                      {entry.meta.note}
-                    </p>
+                    <p className="mt-0.5 truncate text-[11.5px] text-zinc-500">{entry.meta.note}</p>
                   ) : null}
                 </div>
                 {isConfirming ? (

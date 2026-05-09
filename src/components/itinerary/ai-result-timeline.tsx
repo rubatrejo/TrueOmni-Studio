@@ -25,9 +25,7 @@ export function AiResultTimeline({ entries, kindLabels }: AiResultTimelineProps)
             <p className="text-[29px] font-bold leading-tight text-foreground">
               {kindLabels[entry.kind]}
             </p>
-            <p className="mt-1 text-[23px] leading-relaxed text-zinc-700">
-              {entry.description}
-            </p>
+            <p className="mt-1 text-[23px] leading-relaxed text-zinc-700">{entry.description}</p>
           </div>
         </li>
       ))}

@@ -4,10 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { AiModal } from '@/components/ai/ai-modal';
 import { useTextos } from '@/components/i18n-provider';
-import {
-  KIOSK_CLIENT_NAME_OVERRIDE_EVENT,
-  getCachedClientName,
-} from '@/components/studio-bridge';
+import { KIOSK_CLIENT_NAME_OVERRIDE_EVENT, getCachedClientName } from '@/components/studio-bridge';
 import type { AskAiSuggestedQuestion } from '@/lib/config';
 import { useAiStore } from '@/stores/ai-store';
 import { useLocaleStore } from '@/stores/locale-store';

@@ -75,12 +75,12 @@ Atomic plan ejecutable en sesión fresca. Reemplaza el `cut` instantáneo del
 
 ## Dimensiones
 
-| Transition  | Duración | Animación entrante              | Animación saliente                |
-|-------------|----------|---------------------------------|-----------------------------------|
-| `cut`       | 0ms      | (sin animación)                 | (no rendering)                    |
-| `fade`      | 600ms    | opacity 0 → 1                   | opacity 1 → 0                     |
-| `slide-left`| 700ms    | translateX(100%) → translateX(0)| translateX(0) → translateX(-100%) |
-| `slide-up`  | 700ms    | translateY(100%) → translateY(0)| translateY(0) → translateY(-100%) |
+| Transition   | Duración | Animación entrante               | Animación saliente                |
+| ------------ | -------- | -------------------------------- | --------------------------------- |
+| `cut`        | 0ms      | (sin animación)                  | (no rendering)                    |
+| `fade`       | 600ms    | opacity 0 → 1                    | opacity 1 → 0                     |
+| `slide-left` | 700ms    | translateX(100%) → translateX(0) | translateX(0) → translateX(-100%) |
+| `slide-up`   | 700ms    | translateY(100%) → translateY(0) | translateY(0) → translateY(-100%) |
 
 Easing común: `cubic-bezier(0.4, 0, 0.2, 1)` (Material standard out).
 

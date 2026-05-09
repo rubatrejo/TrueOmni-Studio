@@ -1,7 +1,16 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CheckCircle2, History, Loader2, Play, Rocket, RotateCcw, Save, Sparkles } from 'lucide-react';
+import {
+  CheckCircle2,
+  History,
+  Loader2,
+  Play,
+  Rocket,
+  RotateCcw,
+  Save,
+  Sparkles,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import type {
@@ -295,11 +304,7 @@ export function EditorPanel({
         )}
         {sectionKey === 'survey' && <SurveyEditor survey={survey} onChange={onSurveyChange} />}
         {sectionKey === 'deals' && (
-          <DealsEditor
-            deals={deals}
-            onChange={onDealsChange}
-            kioskLocation={kioskLocation ?? ''}
-          />
+          <DealsEditor deals={deals} onChange={onDealsChange} kioskLocation={kioskLocation ?? ''} />
         )}
         {sectionKey === 'photo-booth' && (
           <PhotoBoothEditor photoBooth={photoBooth} onChange={onPhotoBoothChange} />
@@ -547,8 +552,8 @@ function BrandingEditor({
           Gradient overlay
         </p>
         <p className="mb-1.5 text-[10.5px] text-zinc-500">
-          Layer between the hero photo and the logo + clock so they remain readable. Use 8-digit
-          hex (#rrggbbAA) for transparency in the To color.
+          Layer between the hero photo and the logo + clock so they remain readable. Use 8-digit hex
+          (#rrggbbAA) for transparency in the To color.
         </p>
         <HexRow
           label="From"
@@ -886,9 +891,8 @@ function VersionsEditor({
           </h3>
         </header>
         <p className="text-[12px] leading-relaxed text-zinc-500 dark:text-zinc-500">
-          The local timeline above is a transient placeholder. Once GitHub PR-publish ships
-          (S7.2), each release will be an immutable git commit you can review, diff and roll
-          back to.
+          The local timeline above is a transient placeholder. Once GitHub PR-publish ships (S7.2),
+          each release will be an immutable git commit you can review, diff and roll back to.
         </p>
         {/* Timeline visual del roadmap (audit F-46). Done = local timeline,
            In progress = S7.2 publish flow, Upcoming = features post-S7. */}
@@ -947,11 +951,8 @@ function RoadmapStep({
         ? 'bg-sky-500 animate-pulse ring-4 ring-sky-500/20'
         : 'bg-zinc-300 dark:bg-zinc-700';
   const titleClass =
-    status === 'upcoming'
-      ? 'text-zinc-500 dark:text-zinc-500'
-      : 'text-zinc-800 dark:text-zinc-200';
-  const tagLabel =
-    status === 'done' ? 'Live' : status === 'active' ? 'In progress' : 'Upcoming';
+    status === 'upcoming' ? 'text-zinc-500 dark:text-zinc-500' : 'text-zinc-800 dark:text-zinc-200';
+  const tagLabel = status === 'done' ? 'Live' : status === 'active' ? 'In progress' : 'Upcoming';
   const tagClass =
     status === 'done'
       ? 'bg-emerald-500/15 text-emerald-700 ring-emerald-500/30 dark:text-emerald-300'
@@ -964,7 +965,10 @@ function RoadmapStep({
       {/* Dot + linea conectora */}
       <div className="relative flex flex-col items-center">
         <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${dotClass}`} aria-hidden />
-        <span className="mt-1 w-px flex-1 bg-zinc-200 last:bg-transparent dark:bg-zinc-800" aria-hidden />
+        <span
+          className="mt-1 w-px flex-1 bg-zinc-200 last:bg-transparent dark:bg-zinc-800"
+          aria-hidden
+        />
       </div>
       <div className="min-w-0 flex-1 pb-2">
         <div className="flex flex-wrap items-center gap-2">
@@ -1229,7 +1233,11 @@ function SnapshotsTimeline() {
                 disabled={reverting}
                 className="inline-flex items-center gap-1.5 rounded-md bg-amber-600 px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition hover:bg-amber-500 disabled:opacity-50"
               >
-                {reverting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                {reverting ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <RotateCcw className="h-3.5 w-3.5" />
+                )}
                 {reverting ? 'Reverting…' : 'Revert'}
               </button>
             </div>

@@ -254,10 +254,7 @@ export default async function ModulePage({ params }: PageProps) {
     // (Party, Shopping, Wellness, etc) sin necesidad de publish.
     return (
       <KioskCanvas>
-        <DynamicListingsPlaceholder
-          moduleKey={module}
-          clientCoords={config.client.coords}
-        />
+        <DynamicListingsPlaceholder moduleKey={module} clientCoords={config.client.coords} />
         <AdsSlot ads={ads} />
       </KioskCanvas>
     );
@@ -282,7 +279,12 @@ export default async function ModulePage({ params }: PageProps) {
         <Link
           href="/home"
           className="mt-4 inline-flex items-center justify-center rounded-[10px] font-sans font-bold uppercase text-white transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
-          style={{ fontSize: '26px', padding: '16px 40px', letterSpacing: '0.02em', backgroundColor: 'hsl(var(--brand-primary))' }}
+          style={{
+            fontSize: '26px',
+            padding: '16px 40px',
+            letterSpacing: '0.02em',
+            backgroundColor: 'hsl(var(--brand-primary))',
+          }}
         >
           {backToHomeText}
         </Link>

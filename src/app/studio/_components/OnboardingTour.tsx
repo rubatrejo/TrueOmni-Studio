@@ -31,9 +31,9 @@ const STEPS: TourStep[] = [
     title: 'Pick your brand',
     body: (
       <>
-        Open <strong>Branding</strong> in the sidebar. Drop your primary, secondary and tertiary
-        hex colors plus a logo. Every kiosk module reads from those tokens — change them once,
-        ship a new look.
+        Open <strong>Branding</strong> in the sidebar. Drop your primary, secondary and tertiary hex
+        colors plus a logo. Every kiosk module reads from those tokens — change them once, ship a
+        new look.
       </>
     ),
   },
@@ -42,9 +42,9 @@ const STEPS: TourStep[] = [
     title: 'Toggle the modules you want',
     body: (
       <>
-        The <strong>Modules</strong> tab has master switches for the 19 modules. Turn off
-        what you don&rsquo;t need — the corresponding tile, sidebar editor and i18n keys
-        cascade off automatically.
+        The <strong>Modules</strong> tab has master switches for the 19 modules. Turn off what you
+        don&rsquo;t need — the corresponding tile, sidebar editor and i18n keys cascade off
+        automatically.
       </>
     ),
   },
@@ -53,9 +53,9 @@ const STEPS: TourStep[] = [
     title: 'Drop your content',
     body: (
       <>
-        Listings, Events, Deals, Passes, Trails, Brochures — each editor has CSV import,
-        bulk select, and an empty state with a one-click&nbsp;<em>Add</em>. You can paste a
-        spreadsheet and have a kiosk loaded in minutes.
+        Listings, Events, Deals, Passes, Trails, Brochures — each editor has CSV import, bulk
+        select, and an empty state with a one-click&nbsp;<em>Add</em>. You can paste a spreadsheet
+        and have a kiosk loaded in minutes.
       </>
     ),
   },
@@ -64,9 +64,8 @@ const STEPS: TourStep[] = [
     title: 'Verify in the live preview',
     body: (
       <>
-        The right panel mirrors the kiosk in real time. Edits stream via postMessage in
-        &lt;120ms. Switch orientation, zoom in, or open the kiosk full screen via the
-        toolbar.
+        The right panel mirrors the kiosk in real time. Edits stream via postMessage in &lt;120ms.
+        Switch orientation, zoom in, or open the kiosk full screen via the toolbar.
       </>
     ),
   },
@@ -75,10 +74,9 @@ const STEPS: TourStep[] = [
     title: 'Publish when ready',
     body: (
       <>
-        Hit <strong>Publish</strong> in the top bar. You&rsquo;ll see a per-file diff with
-        the JSON keys that changed, confirm, and a GitHub PR is opened automatically. Once
-        merged, Vercel deploys. The <strong>Versions</strong> tab keeps revertable snapshots
-        of every save.
+        Hit <strong>Publish</strong> in the top bar. You&rsquo;ll see a per-file diff with the JSON
+        keys that changed, confirm, and a GitHub PR is opened automatically. Once merged, Vercel
+        deploys. The <strong>Versions</strong> tab keeps revertable snapshots of every save.
       </>
     ),
   },
@@ -227,9 +225,7 @@ export function OnboardingTour() {
                   transition={{ duration: 0.2, ease: 'easeOut' }}
                 >
                   <h3 className="font-display text-[16px] font-semibold leading-tight tracking-tight text-zinc-900 dark:text-white">
-                    <span className="font-mono text-zinc-400 dark:text-zinc-600">
-                      {step.num}.
-                    </span>{' '}
+                    <span className="font-mono text-zinc-400 dark:text-zinc-600">{step.num}.</span>{' '}
                     {step.title}
                   </h3>
                   <p className="mt-2 text-[13.5px] leading-relaxed text-zinc-600 dark:text-zinc-400">

@@ -43,7 +43,14 @@ export function StickerLayer({ stickers, bounds, onUpdate, onRemove }: StickerLa
   // drag del handle BR. Cuando es null no hay gesto activo.
   const gestureRef = useRef<
     | { mode: 'move'; id: string; offsetX: number; offsetY: number }
-    | { mode: 'resize'; id: string; startW: number; startCX: number; startCY: number; aspect: number }
+    | {
+        mode: 'resize';
+        id: string;
+        startW: number;
+        startCX: number;
+        startCY: number;
+        aspect: number;
+      }
     | null
   >(null);
 
@@ -67,7 +74,9 @@ export function StickerLayer({ stickers, bounds, onUpdate, onRemove }: StickerLa
       if (!g) return;
       // Necesitamos el parent (photo container) para convertir client coords
       // a coords del photoRect (compensando scale del kiosk).
-      const parent = document.querySelector('[data-photo-stickers-container]') as HTMLElement | null;
+      const parent = document.querySelector(
+        '[data-photo-stickers-container]',
+      ) as HTMLElement | null;
       if (!parent) return;
       const pRect = parent.getBoundingClientRect();
       const b = boundsRef.current;

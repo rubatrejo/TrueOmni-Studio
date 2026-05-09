@@ -75,7 +75,11 @@ export function MediaField({
   // se resuelven contra `/signage-assets/<slug>/<path>` directamente.
   const previewSrc =
     product === 'signage'
-      ? value && (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/') || value.startsWith('data:'))
+      ? value &&
+        (value.startsWith('http://') ||
+          value.startsWith('https://') ||
+          value.startsWith('/') ||
+          value.startsWith('data:'))
         ? value
         : slug && value
           ? `/signage-assets/${slug}/${value}`
@@ -117,11 +121,7 @@ export function MediaField({
     // valida el cap. Cuando no (dev sin token), seguimos en el régimen
     // antiguo de data URL: imagen comprimida + video <= maxVideoBytes.
     const useBlob = blobAvailable === true;
-    const rawLimit = useBlob
-      ? BLOB_MAX_BYTES
-      : isVideo
-        ? maxVideoBytes
-        : maxImageBytes;
+    const rawLimit = useBlob ? BLOB_MAX_BYTES : isVideo ? maxVideoBytes : maxImageBytes;
     if (file.size > rawLimit) {
       setError(
         isVideo
@@ -291,9 +291,7 @@ export function MediaField({
               <Upload className="h-5 w-5" />
             </div>
             <div className="text-center">
-              <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-200">
-                {label}
-              </p>
+              <p className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-200">{label}</p>
               <p className="mt-1 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-500">
                 Click or drop a file
               </p>
@@ -322,9 +320,7 @@ export function MediaField({
         )}
       </div>
 
-      <p className="text-[10.5px] leading-relaxed text-zinc-500 dark:text-zinc-500">
-        {hint}
-      </p>
+      <p className="text-[10.5px] leading-relaxed text-zinc-500 dark:text-zinc-500">{hint}</p>
       {error ? (
         <p
           role="alert"

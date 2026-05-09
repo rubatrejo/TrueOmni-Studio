@@ -3,17 +3,11 @@
  * recolección de taxonomías a partir de los items importados.
  */
 
-export function upsertBySlug<T extends { slug: string }>(
-  existing: T[],
-  incoming: T[],
-): T[] {
+export function upsertBySlug<T extends { slug: string }>(existing: T[], incoming: T[]): T[] {
   return upsertByKey(existing, incoming, 'slug');
 }
 
-export function upsertById<T extends { id: string }>(
-  existing: T[],
-  incoming: T[],
-): T[] {
+export function upsertById<T extends { id: string }>(existing: T[], incoming: T[]): T[] {
   return upsertByKey(existing, incoming, 'id');
 }
 

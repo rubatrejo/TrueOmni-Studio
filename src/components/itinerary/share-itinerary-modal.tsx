@@ -57,10 +57,7 @@ export function ShareItineraryModal(props: ShareItineraryModalProps) {
             {textos.scanLabel}
           </p>
         </div>
-        <div
-          className="mt-7 flex items-center gap-4"
-          style={{ color: 'hsl(var(--primary))' }}
-        >
+        <div className="mt-7 flex items-center gap-4" style={{ color: 'hsl(var(--primary))' }}>
           <span className="text-[18px] font-bold">{textos.poweredBy}</span>
           <TrueOmniLogo slot="brand" className="h-[38px] w-auto" />
         </div>

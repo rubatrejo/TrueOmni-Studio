@@ -84,8 +84,8 @@ export function ShortcutsModal({ open, onClose }: { open: boolean; onClose: () =
               </ShortcutGroup>
 
               <p className="mt-4 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-500">
-                Cmd+N (new kiosk) lands with the next iteration. On Windows/Linux replace ⌘
-                with Ctrl.
+                Cmd+N (new kiosk) lands with the next iteration. On Windows/Linux replace ⌘ with
+                Ctrl.
               </p>
             </div>
           </motion.div>
@@ -95,13 +95,7 @@ export function ShortcutsModal({ open, onClose }: { open: boolean; onClose: () =
   );
 }
 
-function ShortcutGroup({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function ShortcutGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-4 last:mb-0">
       <h3 className="mb-2 text-[10.5px] font-semibold uppercase tracking-[0.16em] text-zinc-500 dark:text-zinc-400">

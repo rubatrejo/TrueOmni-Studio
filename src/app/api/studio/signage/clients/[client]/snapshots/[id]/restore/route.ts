@@ -45,9 +45,6 @@ export async function POST(_req: NextRequest, ctx: RouteContext) {
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error('[signage:api] theme snapshot restore failed', e);
-    return NextResponse.json(
-      { error: `Restore failed: ${(e as Error).message}` },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: `Restore failed: ${(e as Error).message}` }, { status: 500 });
   }
 }

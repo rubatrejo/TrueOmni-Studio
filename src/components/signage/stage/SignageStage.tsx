@@ -39,10 +39,7 @@ export function SignageStage({ children, debug = false }: SignageStageProps) {
       setScale(Math.min(sx, sy));
     }
     compute();
-    const obs =
-      typeof ResizeObserver !== 'undefined'
-        ? new ResizeObserver(() => compute())
-        : null;
+    const obs = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => compute()) : null;
     if (obs && containerRef.current) obs.observe(containerRef.current);
     window.addEventListener('resize', compute);
     return () => {

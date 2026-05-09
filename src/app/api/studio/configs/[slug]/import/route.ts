@@ -33,9 +33,10 @@ export async function POST(req: Request, { params }: RouteParams) {
     const patched = {
       ...(body as Record<string, unknown>),
       slug,
-      nombre: typeof (body as Record<string, unknown>).nombre === 'string'
-        ? (body as Record<string, unknown>).nombre
-        : (target?.nombre ?? slug),
+      nombre:
+        typeof (body as Record<string, unknown>).nombre === 'string'
+          ? (body as Record<string, unknown>).nombre
+          : (target?.nombre ?? slug),
     };
 
     const parsed = KioskConfigSchema.safeParse(patched);

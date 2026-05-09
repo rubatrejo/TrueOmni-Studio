@@ -18,7 +18,13 @@
  *    para campos hero / settings principales.
  */
 
-import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import {
+  useId,
+  type InputHTMLAttributes,
+  type ReactNode,
+  type SelectHTMLAttributes,
+  type TextareaHTMLAttributes,
+} from 'react';
 
 /* ────────────────────────────────────────────────────────────────────────── */
 /*  Field wrapper                                                             */
@@ -170,9 +176,7 @@ export function Checkbox({ label, checked, onChange, helpText, disabled }: Check
       />
       <label htmlFor={id} className="flex-1 cursor-pointer">
         <span className="block text-[12px] text-zinc-700 dark:text-zinc-200">{label}</span>
-        {helpText ? (
-          <span className="block text-[11px] text-zinc-500">{helpText}</span>
-        ) : null}
+        {helpText ? <span className="block text-[11px] text-zinc-500">{helpText}</span> : null}
       </label>
     </div>
   );
@@ -231,8 +235,7 @@ export function ColorPicker({
     }
   };
 
-  const isInvalid =
-    value.length > 0 && !(HEX6.test(value) || (allowAlpha && HEX8.test(value)));
+  const isInvalid = value.length > 0 && !(HEX6.test(value) || (allowAlpha && HEX8.test(value)));
 
   return (
     <div className="flex items-center gap-2">

@@ -14,9 +14,7 @@ import type { SignageNewsConfig, SignageNewsItem } from './schema';
 
 const CACHE_SECONDS = 300;
 
-export async function resolveNewsItems(
-  config: SignageNewsConfig,
-): Promise<SignageNewsItem[]> {
+export async function resolveNewsItems(config: SignageNewsConfig): Promise<SignageNewsItem[]> {
   const src = config.source;
 
   if (src.kind === 'manual') {

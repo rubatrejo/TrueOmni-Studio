@@ -18,10 +18,7 @@ interface VideoImageAsset {
   kind: 'video' | 'image';
 }
 
-function getAsset(
-  clientSlug: string,
-  slots: SignageTemplateRenderProps['slots'],
-): VideoImageAsset {
+function getAsset(clientSlug: string, slots: SignageTemplateRenderProps['slots']): VideoImageAsset {
   const mod = slots.find((s) => s.module.kind === 'video-image');
   if (mod && mod.module.kind === 'video-image' && mod.module.asset.url) {
     const url = mod.module.asset.url;

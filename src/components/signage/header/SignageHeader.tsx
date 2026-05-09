@@ -51,11 +51,7 @@ const PADDING_X = 40;
  *  permite cambiarla. */
 const HEADER_HEIGHT = 155;
 
-export function SignageHeader({
-  client: serverClient,
-  weather,
-  initialClock,
-}: SignageHeaderProps) {
+export function SignageHeader({ client: serverClient, weather, initialClock }: SignageHeaderProps) {
   const clientPatch = useSignageBridgeStore((s) => s.clientPatch);
   const header: SignageHeaderConfig = clientPatch?.header
     ? { ...serverClient.header, ...clientPatch.header }
@@ -82,11 +78,8 @@ export function SignageHeader({
 
   const logoRel = branding.logos?.default ?? '';
   const isExternalLogo =
-    logoRel.startsWith('http') ||
-    logoRel.startsWith('/') ||
-    logoRel.startsWith('data:');
-  const hasCustomLogo =
-    !!logoRel && (isExternalLogo || logoRel !== 'assets/logo.svg');
+    logoRel.startsWith('http') || logoRel.startsWith('/') || logoRel.startsWith('data:');
+  const hasCustomLogo = !!logoRel && (isExternalLogo || logoRel !== 'assets/logo.svg');
   const resolvedLogoSrc = hasCustomLogo
     ? isExternalLogo
       ? logoRel
@@ -105,11 +98,7 @@ export function SignageHeader({
       data-signage-header-position={header.position}
     >
       {header.showLogo ? (
-        <LogoZone
-          placement={header.layout}
-          customSrc={resolvedLogoSrc}
-          height={HEADER_HEIGHT}
-        />
+        <LogoZone placement={header.layout} customSrc={resolvedLogoSrc} height={HEADER_HEIGHT} />
       ) : null}
 
       {header.showWeather ? (
@@ -135,9 +124,7 @@ export function SignageHeader({
 //  Zonas
 // ---------------------------------------------------------------------------
 
-function placementToCss(
-  placement: 'left' | 'center' | 'right',
-): CSSProperties {
+function placementToCss(placement: 'left' | 'center' | 'right'): CSSProperties {
   if (placement === 'left') return { left: PADDING_X, transform: 'translateY(-50%)' };
   if (placement === 'right') return { right: PADDING_X, transform: 'translateY(-50%)' };
   return { left: '50%', transform: 'translate(-50%, -50%)' };
@@ -153,11 +140,7 @@ function LogoZone({
   height: number;
 }) {
   const simple: 'left' | 'center' | 'right' =
-    placement === 'logo-center'
-      ? 'center'
-      : placement === 'logo-right'
-        ? 'right'
-        : 'left';
+    placement === 'logo-center' ? 'center' : placement === 'logo-right' ? 'right' : 'left';
   // 50% del header height (20% más chico que el 0.62 original).
   const logoHeight = Math.round(height * 0.5);
   return (
@@ -224,10 +207,7 @@ function WeatherZone({
         {weather.currentTempText}
       </span>
       {weather.forecast.slice(0, forecastDays).map((f, i) => (
-        <div
-          key={i}
-          style={{ display: 'flex', alignItems: 'center', gap }}
-        >
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap }}>
           <Divider height={dividerH} />
           <ForecastCard
             dayLabel={f.dayLabel}
@@ -347,10 +327,7 @@ function ClockZone({
         ...placementToCss(placement),
       }}
     >
-      <div
-        className="signage-font-display"
-        style={{ fontSize: clockFs, fontWeight: 700 }}
-      >
+      <div className="signage-font-display" style={{ fontSize: clockFs, fontWeight: 700 }}>
         {clockText}
       </div>
       <div
@@ -379,9 +356,7 @@ function WeatherIcon({ code, size }: { code: number | null; size: number }) {
   return <CloudIcon size={size} />;
 }
 
-function pickIconKind(
-  code: number | null,
-): 'sun' | 'sun-cloud' | 'cloud' | 'rain' {
+function pickIconKind(code: number | null): 'sun' | 'sun-cloud' | 'cloud' | 'rain' {
   if (code == null) return 'sun-cloud';
   if (code === 0 || code === 1) return 'sun';
   if (code === 2 || code === 3) return 'sun-cloud';
@@ -409,7 +384,16 @@ function SunIcon({ size }: { size: number }) {
 
 function CloudIcon({ size }: { size: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" aria-hidden>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinejoin="round"
+      aria-hidden
+    >
       <path d="M7 18a4 4 0 0 1-.6-7.95 5.5 5.5 0 0 1 10.85.95A3.5 3.5 0 1 1 17.5 18H7Z" />
     </svg>
   );
@@ -417,7 +401,17 @@ function CloudIcon({ size }: { size: number }) {
 
 function SunCloudIcon({ size }: { size: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" aria-hidden>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinejoin="round"
+      strokeLinecap="round"
+      aria-hidden
+    >
       <circle cx="8" cy="9" r="3" fill="currentColor" stroke="none" />
       <line x1="8" y1="2" x2="8" y2="3.6" />
       <line x1="2" y1="9" x2="3.4" y2="9" />
@@ -430,7 +424,17 @@ function SunCloudIcon({ size }: { size: number }) {
 
 function RainIcon({ size }: { size: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" aria-hidden>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinejoin="round"
+      strokeLinecap="round"
+      aria-hidden
+    >
       <path d="M7 14a4 4 0 0 1-.6-7.95 5.5 5.5 0 0 1 10.85.95A3.5 3.5 0 1 1 17.5 14H7Z" />
       <line x1="9" y1="17" x2="8" y2="20" />
       <line x1="13" y1="17" x2="12" y2="20" />

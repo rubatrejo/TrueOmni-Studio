@@ -75,12 +75,9 @@ export function DeleteKioskModal({
                   </h2>
                   <p className="mt-1 text-[12.5px] leading-relaxed text-zinc-600 dark:text-zinc-400">
                     This will permanently remove the kiosk{' '}
-                    <span className="font-mono text-zinc-800 dark:text-zinc-200">
-                      {kioskSlug}
-                    </span>{' '}
-                    and all its content (branding, modules, listings,
-                    events, integrations, version history). This action
-                    cannot be undone.
+                    <span className="font-mono text-zinc-800 dark:text-zinc-200">{kioskSlug}</span>{' '}
+                    and all its content (branding, modules, listings, events, integrations, version
+                    history). This action cannot be undone.
                   </p>
                 </div>
               </div>

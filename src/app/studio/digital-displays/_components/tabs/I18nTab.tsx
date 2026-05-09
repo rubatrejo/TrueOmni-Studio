@@ -21,7 +21,7 @@ export interface I18nTabProps {
 
 export function I18nTab({ clientSlug, defaultLocale }: I18nTabProps) {
   const [locale, setLocale] = useState<Locale>(
-    (LOCALES.includes(defaultLocale as Locale) ? (defaultLocale as Locale) : 'en'),
+    LOCALES.includes(defaultLocale as Locale) ? (defaultLocale as Locale) : 'en',
   );
   const [bag, setBag] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -44,10 +44,9 @@ export function I18nTab({ clientSlug, defaultLocale }: I18nTabProps) {
   // Carga el bag EN en paralelo (canónico para AI translate).
   useEffect(() => {
     if (locale === 'en') return; // ya lo cargamos como `bag`
-    fetch(
-      `/api/studio/signage/clients/${encodeURIComponent(clientSlug)}/i18n?locale=en`,
-      { cache: 'no-store' },
-    )
+    fetch(`/api/studio/signage/clients/${encodeURIComponent(clientSlug)}/i18n?locale=en`, {
+      cache: 'no-store',
+    })
       .then((r) => (r.ok ? r.json() : { bag: {} }))
       .then((j: { bag?: Record<string, string> }) => setEnBag(j.bag ?? {}))
       .catch(() => setEnBag({}));
@@ -114,9 +113,7 @@ export function I18nTab({ clientSlug, defaultLocale }: I18nTabProps) {
   }
 
   const missingKeys =
-    locale === 'en'
-      ? []
-      : Object.keys(enBag).filter((k) => !bag[k] || bag[k].trim() === '');
+    locale === 'en' ? [] : Object.keys(enBag).filter((k) => !bag[k] || bag[k].trim() === '');
 
   async function handleSave() {
     setSaving(true);
@@ -159,8 +156,7 @@ export function I18nTab({ clientSlug, defaultLocale }: I18nTabProps) {
             Translations
           </h3>
           <p className="mt-0.5 text-[12px] text-zinc-500">
-            KV overrides al bag base del fs. Cambios reflejan al próximo render
-            del runtime.
+            KV overrides al bag base del fs. Cambios reflejan al próximo render del runtime.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -184,9 +180,7 @@ export function I18nTab({ clientSlug, defaultLocale }: I18nTabProps) {
             disabled={!dirty || saving}
             className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-1.5 text-[11.5px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-40 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
           >
-            {saving ? (
-              <Loader2 className="h-3 w-3 animate-spin" strokeWidth={2.5} />
-            ) : null}
+            {saving ? <Loader2 className="h-3 w-3 animate-spin" strokeWidth={2.5} /> : null}
             {saving ? 'Saving…' : dirty ? 'Save changes' : 'Saved'}
           </button>
         </div>
@@ -216,8 +210,7 @@ export function I18nTab({ clientSlug, defaultLocale }: I18nTabProps) {
           {locale !== 'en' && missingKeys.length > 0 && aiAvailable ? (
             <div className="flex items-center justify-between gap-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
               <span>
-                {missingKeys.length} key{missingKeys.length === 1 ? '' : 's'}{' '}
-                without translation
+                {missingKeys.length} key{missingKeys.length === 1 ? '' : 's'} without translation
               </span>
               <button
                 type="button"
@@ -237,17 +230,14 @@ export function I18nTab({ clientSlug, defaultLocale }: I18nTabProps) {
           <ul className="flex flex-col gap-1.5">
             {keys.map((key) => {
               const empty = !bag[key] || bag[key].trim() === '';
-              const canTranslate =
-                locale !== 'en' && empty && enBag[key] && aiAvailable;
+              const canTranslate = locale !== 'en' && empty && enBag[key] && aiAvailable;
               const isTranslating = translatingKey === key;
               return (
                 <li
                   key={key}
                   className="flex flex-wrap items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900/40"
                 >
-                  <code className="flex-shrink-0 font-mono text-[11px] text-zinc-500">
-                    {key}
-                  </code>
+                  <code className="flex-shrink-0 font-mono text-[11px] text-zinc-500">{key}</code>
                   <input
                     type="text"
                     value={bag[key] ?? ''}

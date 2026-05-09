@@ -1,15 +1,60 @@
 {
   "filter": { "hashtag": null, "network": null },
   "posts": [
-    { "id": "post-1", "author": "@username", "image": "assets/social/post-1.jpg", "network": "instagram" },
-    { "id": "post-2", "author": "@username", "image": "assets/social/post-2.jpg", "network": "instagram" },
-    { "id": "post-3", "author": "@username", "image": "assets/social/post-3.jpg", "network": "instagram" },
-    { "id": "post-4", "author": "@username", "image": "assets/social/post-4.jpg", "network": "instagram" },
-    { "id": "post-5", "author": "@username", "image": "assets/social/post-5.jpg", "network": "instagram" },
-    { "id": "post-6", "author": "@username", "image": "assets/social/post-6.jpg", "network": "instagram" },
-    { "id": "post-7", "author": "@username", "image": "assets/social/post-7.jpg", "network": "instagram" },
-    { "id": "post-8", "author": "@username", "image": "assets/social/post-8.jpg", "network": "instagram" },
-    { "id": "post-9", "author": "@username", "image": "assets/social/post-9.jpg", "network": "instagram" }
+    {
+      "id": "post-1",
+      "author": "@username",
+      "image": "assets/social/post-1.jpg",
+      "network": "instagram"
+    },
+    {
+      "id": "post-2",
+      "author": "@username",
+      "image": "assets/social/post-2.jpg",
+      "network": "instagram"
+    },
+    {
+      "id": "post-3",
+      "author": "@username",
+      "image": "assets/social/post-3.jpg",
+      "network": "instagram"
+    },
+    {
+      "id": "post-4",
+      "author": "@username",
+      "image": "assets/social/post-4.jpg",
+      "network": "instagram"
+    },
+    {
+      "id": "post-5",
+      "author": "@username",
+      "image": "assets/social/post-5.jpg",
+      "network": "instagram"
+    },
+    {
+      "id": "post-6",
+      "author": "@username",
+      "image": "assets/social/post-6.jpg",
+      "network": "instagram"
+    },
+    {
+      "id": "post-7",
+      "author": "@username",
+      "image": "assets/social/post-7.jpg",
+      "network": "instagram"
+    },
+    {
+      "id": "post-8",
+      "author": "@username",
+      "image": "assets/social/post-8.jpg",
+      "network": "instagram"
+    },
+    {
+      "id": "post-9",
+      "author": "@username",
+      "image": "assets/social/post-9.jpg",
+      "network": "instagram"
+    }
   ],
   "featuredTweet": {
     "id": "tweet-jane",

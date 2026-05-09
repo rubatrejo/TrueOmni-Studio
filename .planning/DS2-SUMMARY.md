@@ -21,15 +21,15 @@
 
 ## Verificado
 
-| Check | Resultado |
-|---|---|
-| `pnpm typecheck` | ✅ limpio |
-| `pnpm lint` (signage files) | ✅ cero issues nuevos |
-| GET `/signage/default/lobby-tv` | ✅ HTTP 200, 612KB |
-| GET `/` (kiosk) | ✅ HTTP 200 (no rompí kiosk) |
-| Render inicial muestra Slide A | ✅ "DS2 placeholder" visible |
-| Rotación a Slide B tras 5s | ✅ confirmado por Rubén en pantalla |
-| Cero touch handlers en árbol signage | ✅ |
+| Check                                | Resultado                           |
+| ------------------------------------ | ----------------------------------- |
+| `pnpm typecheck`                     | ✅ limpio                           |
+| `pnpm lint` (signage files)          | ✅ cero issues nuevos               |
+| GET `/signage/default/lobby-tv`      | ✅ HTTP 200, 612KB                  |
+| GET `/` (kiosk)                      | ✅ HTTP 200 (no rompí kiosk)        |
+| Render inicial muestra Slide A       | ✅ "DS2 placeholder" visible        |
+| Rotación a Slide B tras 5s           | ✅ confirmado por Rubén en pantalla |
+| Cero touch handlers en árbol signage | ✅                                  |
 
 ---
 

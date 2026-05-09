@@ -3,15 +3,8 @@
 import { Calendar } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import type {
-  ImportMode,
-  ImportStats,
-} from '@/app/studio/_lib/import-helpers';
-import {
-  type EventItem,
-  type EventsModule,
-  makeBlankEvent,
-} from '@/lib/studio/schema';
+import type { ImportMode, ImportStats } from '@/app/studio/_lib/import-helpers';
+import { type EventItem, type EventsModule, makeBlankEvent } from '@/lib/studio/schema';
 
 import { type AiSuggestedItem } from '../_lib/api-client';
 
@@ -60,8 +53,7 @@ export function EventsEditor({ value, onChange, kioskLocation }: EventsEditorPro
   };
 
   const editingItem = useMemo(
-    () =>
-      editingSlug ? value.events.find((e) => e.slug === editingSlug) ?? null : null,
+    () => (editingSlug ? (value.events.find((e) => e.slug === editingSlug) ?? null) : null),
     [editingSlug, value.events],
   );
 
@@ -329,8 +321,8 @@ export function EventsEditor({ value, onChange, kioskLocation }: EventsEditorPro
                 {item.title || <span className="italic text-zinc-500">Untitled</span>}
               </div>
               <div className="truncate text-[10.5px] text-zinc-500">
-                {item.date} · {item.startTime}–{item.endTime} ·{' '}
-                {item.category || '—'} · {item.priceMode}
+                {item.date} · {item.startTime}–{item.endTime} · {item.category || '—'} ·{' '}
+                {item.priceMode}
               </div>
             </div>
           </div>
@@ -355,7 +347,9 @@ function PricePaidFields({
       </h5>
 
       <label className="block space-y-1">
-        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">Price band</span>
+        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
+          Price band
+        </span>
         <select
           value={item.priceBand?.toString() ?? ''}
           onChange={(e) => {
@@ -375,7 +369,9 @@ function PricePaidFields({
       </label>
 
       <label className="block space-y-1">
-        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">Price display</span>
+        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
+          Price display
+        </span>
         <input
           type="text"
           value={ticket.priceDisplay}
@@ -386,7 +382,9 @@ function PricePaidFields({
       </label>
 
       <label className="block space-y-1">
-        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">Purchase URL</span>
+        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
+          Purchase URL
+        </span>
         <input
           type="text"
           value={ticket.purchaseUrl}

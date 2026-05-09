@@ -36,6 +36,7 @@
     - analytics: regex test `^(G-[A-Z0-9]+|UA-\d+-\d+)$`.
     - openweather: GET `https://api.openweathermap.org/data/2.5/weather?q={city}&appid={key}&units={units}`. 200 → ok.
     - Devuelve `{ ok: boolean, message: string }`. Errores HTTP capturados con AbortController + timeout.
+
   </action>
   <verify>
     `pnpm typecheck` limpio.
@@ -68,6 +69,7 @@
     - Resultado inline (verde ok / rojo error) con icono Check/AlertCircle, autodescarte 6s.
 
     Tokens secret-ish (mapbox token, openweather key) usar input type=password con eye toggle.
+
   </action>
   <verify>
     `pnpm typecheck && pnpm lint` limpios.

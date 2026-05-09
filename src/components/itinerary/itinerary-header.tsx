@@ -59,7 +59,7 @@ export function ItineraryHeader(props: ItineraryHeaderProps) {
         className="absolute flex items-center"
         style={{ left: 65, top: 145, right: 65, gap: 24 }}
       >
-        <h1 className="text-[34px] font-bold tracking-tight whitespace-nowrap">{title}</h1>
+        <h1 className="whitespace-nowrap text-[34px] font-bold tracking-tight">{title}</h1>
         <div
           className="relative ml-auto flex h-[56px] w-[620px] items-center rounded-full bg-white/95 px-6"
           style={{ boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}
@@ -72,12 +72,7 @@ export function ItineraryHeader(props: ItineraryHeaderProps) {
             aria-hidden="true"
           >
             <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" fill="none" />
-            <path
-              d="M20 20l-3.6-3.6"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
+            <path d="M20 20l-3.6-3.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
           <input
             type="text"

@@ -164,8 +164,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
     num: '09',
     label: 'Digital Brochure',
     title: 'Digital Brochures',
-    description:
-      'Upload PDFs and configure the flippable brochure module shown on the kiosk.',
+    description: 'Upload PDFs and configure the flippable brochure module shown on the kiosk.',
     icon: 'BookOpen',
     systemModuleKey: 'digitalBrochure',
     phase: 'S3',
@@ -175,8 +174,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
     num: '10',
     label: 'Social Wall',
     title: 'Social Wall',
-    description:
-      'Connect Instagram, TikTok, Facebook, X. Curate which feeds appear on the wall.',
+    description: 'Connect Instagram, TikTok, Facebook, X. Curate which feeds appear on the wall.',
     icon: 'Share2',
     systemModuleKey: 'socialWall',
     phase: 'S3',
@@ -207,8 +205,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
     num: '13',
     label: 'Events',
     title: 'Events',
-    description:
-      'Calendar-based events with date, time, venue, ticket info and filters.',
+    description: 'Calendar-based events with date, time, venue, ticket info and filters.',
     icon: 'Calendar',
     systemModuleKey: 'events',
     phase: 'S3',
@@ -218,8 +215,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
     num: '14',
     label: 'Tickets',
     title: 'Tickets',
-    description:
-      'Wrapper derived from paid events. Configure visible categories, hero and copy.',
+    description: 'Wrapper derived from paid events. Configure visible categories, hero and copy.',
     icon: 'Ticket',
     systemModuleKey: 'tickets',
     phase: 'S3',
@@ -305,8 +301,7 @@ export const STUDIO_SECTIONS: StudioSection[] = [
     num: '22',
     label: 'Publish',
     title: 'Publish & Approvals',
-    description:
-      'Request a publish to production. Final approval by ruben@trueomni.com.',
+    description: 'Request a publish to production. Final approval by ruben@trueomni.com.',
     icon: 'Rocket',
     phase: 'S7',
   },

@@ -141,7 +141,8 @@ export function EventsTab({ clientSlug, initialEvents }: EventsTabProps) {
             Events
           </h3>
           <p className="mt-0.5 text-[12px] text-zinc-500">
-            {events.length} event{events.length === 1 ? '' : 's'} · shared across every display in this theme
+            {events.length} event{events.length === 1 ? '' : 's'} · shared across every display in
+            this theme
           </p>
         </div>
         <button
@@ -160,12 +161,8 @@ export function EventsTab({ clientSlug, initialEvents }: EventsTabProps) {
           onClick={add}
           className="rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-12 text-center transition hover:border-sky-400 hover:bg-sky-50/50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-sky-500/50 dark:hover:bg-sky-950/20"
         >
-          <p className="text-base font-medium text-zinc-700 dark:text-zinc-300">
-            No events yet
-          </p>
-          <p className="mt-1 text-[12.5px] text-zinc-500">
-            Click to add the first one.
-          </p>
+          <p className="text-base font-medium text-zinc-700 dark:text-zinc-300">No events yet</p>
+          <p className="mt-1 text-[12.5px] text-zinc-500">Click to add the first one.</p>
         </button>
       ) : (
         <ul className="flex flex-col gap-2">
@@ -241,17 +238,13 @@ export function EventsTab({ clientSlug, initialEvents }: EventsTabProps) {
                       label="Location"
                       value={e.location ?? ''}
                       placeholder="(optional)"
-                      onChange={(v) =>
-                        update(e.id, { location: v || undefined })
-                      }
+                      onChange={(v) => update(e.id, { location: v || undefined })}
                     />
                     <FieldSelect
                       label="Category"
                       value={e.category ?? ''}
                       options={CATEGORIES}
-                      onChange={(v) =>
-                        update(e.id, { category: v || undefined })
-                      }
+                      onChange={(v) => update(e.id, { category: v || undefined })}
                     />
                     <SignageMediaField
                       label="Image"
@@ -259,9 +252,7 @@ export function EventsTab({ clientSlug, initialEvents }: EventsTabProps) {
                       aspect="16/9"
                       kind="image"
                       value={e.image ?? ''}
-                      onChange={(next) =>
-                        update(e.id, { image: next?.src || undefined })
-                      }
+                      onChange={(next) => update(e.id, { image: next?.src || undefined })}
                     />
                   </div>
                 ) : null}
@@ -279,9 +270,7 @@ export function EventsTab({ clientSlug, initialEvents }: EventsTabProps) {
         ) : error ? (
           <span className="text-red-600 dark:text-red-400">⚠ {error}</span>
         ) : savedAt ? (
-          <span>
-            Saved {new Date(savedAt).toLocaleTimeString()}
-          </span>
+          <span>Saved {new Date(savedAt).toLocaleTimeString()}</span>
         ) : (
           <span>Idle · auto-saves 800ms after last edit</span>
         )}

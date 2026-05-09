@@ -1,11 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { kv, kvKeys } from '@/lib/studio/kv';
-import {
-  type ConfigMeta,
-  type KioskConfig,
-  makeBlankConfig,
-} from '@/lib/studio/schema';
+import { type ConfigMeta, type KioskConfig, makeBlankConfig } from '@/lib/studio/schema';
 
 /**
  * `/api/studio/seed`

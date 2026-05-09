@@ -101,13 +101,10 @@ export function ItineraryBuilderEditor({
   const categoryOptions = buildCategoryOptions(listings, trails, events);
   const aiEnabled = itinerary.aiEnabled;
 
-  const setQuestions = (questions: ItineraryAiQuestion[]) =>
-    onChange({ ...itinerary, questions });
+  const setQuestions = (questions: ItineraryAiQuestion[]) => onChange({ ...itinerary, questions });
 
   const updateQuestion = (id: string, patch: Partial<ItineraryAiQuestion>) =>
-    setQuestions(
-      itinerary.questions.map((q) => (q.id === id ? { ...q, ...patch } : q)),
-    );
+    setQuestions(itinerary.questions.map((q) => (q.id === id ? { ...q, ...patch } : q)));
 
   const removeQuestion = (id: string) =>
     setQuestions(itinerary.questions.filter((q) => q.id !== id));
@@ -287,10 +284,7 @@ function QuestionRow({
 
   const addOption = () => {
     const idx = question.options.length + 1;
-    setOptions([
-      ...question.options,
-      { value: `option_${idx}`, label: `Option ${idx}` },
-    ]);
+    setOptions([...question.options, { value: `option_${idx}`, label: `Option ${idx}` }]);
   };
 
   const removeOption = (i: number) => {

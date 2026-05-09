@@ -78,7 +78,7 @@ src/components/ai/suggested-questions.tsx # chips horizontales con stagger GSAP
 - **LLM real** (Fase 5+): endpoint `/api/ai` que llame a Anthropic Claude con el contexto del cliente (`clients/{slug}/config.json` como system prompt). Reemplazar el mock typewriter en `ai-store.askQuestion()`.
 - **Voice lang dinámico**: `recognition.lang = 'en-US'` está hardcoded; debería leer de `config.client.locale` o `askAi.voiceLang` para soportar clientes ES.
 - **Fallback response configurable**: el string `'I can help with that! Let me look into it for you.'` en `ai-store.ts:56` podría moverse a `config.textos.ai_fallback_response` (auditor lo notó como mejora opcional).
-- **Bloque askAi en demo-cliente-a y _template**: añadir cuando estos clientes tengan `features.home` configurado.
+- **Bloque askAi en demo-cliente-a y \_template**: añadir cuando estos clientes tengan `features.home` configurado.
 - **Cross-cliente**: verificación visual con `KIOSK_CLIENT=demo-cliente-a` pendiente (requiere primero configurar `features.home` para ese cliente, ahora muestra placeholder).
 - **Photo Booth, Itinerary Builder**: módulos del Home aún sin construir.
 

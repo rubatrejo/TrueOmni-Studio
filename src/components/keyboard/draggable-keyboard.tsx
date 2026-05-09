@@ -187,8 +187,7 @@ export function DraggableKeyboard({
           backgroundColor: 'hsl(var(--keyboard-handle-bg))',
           color: 'hsl(var(--keyboard-handle-fg))',
           borderRadius: '50%',
-          boxShadow:
-            '0 6px 18px rgba(0,0,0,0.28), 0 0 0 4px hsl(var(--keyboard-bg)) inset',
+          boxShadow: '0 6px 18px rgba(0,0,0,0.28), 0 0 0 4px hsl(var(--keyboard-bg)) inset',
           cursor: dragging ? 'grabbing' : 'grab',
           touchAction: 'none',
           userSelect: 'none',

@@ -14,10 +14,7 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import type {
-  ImportMode,
-  ImportStats,
-} from '@/app/studio/_lib/import-helpers';
+import type { ImportMode, ImportStats } from '@/app/studio/_lib/import-helpers';
 import {
   AD_KINDS,
   AD_THEMES,
@@ -132,9 +129,7 @@ export function AdsEditor({ value, onChange }: AdsEditorProps) {
             placeholder="Search id, alt or route…"
             className="flex-1 bg-transparent py-1.5 text-[12px] text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:text-zinc-100 dark:placeholder:text-zinc-600"
           />
-          <span className="font-mono text-[10.5px] text-zinc-500">
-            {value.ads.length}
-          </span>
+          <span className="font-mono text-[10.5px] text-zinc-500">{value.ads.length}</span>
         </div>
         <select
           value={filter}
@@ -238,11 +233,7 @@ function AdRow({
 }) {
   return (
     <li className="group flex items-center gap-3 rounded-md border border-zinc-200 bg-white px-2 py-1.5 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/40 dark:hover:border-zinc-700 dark:hover:bg-zinc-900">
-      <button
-        type="button"
-        onClick={onSelect}
-        className="flex flex-1 items-center gap-3 text-left"
-      >
+      <button type="button" onClick={onSelect} className="flex flex-1 items-center gap-3 text-left">
         {ad.image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -296,7 +287,9 @@ function KindBadge({ kind }: { kind: AdKind }) {
     bottom: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
   }[kind];
   return (
-    <span className={`rounded px-1.5 py-0.5 font-mono text-[9.5px] uppercase tracking-wide ${colorClass}`}>
+    <span
+      className={`rounded px-1.5 py-0.5 font-mono text-[9.5px] uppercase tracking-wide ${colorClass}`}
+    >
       {kind}
     </span>
   );
@@ -334,7 +327,8 @@ function AdEditPanel({
   onBack: () => void;
   onDelete: () => void;
 }) {
-  const setField = <K extends keyof Ad>(key: K, value: Ad[K]) => onChange({ [key]: value } as Partial<Ad>);
+  const setField = <K extends keyof Ad>(key: K, value: Ad[K]) =>
+    onChange({ [key]: value } as Partial<Ad>);
 
   const routesText = ad.routes.join('\n');
   const setRoutes = (text: string) => {
@@ -367,7 +361,10 @@ function AdEditPanel({
       </header>
 
       <div className="space-y-4">
-        <Field label="ID" hint="Stable identifier (kebab-case). Used internally and to track dismissals.">
+        <Field
+          label="ID"
+          hint="Stable identifier (kebab-case). Used internally and to track dismissals."
+        >
           <TextInput
             value={ad.id}
             onChange={(e) => setField('id', e.target.value.trim().toLowerCase())}

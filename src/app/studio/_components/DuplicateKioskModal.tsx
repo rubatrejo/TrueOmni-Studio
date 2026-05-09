@@ -96,7 +96,8 @@ export function DuplicateKioskModal({
                 <p className="text-[12.5px] leading-relaxed text-zinc-500 dark:text-zinc-400">
                   Clones the entire config (branding, modules, content, integrations) of
                   <strong className="font-medium text-zinc-700 dark:text-zinc-300">
-                    {' '}{sourceNombre}
+                    {' '}
+                    {sourceNombre}
                   </strong>{' '}
                   into a new kiosk. You can edit anything in the editor afterwards.
                 </p>
@@ -122,9 +123,7 @@ export function DuplicateKioskModal({
                       {slug || '—'}
                     </code>
                     {slugConflict && (
-                      <span className="ml-2 text-red-600 dark:text-red-400">
-                        already exists
-                      </span>
+                      <span className="ml-2 text-red-600 dark:text-red-400">already exists</span>
                     )}
                   </p>
                 </div>
@@ -143,7 +142,11 @@ export function DuplicateKioskModal({
                   disabled={!canSubmit}
                   className="inline-flex items-center gap-1.5 rounded-md bg-sky-600 px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition hover:bg-sky-500 disabled:opacity-50 dark:bg-sky-500 dark:hover:bg-sky-400"
                 >
-                  {cloning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Copy className="h-3.5 w-3.5" />}
+                  {cloning ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
                   {cloning ? 'Duplicating…' : 'Duplicate'}
                 </button>
               </div>

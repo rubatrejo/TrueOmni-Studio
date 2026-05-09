@@ -47,12 +47,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
           xMidYMid slice. Esto preserva el framing original del XD.
         */}
         <pattern id="ad-fullbleed" width="1" height="1" viewBox="0 94.785 1920 925">
-          <image
-            preserveAspectRatio="xMidYMid slice"
-            width="1920"
-            height="1073.991"
-            href={adUrl}
-          />
+          <image preserveAspectRatio="xMidYMid slice" width="1920" height="1073.991" href={adUrl} />
         </pattern>
       </defs>
 

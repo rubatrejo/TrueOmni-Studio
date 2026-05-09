@@ -73,8 +73,7 @@ export function BrandingTab({ client, tokensCss }: BrandingTabProps) {
           Branding
         </h2>
         <p className="mt-1 text-[13px] text-zinc-500">
-          Cambios se reflejan live en el preview a la derecha y se guardan al KV
-          un segundo después.
+          Cambios se reflejan live en el preview a la derecha y se guardan al KV un segundo después.
         </p>
       </header>
 
@@ -85,8 +84,7 @@ export function BrandingTab({ client, tokensCss }: BrandingTabProps) {
             Brand colors
           </h3>
           <p className="mt-0.5 text-[12px] text-zinc-500">
-            Cambia estos 4 tokens y todo el runtime signage del cliente se
-            recolorea.
+            Cambia estos 4 tokens y todo el runtime signage del cliente se recolorea.
           </p>
         </header>
 
@@ -159,11 +157,7 @@ export function BrandingTab({ client, tokensCss }: BrandingTabProps) {
         {/* Display font — Montserrat default. */}
         <FontSelector
           kind="Display font"
-          value={
-            draft?.branding.fonts?.display ??
-            client.branding.fonts.display ??
-            'Montserrat'
-          }
+          value={draft?.branding.fonts?.display ?? client.branding.fonts.display ?? 'Montserrat'}
           onChange={(next) => {
             const fonts = draft?.branding.fonts ?? client.branding.fonts;
             updateBranding({ fonts: { ...fonts, display: next } });
@@ -171,10 +165,7 @@ export function BrandingTab({ client, tokensCss }: BrandingTabProps) {
         />
         <CustomFontField
           slot="display"
-          value={
-            draft?.branding.fonts?.displayCustom ??
-            client.branding.fonts.displayCustom
-          }
+          value={draft?.branding.fonts?.displayCustom ?? client.branding.fonts.displayCustom}
           onChange={(next) => {
             const fonts = draft?.branding.fonts ?? client.branding.fonts;
             const nextFonts = { ...fonts };
@@ -187,11 +178,7 @@ export function BrandingTab({ client, tokensCss }: BrandingTabProps) {
         {/* Body font — Open Sans default. */}
         <FontSelector
           kind="Body font"
-          value={
-            draft?.branding.fonts?.body ??
-            client.branding.fonts.body ??
-            'Open Sans'
-          }
+          value={draft?.branding.fonts?.body ?? client.branding.fonts.body ?? 'Open Sans'}
           onChange={(next) => {
             const fonts = draft?.branding.fonts ?? client.branding.fonts;
             updateBranding({ fonts: { ...fonts, body: next } });
@@ -199,10 +186,7 @@ export function BrandingTab({ client, tokensCss }: BrandingTabProps) {
         />
         <CustomFontField
           slot="body"
-          value={
-            draft?.branding.fonts?.bodyCustom ??
-            client.branding.fonts.bodyCustom
-          }
+          value={draft?.branding.fonts?.bodyCustom ?? client.branding.fonts.bodyCustom}
           onChange={(next) => {
             const fonts = draft?.branding.fonts ?? client.branding.fonts;
             const nextFonts = { ...fonts };
@@ -309,18 +293,14 @@ function BrandTokenCard({
       <header className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h4 className="text-[13px] font-semibold text-zinc-900 dark:text-white">
-              {label}
-            </h4>
+            <h4 className="text-[13px] font-semibold text-zinc-900 dark:text-white">{label}</h4>
             {isOverride ? (
               <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
                 override
               </span>
             ) : null}
           </div>
-          <p className="mt-0.5 truncate text-[11.5px] text-zinc-500">
-            {description}
-          </p>
+          <p className="mt-0.5 truncate text-[11.5px] text-zinc-500">{description}</p>
         </div>
         {isOverride && onReset ? (
           <button
@@ -348,9 +328,7 @@ function BrandTokenCard({
           <span className="block font-mono text-[11.5px] text-zinc-700 dark:text-zinc-300">
             {currentHsl}
           </span>
-          <span className="block text-[11px] text-zinc-500">
-            --signage-{tokenKey}
-          </span>
+          <span className="block text-[11px] text-zinc-500">--signage-{tokenKey}</span>
         </span>
       </button>
 
@@ -557,9 +535,7 @@ function Section({
         <h3 className="font-display text-[15px] font-semibold text-zinc-900 dark:text-white">
           {title}
         </h3>
-        {subtitle ? (
-          <p className="mt-0.5 text-[12px] text-zinc-500">{subtitle}</p>
-        ) : null}
+        {subtitle ? <p className="mt-0.5 text-[12px] text-zinc-500">{subtitle}</p> : null}
       </header>
       <div className="flex flex-col gap-2">{children}</div>
     </section>

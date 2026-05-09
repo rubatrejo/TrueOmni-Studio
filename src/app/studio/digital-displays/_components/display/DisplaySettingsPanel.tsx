@@ -29,9 +29,7 @@ export function DisplaySettingsPanel() {
         <h3 className="font-display text-[14px] font-semibold text-zinc-900 dark:text-white">
           Settings
         </h3>
-        <p className="mt-0.5 text-[11.5px] text-zinc-500">
-          Cambios se guardan automáticamente
-        </p>
+        <p className="mt-0.5 text-[11.5px] text-zinc-500">Cambios se guardan automáticamente</p>
       </header>
 
       <div className="flex flex-col gap-3">
@@ -85,9 +83,7 @@ export function DisplaySettingsPanel() {
               const seconds = parseFloat(e.target.value);
               if (Number.isNaN(seconds)) return;
               updateSettings({
-                defaultDurationMs: Math.round(
-                  Math.min(Math.max(seconds, 1), 600) * 1000,
-                ),
+                defaultDurationMs: Math.round(Math.min(Math.max(seconds, 1), 600) * 1000),
               });
             }}
             className="w-24 rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[11.5px] text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
@@ -99,11 +95,7 @@ export function DisplaySettingsPanel() {
             value={settings.defaultTransition}
             onChange={(e) =>
               updateSettings({
-                defaultTransition: e.target.value as
-                  | 'cut'
-                  | 'fade'
-                  | 'slide-left'
-                  | 'slide-up',
+                defaultTransition: e.target.value as 'cut' | 'fade' | 'slide-left' | 'slide-up',
               })
             }
             className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[11.5px] text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"

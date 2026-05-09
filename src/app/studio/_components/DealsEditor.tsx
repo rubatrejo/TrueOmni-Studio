@@ -15,12 +15,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-import {
-  makeBlankDeal,
-  newDealSlug,
-  type Deal,
-  type DealsModuleConfig,
-} from '@/lib/studio/schema';
+import { makeBlankDeal, newDealSlug, type Deal, type DealsModuleConfig } from '@/lib/studio/schema';
 
 import { type AiSuggestedItem } from '../_lib/api-client';
 
@@ -58,17 +53,12 @@ export function DealsEditor({
       slug: newDealSlug(orig.title),
       title: `${orig.title} (copy)`,
     };
-    setDeals([
-      ...deals.deals.slice(0, idx + 1),
-      clone,
-      ...deals.deals.slice(idx + 1),
-    ]);
+    setDeals([...deals.deals.slice(0, idx + 1), clone, ...deals.deals.slice(idx + 1)]);
   };
 
   const addDeal = () => setDeals([...deals.deals, makeBlankDeal()]);
 
-  const setFeatureCatalog = (catalog: string[]) =>
-    onChange({ ...deals, featureCatalog: catalog });
+  const setFeatureCatalog = (catalog: string[]) => onChange({ ...deals, featureCatalog: catalog });
 
   return (
     <div className="space-y-7">
@@ -352,7 +342,9 @@ function DealRow({
                 onChange={(e) =>
                   onUpdate({
                     discountValue:
-                      e.target.value === '' ? undefined : Math.max(0, Math.min(100, Number(e.target.value))),
+                      e.target.value === ''
+                        ? undefined
+                        : Math.max(0, Math.min(100, Number(e.target.value))),
                   })
                 }
                 className={inputCls}
@@ -365,9 +357,7 @@ function DealRow({
             <Field label="Original price">
               <input
                 value={deal.originalPrice ?? ''}
-                onChange={(e) =>
-                  onUpdate({ originalPrice: e.target.value || undefined })
-                }
+                onChange={(e) => onUpdate({ originalPrice: e.target.value || undefined })}
                 className={inputCls}
                 maxLength={64}
                 placeholder="$120"
@@ -376,9 +366,7 @@ function DealRow({
             <Field label="Promo code">
               <input
                 value={deal.promoCode ?? ''}
-                onChange={(e) =>
-                  onUpdate({ promoCode: e.target.value.toUpperCase() || undefined })
-                }
+                onChange={(e) => onUpdate({ promoCode: e.target.value.toUpperCase() || undefined })}
                 className={`${inputCls} font-mono uppercase`}
                 maxLength={64}
                 placeholder="ZARA10"
@@ -499,13 +487,7 @@ function FeatureChips({
 /* Catalog tags editor                                                        */
 /* ────────────────────────────────────────────────────────────────────────── */
 
-function TagsEditor({
-  tags,
-  onChange,
-}: {
-  tags: string[];
-  onChange: (next: string[]) => void;
-}) {
+function TagsEditor({ tags, onChange }: { tags: string[]; onChange: (next: string[]) => void }) {
   const [draft, setDraft] = useState('');
   const submit = () => {
     const next = draft.trim();

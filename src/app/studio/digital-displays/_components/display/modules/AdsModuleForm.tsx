@@ -2,11 +2,7 @@
 
 import type { SignageModuleInstance } from '@/lib/signage/schema';
 
-import {
-  FieldStack,
-  NumberField,
-  TextField,
-} from './module-form-primitives';
+import { FieldStack, NumberField, TextField } from './module-form-primitives';
 import { SignageMediaField } from './SignageMediaField';
 
 type AdsModule = Extract<SignageModuleInstance, { kind: 'ads' }>;

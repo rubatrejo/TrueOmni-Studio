@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  Copy,
-  ExternalLink,
-  Monitor,
-  MoreHorizontal,
-  Plus,
-  Trash2,
-} from 'lucide-react';
+import { Copy, ExternalLink, Monitor, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -64,8 +57,8 @@ export function DisplaysTab({ clientSlug, displays }: DisplaysTabProps) {
             Displays
           </h3>
           <p className="mt-0.5 text-[12px] text-zinc-500">
-            {displays.length} display{displays.length === 1 ? '' : 's'} configured
-            · click to open editor
+            {displays.length} display{displays.length === 1 ? '' : 's'} configured · click to open
+            editor
           </p>
         </div>
         <button
@@ -117,9 +110,7 @@ export function DisplaysTab({ clientSlug, displays }: DisplaysTabProps) {
                       </p>
                       <p className="mt-0.5 text-[11.5px] text-zinc-500">
                         <span className="font-mono">{d.slug}</span>
-                        <span className="mx-1.5 text-zinc-400 dark:text-zinc-600">
-                          ·
-                        </span>
+                        <span className="mx-1.5 text-zinc-400 dark:text-zinc-600">·</span>
                         {d.slidesCount} slide{d.slidesCount === 1 ? '' : 's'}
                       </p>
                     </div>

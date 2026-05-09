@@ -1,15 +1,6 @@
 'use client';
 
-import {
-  LayoutGrid,
-  Loader2,
-  Monitor,
-  Search,
-  Smartphone,
-  Tablet,
-  Tv,
-  X,
-} from 'lucide-react';
+import { LayoutGrid, Loader2, Monitor, Search, Smartphone, Tablet, Tv, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -22,11 +13,7 @@ import { NewClientModal } from './_components/NewClientModal';
 import { OnboardingTour, replayOnboardingTour } from './_components/OnboardingTour';
 import { StudioPageHeader } from './_components/PageHeader';
 import { SystemStatusBadge } from './_components/SystemStatusBadge';
-import {
-  cloneConfig,
-  createConfig,
-  deleteConfig,
-} from './_lib/api-client';
+import { cloneConfig, createConfig, deleteConfig } from './_lib/api-client';
 
 /**
  * `/studio` — Dashboard de Clientes (post Fase 3).
@@ -146,10 +133,9 @@ export default function StudioHome() {
       // desde la Vista de Cliente.
       if (input.activateDigitalDisplays) {
         try {
-          await fetch(
-            `/api/studio/clients/${input.slug}/products/digital-displays/activate`,
-            { method: 'POST' },
-          );
+          await fetch(`/api/studio/clients/${input.slug}/products/digital-displays/activate`, {
+            method: 'POST',
+          });
         } catch (ddErr) {
           console.warn('[studio] DD activation failed during create', ddErr);
         }
@@ -236,17 +222,17 @@ export default function StudioHome() {
         <p className="mb-3 text-sm font-medium uppercase tracking-[0.18em] text-zinc-500">
           White-label studio
         </p>
-        <h1 className="font-display text-4xl font-bold leading-[1.08] tracking-tight text-balance text-zinc-900 sm:text-5xl sm:leading-[1.05] dark:text-white">
+        <h1 className="text-balance font-display text-4xl font-bold leading-[1.08] tracking-tight text-zinc-900 dark:text-white sm:text-5xl sm:leading-[1.05]">
           One client. Every product.
         </h1>
-        <p className="mt-5 max-w-2xl text-base leading-relaxed text-pretty text-zinc-600 dark:text-zinc-400">
-          Upload the branding once and feed it to every product the client uses —
-          kiosks, digital displays, and the upcoming PWA, video walls and tablets.
+        <p className="mt-5 max-w-2xl text-pretty text-base leading-relaxed text-zinc-600 dark:text-zinc-400">
+          Upload the branding once and feed it to every product the client uses — kiosks, digital
+          displays, and the upcoming PWA, video walls and tablets.
         </p>
       </section>
 
       <section className="flex-1">
-        <div className="mb-6 flex flex-wrap items-end gap-4 justify-between">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h2 className="font-display text-xl font-semibold text-zinc-900 dark:text-white">
               Your clients
@@ -306,14 +292,10 @@ export default function StudioHome() {
                 onPinToggle={handlePinToggle}
               />
             ))}
-          {!loading && !search && (
-            <NewClientCard onClick={() => setShowNewModal(true)} />
-          )}
+          {!loading && !search && <NewClientCard onClick={() => setShowNewModal(true)} />}
           {!loading && search && filteredClients.length === 0 && (
             <div className="col-span-full rounded-xl border border-dashed border-zinc-300 bg-zinc-50/40 px-6 py-10 text-center dark:border-zinc-800 dark:bg-zinc-900/20">
-              <p className="text-[13px] text-zinc-500">
-                No clients match &quot;{search}&quot;.
-              </p>
+              <p className="text-[13px] text-zinc-500">No clients match &quot;{search}&quot;.</p>
               <button
                 type="button"
                 onClick={() => setSearch('')}
@@ -398,7 +380,11 @@ export default function StudioHome() {
 //  Cards
 // ---------------------------------------------------------------------------
 
-const PRODUCT_BADGES: Array<{ key: keyof ClientSummary['products']; label: string; Icon: typeof Monitor }> = [
+const PRODUCT_BADGES: Array<{
+  key: keyof ClientSummary['products'];
+  label: string;
+  Icon: typeof Monitor;
+}> = [
   { key: 'kiosks', label: 'Kiosks', Icon: Monitor },
   { key: 'digitalDisplays', label: 'Displays', Icon: Tv },
   { key: 'mobilePwa', label: 'PWA', Icon: Smartphone },
@@ -545,7 +531,17 @@ function ClientCard({
             }`}
             aria-label={client.pinned ? `Unpin ${client.name}` : `Pin ${client.name} to top`}
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill={client.pinned ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill={client.pinned ? 'currentColor' : 'none'}
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
               <path d="M16 4l4 4-5 5 1 5-2 2-5-5-5 1-2-2 5-5-1-5 2-2 5 1 3-3z" />
             </svg>
           </button>
@@ -559,7 +555,17 @@ function ClientCard({
             className="grid h-7 w-7 place-items-center rounded-md bg-white/90 text-zinc-700 shadow-sm ring-1 ring-zinc-200 backdrop-blur transition hover:bg-white hover:text-zinc-900 dark:bg-zinc-900/90 dark:text-zinc-300 dark:ring-zinc-800 dark:hover:bg-zinc-900"
             aria-label={`Duplicate ${client.name}`}
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
               <rect x="9" y="9" width="13" height="13" rx="2" />
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
             </svg>
@@ -574,7 +580,17 @@ function ClientCard({
             className="grid h-7 w-7 place-items-center rounded-md bg-white/90 text-red-600 shadow-sm ring-1 ring-red-200 backdrop-blur transition hover:bg-red-50 hover:text-red-700 dark:bg-zinc-900/90 dark:text-red-400 dark:ring-red-900/40 dark:hover:bg-red-950/40"
             aria-label={`Delete ${client.name}`}
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
               <polyline points="3 6 5 6 21 6" />
               <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
               <path d="M10 11v6M14 11v6" />
@@ -618,7 +634,10 @@ function NewClientButton({ onClick }: { onClick: () => void }) {
       aria-label="Create a new client"
       className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3.5 py-2 text-[13px] font-semibold text-white shadow-sm transition hover:bg-zinc-700 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
     >
-      <span aria-hidden className="text-base leading-none">+</span> New client
+      <span aria-hidden className="text-base leading-none">
+        +
+      </span>{' '}
+      New client
     </button>
   );
 }

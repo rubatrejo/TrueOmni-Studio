@@ -18,12 +18,7 @@ export interface SchedulePopoverProps {
   anchorRect: DOMRect | null;
 }
 
-export function SchedulePopover({
-  schedule,
-  onApply,
-  onClose,
-  anchorRect,
-}: SchedulePopoverProps) {
+export function SchedulePopover({ schedule, onApply, onClose, anchorRect }: SchedulePopoverProps) {
   const [kind, setKind] = useState<'always' | 'hours'>(
     schedule.kind === 'hours' ? 'hours' : 'always',
   );
@@ -84,9 +79,7 @@ export function SchedulePopover({
         <h4 className="font-display text-[13.5px] font-semibold text-zinc-900 dark:text-white">
           Schedule
         </h4>
-        <p className="mt-0.5 text-[11.5px] text-zinc-500">
-          When this slide is visible
-        </p>
+        <p className="mt-0.5 text-[11.5px] text-zinc-500">When this slide is visible</p>
       </header>
 
       <div className="mb-3 flex gap-2">

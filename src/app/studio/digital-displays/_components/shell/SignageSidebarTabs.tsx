@@ -123,9 +123,9 @@ export function SignageSidebarTabs<K extends string = string>({
   onReloadPreview,
 }: SignageSidebarTabsProps<K>) {
   const items = (sections ??
-    (SIGNAGE_SECTIONS as unknown as ReadonlyArray<
-      SignageSection<K>
-    >)) as ReadonlyArray<SignageSection<K>>;
+    (SIGNAGE_SECTIONS as unknown as ReadonlyArray<SignageSection<K>>)) as ReadonlyArray<
+    SignageSection<K>
+  >;
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   const focusAndSelect = (idx: number) => {

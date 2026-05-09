@@ -69,7 +69,9 @@ export async function listConfigs(): Promise<ConfigEntry[]> {
   return data.configs;
 }
 
-export async function getConfig(slug: string): Promise<{ config: KioskConfig; meta: ConfigMeta | null }> {
+export async function getConfig(
+  slug: string,
+): Promise<{ config: KioskConfig; meta: ConfigMeta | null }> {
   return http<{ config: KioskConfig; meta: ConfigMeta | null }>(`/api/studio/configs/${slug}`);
 }
 
@@ -96,10 +98,7 @@ export async function patchBranding(slug: string, branding: Branding): Promise<K
   return data.config;
 }
 
-export async function patchModules(
-  slug: string,
-  modules: ModulesConfig,
-): Promise<KioskConfig> {
+export async function patchModules(slug: string, modules: ModulesConfig): Promise<KioskConfig> {
   const data = await http<{ config: KioskConfig }>(`/api/studio/configs/${slug}`, {
     method: 'PATCH',
     body: { modules },

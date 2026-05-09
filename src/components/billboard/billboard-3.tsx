@@ -38,9 +38,7 @@ export function Billboard3() {
   const footerLogoH = useBillboardFooterLogoHeight();
   // touchHere.width/height NO aplican (texto + arrow inline, no botón).
   const rawTouchLabel =
-    touchHere.label.trim().length > 0
-      ? touchHere.label
-      : (t.billboard_touch_here ?? 'Touch Here');
+    touchHere.label.trim().length > 0 ? touchHere.label : (t.billboard_touch_here ?? 'Touch Here');
   const touchLabel = touchHere.twoLines
     ? rawTouchLabel.replace(/\s+/, '\n')
     : rawTouchLabel.replace(/\n+/g, ' ');
@@ -122,17 +120,16 @@ export function Billboard3() {
           />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={heroSrc}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-          />
+          <img src={heroSrc} alt="" className="absolute inset-0 h-full w-full object-cover" />
         )}
         {/* Overlay base de identidad de marca: brand-primary 60% asegura
             legibilidad del logo + TOUCH TO START sobre cualquier hero. Encima,
             OverlayLayer aplica el overlay configurable del Studio si el
             operador definió mode/color/opacity propios. */}
-        <div className="absolute inset-0" style={{ backgroundColor: 'hsl(var(--brand-primary) / 0.6)' }} />
+        <div
+          className="absolute inset-0"
+          style={{ backgroundColor: 'hsl(var(--brand-primary) / 0.6)' }}
+        />
         <OverlayLayer overlayOpacity={overlayOpacity} overlay={overlay} />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-16">
           {/* Logo height configurable desde Studio (S=80 / M=128 / L=180).
@@ -225,10 +222,7 @@ export function Billboard3() {
           paddingRight: '59px',
         }}
       >
-        <span
-          className="flex items-center"
-          style={{ height: footerLogoH }}
-        >
+        <span className="flex items-center" style={{ height: footerLogoH }}>
           <TrueOmniLogo slot="footer" className="h-full w-auto text-white" />
         </span>
         <AccessibilityIcon size={80} color="#fff" />

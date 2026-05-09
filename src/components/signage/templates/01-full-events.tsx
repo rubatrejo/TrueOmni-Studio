@@ -1,8 +1,4 @@
-import {
-  formatDayLabel,
-  formatTime,
-  wrapTitle,
-} from '@/lib/signage/text-helpers';
+import { formatDayLabel, formatTime, wrapTitle } from '@/lib/signage/text-helpers';
 
 import { registerTemplate } from './registry';
 import type { SignageTemplate, SignageTemplateRenderProps } from './types';
@@ -142,7 +138,9 @@ function Render({ client }: SignageTemplateRenderProps) {
               className="signage-font-body"
               fontWeight="700"
             >
-              <tspan x="0" y="0">{e0.title}</tspan>
+              <tspan x="0" y="0">
+                {e0.title}
+              </tspan>
             </text>
             <text
               transform="translate(49 876)"
@@ -156,7 +154,12 @@ function Render({ client }: SignageTemplateRenderProps) {
             </text>
           </g>
           <g transform="translate(159 30)">
-            <rect width="205" height="177.588" transform="translate(0 911.5)" fill="hsl(var(--signage-events-accent))" />
+            <rect
+              width="205"
+              height="177.588"
+              transform="translate(0 911.5)"
+              fill="hsl(var(--signage-events-accent))"
+            />
             {/* Weekday centered horizontally en rect (rect width 205, center x=102.5) */}
             <text
               transform="translate(102.5 965.5)"
@@ -166,7 +169,9 @@ function Render({ client }: SignageTemplateRenderProps) {
               fontWeight="500"
               textAnchor="middle"
             >
-              <tspan x="0" y="0">{labels[0]?.weekday}</tspan>
+              <tspan x="0" y="0">
+                {labels[0]?.weekday}
+              </tspan>
             </text>
             {/* Day centered horizontally, baseline at y=1054.5 */}
             <text
@@ -176,7 +181,9 @@ function Render({ client }: SignageTemplateRenderProps) {
               className="signage-font-body"
               textAnchor="middle"
             >
-              <tspan x="0" y="0">{labels[0]?.day}</tspan>
+              <tspan x="0" y="0">
+                {labels[0]?.day}
+              </tspan>
             </text>
           </g>
         </g>
@@ -203,7 +210,9 @@ function Render({ client }: SignageTemplateRenderProps) {
                 className="signage-font-body"
                 fontWeight="700"
               >
-                <tspan x="0" y="24">{e1.title}</tspan>
+                <tspan x="0" y="24">
+                  {e1.title}
+                </tspan>
               </text>
               <text
                 transform="translate(30 420)"
@@ -232,7 +241,9 @@ function Render({ client }: SignageTemplateRenderProps) {
                 fontWeight="500"
                 textAnchor="middle"
               >
-                <tspan x="0" y="0">{labels[1]?.weekday}</tspan>
+                <tspan x="0" y="0">
+                  {labels[1]?.weekday}
+                </tspan>
               </text>
               <text
                 transform="translate(80 170.5)"
@@ -241,7 +252,9 @@ function Render({ client }: SignageTemplateRenderProps) {
                 className="signage-font-body"
                 textAnchor="middle"
               >
-                <tspan x="0" y="0">{labels[1]?.day}</tspan>
+                <tspan x="0" y="0">
+                  {labels[1]?.day}
+                </tspan>
               </text>
             </g>
           </g>
@@ -278,7 +291,9 @@ function Render({ client }: SignageTemplateRenderProps) {
                 className="signage-font-body"
                 fontWeight="700"
               >
-                <tspan x="0" y="0">{t2line1}</tspan>
+                <tspan x="0" y="0">
+                  {t2line1}
+                </tspan>
                 {t2line2 ? (
                   <tspan x="0" y="24">
                     {t2line2}
@@ -302,7 +317,9 @@ function Render({ client }: SignageTemplateRenderProps) {
                 fontWeight="500"
                 textAnchor="middle"
               >
-                <tspan x="0" y="0">{labels[2]?.weekday}</tspan>
+                <tspan x="0" y="0">
+                  {labels[2]?.weekday}
+                </tspan>
               </text>
               <text
                 transform="translate(65 411.5)"
@@ -311,7 +328,9 @@ function Render({ client }: SignageTemplateRenderProps) {
                 className="signage-font-body"
                 textAnchor="middle"
               >
-                <tspan x="0" y="0">{labels[2]?.day}</tspan>
+                <tspan x="0" y="0">
+                  {labels[2]?.day}
+                </tspan>
               </text>
             </g>
           </g>
@@ -345,7 +364,9 @@ function Render({ client }: SignageTemplateRenderProps) {
                 className="signage-font-body"
                 fontWeight="700"
               >
-                <tspan x="0" y="0">{t3line1}</tspan>
+                <tspan x="0" y="0">
+                  {t3line1}
+                </tspan>
                 {t3line2 ? (
                   <tspan x="0" y="24">
                     {t3line2}
@@ -379,7 +400,9 @@ function Render({ client }: SignageTemplateRenderProps) {
                 fontWeight="500"
                 textAnchor="middle"
               >
-                <tspan x="0" y="0">{labels[3]?.weekday}</tspan>
+                <tspan x="0" y="0">
+                  {labels[3]?.weekday}
+                </tspan>
               </text>
               <text
                 transform="translate(65 734.5)"
@@ -388,7 +411,9 @@ function Render({ client }: SignageTemplateRenderProps) {
                 className="signage-font-body"
                 textAnchor="middle"
               >
-                <tspan x="0" y="0">{labels[3]?.day}</tspan>
+                <tspan x="0" y="0">
+                  {labels[3]?.day}
+                </tspan>
               </text>
             </g>
           </g>
@@ -415,7 +440,9 @@ function Render({ client }: SignageTemplateRenderProps) {
                 className="signage-font-body"
                 fontWeight="700"
               >
-                <tspan x="0" y="0">{t4line1}</tspan>
+                <tspan x="0" y="0">
+                  {t4line1}
+                </tspan>
                 {t4line2 ? (
                   <tspan x="0" y="24">
                     {t4line2}
@@ -449,7 +476,9 @@ function Render({ client }: SignageTemplateRenderProps) {
                 fontWeight="500"
                 textAnchor="middle"
               >
-                <tspan x="0" y="0">{labels[4]?.weekday}</tspan>
+                <tspan x="0" y="0">
+                  {labels[4]?.weekday}
+                </tspan>
               </text>
               <text
                 transform="translate(65 999.5)"
@@ -458,7 +487,9 @@ function Render({ client }: SignageTemplateRenderProps) {
                 className="signage-font-body"
                 textAnchor="middle"
               >
-                <tspan x="0" y="0">{labels[4]?.day}</tspan>
+                <tspan x="0" y="0">
+                  {labels[4]?.day}
+                </tspan>
               </text>
             </g>
           </g>

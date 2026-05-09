@@ -125,14 +125,14 @@ export function FilterOverlay({
             flexShrink: 0,
           }}
         >
-          {t("filters_title")}
+          {t('filters_title')}
         </h2>
 
         <div
           className="scrollbar-hide flex flex-col items-center overflow-y-auto"
           style={{ width: '960px', rowGap: '28px', flexShrink: 0 }}
         >
-          <Section title={t("filters_features")}>
+          <Section title={t('filters_features')}>
             <div
               className="flex flex-wrap items-center justify-center"
               style={{ columnGap: '16px', rowGap: '16px' }}
@@ -149,7 +149,7 @@ export function FilterOverlay({
           </Section>
 
           {mod.subcategories.length > 0 ? (
-            <Section title={t("filters_category")}>
+            <Section title={t('filters_category')}>
               <div
                 className="flex flex-wrap items-center justify-center"
                 style={{ columnGap: '16px', rowGap: '16px' }}
@@ -166,7 +166,7 @@ export function FilterOverlay({
             </Section>
           ) : null}
 
-          <Section title={t("filters_price_range")}>
+          <Section title={t('filters_price_range')}>
             <div className="flex items-center justify-center" style={{ columnGap: '16px' }}>
               {([1, 2, 3, 4] as const).map((p) => (
                 <Pill
@@ -180,7 +180,7 @@ export function FilterOverlay({
             </div>
           </Section>
 
-          <Section title={t("filters_availability")}>
+          <Section title={t('filters_availability')}>
             <Pill
               label={t('filters_open_now')}
               active={draft.openNow}
@@ -213,7 +213,7 @@ export function FilterOverlay({
               letterSpacing: '0.06em',
             }}
           >
-            {t("filters_clear_all")}
+            {t('filters_clear_all')}
           </button>
           <button
             type="button"
@@ -230,7 +230,7 @@ export function FilterOverlay({
               letterSpacing: '0.06em',
             }}
           >
-            {t("filters_apply")}
+            {t('filters_apply')}
           </button>
         </div>
       </div>

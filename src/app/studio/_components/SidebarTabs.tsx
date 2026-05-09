@@ -176,9 +176,7 @@ export function SidebarTabs({
               disabled={disabled}
               aria-disabled={disabled}
               title={
-                disabled
-                  ? `Turn ${section.label} on in the Modules tab to edit it`
-                  : section.title
+                disabled ? `Turn ${section.label} on in the Modules tab to edit it` : section.title
               }
               className={
                 'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[13px] outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-sky-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-950 ' +
@@ -279,7 +277,10 @@ function BridgeStatusCard({
           <span className={`h-1.5 w-1.5 rounded-full ${p.dot}`} />
           <span>{p.label}</span>
         </div>
-        <p className="truncate text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-500" title={p.sub}>
+        <p
+          className="truncate text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-500"
+          title={p.sub}
+        >
           {p.sub}
         </p>
         {showReload && onReload ? (
@@ -303,14 +304,26 @@ function BridgeStatusCard({
       >
         <span className="inline-flex items-center gap-1.5">
           <span className="grid h-4 w-4 place-items-center rounded bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <svg
+              width="9"
+              height="9"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
               <path d="M9 12l2 2 4-4" />
               <circle cx="12" cy="12" r="10" />
             </svg>
           </span>
           Diagnostics
         </span>
-        <span className="text-zinc-400 dark:text-zinc-600" aria-hidden>↗</span>
+        <span className="text-zinc-400 dark:text-zinc-600" aria-hidden>
+          ↗
+        </span>
       </a>
     </div>
   );

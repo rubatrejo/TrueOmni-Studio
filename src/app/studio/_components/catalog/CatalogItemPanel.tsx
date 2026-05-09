@@ -45,9 +45,7 @@ export function CatalogItemPanel({
           <h3 className="truncate text-[14px] font-semibold text-zinc-900 dark:text-zinc-100">
             {title || <span className="italic text-zinc-500">Untitled</span>}
           </h3>
-          {subtitle ? (
-            <p className="truncate text-[11.5px] text-zinc-500">{subtitle}</p>
-          ) : null}
+          {subtitle ? <p className="truncate text-[11.5px] text-zinc-500">{subtitle}</p> : null}
         </div>
 
         {onDelete ? (

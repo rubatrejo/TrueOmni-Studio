@@ -11,13 +11,7 @@ import { createContext, useContext, type ReactNode } from 'react';
  */
 const StudioSlugContext = createContext<string | null>(null);
 
-export function StudioSlugProvider({
-  slug,
-  children,
-}: {
-  slug: string;
-  children: ReactNode;
-}) {
+export function StudioSlugProvider({ slug, children }: { slug: string; children: ReactNode }) {
   return <StudioSlugContext.Provider value={slug}>{children}</StudioSlugContext.Provider>;
 }
 

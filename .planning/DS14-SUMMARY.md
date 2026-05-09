@@ -47,7 +47,7 @@
   (server) y el del navegador (client) — típicamente NBSP (U+00A0) ↔ narrow
   no-break space (U+202F) ↔ thin space (U+2009) en strings como "11:00 a. m.".
   Provocaba `Hydration failed because the server rendered text didn't match
-  the client` en `<text fontSize="20">` del template events y en el clock del
+the client` en `<text fontSize="20">` del template events y en el clock del
   header.
 - **Fix**: helper `normalizeIntlWhitespace(str)` exportado en
   `src/lib/signage/dates.ts` que reemplaza los 3 caracteres por space ASCII.
@@ -57,24 +57,24 @@
 
 ## Archivos tocados
 
-| Archivo | Tipo |
-|---|---|
-| `src/lib/signage/i18n.ts` | NUEVO |
-| `src/components/signage/i18n/SignageI18nProvider.tsx` | NUEVO |
-| `src/components/signage/runtime/SignageSleepGate.tsx` | NUEVO |
-| `src/lib/signage/schedule.ts` | export `isInTimeWindow` + `isInSleepWindow` |
-| `src/lib/signage/dates.ts` | export `normalizeIntlWhitespace` aplicado a 3 fns |
-| `src/components/signage/runtime/SignageRuntime.tsx` | i18n provider + sleep gate |
-| `src/components/signage/player/SignagePlayer.tsx` | `t()` en 5 placeholders |
-| `src/components/signage/templates/01-full-events.tsx` | normalizeIntlWhitespace |
-| `src/components/signage/templates/04-video-events-ad.tsx` | normalizeIntlWhitespace |
-| `src/components/signage/templates/03-full-video-image.tsx` | `muted={!display.settings.audio}` |
-| `src/app/(signage)/signage/[client]/[display]/page.tsx` | loadSignageI18n |
-| `clients-signage/_template/i18n/en.json` | +5 keys runtime |
-| `clients-signage/_template/i18n/es.json` | +5 keys runtime |
-| `clients-signage/default/i18n/en.json` | +5 keys runtime |
-| `clients-signage/default/i18n/es.json` | +5 keys runtime |
-| `clients-signage/default/displays/lobby-tv/display.json` | sleepSchedule shape |
+| Archivo                                                    | Tipo                                              |
+| ---------------------------------------------------------- | ------------------------------------------------- |
+| `src/lib/signage/i18n.ts`                                  | NUEVO                                             |
+| `src/components/signage/i18n/SignageI18nProvider.tsx`      | NUEVO                                             |
+| `src/components/signage/runtime/SignageSleepGate.tsx`      | NUEVO                                             |
+| `src/lib/signage/schedule.ts`                              | export `isInTimeWindow` + `isInSleepWindow`       |
+| `src/lib/signage/dates.ts`                                 | export `normalizeIntlWhitespace` aplicado a 3 fns |
+| `src/components/signage/runtime/SignageRuntime.tsx`        | i18n provider + sleep gate                        |
+| `src/components/signage/player/SignagePlayer.tsx`          | `t()` en 5 placeholders                           |
+| `src/components/signage/templates/01-full-events.tsx`      | normalizeIntlWhitespace                           |
+| `src/components/signage/templates/04-video-events-ad.tsx`  | normalizeIntlWhitespace                           |
+| `src/components/signage/templates/03-full-video-image.tsx` | `muted={!display.settings.audio}`                 |
+| `src/app/(signage)/signage/[client]/[display]/page.tsx`    | loadSignageI18n                                   |
+| `clients-signage/_template/i18n/en.json`                   | +5 keys runtime                                   |
+| `clients-signage/_template/i18n/es.json`                   | +5 keys runtime                                   |
+| `clients-signage/default/i18n/en.json`                     | +5 keys runtime                                   |
+| `clients-signage/default/i18n/es.json`                     | +5 keys runtime                                   |
+| `clients-signage/default/displays/lobby-tv/display.json`   | sleepSchedule shape                               |
 
 ## Verificado
 

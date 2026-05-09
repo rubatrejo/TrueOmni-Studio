@@ -93,9 +93,7 @@ function UserDropdown({ email }: { email: string }) {
         <div className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-sky-500 to-cyan-400 text-[11px] font-semibold text-zinc-900">
           {initial}
         </div>
-        <span className="hidden text-xs text-zinc-600 dark:text-zinc-400 sm:inline">
-          {email}
-        </span>
+        <span className="hidden text-xs text-zinc-600 dark:text-zinc-400 sm:inline">{email}</span>
         <ChevronDown
           className={`hidden h-3.5 w-3.5 text-zinc-400 transition-transform sm:block ${open ? 'rotate-180' : ''}`}
           strokeWidth={2}
@@ -181,9 +179,7 @@ function UserMenuItem({
         <span className="text-zinc-400 dark:text-zinc-500">{icon}</span>
         {label}
       </span>
-      {hint ? (
-        <span className="text-[10px] text-zinc-400 dark:text-zinc-600">{hint}</span>
-      ) : null}
+      {hint ? <span className="text-[10px] text-zinc-400 dark:text-zinc-600">{hint}</span> : null}
     </button>
   );
 }

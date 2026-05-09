@@ -33,9 +33,7 @@ export function SignageEditorProvider({
   children: ReactNode;
 }) {
   return (
-    <SignageEditorContext.Provider
-      value={{ clientSlug, jumpToSlide, navSlide, activeSlideId }}
-    >
+    <SignageEditorContext.Provider value={{ clientSlug, jumpToSlide, navSlide, activeSlideId }}>
       {children}
     </SignageEditorContext.Provider>
   );

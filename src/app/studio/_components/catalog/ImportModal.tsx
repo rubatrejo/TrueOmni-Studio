@@ -214,9 +214,7 @@ export function ImportModal<K extends ImportKind>({
                 </div>
               )}
 
-              {result && result.items.length > 0 && (
-                <ModeSelector mode={mode} onChange={setMode} />
-              )}
+              {result && result.items.length > 0 && <ModeSelector mode={mode} onChange={setMode} />}
             </div>
 
             <div className="flex items-center justify-between gap-2 border-t border-zinc-100 px-5 py-3 dark:border-zinc-800">
@@ -361,10 +359,7 @@ function FilePreview<K extends ImportKind>({
           </p>
           <ul className="space-y-0.5">
             {visibleErrors.map((err, idx) => (
-              <li
-                key={idx}
-                className="font-mono text-[11px] text-red-700/90 dark:text-red-300/90"
-              >
+              <li key={idx} className="font-mono text-[11px] text-red-700/90 dark:text-red-300/90">
                 {err.row > 0 ? `row ${err.row}: ` : ''}
                 {err.message}
               </li>
@@ -382,9 +377,7 @@ function FilePreview<K extends ImportKind>({
         </div>
       )}
 
-      {result && result.items.length > 0 && (
-        <PreviewTable items={result.items} kind={kind} />
-      )}
+      {result && result.items.length > 0 && <PreviewTable items={result.items} kind={kind} />}
     </div>
   );
 }
@@ -444,17 +437,10 @@ function PreviewTable({
         </thead>
         <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
           {preview.map((item, idx) => (
-            <tr
-              key={String(item[keyField] ?? idx)}
-              className="text-zinc-700 dark:text-zinc-300"
-            >
+            <tr key={String(item[keyField] ?? idx)} className="text-zinc-700 dark:text-zinc-300">
               <td className="px-2 py-1.5 font-mono text-zinc-500">{idx + 1}</td>
-              <td className="truncate px-2 py-1.5 font-mono">
-                {String(item[keyField] ?? '')}
-              </td>
-              <td className="truncate px-2 py-1.5">
-                {String(item[labelField] ?? '')}
-              </td>
+              <td className="truncate px-2 py-1.5 font-mono">{String(item[keyField] ?? '')}</td>
+              <td className="truncate px-2 py-1.5">{String(item[labelField] ?? '')}</td>
             </tr>
           ))}
         </tbody>

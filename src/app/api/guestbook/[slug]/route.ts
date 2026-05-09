@@ -53,10 +53,7 @@ function isValidSlug(slug: string): boolean {
   return /^[a-z0-9][a-z0-9-]{0,63}$/.test(slug);
 }
 
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ slug: string }> },
-) {
+export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   if (!isValidSlug(slug)) {
     return NextResponse.json({ error: 'Invalid slug.' }, { status: 400 });
@@ -66,10 +63,7 @@ export async function GET(
   return NextResponse.json({ pins: stored });
 }
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ slug: string }> },
-) {
+export async function POST(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   if (!isValidSlug(slug)) {
     return NextResponse.json({ error: 'Invalid slug.' }, { status: 400 });

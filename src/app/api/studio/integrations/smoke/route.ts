@@ -116,11 +116,7 @@ async function runChecksForKiosk(
   }
 
   // openweather solo si provider="openweather" + key + city
-  if (
-    integ?.weather?.provider === 'openweather' &&
-    integ.weather.apiKey &&
-    integ.weather.city
-  ) {
+  if (integ?.weather?.provider === 'openweather' && integ.weather.apiKey && integ.weather.city) {
     checks.push(
       callCheck(origin, {
         kind: 'openweather',

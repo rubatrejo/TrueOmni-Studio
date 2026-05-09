@@ -47,7 +47,7 @@ ItineraryBuilderSchema = {
 Añadir a `KioskConfigSchema`:
 
 ```ts
-itineraryBuilder: ItineraryBuilderSchema.optional()
+itineraryBuilder: ItineraryBuilderSchema.optional();
 ```
 
 Optional + defaults garantizan compat con KV de kiosks viejos.

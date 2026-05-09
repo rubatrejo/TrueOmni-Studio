@@ -58,7 +58,12 @@ const DEFAULT_CHIP_DEFS: {
     chipKey: 'play',
     bg: MAP_PIN_COLORS['things-to-do'],
   },
-  { source: 'restaurants', defaultLabel: 'Restaurants', chipKey: 'eat', bg: MAP_PIN_COLORS.restaurants },
+  {
+    source: 'restaurants',
+    defaultLabel: 'Restaurants',
+    chipKey: 'eat',
+    bg: MAP_PIN_COLORS.restaurants,
+  },
   { source: 'stay', defaultLabel: 'Stay', chipKey: 'stay', bg: MAP_PIN_COLORS.stay },
   { source: 'events', defaultLabel: 'Events', chipKey: 'events', bg: MAP_PIN_COLORS.events },
 ];
@@ -147,8 +152,8 @@ export function MapModule({
   // exploreTitle (ej. "Explore {client} Map") cuando el operador edita
   // el nombre del kiosk en el Studio. Sin este hook el preview se
   // queda con el nombre server-rendered ("Arizona") hasta publish.
-  const [reactiveClientName, setReactiveClientName] = useState<string | null>(
-    () => getCachedClientName(),
+  const [reactiveClientName, setReactiveClientName] = useState<string | null>(() =>
+    getCachedClientName(),
   );
   useEffect(() => {
     const onName = (event: Event) => {
@@ -239,8 +244,7 @@ export function MapModule({
           ? { ...baseCopy, body: DEFAULT_MAP_WELCOME_BODY }
           : baseCopy;
     if (!merged) return undefined;
-    const allEmpty =
-      !merged.title?.trim() && !merged.body?.trim() && !merged.cta?.trim();
+    const allEmpty = !merged.title?.trim() && !merged.body?.trim() && !merged.cta?.trim();
     if (allEmpty) return undefined;
     return {
       ...merged,
@@ -399,9 +403,7 @@ export function MapModule({
           };
         });
         // 2. Quitar items dinámicos viejos (source no canonical y no events).
-        const noDyn = updated.filter(
-          (it) => CANONICAL.has(it.source) || it.source === 'events',
-        );
+        const noDyn = updated.filter((it) => CANONICAL.has(it.source) || it.source === 'events');
         // 3. Añadir los nuevos dynItems.
         return [...noDyn, ...dynItems];
       });
@@ -557,8 +559,9 @@ export function MapModule({
     setShowWelcome(false);
   }, []);
 
-  const center =
-    mapOverride?.defaultCenter ?? mod.defaultCenter ?? effectiveCoords ?? { lat: 33.4484, lng: -112.074 };
+  const center = mapOverride?.defaultCenter ??
+    mod.defaultCenter ??
+    effectiveCoords ?? { lat: 33.4484, lng: -112.074 };
   const zoom = mapOverride?.defaultZoom ?? mod.defaultZoom ?? 13;
   const PIN_SCALE = { S: 0.75, M: 1.0, L: 1.3 } as const;
   const pinScale = PIN_SCALE[mapOverride?.pinSize ?? 'M'];

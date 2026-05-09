@@ -48,8 +48,7 @@ export async function POST(req: Request) {
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json(
       {
-        error:
-          'AI suggestions require ANTHROPIC_API_KEY. Set it in .env.local and restart.',
+        error: 'AI suggestions require ANTHROPIC_API_KEY. Set it in .env.local and restart.',
       },
       { status: 503 },
     );
@@ -108,10 +107,7 @@ export async function POST(req: Request) {
     });
     const textBlock = res.content.find((b) => b.type === 'text');
     if (!textBlock || textBlock.type !== 'text') {
-      return NextResponse.json(
-        { error: 'Anthropic returned no text content' },
-        { status: 502 },
-      );
+      return NextResponse.json({ error: 'Anthropic returned no text content' }, { status: 502 });
     }
     const items = parseAndValidate(textBlock.text, body.kind as SuggestKind, exclude);
     if (items.length === 0) {
@@ -134,11 +130,7 @@ export async function POST(req: Request) {
 
 /** Parsea el array que Anthropic devolvió, valida shape, dedupe contra
  *  exclude. Tolerante a basura around (markdown fences, prosa, etc.). */
-function parseAndValidate(
-  raw: string,
-  _kind: SuggestKind,
-  exclude: string[],
-): SuggestedItem[] {
+function parseAndValidate(raw: string, _kind: SuggestKind, exclude: string[]): SuggestedItem[] {
   // Strip code fences si llegan.
   const cleaned = raw
     .replace(/^[\s\S]*?```(?:json)?/i, '')

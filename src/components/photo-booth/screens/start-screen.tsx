@@ -69,7 +69,13 @@ export function StartScreen({
         style={{ position: 'absolute', left: -11, top: 1633, pointerEvents: 'none' }}
       >
         <defs>
-          <linearGradient id="pb-bottom-fade" x1="0.5" x2="0.5" y2="1" gradientUnits="objectBoundingBox">
+          <linearGradient
+            id="pb-bottom-fade"
+            x1="0.5"
+            x2="0.5"
+            y2="1"
+            gradientUnits="objectBoundingBox"
+          >
             <stop offset="0" stopColor="hsl(var(--brand-primary))" stopOpacity={0} />
             <stop offset="1" stopColor="hsl(var(--brand-primary))" stopOpacity={1} />
           </linearGradient>

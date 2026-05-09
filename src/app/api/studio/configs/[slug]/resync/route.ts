@@ -62,9 +62,7 @@ export async function POST(req: Request, { params }: RouteParams) {
     // Si el KV tiene config existente y no hay force, lo usamos como base
     // (preserva customizaciones). Con force, makeBlankConfig + bootstrap.
     const existing = force ? null : await kv.get<KioskConfig>(kvKeys.cfg(slug));
-    const base =
-      existing ??
-      makeBlankConfig(slug, fs.config.client?.nombre ?? slug);
+    const base = existing ?? makeBlankConfig(slug, fs.config.client?.nombre ?? slug);
 
     const next = bootstrapStudioFromFs(base, fs.config, fs.tokensCss);
 

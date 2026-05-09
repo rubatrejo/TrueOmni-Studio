@@ -31,14 +31,7 @@ interface BaseModalProps {
   children: ReactNode;
 }
 
-export function BaseModal({
-  open,
-  onClose,
-  title,
-  icon,
-  iconClass,
-  children,
-}: BaseModalProps) {
+export function BaseModal({ open, onClose, title, icon, iconClass, children }: BaseModalProps) {
   if (typeof document === 'undefined') return null;
 
   return createPortal(
@@ -102,11 +95,7 @@ export interface NewSignageThemeModalProps {
   onCreated: (slug: string) => void;
 }
 
-export function NewSignageThemeModal({
-  open,
-  onClose,
-  onCreated,
-}: NewSignageThemeModalProps) {
+export function NewSignageThemeModal({ open, onClose, onCreated }: NewSignageThemeModalProps) {
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [autoSlug, setAutoSlug] = useState(true);
@@ -165,8 +154,8 @@ export function NewSignageThemeModal({
       iconClass="bg-sky-500/15 text-sky-600 ring-sky-500/30 dark:text-sky-300"
     >
       <p className="mb-4 text-[13px] text-zinc-500">
-        Clona el template <code className="font-mono text-[11.5px]">default</code>{' '}
-        con tu nombre y slug. Después editas branding/header/displays.
+        Clona el template <code className="font-mono text-[11.5px]">default</code> con tu nombre y
+        slug. Después editas branding/header/displays.
       </p>
       <div className="flex flex-col gap-3">
         <Field label="Display name">
@@ -326,10 +315,9 @@ export function DeleteSignageThemeModal({
     if (!matches) return;
     setBusy(true);
     try {
-      const res = await fetch(
-        `/api/studio/signage/clients/${encodeURIComponent(slug)}`,
-        { method: 'DELETE' },
-      );
+      const res = await fetch(`/api/studio/signage/clients/${encodeURIComponent(slug)}`, {
+        method: 'DELETE',
+      });
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
         throw new Error(json.error ?? `HTTP ${res.status}`);
@@ -352,9 +340,8 @@ export function DeleteSignageThemeModal({
       iconClass="bg-red-500/15 text-red-600 ring-red-500/30 dark:text-red-400"
     >
       <p className="mb-3 text-[13px] text-zinc-700 dark:text-zinc-300">
-        Esto borrará <strong>{name}</strong> del KV (client.json, displays,
-        snapshots y bags i18n). El filesystem en git no se toca; para
-        eliminar definitivamente requiere PR.
+        Esto borrará <strong>{name}</strong> del KV (client.json, displays, snapshots y bags i18n).
+        El filesystem en git no se toca; para eliminar definitivamente requiere PR.
       </p>
       <p className="mb-3 text-[12px] text-zinc-500">
         Type <code className="font-mono text-[11.5px]">{slug}</code> to confirm.
@@ -403,9 +390,7 @@ export function Field({
         {label}
       </span>
       {children}
-      {hint ? (
-        <span className="text-[11px] text-zinc-400">{hint}</span>
-      ) : null}
+      {hint ? <span className="text-[11px] text-zinc-400">{hint}</span> : null}
     </label>
   );
 }

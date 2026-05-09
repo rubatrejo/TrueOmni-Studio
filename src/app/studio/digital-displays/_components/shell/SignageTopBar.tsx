@@ -42,29 +42,26 @@ export function SignageTopBar({
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-5 dark:border-zinc-900 dark:bg-zinc-950">
       <div className="flex items-center gap-4">
         <StudioBrand />
-        <span
-          className="block h-5 w-px bg-zinc-200 dark:bg-zinc-800"
-          aria-hidden="true"
-        />
+        <span className="block h-5 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden="true" />
         <nav className="flex items-center gap-1.5 text-[13px] text-zinc-500">
           <Link
             href="/studio"
-            className="hidden transition hover:text-zinc-800 xl:inline dark:hover:text-zinc-300"
+            className="hidden transition hover:text-zinc-800 dark:hover:text-zinc-300 xl:inline"
           >
             Clients
           </Link>
           <ChevronRight
-            className="hidden h-3.5 w-3.5 text-zinc-400 xl:block dark:text-zinc-700"
+            className="hidden h-3.5 w-3.5 text-zinc-400 dark:text-zinc-700 xl:block"
             aria-hidden="true"
           />
           <Link
             href={`/studio/${clientSlug}`}
-            className="hidden transition hover:text-zinc-800 xl:inline dark:hover:text-zinc-300"
+            className="hidden transition hover:text-zinc-800 dark:hover:text-zinc-300 xl:inline"
           >
             Digital Displays
           </Link>
           <ChevronRight
-            className="hidden h-3.5 w-3.5 text-zinc-400 xl:block dark:text-zinc-700"
+            className="hidden h-3.5 w-3.5 text-zinc-400 dark:text-zinc-700 xl:block"
             aria-hidden="true"
           />
           <span className="grid h-4 w-4 place-items-center rounded-sm bg-zinc-100 text-zinc-500 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800">
@@ -83,9 +80,7 @@ export function SignageTopBar({
               <line x1="6" y1="14" x2="10" y2="14" />
             </svg>
           </span>
-          <span className="font-medium text-zinc-900 dark:text-zinc-100">
-            {nombre}
-          </span>
+          <span className="font-medium text-zinc-900 dark:text-zinc-100">{nombre}</span>
           <span
             className="ml-1 rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-[11px] text-zinc-500 dark:bg-zinc-900 dark:text-zinc-500"
             title={`Theme slug: ${slug}`}
@@ -97,10 +92,7 @@ export function SignageTopBar({
 
       <div className="flex items-center gap-2">
         <SaveStatusPill state={saveState} isDirty={isDirty} />
-        <span
-          className="mx-1 block h-5 w-px bg-zinc-200 dark:bg-zinc-800"
-          aria-hidden="true"
-        />
+        <span className="mx-1 block h-5 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden="true" />
         <ThemeToggle />
 
         {previewHref ? (

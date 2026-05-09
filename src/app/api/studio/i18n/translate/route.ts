@@ -167,8 +167,7 @@ export async function POST(req: Request) {
     } catch (error) {
       console.error('[i18n/translate] Anthropic failed:', error);
       const message = error instanceof Error ? error.message : 'Translate failed';
-      const status =
-        message.includes('401') || message.includes('authentication') ? 401 : 500;
+      const status = message.includes('401') || message.includes('authentication') ? 401 : 500;
       return NextResponse.json({ error: message }, { status });
     }
   }
@@ -267,9 +266,7 @@ async function translateWithAnthropic({
   const fromName = LOCALE_LABELS[fromLocale] ?? fromLocale;
   const toName = LOCALE_LABELS[toLocale] ?? toLocale;
 
-  const userParts: string[] = [
-    `Translate the following ${fromName} UI string to ${toName}.`,
-  ];
+  const userParts: string[] = [`Translate the following ${fromName} UI string to ${toName}.`];
   if (key) userParts.push(`Key: ${key}`);
   if (context) userParts.push(`Context: ${context}`);
   userParts.push(`Source (${fromName}):`, text);

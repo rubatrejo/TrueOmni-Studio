@@ -4,11 +4,7 @@ export const metadata = {
   title: 'Video Walls · TrueOmni Studio',
 };
 
-export default async function VideoWallsStub({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function VideoWallsStub({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   return (
     <ComingSoon

@@ -71,4 +71,4 @@
 
 - [ ] Auditor white-label no flagea nada nuevo
 - [ ] Subagent `revisor-visual` puede correr (opcional en DS1; obligatorio en sub-fases de template completo)
-- [ ] Header height token `--signage-header-height: 155px` actualizado en _template y default
+- [ ] Header height token `--signage-header-height: 155px` actualizado en \_template y default

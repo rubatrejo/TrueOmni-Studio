@@ -11,6 +11,7 @@ código** — entrega doc de smoke E2E + handoff + actualiza roadmap maestro.
 ## Doc handoff
 
 `.planning/2026-05-07-signage-studio-smoke-e2e.md` con:
+
 - Capacidades del producto al cierre.
 - Smoke E2E checklist (A automático + B visual + C producción).
 - Troubleshooting common issues.
@@ -21,18 +22,18 @@ código** — entrega doc de smoke E2E + handoff + actualiza roadmap maestro.
 
 10 sub-fases ejecutadas en una sola sesión continua (2026-05-07 PM):
 
-| Sub-fase | Entrega |
-|---|---|
-| DSS0 | Bootstrap Studio: dropdown live + dashboard + KV namespace listo |
-| DSS1 | Theme editor con 5 tabs read-only |
-| DSS2 | Display editor con sidebar + preview iframe live |
-| DSS3 | Bridge editor↔iframe + loader híbrido KV→fs |
-| DSS4 | Playlist editable + autosave KV + drag-to-reorder + add slide |
-| DSS5 | Module editors per-slot + overrides reactivos runtime |
-| DSS6 | Snapshots/Versions con FIFO cap 10 + restore |
-| DSS7 | Publish PR + JSON export/import + KV size advisor |
-| DSS8 | Diagnostics + i18n editor + tour deferido |
-| DSS9 | Smoke E2E doc + handoff (esta sub-fase) |
+| Sub-fase | Entrega                                                          |
+| -------- | ---------------------------------------------------------------- |
+| DSS0     | Bootstrap Studio: dropdown live + dashboard + KV namespace listo |
+| DSS1     | Theme editor con 5 tabs read-only                                |
+| DSS2     | Display editor con sidebar + preview iframe live                 |
+| DSS3     | Bridge editor↔iframe + loader híbrido KV→fs                      |
+| DSS4     | Playlist editable + autosave KV + drag-to-reorder + add slide    |
+| DSS5     | Module editors per-slot + overrides reactivos runtime            |
+| DSS6     | Snapshots/Versions con FIFO cap 10 + restore                     |
+| DSS7     | Publish PR + JSON export/import + KV size advisor                |
+| DSS8     | Diagnostics + i18n editor + tour deferido                        |
+| DSS9     | Smoke E2E doc + handoff (esta sub-fase)                          |
 
 ## Capacidades del producto al cierre
 

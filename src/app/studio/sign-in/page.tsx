@@ -11,12 +11,7 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 /** GitHub mark inline — `lucide-react@1.8` no exporta Github. */
 function GithubIcon({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden
-      fill="currentColor"
-      className={className}
-    >
+    <svg viewBox="0 0 24 24" aria-hidden fill="currentColor" className={className}>
       <path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -109,8 +104,8 @@ function SignInContent() {
             Welcome back.
           </h1>
           <p className="max-w-[560px] font-sans text-[20px] leading-relaxed text-white/80">
-            Sign in with GitHub to manage your kiosks, push branding updates and
-            publish changes via Pull Request.
+            Sign in with GitHub to manage your kiosks, push branding updates and publish changes via
+            Pull Request.
           </p>
 
           {error === 'AccessDenied' ? (

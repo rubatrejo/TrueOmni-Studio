@@ -59,12 +59,8 @@ export function ItineraryFinishedPopup(props: ItineraryFinishedPopupProps) {
             />
           </svg>
         </div>
-        <h2 className="mt-5 text-center text-[28px] font-bold text-foreground">
-          {props.title}
-        </h2>
-        <p className="mt-3 text-center text-[16px] leading-relaxed text-zinc-700">
-          {props.body}
-        </p>
+        <h2 className="mt-5 text-center text-[28px] font-bold text-foreground">{props.title}</h2>
+        <p className="mt-3 text-center text-[16px] leading-relaxed text-zinc-700">{props.body}</p>
         <div className="mt-7 h-1 w-full overflow-hidden rounded-full bg-zinc-200">
           <span
             className="block h-full"

@@ -56,10 +56,7 @@ export async function PUT(req: NextRequest, ctx: RouteContext) {
   const bag: Record<string, string> = {};
   for (const [k, v] of Object.entries(wrapper.bag as Record<string, unknown>)) {
     if (typeof v !== 'string') {
-      return NextResponse.json(
-        { error: `bag.${k} must be a string` },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: `bag.${k} must be a string` }, { status: 400 });
     }
     bag[k] = v;
   }

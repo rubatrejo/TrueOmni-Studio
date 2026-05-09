@@ -72,7 +72,7 @@ async function createShim() {
   if (existsSync(pagesDir)) {
     throw new Error(
       'src/pages/ ya existe. El shim no puede arrancar con un pages dir manual presente. ' +
-        'Borra src/pages/ o investiga si alguien añadió Pages Router al proyecto.'
+        'Borra src/pages/ o investiga si alguien añadió Pages Router al proyecto.',
     );
   }
   await mkdir(pagesDir, { recursive: true });
@@ -141,7 +141,9 @@ const skipCleanup = process.env.VERCEL === '1';
     exitCode = 1;
   } finally {
     if (skipCleanup) {
-      console.log('▶ Saltando cleanup del shim (Vercel runner — los tracers post-build lo necesitan).');
+      console.log(
+        '▶ Saltando cleanup del shim (Vercel runner — los tracers post-build lo necesitan).',
+      );
     } else {
       console.log('▶ Borrando src/pages/ shim…');
       await safeCleanup();

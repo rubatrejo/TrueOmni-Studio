@@ -72,25 +72,25 @@ Cada tab respeta el `disabled state` heredado de S2 — si su Module toggle est�
 Se añaden estos schemas al fichero existente:
 
 ```ts
-ListingItemSchema       // slug, title, image, subcategory, features[],
-                        // description, lat, lng, address, hours, price, rating, ...
-ListingsCatalogSchema   // label, heroImage, subcategories[], features[], listings[]
-ListingsModuleSchema    // { restaurants: ListingsCatalogSchema, thingsToDo: ..., stay: ... }
+ListingItemSchema; // slug, title, image, subcategory, features[],
+// description, lat, lng, address, hours, price, rating, ...
+ListingsCatalogSchema; // label, heroImage, subcategories[], features[], listings[]
+ListingsModuleSchema; // { restaurants: ListingsCatalogSchema, thingsToDo: ..., stay: ... }
 
-EventItemSchema         // slug, title, category, image, date, startTime, endTime,
-                        // venue, priceMode, priceBand, ticketable, ...
-EventsModuleSchema      // label, heroImage, categories[], venues[], events[]
+EventItemSchema; // slug, title, category, image, date, startTime, endTime,
+// venue, priceMode, priceBand, ticketable, ...
+EventsModuleSchema; // label, heroImage, categories[], venues[], events[]
 
-TicketsModuleSchema     // label, heroImage, categories[] (visibles, subset de events),
-                        // fallbackHero, copy
-                        // (no edita items — derivados de events)
+TicketsModuleSchema; // label, heroImage, categories[] (visibles, subset de events),
+// fallbackHero, copy
+// (no edita items — derivados de events)
 
-PassItemSchema          // slug, title, image, price, type, qrLogo, ...
-PassesModuleSchema      // label, heroImage, passes[]
+PassItemSchema; // slug, title, image, price, type, qrLogo, ...
+PassesModuleSchema; // label, heroImage, passes[]
 
-TrailItemSchema         // slug, title, image, distance, difficulty,
-                        // lat, lng, polyline, considerations[], ...
-TrailsModuleSchema      // label, heroImage, trails[]
+TrailItemSchema; // slug, title, image, distance, difficulty,
+// lat, lng, polyline, considerations[], ...
+TrailsModuleSchema; // label, heroImage, trails[]
 ```
 
 `KioskConfigSchema` se extiende con cinco campos opcionales: `listings · events · tickets · passes · trails`. Opcionales para no romper clientes pre-S3.7; el backfill defensivo en GET los rellena con defaults vacíos.
@@ -235,14 +235,14 @@ Estructura mínima por catálogo (ejemplo Listings):
 
 ## Out of scope (registro explícito)
 
-| Feature | Fase futura |
-|---|---|
-| Bulk import CSV/JSON | S3.8 |
-| Vercel Blob para imágenes | S5/S6 |
-| Picker Mapbox visual | S6 Integraciones |
-| Edición i18n por item | S4 i18n editor |
-| Galería de imágenes reusable por cliente | S5/S6 |
-| Versioning/diff por item | S7 publish flow |
+| Feature                                  | Fase futura      |
+| ---------------------------------------- | ---------------- |
+| Bulk import CSV/JSON                     | S3.8             |
+| Vercel Blob para imágenes                | S5/S6            |
+| Picker Mapbox visual                     | S6 Integraciones |
+| Edición i18n por item                    | S4 i18n editor   |
+| Galería de imágenes reusable por cliente | S5/S6            |
+| Versioning/diff por item                 | S7 publish flow  |
 
 ## Verificación
 

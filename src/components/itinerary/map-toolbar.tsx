@@ -56,15 +56,7 @@ function Pill({
   );
 }
 
-function Toggle({
-  label,
-  on,
-  onChange,
-}: {
-  label: string;
-  on: boolean;
-  onChange: () => void;
-}) {
+function Toggle({ label, on, onChange }: { label: string; on: boolean; onChange: () => void }) {
   return (
     <button
       type="button"

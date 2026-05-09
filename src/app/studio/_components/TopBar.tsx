@@ -52,12 +52,12 @@ export function TopBar({
               cliente en pantallas más estrechas. */}
           <Link
             href="/studio"
-            className="hidden transition hover:text-zinc-800 xl:inline dark:hover:text-zinc-300"
+            className="hidden transition hover:text-zinc-800 dark:hover:text-zinc-300 xl:inline"
           >
             Clients
           </Link>
           <ChevronRight
-            className="hidden h-3.5 w-3.5 text-zinc-400 xl:block dark:text-zinc-700"
+            className="hidden h-3.5 w-3.5 text-zinc-400 dark:text-zinc-700 xl:block"
             aria-hidden="true"
           />
           <FaviconBadge
@@ -90,7 +90,11 @@ export function TopBar({
         ) : null}
         <SaveStatusPill state={saveState} isDirty={isDirty} />
         {typeof payloadPct === 'number' && payloadPct >= 60 ? (
-          <PayloadSizePill pct={payloadPct} overCap={payloadOverCap ?? false} sizeKb={payloadSizeKb ?? 0} />
+          <PayloadSizePill
+            pct={payloadPct}
+            overCap={payloadOverCap ?? false}
+            sizeKb={payloadSizeKb ?? 0}
+          />
         ) : null}
         <span className="mx-1 block h-5 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden="true" />
 
@@ -131,7 +135,11 @@ export function TopBar({
           type="button"
           onClick={onPublish}
           disabled={!onPublish}
-          title={isDirty ? 'Save changes first to include them in publish' : 'Publish (filesystem in dev, GitHub PR in production)'}
+          title={
+            isDirty
+              ? 'Save changes first to include them in publish'
+              : 'Publish (filesystem in dev, GitHub PR in production)'
+          }
           className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
         >
           <Send className="h-3.5 w-3.5" />
@@ -260,7 +268,17 @@ function PayloadSizePill({
       title={tooltip}
       aria-label={tooltip}
     >
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <svg
+        width="10"
+        height="10"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
         <polyline points="7 10 12 15 17 10" />
         <line x1="12" y1="15" x2="12" y2="3" />
@@ -279,14 +297,39 @@ function SaveStatusPill({
 }) {
   const effective = (() => {
     if (state === 'saving')
-      return { label: 'Saving…', short: 'Saving…', dot: 'bg-amber-400 animate-pulse', text: 'text-amber-600 dark:text-amber-300' };
+      return {
+        label: 'Saving…',
+        short: 'Saving…',
+        dot: 'bg-amber-400 animate-pulse',
+        text: 'text-amber-600 dark:text-amber-300',
+      };
     if (state === 'error')
-      return { label: 'Save failed', short: 'Error', dot: 'bg-red-500', text: 'text-red-600 dark:text-red-400' };
+      return {
+        label: 'Save failed',
+        short: 'Error',
+        dot: 'bg-red-500',
+        text: 'text-red-600 dark:text-red-400',
+      };
     if (isDirty)
-      return { label: 'Unsaved changes', short: 'Unsaved', dot: 'bg-sky-500 animate-pulse', text: 'text-sky-600 dark:text-sky-400' };
+      return {
+        label: 'Unsaved changes',
+        short: 'Unsaved',
+        dot: 'bg-sky-500 animate-pulse',
+        text: 'text-sky-600 dark:text-sky-400',
+      };
     if (state === 'saved')
-      return { label: 'All changes saved', short: 'Saved', dot: 'bg-emerald-500', text: 'text-emerald-600 dark:text-emerald-400' };
-    return { label: 'No pending changes', short: 'Idle', dot: 'bg-zinc-400 dark:bg-zinc-600', text: 'text-zinc-500' };
+      return {
+        label: 'All changes saved',
+        short: 'Saved',
+        dot: 'bg-emerald-500',
+        text: 'text-emerald-600 dark:text-emerald-400',
+      };
+    return {
+      label: 'No pending changes',
+      short: 'Idle',
+      dot: 'bg-zinc-400 dark:bg-zinc-600',
+      text: 'text-zinc-500',
+    };
   })();
 
   return (

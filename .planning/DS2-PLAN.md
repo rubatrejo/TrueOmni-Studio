@@ -4,7 +4,7 @@ Reemplaza el body vacío de DS1 por un player que rota slides según el playlist
 del display. Sin dayparting (DS13), sin transitions reales (DS12) — solo `cut`
 y duración por slide.
 
-```xml
+````xml
 <task type="auto">
   <name>DS2 — SignagePlayer (rotación básica + registry de templates + 2 placeholder slides)</name>
   <files>
@@ -88,7 +88,7 @@ y duración por slide.
     - Commit propuesto.
   </done>
 </task>
-```
+````
 
 ## Decisiones
 

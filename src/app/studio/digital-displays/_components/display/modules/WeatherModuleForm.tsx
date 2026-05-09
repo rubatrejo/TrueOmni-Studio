@@ -22,9 +22,7 @@ export function WeatherModuleForm({ module, onChange }: WeatherModuleFormProps) 
           { value: 'detailed', label: 'detailed' },
           { value: 'hero', label: 'hero' },
         ]}
-        onChange={(v) =>
-          onChange({ ...module, layout: v as WeatherModule['layout'] })
-        }
+        onChange={(v) => onChange({ ...module, layout: v as WeatherModule['layout'] })}
       />
     </FieldStack>
   );

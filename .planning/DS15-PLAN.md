@@ -34,28 +34,28 @@ cerrado y abrir paso al Milestone Signage Studio (DSS0+).
 
 ### A. Verificación automática (script-driven)
 
-| # | Check | Comando | Esperado |
-|---|---|---|---|
-| A1 | Typecheck | `pnpm typecheck` | exit 0 |
-| A2 | Lint global | `pnpm lint` | exit 0 (o warnings preexistentes únicamente) |
-| A3 | Dev server arranque | `pnpm kiosk:dev` | `Ready in <2s` |
-| A4 | Endpoint signage | `GET /signage/default/lobby-tv` | HTTP 200 |
-| A5 | Regression kiosk | `GET /` | HTTP 200 (sin romper Fase 3) |
+| #   | Check               | Comando                         | Esperado                                     |
+| --- | ------------------- | ------------------------------- | -------------------------------------------- |
+| A1  | Typecheck           | `pnpm typecheck`                | exit 0                                       |
+| A2  | Lint global         | `pnpm lint`                     | exit 0 (o warnings preexistentes únicamente) |
+| A3  | Dev server arranque | `pnpm kiosk:dev`                | `Ready in <2s`                               |
+| A4  | Endpoint signage    | `GET /signage/default/lobby-tv` | HTTP 200                                     |
+| A5  | Regression kiosk    | `GET /`                         | HTTP 200 (sin romper Fase 3)                 |
 
 ### B. Verificación visual (humano-driven)
 
-| # | Vector | URL / Acción | Validación |
-|---|---|---|---|
-| B1 | **Rotación 5 min sin leak** | `/signage/default/lobby-tv` abierto 5 min con DevTools Memory tab | Heap estable ±10% durante el ciclo. Sin acumulación de DOM. |
-| B2 | **8 templates pixel-perfect** | mismo URL, observar el ciclo completo | Cada uno de los 8 templates (events, ads, video-image, video-events-ad, video-2ads, video-news-ad, video-social-ad, video-social) renderiza idéntico al SVG fuente |
-| B3 | **Header live** | mismo URL, mirar el header | Logo + weather Phoenix + temp + 3 forecast cards + clock vivo (1s) + date sin glitches |
-| B4 | **4 transitions** | mismo URL, observar transitions entre slides | cut, fade, slide-left, slide-up todas suaves; sin tearing del header durante slide-up |
-| B5 | **Dayparting** | `?clock=20:00` vs `?clock=10:00` | A las 20:00 el slide news-ad está oculto; a las 10:00 visible. El header sigue en hora real (by design) |
-| B6 | **Sleep gate** | activar `sleepSchedule.enabled:true` con ventana cubriendo ahora, refresh | pantalla negra uniforme sobre header + body |
-| B7 | **Header bottom** | cambiar `client.json` `position:"bottom"`, refresh | Header en y=925..1080, body en y=0..925 |
-| B8 | **Audio toggle** | en template 03 con video real, `audio:true` vs `false` | Audio audible solo con audio:true (testeable solo con un mp4 real subido) |
-| B9 | **i18n locale es** | `client.json` `locale:"es"`, fuerza placeholder con dayparting fuera | Strings de placeholder en español, sin hydration mismatch |
-| B10 | **Resolución 1080p / 4K** | DevTools Device Toolbar → 1920×1080 y 3840×2160 | SignageStage escala uniformemente con letterbox tokenizado, sin elementos cortados |
+| #   | Vector                        | URL / Acción                                                              | Validación                                                                                                                                                         |
+| --- | ----------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| B1  | **Rotación 5 min sin leak**   | `/signage/default/lobby-tv` abierto 5 min con DevTools Memory tab         | Heap estable ±10% durante el ciclo. Sin acumulación de DOM.                                                                                                        |
+| B2  | **8 templates pixel-perfect** | mismo URL, observar el ciclo completo                                     | Cada uno de los 8 templates (events, ads, video-image, video-events-ad, video-2ads, video-news-ad, video-social-ad, video-social) renderiza idéntico al SVG fuente |
+| B3  | **Header live**               | mismo URL, mirar el header                                                | Logo + weather Phoenix + temp + 3 forecast cards + clock vivo (1s) + date sin glitches                                                                             |
+| B4  | **4 transitions**             | mismo URL, observar transitions entre slides                              | cut, fade, slide-left, slide-up todas suaves; sin tearing del header durante slide-up                                                                              |
+| B5  | **Dayparting**                | `?clock=20:00` vs `?clock=10:00`                                          | A las 20:00 el slide news-ad está oculto; a las 10:00 visible. El header sigue en hora real (by design)                                                            |
+| B6  | **Sleep gate**                | activar `sleepSchedule.enabled:true` con ventana cubriendo ahora, refresh | pantalla negra uniforme sobre header + body                                                                                                                        |
+| B7  | **Header bottom**             | cambiar `client.json` `position:"bottom"`, refresh                        | Header en y=925..1080, body en y=0..925                                                                                                                            |
+| B8  | **Audio toggle**              | en template 03 con video real, `audio:true` vs `false`                    | Audio audible solo con audio:true (testeable solo con un mp4 real subido)                                                                                          |
+| B9  | **i18n locale es**            | `client.json` `locale:"es"`, fuerza placeholder con dayparting fuera      | Strings de placeholder en español, sin hydration mismatch                                                                                                          |
+| B10 | **Resolución 1080p / 4K**     | DevTools Device Toolbar → 1920×1080 y 3840×2160                           | SignageStage escala uniformemente con letterbox tokenizado, sin elementos cortados                                                                                 |
 
 ### C. Cleanup post-verificación
 

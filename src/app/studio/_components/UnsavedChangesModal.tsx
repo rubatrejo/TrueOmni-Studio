@@ -76,8 +76,8 @@ export function UnsavedChangesModal({
                     id="unsaved-desc"
                     className="mt-1 text-[12.5px] leading-relaxed text-zinc-600 dark:text-zinc-400"
                   >
-                    You have changes that haven&apos;t been saved yet. If you leave now they
-                    will be lost. Save them first or discard to continue.
+                    You have changes that haven&apos;t been saved yet. If you leave now they will be
+                    lost. Save them first or discard to continue.
                   </p>
                 </div>
               </div>

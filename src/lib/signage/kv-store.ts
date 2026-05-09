@@ -109,11 +109,7 @@ export const kvSignageSnapshot = {
   },
 
   /** Lee un snapshot completo (data + meta). */
-  async get(
-    client: string,
-    display: string,
-    id: string,
-  ): Promise<SignageSnapshotEntry | null> {
+  async get(client: string, display: string, id: string): Promise<SignageSnapshotEntry | null> {
     const stored = await kv.get<StoredSnapshot>(kSignageSnap(client, display, id));
     if (!stored) return null;
     const parsed = SignageDisplayConfigSchema.safeParse(stored.data);
@@ -178,15 +174,11 @@ export const kvSignageThemeSnapshot = {
     return Array.isArray(raw) ? raw : [];
   },
 
-  async listMeta(
-    client: string,
-  ): Promise<{ id: string; meta: SignageSnapshotMeta }[]> {
+  async listMeta(client: string): Promise<{ id: string; meta: SignageSnapshotMeta }[]> {
     const ids = await kvSignageThemeSnapshot.listIds(client);
     const out: { id: string; meta: SignageSnapshotMeta }[] = [];
     for (const id of ids) {
-      const stored = await kv.get<StoredThemeSnapshot>(
-        kSignageThemeSnap(client, id),
-      );
+      const stored = await kv.get<StoredThemeSnapshot>(kSignageThemeSnap(client, id));
       if (stored && stored.meta) out.push({ id, meta: stored.meta });
     }
     return out;
@@ -236,11 +228,7 @@ export const kvSignageI18n = {
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
     return raw as Record<string, string>;
   },
-  async set(
-    client: string,
-    locale: string,
-    bag: Record<string, string>,
-  ): Promise<void> {
+  async set(client: string, locale: string, bag: Record<string, string>): Promise<void> {
     await kv.set(kSignageI18n(client, locale), bag);
   },
   async delete(client: string, locale: string): Promise<void> {

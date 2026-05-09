@@ -74,7 +74,8 @@ export function SendConfirmationPopup({
           className="absolute inset-x-0 top-0"
           style={{
             height: '8px',
-            background: 'linear-gradient(90deg, hsl(var(--brand-tertiary)) 0%, hsl(var(--brand-secondary)) 100%)',
+            background:
+              'linear-gradient(90deg, hsl(var(--brand-tertiary)) 0%, hsl(var(--brand-secondary)) 100%)',
           }}
         />
 

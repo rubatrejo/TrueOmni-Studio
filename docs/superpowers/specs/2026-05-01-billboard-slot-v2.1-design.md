@@ -26,6 +26,7 @@ cuando el slot no se toca.
 ## Alcance
 
 **Dentro:**
+
 - 2 slots: B1 slot 2 y B1 slot 3.
 - Catálogo `MODULE_BILLBOARD_INFO` extendido con `icon` y `accentColor`.
 - 2 componentes nuevos en `src/components/billboard/icons/` para preservar los
@@ -35,6 +36,7 @@ cuando el slot no se toca.
   semántica de fallback que `resolveSlotLabel`/`resolveSlotImage`.
 
 **Fuera:**
+
 - B0 (no tiene slots con color sólido + icono).
 - B2 (carousel — no aplica).
 - B3 (todos sus slots ya son imagen + reactivos).
@@ -97,10 +99,10 @@ Patrón idéntico al ya validado en `resolveSlotLabel`/`resolveSlotImage`: si
 
 ### Verbatim (componentes nuevos)
 
-| Módulo | Componente | Origen |
-|---|---|---|
-| `itinerary-builder` | `RouteIcon` | extraído de `billboard-1.tsx` (paths verbatim de `Itinery-Icon.svg`) |
-| `photo-booth` | `CameraIcon` | extraído de `billboard-1.tsx` (paths verbatim de `Photo_Booth-Icon.svg`) |
+| Módulo              | Componente   | Origen                                                                   |
+| ------------------- | ------------ | ------------------------------------------------------------------------ |
+| `itinerary-builder` | `RouteIcon`  | extraído de `billboard-1.tsx` (paths verbatim de `Itinery-Icon.svg`)     |
+| `photo-booth`       | `CameraIcon` | extraído de `billboard-1.tsx` (paths verbatim de `Photo_Booth-Icon.svg`) |
 
 Los componentes viven en `src/components/billboard/icons/route-icon.tsx` y
 `camera-icon.tsx`. Sus paths SVG son **idénticos** a los actuales en
@@ -110,44 +112,44 @@ asignado queda preservado.
 
 ### Lucide-react (los 13 restantes)
 
-| Módulo | Lucide |
-|---|---|
-| `restaurants` | `Utensils` |
-| `things-to-do` | `Sparkles` |
-| `events` | `CalendarDays` |
-| `tickets` | `Ticket` |
-| `passes` | `BadgeCheck` |
-| `guestbook` | `BookHeart` |
-| `social-wall` | `Share2` |
-| `digital-brochure` | `BookOpen` |
-| `map` | `MapPin` |
-| `stay` | `BedDouble` |
-| `survey` | `ClipboardList` |
-| `deals` | `Tag` |
-| `trails` | `Mountain` |
+| Módulo             | Lucide          |
+| ------------------ | --------------- |
+| `restaurants`      | `Utensils`      |
+| `things-to-do`     | `Sparkles`      |
+| `events`           | `CalendarDays`  |
+| `tickets`          | `Ticket`        |
+| `passes`           | `BadgeCheck`    |
+| `guestbook`        | `BookHeart`     |
+| `social-wall`      | `Share2`        |
+| `digital-brochure` | `BookOpen`      |
+| `map`              | `MapPin`        |
+| `stay`             | `BedDouble`     |
+| `survey`           | `ClipboardList` |
+| `deals`            | `Tag`           |
+| `trails`           | `Mountain`      |
 
 Lucide-react ya es dependencia del proyecto (importado en TopBar, ProductDropdown,
 etc.). Cero dependencias nuevas.
 
 ## Catálogo de colores accent
 
-| Módulo | Hex | Notas |
-|---|---|---|
-| `itinerary-builder` | `#b9bd39` | verbatim SVG (olive) |
-| `photo-booth` | `#1796d6` | verbatim SVG (azul cámara) |
-| `restaurants` | `#d63b3b` | rojo cálido |
-| `things-to-do` | `#7c4dff` | violeta |
-| `events` | `#ff6f3c` | coral |
-| `tickets` | `#e91e63` | magenta |
-| `passes` | `#d4a017` | gold |
-| `guestbook` | `#26a69a` | teal |
-| `social-wall` | `#ec407a` | rose |
-| `digital-brochure` | `#455a64` | slate |
-| `map` | `#43a047` | verde |
-| `stay` | `#a1887f` | terracotta |
-| `survey` | `#5c6bc0` | indigo |
-| `deals` | `#ff8f00` | naranja |
-| `trails` | `#558b2f` | verde bosque |
+| Módulo              | Hex       | Notas                      |
+| ------------------- | --------- | -------------------------- |
+| `itinerary-builder` | `#b9bd39` | verbatim SVG (olive)       |
+| `photo-booth`       | `#1796d6` | verbatim SVG (azul cámara) |
+| `restaurants`       | `#d63b3b` | rojo cálido                |
+| `things-to-do`      | `#7c4dff` | violeta                    |
+| `events`            | `#ff6f3c` | coral                      |
+| `tickets`           | `#e91e63` | magenta                    |
+| `passes`            | `#d4a017` | gold                       |
+| `guestbook`         | `#26a69a` | teal                       |
+| `social-wall`       | `#ec407a` | rose                       |
+| `digital-brochure`  | `#455a64` | slate                      |
+| `map`               | `#43a047` | verde                      |
+| `stay`              | `#a1887f` | terracotta                 |
+| `survey`            | `#5c6bc0` | indigo                     |
+| `deals`             | `#ff8f00` | naranja                    |
+| `trails`            | `#558b2f` | verde bosque               |
 
 Todos pasan contraste AA con texto blanco (`#fff`) — el label del slot
 mantiene `color: white` sin cambios.
@@ -191,12 +193,12 @@ plan, no aquí.
 
 ## Comportamiento de fallback
 
-| Estado | Resultado |
-|---|---|
-| `modules` undefined o array vacío | Slot idéntico al SVG original |
-| `modules[i]` undefined / string vacío | Slot idéntico al SVG original |
-| `modules[i]` no existe en el catálogo | Slot idéntico al SVG original |
-| `modules[i]` existe en el catálogo | label + image + href + icon + accent del módulo |
+| Estado                                | Resultado                                       |
+| ------------------------------------- | ----------------------------------------------- |
+| `modules` undefined o array vacío     | Slot idéntico al SVG original                   |
+| `modules[i]` undefined / string vacío | Slot idéntico al SVG original                   |
+| `modules[i]` no existe en el catálogo | Slot idéntico al SVG original                   |
+| `modules[i]` existe en el catálogo    | label + image + href + icon + accent del módulo |
 
 El slot **nunca queda apagado** ni en estado "empty". El SVG original
 siempre es el fallback final. Esto preserva el render del kiosk fresco
@@ -220,12 +222,12 @@ siempre es el fallback final. Esto preserva el render del kiosk fresco
 
 ## Riesgos y mitigaciones
 
-| Riesgo | Mitigación |
-|---|---|
-| Componentes verbatim no idénticos a paths inline | Copy-paste literal de los `<path>`. Diff visual antes/después. |
+| Riesgo                                               | Mitigación                                                                                                                       |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Componentes verbatim no idénticos a paths inline     | Copy-paste literal de los `<path>`. Diff visual antes/después.                                                                   |
 | Lucide icon a 120px se ve sobre-escalado vs verbatim | Inspección visual; si chirría, bajar a `size={104}` para los lucide y mantener `120` solo en verbatim. Decisión durante el plan. |
-| Algún color accent no contrasta con `#fff` | Todos los hex propuestos tienen luminosidad ≤ 65 con `#fff` text → AA. Validable con contrast checker en el plan si surge duda. |
-| Schema persistencia rompe | No se toca el schema. `modules: string[]` ya existe. |
+| Algún color accent no contrasta con `#fff`           | Todos los hex propuestos tienen luminosidad ≤ 65 con `#fff` text → AA. Validable con contrast checker en el plan si surge duda.  |
+| Schema persistencia rompe                            | No se toca el schema. `modules: string[]` ya existe.                                                                             |
 
 ## Trabajo fuera de scope (deuda anotada)
 

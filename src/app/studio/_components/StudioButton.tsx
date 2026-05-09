@@ -32,8 +32,7 @@ const VARIANT_CLASSES: Record<Variant, string> = {
     'border border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-800',
   ghost:
     'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 disabled:opacity-50 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100',
-  danger:
-    'bg-red-500/15 text-red-700 hover:bg-red-500/25 disabled:opacity-50 dark:text-red-300',
+  danger: 'bg-red-500/15 text-red-700 hover:bg-red-500/25 disabled:opacity-50 dark:text-red-300',
 };
 
 const SIZE_CLASSES: Record<Size, string> = {

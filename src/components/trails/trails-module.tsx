@@ -51,15 +51,17 @@ export function TrailsModule({
   const effective: HomeTrailsModule = override ?? mod;
   useEffect(() => {
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent<{
-        label?: string;
-        heroImage?: string;
-        subcategories?: string[];
-        features?: string[];
-        difficulties?: HomeTrailsModule['difficulties'];
-        trailTypes?: HomeTrailsModule['trailTypes'];
-        trails?: Trail[];
-      }>).detail;
+      const detail = (
+        e as CustomEvent<{
+          label?: string;
+          heroImage?: string;
+          subcategories?: string[];
+          features?: string[];
+          difficulties?: HomeTrailsModule['difficulties'];
+          trailTypes?: HomeTrailsModule['trailTypes'];
+          trails?: Trail[];
+        }>
+      ).detail;
       if (!detail || !Array.isArray(detail.trails)) return;
       setOverride({
         kind: 'trails',
@@ -74,14 +76,7 @@ export function TrailsModule({
     };
     window.addEventListener('kiosk:trails-override', handler);
     return () => window.removeEventListener('kiosk:trails-override', handler);
-  }, [
-    mod.label,
-    mod.heroImage,
-    mod.subcategories,
-    mod.features,
-    mod.difficulties,
-    mod.trailTypes,
-  ]);
+  }, [mod.label, mod.heroImage, mod.subcategories, mod.features, mod.difficulties, mod.trailTypes]);
 
   const moduleLabel = useModuleLabel(moduleKey, effective.label);
   const [filter, setFilter] = useState<TrailFilterState>(EMPTY_TRAILS_FILTER);

@@ -69,7 +69,12 @@ export function LocalListingPreview(props: LocalListingPreviewProps) {
             className="absolute right-5 top-5 flex h-12 w-12 items-center justify-center rounded-full bg-foreground/85 text-white"
           >
             <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true">
-              <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              <path
+                d="M5 5l10 10M15 5L5 15"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
             </svg>
           </button>
         </div>
@@ -99,9 +104,7 @@ export function LocalListingPreview(props: LocalListingPreviewProps) {
                         unoptimized
                       />
                     ) : null}
-                    <span
-                      className="absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[12px] font-bold text-white"
-                    >
+                    <span className="absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[12px] font-bold text-white">
                       {i + 1}
                     </span>
                   </div>

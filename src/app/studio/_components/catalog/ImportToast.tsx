@@ -17,12 +17,7 @@ interface ImportToastProps {
  * Banner verde temporal que aparece tras un import exitoso. Se autodescarta
  * después de `durationMs` (default 4s).
  */
-export function ImportToast({
-  stats,
-  noun,
-  onDismiss,
-  durationMs = 4000,
-}: ImportToastProps) {
+export function ImportToast({ stats, noun, onDismiss, durationMs = 4000 }: ImportToastProps) {
   useEffect(() => {
     if (!stats) return;
     const timer = setTimeout(onDismiss, durationMs);

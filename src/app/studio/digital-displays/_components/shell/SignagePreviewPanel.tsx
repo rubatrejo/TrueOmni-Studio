@@ -83,10 +83,8 @@ export function SignagePreviewPanel({
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
   const [fullScreen, setFullScreen] = useState(false);
-  const [formatKey, setFormatKey] =
-    useState<DeviceFormat['key']>('digital-display');
-  const format =
-    DEVICE_FORMATS.find((f) => f.key === formatKey) ?? DEVICE_FORMATS[0];
+  const [formatKey, setFormatKey] = useState<DeviceFormat['key']>('digital-display');
+  const format = DEVICE_FORMATS.find((f) => f.key === formatKey) ?? DEVICE_FORMATS[0];
 
   useEffect(() => {
     const holder = containerRef.current?.parentElement;
@@ -128,7 +126,6 @@ export function SignagePreviewPanel({
               />
             ))}
           </div>
-
         </div>
 
         <div className="flex items-center gap-1 text-[11px] text-zinc-500">
@@ -137,9 +134,7 @@ export function SignagePreviewPanel({
             className="grid h-7 w-7 place-items-center rounded-md text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-zinc-900 dark:hover:text-zinc-200"
             aria-label="Zoom out 10%"
             disabled={scale <= 0.15}
-            onClick={() =>
-              setScale((s) => Math.max(0.15, Math.round((s - 0.1) * 100) / 100))
-            }
+            onClick={() => setScale((s) => Math.max(0.15, Math.round((s - 0.1) * 100) / 100))}
           >
             <Minus className="h-3.5 w-3.5" />
           </button>
@@ -151,9 +146,7 @@ export function SignagePreviewPanel({
             className="grid h-7 w-7 place-items-center rounded-md text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-zinc-900 dark:hover:text-zinc-200"
             aria-label="Zoom in 10%"
             disabled={scale >= 1}
-            onClick={() =>
-              setScale((s) => Math.min(1, Math.round((s + 0.1) * 100) / 100))
-            }
+            onClick={() => setScale((s) => Math.min(1, Math.round((s + 0.1) * 100) / 100))}
           >
             <Plus className="h-3.5 w-3.5" />
           </button>
@@ -213,7 +206,9 @@ export function SignagePreviewPanel({
                   Kiosk Portrait coming soon
                 </p>
                 <p className="mt-1 text-[12.5px] text-zinc-400">
-                  El runtime portrait 1080×1920 está en desarrollo. Mientras tanto, puedes editar el contenido y publicarlo — al activarse, se renderizará automáticamente en kioskos verticales.
+                  El runtime portrait 1080×1920 está en desarrollo. Mientras tanto, puedes editar el
+                  contenido y publicarlo — al activarse, se renderizará automáticamente en kioskos
+                  verticales.
                 </p>
               </div>
             </div>
@@ -374,7 +369,11 @@ function FullScreenPreview({
       <div
         ref={wrapRef}
         className="relative overflow-hidden shadow-2xl"
-        style={{ width: DEVICE_FORMATS[0].width * scale, height: DEVICE_FORMATS[0].height * scale, backgroundColor: '#000' }}
+        style={{
+          width: DEVICE_FORMATS[0].width * scale,
+          height: DEVICE_FORMATS[0].height * scale,
+          backgroundColor: '#000',
+        }}
       >
         <iframe
           src={url}
@@ -392,7 +391,8 @@ function FullScreenPreview({
       </div>
 
       <span className="absolute bottom-6 left-1/2 -translate-x-1/2 font-mono text-[11.5px] text-zinc-500 dark:text-zinc-500">
-        {label} · {DEVICE_FORMATS[0].width}×{DEVICE_FORMATS[0].height} · {Math.round(scale * 100)}% · ESC to close
+        {label} · {DEVICE_FORMATS[0].width}×{DEVICE_FORMATS[0].height} · {Math.round(scale * 100)}%
+        · ESC to close
       </span>
     </div>
   );

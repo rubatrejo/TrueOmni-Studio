@@ -193,7 +193,8 @@ export function BillboardEditor({
             Background (shared across all variants)
           </h3>
           <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
-            One image/video applies to the hero of all 4 idle layouts so the kiosk identity stays consistent when switching variants.
+            One image/video applies to the hero of all 4 idle layouts so the kiosk identity stays
+            consistent when switching variants.
           </p>
         </header>
         <MediaField
@@ -246,9 +247,7 @@ export function BillboardEditor({
               id="billboard-touchhere-label"
               type="text"
               value={b0.touchHere.label}
-              onChange={(e) =>
-                setB0({ touchHere: { ...b0.touchHere, label: e.target.value } })
-              }
+              onChange={(e) => setB0({ touchHere: { ...b0.touchHere, label: e.target.value } })}
               placeholder="Touch Here   (leave empty to use the locale string)"
               className="w-full rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-[12.5px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
             />
@@ -345,9 +344,7 @@ export function BillboardEditor({
                 role="radio"
                 aria-checked={b0.overlay.mode === 'solid'}
                 type="button"
-                onClick={() =>
-                  setB0({ overlay: { ...b0.overlay, mode: 'solid' } })
-                }
+                onClick={() => setB0({ overlay: { ...b0.overlay, mode: 'solid' } })}
                 className={
                   'rounded-md px-3 py-1 text-[11.5px] transition ' +
                   (b0.overlay.mode === 'solid'
@@ -361,9 +358,7 @@ export function BillboardEditor({
                 role="radio"
                 aria-checked={b0.overlay.mode === 'gradient'}
                 type="button"
-                onClick={() =>
-                  setB0({ overlay: { ...b0.overlay, mode: 'gradient' } })
-                }
+                onClick={() => setB0({ overlay: { ...b0.overlay, mode: 'gradient' } })}
                 className={
                   'rounded-md px-3 py-1 text-[11.5px] transition ' +
                   (b0.overlay.mode === 'gradient'
@@ -686,9 +681,7 @@ function SliderRow({
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
-        <span className="text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
-          {label}
-        </span>
+        <span className="text-[12px] font-medium text-zinc-800 dark:text-zinc-200">{label}</span>
         <span className="font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
           {value}
           {unit}
@@ -704,9 +697,7 @@ function SliderRow({
         className="w-full accent-sky-500"
         aria-label={label}
       />
-      {hint ? (
-        <p className="text-[10.5px] text-zinc-500 dark:text-zinc-500">{hint}</p>
-      ) : null}
+      {hint ? <p className="text-[10.5px] text-zinc-500 dark:text-zinc-500">{hint}</p> : null}
     </div>
   );
 }
@@ -725,7 +716,12 @@ function ColorRow({
       <span className="block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
         {label}
       </span>
-      <ColorPicker value={value} onChange={onChange} allowAlpha placeholder="#000000 or #000000FF" />
+      <ColorPicker
+        value={value}
+        onChange={onChange}
+        allowAlpha
+        placeholder="#000000 or #000000FF"
+      />
     </div>
   );
 }

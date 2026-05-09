@@ -56,18 +56,14 @@ export function TrailGeoJsonField({
             disabled={!mapboxToken}
             onClick={() => setMode('map')}
           />
-          <ModeButton
-            label="Raw JSON"
-            active={mode === 'raw'}
-            onClick={() => setMode('raw')}
-          />
+          <ModeButton label="Raw JSON" active={mode === 'raw'} onClick={() => setMode('raw')} />
         </div>
       </div>
 
       {!mapboxToken ? (
         <p className="text-[11px] text-amber-600 dark:text-amber-400">
-          Map disabled — set <code>integrations.mapbox.token</code> in Integrations to enable
-          the visual editor.
+          Map disabled — set <code>integrations.mapbox.token</code> in Integrations to enable the
+          visual editor.
         </p>
       ) : null}
 
@@ -318,9 +314,7 @@ function TrailDrawMap({
         >
           Clear
         </button>
-        <span className="ml-auto text-[11px] text-zinc-500">
-          {coordinates.length} points
-        </span>
+        <span className="ml-auto text-[11px] text-zinc-500">{coordinates.length} points</span>
       </div>
       <input
         ref={fileInputRef}
@@ -335,9 +329,9 @@ function TrailDrawMap({
         <p className="text-[11px] text-emerald-600 dark:text-emerald-400">{importInfo}</p>
       ) : (
         <p className="text-[11px] leading-snug text-zinc-500">
-          Click <em>Draw line</em>, then click on the map to add points. Double-click to
-          finish. Drag a vertex to move it; click <em>Trash</em> in the top-left toolbar to
-          delete the selected feature. Or <em>Import GPX</em> from your hike app.
+          Click <em>Draw line</em>, then click on the map to add points. Double-click to finish.
+          Drag a vertex to move it; click <em>Trash</em> in the top-left toolbar to delete the
+          selected feature. Or <em>Import GPX</em> from your hike app.
         </p>
       )}
     </div>
@@ -397,7 +391,7 @@ function RawJsonField({
           setText(e.target.value);
           commit(e.target.value);
         }}
-        placeholder='[[-112.123,36.123],[-112.124,36.124]]'
+        placeholder="[[-112.123,36.123],[-112.124,36.124]]"
         className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 font-mono text-[11px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100 dark:placeholder:text-zinc-600"
       />
       {error ? (
@@ -420,11 +414,7 @@ function fitToCoords(map: mapboxgl.Map, coords: Coord[]) {
   map.fitBounds(bounds, { padding: 32, maxZoom: 16, duration: 600 });
 }
 
-function syncExternal(
-  draw: MapboxDraw,
-  coords: Coord[],
-  featureIdRef: { current: string | null },
-) {
+function syncExternal(draw: MapboxDraw, coords: Coord[], featureIdRef: { current: string | null }) {
   const existingId = featureIdRef.current;
   // Si las coords coinciden con lo que el plugin ya tiene, nada que hacer.
   if (existingId) {

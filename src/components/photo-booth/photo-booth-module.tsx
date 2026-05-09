@@ -118,11 +118,7 @@ export function PhotoBoothModule({
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<PhotoBoothConfig>).detail;
-      if (
-        detail &&
-        Array.isArray(detail.backgrounds) &&
-        Array.isArray(detail.filters)
-      ) {
+      if (detail && Array.isArray(detail.backgrounds) && Array.isArray(detail.filters)) {
         setOverride(detail);
       }
     };
@@ -345,11 +341,7 @@ export function PhotoBoothModule({
   };
   const onSelectFilter = (id: string) => setSelectedFilterId(id);
 
-  const onAddSticker = (
-    sticker: (typeof resolvedStickers)[number],
-    x: number,
-    y: number,
-  ) => {
+  const onAddSticker = (sticker: (typeof resolvedStickers)[number], x: number, y: number) => {
     const instanceId = `${sticker.id}-${Date.now()}`;
     const w = sticker.defaultWidth ?? 180;
     setPlacedStickers((prev) => [
@@ -367,9 +359,7 @@ export function PhotoBoothModule({
   };
 
   const onUpdateSticker = (id: string, patch: Partial<PlacedSticker>) => {
-    setPlacedStickers((prev) =>
-      prev.map((s) => (s.instanceId === id ? { ...s, ...patch } : s)),
-    );
+    setPlacedStickers((prev) => prev.map((s) => (s.instanceId === id ? { ...s, ...patch } : s)));
   };
 
   const onRemoveSticker = (id: string) => {
@@ -398,14 +388,11 @@ export function PhotoBoothModule({
     const c = captureRef.current;
     if (!c || !c.bitmap) return;
     try {
-      const bg = resolvedBackgrounds.find((b) => b.id === selectedBackgroundId) ??
-        resolvedBackgrounds[0];
+      const bg =
+        resolvedBackgrounds.find((b) => b.id === selectedBackgroundId) ?? resolvedBackgrounds[0];
       const useOriginal = !bg || bg.image === '';
-      const backgroundImg =
-        !useOriginal && bg ? await loadImage(bg.resolvedImage) : null;
-      const frame = resolvedFrames.find(
-        (f) => f.id === selectedFrameId && f.image !== '',
-      );
+      const backgroundImg = !useOriginal && bg ? await loadImage(bg.resolvedImage) : null;
+      const frame = resolvedFrames.find((f) => f.id === selectedFrameId && f.image !== '');
       const frameImg = frame ? await loadImage(frame.resolvedImage) : null;
       const filter = filters.find((f) => f.id === selectedFilterId);
       // Resuelve imágenes de los stickers colocados (1080x1920 coords)
@@ -450,9 +437,9 @@ export function PhotoBoothModule({
   // El popup `SendConfirmationPopup` hace auto-redirect a /home a los 5s.
   const [emailOpen, setEmailOpen] = useState(false);
   const [phoneOpen, setPhoneOpen] = useState(false);
-  const [confirm, setConfirm] = useState<
-    { kind: 'email' | 'phone'; destination: string } | null
-  >(null);
+  const [confirm, setConfirm] = useState<{ kind: 'email' | 'phone'; destination: string } | null>(
+    null,
+  );
 
   const handleEmailSent = (email: string) => {
     setEmailOpen(false);
@@ -479,9 +466,7 @@ export function PhotoBoothModule({
     );
   }
 
-  const livePreviewFrame = resolvedFrames.find(
-    (f) => f.id === selectedFrameId && f.image !== '',
-  );
+  const livePreviewFrame = resolvedFrames.find((f) => f.id === selectedFrameId && f.image !== '');
 
   return (
     <div
@@ -544,7 +529,10 @@ export function PhotoBoothModule({
       )}
 
       {phase === 'countdown' && (
-        <CountdownOverlay value={countdown.value} totalSeconds={timerSeconds > 0 ? timerSeconds : 3} />
+        <CountdownOverlay
+          value={countdown.value}
+          totalSeconds={timerSeconds > 0 ? timerSeconds : 3}
+        />
       )}
 
       {phase === 'capturing' && (
@@ -733,12 +721,8 @@ export function PhotoBoothModule({
         open={confirm !== null}
         kind={confirm?.kind ?? 'email'}
         destination={confirm?.destination ?? ''}
-        title={
-          confirm?.kind === 'phone' ? textos.sentPhoneTitle : textos.sentEmailTitle
-        }
-        body={
-          confirm?.kind === 'phone' ? textos.sentPhoneBody : textos.sentEmailBody
-        }
+        title={confirm?.kind === 'phone' ? textos.sentPhoneTitle : textos.sentEmailTitle}
+        body={confirm?.kind === 'phone' ? textos.sentPhoneBody : textos.sentEmailBody}
         onClose={() => setConfirm(null)}
       />
 

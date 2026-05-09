@@ -37,31 +37,32 @@
 - 5 frames PNG (Frame_0..Frame_4) — copiados a `clients/default/assets/photo-booth/frames/`.
 
 **NO entregados** (a resolver en planning):
+
 - Assets separados para backgrounds (los vi renderizados en el SVG 4-Experience pero no como archivos). Para v1 uso placeholders visuales diversos (Van Gogh SVG del SVG ya existente; LEGO tile de home; paisajes generados) hasta que Rubén entregue el set final.
 - Stickers PNG individuales. Para v1 uso un set reducido de emoji-PNG renderizados al vuelo (Twemoji) o emojis Unicode en `<span>` con `font-size` grande como fallback tokenizado.
 
 ## Tokens `--photo-*`
 
-Añadidos a los 3 `tokens.css` (default, _template, demo-cliente-a):
+Añadidos a los 3 `tokens.css` (default, \_template, demo-cliente-a):
 
-| Token | Valor default | Uso |
-|-------|---------------|-----|
-| `--photo-bg` | `0 0% 100%` | Fondo general editor |
-| `--photo-text` | `218 35% 14%` | Texto principal |
-| `--photo-tabs-bg` | `201 100% 40%` | Fondo barra de tabs (Backgrounds/Frames/Filters) |
-| `--photo-tab-active` | `0 0% 100%` | Tab seleccionado (blanco) |
-| `--photo-tab-inactive` | `201 100% 40%` | Tab no seleccionado (primary) |
-| `--photo-tab-text-active` | `218 35% 14%` | Texto tab activo |
-| `--photo-tab-text-inactive` | `0 0% 100%` | Texto tab inactivo |
-| `--photo-sidebar-bg` | `201 100% 40% / 0.85` | Barra lateral derecha del editor |
-| `--photo-sidebar-icon` | `0 0% 100%` | Flechas e icono QR |
-| `--photo-countdown-bg` | `0 0% 0% / 0.55` | Overlay 3-2-1 (capa oscura) |
-| `--photo-countdown-number` | `0 0% 100%` | Número 3/2/1 |
-| `--photo-share-bg` | `0 0% 0%` | Fondo negro pantalla Share |
-| `--photo-share-title` | `0 0% 100%` | "SHARE YOUR MEMORIES" |
-| `--photo-cta-border` | `0 0% 100%` | Borde botones EMAIL/TEXT |
-| `--photo-accent-from` | `201 95% 46%` | Gradient accent (mic / loader) |
-| `--photo-accent-to` | `173 81% 30%` | Gradient accent |
+| Token                       | Valor default         | Uso                                              |
+| --------------------------- | --------------------- | ------------------------------------------------ |
+| `--photo-bg`                | `0 0% 100%`           | Fondo general editor                             |
+| `--photo-text`              | `218 35% 14%`         | Texto principal                                  |
+| `--photo-tabs-bg`           | `201 100% 40%`        | Fondo barra de tabs (Backgrounds/Frames/Filters) |
+| `--photo-tab-active`        | `0 0% 100%`           | Tab seleccionado (blanco)                        |
+| `--photo-tab-inactive`      | `201 100% 40%`        | Tab no seleccionado (primary)                    |
+| `--photo-tab-text-active`   | `218 35% 14%`         | Texto tab activo                                 |
+| `--photo-tab-text-inactive` | `0 0% 100%`           | Texto tab inactivo                               |
+| `--photo-sidebar-bg`        | `201 100% 40% / 0.85` | Barra lateral derecha del editor                 |
+| `--photo-sidebar-icon`      | `0 0% 100%`           | Flechas e icono QR                               |
+| `--photo-countdown-bg`      | `0 0% 0% / 0.55`      | Overlay 3-2-1 (capa oscura)                      |
+| `--photo-countdown-number`  | `0 0% 100%`           | Número 3/2/1                                     |
+| `--photo-share-bg`          | `0 0% 0%`             | Fondo negro pantalla Share                       |
+| `--photo-share-title`       | `0 0% 100%`           | "SHARE YOUR MEMORIES"                            |
+| `--photo-cta-border`        | `0 0% 100%`           | Borde botones EMAIL/TEXT                         |
+| `--photo-accent-from`       | `201 95% 46%`         | Gradient accent (mic / loader)                   |
+| `--photo-accent-to`         | `173 81% 30%`         | Gradient accent                                  |
 
 ## Verificación (criterios por pantalla)
 

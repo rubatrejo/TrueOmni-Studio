@@ -25,10 +25,7 @@ export async function POST(req: Request, { params }: RouteParams) {
   try {
     const body = (await req.json()) as { newSlug?: string; newNombre?: string };
     if (!body.newSlug || !body.newNombre) {
-      return NextResponse.json(
-        { error: 'newSlug and newNombre are required' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'newSlug and newNombre are required' }, { status: 400 });
     }
     if (!SLUG_REGEX.test(body.newSlug)) {
       return NextResponse.json({ error: 'Invalid newSlug' }, { status: 400 });
@@ -65,10 +62,7 @@ export async function POST(req: Request, { params }: RouteParams) {
     // Lock atómico (mismo patrón que POST /api/studio/configs).
     const created = await kv.set(kvKeys.cfg(body.newSlug), validated.data, { nx: true });
     if (created !== 'OK') {
-      return NextResponse.json(
-        { error: `Slug "${body.newSlug}" already exists` },
-        { status: 409 },
-      );
+      return NextResponse.json({ error: `Slug "${body.newSlug}" already exists` }, { status: 409 });
     }
     await kv.set(kvKeys.cfgMeta(body.newSlug), meta);
     await kv.sadd(kvKeys.clientsList, body.newSlug);
@@ -78,20 +72,12 @@ export async function POST(req: Request, { params }: RouteParams) {
     // el clone aparecía como nuevo cliente sin manifest, dependía de
     // auto-migrate para reconciliar. Ahora replica todo de una vez.
     try {
-      const { kSignageClient, kSignageClientList } = await import(
-        '@/lib/signage/kv-keys'
-      );
+      const { kSignageClient, kSignageClientList } = await import('@/lib/signage/kv-keys');
       const { SignageClientFileSchema } = await import('@/lib/signage/schema');
-      const {
-        kioskToUnifiedBranding,
-        loadUnifiedBranding,
-        saveUnifiedBrandingOnly,
-      } = await import('@/lib/studio/client-branding-sync');
-      const {
-        loadClientManifest,
-        makeBlankManifest,
-        saveClientManifest,
-      } = await import('@/lib/studio/client-manifest');
+      const { kioskToUnifiedBranding, loadUnifiedBranding, saveUnifiedBrandingOnly } =
+        await import('@/lib/studio/client-branding-sync');
+      const { loadClientManifest, makeBlankManifest, saveClientManifest } =
+        await import('@/lib/studio/client-manifest');
 
       const sourceManifest = await loadClientManifest(source);
       const sourceBranding = await loadUnifiedBranding(source);
@@ -110,7 +96,7 @@ export async function POST(req: Request, { params }: RouteParams) {
 
       // Manifest: heredar productos activos del source (si existían).
       // Pinned NO se hereda (pin es operador-specific).
-      const products = sourceManifest?.products ?? { kiosks: true } as const;
+      const products = sourceManifest?.products ?? ({ kiosks: true } as const);
       const newManifest = makeBlankManifest(body.newSlug, body.newNombre, {
         ...products,
         // El kiosk acabamos de crearlo, garantiza true.
@@ -141,10 +127,7 @@ export async function POST(req: Request, { params }: RouteParams) {
       );
     }
 
-    return NextResponse.json(
-      { slug: body.newSlug, config: validated.data, meta },
-      { status: 201 },
-    );
+    return NextResponse.json({ slug: body.newSlug, config: validated.data, meta }, { status: 201 });
   } catch (error) {
     console.error('[api/studio/configs/[slug]/clone POST]', error);
     return NextResponse.json({ error: 'Failed to clone config' }, { status: 500 });

@@ -211,9 +211,7 @@ export function MapCanvas({
       const lineColor =
         routeColor ??
         (() => {
-          const v = getComputedStyle(document.documentElement)
-            .getPropertyValue('--primary')
-            .trim();
+          const v = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
           // Mapbox no acepta el formato moderno `hsl(H S% L%)` (sin comas);
           // convertir a `hsl(H, S%, L%)` para que la librería lo parsee.
           return v ? `hsl(${v.split(/\s+/).join(', ')})` : 'hsl(var(--brand-secondary))';
@@ -320,12 +318,7 @@ export function MapCanvas({
       img.src = pinDataUri(source, categoryIcons?.[source]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    categoryIcons?.restaurants,
-    iconThingsToDo,
-    categoryIcons?.stay,
-    categoryIcons?.events,
-  ]);
+  }, [categoryIcons?.restaurants, iconThingsToDo, categoryIcons?.stay, categoryIcons?.events]);
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !readyRef.current) return;
@@ -347,10 +340,7 @@ export function MapCanvas({
     customMarkersRef.current = [];
     // Index dynamicListings por key para sacar iconKey/customIcon de cada
     // listing module no canónico.
-    const dynBySource = new Map<
-      string,
-      { iconKey?: string; customIcon?: string }
-    >();
+    const dynBySource = new Map<string, { iconKey?: string; customIcon?: string }>();
     if (dynamicListings) {
       for (const d of dynamicListings) dynBySource.set(d.key, d);
     }

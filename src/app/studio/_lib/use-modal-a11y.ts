@@ -41,10 +41,7 @@ export function useEscapeClose(open: boolean, onClose: () => void): void {
  * tabindex="-1" como focusable). Tab al final → primero; Shift+Tab al
  * inicio → último.
  */
-export function useFocusTrap(
-  open: boolean,
-  ref: RefObject<HTMLElement | null>,
-): void {
+export function useFocusTrap(open: boolean, ref: RefObject<HTMLElement | null>): void {
   useEffect(() => {
     if (!open) return;
     const node = ref.current;
@@ -115,9 +112,7 @@ const FOCUSABLE_SELECTOR = [
 ].join(',');
 
 function getFocusableWithin(node: HTMLElement): HTMLElement[] {
-  const all = Array.from(
-    node.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
-  );
+  const all = Array.from(node.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
   return all.filter((el) => {
     if (el.hasAttribute('disabled')) return false;
     if (el.getAttribute('aria-hidden') === 'true') return false;

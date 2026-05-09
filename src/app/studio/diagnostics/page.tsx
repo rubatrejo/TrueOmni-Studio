@@ -22,10 +22,7 @@ import type { HealthResponse } from '@/app/api/health/route';
 import { StudioPageHeader } from '../_components/PageHeader';
 import { SystemStatusBadge } from '../_components/SystemStatusBadge';
 import { listConfigs, type ConfigEntry } from '../_lib/api-client';
-import {
-  getHistory,
-  type LocalVersionEntry,
-} from '../_lib/local-version-history';
+import { getHistory, type LocalVersionEntry } from '../_lib/local-version-history';
 
 /**
  * Diagnostics page (audit F-48).
@@ -53,12 +50,12 @@ export default function DiagnosticsPage() {
         <p className="mb-3 text-sm font-medium uppercase tracking-[0.18em] text-zinc-500">
           Diagnostics
         </p>
-        <h1 className="font-display text-4xl font-bold leading-[1.08] tracking-tight text-balance text-zinc-900 sm:text-5xl sm:leading-[1.05] dark:text-white">
+        <h1 className="text-balance font-display text-4xl font-bold leading-[1.08] tracking-tight text-zinc-900 dark:text-white sm:text-5xl sm:leading-[1.05]">
           What&rsquo;s going on under the hood.
         </h1>
-        <p className="mt-5 max-w-2xl text-base leading-relaxed text-pretty text-zinc-600 dark:text-zinc-400">
-          Probes, recent activity and a quick view of every kiosk in the workspace. Use this
-          page when something feels stuck — bridge disconnected, save failing, slow publish.
+        <p className="mt-5 max-w-2xl text-pretty text-base leading-relaxed text-zinc-600 dark:text-zinc-400">
+          Probes, recent activity and a quick view of every kiosk in the workspace. Use this page
+          when something feels stuck — bridge disconnected, save failing, slow publish.
         </p>
       </header>
 
@@ -162,16 +159,11 @@ function HealthSection() {
             label="Filesystem"
             status={health.probes.filesystem.status}
             latencyMs={health.probes.filesystem.latencyMs}
-            detail={
-              health.probes.filesystem.detail ??
-              'clients/_template/config.json reachable.'
-            }
+            detail={health.probes.filesystem.detail ?? 'clients/_template/config.json reachable.'}
           />
           <p className="pt-1 text-[10.5px] text-zinc-400 dark:text-zinc-600">
             Last checked {new Date(health.timestamp).toLocaleTimeString()} ·{' '}
-            <span className="font-mono uppercase tracking-wide">
-              {health.status}
-            </span>
+            <span className="font-mono uppercase tracking-wide">{health.status}</span>
           </p>
         </div>
       ) : (
@@ -289,7 +281,7 @@ function RecentActivitySection() {
             : 'No edits or publishes recorded yet in this browser.'}
         </div>
       ) : (
-        <ol className="space-y-1.5 max-h-[400px] overflow-y-auto pr-1">
+        <ol className="max-h-[400px] space-y-1.5 overflow-y-auto pr-1">
           {entries.map((e, i) => (
             <li
               key={`${e.slug}-${e.ts}-${i}`}
@@ -399,8 +391,8 @@ function MigrationReportSection() {
             Auto-migration
           </h2>
           <p className="mt-0.5 text-[12px] text-zinc-500 dark:text-zinc-500">
-            Lazy migrator that converts legacy clients (kiosk-only or signage-only)
-            to the unified manifest model. Runs on first dashboard load.
+            Lazy migrator that converts legacy clients (kiosk-only or signage-only) to the unified
+            manifest model. Runs on first dashboard load.
           </p>
         </div>
         <button
@@ -423,8 +415,7 @@ function MigrationReportSection() {
       ) : !data.report ? (
         <p className="rounded-md border border-zinc-200 bg-zinc-50/40 p-3 text-[12px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/20 dark:text-zinc-400">
           No migration has run yet in this server instance. Visit{' '}
-          <code className="font-mono">/studio</code> to trigger the lazy
-          migrator.
+          <code className="font-mono">/studio</code> to trigger the lazy migrator.
         </p>
       ) : (
         <>
@@ -439,8 +430,7 @@ function MigrationReportSection() {
             <ReportStat label="Failed" value={data.report.failed} tone="danger" />
           </div>
           <p className="mt-3 text-[11.5px] text-zinc-500">
-            Last computed{' '}
-            {data.computedAt ? relativeTime(data.computedAt) : '—'}{' '}
+            Last computed {data.computedAt ? relativeTime(data.computedAt) : '—'}{' '}
             {data.ageMs != null && data.ageMs < 60_000 ? '(cache fresh)' : '(cache may be stale)'}
           </p>
           {data.report.details.length > 0 && (
@@ -455,9 +445,7 @@ function MigrationReportSection() {
                     className="flex items-center justify-between gap-3 px-3 py-2 text-[12px]"
                   >
                     <span className="flex items-center gap-2">
-                      <code className="font-mono text-zinc-800 dark:text-zinc-200">
-                        {d.slug}
-                      </code>
+                      <code className="font-mono text-zinc-800 dark:text-zinc-200">{d.slug}</code>
                       <span className="text-zinc-500">{d.products.join(', ') || '—'}</span>
                     </span>
                     <span
@@ -503,12 +491,8 @@ function ReportStat({
         : 'text-zinc-700 dark:text-zinc-300';
   return (
     <div className="rounded-md border border-zinc-200 bg-zinc-50/60 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900/20">
-      <p className="text-[10.5px] font-medium uppercase tracking-wider text-zinc-500">
-        {label}
-      </p>
-      <p className={`mt-0.5 font-display text-2xl font-bold tabular-nums ${toneClass}`}>
-        {value}
-      </p>
+      <p className="text-[10.5px] font-medium uppercase tracking-wider text-zinc-500">{label}</p>
+      <p className={`mt-0.5 font-display text-2xl font-bold tabular-nums ${toneClass}`}>{value}</p>
     </div>
   );
 }
@@ -566,9 +550,8 @@ function IntegrationsSmokeSection() {
             Integrations smoke check
           </h2>
           <p className="mt-0.5 text-[12px] text-zinc-500 dark:text-zinc-500">
-            Pings every configured integration (Mapbox, OpenWeather, Tavus,
-            Satisfi, etc.) of every kiosk and reports OK/failed/skipped.
-            Skipped means no credentials are stored.
+            Pings every configured integration (Mapbox, OpenWeather, Tavus, Satisfi, etc.) of every
+            kiosk and reports OK/failed/skipped. Skipped means no credentials are stored.
           </p>
         </div>
         <button
@@ -577,11 +560,7 @@ function IntegrationsSmokeSection() {
           disabled={loading}
           className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-2.5 py-1 text-[11.5px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
         >
-          {loading ? (
-            <RotateCcw className="h-3 w-3 animate-spin" />
-          ) : (
-            <Plug className="h-3 w-3" />
-          )}
+          {loading ? <RotateCcw className="h-3 w-3 animate-spin" /> : <Plug className="h-3 w-3" />}
           Run smoke check
         </button>
       </header>
@@ -594,9 +573,8 @@ function IntegrationsSmokeSection() {
 
       {!error && !data && !loading && (
         <p className="rounded-md border border-zinc-200 bg-zinc-50/40 p-3 text-[12px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/20 dark:text-zinc-400">
-          Click <strong>Run smoke check</strong> to fan out probes against
-          every integration of every kiosk. Takes a few seconds for large
-          workspaces.
+          Click <strong>Run smoke check</strong> to fan out probes against every integration of
+          every kiosk. Takes a few seconds for large workspaces.
         </p>
       )}
 
@@ -618,15 +596,9 @@ function IntegrationsSmokeSection() {
                 className="rounded-md border border-zinc-200 bg-zinc-50/40 p-3 dark:border-zinc-800 dark:bg-zinc-900/20"
               >
                 <div className="mb-2 flex items-center gap-2 text-[12.5px]">
-                  <span className="font-mono text-zinc-800 dark:text-zinc-200">
-                    {c.slug}
-                  </span>
+                  <span className="font-mono text-zinc-800 dark:text-zinc-200">{c.slug}</span>
                   {c.name && <span className="text-zinc-500">{c.name}</span>}
-                  {c.error && (
-                    <span className="text-red-600 dark:text-red-400">
-                      ({c.error})
-                    </span>
-                  )}
+                  {c.error && <span className="text-red-600 dark:text-red-400">({c.error})</span>}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {c.integrations.map((i) => (
@@ -734,7 +706,7 @@ function KiosksSection() {
                   </td>
                   <td className="px-3 py-2">{cfg.nombre}</td>
                   <td className="px-3 py-2 font-mono">v{cfg.currentVersion}</td>
-                  <td className="px-3 py-2 truncate font-mono text-[10.5px] text-zinc-500">
+                  <td className="truncate px-3 py-2 font-mono text-[10.5px] text-zinc-500">
                     {cfg.meta?.lastEditor ?? '—'}
                   </td>
                   <td className="px-3 py-2 text-[10.5px] text-zinc-500">

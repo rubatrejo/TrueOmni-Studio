@@ -37,9 +37,7 @@ export async function POST(req: Request) {
           ),
         );
       case 'satisfi':
-        return NextResponse.json(
-          checkSatisfi(String(body.apiKey ?? ''), String(body.hubId ?? '')),
-        );
+        return NextResponse.json(checkSatisfi(String(body.apiKey ?? ''), String(body.hubId ?? '')));
       case 'tavus':
         return NextResponse.json(
           await checkTavus(String(body.apiKey ?? ''), String(body.replicaId ?? '')),
@@ -57,10 +55,7 @@ export async function POST(req: Request) {
           await checkViator(String(body.apiKey ?? ''), String(body.partnerId ?? '')),
         );
       default:
-        return NextResponse.json(
-          { ok: false, message: `Unknown kind "${kind}"` },
-          { status: 400 },
-        );
+        return NextResponse.json({ ok: false, message: `Unknown kind "${kind}"` }, { status: 400 });
     }
   } catch (error) {
     console.error('[api/studio/integrations/check]', error);

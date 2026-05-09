@@ -19,13 +19,8 @@ export function StudioBrand({ size = 'md' }: { size?: 'sm' | 'md' }) {
       href="/studio"
       className="group flex items-center gap-3 text-zinc-900 transition hover:text-black dark:text-zinc-100 dark:hover:text-white"
     >
-      <TrueOmniLogo
-        className={`${logoH} w-auto text-zinc-900 transition dark:text-white`}
-      />
-      <span
-        className={`block w-px ${dividerH} bg-zinc-300 dark:bg-zinc-700`}
-        aria-hidden="true"
-      />
+      <TrueOmniLogo className={`${logoH} w-auto text-zinc-900 transition dark:text-white`} />
+      <span className={`block w-px ${dividerH} bg-zinc-300 dark:bg-zinc-700`} aria-hidden="true" />
       <span
         className={`font-display font-medium uppercase tracking-[0.18em] text-zinc-500 group-hover:text-zinc-700 dark:text-zinc-400 dark:group-hover:text-zinc-200 ${labelTxt}`}
       >

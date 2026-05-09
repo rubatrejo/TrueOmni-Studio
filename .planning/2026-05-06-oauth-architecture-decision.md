@@ -30,6 +30,7 @@ TrueOmni (1 app Meta) → kiosk hotel-A → access_token_A
 Cada token vive en `cfg.integrations.socialOauth.{platform}` del kiosk del dueño. Nunca cruzan al iframe ni a otro kiosk.
 
 **Operativa por cliente nuevo:**
+
 1. Creas el kiosk en `/studio`.
 2. Cliente abre Social Wall → Connect Instagram (en sesión de onboarding contigo o vía link compartido).
 3. Logueado con su cuenta, el token queda guardado en su kiosk.
@@ -79,6 +80,7 @@ Cada token vive en `cfg.integrations.socialOauth.{platform}` del kiosk del dueñ
 ## Trigger para revisar esta decisión
 
 Cualquiera de los siguientes:
+
 - Llega el cliente nº 5 con Social Wall activo.
 - Meta nos avisa que estamos cerca del límite de 25 testers.
 - Cliente DMO grande pide setup turnkey sin OAuth.

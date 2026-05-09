@@ -25,10 +25,12 @@ const result = segmenter.segment(imageBitmap);
 ```
 
 **Performance esperada (1080×1920 en desktop intel):**
+
 - Warm-up primera carga: ~500–1500 ms (descarga WASM + modelo + compile).
 - Inferencia por imagen: ~200–600 ms.
 
 **Decisiones:**
+
 - Cargar el modelo desde CDN `storage.googleapis.com` para evitar bundlear el `.tflite` (8 MB). Cache-control del CDN permite reuso.
 - Singleton pattern (crear el segmenter una sola vez y reutilizar entre capturas).
 - Warm-up al entrar a la ruta `/home/photo-booth` con `useEffect`, NO al disparar (para que la captura sea instant).
@@ -39,11 +41,13 @@ const result = segmenter.segment(imageBitmap);
 **OffscreenCanvas con fallback:**
 
 ```ts
-const canvas = 'OffscreenCanvas' in globalThis
-  ? new OffscreenCanvas(1080, 1920)
-  : document.createElement('canvas');
+const canvas =
+  'OffscreenCanvas' in globalThis
+    ? new OffscreenCanvas(1080, 1920)
+    : document.createElement('canvas');
 if (!('OffscreenCanvas' in globalThis)) {
-  canvas.width = 1080; canvas.height = 1920;
+  canvas.width = 1080;
+  canvas.height = 1920;
 }
 const ctx = canvas.getContext('2d')!;
 ```
@@ -90,19 +94,19 @@ Librería existente: `qrcode.react@4.2.0` (ya usada en `qr-purchase-modal`).
 **Template de URL:**
 
 ```ts
-config.features.home.photoBooth.shareUrlTemplate = 'https://share.arizona.com/{id}'
+config.features.home.photoBooth.shareUrlTemplate = 'https://share.arizona.com/{id}';
 // v1 substituye {id} por un UUID client-side (no persiste nada real).
 // Fase 5+ el backend crea el registro y el QR apunta a la URL real.
 ```
 
 ## Alternativas descartadas
 
-| Lib | Motivo descarte |
-|-----|-----------------|
-| `@imgly/background-removal` | 5 MB bundle + 1–3 s por imagen. Mejor calidad de borde pero overkill para v1 |
-| `@tensorflow-models/body-segmentation` | Deprecated (Google sunset). Reemplazado por MediaPipe Tasks |
-| `onnxruntime-web + ISNet/BiRefNet` | Muy buen resultado pero 50+ MB de modelo, impráctico en kiosk |
-| `background-removal.js` | Wrapper de onnxruntime, mismo problema |
+| Lib                                    | Motivo descarte                                                              |
+| -------------------------------------- | ---------------------------------------------------------------------------- |
+| `@imgly/background-removal`            | 5 MB bundle + 1–3 s por imagen. Mejor calidad de borde pero overkill para v1 |
+| `@tensorflow-models/body-segmentation` | Deprecated (Google sunset). Reemplazado por MediaPipe Tasks                  |
+| `onnxruntime-web + ISNet/BiRefNet`     | Muy buen resultado pero 50+ MB de modelo, impráctico en kiosk                |
+| `background-removal.js`                | Wrapper de onnxruntime, mismo problema                                       |
 
 ## Referencias
 

@@ -33,9 +33,7 @@ export function LeaveAiWarningPopup(props: LeaveAiWarningPopupProps) {
         >
           {props.title}
         </h2>
-        <p className="mt-5 text-center text-[16px] leading-relaxed text-zinc-700">
-          {props.body}
-        </p>
+        <p className="mt-5 text-center text-[16px] leading-relaxed text-zinc-700">{props.body}</p>
         <div className="mt-8 flex gap-4">
           <button
             type="button"

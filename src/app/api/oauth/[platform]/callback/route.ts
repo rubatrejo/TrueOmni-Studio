@@ -100,10 +100,7 @@ function htmlError(title: string, detail: string): NextResponse {
   );
 }
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ platform: string }> },
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ platform: string }> }) {
   const { platform } = await params;
   if (!isSocialPlatform(platform)) {
     return htmlError('OAuth error', `Unknown platform "${platform}".`);
@@ -175,9 +172,7 @@ export async function GET(
     connected: true,
     accessToken: token.access_token ?? '',
     refreshToken: token.refresh_token ?? '',
-    expiresAt: token.expires_in
-      ? new Date(Date.now() + token.expires_in * 1000).toISOString()
-      : '',
+    expiresAt: token.expires_in ? new Date(Date.now() + token.expires_in * 1000).toISOString() : '',
     scopes: token.scope
       ? token.scope.split(/[,\s]+/).filter(Boolean)
       : (token.scopes ?? OAUTH_CONFIGS[platform].scopes),

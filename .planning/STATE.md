@@ -43,6 +43,7 @@ Refactor profundo del editor signage en respuesta a 5+ rondas de feedback iterat
 **Siguiente acción concreta:** **Fase 4 — primer cliente real** (bloqueado por negocio: necesita cliente firmado). Mientras tanto, los TODOs operativos pendientes: DNS `studio.trueomni.com` (sin acceso provider — pospuesto), `DEEPL_API_KEY` (Anthropic ya hace fallback automático), credenciales OAuth de las 4 plataformas social (cuando llegue cliente con Social Wall — ver `.planning/2026-05-06-oauth-architecture-decision.md`). UI de starters en NewClientModal pendiente como sub-fase S (~1-2h).
 
 **Bloqueos:**
+
 - **Fase 4 — primer cliente real**: necesita cliente firmado para crear `clients/{cliente-real}/` en producción.
 - **OAuth Social Wall**: bloqueado por las 4 apps de developer (Meta/TikTok/X). Endpoints `/api/oauth/[platform]/{start,callback}` deployados con guard de credenciales (devuelven 503 si faltan envvars). Decisión arquitectónica: documentada en `.planning/2026-05-06-oauth-architecture-decision.md` (modelo 1 app TrueOmni para los primeros 5 clientes; después decidir App Review vs CrowdRiff bundled).
 - **DNS `studio.trueomni.com`**: pospuesto, Rubén sin acceso al provider. Mientras tanto el dominio Vercel `trueomni-studio.vercel.app` funciona OK.
@@ -921,7 +922,7 @@ driving/walking, SEE 360 funcional, favorite toast).
 
 - Brainstorming aprobado en plan mode (3 preguntas — modelo de integración, alcance del trigger, nivel white-label): A + A + C (overlay flotante global solo en Home, fully white-label con UI idéntica al paquete).
 - Plan en `~/.claude/plans/tambien-nos-falta-el-snappy-willow.md`. Spec equivalente en `.planning/3-15-SUMMARY.md`.
-- **Ola 1 (config + tipos + tokens + assets + deps):** 2 interfaces nuevas en `config.ts` (`AskAiSuggestedQuestion`, `AskAiConfig`) + campo `features.home.askAi?`. 8 tokens `--ai-*` añadidos a los 3 `tokens.css`. 8 textos `ai_*` (EN para default/_template, ES para demo-cliente-a). Bloque `home.askAi` completo en `default/config.json` (greeting + 8 suggested questions San Diego). Assets `avatar.png` (4.5 MB) + `hero-video.mp4` (52 MB) copiados desde `_packaged/ask-ai-module/public/` a `clients/default/assets/ai/`. Deps instaladas vía pnpm: `zustand@5.0`, `framer-motion@12.38`, `gsap@3.15`, `@gsap/react@2.1`.
+- **Ola 1 (config + tipos + tokens + assets + deps):** 2 interfaces nuevas en `config.ts` (`AskAiSuggestedQuestion`, `AskAiConfig`) + campo `features.home.askAi?`. 8 tokens `--ai-*` añadidos a los 3 `tokens.css`. 8 textos `ai_*` (EN para default/\_template, ES para demo-cliente-a). Bloque `home.askAi` completo en `default/config.json` (greeting + 8 suggested questions San Diego). Assets `avatar.png` (4.5 MB) + `hero-video.mp4` (52 MB) copiados desde `_packaged/ask-ai-module/public/` a `clients/default/assets/ai/`. Deps instaladas vía pnpm: `zustand@5.0`, `framer-motion@12.38`, `gsap@3.15`, `@gsap/react@2.1`.
 - **Ola 2 (componentes core):** `src/lib/ask-ai.ts` (helper `getAskAiConfig` + `resolveAiAssetPath`), `src/stores/ai-store.ts` (zustand con `hydrate` action server-driven), `src/components/ai/{ai-modal,ai-modal-host,ask-ai-trigger,suggested-questions}.tsx`. Modal usa OnScreenKeyboard del kiosk (no el del paquete con drag+voice). Voice movido al botón mic del hero (Web Speech API). Adapter `handleKey` traduce `KeyboardKey` del kiosk a operaciones sobre input string (mismo patrón que SearchOverlay/SendToEmailModal/GuestbookFormScreen).
 - **Ola 3 (integración):** `src/app/(kiosk)/home/page.tsx` lee `home.askAi`, monta `<AskAiTrigger />` y `<AiModalHost />` como hermanos de HomeShell/AdsSlot/SurveyHost. Si `enabled === false` no renderiza nada.
 - **Ola 4 (QA):** typecheck + lint + format limpios. Auditor white-label encontró un único hardcoded (`#FFFFFF` en input bg) → resuelto con token nuevo `--ai-input-bg`. Playwright verificó: trigger visible bottom-right, modal slide-up, hero Tavus video, mic gradient azul-teal, greeting + 8 chips, typewriter al tap chip (Harbor Grill), input + OnScreenKeyboard subiendo, escritura con tecla `a` → input mostró carácter + apareció Send button.
@@ -1140,7 +1141,7 @@ driving/walking, SEE 360 funcional, favorite toast).
 
 - **3.17-1 (`b8d515b`):** Tipos `ItineraryConfig` + `LocalListingItinerary` + `AiQuestion` + `ItineraryStopRef` en `src/lib/config.ts`. Bloque `features.home.itinerary` en `clients/default/config.json` con las 4 preguntas AI default (Duration / Travel / Activities / Dining). 51 tokens nuevos `itinerary_*` en `textos`. Ruta `/home/itinerary-builder/page.tsx` shell + `ItineraryBuilderModule` placeholder. HTTP 200.
 - **3.17-2 (`b3377a8`):** `src/lib/itinerary-favorites.ts` con `useItineraryRail()` que combina los 3 buckets de favoritos (`useFavorites` + `useEventFavorites` + `useTrailFavorites`) en lista ordenada. Persistencia de orden en `sessionStorage kiosk_itinerary_order`. API: stops, count, has, add, remove, reorder, clear. add/remove idempotentes.
-- **3.17-3 (`65e207a`):** WelcomePopup con mapa estático Mapbox + 4 pins de categoría + card central blanca (kicker / intro / título uppercase con `{client_name}` interp / body / 2 CTAs olive+azul / X close). State machine en módulo con phases `welcome → manual / ai-popup`, `welcome_always_visible` flag del config para forzar el popup en cada entrada mientras está en review. Tokens `--itinerary-*` añadidos a los 3 clientes (default, _template, demo-cliente-a).
+- **3.17-3 (`65e207a`):** WelcomePopup con mapa estático Mapbox + 4 pins de categoría + card central blanca (kicker / intro / título uppercase con `{client_name}` interp / body / 2 CTAs olive+azul / X close). State machine en módulo con phases `welcome → manual / ai-popup`, `welcome_always_visible` flag del config para forzar el popup en cada entrada mientras está en review. Tokens `--itinerary-*` añadidos a los 3 clientes (default, \_template, demo-cliente-a).
 - **3.17-4 (`c517c93`):** ItineraryHeader (logo + weather/clock + title + searchbar). CategoryTabsRow dinámicos del config (excluye `places-to-stay`, antepone `Local Listings` cuando hay pre-built itineraries). ListingsColumn scrollable con collapse/expand handle. ItineraryListingCard horizontal 360×170 con thumbnail + título + distance + heart toggle. Helpers `src/lib/itinerary-tabs.ts` y `src/lib/itinerary-catalog.ts` (Listings + Events + Trails normalizados a `ItineraryCatalogItem`).
 - **3.17-5 (`ab55f6b`):** ItineraryMap standalone (Mapbox GL) con pins por kind + stop markers numerados grandes + GeoJSON LineString conectando stops. AiItineraryFloatingCard top-right. MapToolbar bottom bar (Remove All / Show Driving / Hide Markers / Share). StopsRail con StopSlot por slot (thumbnail + Stop N + heart rojo de delete). Bug detectado: Mapbox sobrescribe `position:absolute` a `relative` rompiendo top/bottom inset → wrapper externo con `width/height: 100%`. Bug detectado: markers no se renderizan en primer effect (load async) → convertí `readyRef` a state con dependency en effects.
 - **3.17-6 (`d0dc0b8`):** `src/lib/use-itinerary-dnd.ts` hook con state machine + listeners pointermove/pointerup registrados en window al iniciar el drag (no via useEffect, para no perder eventos entre setState y next render). Drop targets identificados con `data-itinerary-rail` y `data-itinerary-slot={index}`. Card → drop en rail = `rail.add()`. Stop → drop en otro slot = `rail.reorder(from, to)`. DragGhost en Portal al body.
@@ -2140,7 +2141,7 @@ Para cada uno se entregó:
 - **Audit profundo /studio** (`9577001`): 9 design skills aplicados, 48 findings (3 P0 / 14 P1 / 22 P2 / 9 P3), 42 screenshots @ 4 viewports × light/dark, PDF 32 págs en `docs/superpowers/audits/2026-05-01-studio-design-audit.pdf` (5.1 MB) + markdown source 1048 líneas. HTML report rediseñado web-first después de queja del print-CSS (containers, hero gradient, sticky TOC, finding cards).
 - **3 P0 fixes** (`7fd3326`):
   - **F-01** Languages tab unusable → `min-w-[720px]` + `overflow-x-auto`
-  - **F-02** Default favicon 404 → `favicon.svg` real (TrueOmni mark 128×128) en _template y default
+  - **F-02** Default favicon 404 → `favicon.svg` real (TrueOmni mark 128×128) en \_template y default
   - **F-03** Publish flow sin error feedback → botón Retry rojo en error phase + auto-close countdown 3s en done phase
 - **i18n locales dinámicos** (`4a3f62d`, `22510ff`):
   - `Locale` → `string` (loose). `LOCALES` queda como `DEFAULT_LOCALES` alias back-compat. `I18nBundleSchema` = `z.record(z.string(), LocaleStrings)`.
@@ -2162,6 +2163,7 @@ Para cada uno se entregó:
 **Pendiente / siguiente sesión:**
 
 Ver `~/.claude/projects/-Users-rubenramirez-Documents-Claude-Code-Kiosk-Portrait-Old/memory/project_next_session_priorities.md` para el orden completo. Resumen:
+
 1. **Languages auto-translate** — coordinar provider con dev team (Rubén). Opciones evaluadas: Claude Haiku batched (~$0.08/kiosk, recomendado), MS Translator free, DeepL free, LibreTranslate self-hosted.
 2. **Audit P1/P2 quick wins** — top 10 ROI ~15h estimadas. Detalles en PDF (`docs/superpowers/audits/2026-05-01-studio-design-audit.pdf`).
 3. **S7.x publish flow** — GitHub PR-publish (necesita PAT), NextAuth (necesita OAuth app), Vercel deploy (necesita proyecto).
@@ -2237,6 +2239,7 @@ Ver `~/.claude/projects/-Users-rubenramirez-Documents-Claude-Code-Kiosk-Portrait
 **Hecho (21 commits hoy):**
 
 Setup infra (deploy a `https://trueomni-studio.vercel.app`):
+
 - Repo `rubatrejo/TrueOmni-Studio` privado creado, push inicial.
 - Proyecto Vercel `trueomni-studio` (`prj_puHjPHpHmjg0U6V9pRQzo8jT6Q2C`, team `team_miVkFll8Y3L0BQwWrE68AO1h`) creado via API REST.
 - SSO Protection desactivada (autorizado por Rubén) → kiosk runtime público.
@@ -2245,6 +2248,7 @@ Setup infra (deploy a `https://trueomni-studio.vercel.app`):
 - Build Vercel arreglado: `eslint.ignoreDuringBuilds`, `pnpm.ignoredOptionalDependencies=['canvas']`, shim `src/pages/_document.tsx` no se borra en VERCEL=1.
 
 Studio S7.2 + S7.3 + S7.4 cerrados:
+
 - `src/lib/studio/github-publisher.ts` con octokit (blob → tree → commit → branch → PR) + helper `getRepoFileContent` para surgical edit de `tokens.css` en mode=pr.
 - `POST /api/studio/publish/[slug]?mode=fs|pr` auto-detecta serverless. Approval gate via `X-Studio-Admin-Email` (allowlist).
 - NextAuth v5 (`src/auth.ts`) con GitHub provider único, allowlist fail-closed. Middleware `src/middleware.ts` protege `/studio/*` y `/api/studio/*`, redirige a `/studio/sign-in` (custom).
@@ -2252,17 +2256,20 @@ Studio S7.2 + S7.3 + S7.4 cerrados:
 - Studio docs changelog auto-source desde GitHub Releases con prefix `studio-` (cache 1h, fallback hardcoded).
 
 Editor del Billboard 0 (Idle settings completo):
+
 - Schema `BillboardB0Config`: background (image/video), touchHere (label/twoLines/width/height/fontSize), overlayOpacity (legacy), overlay {mode: solid|gradient, color, opacity, gradient {from, to, angle}}.
 - Bridge: `BillboardPatch.b0` + `useBillboardB0()` hook con defaults canónicos.
 - `BillboardEditor` añadió sección "Idle settings" con MediaField + Touch Here label/layout/sliders + overlay editor (toggle solid/gradient + color pickers hex 6/8 dígitos + slider angle).
 - `MediaField` nuevo: image/video first-class, sin checkerboard, badge IMAGE/VIDEO, hover Replace, hint medidas, "Or paste a CDN URL" para videos grandes.
 
 Branding hero header editable:
+
 - Schema `branding.homeHero?: {kind, src}` y `branding.heroGradient?: {from, to, angle}`.
 - `<HomeHeader>` consume override; aplica a TODOS los hero headers del kiosk (Dashboard, Listings, Events, Map, etc.) — soporta video con autoplay+loop+muted.
 - EditorPanel nueva sección "Hero header" en Branding tab.
 
 Otros:
+
 - Mobile PWA orientation (390×844) en `KIOSK_ORIENTATIONS`. NewClientModal + PreviewPanel con 3 opciones (Portrait/Landscape/Mobile PWA). Modal centrado vert+horiz con grid place-items-center. Modal width 720px. PWA preview: Coming soon estilizado + default zoom 80%.
 - Digital Displays + Video Walls añadidos al ProductDropdown (coming-soon con copy específico).
 - Quick wins i18n: studio sections.ts subtítulo, Ask AI recognition.lang dinámico (BCP-47), ai_fallback_response tokenizado, stub home/[module] tokenizado, send-to-phone country code, filter overlays aria-label.
@@ -2350,6 +2357,7 @@ Otros:
 **Hecho (1 sesión maratón sin commitear hasta el final):**
 
 Trip Planner (renombre + editor completo):
+
 - Schema nuevo `ItineraryBuilderSchema` con aiEnabled / loadingImage / defaultTitleTemplate / wizardHeroImage / questions / localListings + `ItineraryAiQuestionSchema` + `ItineraryAiOptionSchema` (con categoryKey/subcategoryKey).
 - Editor Studio nuevo `<ItineraryBuilderEditor>` con switch AI flow + AI Wizard Hero (full-bleed image card landscape 1080×760) + AI Loading Screen (full-bleed portrait 1080×1920 + title template) + Questions CRUD con drag-reorder + options inline (label/value/days/category/subcategory).
 - Las 4 questions canónicas (duration/travel_type/activities/dining) se bloquean con icono Lock (no se borran). Las custom sí se borran.
@@ -2361,6 +2369,7 @@ Trip Planner (renombre + editor completo):
 - Bridge `kiosk:itinerary-override` + push helper + runtime override merger (camel↔snake, preserva legacy flags).
 
 Idle / Billboard:
+
 - Schema unificado: `b0/b1/b2/b3` comparten ahora `BillboardB0Schema` completo (background + touchHere + overlay).
 - `DEFAULT_BILLBOARD` inicializa b1/b2/b3 con full settings + src por defecto correcto por variante.
 - Editor: panel "Idle settings (Variant N)" siempre visible para todos los variants (label, layout, button width/height, font size, overlay solid/gradient, color, opacity).
@@ -2369,6 +2378,7 @@ Idle / Billboard:
 - `B1/B2/B3 background.src` propaga via bridge + persiste a `billboard_bN_background` en publish + bootstrap-from-fs lee de vuelta.
 
 Otros:
+
 - `?force=true` en `/api/studio/configs/[slug]/resync` para resetear customizaciones obsoletas (resolvió "Food & Drink" → "Restaurants" en KV default).
 - AI question titles interpolan `{client_name}` reactivo (QField con `vars` prop, AiWizard pasa `clientName` desde `templateVars`).
 - Tavus greeting: `/api/ai-avatar/start` POST acepta body `clientName` que sobreescribe `cfg.client.nombre`. `prewarmAiAvatar(clientName)` + `consumePrewarmOrCreate(clientName)` con cache invalidation cuando cambia el name. AskAiTrigger recibe clientName desde host.
@@ -2376,6 +2386,7 @@ Otros:
 - Cascade de tile labels: wrapper `setModules` en Shell.tsx detecta rename de `tiles[].label` y propaga a typed module fields (events/trails/passes/etc.) + listings entries + i18nBundle EN (`tile_label_*` y `module_label_*`).
 
 **Verificado:**
+
 - `pnpm typecheck` limpio (final).
 - `pnpm lint` sin errores nuevos en archivos tocados (errores remanentes son preexistentes: Shell.tsx import order, etc.).
 - Smoke browser playwright: sidebar Trip Planner OK, dropdowns category dinámicos (Restaurants/Things to Do/Stay/Trails/Upcoming Events), aiEnabled toggle dirty diff + welcome popup hide AI CTA reactivo, Idle/Billboard variants con backgrounds editables, Footer logo size pills (48/65/96px).
@@ -2408,6 +2419,7 @@ Otros:
 **Hecho (sesión maratón ~14h, sin commitear hasta el final):**
 
 Polish white-label de la mañana (pre-audit):
+
 - **Idle background shared** en las 4 variants (B0-B3) — `BillboardBackgroundSchema` top-level, MediaField único en BillboardEditor, runtime hook prefiere shared sobre per-variant legacy.
 - **Map welcome popup body** con default `DEFAULT_MAP_WELCOME_BODY` exportable + fallback runtime para kiosks viejos con `body: ''`.
 - **Itinerary local_listings rewrite** — añadidos `venue/caption/instruction` a STRING_FIELDS + `visitWithDirections` recursivo + visit a `socialWall.posts`.
@@ -2417,15 +2429,18 @@ Polish white-label de la mañana (pre-audit):
 Audit panorámico (3 Explore agents en paralelo) → 32 hallazgos identificados → HTML deliverable `.planning/2026-05-05-studio-audit.html` (10 secciones, Tailwind CDN, light/dark, sticky nav, 5 design docs Tema A-E).
 
 **Hallazgos cerrados (26/32 = 81%):**
+
 - 🔴 6/6 bugs: silent catches bridge (33 logged), api-client/theme catches, race condition crear kiosk (Upstash NX `KvSetOptions`), PATCH re-bootstrap from FS (cache TTL 60s), KV cap 950KB advisor (`<PayloadSizePill>` color-coded), allowlist trim+lowercase (ya estaba bien).
 - 🟠 7/8 gaps: search en CatalogToolbar (ya estaba), diff pre-publish con `safeJsonKeyDiff` recursivo + UI desplegable, rollback con snapshots reales (ver siguiente bloque), preview multi-idioma (locale picker en PreviewPanel + bridge `pushLocale` + i18n-provider listener), OnboardingTour (ya estaba), Integrations live preview (`pushIntegrations` filtra apiKeys sensibles), unsaved-changes guard (ya cubierto por beforeunload).
 - 🟡 5/6 friction: debounces uniformes 120ms (18/18), save timeout 30s recovery, Toast unificado (`<ToastProvider>` reemplaza errorMsg banner + alert), Diagnostics link en sidebar, errorMsg→toast.
 - 🔵 8/8 automation: KV size advisor pre-save, PR auto-merge flag (GraphQL `enablePullRequestAutoMerge` SQUASH), clone kiosk UI (`<DuplicateKioskModal>`), JSON export/import endpoints + UI kebab, FS hash detection (`computeFsTemplateHash` + `/api/studio/diag/template-status`), AI content suggestions (Anthropic Claude Haiku endpoint + `<AiSuggestModal>` genérico, wired en ListingsEditor + EventsEditor), i18n auto-translate (ya estaba: DeepL primario + Anthropic fallback), smoke E2E doc (`.planning/2026-05-05-smoke-e2e-publish.md` 9 secciones step-by-step).
 
 Rollback con snapshots reales (#9):
+
 - `kvKeys.cfgSnap`/`cfgSnapList` con TTL 30d + cap 10 rotación FIFO. `takeSnapshot(slug, prev, reason)` antes de cada PATCH/import. Endpoint `/api/studio/configs/[slug]/snapshots` GET+POST con validación zod del snapshot (rechaza schema obsoleto). `<SnapshotsTimeline>` en VersionsEditor con confirm modal + auto-snapshot pre-revert para "un-revert".
 
 **Verificado:**
+
 - `pnpm typecheck` ✅ limpio en TODOS los puntos checkpoint.
 - `pnpm exec eslint` sobre archivos tocados → 0 errores nuevos (los 4 import-order + 2 hook deps de Shell.tsx siguen siendo preexistentes en `main`, verificado con git stash).
 - 33 archivos modificados + 12 nuevos (`Toast.tsx`, `AiSuggestModal.tsx`, `DuplicateKioskModal.tsx`, `snapshots.ts`, 5 endpoints en `/api/studio/`, 2 docs en `.planning/`). +1374 / -205 líneas.
@@ -2460,6 +2475,7 @@ Rollback con snapshots reales (#9):
 **Hecho (9 commits, 9 deploys verdes en cadena):**
 
 Audit panorámico — 8 hallazgos cerrados:
+
 - `e49e12c` **#12** Trails GeoJSON viewer (Mapbox + draw plugin) + sync bidireccional Map↔Raw JSON.
 - `e57fb4e` **#15 fase 1** primitives `Field` + `TextInput` + `NumberInput` + `Textarea` + `Select` + `Checkbox` + `ColorPicker` (con allowAlpha 8-digit) en `_components/ui/`. Migración piloto: ConsiderationsEditor.
 - `6f40727` **#11** OnboardingTour replay button + step 5 actualizado + `replayOnboardingTour()` export. **#14** Mapbox live preview reactivo (hook `useMapboxTokenOverride` + `useIntegrationsOverride`). **#15 fase 2** ColorPicker adoptado en EditorPanel + BillboardEditor (3 funciones eliminadas). **#26** AI suggest cableado a DealsEditor.
@@ -2470,6 +2486,7 @@ Audit panorámico — 8 hallazgos cerrados:
 - `596984c` **Guestbook backend KV** (TODO Fase 5+): `/api/guestbook/[slug]` GET+POST con cap 1000 + FIFO + idempotencia + Zod validation. guestbook-store hidrata local-first y reconcilia con backend. **Listing detail i18n sweep** (WEBSITE/RESERVE NOW/GET DIRECTIONS/SEND TO EMAIL/SEND TO PHONE/ADD TO FAVORITES + aria-labels). **Fase 9 starters** definidos en `_lib/starters.ts` con 4 templates (boutique-hotel/dmo-state/resort-tropical/urban-attraction) + doc `2026-05-06-studio-starters.md`.
 
 **Verificado:**
+
 - 9 deploys Vercel `● Ready` consecutivos en `trueomni-studio.vercel.app`. Build duration constante ~2min.
 - `pnpm typecheck` ✅ limpio en cada commit.
 - `pnpm exec eslint` sobre archivos tocados ✅ sin errores nuevos.
@@ -2501,6 +2518,7 @@ Audit panorámico — 8 hallazgos cerrados:
 **Fase:** Milestone Studio — **CERRADO**. Audit 32/32 en código + 4 TODOs runtime cerrados. Producto production-ready end-to-end. Próximo milestone: Fase 4 (primer cliente real, bloqueado por negocio).
 
 **Hotfix post-cierre (`c03e35a`):**
+
 - **Scroll roto en /studio/docs**: el CSS rule `html:has(.studio-root) { overflow: hidden }` se activaba para todas las páginas del Studio (ThemeProvider aplica `.studio-root` siempre), rompiendo scroll en /studio/docs, /studio (listado), /studio/diagnostics, /studio/sign-in. El lock fue diseñado solo para el editor (iframe del PreviewPanel leakea scrollHeight). Fix: selector más específico `.studio-shell` aplicado al div root de `Shell.tsx`. Páginas estáticas → scroll natural. Editor → lock preservado.
 
 ---
@@ -2704,6 +2722,7 @@ Audit panorámico — 8 hallazgos cerrados:
 **Fase:** Milestone Signage Studio — **CERRADO 2026-05-07**. Próximos focos: primer cliente real, DSS5.5/7.5/8.5 si surge necesidad, asset upload, tech debt acumulado.
 
 **Resumen del día completo (2026-05-07):**
+
 - AM: Maratón Local DS1-DS10 (8 templates pixel-perfect).
 - Mediodía: DS11-DS15 (header position, transitions, dayparting, audio/sleep/i18n, GATE Local).
 - Tarde-Noche: DSS0-DSS9 (Milestone Studio completo end-to-end).
@@ -2722,34 +2741,34 @@ Audit panorámico — 8 hallazgos cerrados:
   fija a 155px (medida del SVG original; no editable). Forecast 1/3/5 days
   con scale 0.65 al 5. Brand colors cascadean a templates (`events-accent`
   y `band-overlay` derivan de brand tokens). Weather card con layout `[DAY
-  + icon] / [high low]`. Bridge live editor↔iframe + sync hooks.
+  - icon] / [high low]`. Bridge live editor↔iframe + sync hooks.
 - **Refactor cliente-primero del Studio** (6 fases consecutivas):
   - **Fase 1** (`b01f63e`): routing — `/studio/[client]/{kiosk,digital-displays/[d],
-    mobile-pwa,video-walls,tablets}`. Redirects desde URLs viejas. Stubs
+mobile-pwa,video-walls,tablets}`. Redirects desde URLs viejas. Stubs
     Coming Soon. Eliminado `<ProductDropdown>` (la jerarquía ahora vive en
     la URL). Catálogo de productos: 5 (kiosks, digital-displays live + 3
     coming soon).
   - **Fase 2** (`0007bd6`): data layer — `UnifiedClientBrandingSchema`,
     `ClientManifestSchema`, KV keys `client:{slug}:{manifest,branding,
-    sync-errors,migrating}` + `client:list`. Sync layer con
+sync-errors,migrating}` + `client:list`. Sync layer con
     `kioskToUnifiedBranding` ↔ `signageToUnifiedBranding`. Auto-migrador
     idempotente lazy on-load.
   - **Fase 3** (`8f0f737`): UI — `/studio` lista clientes (no kiosks),
     `/studio/[slug]` Vista de Cliente con BrandingForm + 5 product cards.
     Endpoints `GET/POST /api/studio/clients` + `GET/PATCH /api/studio/
-    clients/[slug]/branding` con autosave 1s.
+clients/[slug]/branding` con autosave 1s.
   - **Fase 4** (`e7ae4d1`): APIs unificadas — `POST /api/studio/clients`
     crea cliente con productos seleccionados (clona kiosk + signage desde
     `default`). `POST /api/studio/clients/[slug]/products/[product]/activate`
     para activar producto en cliente existente. Sync hooks bidireccionales
     en `PATCH /api/studio/configs/[slug]` y `PUT /api/studio/signage/clients/
-    [client]`.
+[client]`.
   - **Fase 5** (`57d771d`): `<BrandingSyncBanner>` en kiosk Shell (sobre
     EditorPanel cuando `activeTab='branding'`) y signage `BrandingTab` con
     link a la Vista de Cliente.
   - **Fase 6** (`a238b06`): `/studio/[slug]/digital-displays` lista scoped
     de displays del cliente, breadcrumb `Clients > {client} > Digital
-    Displays`.
+Displays`.
 - **UI feedback final** (`6c00948`): BrandingForm con tabs horizontales
   (General · Brand colors · Logos · Fonts · Media — solo el panel activo
   se renderiza, sin scroll). Products section wrap en card con gradient +
@@ -2760,13 +2779,13 @@ Audit panorámico — 8 hallazgos cerrados:
 - Header signage: deployado en producción Vercel (~2:19 build), validado en
   `https://trueomni-studio.vercel.app`.
 - Auto-migración idempotente: 1ª corrida 2 migrados, 2ª 0 (`alreadyMigrated:
-  2`). `default` → kiosks+digitalDisplays (source kv-kiosk), `demo-cliente-a`
+2`). `default` → kiosks+digitalDisplays (source kv-kiosk), `demo-cliente-a`
   → kiosks (fallback por shape legacy de branding pre-S1).
 - Sync E2E: `POST /api/studio/clients` con `test-fase4` → 201 con manifest
-  + branding inherited del kiosk template. `PATCH /api/studio/configs/test-
-  fase4 { branding.primary: '#ff8800' }` → unified.brand.primary = "32 100%
-  50%" (HSL del naranja), signage.branding.tokens['brand-primary'] = "32
-  100% 50%". Sync bidireccional confirmado.
+  - branding inherited del kiosk template. `PATCH /api/studio/configs/test-
+fase4 { branding.primary: '#ff8800' }` → unified.brand.primary = "32 100%
+    50%" (HSL del naranja), signage.branding.tokens['brand-primary'] = "32
+    100% 50%". Sync bidireccional confirmado.
 - Dashboard de clientes: 2 clientes existentes (`Arizona`, `demo-cliente-a`)
   con product badges correctos.
 - Vista de Cliente `/studio/default`: BrandingForm renderiza con tabs, Products
@@ -2783,8 +2802,8 @@ Audit panorámico — 8 hallazgos cerrados:
    Cliente, abrir kiosk + digital-displays editores y confirmar que el
    branding propagó.
 3. **Cablear el flujo de creación** al endpoint nuevo `POST /api/studio/
-   clients` (hoy `<NewClientModal>` sigue usando el `POST /api/studio/
-   configs` legacy, la auto-migración los convierte después). Refactor
+clients` (hoy `<NewClientModal>` sigue usando el `POST /api/studio/
+configs` legacy, la auto-migración los convierte después). Refactor
    menor pero útil para que los clientes nuevos arranquen con manifest +
    unified branding directo.
 4. **Cablear el botón "Activate"** del ProductCard al endpoint
@@ -2817,7 +2836,7 @@ Audit panorámico — 8 hallazgos cerrados:
   a la Vista de Cliente, dejando edición libre porque los hooks ya
   propagan bidireccional.
 - **Auto-migración lazy on-load** en `/studio/page.tsx` (vía `GET /api/
-  studio/clients`). Idempotente con guard por `loadClientManifest`. Sin
+studio/clients`). Idempotente con guard por `loadClientManifest`. Sin
   background jobs ni migrations explícitas.
 
 **Fase:** Studio cliente-primero (6/6 fases cerradas).

@@ -204,20 +204,14 @@ export function ImageField({
         >
           {value ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={previewSrc}
-              alt={label}
-              className="block h-full w-full object-contain p-1"
-            />
+            <img src={previewSrc} alt={label} className="block h-full w-full object-contain p-1" />
           ) : (
             <Upload className="h-3.5 w-3.5 text-zinc-400" />
           )}
         </button>
 
         <div className="min-w-0 flex-1">
-          <div className="text-[12px] font-medium text-zinc-700 dark:text-zinc-200">
-            {label}
-          </div>
+          <div className="text-[12px] font-medium text-zinc-700 dark:text-zinc-200">{label}</div>
           <div className="mt-0.5 flex items-center gap-1 truncate text-[10.5px] text-zinc-500 dark:text-zinc-500">
             {error ? (
               <span className="text-red-600">{error}</span>
@@ -289,11 +283,7 @@ export function ImageField({
         <>
           <div className="studio-img-checker absolute inset-2 grid place-items-center overflow-hidden rounded-md">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={previewSrc}
-              alt={label}
-              className="max-h-[80%] max-w-[80%] object-contain"
-            />
+            <img src={previewSrc} alt={label} className="max-h-[80%] max-w-[80%] object-contain" />
           </div>
           <button
             type="button"
@@ -321,9 +311,7 @@ export function ImageField({
           <span className="text-[12px] font-medium text-zinc-700 dark:text-zinc-200">
             {busy ? 'Reading…' : label}
           </span>
-          <span className="text-center text-[10.5px] text-zinc-400 dark:text-zinc-600">
-            {hint}
-          </span>
+          <span className="text-center text-[10.5px] text-zinc-400 dark:text-zinc-600">{hint}</span>
         </button>
       )}
 

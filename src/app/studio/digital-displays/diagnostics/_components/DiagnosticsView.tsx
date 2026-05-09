@@ -20,8 +20,7 @@ export function DiagnosticsView({ data }: DiagnosticsViewProps) {
     data.storage.capBytes > 0
       ? Math.min(100, (data.storage.totalBytes / data.storage.capBytes) * 100)
       : 0;
-  const barColor =
-    usagePct < 60 ? 'bg-emerald-500' : usagePct < 85 ? 'bg-amber-500' : 'bg-red-500';
+  const barColor = usagePct < 60 ? 'bg-emerald-500' : usagePct < 85 ? 'bg-amber-500' : 'bg-red-500';
 
   return (
     <main className="mx-auto flex min-h-screen max-w-[1280px] flex-col px-4 pb-24 pt-12 sm:px-8">
@@ -36,10 +35,8 @@ export function DiagnosticsView({ data }: DiagnosticsViewProps) {
       </Link>
 
       <section className="mb-10">
-        <p className="mb-2 text-sm font-medium uppercase tracking-[0.18em] text-zinc-500">
-          System
-        </p>
-        <h1 className="font-display text-3xl font-bold leading-[1.1] tracking-tight text-zinc-900 sm:text-4xl dark:text-white">
+        <p className="mb-2 text-sm font-medium uppercase tracking-[0.18em] text-zinc-500">System</p>
+        <h1 className="font-display text-3xl font-bold leading-[1.1] tracking-tight text-zinc-900 dark:text-white sm:text-4xl">
           Signage diagnostics
         </h1>
         <p className="mt-2 text-sm text-zinc-500">
@@ -110,9 +107,7 @@ export function DiagnosticsView({ data }: DiagnosticsViewProps) {
                   key={c.client}
                   className="flex items-center justify-between border-b border-zinc-100 pb-1 last:border-0 dark:border-zinc-900"
                 >
-                  <code className="font-mono text-zinc-700 dark:text-zinc-300">
-                    {c.client}
-                  </code>
+                  <code className="font-mono text-zinc-700 dark:text-zinc-300">{c.client}</code>
                   <span className="text-zinc-500">{c.count}</span>
                 </li>
               ))}
@@ -121,10 +116,7 @@ export function DiagnosticsView({ data }: DiagnosticsViewProps) {
         </Card>
 
         <Card title="Publish">
-          <Row
-            label="GitHub configured"
-            value={<Toggle on={data.publish.githubConfigured} />}
-          />
+          <Row label="GitHub configured" value={<Toggle on={data.publish.githubConfigured} />} />
           {data.publish.githubConfigured ? (
             <>
               <Row
@@ -137,19 +129,15 @@ export function DiagnosticsView({ data }: DiagnosticsViewProps) {
               />
               <Row
                 label="Base branch"
-                value={
-                  <code className="font-mono text-[11.5px]">
-                    {data.publish.baseBranch}
-                  </code>
-                }
+                value={<code className="font-mono text-[11.5px]">{data.publish.baseBranch}</code>}
               />
             </>
           ) : (
             <p className="mt-2 text-[11.5px] text-zinc-500">
               Set <code className="font-mono">STUDIO_GITHUB_TOKEN</code>,{' '}
               <code className="font-mono">STUDIO_GITHUB_OWNER</code>,{' '}
-              <code className="font-mono">STUDIO_GITHUB_REPO</code> in env to enable
-              the per-display publish flow.
+              <code className="font-mono">STUDIO_GITHUB_REPO</code> in env to enable the per-display
+              publish flow.
             </p>
           )}
         </Card>
@@ -174,13 +162,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   );
 }
 
-function Row({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) {
+function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3 border-b border-zinc-100 pb-2 text-[12.5px] last:border-0 last:pb-0 dark:border-zinc-900">
       <span className="text-zinc-500">{label}</span>

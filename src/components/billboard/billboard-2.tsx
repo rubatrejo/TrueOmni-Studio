@@ -60,9 +60,7 @@ export function Billboard2() {
   const [active, setActive] = useState(0);
   // touchHere.width/height NO aplican (texto + arrow inline, no botón).
   const rawTouchLabel =
-    touchHere.label.trim().length > 0
-      ? touchHere.label
-      : (t.billboard_touch_here ?? 'Touch Here');
+    touchHere.label.trim().length > 0 ? touchHere.label : (t.billboard_touch_here ?? 'Touch Here');
   const touchLabel = touchHere.twoLines
     ? rawTouchLabel.replace(/\s+/, '\n')
     : rawTouchLabel.replace(/\n+/g, ' ');
@@ -113,11 +111,7 @@ export function Billboard2() {
         />
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={heroSrc}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+        <img src={heroSrc} alt="" className="absolute inset-0 h-full w-full object-cover" />
       )}
       {/* Overlay base de identidad (gradient negro vertical para legibilidad
           del logo + cards). Encima, OverlayLayer aplica el overlay configurable

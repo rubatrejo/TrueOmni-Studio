@@ -12,17 +12,10 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-import type {
-  SignageSlide,
-  SignageSlideSchedule,
-  SignageSlotConfig,
-} from '@/lib/signage/schema';
+import type { SignageSlide, SignageSlideSchedule, SignageSlotConfig } from '@/lib/signage/schema';
 
 import { useDisplayEditStore } from '../../_lib/display-edit-store';
-import {
-  useSignageActiveSlideId,
-  useSignageJumpToSlide,
-} from '../../_lib/signage-editor-context';
+import { useSignageActiveSlideId, useSignageJumpToSlide } from '../../_lib/signage-editor-context';
 
 import { AddSlideModal } from './AddSlideModal';
 import { SchedulePopover } from './SchedulePopover';
@@ -45,9 +38,7 @@ import { SlideRowExpanded } from './SlideRowExpanded';
 export function PlaylistPanel() {
   const playlist = useDisplayEditStore((s) => s.draft?.playlist ?? []);
   const playlists = useDisplayEditStore((s) => s.draft?.playlists ?? []);
-  const activePlaylistId = useDisplayEditStore(
-    (s) => s.draft?.activePlaylistId ?? null,
-  );
+  const activePlaylistId = useDisplayEditStore((s) => s.draft?.activePlaylistId ?? null);
   const defaultTransition = useDisplayEditStore(
     (s) => s.draft?.settings.defaultTransition ?? 'cut',
   );
@@ -89,9 +80,7 @@ export function PlaylistPanel() {
     setDragOverIdx(null);
   }
 
-  const scheduleSlide = scheduleOpenForId
-    ? playlist.find((s) => s.id === scheduleOpenForId)
-    : null;
+  const scheduleSlide = scheduleOpenForId ? playlist.find((s) => s.id === scheduleOpenForId) : null;
 
   return (
     <section className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
@@ -143,9 +132,7 @@ export function PlaylistPanel() {
               onToggleExpand={() =>
                 setExpandedSlideId(expandedSlideId === slide.id ? null : slide.id)
               }
-              onJumpToPreview={
-                jumpToSlide ? () => jumpToSlide(slide.id) : undefined
-              }
+              onJumpToPreview={jumpToSlide ? () => jumpToSlide(slide.id) : undefined}
               onDragStart={() => handleDragStart(idx)}
               onDragOver={(e) => handleDragOver(idx, e)}
               onDrop={() => handleDrop(idx)}
@@ -173,9 +160,7 @@ export function PlaylistPanel() {
         <SchedulePopover
           schedule={scheduleSlide.schedule}
           anchorRect={scheduleAnchor}
-          onApply={(schedule) =>
-            updateSlide(scheduleSlide.id, { schedule })
-          }
+          onApply={(schedule) => updateSlide(scheduleSlide.id, { schedule })}
           onClose={() => setScheduleOpenForId(null)}
         />
       ) : null}
@@ -302,9 +287,7 @@ function SlideRow({
               const seconds = parseFloat(e.target.value);
               if (Number.isNaN(seconds)) return;
               onUpdate({
-                durationMs: Math.round(
-                  Math.min(Math.max(seconds, 1), 600) * 1000,
-                ),
+                durationMs: Math.round(Math.min(Math.max(seconds, 1), 600) * 1000),
               });
             }}
             className="w-16 rounded border border-zinc-200 bg-white px-1.5 py-0.5 font-mono text-[10.5px] text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
@@ -315,11 +298,7 @@ function SlideRow({
           value={transition}
           onChange={(e) =>
             onUpdate({
-              transition: e.target.value as
-                | 'cut'
-                | 'fade'
-                | 'slide-left'
-                | 'slide-up',
+              transition: e.target.value as 'cut' | 'fade' | 'slide-left' | 'slide-up',
             })
           }
           className={`rounded border bg-white px-1.5 py-0.5 font-mono text-[10.5px] dark:bg-zinc-900 ${

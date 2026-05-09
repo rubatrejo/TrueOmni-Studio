@@ -3,10 +3,7 @@
 import { Plus, TicketCheck, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import type {
-  ImportMode,
-  ImportStats,
-} from '@/app/studio/_lib/import-helpers';
+import type { ImportMode, ImportStats } from '@/app/studio/_lib/import-helpers';
 import {
   makeBlankPass,
   makeBlankPassActivity,
@@ -48,8 +45,7 @@ export function PassesEditor({ value, onChange }: PassesEditorProps) {
   };
 
   const editingItem = useMemo(
-    () =>
-      editingSlug ? value.passes.find((p) => p.slug === editingSlug) ?? null : null,
+    () => (editingSlug ? (value.passes.find((p) => p.slug === editingSlug) ?? null) : null),
     [editingSlug, value.passes],
   );
 
@@ -57,10 +53,7 @@ export function PassesEditor({ value, onChange }: PassesEditorProps) {
     const q = search.trim().toLowerCase();
     return value.passes.filter((p) => {
       if (!q) return true;
-      return (
-        p.title.toLowerCase().includes(q) ||
-        (p.tagline ?? '').toLowerCase().includes(q)
-      );
+      return p.title.toLowerCase().includes(q) || (p.tagline ?? '').toLowerCase().includes(q);
     });
   }, [value.passes, search]);
 
@@ -260,8 +253,7 @@ function PassActivitiesEditor({
   const handleChange = (slug: string, patch: Partial<PassActivity>) =>
     onChange(activities.map((a) => (a.slug === slug ? { ...a, ...patch } : a)));
 
-  const handleDelete = (slug: string) =>
-    onChange(activities.filter((a) => a.slug !== slug));
+  const handleDelete = (slug: string) => onChange(activities.filter((a) => a.slug !== slug));
 
   return (
     <div className="space-y-2 rounded-md border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
@@ -313,7 +305,9 @@ function PassActivitiesEditor({
                 onChange={(next) => handleChange(a.slug, { image: next ?? '' })}
               />
               <label className="block space-y-1">
-                <span className="block text-[11.5px] font-medium text-zinc-700 dark:text-zinc-300">Description</span>
+                <span className="block text-[11.5px] font-medium text-zinc-700 dark:text-zinc-300">
+                  Description
+                </span>
                 <textarea
                   rows={2}
                   value={a.description}
@@ -322,7 +316,9 @@ function PassActivitiesEditor({
                 />
               </label>
               <label className="block space-y-1">
-                <span className="block text-[11.5px] font-medium text-zinc-700 dark:text-zinc-300">Website</span>
+                <span className="block text-[11.5px] font-medium text-zinc-700 dark:text-zinc-300">
+                  Website
+                </span>
                 <input
                   type="text"
                   value={a.website}

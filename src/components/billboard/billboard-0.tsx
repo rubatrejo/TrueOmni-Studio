@@ -19,9 +19,7 @@ export function Billboard0() {
   const touchLeft = (1080 - touchHere.width) / 2;
   const touchTop = 947 - touchHere.height / 2;
   const rawLabel =
-    touchHere.label.trim().length > 0
-      ? touchHere.label
-      : (t.billboard_touch_here ?? 'Touch\nHere');
+    touchHere.label.trim().length > 0 ? touchHere.label : (t.billboard_touch_here ?? 'Touch\nHere');
   const buttonLabel = touchHere.twoLines
     ? rawLabel.replace(/\s+/, '\n')
     : rawLabel.replace(/\n+/g, ' ');
@@ -41,11 +39,7 @@ export function Billboard0() {
           className="absolute inset-0 h-full w-full object-cover"
         />
       ) : (
-        <img
-          src={background.src}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+        <img src={background.src} alt="" className="absolute inset-0 h-full w-full object-cover" />
       )}
 
       <OverlayLayer overlayOpacity={overlayOpacity} overlay={overlay} />
@@ -141,4 +135,3 @@ export function Billboard0() {
     </div>
   );
 }
-

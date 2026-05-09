@@ -34,7 +34,12 @@ type TabKey = 'general' | 'brand' | 'logos' | 'fonts' | 'media';
 
 const TABS: ReadonlyArray<TabStripItem<TabKey>> = [
   { key: 'general', label: 'General', icon: Settings, title: 'Client metadata and location' },
-  { key: 'brand', label: 'Brand colors', icon: Palette, title: 'Primary, secondary, accent and text/background tokens' },
+  {
+    key: 'brand',
+    label: 'Brand colors',
+    icon: Palette,
+    title: 'Primary, secondary, accent and text/background tokens',
+  },
   { key: 'logos', label: 'Logos', icon: Layers, title: 'Default and dark logo paths' },
   { key: 'fonts', label: 'Fonts', icon: Type, title: 'Display and body typefaces' },
   { key: 'media', label: 'Media', icon: ImageIcon, title: 'Hero image and brand video' },
@@ -59,10 +64,7 @@ export function BrandingForm({ value, onChange }: BrandingFormProps) {
   // cada `<button role="tab">` con su `<div role="tabpanel">` por aria.
   const tabsId = useId();
 
-  function setField<K extends keyof UnifiedClientBranding>(
-    key: K,
-    next: UnifiedClientBranding[K],
-  ) {
+  function setField<K extends keyof UnifiedClientBranding>(key: K, next: UnifiedClientBranding[K]) {
     onChange({ ...value, [key]: next });
   }
 
@@ -122,8 +124,7 @@ export function BrandingForm({ value, onChange }: BrandingFormProps) {
                     const num = v === '' ? undefined : Number(v);
                     if (v !== '' && Number.isNaN(num)) return;
                     // S-18: clamp suave a rango válido de latitud.
-                    const clamped =
-                      num != null ? Math.max(-90, Math.min(90, num)) : undefined;
+                    const clamped = num != null ? Math.max(-90, Math.min(90, num)) : undefined;
                     setField('location', { ...value.location, lat: clamped });
                   }}
                   placeholder="33.4484"
@@ -143,8 +144,7 @@ export function BrandingForm({ value, onChange }: BrandingFormProps) {
                     const num = v === '' ? undefined : Number(v);
                     if (v !== '' && Number.isNaN(num)) return;
                     // S-18: clamp suave a rango válido de longitud.
-                    const clamped =
-                      num != null ? Math.max(-180, Math.min(180, num)) : undefined;
+                    const clamped = num != null ? Math.max(-180, Math.min(180, num)) : undefined;
                     setField('location', { ...value.location, lon: clamped });
                   }}
                   placeholder="-112.0740"
@@ -156,26 +156,61 @@ export function BrandingForm({ value, onChange }: BrandingFormProps) {
 
         {tab === 'brand' ? (
           <Panel>
-            <ColorRow label="Primary" value={value.brand.primary} onChange={(v) => setField('brand', { ...value.brand, primary: v })} />
-            <ColorRow label="Secondary" value={value.brand.secondary} onChange={(v) => setField('brand', { ...value.brand, secondary: v })} />
-            <ColorRow label="Accent" value={value.brand.accent} onChange={(v) => setField('brand', { ...value.brand, accent: v })} />
-            <ColorRow label="Neutral" value={value.brand.neutral ?? '0 0% 7%'} onChange={(v) => setField('brand', { ...value.brand, neutral: v })} />
+            <ColorRow
+              label="Primary"
+              value={value.brand.primary}
+              onChange={(v) => setField('brand', { ...value.brand, primary: v })}
+            />
+            <ColorRow
+              label="Secondary"
+              value={value.brand.secondary}
+              onChange={(v) => setField('brand', { ...value.brand, secondary: v })}
+            />
+            <ColorRow
+              label="Accent"
+              value={value.brand.accent}
+              onChange={(v) => setField('brand', { ...value.brand, accent: v })}
+            />
+            <ColorRow
+              label="Neutral"
+              value={value.brand.neutral ?? '0 0% 7%'}
+              onChange={(v) => setField('brand', { ...value.brand, neutral: v })}
+            />
           </Panel>
         ) : null}
 
         {tab === 'logos' ? (
           <Panel>
             <Field label="Default" hint="Main logo — used by every product.">
-              <TextInput value={value.logos.default ?? ''} onChange={(v) => setField('logos', { ...value.logos, default: v })} placeholder="assets/logo.svg or https://..." />
+              <TextInput
+                value={value.logos.default ?? ''}
+                onChange={(v) => setField('logos', { ...value.logos, default: v })}
+                placeholder="assets/logo.svg or https://..."
+              />
             </Field>
-            <Field label="Dark" hint="Variant for light backgrounds (signage). Falls back to default if empty.">
-              <TextInput value={value.logos.dark ?? ''} onChange={(v) => setField('logos', { ...value.logos, dark: v })} placeholder="assets/logo-dark.svg" />
+            <Field
+              label="Dark"
+              hint="Variant for light backgrounds (signage). Falls back to default if empty."
+            >
+              <TextInput
+                value={value.logos.dark ?? ''}
+                onChange={(v) => setField('logos', { ...value.logos, dark: v })}
+                placeholder="assets/logo-dark.svg"
+              />
             </Field>
             <Field label="Idle" hint="Large variant for the kiosk Billboard idle screen.">
-              <TextInput value={value.logos.idle ?? ''} onChange={(v) => setField('logos', { ...value.logos, idle: v })} placeholder="assets/logo-idle.svg" />
+              <TextInput
+                value={value.logos.idle ?? ''}
+                onChange={(v) => setField('logos', { ...value.logos, idle: v })}
+                placeholder="assets/logo-idle.svg"
+              />
             </Field>
             <Field label="Footer" hint="Compact variant for the kiosk footer band.">
-              <TextInput value={value.logos.footer ?? ''} onChange={(v) => setField('logos', { ...value.logos, footer: v })} placeholder="assets/logo-footer.svg" />
+              <TextInput
+                value={value.logos.footer ?? ''}
+                onChange={(v) => setField('logos', { ...value.logos, footer: v })}
+                placeholder="assets/logo-footer.svg"
+              />
             </Field>
           </Panel>
         ) : null}
@@ -183,10 +218,16 @@ export function BrandingForm({ value, onChange }: BrandingFormProps) {
         {tab === 'fonts' ? (
           <Panel>
             <Field label="Display font" hint="Used for headlines, CTAs and large numbers.">
-              <FontSelect value={value.fonts.display} onChange={(v) => setField('fonts', { ...value.fonts, display: v })} />
+              <FontSelect
+                value={value.fonts.display}
+                onChange={(v) => setField('fonts', { ...value.fonts, display: v })}
+              />
             </Field>
             <Field label="Body font" hint="Used for body copy and supporting text.">
-              <FontSelect value={value.fonts.body} onChange={(v) => setField('fonts', { ...value.fonts, body: v })} />
+              <FontSelect
+                value={value.fonts.body}
+                onChange={(v) => setField('fonts', { ...value.fonts, body: v })}
+              />
             </Field>
           </Panel>
         ) : null}
@@ -196,7 +237,12 @@ export function BrandingForm({ value, onChange }: BrandingFormProps) {
             <Field label="Kiosk hero kind">
               <select
                 value={value.homeHero?.kind ?? 'image'}
-                onChange={(e) => setField('homeHero', { kind: e.target.value as 'image' | 'video', src: value.homeHero?.src ?? '' })}
+                onChange={(e) =>
+                  setField('homeHero', {
+                    kind: e.target.value as 'image' | 'video',
+                    src: value.homeHero?.src ?? '',
+                  })
+                }
                 className="h-9 w-full rounded-md border border-zinc-200 bg-white px-2.5 text-[12.5px] outline-none transition focus:border-sky-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200"
               >
                 <option value="image">Image</option>
@@ -204,10 +250,20 @@ export function BrandingForm({ value, onChange }: BrandingFormProps) {
               </select>
             </Field>
             <Field label="Kiosk hero URL">
-              <TextInput value={value.homeHero?.src ?? ''} onChange={(v) => setField('homeHero', { kind: value.homeHero?.kind ?? 'image', src: v })} placeholder="assets/home/hero.jpg or https://...mp4" />
+              <TextInput
+                value={value.homeHero?.src ?? ''}
+                onChange={(v) =>
+                  setField('homeHero', { kind: value.homeHero?.kind ?? 'image', src: v })
+                }
+                placeholder="assets/home/hero.jpg or https://...mp4"
+              />
             </Field>
             <Field label="Favicon">
-              <TextInput value={value.favicon ?? ''} onChange={(v) => setField('favicon', v)} placeholder="assets/favicon.ico" />
+              <TextInput
+                value={value.favicon ?? ''}
+                onChange={(v) => setField('favicon', v)}
+                placeholder="assets/favicon.ico"
+              />
             </Field>
           </Panel>
         ) : null}
@@ -224,7 +280,15 @@ function Panel({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-1 gap-4 md:grid-cols-2">{children}</div>;
 }
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
   // Hallazgo S-31: id auto-generado + htmlFor explícito. Los hijos
   // (TextInput / FontSelect) leen el id del FieldIdContext.
   const fieldId = useId();
@@ -246,7 +310,15 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
   );
 }
 
-function TextInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+function TextInput({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
   const id = useContext(FieldIdContext) ?? undefined;
   return (
     <input
@@ -278,7 +350,15 @@ function FontSelect({ value, onChange }: { value: string; onChange: (v: string) 
   );
 }
 
-function ColorRow({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+function ColorRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
   const [open, setOpen] = useState(false);
   const hsl = parseHsl(value);
   // S-17: click-outside / Escape cierran el picker. Antes solo "Done" o
@@ -330,10 +410,16 @@ function ColorRow({ label, value, onChange }: { label: string; value: string; on
         <div className="absolute right-2 top-12 z-20 rounded-md border border-zinc-200 bg-white p-3 shadow-lg dark:border-zinc-800 dark:bg-zinc-950">
           <HslColorPicker
             color={hsl}
-            onChange={(c: HslColor) => onChange(`${Math.round(c.h)} ${Math.round(c.s)}% ${Math.round(c.l)}%`)}
+            onChange={(c: HslColor) =>
+              onChange(`${Math.round(c.h)} ${Math.round(c.s)}% ${Math.round(c.l)}%`)
+            }
             style={{ width: 200, height: 150 }}
           />
-          <button type="button" onClick={() => setOpen(false)} className="mt-2 w-full rounded border border-zinc-200 bg-zinc-50 px-2 py-1 text-[11px] font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="mt-2 w-full rounded border border-zinc-200 bg-zinc-50 px-2 py-1 text-[11px] font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
+          >
             Done
           </button>
         </div>

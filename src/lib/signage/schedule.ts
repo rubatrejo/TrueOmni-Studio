@@ -125,10 +125,7 @@ export function isSlideActive(
  * iterativo (1 iteración basta porque los offsets de TZ son constantes en
  * tramos de horas, salvo DST transition; aceptable para dev override).
  */
-export function getNowFromSearch(
-  searchParams: URLSearchParams | null,
-  timezone: string,
-): Date {
+export function getNowFromSearch(searchParams: URLSearchParams | null, timezone: string): Date {
   if (!searchParams) return new Date();
   const clock = searchParams.get('clock');
   const day = searchParams.get('day');

@@ -37,9 +37,7 @@ export function TicketsEditor({ value, eventsValue, onChange }: TicketsEditorPro
       return eventsValue.events.filter((e) => e.priceMode === 'paid').length;
     }
     const sel = new Set(value.categories);
-    return eventsValue.events.filter(
-      (e) => e.priceMode === 'paid' && sel.has(e.category),
-    ).length;
+    return eventsValue.events.filter((e) => e.priceMode === 'paid' && sel.has(e.category)).length;
   }, [eventsValue.events, value.categories]);
 
   return (
@@ -51,7 +49,9 @@ export function TicketsEditor({ value, eventsValue, onChange }: TicketsEditorPro
       </p>
 
       <label className="block space-y-1">
-        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">Module label</span>
+        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
+          Module label
+        </span>
         <input
           type="text"
           value={value.label}
@@ -74,7 +74,9 @@ export function TicketsEditor({ value, eventsValue, onChange }: TicketsEditorPro
       />
 
       <label className="block space-y-1">
-        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">Module copy</span>
+        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
+          Module copy
+        </span>
         <textarea
           rows={3}
           value={value.copy}
@@ -120,7 +122,9 @@ export function TicketsEditor({ value, eventsValue, onChange }: TicketsEditorPro
           <>
             <strong>{visibleTicketsCount}</strong>{' '}
             {visibleTicketsCount === 1 ? 'ticket' : 'tickets'} visible across{' '}
-            {value.categories.length === 0 ? 'all categories' : `${value.categories.length} categor${value.categories.length === 1 ? 'y' : 'ies'}`}
+            {value.categories.length === 0
+              ? 'all categories'
+              : `${value.categories.length} categor${value.categories.length === 1 ? 'y' : 'ies'}`}
             .
           </>
         )}

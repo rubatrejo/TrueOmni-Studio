@@ -88,8 +88,8 @@ export function PublishTab({ clientSlug }: PublishTabProps) {
           </li>
         </ul>
         <p className="mt-3 text-[11.5px] text-zinc-500">
-          <code className="font-mono text-[10.5px]">tokens.css</code> y assets
-          binarios quedan fuera por ahora (sin editor en el Studio aún).
+          <code className="font-mono text-[10.5px]">tokens.css</code> y assets binarios quedan fuera
+          por ahora (sin editor en el Studio aún).
         </p>
       </section>
 

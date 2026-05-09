@@ -24,14 +24,21 @@ const POST_NATURAL_DIMS: Array<{ w: number; h: number }> = [
 ];
 
 const GRID_POSITIONS: Array<{ x: number; y: number }> = [
-  { x: 0, y: 0 }, { x: 259.003, y: 0 }, { x: 518.008, y: 0 },
-  { x: 0, y: 308 }, { x: 259.003, y: 308 }, { x: 518.007, y: 308 },
-  { x: 0, y: 616 }, { x: 259.003, y: 616 }, { x: 518.007, y: 616 },
+  { x: 0, y: 0 },
+  { x: 259.003, y: 0 },
+  { x: 518.008, y: 0 },
+  { x: 0, y: 308 },
+  { x: 259.003, y: 308 },
+  { x: 518.007, y: 308 },
+  { x: 0, y: 616 },
+  { x: 259.003, y: 616 },
+  { x: 518.007, y: 616 },
 ];
 
 function buildAssetUrl(clientSlug: string, relPath: string | undefined, fallback: string): string {
   const path = relPath ?? fallback;
-  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/')) return path;
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/'))
+    return path;
   return `/signage-assets/${clientSlug}/${path}`;
 }
 
@@ -78,7 +85,9 @@ function SocialTile({
         fontWeight="700"
         letterSpacing="0.026em"
       >
-        <tspan x="0" y="0">{username}</tspan>
+        <tspan x="0" y="0">
+          {username}
+        </tspan>
       </text>
     </g>
   );
@@ -129,13 +138,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
             </pattern>
           );
         })}
-        <linearGradient
-          id="vs-overlay"
-          x1="0.5"
-          x2="0.5"
-          y2="1"
-          gradientUnits="objectBoundingBox"
-        >
+        <linearGradient id="vs-overlay" x1="0.5" x2="0.5" y2="1" gradientUnits="objectBoundingBox">
           <stop offset="0" stopColor="hsl(var(--signage-brand-primary))" stopOpacity="0" />
           <stop offset="1" stopColor="hsl(var(--signage-brand-primary))" />
         </linearGradient>

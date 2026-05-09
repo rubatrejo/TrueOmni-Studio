@@ -73,17 +73,17 @@ Extraído del group `Display_Info_Header` de `designs/signage/01-full-events.svg
 
 ## Verificado
 
-| Check | Resultado |
-|---|---|
-| `pnpm typecheck` | ✅ limpio |
-| `pnpm lint` (signage files) | ✅ cero issues nuevos |
-| `pnpm kiosk:dev` arranca limpio | ✅ Ready in 1.2s |
-| GET `/signage/default/lobby-tv` | ✅ HTTP 200, 609KB |
-| GET `/` (kiosk) | ✅ HTTP 200 (no rompí kiosk) |
-| Smoke contenido HTML | ✅ contiene `SignageHeader`, `sig-clip-sun-cloud`, `sig-clip-logo`, `signage-header-bg`, `signage-header-text`, `Montserrat-Bold`, `OpenSans-Semibold`, FRI/SAT/SUN, `#0088ce` (logo dots) |
-| Datos weather reales del API | ✅ Phoenix forecast: 78°/96°/58°/99°/63°... (rangos típicos de mayo) |
-| Cero touch handlers en árbol header/page | ✅ grep limpio |
-| Aprobación visual de Rubén | ✅ confirmado en pantalla 2026-05-06 |
+| Check                                    | Resultado                                                                                                                                                                                  |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm typecheck`                         | ✅ limpio                                                                                                                                                                                  |
+| `pnpm lint` (signage files)              | ✅ cero issues nuevos                                                                                                                                                                      |
+| `pnpm kiosk:dev` arranca limpio          | ✅ Ready in 1.2s                                                                                                                                                                           |
+| GET `/signage/default/lobby-tv`          | ✅ HTTP 200, 609KB                                                                                                                                                                         |
+| GET `/` (kiosk)                          | ✅ HTTP 200 (no rompí kiosk)                                                                                                                                                               |
+| Smoke contenido HTML                     | ✅ contiene `SignageHeader`, `sig-clip-sun-cloud`, `sig-clip-logo`, `signage-header-bg`, `signage-header-text`, `Montserrat-Bold`, `OpenSans-Semibold`, FRI/SAT/SUN, `#0088ce` (logo dots) |
+| Datos weather reales del API             | ✅ Phoenix forecast: 78°/96°/58°/99°/63°... (rangos típicos de mayo)                                                                                                                       |
+| Cero touch handlers en árbol header/page | ✅ grep limpio                                                                                                                                                                             |
+| Aprobación visual de Rubén               | ✅ confirmado en pantalla 2026-05-06                                                                                                                                                       |
 
 ---
 

@@ -1,10 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import {
-  kvSignageEvents,
-  kvSignageNews,
-  kvSignageSocial,
-} from '@/lib/signage/kv-store';
+import { kvSignageEvents, kvSignageNews, kvSignageSocial } from '@/lib/signage/kv-store';
 import {
   SignageEventSchema,
   SignageNewsConfigSchema,

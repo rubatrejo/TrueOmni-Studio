@@ -154,141 +154,159 @@ export function NewClientModal({
             className="fixed inset-0 z-40 bg-zinc-950/70 backdrop-blur-md"
           />
           <div className="pointer-events-none fixed inset-0 z-50 grid place-items-center p-4">
-          <motion.div
-            key="modal"
-            ref={dialogRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="new-client-title"
-            initial={{ opacity: 0, y: 12, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.98 }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="pointer-events-auto w-[720px] max-w-[94vw] overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
-          >
-            <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5 dark:border-zinc-800">
-              <h2
-                id="new-client-title"
-                className="font-display text-[15px] font-semibold text-zinc-900 dark:text-white"
-              >
-                New client
-              </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close"
-                className="grid h-8 w-8 place-items-center rounded-md text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+            <motion.div
+              key="modal"
+              ref={dialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="new-client-title"
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8, scale: 0.98 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="pointer-events-auto w-[720px] max-w-[94vw] overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
+            >
+              <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5 dark:border-zinc-800">
+                <h2
+                  id="new-client-title"
+                  className="font-display text-[15px] font-semibold text-zinc-900 dark:text-white"
+                >
+                  New client
+                </h2>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  aria-label="Close"
+                  className="grid h-8 w-8 place-items-center rounded-md text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 px-5 py-5">
-              <Field
-                id="kiosk-name"
-                label="Name"
-                hint="Display name shown on the kiosk and in the studio list."
-                input={
-                  <input
-                    ref={nombreRef}
-                    id="kiosk-name"
-                    type="text"
-                    value={nombre}
-                    onChange={(e) => setNombre(e.target.value)}
-                    placeholder="e.g. Phoenix Convention Center"
-                    className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
-                    autoComplete="off"
-                  />
-                }
-              />
-
-              <Field
-                id="kiosk-slug"
-                label="Slug"
-                hint="Used in URLs and in the file system: clients/<slug>/. Auto-generated from name."
-                input={
-                  <input
-                    id="kiosk-slug"
-                    type="text"
-                    value={slug}
-                    onChange={(e) => {
-                      setSlug(e.target.value.toLowerCase());
-                      setSlugTouched(true);
-                    }}
-                    placeholder="phoenix-convention-center"
-                    className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 font-mono text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
-                    autoComplete="off"
-                    spellCheck={false}
-                  />
-                }
-              />
-
-              <div className="grid grid-cols-2 gap-3">
+              <form onSubmit={handleSubmit} className="space-y-4 px-5 py-5">
                 <Field
-                  id="kiosk-website"
-                  label="Website"
-                  hint="Used in footer + share modals."
+                  id="kiosk-name"
+                  label="Name"
+                  hint="Display name shown on the kiosk and in the studio list."
                   input={
                     <input
-                      id="kiosk-website"
-                      type="url"
-                      value={website}
-                      onChange={(e) => setWebsite(e.target.value)}
-                      placeholder="https://visitcentralflorida.org"
+                      ref={nombreRef}
+                      id="kiosk-name"
+                      type="text"
+                      value={nombre}
+                      onChange={(e) => setNombre(e.target.value)}
+                      placeholder="e.g. Phoenix Convention Center"
                       className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
+                      autoComplete="off"
+                    />
+                  }
+                />
+
+                <Field
+                  id="kiosk-slug"
+                  label="Slug"
+                  hint="Used in URLs and in the file system: clients/<slug>/. Auto-generated from name."
+                  input={
+                    <input
+                      id="kiosk-slug"
+                      type="text"
+                      value={slug}
+                      onChange={(e) => {
+                        setSlug(e.target.value.toLowerCase());
+                        setSlugTouched(true);
+                      }}
+                      placeholder="phoenix-convention-center"
+                      className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 font-mono text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
                       autoComplete="off"
                       spellCheck={false}
                     />
                   }
                 />
-                <Field
-                  id="kiosk-location"
-                  label="Location"
-                  hint="City + state. Used as default address for mock listings and to center the map module."
-                  input={
-                    <input
-                      id="kiosk-location"
-                      type="text"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      placeholder="Davenport, FL"
-                      className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
-                      autoComplete="off"
-                    />
-                  }
-                />
-              </div>
 
-              <div>
-                <span className="mb-1.5 block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
-                  Orientation
-                </span>
-                <div className="grid grid-cols-3 gap-2">
-                  <OrientationOption
-                    active={orientation === 'portrait'}
-                    onClick={() => setOrientation('portrait')}
-                    label="Portrait"
-                    sub="1080 × 1920"
-                    glyph={
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="7" y="2.5" width="10" height="19" rx="1.5" />
-                        <line x1="10.5" y1="19" x2="13.5" y2="19" />
-                      </svg>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field
+                    id="kiosk-website"
+                    label="Website"
+                    hint="Used in footer + share modals."
+                    input={
+                      <input
+                        id="kiosk-website"
+                        type="url"
+                        value={website}
+                        onChange={(e) => setWebsite(e.target.value)}
+                        placeholder="https://visitcentralflorida.org"
+                        className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
+                        autoComplete="off"
+                        spellCheck={false}
+                      />
                     }
                   />
-                  <OrientationOption
-                    active={orientation === 'landscape'}
-                    onClick={() => setOrientation('landscape')}
-                    label="Landscape"
-                    sub="1920 × 1080"
-                    glyph={
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="2.5" y="7" width="19" height="10" rx="1.5" />
-                        <line x1="19" y1="10.5" x2="19" y2="13.5" />
-                      </svg>
+                  <Field
+                    id="kiosk-location"
+                    label="Location"
+                    hint="City + state. Used as default address for mock listings and to center the map module."
+                    input={
+                      <input
+                        id="kiosk-location"
+                        type="text"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        placeholder="Davenport, FL"
+                        className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
+                        autoComplete="off"
+                      />
                     }
                   />
-                  {/* Hallazgo S-47: la opción "Mobile PWA" estaba aquí
+                </div>
+
+                <div>
+                  <span className="mb-1.5 block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+                    Orientation
+                  </span>
+                  <div className="grid grid-cols-3 gap-2">
+                    <OrientationOption
+                      active={orientation === 'portrait'}
+                      onClick={() => setOrientation('portrait')}
+                      label="Portrait"
+                      sub="1080 × 1920"
+                      glyph={
+                        <svg
+                          width="22"
+                          height="22"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.6"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <rect x="7" y="2.5" width="10" height="19" rx="1.5" />
+                          <line x1="10.5" y1="19" x2="13.5" y2="19" />
+                        </svg>
+                      }
+                    />
+                    <OrientationOption
+                      active={orientation === 'landscape'}
+                      onClick={() => setOrientation('landscape')}
+                      label="Landscape"
+                      sub="1920 × 1080"
+                      glyph={
+                        <svg
+                          width="22"
+                          height="22"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.6"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <rect x="2.5" y="7" width="19" height="10" rx="1.5" />
+                          <line x1="19" y1="10.5" x2="19" y2="13.5" />
+                        </svg>
+                      }
+                    />
+                    {/* Hallazgo S-47: la opción "Mobile PWA" estaba aquí
                       visible aunque el producto sigue en estado "Coming
                       soon · Q3 2026". Confunde al operador (cree que el
                       producto existe). La ocultamos hasta que el editor
@@ -296,89 +314,94 @@ export function NewClientModal({
                       tipo Orientation 'mobile-pwa' se mantiene en el
                       schema para no romper kiosks viejos que ya lo
                       tengan persistido. */}
+                  </div>
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-500">
+                    This is the primary view that opens in the editor. All three formats (Portrait,
+                    Landscape, Mobile PWA) are generated automatically — you can switch between them
+                    inside the editor and export any of them at publish time.
+                  </p>
                 </div>
-                <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-500">
-                  This is the primary view that opens in the editor. All three formats
-                  (Portrait, Landscape, Mobile PWA) are generated automatically — you can
-                  switch between them inside the editor and export any of them at publish
-                  time.
+
+                {error && (
+                  <p
+                    role="alert"
+                    className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300"
+                  >
+                    {error}
+                  </p>
+                )}
+
+                {/* Activar Digital Displays junto al kiosk. Hallazgo S-10. */}
+                <div className="flex items-start gap-3 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-[12px] leading-relaxed text-zinc-700 transition hover:border-zinc-300 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-900">
+                  <input
+                    id="kiosk-activate-dd"
+                    type="checkbox"
+                    checked={activateDigitalDisplays}
+                    onChange={(e) => setActivateDigitalDisplays(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 text-sky-600 focus:ring-sky-500/40 dark:border-zinc-600"
+                  />
+                  <label
+                    htmlFor="kiosk-activate-dd"
+                    className="flex cursor-pointer flex-col gap-0.5"
+                  >
+                    <span className="font-medium text-zinc-800 dark:text-zinc-200">
+                      Also activate Digital Displays
+                    </span>
+                    <span className="text-[11px] text-zinc-500 dark:text-zinc-500">
+                      Clones the signage default (header, weather, clock, branding) and creates an
+                      empty playlist. You can add displays from the editor.
+                    </span>
+                  </label>
+                </div>
+
+                {/* Empty mode toggle: arranca sin mock data (listings/events/etc.) */}
+                <div className="flex items-start gap-3 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-[12px] leading-relaxed text-zinc-700 transition hover:border-zinc-300 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-900">
+                  <input
+                    id="kiosk-empty-mode"
+                    type="checkbox"
+                    checked={emptyMode}
+                    onChange={(e) => setEmptyMode(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 text-sky-600 focus:ring-sky-500/40 dark:border-zinc-600"
+                  />
+                  <label
+                    htmlFor="kiosk-empty-mode"
+                    className="flex cursor-pointer flex-col gap-0.5"
+                  >
+                    <span className="font-medium text-zinc-800 dark:text-zinc-200">
+                      Start empty (no demo content)
+                    </span>
+                    <span className="text-[11px] text-zinc-500 dark:text-zinc-500">
+                      Skip the listings, events, passes, deals, trails, social-wall posts and Trip
+                      Planner local listings from the TrueOmni template. Branding and module
+                      structure are still inherited.
+                    </span>
+                  </label>
+                </div>
+
+                <p className="text-[11.5px] leading-relaxed text-zinc-500">
+                  {emptyMode
+                    ? 'Cloning the TrueOmni Default kiosk: brand palette and modules only — no demo listings or events. You can populate content from the editor.'
+                    : 'Cloning the TrueOmni Default kiosk: brand palette, modules, and full mock content (listings, events, passes, deals, trails). You can change anything in the editor afterwards.'}
                 </p>
-              </div>
 
-              {error && (
-                <p
-                  role="alert"
-                  className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300"
-                >
-                  {error}
-                </p>
-              )}
-
-              {/* Activar Digital Displays junto al kiosk. Hallazgo S-10. */}
-              <div className="flex items-start gap-3 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-[12px] leading-relaxed text-zinc-700 transition hover:border-zinc-300 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-900">
-                <input
-                  id="kiosk-activate-dd"
-                  type="checkbox"
-                  checked={activateDigitalDisplays}
-                  onChange={(e) => setActivateDigitalDisplays(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 text-sky-600 focus:ring-sky-500/40 dark:border-zinc-600"
-                />
-                <label htmlFor="kiosk-activate-dd" className="flex cursor-pointer flex-col gap-0.5">
-                  <span className="font-medium text-zinc-800 dark:text-zinc-200">
-                    Also activate Digital Displays
-                  </span>
-                  <span className="text-[11px] text-zinc-500 dark:text-zinc-500">
-                    Clones the signage default (header, weather, clock, branding) and
-                    creates an empty playlist. You can add displays from the editor.
-                  </span>
-                </label>
-              </div>
-
-              {/* Empty mode toggle: arranca sin mock data (listings/events/etc.) */}
-              <div className="flex items-start gap-3 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-[12px] leading-relaxed text-zinc-700 transition hover:border-zinc-300 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-900">
-                <input
-                  id="kiosk-empty-mode"
-                  type="checkbox"
-                  checked={emptyMode}
-                  onChange={(e) => setEmptyMode(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 text-sky-600 focus:ring-sky-500/40 dark:border-zinc-600"
-                />
-                <label htmlFor="kiosk-empty-mode" className="flex cursor-pointer flex-col gap-0.5">
-                  <span className="font-medium text-zinc-800 dark:text-zinc-200">
-                    Start empty (no demo content)
-                  </span>
-                  <span className="text-[11px] text-zinc-500 dark:text-zinc-500">
-                    Skip the listings, events, passes, deals, trails, social-wall posts and
-                    Trip Planner local listings from the TrueOmni template. Branding and
-                    module structure are still inherited.
-                  </span>
-                </label>
-              </div>
-
-              <p className="text-[11.5px] leading-relaxed text-zinc-500">
-                {emptyMode
-                  ? 'Cloning the TrueOmni Default kiosk: brand palette and modules only — no demo listings or events. You can populate content from the editor.'
-                  : 'Cloning the TrueOmni Default kiosk: brand palette, modules, and full mock content (listings, events, passes, deals, trails). You can change anything in the editor afterwards.'}
-              </p>
-
-              <div className="flex items-center justify-end gap-2 border-t border-zinc-100 pt-4 dark:border-zinc-800">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-[12.5px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting || !nombre.trim() || !slug}
-                  className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
-                >
-                  {submitting ? 'Creating…' : 'Create client'}
-                </button>
-              </div>
-            </form>
-          </motion.div>
+                <div className="flex items-center justify-end gap-2 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-[12.5px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting || !nombre.trim() || !slug}
+                    className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+                  >
+                    {submitting ? 'Creating…' : 'Create client'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
           </div>
         </>
       )}
@@ -421,9 +444,7 @@ function OrientationOption({
         {glyph}
       </span>
       <span className="flex min-w-0 flex-col">
-        <span className="whitespace-nowrap text-[13px] font-semibold leading-tight">
-          {label}
-        </span>
+        <span className="whitespace-nowrap text-[13px] font-semibold leading-tight">{label}</span>
         <span className="whitespace-nowrap font-mono text-[11px] opacity-70">{sub}</span>
       </span>
     </button>
@@ -443,7 +464,10 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-1.5 block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+      <label
+        htmlFor={id}
+        className="mb-1.5 block text-[12px] font-medium text-zinc-800 dark:text-zinc-200"
+      >
         {label}
       </label>
       {input}

@@ -104,8 +104,7 @@ function createInMemoryKv(): KvLike {
   };
 }
 
-const hasCloudKv =
-  Boolean(process.env.KV_REST_API_URL) && Boolean(process.env.KV_REST_API_TOKEN);
+const hasCloudKv = Boolean(process.env.KV_REST_API_URL) && Boolean(process.env.KV_REST_API_TOKEN);
 
 export const kv: KvLike = hasCloudKv ? (vercelKv as unknown as KvLike) : createInMemoryKv();
 

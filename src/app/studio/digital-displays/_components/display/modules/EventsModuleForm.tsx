@@ -35,9 +35,7 @@ export function EventsModuleForm({ module, onChange }: EventsModuleFormProps) {
         label="Title override"
         value={module.titleOverride ?? ''}
         placeholder="(use default)"
-        onChange={(v) =>
-          onChange({ ...module, titleOverride: v || undefined })
-        }
+        onChange={(v) => onChange({ ...module, titleOverride: v || undefined })}
       />
     </FieldStack>
   );

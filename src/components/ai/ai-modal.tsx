@@ -71,9 +71,11 @@ async function fetchStart(clientName?: string): Promise<PrewarmedConversation | 
       headers: clientName ? { 'Content-Type': 'application/json' } : undefined,
       body: clientName ? JSON.stringify({ clientName }) : undefined,
     });
-    const data = (await res.json().catch(() => null)) as
-      | { ok: boolean; conversationId?: string; conversationUrl?: string }
-      | null;
+    const data = (await res.json().catch(() => null)) as {
+      ok: boolean;
+      conversationId?: string;
+      conversationUrl?: string;
+    } | null;
     if (!res.ok || !data?.ok || !data.conversationUrl || !data.conversationId) return null;
     return {
       conversationId: data.conversationId,
@@ -117,9 +119,7 @@ export function prewarmAiAvatar(clientName?: string): void {
   });
 }
 
-async function consumePrewarmOrCreate(
-  clientName?: string,
-): Promise<PrewarmedConversation | null> {
+async function consumePrewarmOrCreate(clientName?: string): Promise<PrewarmedConversation | null> {
   const wanted = clientName ?? '';
   // Cache fresca y mismo clientName → la usamos.
   if (
@@ -180,7 +180,11 @@ type SpeechRecognitionCtor = new () => SpeechRecognitionInstance;
  *     diseño mobile original para garantizar legibilidad y target táctil
  *     adecuados a un kiosk retrato 1080×1920.
  */
-export function AiModal({ heroVideoSrc: _heroVideoSrc, textos: incomingTextos, clientName }: AiModalProps) {
+export function AiModal({
+  heroVideoSrc: _heroVideoSrc,
+  textos: incomingTextos,
+  clientName,
+}: AiModalProps) {
   const t = useTextos();
   const currentLocale = useCurrentLocale();
   const pick = (key: string, fallback: string) => {
@@ -188,9 +192,7 @@ export function AiModal({ heroVideoSrc: _heroVideoSrc, textos: incomingTextos, c
     return r === key ? fallback : r;
   };
   const subtitleRaw = pick('ai_subtitle', incomingTextos.subtitle);
-  const subtitle = clientName
-    ? subtitleRaw.replaceAll('{client_name}', clientName)
-    : subtitleRaw;
+  const subtitle = clientName ? subtitleRaw.replaceAll('{client_name}', clientName) : subtitleRaw;
   const textos: AiModalTextos = {
     title: pick('ai_title', incomingTextos.title),
     subtitle,
@@ -370,8 +372,15 @@ export function AiModal({ heroVideoSrc: _heroVideoSrc, textos: incomingTextos, c
           showCaption(text);
         };
 
-        const onParticipantJoined = (event: { participant: { local: boolean; user_name?: string } }) => {
-          console.info('[ai-modal] participant-joined', event.participant.user_name, 'local=', event.participant.local);
+        const onParticipantJoined = (event: {
+          participant: { local: boolean; user_name?: string };
+        }) => {
+          console.info(
+            '[ai-modal] participant-joined',
+            event.participant.user_name,
+            'local=',
+            event.participant.local,
+          );
         };
 
         const onError = (err: unknown) => {
@@ -395,9 +404,7 @@ export function AiModal({ heroVideoSrc: _heroVideoSrc, textos: incomingTextos, c
         // aparece sincronizado con la voz en lugar de delayed.
         call.on(
           'app-message',
-          (event: {
-            data?: { event_type?: string; properties?: Record<string, unknown> };
-          }) => {
+          (event: { data?: { event_type?: string; properties?: Record<string, unknown> } }) => {
             const ev = event?.data;
             const type = ev?.event_type;
             if (!type || !type.startsWith('conversation.')) return;
@@ -853,9 +860,7 @@ export function AiModal({ heroVideoSrc: _heroVideoSrc, textos: incomingTextos, c
                     border: inputFocused
                       ? '3px solid hsl(var(--ai-accent-from))'
                       : '2px solid hsl(var(--ai-text-soft) / 0.08)',
-                    boxShadow: inputFocused
-                      ? '0 0 0 8px hsl(var(--ai-accent-from) / 0.1)'
-                      : 'none',
+                    boxShadow: inputFocused ? '0 0 0 8px hsl(var(--ai-accent-from) / 0.1)' : 'none',
                     transition: 'all 0.2s ease',
                   }}
                   onClick={() => setInputFocused(true)}
@@ -946,4 +951,3 @@ export function AiModal({ heroVideoSrc: _heroVideoSrc, textos: incomingTextos, c
     </AnimatePresence>
   );
 }
-

@@ -123,6 +123,9 @@ ${JSON.stringify(batch, null, 2)}`;
   const data = await response.json();
   const text = data.content[0].text.trim();
   // Quitar bloques markdown si los hay
-  const json = text.replace(/^```(?:json)?\s*/i, '').replace(/```$/, '').trim();
+  const json = text
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/```$/, '')
+    .trim();
   return JSON.parse(json);
 }

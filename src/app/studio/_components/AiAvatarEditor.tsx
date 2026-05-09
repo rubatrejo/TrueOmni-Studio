@@ -28,10 +28,7 @@ export function AiAvatarEditor({
   const addQuestion = () =>
     onChange({
       ...aiAvatar,
-      suggestedQuestions: [
-        ...aiAvatar.suggestedQuestions,
-        { id: newQuestionId(), text: '' },
-      ],
+      suggestedQuestions: [...aiAvatar.suggestedQuestions, { id: newQuestionId(), text: '' }],
     });
 
   const updateQuestion = (id: string, text: string) =>
@@ -71,10 +68,7 @@ export function AiAvatarEditor({
       </Group>
 
       {/* Greeting */}
-      <Group
-        title="Greeting"
-        hint="Shown when the modal opens. Use {client_name} to interpolate."
-      >
+      <Group title="Greeting" hint="Shown when the modal opens. Use {client_name} to interpolate.">
         <textarea
           value={aiAvatar.greeting}
           onChange={(e) => set('greeting', e.target.value)}

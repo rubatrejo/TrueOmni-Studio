@@ -15,14 +15,11 @@ export interface SaveThemeResult {
  */
 export async function saveTheme(client: SignageClientFile): Promise<SaveThemeResult> {
   try {
-    const res = await fetch(
-      `/api/studio/signage/clients/${encodeURIComponent(client.slug)}`,
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ client }),
-      },
-    );
+    const res = await fetch(`/api/studio/signage/clients/${encodeURIComponent(client.slug)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client }),
+    });
     if (!res.ok) {
       const text = await res.text().catch(() => '');
       return { ok: false, error: text || `HTTP ${res.status}` };

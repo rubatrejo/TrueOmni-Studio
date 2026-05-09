@@ -14,10 +14,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
-import type {
-  SignageClientResolved,
-  SignageDisplayConfig,
-} from '@/lib/signage/schema';
+import type { SignageClientResolved, SignageDisplayConfig } from '@/lib/signage/schema';
 
 import { useDisplayEditStore } from '../_lib/display-edit-store';
 import { saveDisplay, useDebouncedAutosave } from '../_lib/save-display';
@@ -32,10 +29,7 @@ import { PlaylistPanel } from './display/PlaylistPanel';
 import { PublishToolbar } from './display/PublishToolbar';
 import { VersionsPanel } from './display/VersionsPanel';
 import { SignagePreviewPanel } from './shell/SignagePreviewPanel';
-import {
-  SignageSidebarTabs,
-  type SignageSection,
-} from './shell/SignageSidebarTabs';
+import { SignageSidebarTabs, type SignageSection } from './shell/SignageSidebarTabs';
 import { SignageTopBar } from './shell/SignageTopBar';
 import { BrandingTab } from './tabs/BrandingTab';
 import { EventsTab } from './tabs/EventsTab';
@@ -303,28 +297,16 @@ export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps
                   {activeTab === 'settings' ? <DisplaySettingsPanel /> : null}
                   {activeTab === 'playlist' ? <PlaylistPanel /> : null}
                   {activeTab === 'events' ? (
-                    <EventsTab
-                      clientSlug={client.slug}
-                      initialEvents={client.events}
-                    />
+                    <EventsTab clientSlug={client.slug} initialEvents={client.events} />
                   ) : null}
                   {activeTab === 'social' ? (
-                    <SocialTab
-                      clientSlug={client.slug}
-                      initialSocial={client.social}
-                    />
+                    <SocialTab clientSlug={client.slug} initialSocial={client.social} />
                   ) : null}
                   {activeTab === 'news' ? (
-                    <NewsTab
-                      clientSlug={client.slug}
-                      initialNews={client.news}
-                    />
+                    <NewsTab clientSlug={client.slug} initialNews={client.news} />
                   ) : null}
                   {activeTab === 'i18n' ? (
-                    <I18nTab
-                      clientSlug={client.slug}
-                      defaultLocale={client.locale}
-                    />
+                    <I18nTab clientSlug={client.slug} defaultLocale={client.locale} />
                   ) : null}
                   {activeTab === 'versions' ? (
                     <VersionsPanel
@@ -334,10 +316,7 @@ export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps
                     />
                   ) : null}
                   {activeTab === 'publish' ? (
-                    <PublishToolbar
-                      clientSlug={client.slug}
-                      displaySlug={draft.slug}
-                    />
+                    <PublishToolbar clientSlug={client.slug} displaySlug={draft.slug} />
                   ) : null}
                   <KvSizeAdvisor
                     clientSlug={client.slug}
@@ -448,11 +427,7 @@ function DisplaySaveBar({
           <polyline points="17 21 17 13 7 13 7 21" />
           <polyline points="7 3 7 8 15 8" />
         </svg>
-        {saveState === 'saving'
-          ? 'Saving…'
-          : saveState === 'saved' && !isDirty
-            ? 'Saved'
-            : 'Save'}
+        {saveState === 'saving' ? 'Saving…' : saveState === 'saved' && !isDirty ? 'Saved' : 'Save'}
       </button>
     </div>
   );

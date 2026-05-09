@@ -36,8 +36,7 @@ export function BrochuresEditor({
   const update = (slug: string, patch: Partial<BrochureItem>) =>
     setList(brochures.brochures.map((b) => (b.slug === slug ? { ...b, ...patch } : b)));
 
-  const remove = (slug: string) =>
-    setList(brochures.brochures.filter((b) => b.slug !== slug));
+  const remove = (slug: string) => setList(brochures.brochures.filter((b) => b.slug !== slug));
 
   const clone = (slug: string) => {
     const idx = brochures.brochures.findIndex((b) => b.slug === slug);
@@ -220,9 +219,7 @@ function BrochureRow({
               </>
             )}
             {!brochure.pdfUrl && (
-              <span className="font-medium text-amber-600 dark:text-amber-400">
-                · no PDF
-              </span>
+              <span className="font-medium text-amber-600 dark:text-amber-400">· no PDF</span>
             )}
           </div>
         </div>

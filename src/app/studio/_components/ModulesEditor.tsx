@@ -113,15 +113,11 @@ function IconNode({
   if (customIcon) {
     // eslint-disable-next-line @next/next/no-img-element
     return (
-      <img
-        src={customIcon}
-        alt=""
-        className={`${className} object-contain`}
-        draggable={false}
-      />
+      <img src={customIcon} alt="" className={`${className} object-contain`} draggable={false} />
     );
   }
-  const LucideComp: LucideIcon = iconKey && LISTING_ICONS[iconKey] ? LISTING_ICONS[iconKey] : Sparkles;
+  const LucideComp: LucideIcon =
+    iconKey && LISTING_ICONS[iconKey] ? LISTING_ICONS[iconKey] : Sparkles;
   return <LucideComp className={className} />;
 }
 
@@ -382,10 +378,7 @@ export function HomeDashboardEditor({
     [modules.tiles, sysModules],
   );
 
-  const enabledCount = useMemo(
-    () => visibleTiles.filter((t) => t.enabled).length,
-    [visibleTiles],
-  );
+  const enabledCount = useMemo(() => visibleTiles.filter((t) => t.enabled).length, [visibleTiles]);
 
   // El reorder solo actúa sobre los tiles VISIBLES; los hidden conservan su
   // posición relativa (los reinsertamos al final con su orden original).
@@ -407,8 +400,7 @@ export function HomeDashboardEditor({
       tiles: modules.tiles.map((t) => (t.key === key ? { ...t, label } : t)),
     });
 
-  const handleReset = () =>
-    onChange({ ...defaultModules(), systemModules: modules.systemModules });
+  const handleReset = () => onChange({ ...defaultModules(), systemModules: modules.systemModules });
 
   return (
     <div className="space-y-7">
@@ -494,10 +486,34 @@ const CATALOG_SYSTEM_MODULE_LIST: Array<{
   subtitle: string;
   cascade: string;
 }> = [
-  { key: 'events', tileKey: 'events', label: 'Events', subtitle: 'Calendar of events', cascade: CASCADE_HOME_TILE_AND_I18N },
-  { key: 'tickets', tileKey: 'tickets', label: 'Tickets', subtitle: 'Single-attraction tickets (derived)', cascade: CASCADE_HOME_TILE },
-  { key: 'passes', tileKey: 'passes', label: 'Passes', subtitle: 'Multi-attraction passes', cascade: CASCADE_HOME_TILE },
-  { key: 'trails', tileKey: 'trails', label: 'Trails', subtitle: 'Hiking / walking trails', cascade: CASCADE_HOME_TILE },
+  {
+    key: 'events',
+    tileKey: 'events',
+    label: 'Events',
+    subtitle: 'Calendar of events',
+    cascade: CASCADE_HOME_TILE_AND_I18N,
+  },
+  {
+    key: 'tickets',
+    tileKey: 'tickets',
+    label: 'Tickets',
+    subtitle: 'Single-attraction tickets (derived)',
+    cascade: CASCADE_HOME_TILE,
+  },
+  {
+    key: 'passes',
+    tileKey: 'passes',
+    label: 'Passes',
+    subtitle: 'Multi-attraction passes',
+    cascade: CASCADE_HOME_TILE,
+  },
+  {
+    key: 'trails',
+    tileKey: 'trails',
+    label: 'Trails',
+    subtitle: 'Hiking / walking trails',
+    cascade: CASCADE_HOME_TILE,
+  },
 ];
 
 const HOME_MODULE_LIST: Array<{
@@ -507,15 +523,69 @@ const HOME_MODULE_LIST: Array<{
   subtitle: string;
   cascade: string;
 }> = [
-  { key: 'itineraryBuilder', tileKey: 'itinerary-builder', label: 'Trip Planner', subtitle: 'AI-assisted trip planner', cascade: CASCADE_HOME_TILE },
-  { key: 'guestbook', tileKey: 'guestbook', label: 'Guestbook', subtitle: 'Visitor pins on the map', cascade: CASCADE_HOME_TILE },
-  { key: 'socialWall', tileKey: 'social-wall', label: 'Social Wall', subtitle: 'Curated social feed', cascade: CASCADE_HOME_TILE },
-  { key: 'digitalBrochure', tileKey: 'digital-brochure', label: 'Digital Brochure', subtitle: 'Flippable brochures', cascade: CASCADE_HOME_TILE },
-  { key: 'map', tileKey: 'map', label: 'Map', subtitle: 'Interactive POI map', cascade: CASCADE_HOME_TILE },
-  { key: 'survey', tileKey: 'survey', label: 'Survey', subtitle: 'NPS / feedback overlay', cascade: 'Sidebar editor' },
-  { key: 'deals', tileKey: 'deals', label: 'Deals', subtitle: 'Promotions & discounts', cascade: CASCADE_HOME_TILE },
-  { key: 'photoBooth', tileKey: 'photo-booth', label: 'Photo Booth', subtitle: 'Green-screen capture', cascade: CASCADE_HOME_TILE },
-  { key: 'wayfinding', tileKey: 'wayfinding', label: 'Wayfinding', subtitle: 'On-property navigation', cascade: CASCADE_HOME_TILE },
+  {
+    key: 'itineraryBuilder',
+    tileKey: 'itinerary-builder',
+    label: 'Trip Planner',
+    subtitle: 'AI-assisted trip planner',
+    cascade: CASCADE_HOME_TILE,
+  },
+  {
+    key: 'guestbook',
+    tileKey: 'guestbook',
+    label: 'Guestbook',
+    subtitle: 'Visitor pins on the map',
+    cascade: CASCADE_HOME_TILE,
+  },
+  {
+    key: 'socialWall',
+    tileKey: 'social-wall',
+    label: 'Social Wall',
+    subtitle: 'Curated social feed',
+    cascade: CASCADE_HOME_TILE,
+  },
+  {
+    key: 'digitalBrochure',
+    tileKey: 'digital-brochure',
+    label: 'Digital Brochure',
+    subtitle: 'Flippable brochures',
+    cascade: CASCADE_HOME_TILE,
+  },
+  {
+    key: 'map',
+    tileKey: 'map',
+    label: 'Map',
+    subtitle: 'Interactive POI map',
+    cascade: CASCADE_HOME_TILE,
+  },
+  {
+    key: 'survey',
+    tileKey: 'survey',
+    label: 'Survey',
+    subtitle: 'NPS / feedback overlay',
+    cascade: 'Sidebar editor',
+  },
+  {
+    key: 'deals',
+    tileKey: 'deals',
+    label: 'Deals',
+    subtitle: 'Promotions & discounts',
+    cascade: CASCADE_HOME_TILE,
+  },
+  {
+    key: 'photoBooth',
+    tileKey: 'photo-booth',
+    label: 'Photo Booth',
+    subtitle: 'Green-screen capture',
+    cascade: CASCADE_HOME_TILE,
+  },
+  {
+    key: 'wayfinding',
+    tileKey: 'wayfinding',
+    label: 'Wayfinding',
+    subtitle: 'On-property navigation',
+    cascade: CASCADE_HOME_TILE,
+  },
 ];
 
 const GLOBAL_MODULE_LIST: Array<{
@@ -525,9 +595,27 @@ const GLOBAL_MODULE_LIST: Array<{
   subtitle: string;
   cascade: string;
 }> = [
-  { key: 'ads', icon: Megaphone, label: 'Ads', subtitle: 'Hero, bottom banner, popup interstitial', cascade: 'Hero / bottom / popup ad slots kiosk-wide' },
-  { key: 'languages', icon: Languages, label: 'Languages', subtitle: 'Locale picker on the Billboard', cascade: 'Billboard locale picker · Sidebar Languages editor' },
-  { key: 'aiAvatar', icon: Sparkles, label: 'AI Avatar', subtitle: 'Floating Ask Anything bubble', cascade: 'Ask Anything bubble · Sidebar AI Avatar editor' },
+  {
+    key: 'ads',
+    icon: Megaphone,
+    label: 'Ads',
+    subtitle: 'Hero, bottom banner, popup interstitial',
+    cascade: 'Hero / bottom / popup ad slots kiosk-wide',
+  },
+  {
+    key: 'languages',
+    icon: Languages,
+    label: 'Languages',
+    subtitle: 'Locale picker on the Billboard',
+    cascade: 'Billboard locale picker · Sidebar Languages editor',
+  },
+  {
+    key: 'aiAvatar',
+    icon: Sparkles,
+    label: 'AI Avatar',
+    subtitle: 'Floating Ask Anything bubble',
+    cascade: 'Ask Anything bubble · Sidebar AI Avatar editor',
+  },
 ];
 
 export function SystemModulesEditor({
@@ -556,8 +644,7 @@ export function SystemModulesEditor({
     homeKeys.filter((k) => sys[k]).length +
     globalKeys.filter((k) => sys[k]).length +
     listings.filter((e) => e.enabled).length;
-  const totalCount =
-    catalogSysKeys.length + homeKeys.length + globalKeys.length + listings.length;
+  const totalCount = catalogSysKeys.length + homeKeys.length + globalKeys.length + listings.length;
 
   const setSystem = (k: keyof SystemModules) =>
     onChange({ ...modules, systemModules: { ...sys, [k]: !sys[k] } });
@@ -582,8 +669,7 @@ export function SystemModulesEditor({
     return canonical;
   };
 
-  const handleReset = () =>
-    onChange({ ...modules, systemModules: { ...DEFAULT_SYSTEM_MODULES } });
+  const handleReset = () => onChange({ ...modules, systemModules: { ...DEFAULT_SYSTEM_MODULES } });
 
   /* ---------------- Listing modules CRUD (sync con tiles) ----------------- */
 
@@ -618,14 +704,9 @@ export function SystemModulesEditor({
     if (op.type === 'add') {
       // No duplicar si ya existe option con ese categoryKey o value.
       if (q.options.some((o) => o.categoryKey === op.key || o.value === op.key)) return;
-      nextOptions = [
-        ...q.options,
-        { value: op.key, label: op.label, categoryKey: op.key },
-      ];
+      nextOptions = [...q.options, { value: op.key, label: op.label, categoryKey: op.key }];
     } else if (op.type === 'delete') {
-      nextOptions = q.options.filter(
-        (o) => o.categoryKey !== op.key && o.value !== op.key,
-      );
+      nextOptions = q.options.filter((o) => o.categoryKey !== op.key && o.value !== op.key);
       if (nextOptions.length === q.options.length) return;
     } else if (op.type === 'renameKey') {
       nextOptions = q.options.map((o) =>
@@ -650,8 +731,7 @@ export function SystemModulesEditor({
     const nextEnabled = !entry.enabled;
     updateListingsAndTiles(
       listings.map((e) => (e.key === key ? { ...e, enabled: nextEnabled } : e)),
-      (tiles) =>
-        tiles.map((t) => (t.key === key ? { ...t, enabled: nextEnabled } : t)),
+      (tiles) => tiles.map((t) => (t.key === key ? { ...t, enabled: nextEnabled } : t)),
     );
   };
 
@@ -977,11 +1057,7 @@ function SystemRow({
           title="Change icon"
           className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-zinc-100 text-zinc-600 ring-1 ring-zinc-200 transition hover:scale-105 hover:bg-sky-500/10 hover:text-sky-700 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800 dark:hover:text-sky-300"
         >
-          {customIcon ? (
-            <IconNode customIcon={customIcon} className="h-4 w-4" />
-          ) : (
-            icon
-          )}
+          {customIcon ? <IconNode customIcon={customIcon} className="h-4 w-4" /> : icon}
         </button>
       ) : (
         <span

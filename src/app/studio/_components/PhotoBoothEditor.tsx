@@ -88,9 +88,7 @@ export function PhotoBoothEditor({
       </div>
 
       {tab === 'settings' && <SettingsTab photoBooth={photoBooth} onChange={onChange} />}
-      {tab === 'backgrounds' && (
-        <BackgroundsTab photoBooth={photoBooth} onChange={onChange} />
-      )}
+      {tab === 'backgrounds' && <BackgroundsTab photoBooth={photoBooth} onChange={onChange} />}
       {tab === 'frames' && <FramesTab photoBooth={photoBooth} onChange={onChange} />}
       {tab === 'filters' && <FiltersTab photoBooth={photoBooth} onChange={onChange} />}
       {tab === 'stickers' && <StickersTab photoBooth={photoBooth} onChange={onChange} />}
@@ -152,9 +150,7 @@ function SettingsTab({
             max={10}
             step={1}
             value={photoBooth.edgeFeather ?? 3}
-            onChange={(e) =>
-              onChange({ ...photoBooth, edgeFeather: Number(e.target.value) })
-            }
+            onChange={(e) => onChange({ ...photoBooth, edgeFeather: Number(e.target.value) })}
             className="flex-1 accent-sky-500"
           />
           <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 font-mono text-[11.5px] text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">
@@ -176,9 +172,7 @@ function SettingsTab({
             max={2}
             step={0.05}
             value={photoBooth.cameraZoom ?? 1}
-            onChange={(e) =>
-              onChange({ ...photoBooth, cameraZoom: Number(e.target.value) })
-            }
+            onChange={(e) => onChange({ ...photoBooth, cameraZoom: Number(e.target.value) })}
             className="flex-1 accent-sky-500"
             aria-label="Camera zoom"
           />
@@ -387,14 +381,12 @@ function BackgroundsTab({
   photoBooth: PhotoBoothConfig;
   onChange: (next: PhotoBoothConfig) => void;
 }) {
-  const setList = (list: PhotoBoothBackground[]) =>
-    onChange({ ...photoBooth, backgrounds: list });
+  const setList = (list: PhotoBoothBackground[]) => onChange({ ...photoBooth, backgrounds: list });
 
   const update = (id: string, patch: Partial<PhotoBoothBackground>) =>
     setList(photoBooth.backgrounds.map((b) => (b.id === id ? { ...b, ...patch } : b)));
 
-  const remove = (id: string) =>
-    setList(photoBooth.backgrounds.filter((b) => b.id !== id));
+  const remove = (id: string) => setList(photoBooth.backgrounds.filter((b) => b.id !== id));
 
   const add = () =>
     setList([
@@ -411,7 +403,12 @@ function BackgroundsTab({
       title="Backgrounds"
       hint="Green-screen replacement scenes shown in the carousel. The first one is &ldquo;Original&rdquo; (no image)."
     >
-      <Reorder.Group axis="y" values={photoBooth.backgrounds} onReorder={setList} className="flex flex-col gap-2">
+      <Reorder.Group
+        axis="y"
+        values={photoBooth.backgrounds}
+        onReorder={setList}
+        className="flex flex-col gap-2"
+      >
         {photoBooth.backgrounds.map((b) => (
           <ListReorderItem
             key={b.id}
@@ -444,9 +441,7 @@ function BackgroundsTab({
           />
         ))}
       </Reorder.Group>
-      {photoBooth.backgrounds.length < 50 && (
-        <AddButton label="Add background" onClick={add} />
-      )}
+      {photoBooth.backgrounds.length < 50 && <AddButton label="Add background" onClick={add} />}
     </Group>
   );
 }
@@ -487,7 +482,12 @@ function FramesTab({
       {photoBooth.frames.length === 0 ? (
         <EmptyState text="No frames yet." />
       ) : (
-        <Reorder.Group axis="y" values={photoBooth.frames} onReorder={setList} className="flex flex-col gap-2">
+        <Reorder.Group
+          axis="y"
+          values={photoBooth.frames}
+          onReorder={setList}
+          className="flex flex-col gap-2"
+        >
           {photoBooth.frames.map((f) => (
             <ListReorderItem
               key={f.id}
@@ -579,7 +579,12 @@ function FiltersTab({
         {photoBooth.filters.length === 0 ? (
           <EmptyState text="No filters yet — add one from the presets below." />
         ) : (
-          <Reorder.Group axis="y" values={photoBooth.filters} onReorder={setList} className="flex flex-col gap-2">
+          <Reorder.Group
+            axis="y"
+            values={photoBooth.filters}
+            onReorder={setList}
+            className="flex flex-col gap-2"
+          >
             {photoBooth.filters.map((f) => (
               <ListReorderItem
                 key={f.id}
@@ -658,14 +663,12 @@ function StickersTab({
   photoBooth: PhotoBoothConfig;
   onChange: (next: PhotoBoothConfig) => void;
 }) {
-  const setList = (list: PhotoBoothSticker[]) =>
-    onChange({ ...photoBooth, stickers: list });
+  const setList = (list: PhotoBoothSticker[]) => onChange({ ...photoBooth, stickers: list });
 
   const update = (id: string, patch: Partial<PhotoBoothSticker>) =>
     setList(photoBooth.stickers.map((s) => (s.id === id ? { ...s, ...patch } : s)));
 
-  const remove = (id: string) =>
-    setList(photoBooth.stickers.filter((s) => s.id !== id));
+  const remove = (id: string) => setList(photoBooth.stickers.filter((s) => s.id !== id));
 
   const add = () =>
     setList([
@@ -686,7 +689,12 @@ function StickersTab({
       {photoBooth.stickers.length === 0 ? (
         <EmptyState text="No stickers yet." />
       ) : (
-        <Reorder.Group axis="y" values={photoBooth.stickers} onReorder={setList} className="flex flex-col gap-2">
+        <Reorder.Group
+          axis="y"
+          values={photoBooth.stickers}
+          onReorder={setList}
+          className="flex flex-col gap-2"
+        >
           {photoBooth.stickers.map((s) => (
             <ListReorderItem
               key={s.id}
@@ -722,10 +730,7 @@ function StickersTab({
                       value={s.defaultWidth ?? 200}
                       onChange={(e) =>
                         update(s.id, {
-                          defaultWidth: Math.max(
-                            50,
-                            Math.min(800, Number(e.target.value) || 200),
-                          ),
+                          defaultWidth: Math.max(50, Math.min(800, Number(e.target.value) || 200)),
                         })
                       }
                       className={inputCls}
@@ -769,9 +774,7 @@ function ListReorderItem<T extends IdItem>({
   const [expanded, setExpanded] = useState(false);
   const slug = useStudioSlug();
   const resolvedPreview =
-    previewKind === 'image' && preview && slug
-      ? resolveStudioAsset(slug, preview)
-      : preview;
+    previewKind === 'image' && preview && slug ? resolveStudioAsset(slug, preview) : preview;
 
   return (
     <Reorder.Item
@@ -884,8 +887,7 @@ function ChromaPreview({ photoBooth }: { photoBooth: PhotoBoothConfig }) {
   const firstBgWithImage = photoBooth.backgrounds.find(
     (bg) => typeof bg.image === 'string' && bg.image.length > 0,
   );
-  const bgUrl =
-    firstBgWithImage && slug ? resolveStudioAsset(firstBgWithImage.image, slug) : null;
+  const bgUrl = firstBgWithImage && slug ? resolveStudioAsset(firstBgWithImage.image, slug) : null;
   const bgLabel = firstBgWithImage?.label ?? 'Ambient';
 
   // Si la imagen no carga en runtime, caemos al gradient ambient para no
@@ -1028,8 +1030,7 @@ function ChromaPreview({ photoBooth }: { photoBooth: PhotoBoothConfig }) {
           <div
             className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4"
             style={{
-              background:
-                'linear-gradient(0deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%)',
+              background: 'linear-gradient(0deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%)',
             }}
           />
 
@@ -1038,10 +1039,42 @@ function ChromaPreview({ photoBooth }: { photoBooth: PhotoBoothConfig }) {
             className="pointer-events-none absolute inset-0 h-full w-full opacity-30"
             aria-hidden="true"
           >
-            <line x1="33.33%" y1="0" x2="33.33%" y2="100%" stroke="rgba(255,255,255,0.4)" strokeWidth="0.5" strokeDasharray="2 4" />
-            <line x1="66.66%" y1="0" x2="66.66%" y2="100%" stroke="rgba(255,255,255,0.4)" strokeWidth="0.5" strokeDasharray="2 4" />
-            <line x1="0" y1="33.33%" x2="100%" y2="33.33%" stroke="rgba(255,255,255,0.4)" strokeWidth="0.5" strokeDasharray="2 4" />
-            <line x1="0" y1="66.66%" x2="100%" y2="66.66%" stroke="rgba(255,255,255,0.4)" strokeWidth="0.5" strokeDasharray="2 4" />
+            <line
+              x1="33.33%"
+              y1="0"
+              x2="33.33%"
+              y2="100%"
+              stroke="rgba(255,255,255,0.4)"
+              strokeWidth="0.5"
+              strokeDasharray="2 4"
+            />
+            <line
+              x1="66.66%"
+              y1="0"
+              x2="66.66%"
+              y2="100%"
+              stroke="rgba(255,255,255,0.4)"
+              strokeWidth="0.5"
+              strokeDasharray="2 4"
+            />
+            <line
+              x1="0"
+              y1="33.33%"
+              x2="100%"
+              y2="33.33%"
+              stroke="rgba(255,255,255,0.4)"
+              strokeWidth="0.5"
+              strokeDasharray="2 4"
+            />
+            <line
+              x1="0"
+              y1="66.66%"
+              x2="100%"
+              y2="66.66%"
+              stroke="rgba(255,255,255,0.4)"
+              strokeWidth="0.5"
+              strokeDasharray="2 4"
+            />
           </svg>
 
           {/* Pills overlay arriba — paleta neutral elegante (zinc + glass). */}
@@ -1067,8 +1100,8 @@ function ChromaPreview({ photoBooth }: { photoBooth: PhotoBoothConfig }) {
           The live kiosk runs MediaPipe SelfieSegmentation on the camera feed —{' '}
           <strong className="font-semibold text-zinc-800 dark:text-zinc-200">feather</strong>{' '}
           softens the mask edges,{' '}
-          <strong className="font-semibold text-zinc-800 dark:text-zinc-200">zoom</strong>{' '}
-          changes how much of the visitor fits in the frame.
+          <strong className="font-semibold text-zinc-800 dark:text-zinc-200">zoom</strong> changes
+          how much of the visitor fits in the frame.
         </p>
       </div>
     </div>

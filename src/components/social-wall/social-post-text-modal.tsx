@@ -37,7 +37,8 @@ export function SocialPostTextModal({ post, onClose }: { post: SocialPost; onClo
           width: '840px',
           minHeight: '700px',
           borderRadius: '14px',
-          background: 'linear-gradient(180deg, hsl(var(--brand-secondary)) 0%, hsl(var(--brand-primary)) 100%)',
+          background:
+            'linear-gradient(180deg, hsl(var(--brand-secondary)) 0%, hsl(var(--brand-primary)) 100%)',
           padding: '32px 36px 40px 36px',
           color: '#fff',
           boxShadow: '0 20px 40px rgba(0,0,0,0.4)',

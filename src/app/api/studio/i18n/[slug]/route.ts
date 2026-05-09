@@ -47,8 +47,10 @@ export async function GET(_req: Request, { params }: RouteParams) {
 export async function PATCH(req: Request, { params }: RouteParams) {
   const { slug } = await params;
   try {
-    const body = (await req.json()) as
-      | { bundle?: unknown; patch?: Record<string, Record<string, string>> };
+    const body = (await req.json()) as {
+      bundle?: unknown;
+      patch?: Record<string, Record<string, string>>;
+    };
 
     const current =
       (await kv.get<I18nBundle>(kvKeys.i18n(slug))) ?? (await bootstrapBundleFromFs(slug));
@@ -75,10 +77,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       }
       nextBundle = parsed.data;
     } else {
-      return NextResponse.json(
-        { error: 'Body must include `bundle` or `patch`' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Body must include `bundle` or `patch`' }, { status: 400 });
     }
 
     const serialized = JSON.stringify(nextBundle);

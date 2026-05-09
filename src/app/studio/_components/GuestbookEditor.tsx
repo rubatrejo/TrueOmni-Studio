@@ -199,14 +199,12 @@ function PinsTab({
   guestbook: GuestbookConfig;
   onChange: (next: GuestbookConfig) => void;
 }) {
-  const setList = (list: GuestbookPinOption[]) =>
-    onChange({ ...guestbook, pinCatalog: list });
+  const setList = (list: GuestbookPinOption[]) => onChange({ ...guestbook, pinCatalog: list });
 
   const update = (id: string, patch: Partial<GuestbookPinOption>) =>
     setList(guestbook.pinCatalog.map((p) => (p.id === id ? { ...p, ...patch } : p)));
 
-  const remove = (id: string) =>
-    setList(guestbook.pinCatalog.filter((p) => p.id !== id));
+  const remove = (id: string) => setList(guestbook.pinCatalog.filter((p) => p.id !== id));
 
   const add = () => setList([...guestbook.pinCatalog, makeBlankPinOption()]);
 
@@ -231,9 +229,7 @@ function PinsTab({
           />
         ))}
       </Reorder.Group>
-      {guestbook.pinCatalog.length < 20 && (
-        <AddButton label="Add pin option" onClick={add} />
-      )}
+      {guestbook.pinCatalog.length < 20 && <AddButton label="Add pin option" onClick={add} />}
     </Group>
   );
 }
@@ -354,25 +350,19 @@ function SeedPinsTab({
   guestbook: GuestbookConfig;
   onChange: (next: GuestbookConfig) => void;
 }) {
-  const setList = (list: GuestbookSeedPin[]) =>
-    onChange({ ...guestbook, seedPins: list });
+  const setList = (list: GuestbookSeedPin[]) => onChange({ ...guestbook, seedPins: list });
 
   const update = (id: string, patch: Partial<GuestbookSeedPin>) =>
     setList(guestbook.seedPins.map((p) => (p.id === id ? { ...p, ...patch } : p)));
 
-  const remove = (id: string) =>
-    setList(guestbook.seedPins.filter((p) => p.id !== id));
+  const remove = (id: string) => setList(guestbook.seedPins.filter((p) => p.id !== id));
 
   const clone = (id: string) => {
     const idx = guestbook.seedPins.findIndex((p) => p.id === id);
     if (idx < 0) return;
     const orig = guestbook.seedPins[idx];
     const copy: GuestbookSeedPin = { ...orig, id: newGuestbookId('seed') };
-    setList([
-      ...guestbook.seedPins.slice(0, idx + 1),
-      copy,
-      ...guestbook.seedPins.slice(idx + 1),
-    ]);
+    setList([...guestbook.seedPins.slice(0, idx + 1), copy, ...guestbook.seedPins.slice(idx + 1)]);
   };
 
   const add = () => setList([...guestbook.seedPins, makeBlankSeedPin()]);
@@ -402,9 +392,7 @@ function SeedPinsTab({
           ))}
         </Reorder.Group>
       )}
-      {guestbook.seedPins.length < 500 && (
-        <AddButton label="Add seed pin" onClick={add} />
-      )}
+      {guestbook.seedPins.length < 500 && <AddButton label="Add seed pin" onClick={add} />}
     </Group>
   );
 }
@@ -587,8 +575,7 @@ function CountriesTab({
   guestbook: GuestbookConfig;
   onChange: (next: GuestbookConfig) => void;
 }) {
-  const setList = (list: GuestbookCountry[]) =>
-    onChange({ ...guestbook, countries: list });
+  const setList = (list: GuestbookCountry[]) => onChange({ ...guestbook, countries: list });
 
   const [draftCode, setDraftCode] = useState('');
   const [draftName, setDraftName] = useState('');
@@ -625,9 +612,7 @@ function CountriesTab({
             <span className="rounded bg-zinc-100 px-1.5 py-0 font-mono text-[10.5px] font-bold text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
               {c.code}
             </span>
-            <span className="flex-1 text-[12.5px] text-zinc-700 dark:text-zinc-300">
-              {c.name}
-            </span>
+            <span className="flex-1 text-[12.5px] text-zinc-700 dark:text-zinc-300">{c.name}</span>
             <button
               type="button"
               onPointerDown={(e) => e.stopPropagation()}

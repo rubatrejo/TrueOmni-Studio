@@ -69,10 +69,6 @@ export function SignageSleepGate({ sleepSchedule, timezone }: SignageSleepGatePr
 
   if (!isAsleep) return null;
   return (
-    <div
-      className="absolute inset-0 z-50 bg-black"
-      aria-hidden="true"
-      data-signage-sleep="true"
-    />
+    <div className="absolute inset-0 z-50 bg-black" aria-hidden="true" data-signage-sleep="true" />
   );
 }

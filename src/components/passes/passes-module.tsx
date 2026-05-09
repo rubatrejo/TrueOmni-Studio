@@ -25,12 +25,14 @@ export function PassesModule({ moduleKey, module: mod, header }: Props) {
   const effective: HomePassesModule = override ?? mod;
   useEffect(() => {
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent<{
-        label?: string;
-        heroImage?: string;
-        passes?: PassItem[];
-        qrLogo?: string;
-      }>).detail;
+      const detail = (
+        e as CustomEvent<{
+          label?: string;
+          heroImage?: string;
+          passes?: PassItem[];
+          qrLogo?: string;
+        }>
+      ).detail;
       if (!detail || !Array.isArray(detail.passes)) return;
       setOverride({
         kind: 'passes',

@@ -90,7 +90,10 @@ export function ValidatedTextField({
           {field.error}
         </p>
       ) : hint ? (
-        <p id={id ? `${id}-hint` : undefined} className="text-[11px] text-zinc-500 dark:text-zinc-500">
+        <p
+          id={id ? `${id}-hint` : undefined}
+          className="text-[11px] text-zinc-500 dark:text-zinc-500"
+        >
           {hint}
         </p>
       ) : null}

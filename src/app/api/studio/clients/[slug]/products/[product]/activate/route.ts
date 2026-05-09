@@ -2,10 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { loadSignageClient } from '@/lib/signage/config';
 import { kSignageClient, kSignageClientList } from '@/lib/signage/kv-keys';
-import {
-  SignageClientFileSchema,
-  type SignageClientFile,
-} from '@/lib/signage/schema';
+import { SignageClientFileSchema, type SignageClientFile } from '@/lib/signage/schema';
 import { bootstrapStudioFromFs, readClientFs } from '@/lib/studio/bootstrap-from-fs';
 import {
   loadUnifiedBranding,
@@ -19,11 +16,7 @@ import {
   type ProductId,
 } from '@/lib/studio/client-manifest';
 import { kv, kvKeys } from '@/lib/studio/kv';
-import {
-  KioskConfigSchema,
-  makeBlankConfig,
-  type ConfigMeta,
-} from '@/lib/studio/schema';
+import { KioskConfigSchema, makeBlankConfig, type ConfigMeta } from '@/lib/studio/schema';
 
 export const dynamic = 'force-dynamic';
 
@@ -124,18 +117,12 @@ export async function POST(_req: Request, { params }: RouteParams) {
     return null;
   })();
   if (!productId || !VALID_PRODUCTS.includes(productId)) {
-    return NextResponse.json(
-      { error: `unknown product "${product}"` },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: `unknown product "${product}"` }, { status: 400 });
   }
 
   const manifest = await loadClientManifest(slug);
   if (!manifest) {
-    return NextResponse.json(
-      { error: `client "${slug}" not found` },
-      { status: 404 },
-    );
+    return NextResponse.json({ error: `client "${slug}" not found` }, { status: 404 });
   }
 
   if (manifest.products[productId]) {
@@ -144,10 +131,7 @@ export async function POST(_req: Request, { params }: RouteParams) {
 
   const branding = await loadUnifiedBranding(slug);
   if (!branding) {
-    return NextResponse.json(
-      { error: `unified branding missing for "${slug}"` },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: `unified branding missing for "${slug}"` }, { status: 500 });
   }
 
   // Activación específica por producto.
@@ -241,9 +225,7 @@ export async function POST(_req: Request, { params }: RouteParams) {
 
   // Hallazgo S-37: invalidar cache para reflejar el cambio de productos.
   try {
-    const { invalidateAutoMigrateCache } = await import(
-      '@/lib/studio/auto-migrate-clients'
-    );
+    const { invalidateAutoMigrateCache } = await import('@/lib/studio/auto-migrate-clients');
     invalidateAutoMigrateCache();
   } catch {
     /* noop */

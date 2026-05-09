@@ -58,17 +58,17 @@ aterriza en DSS4-DSS5.
 
 ## Archivos tocados
 
-| Archivo | Tipo |
-|---|---|
-| `src/components/signage/runtime/signage-bridge-store.ts` | NUEVO |
-| `src/components/signage/runtime/SignageBridge.tsx` | NUEVO |
-| `src/app/(signage)/signage/[client]/[display]/page.tsx` | montar `<SignageBridge>` |
-| `src/lib/signage/config.ts` | loader híbrido KV→fs |
-| `src/app/studio/digital-displays/_lib/use-signage-bridge.ts` | NUEVO |
+| Archivo                                                                | Tipo                              |
+| ---------------------------------------------------------------------- | --------------------------------- |
+| `src/components/signage/runtime/signage-bridge-store.ts`               | NUEVO                             |
+| `src/components/signage/runtime/SignageBridge.tsx`                     | NUEVO                             |
+| `src/app/(signage)/signage/[client]/[display]/page.tsx`                | montar `<SignageBridge>`          |
+| `src/lib/signage/config.ts`                                            | loader híbrido KV→fs              |
+| `src/app/studio/digital-displays/_lib/use-signage-bridge.ts`           | NUEVO                             |
 | `src/app/studio/digital-displays/_components/display/PreviewFrame.tsx` | iframeRef + onLoad + status badge |
-| `src/app/studio/digital-displays/_components/DisplayEditor.tsx` | invoca hook |
-| `.planning/DSS3-PLAN.md` | NUEVO |
-| `.planning/DSS3-SUMMARY.md` | NUEVO |
+| `src/app/studio/digital-displays/_components/DisplayEditor.tsx`        | invoca hook                       |
+| `.planning/DSS3-PLAN.md`                                               | NUEVO                             |
+| `.planning/DSS3-SUMMARY.md`                                            | NUEVO                             |
 
 ## Verificado
 
@@ -107,6 +107,7 @@ aterriza en DSS4-DSS5.
 
 **DSS4** — Playlist editor (drag-to-reorder + Add slide wizard 3 pasos +
 dayparting popover). Primera sub-fase con edición real del display:
+
 - Sidebar editable (settings + slides reorder/delete/edit + add).
 - Push al iframe en cada cambio (`pushDisplay` del hook DSS3).
 - Save al KV via API route nueva.

@@ -23,12 +23,7 @@ import { NextResponse } from 'next/server';
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5MB
 
-const ALLOWED_IMAGE = new Set([
-  'image/png',
-  'image/jpeg',
-  'image/webp',
-  'image/svg+xml',
-]);
+const ALLOWED_IMAGE = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml']);
 const ALLOWED_VIDEO = new Set(['video/mp4', 'video/webm']);
 
 const SLUG_PATTERN = /^[a-z0-9-]+$/;

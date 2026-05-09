@@ -189,10 +189,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     if (typeof body.nombre === 'string') {
       const trimmed = body.nombre.trim();
       if (trimmed.length === 0 || trimmed.length > 120) {
-        return NextResponse.json(
-          { error: 'nombre must be 1-120 chars' },
-          { status: 400 },
-        );
+        return NextResponse.json({ error: 'nombre must be 1-120 chars' }, { status: 400 });
       }
       next = { ...next, nombre: trimmed };
     }
@@ -288,10 +285,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
         );
       }
       // ids únicos por sub-lista
-      const checkUnique = (
-        arr: Array<{ id: string }>,
-        kind: string,
-      ): NextResponse | null => {
+      const checkUnique = (arr: Array<{ id: string }>, kind: string): NextResponse | null => {
         const ids = arr.map((x) => x.id);
         if (new Set(ids).size !== ids.length) {
           return NextResponse.json(
@@ -352,10 +346,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       }
       const postIds = parsed.data.posts.map((p) => p.id);
       if (new Set(postIds).size !== postIds.length) {
-        return NextResponse.json(
-          { error: 'Duplicate post ids are not allowed' },
-          { status: 400 },
-        );
+        return NextResponse.json({ error: 'Duplicate post ids are not allowed' }, { status: 400 });
       }
       const hlIds = parsed.data.highlights.map((h) => h.id);
       if (new Set(hlIds).size !== hlIds.length) {
@@ -374,10 +365,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
           { status: 400 },
         );
       }
-      const checkUnique = (
-        arr: Array<{ id: string }>,
-        kind: string,
-      ): NextResponse | null => {
+      const checkUnique = (arr: Array<{ id: string }>, kind: string): NextResponse | null => {
         const ids = arr.map((x) => x.id);
         if (new Set(ids).size !== ids.length) {
           return NextResponse.json(
@@ -500,10 +488,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       const billboard = cfg.billboard as { b0?: { background?: { src?: string } } } | undefined;
       if (isHeavy(billboard?.b0?.background?.src))
         heavyFields.push('billboard.b0.background (use CDN URL)');
-      const heavyHint =
-        heavyFields.length > 0
-          ? ` Heavy fields: ${heavyFields.join(', ')}.`
-          : '';
+      const heavyHint = heavyFields.length > 0 ? ` Heavy fields: ${heavyFields.join(', ')}.` : '';
       return NextResponse.json(
         {
           error: `Config too large for KV: ${sizeKb}KB (cap ${capKb}KB). Replace heavy uploads with CDN URLs (the "Or paste URL" input below each media field).${heavyHint}`,
@@ -543,17 +528,11 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       clientInfo?: unknown;
     };
     const touchedSyncableField =
-      bodyShape.branding != null ||
-      bodyShape.nombre != null ||
-      bodyShape.clientInfo != null;
+      bodyShape.branding != null || bodyShape.nombre != null || bodyShape.clientInfo != null;
     if (touchedSyncableField) {
       try {
-        const { syncFromKioskSave } = await import(
-          '@/lib/studio/client-branding-sync'
-        );
-        const { loadClientManifest } = await import(
-          '@/lib/studio/client-manifest'
-        );
+        const { syncFromKioskSave } = await import('@/lib/studio/client-branding-sync');
+        const { loadClientManifest } = await import('@/lib/studio/client-manifest');
         const manifest = await loadClientManifest(slug);
         if (manifest) {
           await syncFromKioskSave(slug, validated.data);
@@ -629,9 +608,7 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
     // Hallazgo S-37: invalidar cache para que el dashboard refleje el delete
     // sin esperar el TTL.
     try {
-      const { invalidateAutoMigrateCache } = await import(
-        '@/lib/studio/auto-migrate-clients'
-      );
+      const { invalidateAutoMigrateCache } = await import('@/lib/studio/auto-migrate-clients');
       invalidateAutoMigrateCache();
     } catch {
       /* noop */

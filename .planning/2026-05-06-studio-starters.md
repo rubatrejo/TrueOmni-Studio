@@ -11,6 +11,7 @@ Catálogo de starter templates pre-canned para acelerar la creación de un kiosk
 Definidos en `src/app/studio/_lib/starters.ts`. Listado actual:
 
 ### 1. `boutique-hotel` — Boutique Hotel
+
 - Paleta `Hotel Beach` (calm blues + tropical accents)
 - Fonts `Playfair Display` / `Inter`
 - Módulos default: Restaurants, Things to Do, Trip Planner, Ask AI, Events, Tickets, Guestbook, Digital Brochure
@@ -18,6 +19,7 @@ Definidos en `src/app/studio/_lib/starters.ts`. Listado actual:
 - 4 sugerencias Ask AI pre-pobladas
 
 ### 2. `dmo-state` — DMO Statewide
+
 - Paleta `TrueOmni` (Tech Blue)
 - Fonts `Outfit` / `Inter`
 - Módulos default: TODOS los 16 + ads + lenguajes
@@ -25,12 +27,14 @@ Definidos en `src/app/studio/_lib/starters.ts`. Listado actual:
 - 4 sugerencias
 
 ### 3. `resort-tropical` — Resort / Tropical
+
 - Paleta `Forest`
 - Fonts `Cormorant Garamond` / `Inter`
 - Módulos default: Restaurants, Things to Do, Tickets, Photo Booth, Social Wall, Events, Ask AI, Trip Planner, Trails, Guestbook
 - Tone Ask AI: easy-going vacation host, sunset/excursion focus
 
 ### 4. `urban-attraction` — Urban Attraction
+
 - Paleta `Mono` (editorial)
 - Fonts `Space Grotesk` / `Inter`
 - Módulos default: Tickets, Passes, Events, Ads, Photo Booth, Ask AI, Digital Brochure, Things to Do, Social Wall
@@ -41,6 +45,7 @@ Definidos en `src/app/studio/_lib/starters.ts`. Listado actual:
 ## Cómo se aplica un starter (cuando esté la UI)
 
 Pendiente de cableo en `NewClientModal`:
+
 1. Operador clica "New kiosk".
 2. Tras nombre + slug + location, paso opcional "Choose a starter" con las 4 cards.
 3. Si selecciona uno, el `POST /api/studio/configs` recibe `?starter=boutique-hotel` y aplica:

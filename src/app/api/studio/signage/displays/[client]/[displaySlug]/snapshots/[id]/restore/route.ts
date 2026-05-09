@@ -27,10 +27,7 @@ export async function POST(_req: NextRequest, ctx: RouteContext) {
   try {
     snapshot = await kvSignageSnapshot.get(client, displaySlug, id);
   } catch (e) {
-    return NextResponse.json(
-      { error: `KV read failed: ${(e as Error).message}` },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: `KV read failed: ${(e as Error).message}` }, { status: 500 });
   }
   if (!snapshot) {
     return NextResponse.json({ error: 'Snapshot not found' }, { status: 404 });
@@ -38,9 +35,7 @@ export async function POST(_req: NextRequest, ctx: RouteContext) {
 
   try {
     // Snapshot del current ANTES de sobrescribir.
-    const currentBefore = await kvSignageDisplay
-      .get(client, displaySlug)
-      .catch(() => null);
+    const currentBefore = await kvSignageDisplay.get(client, displaySlug).catch(() => null);
     if (currentBefore) {
       await kvSignageSnapshot.create(client, displaySlug, currentBefore, {
         ts: Date.now(),
@@ -52,10 +47,7 @@ export async function POST(_req: NextRequest, ctx: RouteContext) {
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error('[signage:api] restore failed', e);
-    return NextResponse.json(
-      { error: `Restore failed: ${(e as Error).message}` },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: `Restore failed: ${(e as Error).message}` }, { status: 500 });
   }
 
   return NextResponse.json({

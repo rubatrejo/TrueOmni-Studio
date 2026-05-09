@@ -3,10 +3,7 @@
 import { Sparkles } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
-import type {
-  ImportMode,
-  ImportStats,
-} from '@/app/studio/_lib/import-helpers';
+import type { ImportMode, ImportStats } from '@/app/studio/_lib/import-helpers';
 import {
   type ListingItem,
   type ListingsCatalog,
@@ -55,8 +52,8 @@ export function ListingsEditor({ value, onChange, kioskLocation }: ListingsEdito
     return (
       <div className="rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-4 py-10 text-center dark:border-zinc-800 dark:bg-zinc-900/20">
         <p className="text-[12px] italic text-zinc-500">
-          No listing modules yet. Add one from the <strong>Modules</strong> tab
-          (Listing modules section) to start filling its catalog.
+          No listing modules yet. Add one from the <strong>Modules</strong> tab (Listing modules
+          section) to start filling its catalog.
         </p>
       </div>
     );
@@ -69,9 +66,7 @@ export function ListingsEditor({ value, onChange, kioskLocation }: ListingsEdito
   const activeEntry = value[activeIdx];
 
   const updateEntry = (patch: Partial<ListingsCatalogEntry>) => {
-    onChange(
-      value.map((e, i) => (i === activeIdx ? { ...e, ...patch } : e)),
-    );
+    onChange(value.map((e, i) => (i === activeIdx ? { ...e, ...patch } : e)));
   };
 
   const updateCatalog = (patch: Partial<ListingsCatalog>) => {
@@ -89,7 +84,7 @@ export function ListingsEditor({ value, onChange, kioskLocation }: ListingsEdito
               key={entry.key}
               type="button"
               onClick={() => setActiveKey(entry.key)}
-              className={`flex-1 min-w-fit rounded px-2 py-1.5 text-[12px] font-medium transition ${
+              className={`min-w-fit flex-1 rounded px-2 py-1.5 text-[12px] font-medium transition ${
                 active
                   ? 'bg-sky-500/20 text-sky-700 dark:text-sky-200'
                   : 'text-zinc-600 hover:bg-zinc-200/60 hover:text-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-200'
@@ -132,13 +127,8 @@ function ListingsCatalogEditor({
   const [importOpen, setImportOpen] = useState(false);
   const [lastImport, setLastImport] = useState<ImportStats | null>(null);
 
-  const handleImport = (
-    items: ListingItem[],
-    mode: ImportMode,
-    stats: ImportStats,
-  ) => {
-    const nextListings =
-      mode === 'replace' ? items : upsertBySlug(catalog.listings, items);
+  const handleImport = (items: ListingItem[], mode: ImportMode, stats: ImportStats) => {
+    const nextListings = mode === 'replace' ? items : upsertBySlug(catalog.listings, items);
     onCatalogChange({
       listings: nextListings,
       subcategories: mergeTaxonomy(catalog.subcategories, items, (i) => i.subcategory),
@@ -152,8 +142,7 @@ function ListingsCatalogEditor({
   };
 
   const editingItem = useMemo(
-    () =>
-      editingSlug ? catalog.listings.find((l) => l.slug === editingSlug) ?? null : null,
+    () => (editingSlug ? (catalog.listings.find((l) => l.slug === editingSlug) ?? null) : null),
     [editingSlug, catalog.listings],
   );
 
@@ -206,9 +195,7 @@ function ListingsCatalogEditor({
 
   const handleItemChange = (slug: string, patch: Partial<ListingItem>) =>
     onCatalogChange({
-      listings: catalog.listings.map((l) =>
-        l.slug === slug ? { ...l, ...patch } : l,
-      ),
+      listings: catalog.listings.map((l) => (l.slug === slug ? { ...l, ...patch } : l)),
     });
 
   const handleItemDelete = (slug: string) => {
@@ -275,7 +262,12 @@ function ListingsCatalogEditor({
       { kind: 'text', key: 'address', label: 'Address' },
       { kind: 'text', key: 'phone', label: 'Phone' },
       { kind: 'text', key: 'website', label: 'Website' },
-      { kind: 'text', key: 'reserveUrl', label: 'Reserve URL', helpText: 'Optional — used for the "Reserve now" CTA.' },
+      {
+        kind: 'text',
+        key: 'reserveUrl',
+        label: 'Reserve URL',
+        helpText: 'Optional — used for the "Reserve now" CTA.',
+      },
       { kind: 'text', key: 'hours', label: 'Hours', helpText: 'e.g. 7 am – 11 pm' },
       {
         kind: 'select',
@@ -340,17 +332,13 @@ function ListingsCatalogEditor({
           label="Subcategories"
           items={catalog.subcategories}
           onChange={(next) => onCatalogChange({ subcategories: next })}
-          getUsage={(item) =>
-            catalog.listings.filter((l) => l.subcategory === item).length
-          }
+          getUsage={(item) => catalog.listings.filter((l) => l.subcategory === item).length}
         />
         <TaxonomyEditor
           label="Features"
           items={catalog.features}
           onChange={(next) => onCatalogChange({ features: next })}
-          getUsage={(item) =>
-            catalog.listings.filter((l) => l.features.includes(item)).length
-          }
+          getUsage={(item) => catalog.listings.filter((l) => l.features.includes(item)).length}
         />
       </div>
 

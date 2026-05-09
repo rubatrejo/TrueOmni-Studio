@@ -206,9 +206,7 @@ async function translateBulkDeepL({
   };
   const translated = data.translations ?? [];
   if (translated.length !== items.length) {
-    throw new Error(
-      `DeepL returned ${translated.length} translations, expected ${items.length}`,
-    );
+    throw new Error(`DeepL returned ${translated.length} translations, expected ${items.length}`);
   }
 
   return items.map((it, i) => {

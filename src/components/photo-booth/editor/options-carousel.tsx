@@ -82,8 +82,24 @@ export function OptionsCarousel({
               renderInside(opt)
             ) : opt.addButton ? (
               <svg width={100} height={100} viewBox="0 0 100 100" aria-hidden="true">
-                <line x1={50} y1={20} x2={50} y2={80} stroke="#fff" strokeWidth={12} strokeLinecap="round" />
-                <line x1={20} y1={50} x2={80} y2={50} stroke="#fff" strokeWidth={12} strokeLinecap="round" />
+                <line
+                  x1={50}
+                  y1={20}
+                  x2={50}
+                  y2={80}
+                  stroke="#fff"
+                  strokeWidth={12}
+                  strokeLinecap="round"
+                />
+                <line
+                  x1={20}
+                  y1={50}
+                  x2={80}
+                  y2={50}
+                  stroke="#fff"
+                  strokeWidth={12}
+                  strokeLinecap="round"
+                />
               </svg>
             ) : opt.imageSrc ? (
               // eslint-disable-next-line @next/next/no-img-element

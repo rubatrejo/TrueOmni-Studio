@@ -14,8 +14,8 @@ Header, módulos), DSS6 (Versions), DSS7 (Publish).
 
 - `src/app/studio/digital-displays/[slug]/page.tsx` (nuevo) — server component
   force-dynamic. Carga `loadSignageClient(slug)` + `listSignageDisplays(slug)`
-  + `loadSignageTokensCss(slug)` en paralelo. Si client === null → notFound().
-  Pasa todo al `<ThemeEditor>`.
+  - `loadSignageTokensCss(slug)` en paralelo. Si client === null → notFound().
+    Pasa todo al `<ThemeEditor>`.
 
 ### `<ThemeEditor>` (client)
 
@@ -32,13 +32,13 @@ Header, módulos), DSS6 (Versions), DSS7 (Publish).
 
 ### Tabs
 
-| Tab | Componente | Estado | Contenido |
-|---|---|---|---|
-| Branding | `BrandingTab.tsx` | read-only | logos default+dark, fonts default+display, tabla de token overrides, pre-block con `tokens.css` resuelto |
-| Header | `HeaderTab.tsx` | read-only | position/height/layout pills, toggles showLogo/Weather/Clock (enabled/disabled chips), clockFormat/weatherUnits/forecastDays, background (color/gradient/image) |
-| Displays | `DisplaysTab.tsx` | read-only | lista de displays con Monitor icon + name + slug + slidesCount + "Preview ↗" |
-| Versions | `VersionsTab.tsx` | placeholder | hint con icono + copy "DSS6" |
-| Publish | `PublishTab.tsx` | placeholder | hint con icono + copy "DSS7" + botón disabled |
+| Tab      | Componente        | Estado      | Contenido                                                                                                                                                       |
+| -------- | ----------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Branding | `BrandingTab.tsx` | read-only   | logos default+dark, fonts default+display, tabla de token overrides, pre-block con `tokens.css` resuelto                                                        |
+| Header   | `HeaderTab.tsx`   | read-only   | position/height/layout pills, toggles showLogo/Weather/Clock (enabled/disabled chips), clockFormat/weatherUnits/forecastDays, background (color/gradient/image) |
+| Displays | `DisplaysTab.tsx` | read-only   | lista de displays con Monitor icon + name + slug + slidesCount + "Preview ↗"                                                                                    |
+| Versions | `VersionsTab.tsx` | placeholder | hint con icono + copy "DSS6"                                                                                                                                    |
+| Publish  | `PublishTab.tsx`  | placeholder | hint con icono + copy "DSS7" + botón disabled                                                                                                                   |
 
 ### Dashboard actualizado
 
@@ -52,18 +52,18 @@ Header, módulos), DSS6 (Versions), DSS7 (Publish).
 
 ## Archivos tocados
 
-| Archivo | Tipo |
-|---|---|
-| `src/app/studio/digital-displays/[slug]/page.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/ThemeEditor.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/tabs/BrandingTab.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/tabs/HeaderTab.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/tabs/DisplaysTab.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/tabs/VersionsTab.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/tabs/PublishTab.tsx` | NUEVO |
+| Archivo                                                            | Tipo                              |
+| ------------------------------------------------------------------ | --------------------------------- |
+| `src/app/studio/digital-displays/[slug]/page.tsx`                  | NUEVO                             |
+| `src/app/studio/digital-displays/_components/ThemeEditor.tsx`      | NUEVO                             |
+| `src/app/studio/digital-displays/_components/tabs/BrandingTab.tsx` | NUEVO                             |
+| `src/app/studio/digital-displays/_components/tabs/HeaderTab.tsx`   | NUEVO                             |
+| `src/app/studio/digital-displays/_components/tabs/DisplaysTab.tsx` | NUEVO                             |
+| `src/app/studio/digital-displays/_components/tabs/VersionsTab.tsx` | NUEVO                             |
+| `src/app/studio/digital-displays/_components/tabs/PublishTab.tsx`  | NUEVO                             |
 | `src/app/studio/digital-displays/_components/ClientsDashboard.tsx` | card → editor link, banner update |
-| `.planning/DSS1-PLAN.md` | NUEVO |
-| `.planning/DSS1-SUMMARY.md` | NUEVO |
+| `.planning/DSS1-PLAN.md`                                           | NUEVO                             |
+| `.planning/DSS1-SUMMARY.md`                                        | NUEVO                             |
 
 ## Verificado
 

@@ -25,13 +25,20 @@ export function AiLoadingScreen({ title, body, backgroundImage }: AiLoadingScree
       aria-live="polite"
     >
       {bgSrc ? (
-        <Image src={bgSrc} alt="" fill sizes="1080px" className="object-cover" unoptimized priority />
+        <Image
+          src={bgSrc}
+          alt=""
+          fill
+          sizes="1080px"
+          className="object-cover"
+          unoptimized
+          priority
+        />
       ) : null}
       <div
         className="absolute inset-0"
         style={{
-          background:
-            'linear-gradient(180deg, rgba(13,29,49,0.6) 0%, rgba(13,29,49,0.55) 100%)',
+          background: 'linear-gradient(180deg, rgba(13,29,49,0.6) 0%, rgba(13,29,49,0.55) 100%)',
         }}
       />
       <div className="absolute" style={{ left: 65, top: 44, zIndex: 6 }}>

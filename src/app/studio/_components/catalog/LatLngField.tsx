@@ -32,7 +32,9 @@ export function LatLngField({ label = 'Coordinates', value, onChange }: LatLngFi
 
   return (
     <div className="space-y-1.5">
-      <label className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">{label}</label>
+      <label className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
+        {label}
+      </label>
       <div className="flex items-center gap-2">
         <input
           type="number"

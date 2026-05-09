@@ -189,11 +189,7 @@ export async function POST(req: Request, { params }: RouteParams) {
         currentCss = await readTextFile(tokensPath);
       } else if (ghConfig) {
         const tokensRepoPath = repoRelative(tokensPath);
-        currentCss = await getRepoFileContent(
-          ghConfig,
-          tokensRepoPath,
-          ghConfig.baseBranch,
-        );
+        currentCss = await getRepoFileContent(ghConfig, tokensRepoPath, ghConfig.baseBranch);
       }
       if (currentCss !== null) {
         const nextCss = buildTokensCss(studioConfig, currentCss);

@@ -26,10 +26,12 @@ pnpm kiosk:dev
 ```
 
 Browser → `http://localhost:3000`:
+
 - [ ] El kiosk carga (billboard idle visible).
 - [ ] No hay errors rojos en la consola.
 
 Browser → `http://localhost:3000/studio`:
+
 - [ ] La pantalla de sign-in aparece (NextAuth redirect).
 - [ ] Click "Sign in with GitHub" → vuelve con `/studio` listado.
 
@@ -40,6 +42,7 @@ Browser → `http://localhost:3000/studio`:
 En `/studio` click el botón **"New kiosk"**.
 
 Datos de prueba:
+
 - **Name:** `Smoke Test 2026-05-05`
 - **Slug:** `smoke-test-20260505` (auto-suggested)
 - **Website:** `https://example.com`
@@ -48,6 +51,7 @@ Datos de prueba:
 - **Empty mode:** OFF (queremos heredar mock data del template)
 
 Submit:
+
 - [ ] Overlay de loading "Creating Smoke Test..." aparece.
 - [ ] Redirige a `/studio/smoke-test-20260505`.
 - [ ] El editor abre con sidebar 21 secciones.
@@ -77,20 +81,24 @@ Esperado: `201` con `{ slug, config, meta }`. Race condition: ejecutar el mismo 
 ## 3. Editar branding y verificar live preview
 
 Sidebar → Branding:
+
 - [ ] Cambiar primary color a `#ff6b35` → iframe se actualiza en <120ms (sin reload).
 - [ ] Cambiar logo (drop image) → iframe muestra el nuevo logo.
 - [ ] Cambiar font display → iframe usa la fuente nueva.
 - [ ] El SaveStatusPill del TopBar pasa a "Unsaved changes" (sky blue dot).
 
 Sidebar → Idle / Billboard:
+
 - [ ] Sección **"Background (shared)"** arriba — sube imagen test → 4 variants la heredan.
 - [ ] Sección "Idle settings (Variant N)" — cambiar Touch Here label → preview iframe lo refleja.
 - [ ] Variant 2 muestra correctamente sin error 404 (el bug `.png vs .jpg` está fixeado).
 
 Sidebar → Languages:
+
 - [ ] Cambiar `home.welcome` en EN → si `DEEPL_API_KEY` está set, los otros 5 locales se llenan tras 2s.
 
 PreviewPanel toolbar:
+
 - [ ] Locale dropdown (EN/ES/FR/DE/PT/JA) — cambiar a ES → kiosk preview muestra strings en español sin reload.
 
 ---
@@ -98,11 +106,13 @@ PreviewPanel toolbar:
 ## 4. Save + verificar payload size
 
 Click **Save** en el TopBar:
+
 - [ ] SaveStatusPill pasa a `Saving…` → `Saved`.
 - [ ] Si el config supera 60% del KV cap → aparece el `<PayloadSizePill>` amber/orange/red al lado del Save status.
 - [ ] Toast top-right NO aparece (success silencioso).
 
 Forzar error:
+
 - [ ] DevTools → Network → throttle "Offline" → click Save → tras 30s aparece toast rojo "Save timed out after 30s" (timeout fallback).
 
 ---
@@ -110,12 +120,14 @@ Forzar error:
 ## 5. Snapshots + revert (#9)
 
 Sidebar → Versions:
+
 - [ ] Sección "Restore from snapshot" muestra al menos 1 entry tras el último Save.
 - [ ] Click "Revert" en una entry → confirm modal.
 - [ ] Confirm → reload → editor vuelve al estado anterior.
 - [ ] El revert genera otro snapshot (badge amber "before revert") para deshacer.
 
 curl:
+
 ```bash
 curl http://localhost:3000/api/studio/configs/smoke-test-20260505/snapshots | jq '.entries | length'
 # esperado: >=1
@@ -126,6 +138,7 @@ curl http://localhost:3000/api/studio/configs/smoke-test-20260505/snapshots | jq
 ## 6. Diff pre-publish (#8)
 
 Click **Publish** en el TopBar:
+
 - [ ] Modal abre en estado "Computing diff…".
 - [ ] Pasa a "preview" mostrando archivos cambiados (verde = create, amber = update).
 - [ ] Cada file con `action: 'update'` muestra `<details>` "X JSON keys changed" desplegable con paths exactos (eg. `branding.primary`, `listings.0.title`).
@@ -140,6 +153,7 @@ Click **Publish** en el TopBar:
 ⚠️ Esto crea un PR REAL en `STUDIO_GITHUB_OWNER/STUDIO_GITHUB_REPO`. Si testeas, después cierra el PR + borra la branch.
 
 Click "Publish" → Confirm:
+
 - [ ] Modal pasa a "publishing…" (spinner).
 - [ ] Si OK: "Published" + link al PR `#NNN`.
 - [ ] Auto-close countdown 3-2-1 → modal se cierra.
@@ -147,10 +161,12 @@ Click "Publish" → Confirm:
 - [ ] PR description tiene `**Files changed:** N` + `<details>` con la lista de paths.
 
 **Si `autoMerge: true` está cableado en options:**
+
 - [ ] PR aparece con badge "Auto-merge enabled" en GitHub.
 - [ ] Tras pasar checks de CI, GitHub mergea solo.
 
 curl directo (skip UI):
+
 ```bash
 # dryRun primero para validar files
 curl -X POST "http://localhost:3000/api/studio/publish/smoke-test-20260505?dryRun=1&mode=pr" \
@@ -166,12 +182,14 @@ curl -X POST "http://localhost:3000/api/studio/publish/smoke-test-20260505?mode=
 ## 8. Verificar deploy en Vercel
 
 Tras merge del PR (manual o auto-merge):
+
 - [ ] Vercel detecta el push a `main` y arranca un build.
 - [ ] Build pasa sin errores.
 - [ ] El production URL del Studio sigue accesible (NextAuth, etc.).
 - [ ] El kiosk runtime carga el config nuevo si lo abres como cliente (`/k/smoke-test-20260505` o el subdomain del kiosk).
 
 Vercel CLI alternativo:
+
 ```bash
 vercel logs <studio-deployment-url> --since 10m | grep -i error
 # esperado: vacío

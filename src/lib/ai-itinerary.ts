@@ -116,11 +116,7 @@ function scoreItem(item: ItineraryCatalogItem, preferences: AiPreferences): numb
 }
 
 const DEFAULT_MEAL_PHRASES: Record<GeneratedEntryKind, string[]> = {
-  breakfast: [
-    'Start your day at',
-    'Kick things off with breakfast at',
-    'Morning fuel: head to',
-  ],
+  breakfast: ['Start your day at', 'Kick things off with breakfast at', 'Morning fuel: head to'],
   lunch: ['Lunch break at', 'Take a midday pause at', 'Refuel with lunch at'],
   dinner: ['Wrap up the day with dinner at', 'End on a high note at', 'Dinner at'],
   activity: ['Then head to', 'Spend a couple of hours at', 'Make your way to'],
@@ -180,8 +176,7 @@ export async function generateItinerary(
     .sort((a, b) => scoreItem(b, preferences) - scoreItem(a, preferences));
   const activities = catalog
     .filter(
-      (it) =>
-        (it.kind === 'listing' && it.moduleSlug !== 'restaurants') || it.kind === 'trail',
+      (it) => (it.kind === 'listing' && it.moduleSlug !== 'restaurants') || it.kind === 'trail',
     )
     .sort((a, b) => scoreItem(b, preferences) - scoreItem(a, preferences));
   const events = catalog

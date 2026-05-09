@@ -96,9 +96,7 @@ export function ItineraryMap(props: ItineraryMapProps) {
       // Aún así rendrizamos los stops como pins (importante para que la línea
       // tenga puntos visibles). Los duplicados se filtran abajo.
       const stopSet = new Set(stops.map((s) => `${s.kind}:${s.slug}`));
-      return catalog
-        .filter((it) => stopSet.has(`${it.kind}:${it.slug}`))
-        .map(toMapItem);
+      return catalog.filter((it) => stopSet.has(`${it.kind}:${it.slug}`)).map(toMapItem);
     }
     return catalog.map(toMapItem);
   }, [catalog, stops, hideCatalogMarkers]);

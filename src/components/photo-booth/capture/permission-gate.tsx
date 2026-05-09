@@ -23,9 +23,7 @@ export function PermissionGate({ title, body, retryLabel, onRetry }: PermissionG
         textAlign: 'center',
       }}
     >
-      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 64, marginBottom: 32 }}>
-        {title}
-      </h2>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 64, marginBottom: 32 }}>{title}</h2>
       <p style={{ fontSize: 28, lineHeight: 1.4, maxWidth: 720, marginBottom: 48 }}>{body}</p>
       <button
         type="button"

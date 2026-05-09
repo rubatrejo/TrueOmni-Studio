@@ -24,11 +24,7 @@ interface SizeData {
   cap: number;
 }
 
-export function KvSizeAdvisor({
-  clientSlug,
-  displaySlug,
-  refreshTrigger,
-}: KvSizeAdvisorProps) {
+export function KvSizeAdvisor({ clientSlug, displaySlug, refreshTrigger }: KvSizeAdvisorProps) {
   const [size, setSize] = useState<SizeData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,9 +55,7 @@ export function KvSizeAdvisor({
   if (error) {
     return (
       <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-        <p className="text-[11.5px] text-red-600 dark:text-red-400">
-          KV size error: {error}
-        </p>
+        <p className="text-[11.5px] text-red-600 dark:text-red-400">KV size error: {error}</p>
       </section>
     );
   }
@@ -75,8 +69,7 @@ export function KvSizeAdvisor({
   }
 
   const pct = size.cap > 0 ? Math.min(100, (size.total / size.cap) * 100) : 0;
-  const barColor =
-    pct < 60 ? 'bg-emerald-500' : pct < 85 ? 'bg-amber-500' : 'bg-red-500';
+  const barColor = pct < 60 ? 'bg-emerald-500' : pct < 85 ? 'bg-amber-500' : 'bg-red-500';
 
   return (
     <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
@@ -87,7 +80,7 @@ export function KvSizeAdvisor({
             KV usage
           </h3>
         </div>
-        <span className="text-[11px] font-mono text-zinc-500">
+        <span className="font-mono text-[11px] text-zinc-500">
           {fmtBytes(size.total)} / {fmtBytes(size.cap)}
         </span>
       </header>
@@ -105,7 +98,7 @@ export function KvSizeAdvisor({
         />
       </div>
 
-      <p className="text-[10.5px] font-mono text-zinc-500">
+      <p className="font-mono text-[10.5px] text-zinc-500">
         display: {fmtBytes(size.display)} · snapshots: {fmtBytes(size.snapshots)}
       </p>
     </section>

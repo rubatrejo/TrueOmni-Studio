@@ -1,10 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { bootstrapStudioFromFs, readClientFs } from '@/lib/studio/bootstrap-from-fs';
-import {
-  loadUnifiedBranding,
-  unifiedToKioskBranding,
-} from '@/lib/studio/client-branding-sync';
+import { loadUnifiedBranding, unifiedToKioskBranding } from '@/lib/studio/client-branding-sync';
 import { loadClientManifest } from '@/lib/studio/client-manifest';
 import { kv, kvKeys } from '@/lib/studio/kv';
 import {
@@ -42,11 +39,7 @@ import { Shell } from '../../_components/Shell';
  * cliente (branding + product cards) y este sub-route hospeda el editor
  * del kiosk.
  */
-export default async function KioskEditorPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function KioskEditorPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   let raw = await kv.get<KioskConfig>(kvKeys.cfg(slug));
 

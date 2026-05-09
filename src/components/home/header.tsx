@@ -59,7 +59,14 @@ export async function HomeHeader({
   // En módulos como Listings/Events/Map/etc., usamos el `heroImage` prop
   // (que el módulo controla por sí mismo) y NO heredamos el hero global.
   const brand = applyDashboardOverride
-    ? (config as unknown as { branding?: { homeHero?: { kind: 'image' | 'video'; src: string }; heroGradient?: { from: string; to: string; angle: number } } }).branding
+    ? (
+        config as unknown as {
+          branding?: {
+            homeHero?: { kind: 'image' | 'video'; src: string };
+            heroGradient?: { from: string; to: string; angle: number };
+          };
+        }
+      ).branding
     : undefined;
   const overrideHero = brand?.homeHero?.src ? brand.homeHero : null;
   const heroSrc = overrideHero?.src ?? heroImage;

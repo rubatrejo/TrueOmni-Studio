@@ -32,12 +32,7 @@ export function Wireframe3() {
       {/* Logo + CTA dentro del banner */}
       <LogoPlaceholder x={31} y={74} width={28} height={5} />
       <Pill x={20} y={86} width={36} height={6} rx={1} filled />
-      <circle
-        cx={62}
-        cy={89}
-        r={3.5}
-        className="fill-zinc-200 stroke-current dark:fill-zinc-800"
-      />
+      <circle cx={62} cy={89} r={3.5} className="fill-zinc-200 stroke-current dark:fill-zinc-800" />
 
       {/* Fila 2: 2 cards con imagen */}
       <SlotBox x={1} y={103} width={44} height={37} withImage />

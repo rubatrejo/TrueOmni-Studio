@@ -31,9 +31,9 @@ const STEPS: TourStep[] = [
     title: 'Pick your brand',
     body: (
       <>
-        En <strong>Branding</strong> defines los 4 brand tokens (primary,
-        secondary, accent, neutral), logos y fonts. Cualquier cambio se
-        recolorea en el preview en menos de 200&nbsp;ms vía bridge postMessage.
+        En <strong>Branding</strong> defines los 4 brand tokens (primary, secondary, accent,
+        neutral), logos y fonts. Cualquier cambio se recolorea en el preview en menos de 200&nbsp;ms
+        vía bridge postMessage.
       </>
     ),
   },
@@ -42,9 +42,9 @@ const STEPS: TourStep[] = [
     title: 'Tune the header',
     body: (
       <>
-        El tab <strong>Header</strong> controla la barra superior del runtime:
-        position (top/bottom), height, layout del logo, visibility de clima y
-        reloj, y el background (color sólido, gradient o imagen).
+        El tab <strong>Header</strong> controla la barra superior del runtime: position
+        (top/bottom), height, layout del logo, visibility de clima y reloj, y el background (color
+        sólido, gradient o imagen).
       </>
     ),
   },
@@ -53,9 +53,9 @@ const STEPS: TourStep[] = [
     title: 'Manage displays',
     body: (
       <>
-        Un theme puede tener varios displays (lobby-tv, entrance-tv, etc.).
-        Desde el tab <strong>Displays</strong> entras al editor por display
-        donde armas la playlist con drag-to-reorder, dayparting y schedule.
+        Un theme puede tener varios displays (lobby-tv, entrance-tv, etc.). Desde el tab{' '}
+        <strong>Displays</strong> entras al editor por display donde armas la playlist con
+        drag-to-reorder, dayparting y schedule.
       </>
     ),
   },
@@ -64,9 +64,8 @@ const STEPS: TourStep[] = [
     title: 'Translate with AI',
     body: (
       <>
-        En <strong>Languages</strong> editas las strings localizadas. Si tienes
-        DeepL o Anthropic configurado, el botón <span aria-hidden>✨</span>{' '}
-        traduce keys faltantes en un click.
+        En <strong>Languages</strong> editas las strings localizadas. Si tienes DeepL o Anthropic
+        configurado, el botón <span aria-hidden>✨</span> traduce keys faltantes en un click.
       </>
     ),
   },
@@ -75,10 +74,9 @@ const STEPS: TourStep[] = [
     title: 'Versions & Publish',
     body: (
       <>
-        Cada save crea snapshot reversible del estado previo (cap 10) en el
-        tab <strong>Versions</strong>. Cuando quieras shipear, pulsa{' '}
-        <strong>Publish</strong> arriba a la derecha — abre PR con{' '}
-        <code className="font-mono text-[11.5px]">client.json</code>,{' '}
+        Cada save crea snapshot reversible del estado previo (cap 10) en el tab{' '}
+        <strong>Versions</strong>. Cuando quieras shipear, pulsa <strong>Publish</strong> arriba a
+        la derecha — abre PR con <code className="font-mono text-[11.5px]">client.json</code>,{' '}
         <code className="font-mono text-[11.5px]">tokens.css</code> y{' '}
         <code className="font-mono text-[11.5px]">i18n/*.json</code>.
       </>
@@ -206,9 +204,7 @@ export function SignageOnboardingTour() {
                   transition={{ duration: 0.2, ease: 'easeOut' }}
                 >
                   <h3 className="font-display text-[16px] font-semibold leading-tight tracking-tight text-zinc-900 dark:text-white">
-                    <span className="font-mono text-zinc-400 dark:text-zinc-600">
-                      {step.num}.
-                    </span>{' '}
+                    <span className="font-mono text-zinc-400 dark:text-zinc-600">{step.num}.</span>{' '}
                     {step.title}
                   </h3>
                   <p className="mt-2 text-[13.5px] leading-relaxed text-zinc-600 dark:text-zinc-400">

@@ -40,10 +40,7 @@ export function IntegrationsEditor({ value, onChange }: IntegrationsEditorProps)
 
   return (
     <div className="space-y-3">
-      <WeatherCard
-        config={value.weather}
-        onChange={(next) => update({ weather: next })}
-      />
+      <WeatherCard config={value.weather} onChange={(next) => update({ weather: next })} />
       <ApiCard
         baseUrl={value.api.baseUrl}
         onChange={(next) => update({ api: { baseUrl: next } })}
@@ -56,26 +53,11 @@ export function IntegrationsEditor({ value, onChange }: IntegrationsEditorProps)
         gaId={value.analytics.gaId}
         onChange={(next) => update({ analytics: { gaId: next } })}
       />
-      <SatisfiCard
-        config={value.satisfi}
-        onChange={(next) => update({ satisfi: next })}
-      />
-      <TavusCard
-        config={value.tavus}
-        onChange={(next) => update({ tavus: next })}
-      />
-      <BandwangoCard
-        config={value.bandwango}
-        onChange={(next) => update({ bandwango: next })}
-      />
-      <CrowdriffCard
-        config={value.crowdriff}
-        onChange={(next) => update({ crowdriff: next })}
-      />
-      <ViatorCard
-        config={value.viator}
-        onChange={(next) => update({ viator: next })}
-      />
+      <SatisfiCard config={value.satisfi} onChange={(next) => update({ satisfi: next })} />
+      <TavusCard config={value.tavus} onChange={(next) => update({ tavus: next })} />
+      <BandwangoCard config={value.bandwango} onChange={(next) => update({ bandwango: next })} />
+      <CrowdriffCard config={value.crowdriff} onChange={(next) => update({ crowdriff: next })} />
+      <ViatorCard config={value.viator} onChange={(next) => update({ viator: next })} />
     </div>
   );
 }
@@ -97,8 +79,7 @@ function WeatherCard({
   const update = (patch: Partial<IntegrationsConfig['weather']>) =>
     onChange({ ...config, ...patch });
 
-  const canTest =
-    config.provider === 'openweather' && !!config.apiKey && !!config.city;
+  const canTest = config.provider === 'openweather' && !!config.apiKey && !!config.city;
 
   const handleTest = async () => {
     setTesting(true);
@@ -118,7 +99,11 @@ function WeatherCard({
   };
 
   return (
-    <Card icon={<CloudSun className="h-4 w-4" />} title="Weather" subtitle="Powers the weather widget on idle/billboard.">
+    <Card
+      icon={<CloudSun className="h-4 w-4" />}
+      title="Weather"
+      subtitle="Powers the weather widget on idle/billboard."
+    >
       <Field label="Provider">
         <div className="flex gap-2">
           {WEATHER_PROVIDERS.map((p) => (
@@ -171,21 +156,15 @@ function WeatherCard({
       ) : (
         <p className="text-[11.5px] text-zinc-500 dark:text-zinc-500">
           Open-Meteo doesn&apos;t need an API key — coords come from{' '}
-          <span className="font-mono text-[11px]">cliente.coords</span> and the widget works
-          out of the box.
+          <span className="font-mono text-[11px]">cliente.coords</span> and the widget works out of
+          the box.
         </p>
       )}
     </Card>
   );
 }
 
-function ApiCard({
-  baseUrl,
-  onChange,
-}: {
-  baseUrl: string;
-  onChange: (next: string) => void;
-}) {
+function ApiCard({ baseUrl, onChange }: { baseUrl: string; onChange: (next: string) => void }) {
   const [result, setResult] = useState<CheckResult | null>(null);
   const [testing, setTesting] = useState(false);
 
@@ -227,13 +206,7 @@ function ApiCard({
   );
 }
 
-function MapboxCard({
-  token,
-  onChange,
-}: {
-  token: string;
-  onChange: (next: string) => void;
-}) {
+function MapboxCard({ token, onChange }: { token: string; onChange: (next: string) => void }) {
   const [result, setResult] = useState<CheckResult | null>(null);
   const [testing, setTesting] = useState(false);
 
@@ -269,13 +242,7 @@ function MapboxCard({
   );
 }
 
-function AnalyticsCard({
-  gaId,
-  onChange,
-}: {
-  gaId: string;
-  onChange: (next: string) => void;
-}) {
+function AnalyticsCard({ gaId, onChange }: { gaId: string; onChange: (next: string) => void }) {
   const [result, setResult] = useState<CheckResult | null>(null);
   const [testing, setTesting] = useState(false);
 
@@ -385,8 +352,7 @@ function TavusCard({
 }) {
   const [result, setResult] = useState<CheckResult | null>(null);
   const [testing, setTesting] = useState(false);
-  const update = (patch: Partial<IntegrationsConfig['tavus']>) =>
-    onChange({ ...config, ...patch });
+  const update = (patch: Partial<IntegrationsConfig['tavus']>) => onChange({ ...config, ...patch });
 
   const handleTest = async () => {
     setTesting(true);
@@ -654,9 +620,7 @@ function Card({
           <h3 className="font-display text-[13px] font-semibold text-zinc-900 dark:text-white">
             {title}
           </h3>
-          <p className="text-[11px] leading-snug text-zinc-500 dark:text-zinc-500">
-            {subtitle}
-          </p>
+          <p className="text-[11px] leading-snug text-zinc-500 dark:text-zinc-500">{subtitle}</p>
         </div>
       </header>
       <div className="space-y-2.5">{children}</div>

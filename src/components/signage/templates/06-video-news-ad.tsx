@@ -86,8 +86,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
   // Para DS8 con source manual, items vienen directamente del client.news.
   // Cuando rss/api: el page.tsx debe pre-resolver via resolveNewsItems() y
   // pasarlos como prop. Sub-fase tardía añade el cableo runtime.
-  const newsItems =
-    client.news.source.kind === 'manual' ? client.news.source.items : [];
+  const newsItems = client.news.source.kind === 'manual' ? client.news.source.items : [];
   const newsInterval = client.news.rotationIntervalSec;
 
   return (
@@ -135,7 +134,12 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
 
       {/* Bottom News — background rect cyan + QR + foreignObject con ticker.
           QR ocupa la franja izquierda donde antes iba el icono periódico. */}
-      <rect width="1144" height="281" transform="translate(0 799)" fill="hsl(var(--signage-band-overlay))" />
+      <rect
+        width="1144"
+        height="281"
+        transform="translate(0 799)"
+        fill="hsl(var(--signage-band-overlay))"
+      />
       <NewsQrCode url={client.website ?? 'https://trueomni.com'} />
       <foreignObject x="264" y="817" width="852" height="245">
         <SignageNewsTicker items={newsItems} intervalSec={newsInterval} />

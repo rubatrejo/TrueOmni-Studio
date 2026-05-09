@@ -56,10 +56,7 @@ export function MapEditor({
         onChange={(welcomeCopy) => onChange({ ...map, welcomeCopy })}
       />
 
-      <ChipsLabelsSection
-        chips={map.chips}
-        onChange={(chips) => onChange({ ...map, chips })}
-      />
+      <ChipsLabelsSection chips={map.chips} onChange={(chips) => onChange({ ...map, chips })} />
 
       <PinStylingSection
         pinSize={map.pinSize}
@@ -317,7 +314,10 @@ function PinStylingSection({
 }: {
   pinSize: 'S' | 'M' | 'L';
   categoryIcons: MapConfig['categoryIcons'];
-  onChange: (next: { pinSize?: 'S' | 'M' | 'L'; categoryIcons?: MapConfig['categoryIcons'] }) => void;
+  onChange: (next: {
+    pinSize?: 'S' | 'M' | 'L';
+    categoryIcons?: MapConfig['categoryIcons'];
+  }) => void;
 }) {
   return (
     <Section
@@ -420,8 +420,7 @@ function CustomPinsSection({
                 <MapPin
                   className="mt-1 h-4 w-4 shrink-0"
                   style={{
-                    color:
-                      SOURCE_OPTIONS.find((s) => s.value === p.source)?.color ?? '#999',
+                    color: SOURCE_OPTIONS.find((s) => s.value === p.source)?.color ?? '#999',
                   }}
                 />
                 <div className="flex-1 space-y-2">

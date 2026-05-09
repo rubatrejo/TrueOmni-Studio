@@ -16,7 +16,7 @@
   agendado a `duration + 50ms guard`. Cancel-safe ante ticks rápidos.
 - Cleanup en unmount (timer ref clearable).
 - Wrapper común `.signage-transition-host` con `position: absolute; inset: 0;
-  will-change: transform, opacity` (GPU compositing).
+will-change: transform, opacity` (GPU compositing).
 - `display.json` default distribuye las 4 transitions en los 8 slides para
   smoke E2E continuo en localhost.
 

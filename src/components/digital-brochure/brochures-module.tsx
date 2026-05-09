@@ -30,12 +30,14 @@ export function BrochuresModule({
   const [override, setOverride] = useState<HomeDigitalBrochureModule | null>(null);
   useEffect(() => {
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent<{
-        label?: string;
-        heroImage?: string;
-        categories?: string[];
-        brochures?: BrochureItem[];
-      }>).detail;
+      const detail = (
+        e as CustomEvent<{
+          label?: string;
+          heroImage?: string;
+          categories?: string[];
+          brochures?: BrochureItem[];
+        }>
+      ).detail;
       if (!detail || !Array.isArray(detail.brochures)) return;
       setOverride({
         kind: 'digital-brochure',
@@ -53,10 +55,7 @@ export function BrochuresModule({
 
   // Si la categoría activa ya no existe en el override, vuelve a "all".
   useEffect(() => {
-    if (
-      activeCategory !== 'all' &&
-      !effective.categories.includes(activeCategory as string)
-    ) {
+    if (activeCategory !== 'all' && !effective.categories.includes(activeCategory as string)) {
       setActiveCategory('all');
     }
   }, [effective.categories, activeCategory]);

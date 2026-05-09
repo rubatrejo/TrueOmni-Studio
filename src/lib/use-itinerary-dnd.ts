@@ -164,10 +164,7 @@ export function useItineraryDnd(options: UseItineraryDndOptions): UseItineraryDn
   );
 
   const startDragStop = useCallback(
-    (
-      payload: Omit<Extract<DragPayload, { type: 'stop' }>, 'type'>,
-      ev: React.PointerEvent,
-    ) => {
+    (payload: Omit<Extract<DragPayload, { type: 'stop' }>, 'type'>, ev: React.PointerEvent) => {
       if (ev.button !== 0 && ev.pointerType === 'mouse') return;
       arm({ type: 'stop', ...payload }, ev.clientX, ev.clientY);
     },

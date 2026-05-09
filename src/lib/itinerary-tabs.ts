@@ -53,16 +53,11 @@ function isItineraryEligible(slug: string, mod: HomeModuleVariant): boolean {
  * a espacio para que el tab quede en una sola línea. Si el módulo no tiene
  * tile equivalente (caso raro), cae al `mod.label` del propio módulo.
  */
-export function getItineraryTabs(
-  config: KioskConfig,
-  localListingsLabel: string,
-): ItineraryTab[] {
+export function getItineraryTabs(config: KioskConfig, localListingsLabel: string): ItineraryTab[] {
   const tabs: ItineraryTab[] = [];
 
   const modules = config.features?.home?.modules ?? {};
-  const tilesByKey = new Map(
-    (config.features?.home?.tiles ?? []).map((t) => [t.key, t.label]),
-  );
+  const tilesByKey = new Map((config.features?.home?.tiles ?? []).map((t) => [t.key, t.label]));
   const tabLabelFor = (slug: string, fallback: string): string => {
     const tileLabel = tilesByKey.get(slug);
     return tileLabel ? tileLabel.replace(/\s*\n\s*/g, ' ') : fallback;

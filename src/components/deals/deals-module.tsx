@@ -58,13 +58,15 @@ export function DealsModule({
   const [override, setOverride] = useState<HomeDealsModule | null>(null);
   useEffect(() => {
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent<{
-        label?: string;
-        heroImage?: string;
-        featureCatalog?: string[];
-        deals?: Deal[];
-        qrLogo?: string;
-      }>).detail;
+      const detail = (
+        e as CustomEvent<{
+          label?: string;
+          heroImage?: string;
+          featureCatalog?: string[];
+          deals?: Deal[];
+          qrLogo?: string;
+        }>
+      ).detail;
       if (!detail || !Array.isArray(detail.deals)) return;
       setOverride({
         kind: 'deals',

@@ -69,10 +69,7 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error('[signage:api] import failed', e);
-    return NextResponse.json(
-      { error: `Import failed: ${(e as Error).message}` },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: `Import failed: ${(e as Error).message}` }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, importedAt: Date.now() });

@@ -21,9 +21,6 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error('[signage:api] theme snapshots list failed', e);
-    return NextResponse.json(
-      { error: `KV read failed: ${(e as Error).message}` },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: `KV read failed: ${(e as Error).message}` }, { status: 500 });
   }
 }

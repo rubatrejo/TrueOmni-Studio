@@ -2,11 +2,7 @@
 
 import type { SignageModuleInstance } from '@/lib/signage/schema';
 
-import {
-  CheckboxField,
-  FieldStack,
-  SelectField,
-} from './module-form-primitives';
+import { CheckboxField, FieldStack, SelectField } from './module-form-primitives';
 import { SignageMediaField } from './SignageMediaField';
 
 type VideoImageModule = Extract<SignageModuleInstance, { kind: 'video-image' }>;

@@ -4,17 +4,9 @@ import { Languages, Loader2, Plus, Search, Sparkles, Star, X } from 'lucide-reac
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { getLocaleInfo } from '@/lib/studio/locale-catalog';
-import {
-  type I18nBundle,
-  type Locale,
-  type LocaleStrings,
-} from '@/lib/studio/schema';
+import { type I18nBundle, type Locale, type LocaleStrings } from '@/lib/studio/schema';
 
-import {
-  getTranslateStatus,
-  translateI18nBulk,
-  translateI18nText,
-} from '../_lib/api-client';
+import { getTranslateStatus, translateI18nBulk, translateI18nText } from '../_lib/api-client';
 
 import { AddLanguageModal } from './AddLanguageModal';
 
@@ -60,10 +52,7 @@ export function I18nEditor({ value, onChange }: I18nEditorProps) {
   const localeList = useMemo<readonly Locale[]>(() => {
     const keys = Object.keys(value);
     if (!keys.includes('en')) keys.unshift('en');
-    return [
-      'en',
-      ...keys.filter((k) => k !== 'en').sort((a, b) => a.localeCompare(b)),
-    ];
+    return ['en', ...keys.filter((k) => k !== 'en').sort((a, b) => a.localeCompare(b))];
   }, [value]);
 
   const allKeys = useMemo(() => {
@@ -104,9 +93,7 @@ export function I18nEditor({ value, onChange }: I18nEditorProps) {
       }
       if (!q) return true;
       if (key.toLowerCase().includes(q)) return true;
-      return localeList.some((loc) =>
-        (value[loc]?.[key] ?? '').toLowerCase().includes(q),
-      );
+      return localeList.some((loc) => (value[loc]?.[key] ?? '').toLowerCase().includes(q));
     });
   }, [allKeys, section, search, value, localeList]);
 
@@ -140,11 +127,12 @@ export function I18nEditor({ value, onChange }: I18nEditorProps) {
   };
 
   const handleAddKey = () => {
-    const raw = window.prompt(
-      'New i18n key (snake_case, lowercase, e.g. "tile_label_my_module")',
-    );
+    const raw = window.prompt('New i18n key (snake_case, lowercase, e.g. "tile_label_my_module")');
     if (!raw) return;
-    const key = raw.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    const key = raw
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, '_');
     if (!key) return;
     if (allKeys.includes(key)) {
       window.alert(`Key "${key}" already exists.`);
@@ -327,10 +315,7 @@ export function I18nEditor({ value, onChange }: I18nEditorProps) {
               {localeList.map((loc) => {
                 const info = getLocaleInfo(loc);
                 return (
-                  <th
-                    key={loc}
-                    className="min-w-[160px] px-2 py-2 font-medium"
-                  >
+                  <th key={loc} className="min-w-[160px] px-2 py-2 font-medium">
                     <span className="flex items-center gap-1">
                       <span className="font-mono text-[10.5px] uppercase">{loc}</span>
                       <span className="truncate text-[10px] text-zinc-500" title={info.nativeName}>
@@ -412,10 +397,7 @@ function MissingSummary({
   bulkProgress: { done: number; total: number } | null;
   onBulkTranslate: (toLocale: string) => void;
 }) {
-  const total = localeList.reduce(
-    (acc, loc) => acc + (loc === 'en' ? 0 : missing[loc] ?? 0),
-    0,
-  );
+  const total = localeList.reduce((acc, loc) => acc + (loc === 'en' ? 0 : (missing[loc] ?? 0)), 0);
   if (total === 0) {
     return (
       <p className="rounded-md border border-emerald-200 bg-emerald-50/60 px-3 py-2 text-[11.5px] text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">
@@ -429,44 +411,46 @@ function MissingSummary({
     <div className="space-y-2 rounded-md border border-amber-200 bg-amber-50/60 px-3 py-2 dark:border-amber-900/40 dark:bg-amber-950/30">
       <div className="flex flex-wrap items-center gap-2 text-[11.5px] text-amber-900 dark:text-amber-200">
         <span className="font-semibold">Missing translations:</span>
-        {localeList.filter((l) => l !== 'en').map((loc) => {
-          const count = missing[loc] ?? 0;
-          const isRunning = bulkRunning === loc;
-          const canTranslate = aiAvailable && count > 0 && !bulkRunning;
-          return (
-            <span key={loc} className="inline-flex items-center gap-1">
-              <span
-                className={`rounded px-1.5 py-0.5 font-mono text-[11px] ${
-                  count > 0
-                    ? 'bg-amber-200/70 text-amber-900 dark:bg-amber-900/50 dark:text-amber-100'
-                    : 'bg-emerald-200/70 text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-100'
-                }`}
-              >
-                {loc.toUpperCase()} {count}
-              </span>
-              {count > 0 && aiAvailable ? (
-                <button
-                  type="button"
-                  disabled={!canTranslate}
-                  onClick={() => onBulkTranslate(loc)}
-                  title={
-                    isRunning
-                      ? `Translating ${bulkProgress?.done ?? 0}/${bulkProgress?.total ?? count}…`
-                      : `Auto-translate ${count} missing key${count === 1 ? '' : 's'} to ${loc.toUpperCase()} via ${providerLabel}`
-                  }
-                  className="inline-flex items-center gap-1 rounded bg-sky-500/15 px-1.5 py-0.5 text-[10.5px] font-semibold text-sky-700 transition hover:bg-sky-500/25 disabled:cursor-not-allowed disabled:opacity-50 dark:text-sky-300"
+        {localeList
+          .filter((l) => l !== 'en')
+          .map((loc) => {
+            const count = missing[loc] ?? 0;
+            const isRunning = bulkRunning === loc;
+            const canTranslate = aiAvailable && count > 0 && !bulkRunning;
+            return (
+              <span key={loc} className="inline-flex items-center gap-1">
+                <span
+                  className={`rounded px-1.5 py-0.5 font-mono text-[11px] ${
+                    count > 0
+                      ? 'bg-amber-200/70 text-amber-900 dark:bg-amber-900/50 dark:text-amber-100'
+                      : 'bg-emerald-200/70 text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-100'
+                  }`}
                 >
-                  {isRunning ? (
-                    <Loader2 className="h-2.5 w-2.5 animate-spin" />
-                  ) : (
-                    <Sparkles className="h-2.5 w-2.5" />
-                  )}
-                  {isRunning ? 'Translating…' : 'Auto'}
-                </button>
-              ) : null}
-            </span>
-          );
-        })}
+                  {loc.toUpperCase()} {count}
+                </span>
+                {count > 0 && aiAvailable ? (
+                  <button
+                    type="button"
+                    disabled={!canTranslate}
+                    onClick={() => onBulkTranslate(loc)}
+                    title={
+                      isRunning
+                        ? `Translating ${bulkProgress?.done ?? 0}/${bulkProgress?.total ?? count}…`
+                        : `Auto-translate ${count} missing key${count === 1 ? '' : 's'} to ${loc.toUpperCase()} via ${providerLabel}`
+                    }
+                    className="inline-flex items-center gap-1 rounded bg-sky-500/15 px-1.5 py-0.5 text-[10.5px] font-semibold text-sky-700 transition hover:bg-sky-500/25 disabled:cursor-not-allowed disabled:opacity-50 dark:text-sky-300"
+                  >
+                    {isRunning ? (
+                      <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-2.5 w-2.5" />
+                    )}
+                    {isRunning ? 'Translating…' : 'Auto'}
+                  </button>
+                ) : null}
+              </span>
+            );
+          })}
       </div>
       {aiAvailable && providerLabel ? (
         <p className="text-[10.5px] text-amber-800/80 dark:text-amber-300/70">
@@ -477,7 +461,8 @@ function MissingSummary({
         </p>
       ) : !aiAvailable ? (
         <p className="text-[10.5px] text-amber-800/80 dark:text-amber-300/70">
-          Set <code className="font-mono">DEEPL_API_KEY</code> in <code className="font-mono">.env.local</code> to enable bulk auto-translate.
+          Set <code className="font-mono">DEEPL_API_KEY</code> in{' '}
+          <code className="font-mono">.env.local</code> to enable bulk auto-translate.
         </p>
       ) : null}
     </div>
@@ -513,9 +498,7 @@ function I18nRow({
               value={cellValue}
               onCommit={(next) => onChangeCell(loc, k, next)}
               ariaLabel={`${k} in ${loc}`}
-              missing={
-                loc !== 'en' && !!enValue && (!cellValue || cellValue.trim() === '')
-              }
+              missing={loc !== 'en' && !!enValue && (!cellValue || cellValue.trim() === '')}
               translateInput={
                 aiAvailable && loc !== 'en' && enValue
                   ? { sourceText: enValue, fromLocale: 'en', toLocale: loc, key: k }

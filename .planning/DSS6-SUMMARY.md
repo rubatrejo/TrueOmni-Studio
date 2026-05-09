@@ -59,17 +59,17 @@ con cap FIFO 10 y permite restore con confirmación inline.
 
 ## Archivos tocados
 
-| Archivo | Tipo |
-|---|---|
-| `src/lib/signage/kv-store.ts` | + `kvSignageSnapshot` namespace |
-| `src/app/api/studio/signage/displays/[client]/[displaySlug]/route.ts` | PUT crea snapshot del previo |
-| `src/app/api/studio/signage/displays/[client]/[displaySlug]/snapshots/route.ts` | NUEVO — GET list |
-| `src/app/api/studio/signage/displays/[client]/[displaySlug]/snapshots/[id]/restore/route.ts` | NUEVO — POST restore |
-| `src/app/studio/digital-displays/_lib/snapshots-api.ts` | NUEVO |
-| `src/app/studio/digital-displays/_components/display/VersionsPanel.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/DisplayEditor.tsx` | montar VersionsPanel |
-| `.planning/DSS6-PLAN.md` | NUEVO |
-| `.planning/DSS6-SUMMARY.md` | NUEVO |
+| Archivo                                                                                      | Tipo                            |
+| -------------------------------------------------------------------------------------------- | ------------------------------- |
+| `src/lib/signage/kv-store.ts`                                                                | + `kvSignageSnapshot` namespace |
+| `src/app/api/studio/signage/displays/[client]/[displaySlug]/route.ts`                        | PUT crea snapshot del previo    |
+| `src/app/api/studio/signage/displays/[client]/[displaySlug]/snapshots/route.ts`              | NUEVO — GET list                |
+| `src/app/api/studio/signage/displays/[client]/[displaySlug]/snapshots/[id]/restore/route.ts` | NUEVO — POST restore            |
+| `src/app/studio/digital-displays/_lib/snapshots-api.ts`                                      | NUEVO                           |
+| `src/app/studio/digital-displays/_components/display/VersionsPanel.tsx`                      | NUEVO                           |
+| `src/app/studio/digital-displays/_components/DisplayEditor.tsx`                              | montar VersionsPanel            |
+| `.planning/DSS6-PLAN.md`                                                                     | NUEVO                           |
+| `.planning/DSS6-SUMMARY.md`                                                                  | NUEVO                           |
 
 ## Verificado
 

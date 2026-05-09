@@ -74,9 +74,11 @@ export function GuestbookMapScreen({
     for (const m of seedMarkersRef.current) m.remove();
     seedMarkersRef.current = [];
 
-    const mapboxglGlobal = (globalThis as unknown as {
-      mapboxgl?: typeof mapboxgl;
-    }).mapboxgl;
+    const mapboxglGlobal = (
+      globalThis as unknown as {
+        mapboxgl?: typeof mapboxgl;
+      }
+    ).mapboxgl;
     void import('mapbox-gl').then((mod) => {
       if (cancelled) return;
       const Marker = mod.Marker ?? mapboxglGlobal?.Marker;

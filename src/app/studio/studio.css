@@ -64,10 +64,8 @@ body:has(.studio-shell) {
   --studio-warning: #f59e0b;
   --studio-danger: #ef4444;
 
-  --studio-shadow-soft:
-    0 1px 2px 0 rgb(0 0 0 / 0.3), 0 1px 1px -1px rgb(0 0 0 / 0.2);
-  --studio-shadow-elevated:
-    0 4px 12px -2px rgb(0 0 0 / 0.5), 0 2px 6px -2px rgb(0 0 0 / 0.3);
+  --studio-shadow-soft: 0 1px 2px 0 rgb(0 0 0 / 0.3), 0 1px 1px -1px rgb(0 0 0 / 0.2);
+  --studio-shadow-elevated: 0 4px 12px -2px rgb(0 0 0 / 0.5), 0 2px 6px -2px rgb(0 0 0 / 0.3);
 
   /* Layout */
   --studio-sidebar-w: 240px;
@@ -234,25 +232,11 @@ body:has(.studio-shell) {
  * cubre el rango completo white→black.
  */
 .studio-root .studio-img-checker {
-  background:
-    linear-gradient(
-      135deg,
-      #18181b 0%,
-      #18181b 49.5%,
-      #e4e4e7 50.5%,
-      #fafafa 100%
-    );
+  background: linear-gradient(135deg, #18181b 0%, #18181b 49.5%, #e4e4e7 50.5%, #fafafa 100%);
 }
 .dark .studio-root .studio-img-checker,
 .studio-root.dark .studio-img-checker {
-  background:
-    linear-gradient(
-      135deg,
-      #09090b 0%,
-      #09090b 49.5%,
-      #71717a 50.5%,
-      #d4d4d8 100%
-    );
+  background: linear-gradient(135deg, #09090b 0%, #09090b 49.5%, #71717a 50.5%, #d4d4d8 100%);
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */

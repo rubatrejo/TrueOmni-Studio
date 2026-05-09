@@ -31,6 +31,7 @@
     - Usar `loadLocale` de `src/lib/i18n-server.ts` para el bootstrap.
 
     Tipos exportados: `Locale`, `LocaleStrings`, `I18nBundle`.
+
   </action>
   <verify>
     `pnpm typecheck` limpio.
@@ -63,6 +64,7 @@
     onChange immutable: clona, modifica el path puntual, devuelve nuevo bundle.
 
     Sin librerías nuevas. Tailwind + lucide-react ya disponibles.
+
   </action>
   <verify>
     `pnpm typecheck` limpio.
@@ -108,6 +110,7 @@
     - typecheck + lint limpios.
 
     Commit: `feat(studio): S4 base — i18n editor side-by-side con detección de missing keys`.
+
   </action>
   <verify>
     `pnpm typecheck && pnpm lint` limpios.

@@ -71,7 +71,8 @@ async function buildGreeting(
   const askAi = (cfg.features?.home as { askAi?: { greeting?: string } } | undefined)?.askAi;
   const fromI18n = await readI18nGreeting(slug, locale);
   const fromI18nDefault =
-    fromI18n ?? (slug !== DEFAULT_CLIENT_SLUG ? await readI18nGreeting(DEFAULT_CLIENT_SLUG, locale) : null);
+    fromI18n ??
+    (slug !== DEFAULT_CLIENT_SLUG ? await readI18nGreeting(DEFAULT_CLIENT_SLUG, locale) : null);
   const raw = fromI18nDefault ?? askAi?.greeting ?? cfg.textos?.ai_greeting ?? '';
   return raw.replaceAll('{client_name}', clientName).trim();
 }

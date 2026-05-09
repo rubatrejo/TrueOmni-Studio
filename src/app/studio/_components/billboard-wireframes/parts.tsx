@@ -38,7 +38,9 @@ export function SlotBox({
         rx={rx}
         className="fill-zinc-100 stroke-current dark:fill-zinc-800/40"
       />
-      {withImage && <ImagePlaceholder cx={x + width / 2} cy={y + height / 2} size={Math.min(width, height)} />}
+      {withImage && (
+        <ImagePlaceholder cx={x + width / 2} cy={y + height / 2} size={Math.min(width, height)} />
+      )}
     </g>
   );
 }
@@ -156,13 +158,25 @@ export function ImagePlaceholder({ cx, cy, size }: { cx: number; cy: number; siz
       {/* Sol */}
       <circle cx={left + s * 0.3} cy={top + s * 0.32} r={s * 0.1} />
       {/* Montañas */}
-      <path d={`M ${left} ${top + s * 0.78} L ${left + s * 0.35} ${top + s * 0.42} L ${left + s * 0.55} ${top + s * 0.62} L ${left + s * 0.78} ${top + s * 0.32} L ${left + s} ${top + s * 0.78} Z`} />
+      <path
+        d={`M ${left} ${top + s * 0.78} L ${left + s * 0.35} ${top + s * 0.42} L ${left + s * 0.55} ${top + s * 0.62} L ${left + s * 0.78} ${top + s * 0.32} L ${left + s} ${top + s * 0.78} Z`}
+      />
     </g>
   );
 }
 
 /** Reloj minimalista (dos rayas tipo dígitos). Para B1 header. */
-export function ClockGlyph({ x, y, width = 16, height = 5 }: { x: number; y: number; width?: number; height?: number }) {
+export function ClockGlyph({
+  x,
+  y,
+  width = 16,
+  height = 5,
+}: {
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+}) {
   return (
     <g className="fill-current opacity-70">
       <rect x={x} y={y} width={width * 0.42} height={height} rx={0.5} />

@@ -27,14 +27,15 @@
 
 Kiosk Studio (versión v0.1) es un editor white-label para configurar kioscos de TrueOmni sin tocar código. Tras una sesión intensa de polish (responsive editor, dark mode, naming consistency, favicon visibility), el producto está **funcional y usable** en el operador típico (laptop ≥1280px en dark mode). El audit identifica **48 findings** distribuidos así:
 
-| Severity | Count | % |
-|----------|-------|---|
-| P0 Critical | 3 | 6% |
-| P1 High | 14 | 29% |
-| P2 Medium | 22 | 46% |
-| P3 Nice-to-have | 9 | 19% |
+| Severity        | Count | %   |
+| --------------- | ----- | --- |
+| P0 Critical     | 3     | 6%  |
+| P1 High         | 14    | 29% |
+| P2 Medium       | 22    | 46% |
+| P3 Nice-to-have | 9     | 19% |
 
 **Top 5 áreas críticas:**
+
 1. **Languages tab** — grid de 7 columnas trunca celdas a 1 char en panel `<xl`. Bloquea uso real de i18n.
 2. **Estados vacíos** ausentes — listings/events/passes sin entries muestran espacio en blanco sin guidance.
 3. **Keyboard navigation** parcial — sidebar tabs y ProductDropdown no responden a flechas, solo mouse.
@@ -42,6 +43,7 @@ Kiosk Studio (versión v0.1) es un editor white-label para configurar kioscos de
 5. **Onboarding cero** — primer login no orienta al operador. `+` plus icon en grid empty es la única pista.
 
 **Métrica de salud por categoría:**
+
 - UX: 18 findings — el ciclo de edición funciona pero faltan estados intermedios.
 - UI: 13 findings — sólido visualmente, deuda de polish en spacing y typography rhythm.
 - A11y: 8 findings — keyboard nav y focus rings necesitan refuerzo para WCAG AA.
@@ -55,17 +57,17 @@ Kiosk Studio (versión v0.1) es un editor white-label para configurar kioscos de
 
 ### Skills aplicados (9 perspectivas)
 
-| Skill | Lente |
-|-------|-------|
-| `superpowers:brainstorming` | Cuestiona suposiciones del flujo del operador |
-| `frontend-design` | Estructura de componentes, jerarquía visual, layouts |
-| `ui-ux-pro-max` | Micro-interactions, motion, feedback, estados vacíos/error |
-| `theme-factory` | Consistencia de tokens (color, spacing, type), brand alignment |
-| `web-design-guidelines` | Typography rhythm, contrast, hierarchy, spacing |
-| `vercel-react-best-practices` | Server vs client components, perf, hydration |
-| `audit-website` | Heuristic eval (Nielsen 10) + WCAG AA mínimo |
-| `Trueomni-product-design-excellence-skill` | Operator-first patterns, kiosk-aware UX |
-| `ui-component-libraries` + `shadcn-awesome-libs` | Oportunidades de upgrade visual |
+| Skill                                            | Lente                                                          |
+| ------------------------------------------------ | -------------------------------------------------------------- |
+| `superpowers:brainstorming`                      | Cuestiona suposiciones del flujo del operador                  |
+| `frontend-design`                                | Estructura de componentes, jerarquía visual, layouts           |
+| `ui-ux-pro-max`                                  | Micro-interactions, motion, feedback, estados vacíos/error     |
+| `theme-factory`                                  | Consistencia de tokens (color, spacing, type), brand alignment |
+| `web-design-guidelines`                          | Typography rhythm, contrast, hierarchy, spacing                |
+| `vercel-react-best-practices`                    | Server vs client components, perf, hydration                   |
+| `audit-website`                                  | Heuristic eval (Nielsen 10) + WCAG AA mínimo                   |
+| `Trueomni-product-design-excellence-skill`       | Operator-first patterns, kiosk-aware UX                        |
+| `ui-component-libraries` + `shadcn-awesome-libs` | Oportunidades de upgrade visual                                |
 
 ### Coverage
 
@@ -77,6 +79,7 @@ Kiosk Studio (versión v0.1) es un editor white-label para configurar kioscos de
 ### Metodología por finding
 
 Cada finding tiene:
+
 - **ID** único (`F-NN`).
 - **Severity**: P0 (broken) / P1 (alta) / P2 (media) / P3 (nice-to-have).
 - **Category**: UX | UI | A11y | Perf | Consistency | Code.
@@ -124,6 +127,7 @@ Lo que **podría mejorar**:
 **Why it matters:** Hace imposible editar i18n a viewports comunes. Bloquea el flujo "completar traducciones" que es uno de los más importantes para clientes multinacionales.
 
 **Recommendation:**
+
 1. **A corto plazo (S):** scroll horizontal en el grid cuando viewport `<xl`. Añadir `overflow-x-auto` al wrapper + `min-w-[640px]` al table.
 2. **A medio plazo (M):** reorganizar a layout vertical en `<xl` — cada key en su tarjeta con los 6 locales como filas en lugar de columnas. Más legible y editable a cualquier ancho.
 
@@ -154,6 +158,7 @@ Lo que **podría mejorar**:
 **Why it matters:** Publish es la acción más crítica del Studio (lleva config a producción). Sin feedback claro de éxito/error, el operador puede creer que no pasó nada y republicar 5 veces.
 
 **Recommendation:**
+
 1. Añadir estados explícitos al modal: `idle | publishing | success | error`.
 2. En error: mostrar el mensaje del backend + botón "Retry" / "Cancel".
 3. En success: toast verde + auto-cerrar tras 3s.
@@ -174,6 +179,7 @@ Lo que **podría mejorar**:
 **Why it matters:** El "first run" es el momento más frágil. Operador nuevo no sabe si: (a) Algo está roto, (b) Hay que esperar, (c) Tiene que clickear algo. La adopción muere aquí.
 
 **Recommendation:** Crear un componente `<EditorEmptyState>` reusable con:
+
 - Ilustración SVG mínima (tipo placeholder con icono lucide grande).
 - Headline: "No [items] yet".
 - Subtext explicando por qué importa.
@@ -195,6 +201,7 @@ Aplicar a las 12 secciones afectadas.
 **Why it matters:** Operador con keyboard puro tarda 19 tabs para llegar al último editor. WCAG AA exige navegación coherente.
 
 **Recommendation:** Implementar roving tabindex pattern:
+
 - Sidebar como `role="tablist"`, items como `role="tab"`.
 - Solo el activo tiene `tabindex="0"`, otros `tabindex="-1"`.
 - Flechas ↑↓ mueven focus sin consumir Tab.
@@ -214,6 +221,7 @@ Aplicar a las 12 secciones afectadas.
 **Why it matters:** El operador no aprende un mental model — debe averiguar caso por caso si su edición es válida.
 
 **Recommendation:**
+
 1. Definir convención: validate on blur, mostrar error inline (red-500 border + text-xs explicativo).
 2. Crear hook `useFieldValidation(value, schema)` reusable con zod.
 3. Aplicar a todos los TextField, NumberField, ColorField del Studio.
@@ -231,6 +239,7 @@ Aplicar a las 12 secciones afectadas.
 **Why it matters:** Operador en laptop 13" (1024-1280) ve un dot de color sin contexto. Si no recuerda la convención, no sabe si su edit fue guardado.
 
 **Recommendation:**
+
 1. Mantener el text visible en lg pero abreviado: "Saved", "Unsaved", "Saving...".
 2. O añadir tooltip al dot con el label completo.
 3. (Ya tiene title attribute pero los tooltips nativos son lentos — usar componente shadcn Tooltip).
@@ -262,6 +271,7 @@ Aplicar a las 12 secciones afectadas.
 **Why it matters:** Causa confusión: "¿Por qué se borraron mis tiles del Home Dashboard?".
 
 **Recommendation:**
+
 1. Tooltip al toggle: "Disabling X also hides X tile from Home Dashboard, AI Avatar, Languages tab".
 2. O modal de confirmación cuando se desactiva un módulo con dependencias activas.
 3. O badge en el Home Dashboard tab indicando "X tiles affected by Modules toggles".
@@ -289,6 +299,7 @@ Aplicar a las 12 secciones afectadas.
 **Where:** `src/app/studio/_components/catalog/CatalogList.tsx`
 
 **Description:** Los catálogos tienen Import/Export en toolbar pero no:
+
 - Bulk select (checkbox por row + "X selected" + delete/duplicate/edit).
 - Filter avanzado (solo búsqueda libre).
 - Sort columns.
@@ -296,6 +307,7 @@ Aplicar a las 12 secciones afectadas.
 **Why it matters:** Un cliente con 200 deals + 100 events necesita herramientas de bulk para escalar. El estado actual fuerza edición one-by-one.
 
 **Recommendation:**
+
 1. Adoptar `shadcn data-table` (TanStack Table) con bulk select + sort + filter.
 2. Mantener el actual Import/Export para CSV bulk.
 3. Si es muy grande, mover a página dedicada en lugar de panel angosto.
@@ -327,6 +339,7 @@ Aplicar a las 12 secciones afectadas.
 **Why it matters:** Cognitive load mayor — el "Kiosks" aparece 2 veces seguidas con significados distintos.
 
 **Recommendation:**
+
 1. Esconder breadcrumb en `lg` (ya casi se hace).
 2. O reemplazar el dropdown "Kiosks ▾" con tabs en otra ubicación.
 3. O fusionar: el dropdown abarca ambos roles (selecciona producto Y muestra kiosk activo).
@@ -344,6 +357,7 @@ Aplicar a las 12 secciones afectadas.
 **Why it matters:** Mouse user no recibe affordance clara. Keyboard user no ve qué item tiene focus.
 
 **Recommendation:**
+
 1. Hover bg uniforme: `hover:bg-zinc-50/dark:hover:bg-zinc-900/60` con transition-colors duration-150.
 2. Focus ring custom: `focus-visible:ring-2 focus-visible:ring-sky-500/40 focus-visible:ring-offset-2`.
 3. Active state coexiste con focus (no se sobreescriben).
@@ -389,6 +403,7 @@ Aplicar a las 12 secciones afectadas.
 **Why it matters:** Si el iframe pierde el bridge (postMessage falla), el operador no se entera y cree que el preview está actualizado.
 
 **Recommendation:**
+
 1. Realmente trackear el estado del postMessage bridge (last ack timestamp).
 2. Mostrar verde si <5s, amber si 5-30s, rojo si >30s con icon de warning.
 3. Si rojo, ofrecer botón "Reload preview" que hace `previewKey++`.
@@ -408,6 +423,7 @@ Aplicar a las 12 secciones afectadas.
 **Why it matters:** Pequeñas inconsistencias de tamaño se acumulan visualmente. Más difícil de mantener.
 
 **Recommendation:** Definir 6 escalas en `tailwind.config.ts` o `studio.css`:
+
 - `text-caption` (11px) — meta info, tags
 - `text-body-sm` (12.5px) — UI text
 - `text-body` (14px) — default
@@ -444,6 +460,7 @@ Refactor incremental por sección.
 **Why it matters:** Cuando todo es accent, nada es accent. El ojo no sabe qué es importante.
 
 **Recommendation:**
+
 1. Reservar accent para SOLO: primary action buttons + focus rings.
 2. Active states en sidebar/tabs: usar zinc neutral con ring sutil.
 3. Links: subrayado + underline-offset, no full color change.
@@ -461,6 +478,7 @@ Refactor incremental por sección.
 **Why it matters:** Visualmente "saltón". Cada tamaño tiene un peso visual distinto que distrae.
 
 **Recommendation:** Definir 4 sizes:
+
 - `icon-sm` (14px) — inline en botones pequeños
 - `icon-base` (16px) — default
 - `icon-md` (20px) — navegación principal
@@ -479,6 +497,7 @@ Refactor incremental por sección.
 **Why it matters:** "v0" implica "borrador", "v1" implica "live publicado". Sin contexto, ambiguo.
 
 **Recommendation:**
+
 1. Tooltip: "Draft (no published version yet)" / "v3 published 2 days ago".
 2. Cambiar el badge color: gray para draft, green para live, blue para versioned.
 
@@ -547,6 +566,7 @@ Refactor incremental por sección.
 **Where:** Múltiples archivos
 
 **Description:**
+
 - "New kiosk" botón: `bg-zinc-900 text-white` shadow-md
 - "Publish" botón: `bg-zinc-900 text-white` shadow-sm
 - "Save" pill: `bg-zinc-100 text-zinc-700` (cuando saved)
@@ -584,6 +604,7 @@ Misma jerarquía (primary action) con estilos distintos.
 **Why it matters:** Trust issue. Si el backend cae y el badge dice OK, pierde credibilidad.
 
 **Recommendation:**
+
 1. Quitar si no hay backing real.
 2. O conectar a un endpoint `/api/health` que monitoree KV + asset routes + bridge.
 3. Cambiar a amber si <100% disponible, rojo si crítico.
@@ -611,6 +632,7 @@ Misma jerarquía (primary action) con estilos distintos.
 **Where:** Home + Editor
 
 **Description:** Operador nuevo entra al Studio. Ve cards. ¿Qué hace?
+
 - ¿Click en una card? → Editor con 21 secciones, ¿por dónde empezar?
 - ¿+ New kiosk? → Modal con slug + nombre, sin guidance del flujo completo.
 
@@ -619,6 +641,7 @@ Sin tour, sin tooltips, sin progressive disclosure.
 **Why it matters:** Time-to-first-value alto. Operadores capacitados via Slack/email/llamada.
 
 **Recommendation:**
+
 1. Coach marks/walkthrough opcional al primer login: 5 pasos clave (Branding → Modules → Content → Preview → Publish).
 2. Empty state del home con video/GIF demo.
 3. Per-section "First time?" callouts.
@@ -854,6 +877,7 @@ Sin tour, sin tooltips, sin progressive disclosure.
 Lo bueno: dark mode funciona en TODAS las 21 secciones del editor (validado con audit screenshots). El contraste base zinc-950/zinc-100 cumple WCAG AAA.
 
 Áreas de mejora:
+
 - Border colors a veces invisibles en dark (zinc-800 sobre zinc-950 = baja diferenciación).
 - Hover states más sutiles en dark — necesitan más bg shift.
 - Selected/active rings: aplicar uniforme `ring-sky-500/30` en dark, `ring-zinc-200` en light.
@@ -861,6 +885,7 @@ Lo bueno: dark mode funciona en TODAS las 21 secciones del editor (validado con 
 ### Tema B · Operator-first UX
 
 El Studio está construido como "developer tool first". Patrones:
+
 - Toggles tipo developer console.
 - Sin coach marks ni progressive disclosure.
 - JSON-mental-model leakage (preview de tokens hex, slug visible).
@@ -870,6 +895,7 @@ Mejora: re-empaquetar como "creative tool" con progressive disclosure. Operador 
 ### Tema C · Consistency
 
 Inconsistencias detectadas (de mayor a menor):
+
 1. Hover states (sidebar items vs cards vs buttons).
 2. Modal backdrops.
 3. Form validation.
@@ -882,6 +908,7 @@ Recomendación: documento `STUDIO-DESIGN-SYSTEM.md` con tokens canónicos. Hoy e
 ### Tema D · A11y
 
 WCAG AA mínimo necesita:
+
 - Roving tabindex en sidebar.
 - Focus rings consistentes.
 - Skip-to-main-content link.
@@ -891,8 +918,9 @@ WCAG AA mínimo necesita:
 ### Tema E · Performance
 
 Bundle del editor (`/studio/[slug]`) es grande:
+
 - framer-motion (~60KB)
-- 18 editor components con catalog/* (cada uno con form state)
+- 18 editor components con catalog/\* (cada uno con form state)
 - Zustand + GSAP del kiosk runtime que hereda
 
 Recomendación: lazy-load editors por sección con `React.lazy + Suspense`. Solo carga el editor activo.
@@ -901,18 +929,18 @@ Recomendación: lazy-load editors por sección con `React.lazy + Suspense`. Solo
 
 ## 9. Quick-Wins Backlog (Top 10 por ROI)
 
-| # | Finding | Severity | Effort | ROI |
-|---|---------|----------|--------|-----|
-| 1 | F-01 — Languages tab scroll horizontal | P0 | S | ⭐⭐⭐⭐⭐ |
-| 2 | F-08 — Iframe auto-fit zoom | P1 | S | ⭐⭐⭐⭐⭐ |
-| 3 | F-07 — Save status text en lg | P1 | S | ⭐⭐⭐⭐ |
-| 4 | F-05 — Roving tabindex sidebar | P1 | S | ⭐⭐⭐⭐ |
-| 5 | F-15 — Modal backdrop unificado | P1 | S | ⭐⭐⭐ |
-| 6 | F-14 — Hover/focus consistente | P1 | S | ⭐⭐⭐ |
-| 7 | F-21 — Icon size system | P2 | S | ⭐⭐⭐ |
-| 8 | F-26 — beforeunload warning | P2 | S | ⭐⭐⭐⭐ |
-| 9 | F-30 — Hide Next.js dev indicator | P2 | S | ⭐⭐⭐ |
-| 10 | F-22 — Version pill tooltip | P2 | S | ⭐⭐⭐ |
+| #   | Finding                                | Severity | Effort | ROI        |
+| --- | -------------------------------------- | -------- | ------ | ---------- |
+| 1   | F-01 — Languages tab scroll horizontal | P0       | S      | ⭐⭐⭐⭐⭐ |
+| 2   | F-08 — Iframe auto-fit zoom            | P1       | S      | ⭐⭐⭐⭐⭐ |
+| 3   | F-07 — Save status text en lg          | P1       | S      | ⭐⭐⭐⭐   |
+| 4   | F-05 — Roving tabindex sidebar         | P1       | S      | ⭐⭐⭐⭐   |
+| 5   | F-15 — Modal backdrop unificado        | P1       | S      | ⭐⭐⭐     |
+| 6   | F-14 — Hover/focus consistente         | P1       | S      | ⭐⭐⭐     |
+| 7   | F-21 — Icon size system                | P2       | S      | ⭐⭐⭐     |
+| 8   | F-26 — beforeunload warning            | P2       | S      | ⭐⭐⭐⭐   |
+| 9   | F-30 — Hide Next.js dev indicator      | P2       | S      | ⭐⭐⭐     |
+| 10  | F-22 — Version pill tooltip            | P2       | S      | ⭐⭐⭐     |
 
 **Total effort estimado: ~15h (2 días).** Resuelve P0 + 7 P1/P2 más visibles.
 
@@ -921,24 +949,28 @@ Recomendación: lazy-load editors por sección con `React.lazy + Suspense`. Solo
 ## 10. Roadmap recomendado
 
 ### Sprint 1 (semana 1) — P0 + Quick Wins
+
 - F-01 Languages scroll
 - F-02 Default favicon real
 - F-03 Publish error feedback
-- + Top 10 quick wins
+- - Top 10 quick wins
 
 ### Sprint 2 (semana 2) — Empty States + Onboarding
+
 - F-04 EditorEmptyState reusable (12 secciones)
 - F-31 Coach marks first run
 - F-09 Modules cascade tooltip
 - F-10 Versions timeline local
 
 ### Sprint 3 (semana 3) — Forms + Validation + Catalogs
+
 - F-06 useFieldValidation hook
 - F-11 shadcn data-table en catalogs
 - F-32 ImageField progress
 - F-39 User avatar dropdown
 
 ### Sprint 4 (semana 4) — Visual System
+
 - F-18 Type scale
 - F-19 Spacing tokens
 - F-20 Color semantics
@@ -946,6 +978,7 @@ Recomendación: lazy-load editors por sección con `React.lazy + Suspense`. Solo
 - Cross-cutting tema C
 
 ### Backlog (post v0.2)
+
 - F-12 Photo Booth live preview
 - F-44 Keyboard shortcuts cheat sheet
 - F-47 Command palette
@@ -958,56 +991,56 @@ Recomendación: lazy-load editors por sección con `React.lazy + Suspense`. Solo
 
 ### Findings index (alfabético por ID)
 
-| ID | Severity | Category | Title |
-|----|----------|----------|-------|
-| F-01 | P0 | UX/Consistency | Languages tab unusable en panel <xl |
-| F-02 | P0 | Code/UX | default favicon path 404 |
-| F-03 | P0 | UX/A11y | Publish flow falta error feedback |
-| F-04 | P1 | UX | Empty states ausentes en 12 secciones |
-| F-05 | P1 | A11y | Keyboard nav incompleta en sidebar |
-| F-06 | P1 | UX/Consistency | Form validation inconsistente |
-| F-07 | P1 | UX | Save status text invisible en lg-xl |
-| F-08 | P1 | UX | Iframe se sale del viewport @ 1024 |
-| F-09 | P1 | UX | Modules cascada side-effects sin pista |
-| F-10 | P1 | UX | Versions tab placeholder no genera trust |
-| F-11 | P1 | UX | Catalog editors sin bulk operations |
-| F-12 | P1 | UX | Photo Booth sin preview en vivo |
-| F-13 | P1 | UI | TopBar layout izquierdo confuso |
-| F-14 | P1 | UI/Consistency | Hover/focus inconsistente |
-| F-15 | P1 | UI/Consistency | Modal backdrops inconsistentes |
-| F-16 | P1 | UI | Hero h1 br hardcoded rompe en mobile |
-| F-17 | P1 | UX | Live preview connected es decorativo |
-| F-18 | P2 | UI | Typography scale no estandarizada |
-| F-19 | P2 | UI/Consistency | Spacing inconsistente |
-| F-20 | P2 | UI | Accent secondary sin uso semántico |
-| F-21 | P2 | UI | Icon sizes inconsistentes |
-| F-22 | P2 | UX | Version pill v0 sin contexto |
-| F-23 | P2 | UX | Billboard preview requiere clic extra |
-| F-24 | P2 | UX | Languages sin filter "missing only" |
-| F-25 | P2 | UX | Open in tab URL no shareable |
-| F-26 | P2 | UX | Sin warning de unsaved changes |
-| F-27 | P2 | UI/Consistency | CTAs primarios variantes |
-| F-28 | P2 | UI | Card hover lift invisible en dark |
-| F-29 | P2 | UX | Footer "All systems operational" estático |
-| F-30 | P2 | UI/Code | Next.js dev indicator visible |
-| F-31 | P2 | UX | Onboarding cero |
-| F-32 | P2 | UX | ImageField upload sin progress |
-| F-33 | P2 | UX/Perf | CustomFont sin size limit |
-| F-34 | P2 | UI | Survey progress sin bar |
-| F-35 | P2 | A11y/Consistency | Modals Escape inconsistente |
-| F-36 | P2 | UI | Sidebar footer overflow en sm |
-| F-37 | P2 | UX | Docs TOC no sticky |
-| F-38 | P2 | UX | Iframe orientation no auto-zoom |
-| F-39 | P2 | UX | Avatar sin dropdown menu |
-| F-40 | P3 | UI | Theme toggle sin animación |
-| F-41 | P3 | Perf | Framer-motion overhead |
-| F-42 | P3 | Perf | Logo SVG re-render |
-| F-43 | P3 | UX | CSV import sin preview rows |
-| F-44 | P3 | UX | Keyboard shortcuts inexistentes |
-| F-45 | P3 | UI | Coming-soon empty states genéricos |
-| F-46 | P3 | UI | Versions roadmap como lista plana |
-| F-47 | P3 | UX | Sin command palette Cmd+K |
-| F-48 | P3 | UX | Sin acceso a logs/diagnostics |
+| ID   | Severity | Category         | Title                                     |
+| ---- | -------- | ---------------- | ----------------------------------------- |
+| F-01 | P0       | UX/Consistency   | Languages tab unusable en panel <xl       |
+| F-02 | P0       | Code/UX          | default favicon path 404                  |
+| F-03 | P0       | UX/A11y          | Publish flow falta error feedback         |
+| F-04 | P1       | UX               | Empty states ausentes en 12 secciones     |
+| F-05 | P1       | A11y             | Keyboard nav incompleta en sidebar        |
+| F-06 | P1       | UX/Consistency   | Form validation inconsistente             |
+| F-07 | P1       | UX               | Save status text invisible en lg-xl       |
+| F-08 | P1       | UX               | Iframe se sale del viewport @ 1024        |
+| F-09 | P1       | UX               | Modules cascada side-effects sin pista    |
+| F-10 | P1       | UX               | Versions tab placeholder no genera trust  |
+| F-11 | P1       | UX               | Catalog editors sin bulk operations       |
+| F-12 | P1       | UX               | Photo Booth sin preview en vivo           |
+| F-13 | P1       | UI               | TopBar layout izquierdo confuso           |
+| F-14 | P1       | UI/Consistency   | Hover/focus inconsistente                 |
+| F-15 | P1       | UI/Consistency   | Modal backdrops inconsistentes            |
+| F-16 | P1       | UI               | Hero h1 br hardcoded rompe en mobile      |
+| F-17 | P1       | UX               | Live preview connected es decorativo      |
+| F-18 | P2       | UI               | Typography scale no estandarizada         |
+| F-19 | P2       | UI/Consistency   | Spacing inconsistente                     |
+| F-20 | P2       | UI               | Accent secondary sin uso semántico        |
+| F-21 | P2       | UI               | Icon sizes inconsistentes                 |
+| F-22 | P2       | UX               | Version pill v0 sin contexto              |
+| F-23 | P2       | UX               | Billboard preview requiere clic extra     |
+| F-24 | P2       | UX               | Languages sin filter "missing only"       |
+| F-25 | P2       | UX               | Open in tab URL no shareable              |
+| F-26 | P2       | UX               | Sin warning de unsaved changes            |
+| F-27 | P2       | UI/Consistency   | CTAs primarios variantes                  |
+| F-28 | P2       | UI               | Card hover lift invisible en dark         |
+| F-29 | P2       | UX               | Footer "All systems operational" estático |
+| F-30 | P2       | UI/Code          | Next.js dev indicator visible             |
+| F-31 | P2       | UX               | Onboarding cero                           |
+| F-32 | P2       | UX               | ImageField upload sin progress            |
+| F-33 | P2       | UX/Perf          | CustomFont sin size limit                 |
+| F-34 | P2       | UI               | Survey progress sin bar                   |
+| F-35 | P2       | A11y/Consistency | Modals Escape inconsistente               |
+| F-36 | P2       | UI               | Sidebar footer overflow en sm             |
+| F-37 | P2       | UX               | Docs TOC no sticky                        |
+| F-38 | P2       | UX               | Iframe orientation no auto-zoom           |
+| F-39 | P2       | UX               | Avatar sin dropdown menu                  |
+| F-40 | P3       | UI               | Theme toggle sin animación                |
+| F-41 | P3       | Perf             | Framer-motion overhead                    |
+| F-42 | P3       | Perf             | Logo SVG re-render                        |
+| F-43 | P3       | UX               | CSV import sin preview rows               |
+| F-44 | P3       | UX               | Keyboard shortcuts inexistentes           |
+| F-45 | P3       | UI               | Coming-soon empty states genéricos        |
+| F-46 | P3       | UI               | Versions roadmap como lista plana         |
+| F-47 | P3       | UX               | Sin command palette Cmd+K                 |
+| F-48 | P3       | UX               | Sin acceso a logs/diagnostics             |
 
 ### Glosario
 
@@ -1021,21 +1054,22 @@ Recomendación: lazy-load editors por sección con `React.lazy + Suspense`. Solo
 
 ### Skills usados
 
-| Skill | Findings principales |
-|-------|---------------------|
-| `superpowers:brainstorming` | F-31 onboarding, F-09 cascada, F-44 shortcuts |
-| `frontend-design` | F-04 EmptyState, F-06 useFieldValidation, F-11 data-table |
-| `ui-ux-pro-max` | F-12 live preview, F-32 upload progress, F-40 theme animation |
-| `theme-factory` | F-18 typography, F-19 spacing, F-20 color semantics, F-21 icons |
-| `web-design-guidelines` | F-13 TopBar, F-16 hero, F-27 CTAs, F-28 card lift |
-| `vercel-react-best-practices` | F-41 framer-motion, F-42 SVG memo, perf observations |
-| `audit-website` | F-05 keyboard, F-26 unsaved warning, F-35 escape, F-39 dropdown |
-| `Trueomni-product-design-excellence-skill` | F-31 onboarding, Tema B operator-first, F-29 systems status |
+| Skill                                            | Findings principales                                                                 |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `superpowers:brainstorming`                      | F-31 onboarding, F-09 cascada, F-44 shortcuts                                        |
+| `frontend-design`                                | F-04 EmptyState, F-06 useFieldValidation, F-11 data-table                            |
+| `ui-ux-pro-max`                                  | F-12 live preview, F-32 upload progress, F-40 theme animation                        |
+| `theme-factory`                                  | F-18 typography, F-19 spacing, F-20 color semantics, F-21 icons                      |
+| `web-design-guidelines`                          | F-13 TopBar, F-16 hero, F-27 CTAs, F-28 card lift                                    |
+| `vercel-react-best-practices`                    | F-41 framer-motion, F-42 SVG memo, perf observations                                 |
+| `audit-website`                                  | F-05 keyboard, F-26 unsaved warning, F-35 escape, F-39 dropdown                      |
+| `Trueomni-product-design-excellence-skill`       | F-31 onboarding, Tema B operator-first, F-29 systems status                          |
 | `ui-component-libraries` + `shadcn-awesome-libs` | F-11 data-table, F-15 dialog, F-22 tooltip, F-27 button system, F-47 command palette |
 
 ### Screenshots reference
 
 42 screenshots disponibles en `.audit/screenshots/`:
+
 - home-{375,768,1440}-{light,dark}.png
 - docs-{375,768,1440}-{light,dark}.png
 - coming-soon-1440-{light,dark}.png

@@ -94,7 +94,11 @@ export function useItineraryRail(): UseItineraryRailResult {
     setOrder((prev) => {
       const surviving = prev.filter((e) => {
         const set =
-          e.kind === 'listing' ? list.favorites : e.kind === 'event' ? evts.favorites : tr.favorites;
+          e.kind === 'listing'
+            ? list.favorites
+            : e.kind === 'event'
+              ? evts.favorites
+              : tr.favorites;
         return set.has(e.slug);
       });
       const seen = new Set(surviving.map((e) => entryKey(e.slug, e.kind)));

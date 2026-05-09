@@ -53,6 +53,7 @@
     - Footer: `Cancel` + `Import N items` (disabled si 0 válidos).
     - Texto y placeholders sin hardcoded de colores; usa tokens zinc/sky del Studio.
     - Cuando se hace click Import: llama `onImport` y cierra.
+
   </action>
   <verify>
     `pnpm typecheck` limpio.

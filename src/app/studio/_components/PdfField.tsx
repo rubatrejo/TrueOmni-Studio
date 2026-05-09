@@ -123,9 +123,7 @@ export function PdfField({
       </button>
 
       <div className="min-w-0 flex-1">
-        <div className="text-[12px] font-medium text-zinc-700 dark:text-zinc-200">
-          {label}
-        </div>
+        <div className="text-[12px] font-medium text-zinc-700 dark:text-zinc-200">{label}</div>
         <div className="mt-0.5 truncate text-[10.5px] text-zinc-500 dark:text-zinc-500">
           {error ? (
             <span className="text-red-600">{error}</span>

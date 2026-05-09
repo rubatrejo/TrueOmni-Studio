@@ -49,14 +49,16 @@ export function EventsModule({
   const effective: HomeEventsModule = override ?? mod;
   useEffect(() => {
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent<{
-        label?: string;
-        heroImage?: string;
-        categories?: string[];
-        venues?: string[];
-        features?: string[];
-        events?: EventItem[];
-      }>).detail;
+      const detail = (
+        e as CustomEvent<{
+          label?: string;
+          heroImage?: string;
+          categories?: string[];
+          venues?: string[];
+          features?: string[];
+          events?: EventItem[];
+        }>
+      ).detail;
       if (!detail || !Array.isArray(detail.events)) return;
       setOverride({
         kind: 'events',

@@ -11,7 +11,7 @@ JSON local + advisor del uso KV.
 ### Build helpers
 
 - **`publish-files.ts`**: `buildSignageDisplayPublishFiles(client, display,
-  data)` → PublishFile[] con `clients-signage/<c>/displays/<d>/display.json`.
+data)` → PublishFile[] con `clients-signage/<c>/displays/<d>/display.json`.
   DSS7 publica solo display.json; client publish (branding + tokens.css +
   i18n) llega en DSS7.5 si surge.
 - **`kv-size.ts`**: `computeSignageKvSize(c, d)` → bytes del display + bytes
@@ -19,12 +19,12 @@ JSON local + advisor del uso KV.
 
 ### 4 endpoints API
 
-| Endpoint | Verb | Función |
-|---|---|---|
+| Endpoint   | Verb | Función                                                                                   |
+| ---------- | ---- | ----------------------------------------------------------------------------------------- |
 | `/publish` | POST | Reusa `publishToGitHub` del kiosk con autoMerge true. 503 si falta `STUDIO_GITHUB_TOKEN`. |
-| `/export` | GET | Descarga `display.json` con `Content-Disposition: attachment`. |
-| `/import` | POST | Recibe `{ display }`, valida con Zod, crea snapshot pre-import del current, set al KV. |
-| `/size` | GET | Retorna `{ display, snapshots, total, cap }` en bytes. |
+| `/export`  | GET  | Descarga `display.json` con `Content-Disposition: attachment`.                            |
+| `/import`  | POST | Recibe `{ display }`, valida con Zod, crea snapshot pre-import del current, set al KV.    |
+| `/size`    | GET  | Retorna `{ display, snapshots, total, cap }` en bytes.                                    |
 
 ### UI componentes
 
@@ -46,19 +46,19 @@ de `<VersionsPanel>`.
 
 ## Archivos tocados
 
-| Archivo | Tipo |
-|---|---|
-| `src/lib/signage/publish-files.ts` | NUEVO |
-| `src/lib/signage/kv-size.ts` | NUEVO |
-| `src/app/api/studio/signage/displays/[c]/[d]/publish/route.ts` | NUEVO |
-| `src/app/api/studio/signage/displays/[c]/[d]/export/route.ts` | NUEVO |
-| `src/app/api/studio/signage/displays/[c]/[d]/import/route.ts` | NUEVO |
-| `src/app/api/studio/signage/displays/[c]/[d]/size/route.ts` | NUEVO |
-| `src/app/studio/digital-displays/_components/display/PublishToolbar.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/display/KvSizeAdvisor.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/DisplayEditor.tsx` | mount toolbar + advisor |
-| `.planning/DSS7-PLAN.md` | NUEVO |
-| `.planning/DSS7-SUMMARY.md` | NUEVO |
+| Archivo                                                                  | Tipo                    |
+| ------------------------------------------------------------------------ | ----------------------- |
+| `src/lib/signage/publish-files.ts`                                       | NUEVO                   |
+| `src/lib/signage/kv-size.ts`                                             | NUEVO                   |
+| `src/app/api/studio/signage/displays/[c]/[d]/publish/route.ts`           | NUEVO                   |
+| `src/app/api/studio/signage/displays/[c]/[d]/export/route.ts`            | NUEVO                   |
+| `src/app/api/studio/signage/displays/[c]/[d]/import/route.ts`            | NUEVO                   |
+| `src/app/api/studio/signage/displays/[c]/[d]/size/route.ts`              | NUEVO                   |
+| `src/app/studio/digital-displays/_components/display/PublishToolbar.tsx` | NUEVO                   |
+| `src/app/studio/digital-displays/_components/display/KvSizeAdvisor.tsx`  | NUEVO                   |
+| `src/app/studio/digital-displays/_components/DisplayEditor.tsx`          | mount toolbar + advisor |
+| `.planning/DSS7-PLAN.md`                                                 | NUEVO                   |
+| `.planning/DSS7-SUMMARY.md`                                              | NUEVO                   |
 
 ## Verificado
 

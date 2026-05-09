@@ -78,11 +78,7 @@ export async function autoMigrateClients(
   options: { force?: boolean } = {},
 ): Promise<MigrationReport> {
   const now = Date.now();
-  if (
-    !options.force &&
-    cachedReport &&
-    now - cachedAt < MIGRATION_CACHE_TTL_MS
-  ) {
+  if (!options.force && cachedReport && now - cachedAt < MIGRATION_CACHE_TTL_MS) {
     return cachedReport;
   }
 

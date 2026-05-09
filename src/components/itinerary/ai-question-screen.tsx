@@ -180,12 +180,7 @@ export function AiQuestionScreen(props: AiQuestionScreenProps) {
             className="mt-4 text-center text-[42px] font-bold leading-tight text-foreground"
             style={{ whiteSpace: 'pre-line' }}
           >
-            <QField
-              qkey={question.key}
-              field="title"
-              fallback={question.title}
-              vars={interpVars}
-            />
+            <QField qkey={question.key} field="title" fallback={question.title} vars={interpVars} />
           </h2>
           {question.subtitle ? (
             <p

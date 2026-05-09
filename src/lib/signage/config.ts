@@ -102,8 +102,7 @@ export const loadSignageClient = cache(
           ...kvClient,
           events: kvEvents ?? fsFiles?.events ?? [],
           social: kvSocial ?? fsFiles?.social ?? { posts: [] },
-          news:
-            kvNews ??
+          news: kvNews ??
             fsFiles?.news ?? {
               source: { kind: 'manual', items: [] },
               rotationIntervalSec: 8,
@@ -170,13 +169,7 @@ export const loadSignageDisplay = cache(
 
     // 2. Fallback fs.
     const root = SIGNAGE_ROOT();
-    const displayPath = path.join(
-      root,
-      clientSlug,
-      'displays',
-      displaySlug,
-      'display.json',
-    );
+    const displayPath = path.join(root, clientSlug, 'displays', displaySlug, 'display.json');
     if (!(await fileExists(displayPath))) {
       // Intento secundario: si el client cayó a default, mirar también default/displays/<displaySlug>.
       const fallbackPath = path.join(root, 'default', 'displays', displaySlug, 'display.json');

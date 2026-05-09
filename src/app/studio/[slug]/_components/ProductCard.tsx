@@ -53,10 +53,9 @@ export function ProductCard({
     setActivating(true);
     setError(null);
     try {
-      const res = await fetch(
-        `/api/studio/clients/${slug}/products/${productSegment}/activate`,
-        { method: 'POST' },
-      );
+      const res = await fetch(`/api/studio/clients/${slug}/products/${productSegment}/activate`, {
+        method: 'POST',
+      });
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(body.error ?? `activate failed: ${res.status}`);
@@ -92,9 +91,7 @@ export function ProductCard({
       {!isComingSoon && (
         <div
           className={`mt-4 flex items-center gap-1.5 text-[12px] font-medium ${
-            active
-              ? 'text-zinc-700 dark:text-zinc-300'
-              : 'text-sky-700 dark:text-sky-300'
+            active ? 'text-zinc-700 dark:text-zinc-300' : 'text-sky-700 dark:text-sky-300'
           }`}
         >
           {active ? (
@@ -130,7 +127,7 @@ export function ProductCard({
 
   if (isComingSoon) {
     return (
-      <div aria-disabled className="opacity-60 cursor-not-allowed">
+      <div aria-disabled className="cursor-not-allowed opacity-60">
         {card}
       </div>
     );

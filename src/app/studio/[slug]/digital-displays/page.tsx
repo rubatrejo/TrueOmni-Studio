@@ -5,10 +5,7 @@ import { notFound } from 'next/navigation';
 import { listSignageDisplays, loadSignageClient } from '@/lib/signage/config';
 import { kSignageClient, kSignageClientList } from '@/lib/signage/kv-keys';
 import { SignageClientFileSchema, type SignageClientFile } from '@/lib/signage/schema';
-import {
-  loadUnifiedBranding,
-  unifiedToSignageBranding,
-} from '@/lib/studio/client-branding-sync';
+import { loadUnifiedBranding, unifiedToSignageBranding } from '@/lib/studio/client-branding-sync';
 import { loadClientManifest } from '@/lib/studio/client-manifest';
 import { kv } from '@/lib/studio/kv';
 
@@ -108,9 +105,7 @@ export default async function ClientDisplaysPage({ params }: PageProps) {
               {manifest.name}
             </Link>
             <ChevronRight className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-700" aria-hidden />
-            <span className="font-medium text-zinc-900 dark:text-zinc-100">
-              Digital Displays
-            </span>
+            <span className="font-medium text-zinc-900 dark:text-zinc-100">Digital Displays</span>
           </nav>
         </div>
         <ThemeToggle />
@@ -160,10 +155,7 @@ export default async function ClientDisplaysPage({ params }: PageProps) {
               un flujo real de creación. Reusa el endpoint existente
               `POST /api/studio/signage/displays/[client]` que clona desde
               `default/lobby-tv`. */}
-          <NewDisplayCard
-            clientSlug={slug}
-            existingSlugs={displays.map((d) => d.slug)}
-          />
+          <NewDisplayCard clientSlug={slug} existingSlugs={displays.map((d) => d.slug)} />
         </div>
       </main>
     </div>

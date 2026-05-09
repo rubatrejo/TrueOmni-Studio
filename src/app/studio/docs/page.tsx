@@ -38,7 +38,8 @@ export default async function StudioDocsPage() {
           Documentation
         </p>
         <h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight text-zinc-900 dark:text-white">
-          Everything you need<br />
+          Everything you need
+          <br />
           to ship a kiosk.
         </h1>
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-zinc-600 dark:text-zinc-400">
@@ -70,22 +71,21 @@ export default async function StudioDocsPage() {
         <article className="col-span-12 max-w-[720px] space-y-16 lg:col-span-9">
           <Section id="overview" title="Overview">
             <P>
-              Kiosk Studio is the workspace where your team designs, configures, and ships kiosks
-              — without touching code. Every kiosk in your account corresponds to a real device or
-              fleet of devices in the field, and changes you make here flow to those screens
-              through a controlled release pipeline.
+              Kiosk Studio is the workspace where your team designs, configures, and ships kiosks —
+              without touching code. Every kiosk in your account corresponds to a real device or
+              fleet of devices in the field, and changes you make here flow to those screens through
+              a controlled release pipeline.
             </P>
             <P>
               The Studio is organized around three ideas: a <Strong>kiosk</Strong> is a branded
               instance of the product; a <Strong>configuration</Strong> is the set of branding,
-              modules, content, copy and integrations that defines how that kiosk looks and
-              behaves; and a <Strong>release</Strong> is a published version of that
-              configuration that the live kiosks pull on their next sync.
+              modules, content, copy and integrations that defines how that kiosk looks and behaves;
+              and a <Strong>release</Strong> is a published version of that configuration that the
+              live kiosks pull on their next sync.
             </P>
             <Callout tone="info" title="Mental model">
               Studio = the editor. Configuration = your draft. Release = what the kiosks in the
-              field actually run. You can edit forever; nothing reaches a screen until you
-              publish.
+              field actually run. You can edit forever; nothing reaches a screen until you publish.
             </Callout>
           </Section>
 
@@ -105,13 +105,13 @@ export default async function StudioDocsPage() {
                 that already works. The editor opens with the live preview on the right.
               </li>
               <li>
-                Edit any tab on the left. The preview updates in real time so you see your
-                changes the moment you make them.
+                Edit any tab on the left. The preview updates in real time so you see your changes
+                the moment you make them.
               </li>
               <li>
-                When the configuration is ready, hit <Strong>Publish</Strong> in the save bar.
-                The release goes through the approval pipeline and lands on the live kiosks
-                shortly after.
+                When the configuration is ready, hit <Strong>Publish</Strong> in the save bar. The
+                release goes through the approval pipeline and lands on the live kiosks shortly
+                after.
               </li>
             </Ol>
           </Section>
@@ -148,36 +148,36 @@ export default async function StudioDocsPage() {
             <Callout tone="warn" title="Save vs Publish">
               <Strong>Save</Strong> persists your draft to your account so you can come back to it
               from any browser. <Strong>Publish</Strong> turns that draft into a release that goes
-              live on the kiosks. Closing the tab without saving loses unsaved edits — the bar
-              warns you when you have pending changes.
+              live on the kiosks. Closing the tab without saving loses unsaved edits — the bar warns
+              you when you have pending changes.
             </Callout>
           </Section>
 
           <Section id="preview" title="Live preview">
             <P>
-              The right pane is a real instance of the kiosk rendering your draft configuration.
-              It is the same code path that runs on the kiosks in the field, so what you see is
-              exactly what your customers will see.
+              The right pane is a real instance of the kiosk rendering your draft configuration. It
+              is the same code path that runs on the kiosks in the field, so what you see is exactly
+              what your customers will see.
             </P>
             <Ul>
               <li>The preview always renders at 1080×1920 portrait, scaled to fit the pane.</li>
               <li>
-                Click any module in the preview and the editor jumps to the corresponding tab when
-                a deep-link target is registered — so reviewing a screen and editing it become the
+                Click any module in the preview and the editor jumps to the corresponding tab when a
+                deep-link target is registered — so reviewing a screen and editing it become the
                 same gesture.
               </li>
               <li>
                 Use <Strong>Open in new tab</Strong> to inspect the kiosk full-screen, share a
-                preview link with a stakeholder, or test it on a real device pointed at the
-                preview URL.
+                preview link with a stakeholder, or test it on a real device pointed at the preview
+                URL.
               </li>
             </Ul>
           </Section>
 
           <Section id="publishing" title="Publishing & releases">
             <P>
-              Publishing turns your draft into a versioned release. Releases are immutable — once
-              a version exists, it never changes — which means every kiosk in the field is always
+              Publishing turns your draft into a versioned release. Releases are immutable — once a
+              version exists, it never changes — which means every kiosk in the field is always
               running a known, named state of your configuration.
             </P>
             <Ol>
@@ -186,16 +186,16 @@ export default async function StudioDocsPage() {
                 summary of what will change.
               </li>
               <li>
-                The release enters the approval pipeline. Depending on your workspace settings,
-                it can go live immediately or wait for a reviewer to sign off.
+                The release enters the approval pipeline. Depending on your workspace settings, it
+                can go live immediately or wait for a reviewer to sign off.
               </li>
               <li>
-                Once approved, the release is distributed to every kiosk associated with that
-                slug. Devices pick it up on their next sync — typically within seconds.
+                Once approved, the release is distributed to every kiosk associated with that slug.
+                Devices pick it up on their next sync — typically within seconds.
               </li>
               <li>
-                The release is recorded in the kiosk&apos;s history so you can see who shipped
-                what, when, and roll back if anything looks off.
+                The release is recorded in the kiosk&apos;s history so you can see who shipped what,
+                when, and roll back if anything looks off.
               </li>
             </Ol>
             <Callout tone="info" title="Publishing only changes what you changed">
@@ -207,9 +207,9 @@ export default async function StudioDocsPage() {
 
           <Section id="versioning" title="Versioning & rollback">
             <P>
-              Every published release is tagged with an incrementing version number visible on
-              the kiosk card (e.g. <Code>v3</Code>) and in the editor header. The current version
-              is what the live kiosks are running; previous versions are kept in history.
+              Every published release is tagged with an incrementing version number visible on the
+              kiosk card (e.g. <Code>v3</Code>) and in the editor header. The current version is
+              what the live kiosks are running; previous versions are kept in history.
             </P>
             <Ul>
               <li>
@@ -217,17 +217,17 @@ export default async function StudioDocsPage() {
                 every release, the editor who shipped it, and a diff of what changed.
               </li>
               <li>
-                <Strong>Rollback</Strong> — promote any past version back to current with one
-                click. The kiosks in the field pick up the rollback on their next sync.
+                <Strong>Rollback</Strong> — promote any past version back to current with one click.
+                The kiosks in the field pick up the rollback on their next sync.
               </li>
               <li>
-                <Strong>Pinning</Strong> — a kiosk can be pinned to a specific version for
-                staging or QA, while the rest of the fleet keeps tracking current.
+                <Strong>Pinning</Strong> — a kiosk can be pinned to a specific version for staging
+                or QA, while the rest of the fleet keeps tracking current.
               </li>
             </Ul>
             <Callout tone="info" title="Rollbacks are releases too">
-              Promoting an old version creates a new release with the old contents, so the
-              history stays linear and auditable. You never lose track of what shipped when.
+              Promoting an old version creates a new release with the old contents, so the history
+              stays linear and auditable. You never lose track of what shipped when.
             </Callout>
           </Section>
 
@@ -463,10 +463,7 @@ function ChangelogContent({ releases }: { releases: StudioRelease[] | null }) {
       <ChangelogEntry
         version="v0.0.6"
         date="April 22, 2026"
-        items={[
-          'Tickets, Passes and Deals modules.',
-          'Survey overlay with 8 design variants.',
-        ]}
+        items={['Tickets, Passes and Deals modules.', 'Survey overlay with 8 design variants.']}
       />
       <ChangelogEntry
         version="v0.0.1"

@@ -4,10 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { ListingsModule } from '@/components/listings/listings-module';
-import {
-  KIOSK_LISTINGS_OVERRIDE_EVENT,
-  getCachedListings,
-} from '@/components/studio-bridge';
+import { KIOSK_LISTINGS_OVERRIDE_EVENT, getCachedListings } from '@/components/studio-bridge';
 import type { HomeModule, Listing } from '@/lib/config';
 
 /**
@@ -115,7 +112,10 @@ export function DynamicListingsPlaceholder({
         <div
           aria-hidden
           className="h-12 w-12 animate-spin rounded-full border-4"
-          style={{ borderColor: 'hsl(var(--brand-primary) / 0.2)', borderTopColor: 'hsl(var(--brand-primary))' }}
+          style={{
+            borderColor: 'hsl(var(--brand-primary) / 0.2)',
+            borderTopColor: 'hsl(var(--brand-primary))',
+          }}
         />
       </div>
     );
@@ -143,12 +143,18 @@ export function DynamicListingsPlaceholder({
  */
 function MinimalHeader({ heroImage }: { heroImage?: string }) {
   return (
-    <header className="relative overflow-hidden" style={{ width: '1080px', height: '620px', flexShrink: 0 }}>
+    <header
+      className="relative overflow-hidden"
+      style={{ width: '1080px', height: '620px', flexShrink: 0 }}
+    >
       {heroImage ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
       ) : (
-        <div className="absolute inset-0" style={{ backgroundColor: 'hsl(var(--brand-primary))' }} />
+        <div
+          className="absolute inset-0"
+          style={{ backgroundColor: 'hsl(var(--brand-primary))' }}
+        />
       )}
       <div
         aria-hidden
@@ -158,7 +164,10 @@ function MinimalHeader({ heroImage }: { heroImage?: string }) {
             'linear-gradient(180deg, hsl(var(--brand-primary) / 0.9) 0%, hsl(var(--brand-primary) / 0.55) 30%, hsl(var(--brand-primary) / 0) 70%)',
         }}
       />
-      <div className="absolute flex items-center" style={{ left: '65px', top: '38px', width: '360px', height: '90px' }}>
+      <div
+        className="absolute flex items-center"
+        style={{ left: '65px', top: '38px', width: '360px', height: '90px' }}
+      >
         <TrueOmniLogo slot="default" className="h-full w-full text-white" />
       </div>
     </header>

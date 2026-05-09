@@ -53,8 +53,7 @@ export default async function PhotoBoothPage() {
     experienceLabel: config.textos.photo_booth_start_cta ?? 'EXPERIENCE',
     permissionTitle: config.textos.photo_booth_permission_title ?? 'Camera access needed',
     permissionBody:
-      config.textos.photo_booth_permission_body ??
-      'Allow camera access to take your photo.',
+      config.textos.photo_booth_permission_body ?? 'Allow camera access to take your photo.',
     permissionRetry: config.textos.photo_booth_permission_retry ?? 'Try again',
     processing: config.textos.photo_booth_processing ?? 'Processing…',
     ariaHome: config.textos.photo_booth_aria_home ?? 'Go home',
@@ -66,17 +65,14 @@ export default async function PhotoBoothPage() {
     tabFrames: config.textos.photo_booth_tab_frames ?? 'Frames',
     tabFilters: config.textos.photo_booth_tab_filters ?? 'Filters',
     shareTitle: config.textos.photo_booth_share_title ?? 'SHARE YOUR MEMORIES',
-    shareScanKicker:
-      config.textos.photo_booth_share_scan_kicker ?? 'Scan to Save',
+    shareScanKicker: config.textos.photo_booth_share_scan_kicker ?? 'Scan to Save',
     shareEmailCta: config.textos.photo_booth_share_email_cta ?? 'EMAIL',
     shareTextCta: config.textos.photo_booth_share_text_cta ?? 'TEXT',
-    sentEmailTitle:
-      config.textos.photo_booth_sent_email_title ?? 'Your photo is on its way!',
+    sentEmailTitle: config.textos.photo_booth_sent_email_title ?? 'Your photo is on its way!',
     sentEmailBody:
       config.textos.photo_booth_sent_email_body ??
       'Check your inbox to view and share your Photo Booth memory.',
-    sentPhoneTitle:
-      config.textos.photo_booth_sent_phone_title ?? 'Sent to your phone',
+    sentPhoneTitle: config.textos.photo_booth_sent_phone_title ?? 'Sent to your phone',
     sentPhoneBody:
       config.textos.photo_booth_sent_phone_body ??
       'Check your messages. Your Photo Booth photo is waiting for you.',
@@ -86,16 +82,13 @@ export default async function PhotoBoothPage() {
       "You'll lose your photo and all the edits you've made.",
     exitCancel: config.textos.photo_booth_exit_cancel ?? 'Cancel',
     exitConfirm: config.textos.photo_booth_exit_confirm ?? 'Leave',
-    experienceTeaserKicker:
-      config.textos.photo_booth_experience_kicker ?? 'Coming Soon',
-    experienceTeaserTitle:
-      config.textos.photo_booth_experience_title ?? 'Coming Next',
+    experienceTeaserKicker: config.textos.photo_booth_experience_kicker ?? 'Coming Soon',
+    experienceTeaserTitle: config.textos.photo_booth_experience_title ?? 'Coming Next',
     experienceTeaserBody: (
       config.textos.photo_booth_experience_body ??
       'An immersive {client_name} experience is on the way.'
     ).replaceAll('{client_name}', config.client.nombre),
-    experienceTeaserBack:
-      config.textos.photo_booth_experience_back ?? 'Back to Photo Booth',
+    experienceTeaserBack: config.textos.photo_booth_experience_back ?? 'Back to Photo Booth',
   };
 
   return (

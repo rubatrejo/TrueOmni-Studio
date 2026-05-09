@@ -2,11 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import {
-  getNowFromSearch,
-  isSlideActive,
-  msUntilNextMinute,
-} from '@/lib/signage/schedule';
+import { getNowFromSearch, isSlideActive, msUntilNextMinute } from '@/lib/signage/schedule';
 import type {
   SignageClientResolved,
   SignageDisplayConfig,
@@ -95,9 +91,7 @@ export function SignagePlayer({
     return {
       ...serverClient,
       ...(clientPatch.name ? { name: clientPatch.name } : null),
-      ...(clientPatch.website !== undefined
-        ? { website: clientPatch.website }
-        : null),
+      ...(clientPatch.website !== undefined ? { website: clientPatch.website } : null),
       branding: clientPatch.branding
         ? { ...serverClient.branding, ...clientPatch.branding }
         : serverClient.branding,
@@ -112,8 +106,7 @@ export function SignagePlayer({
   const playlist: SignageSlide[] = useMemo(() => {
     if (display.playlists && display.playlists.length > 0) {
       const active =
-        display.playlists.find((p) => p.id === display.activePlaylistId) ??
-        display.playlists[0];
+        display.playlists.find((p) => p.id === display.activePlaylistId) ?? display.playlists[0];
       return active?.slides ?? [];
     }
     return display.playlist ?? serverPlaylist;
@@ -149,9 +142,11 @@ export function SignagePlayer({
   // esperar al ciclo natural. Sin animación de transición — es navegación.
   useEffect(() => {
     function handler(event: MessageEvent) {
-      const data = event.data as
-        | { type?: string; slideId?: string; direction?: 'prev' | 'next' }
-        | null;
+      const data = event.data as {
+        type?: string;
+        slideId?: string;
+        direction?: 'prev' | 'next';
+      } | null;
       if (!data) return;
       if (data.type === 'signage:jump-slide' && data.slideId) {
         const idx = playlist.findIndex((s) => s.id === data.slideId);
@@ -176,9 +171,7 @@ export function SignagePlayer({
         setCurrentIdx((idx) => {
           const len = playlist.length;
           if (len === 0) return 0;
-          return data.direction === 'next'
-            ? (idx + 1) % len
-            : (idx - 1 + len) % len;
+          return data.direction === 'next' ? (idx + 1) % len : (idx - 1 + len) % len;
         });
       }
     }
@@ -264,9 +257,7 @@ export function SignagePlayer({
     const stillActive = effectivePlaylist.some((s) => s.id === currentSlideId);
     if (!stillActive) {
       // El slide actual salió de schedule: jump al primer activo (sin animación).
-      const firstActiveOriginalIdx = playlist.findIndex(
-        (s) => s.id === effectivePlaylist[0]?.id,
-      );
+      const firstActiveOriginalIdx = playlist.findIndex((s) => s.id === effectivePlaylist[0]?.id);
       if (firstActiveOriginalIdx >= 0 && firstActiveOriginalIdx !== currentIdx) {
         if (cleanupTimerRef.current !== null) {
           window.clearTimeout(cleanupTimerRef.current);
@@ -304,8 +295,8 @@ export function SignagePlayer({
       if (safetyHops >= playlist.length) return; // ningún activo (no debería pasar aquí).
 
       const nextSlide = playlist[nextIdx];
-      const kind: TransitionKind =
-        (nextSlide?.transition ?? settings.defaultTransition) as TransitionKind;
+      const kind: TransitionKind = (nextSlide?.transition ??
+        settings.defaultTransition) as TransitionKind;
 
       if (cleanupTimerRef.current !== null) {
         window.clearTimeout(cleanupTimerRef.current);
@@ -330,13 +321,7 @@ export function SignagePlayer({
     return () => {
       window.clearTimeout(tickId);
     };
-  }, [
-    currentIdx,
-    duration,
-    playlist,
-    effectivePlaylist,
-    settings.defaultTransition,
-  ]);
+  }, [currentIdx, duration, playlist, effectivePlaylist, settings.defaultTransition]);
 
   // Cleanup global en unmount.
   useEffect(() => {

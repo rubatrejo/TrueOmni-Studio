@@ -264,11 +264,7 @@ export function QrPurchaseModal({
         </div>
       </div>
 
-      <DraggableKeyboard
-        width={389}
-        height={403}
-        storageKey="kiosk_keyboard_pos:qr-purchase"
-      >
+      <DraggableKeyboard width={389} height={403} storageKey="kiosk_keyboard_pos:qr-purchase">
         <div
           style={{
             padding: '26px 26px 32px 26px',

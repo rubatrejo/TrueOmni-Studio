@@ -5,10 +5,7 @@ import { useEffect, useState } from 'react';
 import { prewarmAiAvatar } from '@/components/ai/ai-modal';
 import { AiModalHost } from '@/components/ai/ai-modal-host';
 import { AskAiTrigger } from '@/components/ai/ask-ai-trigger';
-import {
-  KIOSK_CLIENT_NAME_OVERRIDE_EVENT,
-  getCachedClientName,
-} from '@/components/studio-bridge';
+import { KIOSK_CLIENT_NAME_OVERRIDE_EVENT, getCachedClientName } from '@/components/studio-bridge';
 
 interface AskAiTextos {
   title: string;
@@ -54,8 +51,8 @@ export function AskAiHost(props: AskAiHostProps) {
   const [override, setOverride] = useState<AiAvatarDetail | null>(null);
   // Reactive client name del bridge del Studio. Sustituye `{client_name}`
   // en greeting cuando el operador edita el nombre del kiosk en preview.
-  const [reactiveClientName, setReactiveClientName] = useState<string | null>(
-    () => getCachedClientName(),
+  const [reactiveClientName, setReactiveClientName] = useState<string | null>(() =>
+    getCachedClientName(),
   );
   useEffect(() => {
     const onName = (event: Event) => {
@@ -109,10 +106,10 @@ export function AskAiHost(props: AskAiHostProps) {
   // viene RAW con `{client_name}`. Interpolamos con effectiveClientName
   // (reactivo). Si NO hay override, el greeting del prop también puede
   // venir RAW (desde (kiosk)/home/page.tsx que dejó de pre-interpolar).
-  const greeting = (override?.greeting?.length
-    ? override.greeting
-    : props.greeting
-  ).replaceAll('{client_name}', effectiveClientName);
+  const greeting = (override?.greeting?.length ? override.greeting : props.greeting).replaceAll(
+    '{client_name}',
+    effectiveClientName,
+  );
   const suggested = override?.suggestedQuestions?.length
     ? override.suggestedQuestions.map((q) => ({ id: q.id, text: q.text, response: '' }))
     : ([...props.suggestedQuestions] as Array<{ id: string; text: string; response: string }>);

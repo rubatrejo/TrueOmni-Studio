@@ -18,10 +18,7 @@ export interface LocalListingsColumnProps {
  */
 export function LocalListingsColumn(props: LocalListingsColumnProps) {
   return (
-    <div
-      className="absolute z-20"
-      style={{ left: 30, top: 340, width: 400, bottom: 380 }}
-    >
+    <div className="absolute z-20" style={{ left: 30, top: 340, width: 400, bottom: 380 }}>
       <div className="flex h-full flex-col gap-3 overflow-y-auto pr-1">
         {props.items.length === 0 ? (
           <div className="mt-8 text-center text-[15px] text-muted-foreground">
@@ -52,8 +49,7 @@ export function LocalListingsColumn(props: LocalListingsColumnProps) {
                 className="pointer-events-none absolute inset-x-0 bottom-0"
                 style={{
                   height: 110,
-                  background:
-                    'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 100%)',
+                  background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 100%)',
                 }}
               />
               <div className="absolute inset-x-4 bottom-3 text-white">

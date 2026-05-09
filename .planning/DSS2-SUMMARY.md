@@ -12,8 +12,8 @@ read-only y preview iframe live del runtime al lado.
 
 - `src/app/studio/digital-displays/[slug]/displays/[displaySlug]/page.tsx`
   (NUEVO) — server component force-dynamic. Carga `loadSignageClient(slug)`
-  + `loadSignageDisplay(slug, displaySlug)` en paralelo. Si client o display
-  null → notFound(). Pasa al `<DisplayEditor>`.
+  - `loadSignageDisplay(slug, displaySlug)` en paralelo. Si client o display
+    null → notFound(). Pasa al `<DisplayEditor>`.
 
 ### `<DisplayEditor>` (client)
 
@@ -60,16 +60,16 @@ read-only y preview iframe live del runtime al lado.
 
 ## Archivos tocados
 
-| Archivo | Tipo |
-|---|---|
-| `src/app/studio/digital-displays/[slug]/displays/[displaySlug]/page.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/DisplayEditor.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/display/DisplaySettingsPanel.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/display/PlaylistPanel.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/display/PreviewFrame.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/tabs/DisplaysTab.tsx` | card → editor link |
-| `.planning/DSS2-PLAN.md` | NUEVO |
-| `.planning/DSS2-SUMMARY.md` | NUEVO |
+| Archivo                                                                        | Tipo               |
+| ------------------------------------------------------------------------------ | ------------------ |
+| `src/app/studio/digital-displays/[slug]/displays/[displaySlug]/page.tsx`       | NUEVO              |
+| `src/app/studio/digital-displays/_components/DisplayEditor.tsx`                | NUEVO              |
+| `src/app/studio/digital-displays/_components/display/DisplaySettingsPanel.tsx` | NUEVO              |
+| `src/app/studio/digital-displays/_components/display/PlaylistPanel.tsx`        | NUEVO              |
+| `src/app/studio/digital-displays/_components/display/PreviewFrame.tsx`         | NUEVO              |
+| `src/app/studio/digital-displays/_components/tabs/DisplaysTab.tsx`             | card → editor link |
+| `.planning/DSS2-PLAN.md`                                                       | NUEVO              |
+| `.planning/DSS2-SUMMARY.md`                                                    | NUEVO              |
 
 ## Verificado
 

@@ -37,11 +37,7 @@ interface TrueOmniLogoProps {
   slot?: 'default' | 'idle' | 'footer' | 'brand';
 }
 
-function TrueOmniLogoBase({
-  className,
-  title = 'TrueOmni',
-  slot = 'default',
-}: TrueOmniLogoProps) {
+function TrueOmniLogoBase({ className, title = 'TrueOmni', slot = 'default' }: TrueOmniLogoProps) {
   const [override, setOverride] = useState<string | null>(null);
 
   useEffect(() => {

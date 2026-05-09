@@ -3,11 +3,7 @@
 import { ChevronDown, ChevronRight, History, RotateCcw } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
-import {
-  listSnapshots,
-  restoreSnapshot,
-  type SnapshotListEntry,
-} from '../../_lib/snapshots-api';
+import { listSnapshots, restoreSnapshot, type SnapshotListEntry } from '../../_lib/snapshots-api';
 
 /**
  * `<VersionsPanel>` — Lista de snapshots del display + restore (DSS6).
@@ -24,11 +20,7 @@ export interface VersionsPanelProps {
   refreshTrigger?: number | null;
 }
 
-export function VersionsPanel({
-  clientSlug,
-  displaySlug,
-  refreshTrigger,
-}: VersionsPanelProps) {
+export function VersionsPanel({ clientSlug, displaySlug, refreshTrigger }: VersionsPanelProps) {
   const [open, setOpen] = useState(true);
   const [snapshots, setSnapshots] = useState<SnapshotListEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -147,9 +139,7 @@ function SnapshotRow({
             {dateLabel}
           </span>
           {snapshot.meta.note ? (
-            <span className="text-[10.5px] italic text-zinc-500">
-              {snapshot.meta.note}
-            </span>
+            <span className="text-[10.5px] italic text-zinc-500">{snapshot.meta.note}</span>
           ) : null}
         </div>
         {!isConfirming ? (

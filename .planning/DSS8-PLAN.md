@@ -1,6 +1,7 @@
 # DSS8-PLAN.md — Diagnostics + i18n editor extension
 
 Atomic plan ejecutable en sesión fresca. Entrega:
+
 1. Página `/studio/digital-displays/diagnostics` con info de sistema (KV
    size global, count clients/displays, GitHub config, bridge runtime).
 2. i18n editor en el theme editor: tab que ya existe (5to tab) refactorizado

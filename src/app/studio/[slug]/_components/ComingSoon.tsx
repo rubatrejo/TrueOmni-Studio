@@ -33,8 +33,7 @@ const TONE_PRESETS = {
   design: {
     badge:
       'bg-sky-100 text-sky-800 ring-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:ring-sky-800/40',
-    accent:
-      'from-sky-500/15 via-sky-500/5 to-transparent dark:from-sky-400/15 dark:via-sky-400/5',
+    accent: 'from-sky-500/15 via-sky-500/5 to-transparent dark:from-sky-400/15 dark:via-sky-400/5',
   },
   roadmap: {
     badge:

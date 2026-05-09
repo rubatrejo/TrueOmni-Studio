@@ -71,16 +71,16 @@
 
 ## Archivos tocados
 
-| Archivo | Tipo |
-|---|---|
-| `src/app/studio/_lib/products.ts` | digital-displays: soon → live |
-| `src/app/studio/digital-displays/page.tsx` | reemplazo (era ComingSoon placeholder) |
-| `src/app/studio/digital-displays/layout.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/ClientsDashboard.tsx` | NUEVO |
-| `src/lib/signage/config.ts` | export `listSignageClients` + `listSignageDisplays` |
-| `src/lib/signage/kv-store.ts` | NUEVO |
-| `.planning/DSS0-PLAN.md` | NUEVO |
-| `.planning/DSS0-SUMMARY.md` | NUEVO |
+| Archivo                                                            | Tipo                                                |
+| ------------------------------------------------------------------ | --------------------------------------------------- |
+| `src/app/studio/_lib/products.ts`                                  | digital-displays: soon → live                       |
+| `src/app/studio/digital-displays/page.tsx`                         | reemplazo (era ComingSoon placeholder)              |
+| `src/app/studio/digital-displays/layout.tsx`                       | NUEVO                                               |
+| `src/app/studio/digital-displays/_components/ClientsDashboard.tsx` | NUEVO                                               |
+| `src/lib/signage/config.ts`                                        | export `listSignageClients` + `listSignageDisplays` |
+| `src/lib/signage/kv-store.ts`                                      | NUEVO                                               |
+| `.planning/DSS0-PLAN.md`                                           | NUEVO                                               |
+| `.planning/DSS0-SUMMARY.md`                                        | NUEVO                                               |
 
 ## Verificado
 

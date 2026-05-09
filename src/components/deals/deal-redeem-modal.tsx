@@ -257,7 +257,10 @@ function HeroWithOverlay({
         <div
           aria-hidden
           className="absolute inset-0"
-          style={{ background: 'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%)' }}
+          style={{
+            background:
+              'linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-secondary)) 100%)',
+          }}
         />
       ) : (
         // eslint-disable-next-line @next/next/no-img-element

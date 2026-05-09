@@ -4,11 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2, Sparkles, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-import {
-  type AiSuggestKind,
-  type AiSuggestedItem,
-  suggestContent,
-} from '../_lib/api-client';
+import { type AiSuggestKind, type AiSuggestedItem, suggestContent } from '../_lib/api-client';
 import { useEscapeClose, useFocusTrap } from '../_lib/use-modal-a11y';
 
 import { useToast } from './Toast';
@@ -191,8 +187,9 @@ export function AiSuggestModal({
                       </p>
                       {!parsed ? (
                         <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11.5px] text-amber-700 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-300">
-                          Set the kiosk location to &quot;City, ST&quot; format (e.g. &quot;Davenport, FL&quot;)
-                          before generating. Otherwise the AI has no geographic context.
+                          Set the kiosk location to &quot;City, ST&quot; format (e.g.
+                          &quot;Davenport, FL&quot;) before generating. Otherwise the AI has no
+                          geographic context.
                         </p>
                       ) : null}
                     </div>
@@ -222,7 +219,9 @@ export function AiSuggestModal({
                 ) : phase === 'loading' ? (
                   <div className="flex flex-col items-center justify-center gap-3 py-12 text-zinc-500">
                     <Loader2 className="h-6 w-6 animate-spin text-violet-500" />
-                    <p className="text-[12.5px]">Generating {count} {kind}…</p>
+                    <p className="text-[12.5px]">
+                      Generating {count} {kind}…
+                    </p>
                     <p className="text-[11px] text-zinc-400">Usually 2-5 seconds</p>
                   </div>
                 ) : (

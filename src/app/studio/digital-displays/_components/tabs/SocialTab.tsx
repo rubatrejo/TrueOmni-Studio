@@ -48,12 +48,8 @@ export function SocialTab({ clientSlug, initialSocial }: SocialTabProps) {
     ...initialSocial,
     posts: [...(initialSocial.posts ?? [])],
   });
-  const [expanded, setExpanded] = useState<string | null>(
-    social.posts[0]?.id ?? null,
-  );
-  const [showFeaturedForm, setShowFeaturedForm] = useState(
-    Boolean(social.featuredTweet),
-  );
+  const [expanded, setExpanded] = useState<string | null>(social.posts[0]?.id ?? null);
+  const [showFeaturedForm, setShowFeaturedForm] = useState(Boolean(social.featuredTweet));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<number | null>(null);
@@ -136,13 +132,12 @@ export function SocialTab({ clientSlug, initialSocial }: SocialTabProps) {
 
   function updateFeatured(patch: Partial<SignageFeaturedTweet>) {
     setData((prev) => {
-      const current: SignageFeaturedTweet =
-        prev.featuredTweet ?? {
-          id: 'featured-tweet',
-          author: '',
-          body: '',
-          network: 'x',
-        };
+      const current: SignageFeaturedTweet = prev.featuredTweet ?? {
+        id: 'featured-tweet',
+        author: '',
+        body: '',
+        network: 'x',
+      };
       return { ...prev, featuredTweet: { ...current, ...patch } };
     });
   }
@@ -164,7 +159,8 @@ export function SocialTab({ clientSlug, initialSocial }: SocialTabProps) {
             Social
           </h3>
           <p className="mt-0.5 text-[12px] text-zinc-500">
-            {social.posts.length} post{social.posts.length === 1 ? '' : 's'} · shared across every display
+            {social.posts.length} post{social.posts.length === 1 ? '' : 's'} · shared across every
+            display
           </p>
         </div>
         <button
@@ -183,9 +179,7 @@ export function SocialTab({ clientSlug, initialSocial }: SocialTabProps) {
           onClick={addPost}
           className="rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-12 text-center transition hover:border-sky-400 hover:bg-sky-50/50 dark:border-zinc-800 dark:bg-zinc-950"
         >
-          <p className="text-base font-medium text-zinc-700 dark:text-zinc-300">
-            No posts yet
-          </p>
+          <p className="text-base font-medium text-zinc-700 dark:text-zinc-300">No posts yet</p>
         </button>
       ) : (
         <ul className="flex flex-col gap-2">
@@ -265,9 +259,7 @@ export function SocialTab({ clientSlug, initialSocial }: SocialTabProps) {
                     <FieldTextarea
                       label="Caption"
                       value={p.caption ?? ''}
-                      onChange={(v) =>
-                        updatePost(p.id, { caption: v || undefined })
-                      }
+                      onChange={(v) => updatePost(p.id, { caption: v || undefined })}
                     />
                     <SignageMediaField
                       label="Image"
@@ -275,9 +267,7 @@ export function SocialTab({ clientSlug, initialSocial }: SocialTabProps) {
                       aspect="1/1"
                       kind="image"
                       value={p.image ?? ''}
-                      onChange={(next) =>
-                        updatePost(p.id, { image: next?.src || undefined })
-                      }
+                      onChange={(next) => updatePost(p.id, { image: next?.src || undefined })}
                     />
                   </div>
                 ) : null}
@@ -351,9 +341,7 @@ export function SocialTab({ clientSlug, initialSocial }: SocialTabProps) {
               label="Hashtag"
               value={social.featuredTweet.hashtag ?? ''}
               placeholder="#optional"
-              onChange={(v) =>
-                updateFeatured({ hashtag: v || undefined })
-              }
+              onChange={(v) => updateFeatured({ hashtag: v || undefined })}
             />
             <SignageMediaField
               label="Avatar"
@@ -361,9 +349,7 @@ export function SocialTab({ clientSlug, initialSocial }: SocialTabProps) {
               aspect="1/1"
               kind="image"
               value={social.featuredTweet.avatar ?? ''}
-              onChange={(next) =>
-                updateFeatured({ avatar: next?.src || undefined })
-              }
+              onChange={(next) => updateFeatured({ avatar: next?.src || undefined })}
             />
           </div>
         ) : null}

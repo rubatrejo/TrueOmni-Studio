@@ -83,9 +83,7 @@ export function isSocialPlatform(value: string): value is SocialPlatform {
  */
 export function readPlatformCredentials(
   platform: SocialPlatform,
-):
-  | { ok: true; clientId: string; clientSecret: string }
-  | { ok: false; missing: string[] } {
+): { ok: true; clientId: string; clientSecret: string } | { ok: false; missing: string[] } {
   const cfg = OAUTH_CONFIGS[platform];
   const clientId = process.env[cfg.clientIdEnv] ?? '';
   const clientSecret = process.env[cfg.clientSecretEnv] ?? '';
@@ -102,7 +100,6 @@ export function readPlatformCredentials(
  */
 export function buildCallbackUrl(platform: SocialPlatform, originFromReq: string): string {
   const base =
-    process.env.NEXT_PUBLIC_STUDIO_BASE_URL?.replace(/\/$/, '') ??
-    originFromReq.replace(/\/$/, '');
+    process.env.NEXT_PUBLIC_STUDIO_BASE_URL?.replace(/\/$/, '') ?? originFromReq.replace(/\/$/, '');
   return `${base}/api/oauth/${platform}/callback`;
 }

@@ -404,8 +404,7 @@ export function GuestbookModule({
               className="text-center font-sans"
               style={{ fontSize: '18px', lineHeight: 1.5, color: '#5a5a5a' }}
             >
-              {textos.guestbook_exit_message ??
-                "You'll lose all the information you've entered."}
+              {textos.guestbook_exit_message ?? "You'll lose all the information you've entered."}
             </p>
             <div className="mt-2 flex items-center justify-center" style={{ gap: '14px' }}>
               <button
@@ -474,7 +473,8 @@ export function GuestbookModule({
               className="absolute inset-x-0 top-0"
               style={{
                 height: '8px',
-                background: 'linear-gradient(90deg, hsl(var(--brand-tertiary)) 0%, hsl(var(--brand-secondary)) 100%)',
+                background:
+                  'linear-gradient(90deg, hsl(var(--brand-tertiary)) 0%, hsl(var(--brand-secondary)) 100%)',
               }}
             />
             <div

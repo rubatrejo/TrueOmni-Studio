@@ -30,11 +30,7 @@ export function formatSignageClock(
   return normalizeIntlWhitespace(fmt.format(date));
 }
 
-export function formatSignageDate(
-  date: Date,
-  locale: string,
-  timezone: string,
-): string {
+export function formatSignageDate(date: Date, locale: string, timezone: string): string {
   const fmt = new Intl.DateTimeFormat(locale, {
     weekday: 'short',
     month: 'short',

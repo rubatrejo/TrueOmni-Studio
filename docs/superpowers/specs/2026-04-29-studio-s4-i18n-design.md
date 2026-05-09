@@ -59,11 +59,13 @@ export type I18nBundle = z.infer<typeof I18nBundleSchema>;
 ### Endpoint
 
 `GET  /api/studio/i18n/[slug]`
+
 - Lee `i18n:<slug>` de KV.
 - Si no existe, bootstrap: lee `clients/<slug>/i18n/*.json` (fs); si tampoco existe, `clients/_template/i18n/*.json`.
 - Devuelve `{ bundle: I18nBundle }`.
 
 `PATCH /api/studio/i18n/[slug]`
+
 - Body: `{ bundle: I18nBundle }` (full replacement) o `{ patch: { [locale]: { [key]: value } } }` (partial).
 - Re-valida con zod, hace merge si `patch`, guarda. Cap 480 KB enforzado.
 - 413 si supera el cap.

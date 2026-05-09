@@ -36,8 +36,7 @@ export function ImageUrlField({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const dataUrlBytes =
-    value && value.startsWith('data:') ? Math.ceil((value.length * 3) / 4) : 0;
+  const dataUrlBytes = value && value.startsWith('data:') ? Math.ceil((value.length * 3) / 4) : 0;
   const oversize = dataUrlBytes > maxBytes;
 
   const handleFile = async (file: File) => {
@@ -57,7 +56,9 @@ export function ImageUrlField({
 
   return (
     <div className="space-y-1.5">
-      <label className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">{label}</label>
+      <label className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
+        {label}
+      </label>
       <div
         className={`flex items-stretch gap-2 rounded-md border bg-zinc-50 p-1.5 transition dark:bg-zinc-900/40 ${
           hover

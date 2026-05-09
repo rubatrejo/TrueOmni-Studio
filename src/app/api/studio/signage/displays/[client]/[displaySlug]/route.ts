@@ -1,15 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { loadSignageClient } from '@/lib/signage/config';
-import {
-  kvSignageClient,
-  kvSignageDisplay,
-  kvSignageSnapshot,
-} from '@/lib/signage/kv-store';
-import {
-  SignageClientFileSchema,
-  SignageDisplayConfigSchema,
-} from '@/lib/signage/schema';
+import { kvSignageClient, kvSignageDisplay, kvSignageSnapshot } from '@/lib/signage/kv-store';
+import { SignageClientFileSchema, SignageDisplayConfigSchema } from '@/lib/signage/schema';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -114,10 +107,7 @@ export async function DELETE(_req: NextRequest, ctx: RouteContext) {
 
   const clientFile = await loadSignageClient(client).catch(() => null);
   if (!clientFile) {
-    return NextResponse.json(
-      { error: `Theme "${client}" not found.` },
-      { status: 404 },
-    );
+    return NextResponse.json({ error: `Theme "${client}" not found.` }, { status: 404 });
   }
 
   const displays = clientFile.displays ?? [];

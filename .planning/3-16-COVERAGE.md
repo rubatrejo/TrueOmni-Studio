@@ -52,6 +52,7 @@ _TBD — se rellena al abrir Ola 5._
 ## Verificación visual (revisor-visual)
 
 Por cada pantalla:
+
 1. `pnpm kiosk:dev` + navegar a la ruta de prueba.
 2. Playwright screenshot 1080×1920 sin escalado.
 3. Comparar contra el PNG del SVG original con `revisor-visual`.

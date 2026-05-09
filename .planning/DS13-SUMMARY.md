@@ -6,12 +6,12 @@
 ## Hecho
 
 - **`src/lib/signage/schedule.ts`** (nuevo): `isSlideActive(schedule, now, timezone)`
-  + `getNowFromSearch(searchParams, timezone)` + `msUntilNextMinute(now)`.
-  - `kind: 'always'` → true.
-  - `kind: 'hours'` → wall-clock HH:MM en `timezone` ∈ `[startTime, endTime)`,
+  - `getNowFromSearch(searchParams, timezone)` + `msUntilNextMinute(now)`.
+  * `kind: 'always'` → true.
+  * `kind: 'hours'` → wall-clock HH:MM en `timezone` ∈ `[startTime, endTime)`,
     soportando wrap medianoche (start > end). Si `daysOfWeek` está, valida también
     el día (0=Sun..6=Sat).
-  - `kind: 'date-range'` → wall-clock day YYYY-MM-DD ∈ `[startDate, endDate]`.
+  * `kind: 'date-range'` → wall-clock day YYYY-MM-DD ∈ `[startDate, endDate]`.
     Si además trae `startTime`/`endTime`, los aplica como filtro adicional.
 - **`<SignagePlayer>`** ahora deriva `effectivePlaylist` filtrando por
   `isSlideActive`. Re-evaluación cada minuto alineada al boundary del minuto

@@ -125,9 +125,7 @@ export function CustomFontField({
 
   if (value) {
     return (
-      <div
-        className="mb-1.5 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-2"
-      >
+      <div className="mb-1.5 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-2">
         <span
           className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-white text-[18px] font-bold text-zinc-800 ring-1 ring-emerald-500/20 dark:bg-zinc-950 dark:text-zinc-200"
           style={{ fontFamily: `"${value.name}", system-ui` }}
@@ -199,9 +197,7 @@ export function CustomFontField({
           }}
         />
       </label>
-      {error && (
-        <p className="mt-1 text-[10.5px] text-red-600 dark:text-red-400">{error}</p>
-      )}
+      {error && <p className="mt-1 text-[10.5px] text-red-600 dark:text-red-400">{error}</p>}
     </div>
   );
 }

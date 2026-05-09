@@ -90,9 +90,7 @@ export async function PUT(req: NextRequest, ctx: RouteContext) {
   // del signage. Solo se ejecuta si el cliente ya tiene manifest unificado;
   // si todavía no migró, este save es el legacy puro.
   try {
-    const { syncFromSignageSave } = await import(
-      '@/lib/studio/client-branding-sync'
-    );
+    const { syncFromSignageSave } = await import('@/lib/studio/client-branding-sync');
     const { loadClientManifest } = await import('@/lib/studio/client-manifest');
     const manifest = await loadClientManifest(clientSlug);
     if (manifest) {
@@ -127,18 +125,13 @@ export async function DELETE(_req: NextRequest, ctx: RouteContext) {
 
   const existing = await kvSignageClient.get(client).catch(() => null);
   if (!existing) {
-    return NextResponse.json(
-      { error: `Theme "${client}" not found in KV.` },
-      { status: 404 },
-    );
+    return NextResponse.json({ error: `Theme "${client}" not found in KV.` }, { status: 404 });
   }
 
   try {
     // Borra displays + sus snapshots.
     for (const dSlug of existing.displays ?? []) {
-      const ids = await kvSignageSnapshot
-        .listIds(client, dSlug)
-        .catch(() => [] as string[]);
+      const ids = await kvSignageSnapshot.listIds(client, dSlug).catch(() => [] as string[]);
       for (const id of ids) {
         await kvSignageSnapshot.delete(client, dSlug, id);
       }
@@ -146,9 +139,7 @@ export async function DELETE(_req: NextRequest, ctx: RouteContext) {
     }
 
     // Borra snapshots theme-level.
-    const themeIds = await kvSignageThemeSnapshot
-      .listIds(client)
-      .catch(() => [] as string[]);
+    const themeIds = await kvSignageThemeSnapshot.listIds(client).catch(() => [] as string[]);
     for (const id of themeIds) {
       await kvSignageThemeSnapshot.delete(client, id);
     }

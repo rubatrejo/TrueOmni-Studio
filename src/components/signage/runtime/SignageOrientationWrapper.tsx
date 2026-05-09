@@ -28,12 +28,9 @@ export function SignageOrientationWrapper({
 }: SignageOrientationWrapperProps) {
   const clientPatch = useSignageBridgeStore((s) => s.clientPatch);
   const position = clientPatch?.header?.position ?? serverPosition;
-  const orientationClass =
-    position === 'bottom' ? 'flex-col-reverse' : 'flex-col';
+  const orientationClass = position === 'bottom' ? 'flex-col-reverse' : 'flex-col';
   return (
-    <div
-      className={`relative flex h-full w-full ${orientationClass} bg-signage-surface`}
-    >
+    <div className={`relative flex h-full w-full ${orientationClass} bg-signage-surface`}>
       {children}
     </div>
   );

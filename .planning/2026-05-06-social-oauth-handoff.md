@@ -40,6 +40,7 @@ window.location.href = `/api/oauth/${platform}/start?slug=${kioskSlug}`;
 ### Endpoints (⏳ pendientes)
 
 A crear:
+
 - `src/app/api/oauth/[platform]/start/route.ts` — redirect al consent screen.
 - `src/app/api/oauth/[platform]/callback/route.ts` — recibe el code, intercambia por tokens, persiste en KV bajo `integrations.socialOauth.{platform}`.
 - `src/app/api/oauth/[platform]/refresh/route.ts` — usa refreshToken cuando expiresAt < now.

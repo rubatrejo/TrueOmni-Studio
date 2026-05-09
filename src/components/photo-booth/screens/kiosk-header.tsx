@@ -39,10 +39,7 @@ export function KioskHeader({ weather, locale, timezone }: KioskHeaderProps) {
       <div className="absolute" style={{ left: 65, top: 44, zIndex: 6 }}>
         <TrueOmniLogo className="h-[70px] w-auto text-white" />
       </div>
-      <div
-        className="absolute"
-        style={{ left: 744, top: 40, width: 300, height: 85, zIndex: 6 }}
-      >
+      <div className="absolute" style={{ left: 744, top: 40, width: 300, height: 85, zIndex: 6 }}>
         <WeatherClock initialWeather={weather} locale={locale} timezone={timezone} />
       </div>
     </>

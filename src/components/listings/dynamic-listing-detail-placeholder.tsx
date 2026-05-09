@@ -5,10 +5,7 @@ import { useEffect, useState } from 'react';
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { ListingDetail } from '@/components/listings/listing-detail';
 import { ListingsModule } from '@/components/listings/listings-module';
-import {
-  KIOSK_LISTINGS_OVERRIDE_EVENT,
-  getCachedListings,
-} from '@/components/studio-bridge';
+import { KIOSK_LISTINGS_OVERRIDE_EVENT, getCachedListings } from '@/components/studio-bridge';
 import type { HomeModule, Listing } from '@/lib/config';
 
 /**
@@ -141,13 +138,12 @@ function MinimalHeader({ heroImage }: { heroImage?: string }) {
     >
       {heroImage ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={heroImage}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+        <img src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover" />
       ) : (
-        <div className="absolute inset-0" style={{ backgroundColor: 'hsl(var(--brand-primary))' }} />
+        <div
+          className="absolute inset-0"
+          style={{ backgroundColor: 'hsl(var(--brand-primary))' }}
+        />
       )}
       <div
         aria-hidden

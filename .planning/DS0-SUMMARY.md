@@ -16,7 +16,7 @@
   - `events.json` (5 placeholders coincidentes con los eventos visibles en SVG `01-full-events`)
   - `social.json` (6 posts Instagram + featured tweet con shape Jane Doe del SVG `08-video-social`)
   - `news.json` (source `manual` con 2 items + rotationIntervalSec=8 — coincide con SVG `06-video-news-ad`)
-  - `i18n/{en,es}.json` con namespace `signage.*` (placeholder + header.day.* + modules.title)
+  - `i18n/{en,es}.json` con namespace `signage.*` (placeholder + header.day.\* + modules.title)
   - `displays/_template/display.json` (settings 1080p + audio off + cut transition + playlist vacío)
 
 - `clients-signage/default/` clonado del template con un display real:
@@ -64,6 +64,7 @@ Bloque `signage` añadido en `theme.extend.colors` mapeando `hsl(var(--signage-*
 ### 7. Placeholder runtime (`src/components/signage/runtime/SignagePlaceholder.tsx`)
 
 Cliente component que renderea metadata del cliente y display dentro del SignageStage:
+
 - Header con bg `hsl(var(--signage-header-bg))` y text `hsl(var(--signage-header-text))`, mostrando nombre del cliente y reloj con timezone+locale aplicados.
 - Body con tarjeta de info (slug client, slug display, locale, timezone, header position, forecast days, target resolution, audio, slides count, default duration).
 - Reloj refresca cada 1s con `Intl.DateTimeFormat`.
@@ -95,18 +96,18 @@ Será reemplazado por `<SignagePlayer>` en DS2 y por templates pixel-perfect en 
 
 ## Verificado
 
-| Check | Resultado |
-|---|---|
-| `pnpm typecheck` | ✅ limpio |
-| `pnpm lint` (signage files) | ✅ cero issues nuevos (errores preexistentes en kiosk no afectados) |
-| `pnpm kiosk:dev` arranca limpio | ✅ Ready in 1.4s (regla CLAUDE.md sec 9) |
-| GET `/signage/default/lobby-tv` | ✅ HTTP 200 (595KB, contiene "Signage runtime", "signage-tokens" inyectado, tokens visibles, "Default Signage Client", "Lobby TV", "America/Phoenix") |
-| GET `/signage/no-existe/no-existe` | ✅ HTTP 404 |
-| GET `/signage/default/no-existe` | ✅ HTTP 404 |
-| Cero `onClick`/`onTouchStart`/`onPointerDown`/`onKeyDown` en árbol signage | ✅ grep limpio |
-| Cero hex hardcoded en `src/components/signage/` y `src/app/(signage)/` | ✅ grep limpio |
-| Cero tokens del kiosk (`bg-primary`, `text-foreground`, etc.) en signage | ✅ grep limpio |
-| Tokens `--signage-*` resueltos en runtime | ✅ verificable en HTML retornado |
+| Check                                                                      | Resultado                                                                                                                                             |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm typecheck`                                                           | ✅ limpio                                                                                                                                             |
+| `pnpm lint` (signage files)                                                | ✅ cero issues nuevos (errores preexistentes en kiosk no afectados)                                                                                   |
+| `pnpm kiosk:dev` arranca limpio                                            | ✅ Ready in 1.4s (regla CLAUDE.md sec 9)                                                                                                              |
+| GET `/signage/default/lobby-tv`                                            | ✅ HTTP 200 (595KB, contiene "Signage runtime", "signage-tokens" inyectado, tokens visibles, "Default Signage Client", "Lobby TV", "America/Phoenix") |
+| GET `/signage/no-existe/no-existe`                                         | ✅ HTTP 404                                                                                                                                           |
+| GET `/signage/default/no-existe`                                           | ✅ HTTP 404                                                                                                                                           |
+| Cero `onClick`/`onTouchStart`/`onPointerDown`/`onKeyDown` en árbol signage | ✅ grep limpio                                                                                                                                        |
+| Cero hex hardcoded en `src/components/signage/` y `src/app/(signage)/`     | ✅ grep limpio                                                                                                                                        |
+| Cero tokens del kiosk (`bg-primary`, `text-foreground`, etc.) en signage   | ✅ grep limpio                                                                                                                                        |
+| Tokens `--signage-*` resueltos en runtime                                  | ✅ verificable en HTML retornado                                                                                                                      |
 
 Pendiente verificación visual manual en navegador (Rubén): viewport 1920×1080 → stage llena pantalla; viewport 3840×2160 → escala 2x sin pixelar; viewport ultrawide → letterbox negro.
 

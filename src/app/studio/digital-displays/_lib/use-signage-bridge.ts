@@ -89,10 +89,7 @@ export function useSignageBridge() {
   // Listener del handshake/heartbeat del runtime + slide-active events.
   useEffect(() => {
     function handler(event: MessageEvent) {
-      const data = event.data as
-        | ReadyAck
-        | SlideActiveEvent
-        | null;
+      const data = event.data as ReadyAck | SlideActiveEvent | null;
       if (!data) return;
       if (data.type === 'signage:ready') {
         setIsReady(true);
@@ -186,10 +183,7 @@ export function useSignageBridge() {
         if (!win) return;
         if (lastClientRef.current) {
           try {
-            win.postMessage(
-              { type: 'signage:client-update', client: lastClientRef.current },
-              '*',
-            );
+            win.postMessage({ type: 'signage:client-update', client: lastClientRef.current }, '*');
           } catch {
             // ignored
           }

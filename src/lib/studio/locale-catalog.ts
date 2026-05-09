@@ -12,13 +12,7 @@
  * (kioscos en hoteles, museos, aeropuertos).
  */
 
-export type LocaleRegion =
-  | 'Europe'
-  | 'Americas'
-  | 'Asia'
-  | 'Middle East'
-  | 'Africa'
-  | 'Pacific';
+export type LocaleRegion = 'Europe' | 'Americas' | 'Asia' | 'Middle East' | 'Africa' | 'Pacific';
 
 export type LocaleEntry = {
   /** Código ISO 639-1 de 2 letras (en minúsculas). */

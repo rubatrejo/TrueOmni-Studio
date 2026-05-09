@@ -9,7 +9,11 @@
  */
 export function hexToHsl(hex: string): string {
   let h = hex.trim().replace(/^#/, '');
-  if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+  if (h.length === 3)
+    h = h
+      .split('')
+      .map((c) => c + c)
+      .join('');
   if (h.length !== 6) return '0 0% 0%';
 
   const r = parseInt(h.slice(0, 2), 16) / 255;

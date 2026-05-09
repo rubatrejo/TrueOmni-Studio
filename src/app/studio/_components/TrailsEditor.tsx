@@ -3,10 +3,7 @@
 import { Footprints } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import type {
-  ImportMode,
-  ImportStats,
-} from '@/app/studio/_lib/import-helpers';
+import type { ImportMode, ImportStats } from '@/app/studio/_lib/import-helpers';
 import {
   makeBlankTrail,
   type TrailDifficulty,
@@ -62,8 +59,7 @@ export function TrailsEditor({ value, onChange, mapboxToken = '' }: TrailsEditor
   };
 
   const editingItem = useMemo(
-    () =>
-      editingSlug ? value.trails.find((t) => t.slug === editingSlug) ?? null : null,
+    () => (editingSlug ? (value.trails.find((t) => t.slug === editingSlug) ?? null) : null),
     [editingSlug, value.trails],
   );
 
@@ -182,17 +178,13 @@ export function TrailsEditor({ value, onChange, mapboxToken = '' }: TrailsEditor
             <>
               <ConsiderationsEditor
                 considerations={editingItem.considerations}
-                onChange={(next) =>
-                  handleItemChange(editingItem.slug, { considerations: next })
-                }
+                onChange={(next) => handleItemChange(editingItem.slug, { considerations: next })}
               />
               <TrailMapEditor
                 trailMap={editingItem.trailMap}
                 trailheadCoords={editingItem.coords}
                 mapboxToken={mapboxToken}
-                onChange={(next) =>
-                  handleItemChange(editingItem.slug, { trailMap: next })
-                }
+                onChange={(next) => handleItemChange(editingItem.slug, { trailMap: next })}
               />
             </>
           }
@@ -214,17 +206,13 @@ export function TrailsEditor({ value, onChange, mapboxToken = '' }: TrailsEditor
           label="Subcategories"
           items={value.subcategories}
           onChange={(next) => update({ subcategories: next })}
-          getUsage={(item) =>
-            value.trails.filter((t) => t.subcategory === item).length
-          }
+          getUsage={(item) => value.trails.filter((t) => t.subcategory === item).length}
         />
         <TaxonomyEditor
           label="Features"
           items={value.features}
           onChange={(next) => update({ features: next })}
-          getUsage={(item) =>
-            value.trails.filter((t) => t.features.includes(item)).length
-          }
+          getUsage={(item) => value.trails.filter((t) => t.features.includes(item)).length}
         />
       </div>
 
@@ -308,8 +296,7 @@ export function TrailsEditor({ value, onChange, mapboxToken = '' }: TrailsEditor
                 {item.title || <span className="italic text-zinc-500">Untitled</span>}
               </div>
               <div className="truncate text-[10.5px] text-zinc-500">
-                {item.considerations.difficulty} ·{' '}
-                {item.considerations.distance || '—'}
+                {item.considerations.difficulty} · {item.considerations.distance || '—'}
                 {item.subcategory ? ` · ${item.subcategory}` : ''}
               </div>
             </div>
@@ -417,9 +404,7 @@ function ConsiderationsEditor({
         <Field label="Trail type (optional)">
           <Select
             value={considerations.trailType ?? ''}
-            onChange={(e) =>
-              update('trailType', (e.target.value as TrailType) || undefined)
-            }
+            onChange={(e) => update('trailType', (e.target.value as TrailType) || undefined)}
           >
             <option value="">—</option>
             {TRAIL_TYPE_OPTIONS.map((t) => (

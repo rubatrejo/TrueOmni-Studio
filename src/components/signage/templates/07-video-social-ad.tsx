@@ -27,7 +27,8 @@ const POST_NATURAL_DIMS: Array<{ w: number; h: number }> = [
 
 function buildAssetUrl(clientSlug: string, relPath: string | undefined, fallback: string): string {
   const path = relPath ?? fallback;
-  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/')) return path;
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/'))
+    return path;
   return `/signage-assets/${clientSlug}/${path}`;
 }
 
@@ -62,9 +63,15 @@ function PlayIconOverlay({ x, y }: { x: number; y: number }) {
 // Posiciones del grid 3×3 dentro de Splash-Social-Listing (translate 1143.992 155).
 // Cada tile es 258×308 con gaps de ~1px.
 const GRID_POSITIONS: Array<{ x: number; y: number }> = [
-  { x: 0, y: 0 }, { x: 259.003, y: 0 }, { x: 518.008, y: 0 },
-  { x: 0, y: 308 }, { x: 259.003, y: 308 }, { x: 518.007, y: 308 },
-  { x: 0, y: 616 }, { x: 259.003, y: 616 }, { x: 518.007, y: 616 },
+  { x: 0, y: 0 },
+  { x: 259.003, y: 0 },
+  { x: 518.008, y: 0 },
+  { x: 0, y: 308 },
+  { x: 259.003, y: 308 },
+  { x: 518.007, y: 308 },
+  { x: 0, y: 616 },
+  { x: 259.003, y: 616 },
+  { x: 518.007, y: 616 },
 ];
 
 function Render({ client, slots }: SignageTemplateRenderProps) {
@@ -96,12 +103,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
           <image width="1280" height="720" href={videoUrl} />
         </pattern>
         <pattern id="vsa-ad" width="1" height="1" viewBox="0 22.154 1144 281">
-          <image
-            preserveAspectRatio="xMidYMid slice"
-            width="1144"
-            height="448.712"
-            href={adUrl}
-          />
+          <image preserveAspectRatio="xMidYMid slice" width="1144" height="448.712" href={adUrl} />
         </pattern>
         {postUrls.map((url, i) => {
           const dims = POST_NATURAL_DIMS[i] ?? { w: 258, h: 308 };
@@ -119,13 +121,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
           );
         })}
         {/* Linear gradient azul brand-primary verbatim del SVG fuente. */}
-        <linearGradient
-          id="vsa-overlay"
-          x1="0.5"
-          x2="0.5"
-          y2="1"
-          gradientUnits="objectBoundingBox"
-        >
+        <linearGradient id="vsa-overlay" x1="0.5" x2="0.5" y2="1" gradientUnits="objectBoundingBox">
           <stop offset="0" stopColor="hsl(var(--signage-brand-primary))" stopOpacity="0" />
           <stop offset="1" stopColor="hsl(var(--signage-brand-primary))" />
         </linearGradient>
@@ -181,7 +177,9 @@ function SocialTile({
         fontWeight="700"
         letterSpacing="0.026em"
       >
-        <tspan x="0" y="0">{username}</tspan>
+        <tspan x="0" y="0">
+          {username}
+        </tspan>
       </text>
     </g>
   );

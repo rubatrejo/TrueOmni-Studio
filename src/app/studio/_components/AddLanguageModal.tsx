@@ -29,12 +29,7 @@ interface AddLanguageModalProps {
  * casos. Para idiomas custom el dev puede añadir entries en
  * `src/lib/studio/locale-catalog.ts`.
  */
-export function AddLanguageModal({
-  open,
-  existingLocales,
-  onClose,
-  onAdd,
-}: AddLanguageModalProps) {
+export function AddLanguageModal({ open, existingLocales, onClose, onAdd }: AddLanguageModalProps) {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
@@ -118,8 +113,8 @@ export function AddLanguageModal({
                   Add a language
                 </h2>
                 <p className="mt-0.5 text-[11px] text-zinc-500">
-                  Adds a new locale column with empty translations. You can edit them manually
-                  or use the ✨ button per cell.
+                  Adds a new locale column with empty translations. You can edit them manually or
+                  use the ✨ button per cell.
                 </p>
               </div>
               <button
@@ -183,10 +178,10 @@ export function AddLanguageModal({
                                     : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/60')
                                 }
                               >
-                                <span className="font-mono text-[10.5px] uppercase tracking-wide text-zinc-500 dark:text-zinc-500 w-7 shrink-0">
+                                <span className="w-7 shrink-0 font-mono text-[10.5px] uppercase tracking-wide text-zinc-500 dark:text-zinc-500">
                                   {entry.code}
                                 </span>
-                                <span className="flex-1 min-w-0">
+                                <span className="min-w-0 flex-1">
                                   <span className="block text-[13px] font-medium text-zinc-900 dark:text-zinc-100">
                                     {entry.englishName}
                                   </span>

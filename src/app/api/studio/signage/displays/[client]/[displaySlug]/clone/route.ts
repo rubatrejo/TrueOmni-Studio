@@ -2,10 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 import { loadSignageClient, loadSignageDisplay } from '@/lib/signage/config';
 import { kvSignageClient, kvSignageDisplay } from '@/lib/signage/kv-store';
-import {
-  SignageClientFileSchema,
-  SignageDisplayConfigSchema,
-} from '@/lib/signage/schema';
+import { SignageClientFileSchema, SignageDisplayConfigSchema } from '@/lib/signage/schema';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -38,43 +35,26 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
   const newName = typeof body?.newName === 'string' ? body.newName.trim() : '';
 
   if (!newSlug || !newName) {
-    return NextResponse.json(
-      { error: 'newSlug and newName are required' },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: 'newSlug and newName are required' }, { status: 400 });
   }
   if (!SLUG_REGEX.test(newSlug)) {
     return NextResponse.json({ error: 'Invalid newSlug' }, { status: 400 });
   }
   if (newSlug === source) {
-    return NextResponse.json(
-      { error: 'newSlug must differ from source slug' },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: 'newSlug must differ from source slug' }, { status: 400 });
   }
 
   const clientFile = await loadSignageClient(client).catch(() => null);
   if (!clientFile) {
-    return NextResponse.json(
-      { error: `Theme "${client}" not found.` },
-      { status: 404 },
-    );
+    return NextResponse.json({ error: `Theme "${client}" not found.` }, { status: 404 });
   }
   if ((clientFile.displays ?? []).includes(newSlug)) {
-    return NextResponse.json(
-      { error: `Display "${newSlug}" already exists.` },
-      { status: 409 },
-    );
+    return NextResponse.json({ error: `Display "${newSlug}" already exists.` }, { status: 409 });
   }
 
-  const sourceDisplay = await loadSignageDisplay(client, source).catch(
-    () => null,
-  );
+  const sourceDisplay = await loadSignageDisplay(client, source).catch(() => null);
   if (!sourceDisplay) {
-    return NextResponse.json(
-      { error: `Source display "${source}" not found.` },
-      { status: 404 },
-    );
+    return NextResponse.json({ error: `Source display "${source}" not found.` }, { status: 404 });
   }
 
   const cloned = {

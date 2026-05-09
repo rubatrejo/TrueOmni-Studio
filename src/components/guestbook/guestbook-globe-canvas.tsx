@@ -310,7 +310,8 @@ export const GuestbookGlobeCanvas = forwardRef<
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'radial-gradient(circle at 50% 50%, hsl(var(--brand-primary)) 0%, #020912 80%)',
+          background:
+            'radial-gradient(circle at 50% 50%, hsl(var(--brand-primary)) 0%, #020912 80%)',
           color: '#ffffff',
           fontFamily: 'Helvetica, Arial, sans-serif',
           fontSize: '14px',

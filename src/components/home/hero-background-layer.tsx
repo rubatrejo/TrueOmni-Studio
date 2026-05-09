@@ -92,12 +92,7 @@ export function HeroBackgroundLayer({
           />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={src}
-            src={src}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-          />
+          <img key={src} src={src} alt="" className="absolute inset-0 h-full w-full object-cover" />
         )
       ) : null}
       <div

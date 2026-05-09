@@ -39,9 +39,7 @@ export function SignageNewsTicker({ items, intervalSec }: SignageNewsTickerProps
   const item = items[index];
   if (!item) return null;
 
-  const date = item.publishedAt
-    ? formatNewsDate(item.publishedAt)
-    : null;
+  const date = item.publishedAt ? formatNewsDate(item.publishedAt) : null;
 
   return (
     <div className="relative h-full w-full overflow-hidden">

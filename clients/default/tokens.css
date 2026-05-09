@@ -116,8 +116,12 @@
   /* ---------------------------------------------------------------------- */
   /*  ITINERARY BUILDER MODULE (Fase 3.17)                                  */
   /* ---------------------------------------------------------------------- */
-  --itinerary-olive: var(--brand-tertiary); /* CTA Create Itinerary / Send to Phone / progress slider */
-  --itinerary-toolbar-bg: var(--brand-primary); /* header banda + bottom map toolbar (azul oscuro) */
+  --itinerary-olive: var(
+    --brand-tertiary
+  ); /* CTA Create Itinerary / Send to Phone / progress slider */
+  --itinerary-toolbar-bg: var(
+    --brand-primary
+  ); /* header banda + bottom map toolbar (azul oscuro) */
   --itinerary-rail-bg: 220 14% 96%; /* gris claro del rail inferior */
   --itinerary-tab-active: var(--brand-secondary); /* tab activo (azul medio) */
   --itinerary-tab-inactive: 0 0% 64%; /* #a3a3a3 — gris medio del SVG inactive */
@@ -154,7 +158,8 @@
   --font-display:
     var(--font-montserrat, 'Montserrat'), var(--font-noto-jp, 'Noto Sans JP'), system-ui,
     -apple-system, 'Segoe UI', sans-serif;
-  --font-sans: var(--font-open-sans, 'Open Sans'), var(--font-noto-jp, 'Noto Sans JP'), system-ui,
+  --font-sans:
+    var(--font-open-sans, 'Open Sans'), var(--font-noto-jp, 'Noto Sans JP'), system-ui,
     -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 

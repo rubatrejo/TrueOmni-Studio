@@ -14,7 +14,7 @@ en runtime** para que el push live del bridge se vea sin reload.
 
 - **`src/lib/signage/template-catalog.ts`** (NUEVO): POJO ligero con
   descriptors de los 8 templates conocidos. Cada uno trae `slots: [{ key,
-  kind, rect, acceptedModules }]`. Helpers `getTemplateDescriptor(id)` y
+kind, rect, acceptedModules }]`. Helpers `getTemplateDescriptor(id)` y
   `defaultModuleFor(kind)` (devuelve instancia mínima válida con defaults
   del schema Zod). Sync manual con los `<NN-template>.tsx`.
 
@@ -32,6 +32,7 @@ en runtime** para que el push live del bridge se vea sin reload.
 ### 6 module forms
 
 Forms compactos en `_components/display/modules/`:
+
 - `EventsModuleForm`: layout select, maxItems number, titleOverride text.
 - `SocialModuleForm`: layout, maxPosts, rotationIntervalSec, hashtag filter.
 - `VideoImageModuleForm`: asset.kind, asset.url, loop checkbox, fit select.
@@ -66,21 +67,21 @@ resto del editor signage.
 
 ## Archivos tocados
 
-| Archivo | Tipo |
-|---|---|
-| `src/lib/signage/template-catalog.ts` | NUEVO |
-| `src/app/studio/digital-displays/_components/display/SlideRowExpanded.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/display/PlaylistPanel.tsx` | toggle expand + onUpdateSlots |
-| `src/app/studio/digital-displays/_components/display/modules/EventsModuleForm.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/display/modules/SocialModuleForm.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/display/modules/VideoImageModuleForm.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/display/modules/AdsModuleForm.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/display/modules/NewsModuleForm.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/display/modules/WeatherModuleForm.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/display/modules/module-form-primitives.tsx` | NUEVO |
-| `src/components/signage/player/SignagePlayer.tsx` | useSignageBridgeStore + shallow merge |
-| `.planning/DSS5-PLAN.md` | NUEVO |
-| `.planning/DSS5-SUMMARY.md` | NUEVO |
+| Archivo                                                                                  | Tipo                                  |
+| ---------------------------------------------------------------------------------------- | ------------------------------------- |
+| `src/lib/signage/template-catalog.ts`                                                    | NUEVO                                 |
+| `src/app/studio/digital-displays/_components/display/SlideRowExpanded.tsx`               | NUEVO                                 |
+| `src/app/studio/digital-displays/_components/display/PlaylistPanel.tsx`                  | toggle expand + onUpdateSlots         |
+| `src/app/studio/digital-displays/_components/display/modules/EventsModuleForm.tsx`       | NUEVO                                 |
+| `src/app/studio/digital-displays/_components/display/modules/SocialModuleForm.tsx`       | NUEVO                                 |
+| `src/app/studio/digital-displays/_components/display/modules/VideoImageModuleForm.tsx`   | NUEVO                                 |
+| `src/app/studio/digital-displays/_components/display/modules/AdsModuleForm.tsx`          | NUEVO                                 |
+| `src/app/studio/digital-displays/_components/display/modules/NewsModuleForm.tsx`         | NUEVO                                 |
+| `src/app/studio/digital-displays/_components/display/modules/WeatherModuleForm.tsx`      | NUEVO                                 |
+| `src/app/studio/digital-displays/_components/display/modules/module-form-primitives.tsx` | NUEVO                                 |
+| `src/components/signage/player/SignagePlayer.tsx`                                        | useSignageBridgeStore + shallow merge |
+| `.planning/DSS5-PLAN.md`                                                                 | NUEVO                                 |
+| `.planning/DSS5-SUMMARY.md`                                                              | NUEVO                                 |
 
 ## Verificado
 

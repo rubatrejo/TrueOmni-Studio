@@ -1,8 +1,4 @@
-import type {
-  SignageEvent,
-  SignageNewsConfig,
-  SignageSocialData,
-} from '@/lib/signage/schema';
+import type { SignageEvent, SignageNewsConfig, SignageSocialData } from '@/lib/signage/schema';
 
 type Result = { ok: true; savedAt: number } | { ok: false; error: string };
 
@@ -13,9 +9,7 @@ async function putContent(
 ): Promise<Result> {
   try {
     const res = await fetch(
-      `/api/studio/signage/clients/${encodeURIComponent(
-        clientSlug,
-      )}/content?kind=${kind}`,
+      `/api/studio/signage/clients/${encodeURIComponent(clientSlug)}/content?kind=${kind}`,
       {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -33,17 +27,11 @@ async function putContent(
   }
 }
 
-export const saveSignageEvents = (
-  clientSlug: string,
-  events: SignageEvent[],
-): Promise<Result> => putContent(clientSlug, 'events', { events });
+export const saveSignageEvents = (clientSlug: string, events: SignageEvent[]): Promise<Result> =>
+  putContent(clientSlug, 'events', { events });
 
-export const saveSignageSocial = (
-  clientSlug: string,
-  social: SignageSocialData,
-): Promise<Result> => putContent(clientSlug, 'social', { social });
+export const saveSignageSocial = (clientSlug: string, social: SignageSocialData): Promise<Result> =>
+  putContent(clientSlug, 'social', { social });
 
-export const saveSignageNews = (
-  clientSlug: string,
-  news: SignageNewsConfig,
-): Promise<Result> => putContent(clientSlug, 'news', { news });
+export const saveSignageNews = (clientSlug: string, news: SignageNewsConfig): Promise<Result> =>
+  putContent(clientSlug, 'news', { news });

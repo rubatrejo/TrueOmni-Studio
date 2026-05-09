@@ -43,19 +43,19 @@ de bajo valor.
 
 ## Archivos tocados
 
-| Archivo | Tipo |
-|---|---|
-| `src/lib/signage/diagnostics.ts` | NUEVO |
-| `src/app/studio/digital-displays/diagnostics/page.tsx` | NUEVO |
-| `src/app/studio/digital-displays/diagnostics/_components/DiagnosticsView.tsx` | NUEVO |
-| `src/lib/signage/kv-keys.ts` | + kSignageI18n |
-| `src/lib/signage/kv-store.ts` | + kvSignageI18n namespace |
-| `src/lib/signage/i18n.ts` | loader híbrido KV→fs |
-| `src/app/api/studio/signage/clients/[client]/i18n/route.ts` | NUEVO |
-| `src/app/studio/digital-displays/_components/tabs/I18nTab.tsx` | NUEVO |
-| `src/app/studio/digital-displays/_components/ThemeEditor.tsx` | + i18n tab + reorden + cleanup disabled flags |
-| `.planning/DSS8-PLAN.md` | NUEVO |
-| `.planning/DSS8-SUMMARY.md` | NUEVO |
+| Archivo                                                                       | Tipo                                          |
+| ----------------------------------------------------------------------------- | --------------------------------------------- |
+| `src/lib/signage/diagnostics.ts`                                              | NUEVO                                         |
+| `src/app/studio/digital-displays/diagnostics/page.tsx`                        | NUEVO                                         |
+| `src/app/studio/digital-displays/diagnostics/_components/DiagnosticsView.tsx` | NUEVO                                         |
+| `src/lib/signage/kv-keys.ts`                                                  | + kSignageI18n                                |
+| `src/lib/signage/kv-store.ts`                                                 | + kvSignageI18n namespace                     |
+| `src/lib/signage/i18n.ts`                                                     | loader híbrido KV→fs                          |
+| `src/app/api/studio/signage/clients/[client]/i18n/route.ts`                   | NUEVO                                         |
+| `src/app/studio/digital-displays/_components/tabs/I18nTab.tsx`                | NUEVO                                         |
+| `src/app/studio/digital-displays/_components/ThemeEditor.tsx`                 | + i18n tab + reorden + cleanup disabled flags |
+| `.planning/DSS8-PLAN.md`                                                      | NUEVO                                         |
+| `.planning/DSS8-SUMMARY.md`                                                   | NUEVO                                         |
 
 ## Verificado
 

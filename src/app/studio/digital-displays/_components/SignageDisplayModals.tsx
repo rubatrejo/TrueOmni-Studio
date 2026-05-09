@@ -74,14 +74,11 @@ export function NewSignageDisplayModal({
     }
     setBusy(true);
     try {
-      const res = await fetch(
-        `/api/studio/signage/displays/${encodeURIComponent(clientSlug)}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ slug: trimmedSlug, name: trimmedName }),
-        },
-      );
+      const res = await fetch(`/api/studio/signage/displays/${encodeURIComponent(clientSlug)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: trimmedSlug, name: trimmedName }),
+      });
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
         throw new Error(json.error ?? `HTTP ${res.status}`);
@@ -103,8 +100,8 @@ export function NewSignageDisplayModal({
       iconClass="bg-sky-500/15 text-sky-600 ring-sky-500/30 dark:text-sky-300"
     >
       <p className="mb-4 text-[13px] text-zinc-500">
-        Crea un display nuevo dentro de este theme. Clona la playlist y
-        settings de la plantilla <code className="font-mono text-[11.5px]">default → lobby-tv</code>.
+        Crea un display nuevo dentro de este theme. Clona la playlist y settings de la plantilla{' '}
+        <code className="font-mono text-[11.5px]">default → lobby-tv</code>.
       </p>
       <div className="flex flex-col gap-3">
         <Field label="Display name">
@@ -116,10 +113,7 @@ export function NewSignageDisplayModal({
             className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-[13px] text-zinc-800 outline-none focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
           />
         </Field>
-        <Field
-          label="Slug"
-          hint="Lowercase, dashes. Used in URLs and KV keys."
-        >
+        <Field label="Slug" hint="Lowercase, dashes. Used in URLs and KV keys.">
           <input
             type="text"
             value={slug}
@@ -330,15 +324,15 @@ export function DeleteSignageDisplayModal({
     >
       {isLast ? (
         <ErrorMessage>
-          No puedes borrar el último display del theme. Crea otro primero o
-          elimina el theme entero desde el dashboard.
+          No puedes borrar el último display del theme. Crea otro primero o elimina el theme entero
+          desde el dashboard.
         </ErrorMessage>
       ) : (
         <>
           <p className="mb-3 text-[13px] text-zinc-700 dark:text-zinc-300">
-            Esto borrará <strong>{name}</strong> del KV (display config +
-            snapshots) y lo quita del array <code className="font-mono text-[11.5px]">client.displays</code>.
-            El filesystem en git no se toca.
+            Esto borrará <strong>{name}</strong> del KV (display config + snapshots) y lo quita del
+            array <code className="font-mono text-[11.5px]">client.displays</code>. El filesystem en
+            git no se toca.
           </p>
           <p className="mb-3 text-[12px] text-zinc-500">
             Type <code className="font-mono text-[11.5px]">{slug}</code> to confirm.

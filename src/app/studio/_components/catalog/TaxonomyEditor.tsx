@@ -246,10 +246,7 @@ export function TaxonomyEditor({
           aria-labelledby="taxonomy-confirm-delete"
           className="rounded-md border border-amber-500/30 bg-amber-500/5 p-3"
         >
-          <p
-            id="taxonomy-confirm-delete"
-            className="text-[12px] font-medium text-amber-200"
-          >
+          <p id="taxonomy-confirm-delete" className="text-[12px] font-medium text-amber-200">
             {`"${confirmDelete.item}" is used by ${confirmDelete.usage} item${
               confirmDelete.usage === 1 ? '' : 's'
             }.`}

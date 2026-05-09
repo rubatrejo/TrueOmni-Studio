@@ -156,12 +156,52 @@ async function diffSignage(slug: string): Promise<PendingProductResult> {
       out.push({ path: f.path, action: 'create' });
     } else if (current === f.content) {
       out.push({ path: f.path, action: 'unchanged' });
+    } else if (f.path.endsWith('.json') && jsonDeepEqual(current, f.content)) {
+      // Mismo contenido semántico aunque difiera el formatting (Prettier
+      // vs JSON.stringify). Evita el falso positivo "N files pending"
+      // cuando el operador no tocó nada.
+      out.push({ path: f.path, action: 'unchanged' });
     } else {
       out.push({ path: f.path, action: 'update' });
     }
   }
   const changed = out.filter((f) => f.action !== 'unchanged').length;
   return { changed, files: out };
+}
+
+/** Compara dos strings JSON estructuralmente (deep-equal del parsed). */
+function jsonDeepEqual(a: string, b: string): boolean {
+  try {
+    return deepEqual(JSON.parse(a), JSON.parse(b));
+  } catch {
+    return false;
+  }
+}
+
+function deepEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (a === null || b === null) return false;
+  if (typeof a !== typeof b) return false;
+  if (typeof a !== 'object') return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a)) {
+    const arrB = b as unknown[];
+    if (a.length !== arrB.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (!deepEqual(a[i], arrB[i])) return false;
+    }
+    return true;
+  }
+  const aRec = a as Record<string, unknown>;
+  const bRec = b as Record<string, unknown>;
+  const aKeys = Object.keys(aRec);
+  const bKeys = Object.keys(bRec);
+  if (aKeys.length !== bKeys.length) return false;
+  for (const k of aKeys) {
+    if (!Object.hasOwn(bRec, k)) return false;
+    if (!deepEqual(aRec[k], bRec[k])) return false;
+  }
+  return true;
 }
 
 /** Path relativo al repo root para mostrar al operador. */

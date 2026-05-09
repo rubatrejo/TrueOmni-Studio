@@ -307,6 +307,23 @@ async function computeChange(
     if (current === nextContent) {
       return { path: filePath, action: 'unchanged', sizeBefore, sizeAfter };
     }
+    // Para JSON: comparar el contenido SEMÁNTICO (deep-equal del parsed)
+    // antes de declarar "update". Whitespace, ordering de keys y trailing
+    // newlines NO cuentan como diff real. Cierra el falso positivo del
+    // PendingChangesPanel — el operador veía "7 files pending" sin haber
+    // tocado nada porque Prettier formatea el fs distinto al
+    // JSON.stringify del KV.
+    if (filePath.endsWith('.json')) {
+      try {
+        const a = JSON.parse(current);
+        const b = JSON.parse(nextContent);
+        if (deepEqual(a, b)) {
+          return { path: filePath, action: 'unchanged', sizeBefore, sizeAfter };
+        }
+      } catch {
+        // Parse falló — caemos al string-diff.
+      }
+    }
     // JSON diff por keys top-level (#8 del audit). Solo si ambos lados son
     // JSON parseable y el archivo no es enorme (cap ~300KB para evitar
     // payloads pesados al cliente).
@@ -318,6 +335,33 @@ async function computeChange(
   } catch {
     return { path: filePath, action: 'create', sizeAfter };
   }
+}
+
+/** Deep equal estructural — handles objects, arrays, primitives, null. */
+function deepEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (a === null || b === null) return false;
+  if (typeof a !== typeof b) return false;
+  if (typeof a !== 'object') return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a)) {
+    const arrB = b as unknown[];
+    if (a.length !== arrB.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (!deepEqual(a[i], arrB[i])) return false;
+    }
+    return true;
+  }
+  const aRec = a as Record<string, unknown>;
+  const bRec = b as Record<string, unknown>;
+  const aKeys = Object.keys(aRec);
+  const bKeys = Object.keys(bRec);
+  if (aKeys.length !== bKeys.length) return false;
+  for (const k of aKeys) {
+    if (!Object.hasOwn(bRec, k)) return false;
+    if (!deepEqual(aRec[k], bRec[k])) return false;
+  }
+  return true;
 }
 
 /** Compara dos strings JSON y devuelve los paths donde hay diferencias. Si

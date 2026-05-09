@@ -398,8 +398,8 @@ function PendingChangesPanel({ slug, manifest }: { slug: string; manifest: Clien
     <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40">
       <div className="mb-4 flex items-center justify-between gap-3">
         <SectionHeading
-          title="Pending changes"
-          subtitle="Files that will be written when you publish each product. Re-checks every time you reopen the client."
+          title="Pending publish"
+          subtitle="Files where the live config (KV) differs from the published filesystem. JSON whitespace is ignored — only real semantic differences are counted."
         />
         <button
           type="button"

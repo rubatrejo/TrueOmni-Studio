@@ -24,6 +24,12 @@ import {
 } from '@/lib/studio/client-manifest';
 import { kv, kvKeys } from '@/lib/studio/kv';
 import {
+  emptyDemoContentInPlace,
+  geocodeLocation,
+  rewriteAddressesInPlace,
+  rewriteContentInPlace,
+} from '@/lib/studio/rewrite-client-content';
+import {
   KioskConfigSchema,
   makeBlankConfig,
   type ConfigMeta,
@@ -110,6 +116,20 @@ const CreateClientBodySchema = z.object({
     })
     .partial()
     .optional(),
+  /**
+   * Location en formato "City, ST" para el rewrite del contenido del template
+   * Arizona (addresses + Phoenix/Mesa/etc. en titles/descriptions). Si se
+   * omite, el cliente nuevo arrastra las referencias geográficas del default
+   * — útil para clientes que también son de Arizona o que van a poblar todo
+   * a mano (emptyMode).
+   */
+  locationFull: z.string().max(160).optional(),
+  /**
+   * Vacía las colecciones de mock data del template (listings/events/passes/
+   * deals/trails/itineraryBuilder.localListings/socialWall.posts). Branding,
+   * módulos y estructura se preservan para que el editor no quede roto.
+   */
+  emptyMode: z.boolean().optional(),
   products: ClientProductsSchema.partial().default({ kiosks: true }),
 });
 
@@ -165,6 +185,7 @@ export async function POST(request: Request) {
 
   // 1. Clonar kiosk si toca.
   let kioskConfig: KioskConfig | null = null;
+  const locationFull = parsed.data.locationFull?.trim() ?? '';
   if (products.kiosks) {
     try {
       const fsTemplate = await readClientFs(TEMPLATE_SLUG);
@@ -175,17 +196,41 @@ export async function POST(request: Request) {
         cfg.nombre = name;
         cfg.currentVersion = 0;
       }
-      const trimmedLocation = parsed.data.location?.city ?? '';
+      const trimmedLocation = locationFull || parsed.data.location?.city || '';
       const trimmedWebsite = parsed.data.website ?? '';
-      if (trimmedWebsite || trimmedLocation || parsed.data.location?.lat != null) {
+      // Geocoding: si el operador no envió coords explícitas pero sí
+      // "City, ST", resolvemos lat/lon via Nominatim para que el módulo
+      // Map y los address pickers arranquen centrados en el cliente.
+      let resolvedCoords: { lat: number; lng: number } | undefined;
+      if (parsed.data.location?.lat != null && parsed.data.location?.lon != null) {
+        resolvedCoords = { lat: parsed.data.location.lat, lng: parsed.data.location.lon };
+      } else if (locationFull) {
+        resolvedCoords = (await geocodeLocation(locationFull)) ?? undefined;
+      }
+      if (trimmedWebsite || trimmedLocation || resolvedCoords) {
         cfg.clientInfo = {
           website: trimmedWebsite,
           location: trimmedLocation,
-          ...(parsed.data.location?.lat != null && parsed.data.location?.lon != null
-            ? { coords: { lat: parsed.data.location.lat, lng: parsed.data.location.lon } }
-            : {}),
+          ...(resolvedCoords ? { coords: resolvedCoords } : {}),
         };
       }
+
+      // Empty mode: vaciar mock data antes del rewrite (no hay nada
+      // Phoenix-specific que reescribir si las colecciones están vacías).
+      if (parsed.data.emptyMode) {
+        emptyDemoContentInPlace(cfg);
+      }
+
+      // Rewrite del contenido del template (Phoenix/Arizona → location del
+      // cliente nuevo). Garantiza que un kiosk de "Davenport, FL" no vea
+      // "North Phoenix, AZ" en addresses ni "Arizona Science Center" en
+      // titles. Solo aplica si el operador envió locationFull en formato
+      // "City, ST".
+      if (locationFull) {
+        rewriteAddressesInPlace(cfg, locationFull);
+        rewriteContentInPlace(cfg, locationFull);
+      }
+
       const validated = KioskConfigSchema.safeParse(cfg);
       if (!validated.success) {
         return NextResponse.json(

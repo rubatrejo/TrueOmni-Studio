@@ -13,7 +13,7 @@ import { NewClientModal } from './_components/NewClientModal';
 import { OnboardingTour, replayOnboardingTour } from './_components/OnboardingTour';
 import { StudioPageHeader } from './_components/PageHeader';
 import { SystemStatusBadge } from './_components/SystemStatusBadge';
-import { cloneConfig, createConfig, deleteConfig } from './_lib/api-client';
+import { cloneConfig, createClient, deleteConfig } from './_lib/api-client';
 
 /**
  * `/studio` — Dashboard de Clientes (post Fase 3).
@@ -123,23 +123,24 @@ export default function StudioHome() {
   }) => {
     setCreatingClient(input.nombre);
     try {
-      // Por ahora reusamos el endpoint kiosk-only. La auto-migración convierte
-      // el resultado en un cliente unificado al regresar al dashboard. El
-      // endpoint /api/studio/clients POST llega en Fase 4.
-      await createConfig(input);
-      // S-10: si el operador marcó "Also activate Digital Displays", llamar
-      // al endpoint activate del producto DD. Best-effort: si falla, el
-      // cliente ya existe con el kiosk; el operador puede activar DD luego
-      // desde la Vista de Cliente.
-      if (input.activateDigitalDisplays) {
-        try {
-          await fetch(`/api/studio/clients/${input.slug}/products/digital-displays/activate`, {
-            method: 'POST',
-          });
-        } catch (ddErr) {
-          console.warn('[studio] DD activation failed during create', ddErr);
-        }
-      }
+      // Endpoint unified (Fase 4 cliente-primero): crea kiosk + DD en un
+      // solo round-trip + manifest + unified branding. Reemplaza el flujo
+      // legacy createConfig + activate-DD que requería 2 calls y dependía
+      // de la auto-migración para generar el manifest.
+      const locationFull = input.location?.trim() || undefined;
+      const cityFromFull = locationFull?.split(',')[0]?.trim();
+      await createClient({
+        slug: input.slug,
+        name: input.nombre,
+        website: input.website || undefined,
+        location: cityFromFull ? { city: cityFromFull } : undefined,
+        locationFull,
+        emptyMode: input.emptyMode || undefined,
+        products: {
+          kiosks: true,
+          digitalDisplays: input.activateDigitalDisplays || undefined,
+        },
+      });
       setShowNewModal(false);
       router.push(`/studio/${input.slug}`);
     } catch (err) {

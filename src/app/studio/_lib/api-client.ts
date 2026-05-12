@@ -90,6 +90,55 @@ export async function createConfig(input: {
   return { ...data.config, meta: data.meta };
 }
 
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Clients API (unified, Fase 4 cliente-primero)                            */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export interface ClientProductsInput {
+  kiosks?: boolean;
+  digitalDisplays?: boolean;
+  mobilePwa?: boolean;
+  videoWalls?: boolean;
+  tablets?: boolean;
+}
+
+export interface CreateClientInput {
+  slug: string;
+  name: string;
+  website?: string;
+  /** Coords + ciudad estructurados. Si no hay coords, el server geocodea
+   *  via Nominatim a partir de `locationFull`. */
+  location?: { city?: string; lat?: number; lon?: number };
+  /** "City, ST" sin parsear. Lo usa el backend para reescribir el contenido
+   *  Phoenix/Arizona del template default → la ciudad del cliente nuevo. */
+  locationFull?: string;
+  /** Vacía colecciones de mock data (listings/events/passes/deals/trails/
+   *  itinerary.localListings/socialWall.posts) tras clonar el template. */
+  emptyMode?: boolean;
+  products?: ClientProductsInput;
+}
+
+/**
+ * Crea un cliente unificado vía `POST /api/studio/clients` (Fase 4).
+ *
+ * A diferencia del legacy `createConfig`, este helper:
+ *  - Recibe `products` para activar kiosks + digital-displays + más
+ *    productos en un solo round-trip.
+ *  - Devuelve el manifest unificado + unified branding (no `KioskConfig`),
+ *    porque el cliente puede no tener kiosk activo.
+ *  - Aplica los rewrites del template Arizona/Phoenix igual que el legacy.
+ */
+export async function createClient(input: CreateClientInput): Promise<{
+  slug: string;
+  manifest: unknown;
+  branding: unknown;
+}> {
+  return http<{ slug: string; manifest: unknown; branding: unknown }>('/api/studio/clients', {
+    method: 'POST',
+    body: input,
+  });
+}
+
 export async function patchBranding(slug: string, branding: Branding): Promise<KioskConfig> {
   const data = await http<{ config: KioskConfig }>(`/api/studio/configs/${slug}`, {
     method: 'PATCH',

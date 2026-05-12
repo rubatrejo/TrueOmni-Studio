@@ -4,6 +4,59 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+## 2026-05-11 · MIG-AB-1: migración Playwright → agent-browser + higiene
+
+Decisión y ejecución de la fase puntual **MIG-AB-1** (plan en `.planning/MIG-AB-1-PLAN.md`).
+
+**Qué cambió:**
+
+- Toolchain único de QA visual: `agent-browser` (vercel-labs). Playwright MCP / skill `webapp-testing` queda fuera del flujo oficial. Detalle en CLAUDE.md §9 (nueva regla).
+- `.claude/agents/revisor-visual.md` reescrito: paso 3 usa los 4 comandos `agent-browser` (set viewport → open → wait networkidle → screenshot) + paso 3b opcional con `diff screenshot --baseline`.
+- `.planning/SKILLS.md`: `agent-browser` promovido a Tier 2. Borrada la fila "webapp-testing" de skills faltantes.
+- `.planning/PIXEL-PERFECT-PROTOCOL.md` línea 100: bloque de comandos `agent-browser` reemplaza la mención a Playwright MCP.
+- `.claude/commands/verificar-visual.md`: precondición `command -v agent-browser` + prompt al subagente actualizado.
+- E2E del Studio: `tests/e2e/studio-create-client.json` ejecutable con `agent-browser batch --bail`. README en `tests/e2e/README.md`. El `.md` original (`.planning/tests/studio-create-client.e2e.md`) ahora marca el camino Playwright como **opcional futuro**, no roadmap obligatorio.
+- Scripts nuevos en `package.json`: `pnpm verify:visual --ruta <ruta>` (screenshot scriptable) y `pnpm clean:screenshots` (mueve PNGs sueltos a `.planning/verifications/_orphans-<fecha>/`).
+- Higiene: 264 PNGs (147 MB) movidos de raíz a `.planning/verifications/_orphans-2026-05-11/`. Disco local liberado, histórico preservado.
+- `tsconfig.json` `paths`: añadidos `@/hooks/*` y `@/stores/*` (los directorios existían, faltaba el mapping).
+- `.gitignore`: bloque Playwright eliminado, comentarios actualizados a agent-browser.
+
+**Verificación:**
+
+- `tsc --noEmit` exit 0.
+- `node scripts/validate-configs.mjs`: 3/3 clientes válidos.
+- Grep en archivos vivos (`.claude/agents`, `.claude/commands`, `.planning/SKILLS.md`, `.planning/PIXEL-PERFECT-PROTOCOL.md`, `tsconfig.json`, `package.json`, `scripts/`, `tests/`) → cero hits de `playwright|webapp-testing` excepto:
+  - `CLAUDE.md §9` con la nueva regla prohibitoria (intencional).
+  - `tests/e2e/README.md` que documenta cuándo evaluar Playwright a futuro (intencional).
+- `STATE.md` y planes `3-NN-*` mantienen sus menciones históricas. NO se reescribe registro.
+
+**Sin commit todavía.** Rubén debe revisar los diffs antes de `git add` + `git commit`. Pull todo nuevo está bajo:
+
+- `.planning/MIG-AB-1-PLAN.md` (plan)
+- `.claude/agents/revisor-visual.md`
+- `.planning/SKILLS.md`
+- `.planning/PIXEL-PERFECT-PROTOCOL.md`
+- `.claude/commands/verificar-visual.md`
+- `.planning/tests/studio-create-client.e2e.md` (cabecera + sección "Pendiente")
+- `tests/e2e/README.md` (nuevo)
+- `tests/e2e/studio-create-client.json` (nuevo)
+- `scripts/verify-visual.mjs` (nuevo)
+- `scripts/clean-dev-screenshots.mjs` (nuevo)
+- `package.json` (2 scripts nuevos)
+- `tsconfig.json` (2 paths nuevos)
+- `CLAUDE.md` §6 y §9
+- `.gitignore`
+- `.planning/verifications/_orphans-2026-05-11/` (264 archivos movidos)
+
+**Pendiente para próxima sesión (no bloqueante):**
+
+1. Rotar `STATE.md` (295 KB). Archivar fases cerradas (3-9 a 3-16, DS-_, S-_) en `.planning/archive/STATE-fase-3-{N}.md`. Dejar el activo en ≤ 30 KB.
+2. Cerrar el worktree `.claude/worktrees/vibrant-kirch-310f4a/` con `git worktree remove` si la rama ya se mergeó. Requiere confirmación del owner.
+3. Decidir borrado de `.playwright-mcp/` (31 MB). Ya no se referencia desde ningún archivo vivo.
+4. Plan futuro `next-auth@stable` cuando salga.
+
+---
+
 ## Estado actual
 
 **Fase activa:** **Audit panorámico v2 cerrado al 96% en producción** (45/47 hallazgos). Studio + signage operativos en `https://trueomni-studio.vercel.app` con allowlist GitHub OAuth + super-admin hardcoded (`ruba.trejo@gmail.com`). Working tree limpio (excepto `.claude/scheduled_tasks.lock` artefacto de tooling, no debe commitearse).
@@ -2861,6 +2914,42 @@ studio/clients`). Idempotente con guard por `loadClientManifest`. Sin
 - **Helper `deepEqual` duplicado intencionalmente**: una copia en `publish/[slug]/route.ts` y otra en `pending/route.ts`. Extraer a `_lib/deep-equal.ts` será un refactor menor cuando un tercer call-site lo necesite.
 
 **Fase:** Audit panorámico v2 cerrado en producción (45/47, 96%) · próxima fase: Fase 4 primer cliente real (bloqueada por negocio).
+
+---
+
+### Sesión 2026-05-12 — Digital Display Portrait + pivot a display unificado multi-orientation
+
+**Hecho:**
+
+- **Sprint 1 (mañana) — Signage Portrait v1** (commits `c590249`, `e516817`, `de6b8a7`): añadida orientación portrait (1080×1920) al producto Digital Signage con modelo "1 display = 1 orientation fija". Schema con `SignageDisplaySettings.orientation`, registry por `(templateId, orientation)`, SignageStage redimensionable, SignageHeader con escalas portrait (logo 0.36×, weather/clock 0.62×, padding 28 vs 40, clock/date +2pt bump portrait), 8 templates portrait pixel-perfect contra SVG XD (`designs/signage/portrait/`), bridge propaga orientation editor → runtime, NewDisplayCard con selector landscape/portrait, tag de orientation en cards del dashboard (violet portrait, sky landscape), zoom split (autoFit + userZoom) en PreviewPanel, HeaderTab con forecast cap 1/2 en portrait.
+- **Sprint 2 (tarde) — Pivot a display unificado** (commits `5c4dbd2`, `238a451`): cambio de modelo a "1 display sirve a ambas orientations". Campo renombrado `orientation` → `defaultOrientation` con zod preprocess que acepta legacy. Runtime `/signage/[c]/[d]` resuelve cascada `searchParams.orientation` → `defaultOrientation` → `landscape`. SignagePlayer, SignageHeader y SignageStage los 3 reactive al bridge `displayPatch.settings.defaultOrientation` (bug detectado: si solo Stage reaccionaba, templates dentro seguían siendo los server-rendered). PreviewPanel toggle live Landscape↔Portrait restaurado con DeviceTab. HeaderTab dinámico (1/2 portrait, 1/2/3/5 landscape) según preview actual. Endpoint acepta ambos nombres del campo durante transición. NewDisplayCard envía `defaultOrientation`.
+- **Fix branding del cliente en portrait** (commit `238a451`): los 8 templates portrait usaban colores y fonts HARDCODED del SVG XD (#1796d6, #b9bd39, #fff, OpenSans, Montserrat). Sweep a CSS vars del cliente (`--signage-band-overlay`, `--signage-events-accent`, `--signage-text-on-brand`, `--signage-font-body`, `--signage-font-display`). Ahora los colores y fonts editados desde el branding tab del Studio SÍ se reflejan en portrait.
+- **Fix header portrait pegado arriba** (commit `238a451`): añadido `PADDING_Y_PORTRAIT = 16px` en las 3 zonas (logo/weather/clock). Antes el contenido con `lineHeight: 1` quedaba contra el borde superior del rect del header.
+
+**Verificado:**
+
+- Typecheck + lint limpios en cada commit (hook husky pre-commit corre).
+- Push limpio: 5 commits en cadena desde el último cierre (`dc70f1a`). Tip: `238a451`.
+- Smoke local validado por Rubén entre Sprint 1 y 2: toggle live funciona, query param override funciona, templates pixel-perfect.
+- Producción Vercel deploy READY tras cada push (5 deploys consecutivos verdes).
+
+**Pendiente / siguiente:**
+
+1. **Validación visual final en producción**: confirmar branding del cliente reflejado en portrait + header con respiro correcto (commit `238a451` deployed).
+2. **Iteración pixel-perfect de los 8 templates portrait**: la primera versión es funcional pero los SVGs XD son re-diseños complejos. Si Rubén nota diff > ±2px en algún tile específico, sub-fase de tuning por template.
+3. **Doble badge en cards del dashboard**: hoy el tag muestra solo `defaultOrientation`. Cuando un cliente sirva ambas orientations explícitamente, considerar mostrar "L+P".
+4. **Sprint 5 técnico futuro** (heredado): `@playwright/test` + GitHub Action e2e + S-46 custom domain. Nada bloqueante.
+
+**Decisiones:**
+
+- **`defaultOrientation` en lugar de `orientation`**: el display ya no "es" portrait o landscape; sirve a ambas. El campo solo indica qué pintar por defecto si la URL no especifica. Hardware portrait usa `?orientation=portrait` en la URL del kiosk.
+- **Cascade query > bridge > defaultOrientation > landscape**: query gana siempre (operador físico) para que un toggle accidental en el editor NUNCA cambie lo que renderea un TV en producción que usa URL fija. El bridge solo afecta al iframe del editor.
+- **Zod preprocess en lugar de migration batch**: el rename `orientation` → `defaultOrientation` se hace al parsear. Sin migración explícita. Al primer save del editor, el KV se reescribe con el nombre nuevo.
+- **3 componentes (Stage + Player + Header) leen del bridge**: cualquiera de los 3 que NO reaccione genera un bug visual (Stage redimensiona pero templates siguen, o templates cambian pero header sigue). Todos comparten el mismo selector `displayPatch.settings.defaultOrientation`.
+- **CSS vars en templates portrait** (en lugar de hardcoded del SVG): pixel-perfect contra el SVG XD vale para la GEOMETRÍA (rects, paths, transforms), no para los COLORES — esos son del cliente. Misma decisión que tomó el equipo cuando hizo landscape v1.
+- **PADDING_Y_PORTRAIT=16**: el SVG XD no tiene padding interno del header band; los textos quedan contra el edge. En landscape no se nota por el ancho 1920; en portrait 1080 con scaling 0.62 sí. Padding solo en portrait.
+
+**Fase:** Signage Portrait deployado en producción + pivot a display unificado multi-orientation cerrado. Producto Digital Signage ahora soporta ambas orientations desde un único display config, con templates pixel-perfect por orientation y branding del cliente aplicado. Próxima fase: iteración pixel-perfect on-demand o Fase 4 primer cliente real (bloqueada por negocio).
 
 ---
 

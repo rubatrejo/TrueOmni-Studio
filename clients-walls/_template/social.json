@@ -1,0 +1,51 @@
+{
+  "filter": { "hashtag": null, "network": null },
+  "posts": [
+    {
+      "id": "post-1",
+      "author": "@username",
+      "image": "assets/social/post-1.jpg",
+      "network": "instagram"
+    },
+    {
+      "id": "post-2",
+      "author": "@username",
+      "image": "assets/social/post-2.jpg",
+      "network": "instagram"
+    },
+    {
+      "id": "post-3",
+      "author": "@username",
+      "image": "assets/social/post-3.jpg",
+      "network": "instagram"
+    },
+    {
+      "id": "post-4",
+      "author": "@username",
+      "image": "assets/social/post-4.jpg",
+      "network": "instagram"
+    },
+    {
+      "id": "post-5",
+      "author": "@username",
+      "image": "assets/social/post-5.jpg",
+      "network": "instagram"
+    },
+    {
+      "id": "post-6",
+      "author": "@username",
+      "image": "assets/social/post-6.jpg",
+      "network": "instagram"
+    }
+  ],
+  "featuredTweet": {
+    "id": "tweet-jane",
+    "author": "Jane Doe",
+    "handle": "@username",
+    "publishedAt": "2026-05-06T15:00:00",
+    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus non augue sit amet quam ut faucibus, semis volutpat id, elementum non. Duis a purus quis odio condimentum lacinia.",
+    "network": "x",
+    "hashtag": "#Hashtag",
+    "image": "assets/social/featured-bg.jpg"
+  }
+}

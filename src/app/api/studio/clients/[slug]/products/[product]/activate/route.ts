@@ -17,6 +17,9 @@ import {
 } from '@/lib/studio/client-manifest';
 import { kv, kvKeys } from '@/lib/studio/kv';
 import { KioskConfigSchema, makeBlankConfig, type ConfigMeta } from '@/lib/studio/schema';
+import { loadVideoWallClient } from '@/lib/video-walls/config';
+import { kVideoWallClient, kVideoWallClientList } from '@/lib/video-walls/kv-keys';
+import { VideoWallClientFileSchema, type VideoWallClientFile } from '@/lib/video-walls/schema';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,6 +78,55 @@ function makeBlankSignageClient(
       forecastDays: 1,
     },
     displays: [],
+  };
+}
+
+/**
+ * Fallback blank video-walls client cuando el template `default` no
+ * está disponible. Mismo patrón que makeBlankSignageClient — un cliente
+ * con header default + branding del usuario y `walls: []`.
+ */
+function makeBlankVideoWallClient(
+  slug: string,
+  name: string,
+  branding: UnifiedClientBranding,
+): VideoWallClientFile {
+  return {
+    slug,
+    name,
+    locale: 'en',
+    timezone: 'America/Phoenix',
+    location: {
+      city: branding.location?.city ?? '',
+      lat: branding.location?.lat ?? 0,
+      lon: branding.location?.lon ?? 0,
+    },
+    website: normalizeUrl(branding.website),
+    branding: {
+      ...unifiedToSignageBranding(branding),
+      logos: { default: branding.logos.default || 'assets/logo.svg' },
+      fonts: {
+        display: branding.fonts.display ?? 'Montserrat',
+        body: branding.fonts.body ?? 'Open Sans',
+        displayCustom: undefined,
+        bodyCustom: undefined,
+      },
+    },
+    header: {
+      position: 'top',
+      height: 100,
+      layout: 'logo-left',
+      weatherPlacement: 'center',
+      clockPlacement: 'right',
+      background: { kind: 'color', color: '#0b1f3a' },
+      showLogo: true,
+      showWeather: true,
+      showClock: true,
+      clockFormat: '12h',
+      weatherUnits: 'imperial',
+      forecastDays: 1,
+    },
+    walls: [],
   };
 }
 
@@ -213,8 +265,40 @@ export async function POST(_req: Request, { params }: RouteParams) {
     }
     await kv.set(kSignageClient(slug), validated.data);
     await kv.sadd(kSignageClientList, slug);
+  } else if (productId === 'videoWalls') {
+    const template = await loadVideoWallClient(TEMPLATE_SLUG);
+    const clone: VideoWallClientFile = template
+      ? {
+          slug,
+          name: manifest.name,
+          locale: template.locale,
+          timezone: template.timezone,
+          location: {
+            ...template.location,
+            ...(branding.location?.city ? { city: branding.location.city } : null),
+            ...(branding.location?.lat != null ? { lat: branding.location.lat } : null),
+            ...(branding.location?.lon != null ? { lon: branding.location.lon } : null),
+          },
+          website: normalizeUrl(branding.website) ?? normalizeUrl(template.website),
+          branding: {
+            ...structuredClone(template.branding),
+            ...unifiedToSignageBranding(branding),
+          },
+          header: structuredClone(template.header),
+          walls: [],
+        }
+      : makeBlankVideoWallClient(slug, manifest.name, branding);
+    const validated = VideoWallClientFileSchema.safeParse(clone);
+    if (!validated.success) {
+      return NextResponse.json(
+        { error: 'video-walls clone validation failed', issues: validated.error.issues },
+        { status: 500 },
+      );
+    }
+    await kv.set(kVideoWallClient(slug), validated.data);
+    await kv.sadd(kVideoWallClientList, slug);
   }
-  // Para mobile-pwa/video-walls/tablets: solo flipea el flag por ahora.
+  // Para mobile-pwa/tablets: solo flipea el flag por ahora.
   // Cuando se implementen, agregar aquí la lógica de clone.
 
   await saveClientManifest({

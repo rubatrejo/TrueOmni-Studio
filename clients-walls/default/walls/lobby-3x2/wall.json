@@ -1,0 +1,17 @@
+{
+  "slug": "lobby-3x2",
+  "name": "Lobby 3×2",
+  "grid": "3x2",
+  "settings": {
+    "targetResolution": "1080p",
+    "audio": false,
+    "defaultDurationMs": 7000,
+    "defaultTransition": "cut",
+    "sleepSchedule": {
+      "enabled": false,
+      "startTime": "23:00",
+      "endTime": "06:00"
+    }
+  },
+  "playlist": []
+}

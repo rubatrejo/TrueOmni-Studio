@@ -1,0 +1,68 @@
+/*
+ * tokens.css — Plantilla de tokens de diseño para Digital Displays (signage).
+ *
+ * Reglas:
+ *  - Cada cliente signage tiene su propia copia en clients-signage/<slug>/tokens.css
+ *  - Valores en formato HSL sin la función hsl(): "H S% L%".
+ *  - Todos los tokens viven bajo el prefijo --signage-* para no chocar con kiosk.
+ *  - Tailwind consume estos tokens vía hsl(var(--signage-*)) en tailwind.config.ts.
+ *  - Cero hardcoded en componentes signage. Siempre clase que resuelva al token.
+ */
+
+:root {
+  /* ====================================================================== */
+  /*  PALETA DE MARCA SIGNAGE — LOS COLORES DEL CLIENTE                     */
+  /*                                                                        */
+  /*  Cambia estos y todos los displays del cliente recolorean.             */
+  /* ====================================================================== */
+  --signage-brand-primary: 211 100% 25%; /* #003F7E Azul oscuro: header band */
+  --signage-brand-secondary: 200 100% 50%; /* #00A8E1 Cyan: accents secundarios */
+  --signage-brand-accent: 62 53% 48%; /* #B9BD39 Olive: accent del SVG fuente */
+  --signage-brand-neutral: 0 0% 7%; /* #131313 Black */
+
+  /* ---------------------------------------------------------------------- */
+  /*  SUPERFICIES                                                           */
+  /* ---------------------------------------------------------------------- */
+  --signage-surface: 0 0% 100%; /* fondo claro de body */
+  --signage-surface-alt: 210 40% 96%; /* tarjetas, panels suaves */
+  --signage-surface-dark: 222 47% 11%; /* fondo oscuro alternativo */
+  --signage-stage-bg: 0 0% 0%; /* color del letterbox cuando aspect != 16:9 */
+
+  /* ---------------------------------------------------------------------- */
+  /*  TEXTO                                                                 */
+  /* ---------------------------------------------------------------------- */
+  --signage-text: 222 84% 5%; /* texto principal sobre superficie clara */
+  --signage-text-muted: 215 16% 47%; /* texto secundario */
+  --signage-text-on-brand: 0 0% 100%; /* texto sobre band del header */
+  --signage-text-on-dark: 0 0% 100%; /* texto sobre fondos oscuros */
+
+  /* ---------------------------------------------------------------------- */
+  /*  HEADER UNIVERSAL                                                      */
+  /* ---------------------------------------------------------------------- */
+  --signage-header-bg: var(--signage-brand-primary);
+  --signage-header-text: var(--signage-text-on-brand);
+  --signage-header-height: 155px;
+
+  /* ---------------------------------------------------------------------- */
+  /*  ACCENTS POR MÓDULO (defaults derivados — overrideables por cliente)   */
+  /* ---------------------------------------------------------------------- */
+  /* Olive #b9bd39 — color del label de eventos en el SVG fuente. */
+  --signage-events-accent: var(--signage-brand-accent);
+  --signage-social-accent: var(--signage-brand-secondary);
+  --signage-news-accent: var(--signage-brand-accent);
+  --signage-weather-accent: var(--signage-brand-secondary);
+  --signage-ads-accent: var(--signage-brand-accent);
+  --signage-video-accent: var(--signage-brand-primary);
+
+  /* Cyan band overlay — antes hardcoded #1796d6 en templates 01/04/06. */
+  --signage-band-overlay: var(--signage-brand-secondary);
+
+  /* ---------------------------------------------------------------------- */
+  /*  ESTADOS                                                               */
+  /* ---------------------------------------------------------------------- */
+  --signage-border: 214 32% 91%;
+  --signage-ring: var(--signage-brand-secondary);
+  --signage-success: 142 71% 45%;
+  --signage-warning: 38 92% 50%;
+  --signage-destructive: 0 84% 60%;
+}

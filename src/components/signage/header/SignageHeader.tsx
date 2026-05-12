@@ -52,6 +52,11 @@ export interface SignageHeaderProps {
 
 const PADDING_X_LANDSCAPE = 40;
 const PADDING_X_PORTRAIT = 28;
+/** Portrait añade respiro vertical (top/bottom) para que los textos del
+ *  weather/clock con lineHeight:1 no queden pegados al borde superior del
+ *  header rect. Landscape no necesita — el header es 1920 ancho con espacio
+ *  sobrado horizontal. */
+const PADDING_Y_PORTRAIT = 16;
 /** Altura fija del header signage. Coincide con el viewBox original de los
  *  SVGs de Adobe XD (1920×1080 → header band 1920×155). El editor ya no
  *  permite cambiarla. */
@@ -117,6 +122,7 @@ export function SignageHeader({
     : null;
 
   const paddingX = orientation === 'portrait' ? PADDING_X_PORTRAIT : PADDING_X_LANDSCAPE;
+  const paddingY = orientation === 'portrait' ? PADDING_Y_PORTRAIT : 0;
   return (
     <div
       style={{
@@ -136,6 +142,7 @@ export function SignageHeader({
           height={HEADER_HEIGHT}
           orientation={orientation}
           paddingX={paddingX}
+          paddingY={paddingY}
         />
       ) : null}
 
@@ -146,6 +153,7 @@ export function SignageHeader({
           forecastDays={forecastDays}
           orientation={orientation}
           paddingX={paddingX}
+          paddingY={paddingY}
         />
       ) : null}
 
@@ -156,6 +164,7 @@ export function SignageHeader({
           dateText={dateText}
           orientation={orientation}
           paddingX={paddingX}
+          paddingY={paddingY}
         />
       ) : null}
     </div>
@@ -166,15 +175,21 @@ export function SignageHeader({
 //  Zonas
 // ---------------------------------------------------------------------------
 
-function placementToCss(placement: 'left' | 'center' | 'right', paddingX: number): CSSProperties {
+function placementToCss(
+  placement: 'left' | 'center' | 'right',
+  paddingX: number,
+  paddingY: number = 0,
+): CSSProperties {
   // Full-height zones + flex centering interno. Garantiza que las 3 zonas
   // (logo / weather / clock) compartan el mismo eje vertical y los
   // baselines visuales queden alineados, independientemente de cuántas
-  // líneas de texto traiga cada zona.
+  // líneas de texto traiga cada zona. paddingY portrait añade respiro
+  // contra los bordes superior/inferior del rect del header (los textos
+  // grandes con lineHeight:1 quedaban pegados al edge).
   const base: CSSProperties = {
     position: 'absolute',
-    top: 0,
-    bottom: 0,
+    top: paddingY,
+    bottom: paddingY,
     display: 'flex',
     alignItems: 'center',
   };
@@ -189,12 +204,14 @@ function LogoZone({
   height,
   orientation,
   paddingX,
+  paddingY,
 }: {
   placement: 'logo-left' | 'logo-center' | 'logo-right';
   customSrc: string | null;
   height: number;
   orientation: SignageOrientation;
   paddingX: number;
+  paddingY: number;
 }) {
   const simple: 'left' | 'center' | 'right' =
     placement === 'logo-center' ? 'center' : placement === 'logo-right' ? 'right' : 'left';
@@ -205,7 +222,7 @@ function LogoZone({
   return (
     <div
       style={{
-        ...placementToCss(simple, paddingX),
+        ...placementToCss(simple, paddingX, paddingY),
       }}
     >
       <div style={{ height: logoHeight, display: 'flex', alignItems: 'center' }}>
@@ -230,12 +247,14 @@ function WeatherZone({
   forecastDays,
   orientation,
   paddingX,
+  paddingY,
 }: {
   placement: 'left' | 'center' | 'right';
   weather: SignageHeaderWeather;
   forecastDays: 1 | 2 | 3 | 5;
   orientation: SignageOrientation;
   paddingX: number;
+  paddingY: number;
 }) {
   // Landscape: 5 días encogen el bloque a 0.65 para caber junto al clock.
   // Portrait: max 2 días, escala base 0.62 para que todo el header quepa
@@ -254,7 +273,7 @@ function WeatherZone({
         gap,
         color: 'hsl(var(--signage-header-text))',
         whiteSpace: 'nowrap',
-        ...placementToCss(placement, paddingX),
+        ...placementToCss(placement, paddingX, paddingY),
       }}
     >
       <span
@@ -366,12 +385,14 @@ function ClockZone({
   dateText,
   orientation,
   paddingX,
+  paddingY,
 }: {
   placement: 'left' | 'center' | 'right';
   clockText: string;
   dateText: string;
   orientation: SignageOrientation;
   paddingX: number;
+  paddingY: number;
 }) {
   // Landscape (1920) usa los tamaños del SVG XD. Portrait (1080) escala a
   // 0.62 para que clock + weather + logo quepan sin colisión, +2pt sobre
@@ -388,7 +409,7 @@ function ClockZone({
         textAlign,
         color: 'hsl(var(--signage-header-text))',
         lineHeight: 1.15,
-        ...placementToCss(placement, paddingX),
+        ...placementToCss(placement, paddingX, paddingY),
       }}
     >
       <div>

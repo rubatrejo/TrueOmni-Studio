@@ -98,7 +98,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
         <g transform="translate(465 267)">
           <path
             d="M75,150a75,75,0,1,1,75-75A75.085,75.085,0,0,1,75,150ZM55.434,42.391v65.217L110.869,75Z"
-            fill="#fff"
+            fill="hsl(var(--signage-text-on-brand))"
             opacity="0.8"
           />
         </g>
@@ -148,13 +148,18 @@ function SmallTile({
       <g>
         <rect width="360" height="549" transform="translate(0 -87)" fill={`url(#${patternId})`} />
         <g transform="translate(0 362)">
-          <rect width="360" height="100" fill="#1796d6" fillOpacity="0.901" />
+          <rect
+            width="360"
+            height="100"
+            fill="hsl(var(--signage-band-overlay))"
+            fillOpacity="0.901"
+          />
         </g>
         <text
           transform="translate(26 392)"
-          fill="#fff"
+          fill="hsl(var(--signage-text-on-brand))"
           fontSize="18"
-          fontFamily="OpenSans-Bold, Open Sans"
+          fontFamily="var(--signage-font-body, 'Open Sans')"
           fontWeight="700"
         >
           <tspan x="0" y="0">
@@ -168,20 +173,20 @@ function SmallTile({
         </text>
         <text
           transform="translate(26 445)"
-          fill="#fff"
+          fill="hsl(var(--signage-text-on-brand))"
           fontSize="16"
-          fontFamily="OpenSans, Open Sans"
+          fontFamily="var(--signage-font-body, 'Open Sans')"
         >
           <tspan x="0" y="0">{`${time} - ${ev.location ?? 'Location'}`}</tspan>
         </text>
       </g>
       <g transform="translate(0 -57)">
-        <rect width="130" height="112" fill="#b9bd39" />
+        <rect width="130" height="112" fill="hsl(var(--signage-events-accent))" />
         <text
           transform="translate(65 34)"
-          fill="#fff"
+          fill="hsl(var(--signage-text-on-brand))"
           fontSize="20"
-          fontFamily="Montserrat-Medium, Montserrat"
+          fontFamily="var(--signage-font-display, Montserrat)"
           fontWeight="500"
           textAnchor="middle"
         >
@@ -191,9 +196,9 @@ function SmallTile({
         </text>
         <text
           transform="translate(65 88)"
-          fill="#fff"
+          fill="hsl(var(--signage-text-on-brand))"
           fontSize="50"
-          fontFamily="OpenSans, Open Sans"
+          fontFamily="var(--signage-font-body, 'Open Sans')"
           textAnchor="middle"
         >
           <tspan x="0" y="0">

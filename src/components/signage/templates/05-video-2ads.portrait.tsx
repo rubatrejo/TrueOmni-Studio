@@ -90,7 +90,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
         <g transform="translate(703 363)">
           <path
             d="M75,150a75,75,0,1,1,75-75A75.085,75.085,0,0,1,75,150ZM55.434,42.391v65.217L110.869,75Z"
-            fill="#fff"
+            fill="hsl(var(--signage-text-on-brand))"
             opacity="0.8"
           />
         </g>

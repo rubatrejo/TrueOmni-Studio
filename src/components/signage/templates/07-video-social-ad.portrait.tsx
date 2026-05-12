@@ -100,7 +100,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
         <g transform="translate(703 363)">
           <path
             d="M75,150a75,75,0,1,1,75-75A75.085,75.085,0,0,1,75,150ZM55.434,42.391v65.217L110.869,75Z"
-            fill="#fff"
+            fill="hsl(var(--signage-text-on-brand))"
             opacity="0.8"
           />
         </g>
@@ -152,16 +152,16 @@ function SocialTile({
           <text
             x="14"
             y="285"
-            fontFamily="Open Sans, sans-serif"
+            fontFamily="var(--signage-font-body, 'Open Sans')"
             fontSize="16"
             fontWeight="600"
-            fill="#fff"
+            fill="hsl(var(--signage-text-on-brand))"
           >
             {`@${post.author}`}
           </text>
         </>
       ) : (
-        <rect width="270" height="304" fill="#222" />
+        <rect width="270" height="304" fill="hsl(var(--signage-stage-bg))" />
       )}
     </g>
   );

@@ -131,15 +131,15 @@ function Render({ client }: SignageTemplateRenderProps) {
             width="1080"
             height="100"
             transform="translate(0 363)"
-            fill="#1796d6"
+            fill="hsl(var(--signage-band-overlay))"
             fillOpacity="0.897"
           />
           {/* Title — translate(30 380), font 22 OpenSans-Bold */}
           <text
             transform="translate(30 380)"
-            fill="#fff"
+            fill="hsl(var(--signage-text-on-brand))"
             fontSize="22"
-            fontFamily="OpenSans-Bold, Open Sans"
+            fontFamily="var(--signage-font-body, 'Open Sans')"
             fontWeight="700"
           >
             <tspan x="0" y="24">
@@ -149,9 +149,9 @@ function Render({ client }: SignageTemplateRenderProps) {
           {/* Time/location — translate(30 420), font 20 OpenSans */}
           <text
             transform="translate(30 420)"
-            fill="#fff"
+            fill="hsl(var(--signage-text-on-brand))"
             fontSize="20"
-            fontFamily="OpenSans, Open Sans"
+            fontFamily="var(--signage-font-body, 'Open Sans')"
           >
             <tspan
               x="0"
@@ -165,12 +165,17 @@ function Render({ client }: SignageTemplateRenderProps) {
             del SVG XD asumen otra convención de anchor; usar middle
             evita que "Thursday" salga del olive box. */}
         <g transform="translate(160 -174)">
-          <rect width="160" height="138.588" transform="translate(0 58.5)" fill="#b9bd39" />
+          <rect
+            width="160"
+            height="138.588"
+            transform="translate(0 58.5)"
+            fill="hsl(var(--signage-events-accent))"
+          />
           <text
             transform="translate(80 170.5)"
-            fill="#fff"
+            fill="hsl(var(--signage-text-on-brand))"
             fontSize="68"
-            fontFamily="OpenSans, Open Sans"
+            fontFamily="var(--signage-font-body, 'Open Sans')"
             textAnchor="middle"
           >
             <tspan x="0" y="0">
@@ -179,9 +184,9 @@ function Render({ client }: SignageTemplateRenderProps) {
           </text>
           <text
             transform="translate(80 96.5)"
-            fill="#fff"
+            fill="hsl(var(--signage-text-on-brand))"
             fontSize="24"
-            fontFamily="Montserrat-Medium, Montserrat"
+            fontFamily="var(--signage-font-display, Montserrat)"
             fontWeight="500"
             textAnchor="middle"
           >
@@ -233,13 +238,18 @@ function SmallTile({ col, ev, locale, patternId }: SmallTileProps) {
       <g>
         <rect width="360" height="549" transform="translate(0 -87)" fill={`url(#${patternId})`} />
         <g transform="translate(0 362)">
-          <rect width="360" height="100" fill="#1796d6" fillOpacity="0.901" />
+          <rect
+            width="360"
+            height="100"
+            fill="hsl(var(--signage-band-overlay))"
+            fillOpacity="0.901"
+          />
         </g>
         <text
           transform="translate(26 392)"
-          fill="#fff"
+          fill="hsl(var(--signage-text-on-brand))"
           fontSize="18"
-          fontFamily="OpenSans-Bold, Open Sans"
+          fontFamily="var(--signage-font-body, 'Open Sans')"
           fontWeight="700"
         >
           <tspan x="0" y="0">
@@ -253,20 +263,20 @@ function SmallTile({ col, ev, locale, patternId }: SmallTileProps) {
         </text>
         <text
           transform="translate(26 445)"
-          fill="#fff"
+          fill="hsl(var(--signage-text-on-brand))"
           fontSize="16"
-          fontFamily="OpenSans, Open Sans"
+          fontFamily="var(--signage-font-body, 'Open Sans')"
         >
           <tspan x="0" y="0">{`${time} - ${ev.location ?? 'Location'}`}</tspan>
         </text>
       </g>
       <g transform="translate(0 -57)">
-        <rect width="130" height="112" fill="#b9bd39" />
+        <rect width="130" height="112" fill="hsl(var(--signage-events-accent))" />
         <text
           transform="translate(65 34)"
-          fill="#fff"
+          fill="hsl(var(--signage-text-on-brand))"
           fontSize="20"
-          fontFamily="Montserrat-Medium, Montserrat"
+          fontFamily="var(--signage-font-display, Montserrat)"
           fontWeight="500"
           textAnchor="middle"
         >
@@ -276,9 +286,9 @@ function SmallTile({ col, ev, locale, patternId }: SmallTileProps) {
         </text>
         <text
           transform="translate(65 88)"
-          fill="#fff"
+          fill="hsl(var(--signage-text-on-brand))"
           fontSize="50"
-          fontFamily="OpenSans, Open Sans"
+          fontFamily="var(--signage-font-body, 'Open Sans')"
           textAnchor="middle"
         >
           <tspan x="0" y="0">

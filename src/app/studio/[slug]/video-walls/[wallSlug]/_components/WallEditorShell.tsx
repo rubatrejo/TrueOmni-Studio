@@ -11,14 +11,21 @@ import {
   Settings as SettingsIcon,
   Share2,
 } from 'lucide-react';
-import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   SignageSidebarTabs,
   type SignageSection,
 } from '@/app/studio/digital-displays/_components/shell/SignageSidebarTabs';
+import { BrandingTab } from '@/app/studio/digital-displays/_components/tabs/BrandingTab';
+import { EventsTab } from '@/app/studio/digital-displays/_components/tabs/EventsTab';
+import { HeaderTab } from '@/app/studio/digital-displays/_components/tabs/HeaderTab';
+import { NewsTab } from '@/app/studio/digital-displays/_components/tabs/NewsTab';
+import { SocialTab } from '@/app/studio/digital-displays/_components/tabs/SocialTab';
+import { saveTheme } from '@/app/studio/digital-displays/_lib/save-theme';
+import { useThemeEditStore } from '@/app/studio/digital-displays/_lib/theme-edit-store';
 import type { SignageBridgeStatus } from '@/app/studio/digital-displays/_lib/use-signage-bridge';
+import type { SignageClientResolved } from '@/lib/signage/schema';
 import { GRID_CONFIGS, type GridConfig } from '@/lib/video-walls/dimensions';
 import type { VideoWallConfig } from '@/lib/video-walls/schema';
 
@@ -43,6 +50,9 @@ import { WallTopBar } from './WallTopBar';
 export interface WallEditorShellProps {
   clientSlug: string;
   clientName: string;
+  /** Cliente resuelto del KV/fs (incluye branding/header/events/social/news). */
+  client: SignageClientResolved;
+  tokensCss: string;
   wallSlug: string;
   wallName: string;
   grid: GridConfig;
@@ -85,6 +95,8 @@ const SECTIONS: readonly SignageSection<TabKey>[] = [
 export function WallEditorShell({
   clientSlug,
   clientName,
+  client,
+  tokensCss,
   wallSlug,
   wallName,
   grid,
@@ -94,6 +106,47 @@ export function WallEditorShell({
   const [wall, setWall] = useState<VideoWallConfig>(initialWall);
   const [previewKey, setPreviewKey] = useState(0);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+
+  // Theme store (branding/header) compartido con Digital Displays — la data
+  // del cliente vive en `signage:client:{slug}` KV y syncea entre productos.
+  const initTheme = useThemeEditStore((s) => s.init);
+  const themeDraft = useThemeEditStore((s) => s.draft);
+  const themeDirty = useThemeEditStore((s) => s.dirty);
+
+  useEffect(() => {
+    initTheme({
+      slug: client.slug,
+      name: client.name,
+      locale: client.locale,
+      timezone: client.timezone,
+      location: client.location,
+      website: client.website,
+      branding: client.branding,
+      header: client.header,
+      displays: [],
+    });
+    return () => {
+      useThemeEditStore.getState().reset();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client.slug]);
+
+  // Autosave theme con debounce 1s cuando hay cambios sucios.
+  useEffect(() => {
+    if (!themeDirty || !themeDraft) return;
+    const t = window.setTimeout(async () => {
+      const cur = useThemeEditStore.getState().draft;
+      if (!cur) return;
+      const result = await saveTheme(cur);
+      if (result.ok) {
+        useThemeEditStore.getState().markSaved();
+        setPreviewKey((k) => k + 1);
+      } else {
+        useThemeEditStore.getState().setError(result.error ?? 'Save failed');
+      }
+    }, 1000);
+    return () => window.clearTimeout(t);
+  }, [themeDirty, themeDraft]);
 
   // Bridge live editor↔iframe queda como sub-fase futura. Por ahora
   // bumpamos previewKey al guardar para forzar reload del iframe.
@@ -168,47 +221,26 @@ export function WallEditorShell({
                     onWallChange={handleWallChange}
                   />
                 )}
-                {tab === 'branding' && (
-                  <ClientScopedNotice
-                    clientSlug={clientSlug}
-                    clientName={clientName}
-                    title="Branding is client-scoped"
-                    description="Logos, brand colors and fonts live on the client manifest and sync with every product (Kiosks, Digital Displays, Video Walls). Edit them from the client view so the changes propagate everywhere."
-                  />
-                )}
-                {tab === 'header' && (
-                  <ClientScopedNotice
-                    clientSlug={clientSlug}
-                    clientName={clientName}
-                    title="Header is client-scoped"
-                    description="Header position, weather placement, clock format, forecast days. Same configuration applies to Digital Displays and Video Walls of this client."
-                  />
-                )}
+                {tab === 'branding' && <BrandingTab client={client} tokensCss={tokensCss} />}
+                {tab === 'header' && <HeaderTab client={client} />}
                 {tab === 'events' && (
-                  <ClientScopedNotice
-                    clientSlug={clientSlug}
-                    clientName={clientName}
-                    productSegment="digital-displays"
-                    title="Events are shared with Digital Displays"
-                    description="Events shown in event-slot templates come from the client's events.json. Edit them in the Digital Displays editor (Events tab) — they apply to both products."
-                  />
+                  <EventsTab clientSlug={clientSlug} initialEvents={client.events ?? []} />
                 )}
                 {tab === 'social' && (
-                  <ClientScopedNotice
+                  <SocialTab
                     clientSlug={clientSlug}
-                    clientName={clientName}
-                    productSegment="digital-displays"
-                    title="Social posts are shared with Digital Displays"
-                    description="Posts and featured tweet come from the client's social.json. Edit them in the Digital Displays editor (Social tab)."
+                    initialSocial={client.social ?? { posts: [] }}
                   />
                 )}
                 {tab === 'news' && (
-                  <ClientScopedNotice
+                  <NewsTab
                     clientSlug={clientSlug}
-                    clientName={clientName}
-                    productSegment="digital-displays"
-                    title="News source is shared with Digital Displays"
-                    description="News configuration comes from the client's news.json. Edit it in the Digital Displays editor (News tab)."
+                    initialNews={
+                      client.news ?? {
+                        source: { kind: 'manual', items: [] },
+                        rotationIntervalSec: 8,
+                      }
+                    }
                   />
                 )}
                 {tab === 'versions' && (
@@ -243,39 +275,6 @@ export function WallEditorShell({
           </div>
         </main>
       </div>
-    </div>
-  );
-}
-
-function ClientScopedNotice({
-  clientSlug,
-  clientName,
-  productSegment,
-  title,
-  description,
-}: {
-  clientSlug: string;
-  clientName: string;
-  productSegment?: string;
-  title: string;
-  description: string;
-}) {
-  const href = productSegment ? `/studio/${clientSlug}/${productSegment}` : `/studio/${clientSlug}`;
-  const linkLabel = productSegment
-    ? `→ Open ${productSegment.replace('-', ' ')} editor`
-    : `→ Edit on ${clientName}'s client view`;
-  return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900/40">
-      <h3 className="text-[13px] font-semibold text-zinc-900 dark:text-white">{title}</h3>
-      <p className="mt-2 text-[12.5px] leading-relaxed text-zinc-600 dark:text-zinc-400">
-        {description}
-      </p>
-      <Link
-        href={href}
-        className="mt-3 inline-flex items-center gap-1 text-[12.5px] font-medium text-sky-600 dark:text-sky-400"
-      >
-        {linkLabel}
-      </Link>
     </div>
   );
 }

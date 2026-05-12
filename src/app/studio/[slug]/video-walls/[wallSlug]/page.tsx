@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 
+import { loadSignageClient, loadSignageTokensCss } from '@/lib/signage/config';
 import { loadClientManifest } from '@/lib/studio/client-manifest';
 import { loadVideoWall, loadVideoWallClient } from '@/lib/video-walls/config';
 
@@ -24,17 +25,31 @@ export const metadata = {
  */
 export default async function VideoWallEditorPage({ params }: PageProps) {
   const { slug, wallSlug } = await params;
-  const [manifest, client, wall] = await Promise.all([
+  const [manifest, vwClient, signageClient, wall, tokensCss] = await Promise.all([
     loadClientManifest(slug),
     loadVideoWallClient(slug),
+    // Cliente signage: branding/header/events/social/news son compartidos
+    // entre Digital Displays y Video Walls vía KV `signage:client:{slug}`.
+    // Si el cliente no tiene displays signage, caemos al VW client (mismo shape).
+    loadSignageClient(slug).catch(() => null),
     loadVideoWall(slug, wallSlug),
+    loadSignageTokensCss(slug).catch(() => ''),
   ]);
-  if (!manifest || !client || !wall) notFound();
+  if (!manifest || !vwClient || !wall) notFound();
+
+  // Si no hay cliente signage, sintetizar uno desde el VW client (branding/
+  // header/events/social/news vienen igual del KV unificado).
+  const client = signageClient ?? {
+    ...vwClient,
+    displays: [],
+  };
 
   return (
     <WallEditorShell
       clientSlug={slug}
       clientName={manifest.name}
+      client={client}
+      tokensCss={tokensCss}
       wallSlug={wall.slug}
       wallName={wall.name}
       grid={wall.grid}

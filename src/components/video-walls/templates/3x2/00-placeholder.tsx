@@ -1,6 +1,6 @@
 'use client';
 
-import { GRID_CONFIGS } from '@/lib/video-walls/dimensions';
+import { GRID_CONFIGS, HEADER_H } from '@/lib/video-walls/dimensions';
 
 import { registerTemplate } from '../registry';
 import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
@@ -12,7 +12,8 @@ import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
  * default para que un wall recién creado sin slides renderice algo
  * útil para debug.
  *
- * VW3 lo reemplaza con los 6 templates 3×2 pixel-perfect contra XD.
+ * Respeta el header band top (row 0 arranca en y = HEADER_H para no
+ * tapar el header continuo).
  */
 
 function Render(_props: VideoWallTemplateRenderProps) {
@@ -29,7 +30,9 @@ function Render(_props: VideoWallTemplateRenderProps) {
     <div className="absolute inset-0">
       {cells.map(({ row, col }, i) => {
         const x = col * 1920;
-        const y = row * 1080;
+        const isTopRow = row === 0;
+        const y = row * 1080 + (isTopRow ? HEADER_H : 0);
+        const h = 1080 - (isTopRow ? HEADER_H : 0);
         const hue = i * hueStep;
         return (
           <div
@@ -39,7 +42,7 @@ function Render(_props: VideoWallTemplateRenderProps) {
               left: x,
               top: y,
               width: 1920,
-              height: 1080,
+              height: h,
               backgroundColor: `hsl(${hue}, 55%, 35%)`,
               color: 'white',
               fontFamily: 'system-ui, -apple-system, sans-serif',

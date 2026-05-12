@@ -14,10 +14,12 @@ export const CELL = { w: 1920, h: 1080 } as const;
 
 /**
  * Altura del header band continuo en la fila superior del wall.
- * Misma medida del SignageHeader landscape para mantener consistencia
- * visual entre productos del mismo cliente.
+ * Medida verbatim de los SVGs Adobe XD del catálogo 3×2 (Display_Info_Header
+ * width=5760 height=335). El header del wall NO es el mismo del signage
+ * landscape (155px) — es proporcionalmente más alto para que el contenido
+ * sea legible desde lejos en grids grandes.
  */
-export const HEADER_H = 155;
+export const HEADER_H = 335;
 
 export const GRID_CONFIGS = {
   '3x2': { cols: 3, rows: 2 },

@@ -38,7 +38,12 @@ export function SignageRuntime({ client, display, weather, i18nBag }: SignageRun
   return (
     <SignageI18nProvider bag={i18nBag} locale={client.locale}>
       <SignageOrientationWrapper serverPosition={client.header.position}>
-        <SignageHeader client={client} weather={weather} initialClock={initialClock} />
+        <SignageHeader
+          client={client}
+          weather={weather}
+          initialClock={initialClock}
+          orientation={display.settings.orientation ?? 'landscape'}
+        />
         <div className="flex-1 overflow-hidden">
           <SignagePlayer
             client={client}

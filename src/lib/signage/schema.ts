@@ -104,10 +104,12 @@ export const SignageHeaderSchema = z.object({
   showClock: z.boolean(),
   clockFormat: z.enum(['12h', '24h']),
   weatherUnits: z.enum(['metric', 'imperial']),
-  /** 1, 3 ó 5 forecast cards. Datos legacy con `0` se migran a `1`. */
+  /** 1, 2, 3 ó 5 forecast cards. Datos legacy con `0` se migran a `1`.
+   *  Portrait displays (1080) hacen cap interno a 2 max — el runtime
+   *  recorta sin importar el valor persistido. */
   forecastDays: z.preprocess(
     (v) => (v === 0 ? 1 : v),
-    z.union([z.literal(1), z.literal(3), z.literal(5)]),
+    z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(5)]),
   ),
 });
 export type SignageHeader = z.infer<typeof SignageHeaderSchema>;
@@ -202,11 +204,27 @@ export type SignageNewsConfig = z.infer<typeof SignageNewsConfigSchema>;
 //  Display — settings + playlist
 // ---------------------------------------------------------------------------
 
+export const SIGNAGE_ORIENTATIONS = ['landscape', 'portrait'] as const;
+export type SignageOrientation = (typeof SIGNAGE_ORIENTATIONS)[number];
+
+/** Dimensiones canónicas por orientation. Las consume SignageStage para
+ *  el viewport base + el preview iframe del editor para el wrapper escalado. */
+export const SIGNAGE_ORIENTATION_DIMENSIONS: Record<SignageOrientation, { w: number; h: number }> =
+  {
+    landscape: { w: 1920, h: 1080 },
+    portrait: { w: 1080, h: 1920 },
+  };
+
 export const SignageDisplaySettingsSchema = z.object({
   targetResolution: z.enum(['1080p', '4k']),
   audio: z.boolean(),
   defaultDurationMs: z.number().int().min(1000).max(600_000),
   defaultTransition: z.enum(['cut', 'fade', 'slide-left', 'slide-up']),
+  /** Orientación física del display. `landscape` es el default histórico
+   *  (Signage v1 solo soportaba 1920×1080). `portrait` (1080×1920) llegó
+   *  en esta sesión con 8 templates pixel-perfect propios. Optional al
+   *  parsear para no romper displays preexistentes en KV. */
+  orientation: z.enum(SIGNAGE_ORIENTATIONS).default('landscape'),
   sleepSchedule: z
     .object({
       enabled: z.boolean(),

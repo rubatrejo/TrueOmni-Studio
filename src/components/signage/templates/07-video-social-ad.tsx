@@ -187,6 +187,7 @@ function SocialTile({
 
 const VideoSocialAdTemplate: SignageTemplate = {
   id: '07-video-social-ad',
+  orientation: 'landscape',
   label: 'Video + Social + Ad',
   category: 'composed',
   slots: [

@@ -171,6 +171,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
 
 const VideoSocialTemplate: SignageTemplate = {
   id: '08-video-social',
+  orientation: 'landscape',
   label: 'Video + Social',
   category: 'composed',
   slots: [

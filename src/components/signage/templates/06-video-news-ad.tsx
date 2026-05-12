@@ -150,6 +150,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
 
 const VideoNewsAdTemplate: SignageTemplate = {
   id: '06-video-news-ad',
+  orientation: 'landscape',
   label: 'Video + News + Ad',
   category: 'composed',
   slots: [

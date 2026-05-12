@@ -501,6 +501,7 @@ function Render({ client }: SignageTemplateRenderProps) {
 
 const FullEventsTemplate: SignageTemplate = {
   id: '01-full-events',
+  orientation: 'landscape',
   label: 'Full Events',
   category: 'fullscreen',
   slots: [

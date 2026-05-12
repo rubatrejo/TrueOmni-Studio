@@ -116,6 +116,7 @@ function Render({ client, display, slots }: SignageTemplateRenderProps) {
 
 const FullVideoImageTemplate: SignageTemplate = {
   id: '03-full-video-image',
+  orientation: 'landscape',
   label: 'Full Video / Image',
   category: 'fullscreen',
   slots: [

@@ -19,6 +19,7 @@ function Render({}: SignageTemplateRenderProps) {
 
 const PlaceholderB: SignageTemplate = {
   id: 'placeholder-b',
+  orientation: 'landscape',
   label: 'Placeholder B',
   category: 'placeholder',
   slots: [],

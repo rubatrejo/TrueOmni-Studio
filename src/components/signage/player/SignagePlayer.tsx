@@ -404,7 +404,7 @@ interface SlideHostProps {
 
 function SlideHost({ slide, client, display, animationClass }: SlideHostProps) {
   const t = useSignageT();
-  const template = getTemplate(slide.templateId);
+  const template = getTemplate(slide.templateId, display.settings.orientation);
   if (!template) {
     return (
       <div

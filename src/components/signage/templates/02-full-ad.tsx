@@ -61,6 +61,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
 
 const FullAdTemplate: SignageTemplate = {
   id: '02-full-ad',
+  orientation: 'landscape',
   label: 'Full Ad',
   category: 'fullscreen',
   slots: [

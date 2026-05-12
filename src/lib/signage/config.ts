@@ -203,6 +203,7 @@ export interface SignageDisplayListEntry {
   slug: string;
   name: string;
   slidesCount: number;
+  orientation: 'landscape' | 'portrait';
 }
 
 /** Lista clients signage del fs (excluyendo `_template`). Solo lee `client.json`
@@ -269,6 +270,7 @@ export const listSignageDisplays = cache(
           slug: display.slug,
           name: display.name,
           slidesCount: display.playlist.length,
+          orientation: display.settings.orientation ?? 'landscape',
         });
       } catch {
         // Skip displays inválidos.

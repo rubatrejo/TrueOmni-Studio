@@ -4,6 +4,7 @@ import type {
   SignageClientResolved,
   SignageDisplayConfig,
   SignageModuleKind,
+  SignageOrientation,
   SignageSlotConfig,
 } from '@/lib/signage/schema';
 
@@ -42,6 +43,11 @@ export interface SignageTemplate {
   id: string;
   label: string;
   category: 'fullscreen' | 'composed' | 'placeholder';
+  /** Orientación a la que sirve este template. Cada (id, orientation) es
+   *  un slot único en el registry — un mismo id puede tener variantes
+   *  landscape + portrait. Default `landscape` para back-compat con los
+   *  10 templates pre-portrait. */
+  orientation: SignageOrientation;
   slots: TemplateSlot[];
   Render: ComponentType<SignageTemplateRenderProps>;
 }

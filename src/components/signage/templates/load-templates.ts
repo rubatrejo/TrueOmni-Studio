@@ -11,6 +11,7 @@
 
 import './PlaceholderA';
 import './PlaceholderB';
+// Landscape (1920×1080) — catálogo Signage Local v1.
 import './01-full-events';
 import './02-full-ad';
 import './03-full-video-image';
@@ -19,13 +20,14 @@ import './05-video-2ads';
 import './06-video-news-ad';
 import './07-video-social-ad';
 import './08-video-social';
-// 8/8 templates registrados — catálogo completo del Milestone Signage Local.
-// import './02-full-ad';          // DS4
-// import './03-full-video-image'; // DS5
-// import './04-video-events-ad';  // DS6
-// import './05-video-2ads';       // DS7
-// import './06-video-news-ad';    // DS8
-// import './07-video-social-ad';  // DS9
-// import './08-video-social';     // DS10
+// Portrait (1080×1920) — catálogo Signage Portrait v1.
+import './01-full-events.portrait';
+import './02-full-ad.portrait';
+import './03-full-video-image.portrait';
+import './04-video-events-ad.portrait';
+import './05-video-2ads.portrait';
+import './06-video-news-ad.portrait';
+import './07-video-social-ad.portrait';
+import './08-video-social.portrait';
 
 export {};

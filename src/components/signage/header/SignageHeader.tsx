@@ -8,6 +8,7 @@ import type {
   SignageClientResolved,
   SignageHeader as SignageHeaderConfig,
   SignageHeaderBackground,
+  SignageOrientation,
 } from '@/lib/signage/schema';
 import type { SignageHeaderWeather } from '@/lib/signage/weather-adapter';
 
@@ -43,15 +44,25 @@ export interface SignageHeaderProps {
   client: SignageClientResolved;
   weather: SignageHeaderWeather;
   initialClock: SignageClockState;
+  /** Orientación del display. En portrait (1080 ancho) los elementos del
+   *  header se escalan a ~0.62 para que logo/clock/weather no aprieten
+   *  unos contra otros y los forecasts queden legibles. */
+  orientation?: SignageOrientation;
 }
 
-const PADDING_X = 40;
+const PADDING_X_LANDSCAPE = 40;
+const PADDING_X_PORTRAIT = 28;
 /** Altura fija del header signage. Coincide con el viewBox original de los
  *  SVGs de Adobe XD (1920×1080 → header band 1920×155). El editor ya no
  *  permite cambiarla. */
 const HEADER_HEIGHT = 155;
 
-export function SignageHeader({ client: serverClient, weather, initialClock }: SignageHeaderProps) {
+export function SignageHeader({
+  client: serverClient,
+  weather,
+  initialClock,
+  orientation = 'landscape',
+}: SignageHeaderProps) {
   const clientPatch = useSignageBridgeStore((s) => s.clientPatch);
   const header: SignageHeaderConfig = clientPatch?.header
     ? { ...serverClient.header, ...clientPatch.header }
@@ -73,8 +84,17 @@ export function SignageHeader({ client: serverClient, weather, initialClock }: S
     header.clockFormat,
   );
 
-  const rawForecastDays = header.forecastDays as 1 | 3 | 5 | 0;
-  const forecastDays: 1 | 3 | 5 = rawForecastDays === 0 ? 1 : rawForecastDays;
+  const rawForecastDays = header.forecastDays as 1 | 2 | 3 | 5 | 0;
+  // Portrait (1080) no cabe 3 ni 5 forecasts cómodos al lado del clock.
+  // Cap a 2 max y mapeamos 3/5 → 2; 1/2 se mantienen. Landscape acepta los 4.
+  const forecastDays: 1 | 2 | 3 | 5 =
+    orientation === 'portrait'
+      ? rawForecastDays === 0 || rawForecastDays === 1
+        ? 1
+        : 2
+      : rawForecastDays === 0
+        ? 1
+        : rawForecastDays;
 
   const logoRel = branding.logos?.default ?? '';
   const isExternalLogo =
@@ -86,6 +106,7 @@ export function SignageHeader({ client: serverClient, weather, initialClock }: S
       : `/signage-assets/${serverClient.slug}/${logoRel}`
     : null;
 
+  const paddingX = orientation === 'portrait' ? PADDING_X_PORTRAIT : PADDING_X_LANDSCAPE;
   return (
     <div
       style={{
@@ -96,9 +117,16 @@ export function SignageHeader({ client: serverClient, weather, initialClock }: S
         ...resolveBackgroundCss(header.background),
       }}
       data-signage-header-position={header.position}
+      data-signage-header-orientation={orientation}
     >
       {header.showLogo ? (
-        <LogoZone placement={header.layout} customSrc={resolvedLogoSrc} height={HEADER_HEIGHT} />
+        <LogoZone
+          placement={header.layout}
+          customSrc={resolvedLogoSrc}
+          height={HEADER_HEIGHT}
+          orientation={orientation}
+          paddingX={paddingX}
+        />
       ) : null}
 
       {header.showWeather ? (
@@ -106,6 +134,8 @@ export function SignageHeader({ client: serverClient, weather, initialClock }: S
           placement={header.weatherPlacement ?? 'center'}
           weather={weather}
           forecastDays={forecastDays}
+          orientation={orientation}
+          paddingX={paddingX}
         />
       ) : null}
 
@@ -114,6 +144,8 @@ export function SignageHeader({ client: serverClient, weather, initialClock }: S
           placement={header.clockPlacement ?? 'right'}
           clockText={clockText}
           dateText={dateText}
+          orientation={orientation}
+          paddingX={paddingX}
         />
       ) : null}
     </div>
@@ -124,46 +156,60 @@ export function SignageHeader({ client: serverClient, weather, initialClock }: S
 //  Zonas
 // ---------------------------------------------------------------------------
 
-function placementToCss(placement: 'left' | 'center' | 'right'): CSSProperties {
-  if (placement === 'left') return { left: PADDING_X, transform: 'translateY(-50%)' };
-  if (placement === 'right') return { right: PADDING_X, transform: 'translateY(-50%)' };
-  return { left: '50%', transform: 'translate(-50%, -50%)' };
+function placementToCss(placement: 'left' | 'center' | 'right', paddingX: number): CSSProperties {
+  // Full-height zones + flex centering interno. Garantiza que las 3 zonas
+  // (logo / weather / clock) compartan el mismo eje vertical y los
+  // baselines visuales queden alineados, independientemente de cuántas
+  // líneas de texto traiga cada zona.
+  const base: CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    display: 'flex',
+    alignItems: 'center',
+  };
+  if (placement === 'left') return { ...base, left: paddingX };
+  if (placement === 'right') return { ...base, right: paddingX };
+  return { ...base, left: '50%', transform: 'translateX(-50%)' };
 }
 
 function LogoZone({
   placement,
   customSrc,
   height,
+  orientation,
+  paddingX,
 }: {
   placement: 'logo-left' | 'logo-center' | 'logo-right';
   customSrc: string | null;
   height: number;
+  orientation: SignageOrientation;
+  paddingX: number;
 }) {
   const simple: 'left' | 'center' | 'right' =
     placement === 'logo-center' ? 'center' : placement === 'logo-right' ? 'right' : 'left';
-  // 50% del header height (20% más chico que el 0.62 original).
-  const logoHeight = Math.round(height * 0.5);
+  // Landscape: 50% del header. Portrait: 36% para no apretar al weather y
+  // dejar respiro lateral (canvas 1080 vs 1920).
+  const heightFactor = orientation === 'portrait' ? 0.36 : 0.5;
+  const logoHeight = Math.round(height * heightFactor);
   return (
     <div
       style={{
-        position: 'absolute',
-        top: '50%',
-        height: logoHeight,
-        display: 'flex',
-        alignItems: 'center',
-        ...placementToCss(simple),
+        ...placementToCss(simple, paddingX),
       }}
     >
-      {customSrc ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={customSrc}
-          alt=""
-          style={{ height: '100%', width: 'auto', objectFit: 'contain' }}
-        />
-      ) : (
-        <TrueOmniIsotipo height={logoHeight} />
-      )}
+      <div style={{ height: logoHeight, display: 'flex', alignItems: 'center' }}>
+        {customSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={customSrc}
+            alt=""
+            style={{ height: '100%', width: 'auto', objectFit: 'contain' }}
+          />
+        ) : (
+          <TrueOmniIsotipo height={logoHeight} />
+        )}
+      </div>
     </div>
   );
 }
@@ -172,32 +218,33 @@ function WeatherZone({
   placement,
   weather,
   forecastDays,
+  orientation,
+  paddingX,
 }: {
   placement: 'left' | 'center' | 'right';
   weather: SignageHeaderWeather;
-  forecastDays: 1 | 3 | 5;
+  forecastDays: 1 | 2 | 3 | 5;
+  orientation: SignageOrientation;
+  paddingX: number;
 }) {
-  // Tamaños base calibrados para `HEADER_HEIGHT = 155` (sin escalar). Toda
-  // la weather zone se encoge cuando hay 5 días para que el bloque entero
-  // ocupe menos ancho y no invada al logo ni al clock. Logo y clock viven
-  // en sus propias zonas y no se ven afectados.
+  // Landscape: 5 días encogen el bloque a 0.65 para caber junto al clock.
+  // Portrait: max 2 días, escala base 0.62 para que todo el header quepa
+  // cómodo en 1080.
+  const portraitScale = orientation === 'portrait' ? 0.62 : 1;
   const forecastBlockScale = forecastDays === 5 ? 0.65 : 1;
-  const cardScale = forecastBlockScale;
-  const tempFontSize = Math.round(64 * forecastBlockScale);
-  const gap = Math.round(28 * forecastBlockScale);
-  const dividerH = Math.round(88 * forecastBlockScale);
+  const totalScale = portraitScale * forecastBlockScale;
+  const cardScale = totalScale;
+  const tempFontSize = Math.round(64 * totalScale);
+  const gap = Math.round(28 * totalScale);
+  const dividerH = Math.round(88 * totalScale);
 
   return (
     <div
       style={{
-        position: 'absolute',
-        top: '50%',
-        display: 'flex',
-        alignItems: 'center',
         gap,
         color: 'hsl(var(--signage-header-text))',
         whiteSpace: 'nowrap',
-        ...placementToCss(placement),
+        ...placementToCss(placement, paddingX),
       }}
     >
       <span
@@ -307,34 +354,43 @@ function ClockZone({
   placement,
   clockText,
   dateText,
+  orientation,
+  paddingX,
 }: {
   placement: 'left' | 'center' | 'right';
   clockText: string;
   dateText: string;
+  orientation: SignageOrientation;
+  paddingX: number;
 }) {
-  // Tamaños base para HEADER_HEIGHT=155 (matchea el SVG original).
-  const clockFs = 42;
-  const dateFs = 28;
+  // Landscape (1920) usa los tamaños del SVG XD. Portrait (1080) escala a
+  // 0.62 para que clock + weather + logo quepan sin colisión, +2pt sobre
+  // el escalado base para que la hora/fecha se lean cómodos a distancia
+  // (feedback Rubén 2026-05-12).
+  const scale = orientation === 'portrait' ? 0.62 : 1;
+  const portraitBump = orientation === 'portrait' ? 2 : 0;
+  const clockFs = Math.round(42 * scale) + portraitBump;
+  const dateFs = Math.round(28 * scale) + portraitBump;
   const textAlign = placement === 'left' ? 'left' : placement === 'right' ? 'right' : 'center';
   return (
     <div
       style={{
-        position: 'absolute',
-        top: '50%',
         textAlign,
         color: 'hsl(var(--signage-header-text))',
         lineHeight: 1.15,
-        ...placementToCss(placement),
+        ...placementToCss(placement, paddingX),
       }}
     >
-      <div className="signage-font-display" style={{ fontSize: clockFs, fontWeight: 700 }}>
-        {clockText}
-      </div>
-      <div
-        className="signage-font-display"
-        style={{ fontSize: dateFs, fontWeight: 500, opacity: 0.95 }}
-      >
-        {dateText}
+      <div>
+        <div className="signage-font-display" style={{ fontSize: clockFs, fontWeight: 700 }}>
+          {clockText}
+        </div>
+        <div
+          className="signage-font-display"
+          style={{ fontSize: dateFs, fontWeight: 500, opacity: 0.95 }}
+        >
+          {dateText}
+        </div>
       </div>
     </div>
   );

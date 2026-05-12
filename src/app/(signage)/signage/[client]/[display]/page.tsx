@@ -46,7 +46,7 @@ export default async function SignageDisplayPage({ params, searchParams }: PageP
   const weather = mapWeatherToHeader(weatherData, clientCfg.locale, clientCfg.timezone, 5);
 
   return (
-    <SignageStage debug={debug}>
+    <SignageStage orientation={displayCfg.settings.orientation} debug={debug}>
       <SignageBridge clientSlug={clientCfg.slug} displaySlug={displayCfg.slug} />
       <SignageBridgeStyleApplier />
       <SignageRuntime client={clientCfg} display={displayCfg} weather={weather} i18nBag={i18nBag} />

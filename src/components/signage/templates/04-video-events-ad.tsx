@@ -448,6 +448,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
 
 const VideoEventsAdTemplate: SignageTemplate = {
   id: '04-video-events-ad',
+  orientation: 'landscape',
   label: 'Video + Events + Ad',
   category: 'composed',
   slots: [

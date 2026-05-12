@@ -125,6 +125,7 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
 
 const Video2AdsTemplate: SignageTemplate = {
   id: '05-video-2ads',
+  orientation: 'landscape',
   label: 'Video + 2 Ads',
   category: 'composed',
   slots: [

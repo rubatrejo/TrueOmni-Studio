@@ -270,10 +270,9 @@ export function ClientView({ slug, initialManifest, initialBranding }: ClientVie
               segment="video-walls"
               productSegment="video-walls"
               label="Video Walls"
-              description="Multi-screen synchronized compositions. Hasta 8 displays sincronizados con un compositor único."
+              description="Grid de displays sincronizados (3×2 / 4×2 / 2×2 / 2×1 / 1×2). Slots cell-anchored, crop por TV con ?cell=row,col."
               icon={LayoutGrid}
-              status="soon"
-              soonTimeline="On roadmap · Q4 2026"
+              status="live"
               active={initialManifest.products.videoWalls}
             />
             <ProductCard

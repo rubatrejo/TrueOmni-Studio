@@ -26,6 +26,12 @@ function getAssetUrl(clientSlug: string, slots: SignageTemplateRenderProps['slot
 function Render({ client, slots }: SignageTemplateRenderProps) {
   const adUrl = getAssetUrl(client.slug, slots);
 
+  // Body region 1080×1765 a partir de y=155 (debajo del header). Usamos
+  // <image> directo con preserveAspectRatio="xMidYMid slice" para que el
+  // ad llene la región completa recortando excedentes. La variante con
+  // <pattern patternUnits="objectBoundingBox"> dejaba un gap superior y
+  // letterboxing porque el sizing del pattern + image no resolvía a 1:1
+  // con el rect — se evita ese path por simplicidad.
   return (
     <svg
       viewBox="0 155 1080 1765"
@@ -36,27 +42,14 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
       aria-hidden="true"
       className="block"
     >
-      <defs>
-        {/* El SVG XD usa una image base 800×1114 portrait pero el ad del
-            cliente puede subir cualquier aspect. preserveAspectRatio del
-            pattern usa "100% 100%" para que la image SIEMPRE llene el rect
-            (cover-style con slice). El image dentro del pattern también
-            usa xMidYMid slice para centrar + recortar excedentes. */}
-        <pattern
-          id="ad-fullbleed-portrait"
-          patternUnits="objectBoundingBox"
-          preserveAspectRatio="xMidYMid slice"
-          width="1"
-          height="1"
-        >
-          <image preserveAspectRatio="xMidYMid slice" width="1080" height="1765" href={adUrl} />
-        </pattern>
-      </defs>
-
-      {/* Right_Vertical_Add transform(0 155) — body 1080×1765 portrait */}
-      <g transform="translate(0 155)">
-        <rect width="1080" height="1765" fill="url(#ad-fullbleed-portrait)" />
-      </g>
+      <image
+        x="0"
+        y="155"
+        width="1080"
+        height="1765"
+        preserveAspectRatio="xMidYMid slice"
+        href={adUrl}
+      />
     </svg>
   );
 }

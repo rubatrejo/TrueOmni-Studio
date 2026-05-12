@@ -151,6 +151,25 @@ export function SignagePlayer({
    *  schedule. Se desactiva al primer auto-advance natural. */
   const manualOverrideRef = useRef(false);
 
+  // QA freeze hook (`?slide=N` o `?slide=<templateId>`): pinta el slide
+  // pedido y desactiva auto-advance. Se usa por el revisor-visual /
+  // agent-browser para diffs pixel-perfect tile-a-tile sin esperar al
+  // ciclo. No afecta producción (solo se dispara con query param explícito).
+  useEffect(() => {
+    const sp = readSearchParams();
+    const raw = sp?.get('slide');
+    if (!raw) return;
+    let target = -1;
+    const asNum = Number.parseInt(raw, 10);
+    if (Number.isFinite(asNum) && asNum >= 0) target = asNum;
+    if (target < 0) target = playlist.findIndex((s) => s.templateId === raw);
+    if (target < 0 || target >= playlist.length) return;
+    manualOverrideRef.current = true;
+    setOutgoingIdx(null);
+    setTransitionKind('cut');
+    setCurrentIdx(target);
+  }, [playlist]);
+
   const cleanupTimerRef = useRef<number | null>(null);
   const tickTimerRef = useRef<number | null>(null);
 

@@ -2953,6 +2953,105 @@ studio/clients`). Idempotente con guard por `loadClientManifest`. Sin
 
 ---
 
+### Sesión 2026-05-12 (tarde-noche) — Video Walls VW1-VW10 + iteración header pixel-perfect
+
+**Hecho — Producto Video Walls cableado end-to-end (12 commits, 12 deploys Vercel READY):**
+
+Setup inicial:
+
+- Brainstorm + plan completo en `~/.claude/plans/ok-ahora-vamos-a-foamy-lemur.md`.
+- 7 SVG/PNG de referencia 3×2 copiados a `designs/video-walls/3x2/` desde `~/Desktop/Video Wall/3x2/`.
+
+VW1 (`66772a0`) — Schema + KV + manifest bootstrap:
+
+- `src/lib/video-walls/` con dimensions.ts (GRID_CONFIGS 5 fijas, HEADER_H, cellRectToPx), schema.ts (reusa SignageBranding/Header/Modules via re-export), kv-keys.ts, kv-store.ts, config.ts (loaders fs/KV híbrido con events/social/news compartidos con signage), i18n.ts.
+- `clients-walls/_template/` y `clients-walls/default/walls/lobby-3x2/wall.json` (playlist vacía).
+- `activate/route.ts` branch `videoWalls` deja de ser stub, clona desde template + merge unified branding.
+
+VW2+4+5 (`6e57fcc`) — Runtime canvas + dashboard + editor shell:
+
+- Runtime `/video-walls/[c]/[w]` con `?cell=row,col` crop CSS (GPU). Template registry id\_\_grid. Placeholder colorido (luego eliminado).
+- Dashboard `/studio/[slug]/video-walls` con grid cards + GridGlyph + NewWallCard (modal grid picker 5-way).
+- Editor shell con tabs verticales custom (luego reemplazado).
+
+VW3+6+7+8+9+10 (`4a7216c`) — Templates + playlist + tabs + publish + e2e:
+
+- 6 templates 3×2 + 11 derivados (4×2/2×2/2×1/1×2) — geometría aproximada con slot-renderers compartidos.
+- PlaylistPanel: CRUD slides + assign modules con autosave PUT 800ms.
+- SettingsPanel: duration slider + transition + audio + sleep.
+- POST publish endpoint (solo KV — sin GitHub PR aún).
+- `tests/e2e/video-walls-create-wall.json` smoke spec.
+
+Fixes plumbing post-deploy:
+
+- `7816bf4` — `products.ts` status video-walls 'soon' → 'live'.
+- `3f7297c` — `ClientView.tsx` ProductCard hardcoded status='soon' → 'live'. **Esto era lo que mantenía la card como "ComingSoon" en la Vista de Cliente** (el products.ts solo afecta el sidebar).
+- `85c5ca9` — HEADER_H 155 → 335 (verbatim XD), z-index 20, placeholder respeta offset.
+- `17e301c` — Editor shell reescrito reusando `SignageSidebarTabs` literal del DD + WallTopBar/WallPreviewPanel clones visuales del DD. Eliminado placeholder colorido (00-placeholder.tsx). Isotipo TrueOmni real (paths verbatim del SVG XD del SignageHeader).
+- `0ee3d23` — Header reescrito como SVG inline verbatim contra XD: rect bg + stroke #707070 1px, paths del logo, 3 forecast cards (Group_1 translate(-633 59), Group_8 translate(-223.309 59), Group_9 translate(167.191 18)), sun icon translate(225.514 24) rotate(11), cloud rain icon (Group_4), cloud outline (ic_weather), 2 separators verticales (Rectangle_Copy translate(424.829) y translate(893.191)), clock fontSize 92 + date 72 con tspan x offsets exactos. BezelOverlay: stroke #707070 width 3 verbatim XD (antes blanco con opacity, feo). Template 01 reescrito verbatim: rect + pattern viewBox `0 4138.818 5760 2160`, Play_Icon translate(2724 1092) path 312×312 opacity 0.8.
+
+**Verificado:**
+
+- 12 deploys Vercel READY consecutivos. `pnpm typecheck` + `pnpm lint` limpios en cada commit.
+- Manifest video-walls activate funciona end-to-end (curl test desde producción).
+- URL runtime `/video-walls/default/lobby-3x2` responde y renderea header + bezels + body negro (playlist vacía).
+- WebFetch confirma weather header texto + clock real renderizando.
+
+**Pendiente / siguiente — para retomar en sesión fresca:**
+
+A — **Templates 3×2 pixel-perfect contra XD (5 restantes)**. Patrón establecido con template 01 (SVG inline + paths verbatim + pattern para asset cliente). Source XD limpio (sin base64) en `/tmp/svg-struct-*.txt`. Por template:
+
+1. `02-video-image-ad` — video pattern 2×2 + ad pattern vertical 1×2. ~150 líneas.
+2. `03-video-image-events` — video pattern + 6 event cards grid 3×2 con date badge + title + image. ~300 líneas.
+3. `04-video-image-ad-events` — video + ad + events strip 3×1. ~250 líneas.
+4. `05-video-image-social-wall` — video + social grid 3×3 (9 posts) con @username overlay. ~300 líneas.
+5. `06-video-image-ad-social-wall` — video + ad + social grid 3×3 acotado. ~280 líneas.
+
+B — **Variantes derivadas (12 templates)** sin XD para comparar. Decidir: derivar proporcionalmente del 3×2 (eficiente) o esperar XDs del cliente. 4×2 (6 templates), 2×2 (5), 2×1 (3), 1×2 (3). Headers en 1×2/2×1 requieren adaptación (no aplica banda continua full-width).
+
+C — **Editor tabs funcionales** (hoy stubs/links al DD):
+
+- Branding/Header tabs editables in-place reusando `BrandingTab`/`HeaderTab` del DD (con `useThemeEditStore` compartido).
+- Events/Social/News tabs editables in-place (clone del DD).
+- Versions tab — snapshots CRUD (`kvVideoWallSnapshot` + endpoints `/snapshots` + restore).
+- Publish tab — GitHub PR sync (clone del signage publish, escribe `clients-walls/{slug}/walls/{wallSlug}/wall.json` + crea branch + PR).
+
+D — **Infra adicional**:
+
+- `useVideoWallBridge` (clone `useSignageBridge`) para live editor↔preview sin reload (hoy el reload del iframe es slow + flicker).
+- `/api/studio/upload?product=video-walls` + `/video-wall-assets/[client]/[...path]/route.ts` handler para servir imágenes.
+- Header adaptado para grids 1×2 (portrait, header solo cell (0,0)) y 2×1 (strip, ¿hay header?).
+- Smoke E2E ejecutado contra producción con `agent-browser batch < tests/e2e/video-walls-create-wall.json`.
+
+E — **Validación visual real** (ningún template validado pixel-a-pixel todavía):
+
+- Para cada template: crear wall con ese slide + asset asignado → screenshot 5760×2160 con `agent-browser` → diff contra `designs/video-walls/3x2/*.png` → iterar diferencias > ±2px.
+
+**Estimación 14-18h restantes** (3-4 sesiones frescas):
+
+- B (templates 02-06) — ~3-4h, una sesión.
+- B-derivados (12 más) — ~2h.
+- C (tabs editor) — ~4-6h.
+- D (bridge + assets + snapshots + publish PR) — ~3h.
+- E (validación visual + iteración) — ~2-3h.
+
+**Decisiones:**
+
+- **Modelo render híbrido grid-based**: slots cell-anchored (cellRect: row/col/rowSpan/colSpan), canvas total cols×1920 × rows×1080, cada TV físico crop CSS via `?cell=row,col`. Decidido en brainstorming.
+- **Catálogo cerrado de 5 grids**: 3×2, 4×2, 2×2, 2×1, 1×2. Celdas siempre 1920×1080 landscape; 1×2 emerge portrait porque son 2 TVs apilados.
+- **HEADER_H = 335** verbatim XD (no 155 del signage landscape). El header del wall es ~2.16× más alto para legibilidad desde lejos.
+- **Reusar SignageSidebarTabs literal**: el editor de Video Walls usa el mismo sidebar del Digital Displays con sections custom. WallTopBar y WallPreviewPanel son clones VISUALES del DD (mismo lenguaje) pero adaptados a grid en lugar de orientation.
+- **Branding/Header/Events/Social/News tabs redirigen a editores del DD/Vista de Cliente**: la data es client-scoped y syncea via `loadUnifiedBranding`. Decisión arquitectónica para evitar duplicación de UI.
+- **SVG inline verbatim como estrategia pixel-perfect**: cada template es un componente React que renderea un `<svg>` con paths/rects/transforms verbatim del XD. Solo los `<pattern>` con base64 se reemplazan por URLs reales del cliente. Esta es la única forma de garantizar pixel-perfect contra XD complejo (paths del isotipo, gradients, icons).
+- **Templates 02-06 NO se hicieron en esta sesión**: contexto limitado al 79% al final. Mejor sesión fresca dedicada que tirar código a medias.
+- **NO instalar Playwright** (CLAUDE.md). E2E con agent-browser via `pnpm verify:visual` o spec JSON.
+
+**Plan completo**: `~/.claude/plans/ok-ahora-vamos-a-foamy-lemur.md` (versionado solo local del plan-mode, NO committeado al repo).
+
+**Fase:** Video Walls — VW1-VW10 cableado + header/bezels/template 01 pixel-perfect verbatim XD. Pendiente templates 02-06 pixel-perfect + 12 derivados + editor tabs editables + bridge/snapshots/publish-PR + validación visual end-to-end. **Próxima sesión: empezar por templates 02-06 contra los SVG XD en `designs/video-walls/3x2/`**.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

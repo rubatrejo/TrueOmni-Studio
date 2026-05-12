@@ -4,17 +4,20 @@ import path from 'node:path';
 import { NextResponse } from 'next/server';
 
 /**
- * Sirve archivos desde `clients-walls/<client>/assets/...` como rutas
- * `/video-wall-assets/<client>/...`. Espejo del handler `/signage-assets`
- * adaptado al producto video-walls.
+ * Sirve archivos desde `clients-walls/<client>/...` como rutas
+ * `/video-wall-assets/<client>/...`.
  *
  * Fallback chain por cliente:
- *   1. `clients-walls/<client>/<relPath>`.
+ *   1. `clients-walls/<client>/<relPath>` (own).
  *   2. `clients-walls/default/<relPath>` (cliente custom sin override).
- *   3. `clients-signage/<client>/<relPath>` (data compartida con signage,
- *      videos/ads/social/events del mismo cliente).
- *   4. `clients-signage/default/<relPath>` (seed por defecto).
- *   5. 404.
+ *   3. Redirect 302 → `/signage-assets/<client>/<relPath>` (data
+ *      compartida con signage — events/social/ads/video-image que el
+ *      cliente ya pobló para signage también sirven aquí).
+ *
+ * Nota: no leemos `clients-signage/` directamente para no inflar el
+ * bundle de la función serverless (~1.5GB de assets entre signage +
+ * walls excede el límite Vercel de 300MB). El redirect mantiene el
+ * fallback funcional sin duplicar tracing.
  */
 
 const MIME_TYPES: Record<string, string> = {
@@ -30,8 +33,8 @@ const MIME_TYPES: Record<string, string> = {
   webm: 'video/webm',
 };
 
-async function readFromRoot(root: string, slug: string, relPath: string): Promise<Buffer | null> {
-  const fullPath = path.join(process.cwd(), root, slug, relPath);
+async function readWallsAsset(slug: string, relPath: string): Promise<Buffer | null> {
+  const fullPath = path.join(process.cwd(), 'clients-walls', slug, relPath);
   try {
     return await readFile(fullPath);
   } catch {
@@ -50,18 +53,13 @@ export async function GET(
     return new NextResponse('forbidden', { status: 403 });
   }
 
-  let data = await readFromRoot('clients-walls', client, relPath);
+  let data = await readWallsAsset(client, relPath);
   if (!data && client !== 'default') {
-    data = await readFromRoot('clients-walls', 'default', relPath);
+    data = await readWallsAsset('default', relPath);
   }
   if (!data) {
-    data = await readFromRoot('clients-signage', client, relPath);
-  }
-  if (!data && client !== 'default') {
-    data = await readFromRoot('clients-signage', 'default', relPath);
-  }
-  if (!data) {
-    return new NextResponse('not found', { status: 404 });
+    // Fallback a signage-assets vía redirect (mismos assets, otro endpoint).
+    return NextResponse.redirect(new URL(`/signage-assets/${client}/${relPath}`, _req.url), 302);
   }
 
   const ext = relPath.split('.').pop()?.toLowerCase() ?? '';

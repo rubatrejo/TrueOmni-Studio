@@ -4,6 +4,8 @@ import { Loader2, Plus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
+import type { SignageOrientation } from '@/lib/signage/schema';
+
 import { useEscapeClose, useFocusTrap } from '../../../_lib/use-modal-a11y';
 
 /**
@@ -28,6 +30,7 @@ export function NewDisplayCard({
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [slugTouched, setSlugTouched] = useState(false);
+  const [orientation, setOrientation] = useState<SignageOrientation>('landscape');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -37,6 +40,7 @@ export function NewDisplayCard({
     setName('');
     setSlug('');
     setSlugTouched(false);
+    setOrientation('landscape');
     setSubmitting(false);
     setError(null);
     setTimeout(() => inputRef.current?.focus(), 60);
@@ -72,7 +76,7 @@ export function NewDisplayCard({
       const res = await fetch(`/api/studio/signage/displays/${clientSlug}`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ slug, name: name.trim() }),
+        body: JSON.stringify({ slug, name: name.trim(), orientation }),
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => null)) as { error?: string } | null;
@@ -192,6 +196,59 @@ export function NewDisplayCard({
                   )}
                 </div>
 
+                <div>
+                  <span className="mb-1.5 block text-[12.5px] font-medium text-zinc-700 dark:text-zinc-300">
+                    Orientation
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <OrientationButton
+                      active={orientation === 'landscape'}
+                      onClick={() => setOrientation('landscape')}
+                      label="Landscape"
+                      sub="1920 × 1080"
+                      glyph={
+                        <svg
+                          width="22"
+                          height="22"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.6"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <rect x="2.5" y="7" width="19" height="10" rx="1.5" />
+                          <line x1="19" y1="10.5" x2="19" y2="13.5" />
+                        </svg>
+                      }
+                    />
+                    <OrientationButton
+                      active={orientation === 'portrait'}
+                      onClick={() => setOrientation('portrait')}
+                      label="Portrait"
+                      sub="1080 × 1920"
+                      glyph={
+                        <svg
+                          width="22"
+                          height="22"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.6"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <rect x="7" y="2.5" width="10" height="19" rx="1.5" />
+                          <line x1="10.5" y1="19" x2="13.5" y2="19" />
+                        </svg>
+                      }
+                    />
+                  </div>
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500">
+                    Physical orientation of the screen. Templates and preview adapt automatically.
+                  </p>
+                </div>
+
                 {error && (
                   <div className="rounded-md border border-red-200 bg-red-50/60 p-2.5 text-[12px] text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
                     {error}
@@ -233,4 +290,46 @@ function slugify(input: string): string {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 64);
+}
+
+function OrientationButton({
+  active,
+  onClick,
+  label,
+  sub,
+  glyph,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  sub: string;
+  glyph: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`flex items-center gap-3 rounded-md border px-3 py-2.5 text-left transition ${
+        active
+          ? 'border-sky-500 bg-sky-50 text-sky-900 dark:border-sky-500/60 dark:bg-sky-500/10 dark:text-sky-100'
+          : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-900'
+      }`}
+    >
+      <span
+        className={`grid h-9 w-9 shrink-0 place-items-center rounded-md ${
+          active
+            ? 'bg-sky-500/15 text-sky-700 dark:text-sky-300'
+            : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400'
+        }`}
+        aria-hidden="true"
+      >
+        {glyph}
+      </span>
+      <span className="flex min-w-0 flex-col">
+        <span className="whitespace-nowrap text-[13px] font-semibold leading-tight">{label}</span>
+        <span className="whitespace-nowrap font-mono text-[11px] opacity-70">{sub}</span>
+      </span>
+    </button>
+  );
 }

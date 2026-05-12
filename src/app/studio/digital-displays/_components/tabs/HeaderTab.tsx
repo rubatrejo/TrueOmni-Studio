@@ -7,6 +7,7 @@ import type {
   SignageClientResolved,
   SignageHeader,
   SignageHeaderBackground,
+  SignageOrientation,
 } from '@/lib/signage/schema';
 
 import { useThemeEditStore } from '../../_lib/theme-edit-store';
@@ -28,9 +29,13 @@ import { SignageMediaField } from '../display/modules/SignageMediaField';
  */
 export interface HeaderTabProps {
   client: SignageClientResolved;
+  /** Orientation del display que se está editando. Cuando es `portrait` el
+   *  selector de forecastDays solo ofrece 1/2 (el canvas 1080 no soporta
+   *  3 ni 5 forecasts sin romper el layout). */
+  displayOrientation?: SignageOrientation;
 }
 
-export function HeaderTab({ client }: HeaderTabProps) {
+export function HeaderTab({ client, displayOrientation = 'landscape' }: HeaderTabProps) {
   const draft = useThemeEditStore((s) => s.draft);
   const updateHeader = useThemeEditStore((s) => s.updateHeader);
   const h: SignageHeader = draft?.header ?? client.header;
@@ -142,14 +147,35 @@ export function HeaderTab({ client }: HeaderTabProps) {
           />
         </Field>
 
-        <Field label="Forecast days">
+        <Field
+          label="Forecast days"
+          hint={
+            displayOrientation === 'portrait'
+              ? 'Portrait canvas (1080 ancho) solo aguanta 1 o 2 forecasts sin colisionar con clock y logo.'
+              : undefined
+          }
+        >
           <SegmentedToggle
-            options={[
-              { value: '1', label: '1 day' },
-              { value: '3', label: '3 days' },
-              { value: '5', label: '5 days' },
-            ]}
-            value={String((h.forecastDays as 0 | 1 | 3 | 5) === 0 ? 1 : h.forecastDays)}
+            options={
+              displayOrientation === 'portrait'
+                ? [
+                    { value: '1', label: '1 day' },
+                    { value: '2', label: '2 days' },
+                  ]
+                : [
+                    { value: '1', label: '1 day' },
+                    { value: '2', label: '2 days' },
+                    { value: '3', label: '3 days' },
+                    { value: '5', label: '5 days' },
+                  ]
+            }
+            value={String(
+              (() => {
+                const v = (h.forecastDays as 0 | 1 | 2 | 3 | 5) === 0 ? 1 : h.forecastDays;
+                if (displayOrientation === 'portrait' && (v === 3 || v === 5)) return 2;
+                return v;
+              })(),
+            )}
             onChange={(v) =>
               updateHeader({
                 forecastDays: Number(v) as SignageHeader['forecastDays'],
@@ -482,7 +508,26 @@ function Section({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  if (hint) {
+    return (
+      <div className="flex flex-col gap-1 text-[13px]">
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-zinc-500">{label}</span>
+          <span className="flex shrink-0 items-center justify-end">{children}</span>
+        </div>
+        <p className="text-[11px] leading-relaxed text-zinc-400 dark:text-zinc-500">{hint}</p>
+      </div>
+    );
+  }
   return (
     <div className="flex items-center justify-between gap-4 text-[13px]">
       <span className="text-zinc-500">{label}</span>

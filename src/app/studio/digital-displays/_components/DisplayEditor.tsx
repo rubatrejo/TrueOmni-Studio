@@ -293,7 +293,9 @@ export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps
                   {activeTab === 'branding' ? (
                     <BrandingTab client={client} tokensCss={tokensCss} />
                   ) : null}
-                  {activeTab === 'header' ? <HeaderTab client={client} /> : null}
+                  {activeTab === 'header' ? (
+                    <HeaderTab client={client} displayOrientation={draft.settings.orientation} />
+                  ) : null}
                   {activeTab === 'settings' ? <DisplaySettingsPanel /> : null}
                   {activeTab === 'playlist' ? <PlaylistPanel /> : null}
                   {activeTab === 'events' ? (
@@ -345,6 +347,7 @@ export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps
                 onReload={() => setPreviewKey((k) => k + 1)}
                 activeSlide={bridge.activeSlide}
                 onNavSlide={bridge.navSlide}
+                orientation={draft.settings.orientation}
               />
             </div>
           </main>

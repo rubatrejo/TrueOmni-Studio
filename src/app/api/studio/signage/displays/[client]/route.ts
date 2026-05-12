@@ -3,10 +3,12 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { loadSignageClient, loadSignageDisplay } from '@/lib/signage/config';
 import { kvSignageClient, kvSignageDisplay } from '@/lib/signage/kv-store';
 import {
+  SIGNAGE_ORIENTATIONS,
   SignageClientFileSchema,
   SignageDisplayConfigSchema,
   type SignageClientFile,
   type SignageDisplayConfig,
+  type SignageOrientation,
 } from '@/lib/signage/schema';
 
 export const runtime = 'nodejs';
@@ -43,6 +45,7 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
     slug?: unknown;
     name?: unknown;
     sourceDisplaySlug?: unknown;
+    orientation?: unknown;
   };
   let body: BodyShape | null = null;
   try {
@@ -55,6 +58,11 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
   const name = typeof body?.name === 'string' ? body.name.trim() : '';
   const sourceDisplaySlug =
     typeof body?.sourceDisplaySlug === 'string' ? body.sourceDisplaySlug.trim() : '';
+  const orientation: SignageOrientation =
+    typeof body?.orientation === 'string' &&
+    (SIGNAGE_ORIENTATIONS as readonly string[]).includes(body.orientation)
+      ? (body.orientation as SignageOrientation)
+      : 'landscape';
 
   if (!slug || !name) {
     return NextResponse.json({ error: 'slug and name are required' }, { status: 400 });
@@ -102,11 +110,17 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
     );
   }
 
+  const cloned = structuredClone(template);
   const seed: SignageDisplayConfig = {
-    ...structuredClone(template),
+    ...cloned,
     slug,
     name,
+    settings: { ...cloned.settings, orientation },
   };
+  // Si el operador eligió portrait, el playlist del template default está
+  // armado contra templates landscape. Como los template-ids landscape
+  // tienen fallback registry → landscape, el display renderizará sin crash;
+  // el operador re-asigna template-ids portrait desde el editor.
   const parsedDisplay = SignageDisplayConfigSchema.safeParse(seed);
   if (!parsedDisplay.success) {
     return NextResponse.json(

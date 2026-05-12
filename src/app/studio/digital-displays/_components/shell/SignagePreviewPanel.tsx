@@ -9,38 +9,36 @@ import {
   Monitor,
   Plus,
   RotateCcw,
-  Smartphone,
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState, type RefObject } from 'react';
 
+import { SIGNAGE_ORIENTATION_DIMENSIONS, type SignageOrientation } from '@/lib/signage/schema';
+
 import type { SignageActiveSlide } from '../../_lib/use-signage-bridge';
 
 interface DeviceFormat {
-  key: 'digital-display' | 'kiosk-portrait';
+  key: SignageOrientation;
   label: string;
   width: number;
   height: number;
-  glyph: 'tv' | 'kiosk';
-  available: boolean;
+  glyph: 'tv-landscape' | 'tv-portrait';
 }
 
 const DEVICE_FORMATS: DeviceFormat[] = [
   {
-    key: 'digital-display',
-    label: 'Digital Display',
-    width: 1920,
-    height: 1080,
-    glyph: 'tv',
-    available: true,
+    key: 'landscape',
+    label: 'Digital Display · Landscape',
+    width: SIGNAGE_ORIENTATION_DIMENSIONS.landscape.w,
+    height: SIGNAGE_ORIENTATION_DIMENSIONS.landscape.h,
+    glyph: 'tv-landscape',
   },
   {
-    key: 'kiosk-portrait',
-    label: 'Kiosk Portrait',
-    width: 1080,
-    height: 1920,
-    glyph: 'kiosk',
-    available: false, // se habilita cuando esté el runtime portrait.
+    key: 'portrait',
+    label: 'Digital Display · Portrait',
+    width: SIGNAGE_ORIENTATION_DIMENSIONS.portrait.w,
+    height: SIGNAGE_ORIENTATION_DIMENSIONS.portrait.h,
+    glyph: 'tv-portrait',
   },
 ];
 
@@ -67,6 +65,10 @@ export interface SignagePreviewPanelProps {
   onReload: () => void;
   activeSlide?: SignageActiveSlide | null;
   onNavSlide?: (direction: 'prev' | 'next') => void;
+  /** Orientation fija del display (se elige al crear, no se cambia en
+   *  preview). Controla el aspect-ratio del iframe wrapper y se muestra
+   *  como label en la toolbar. */
+  orientation?: SignageOrientation;
 }
 
 export function SignagePreviewPanel({
@@ -79,12 +81,19 @@ export function SignagePreviewPanel({
   onReload,
   activeSlide,
   onNavSlide,
+  orientation = 'landscape',
 }: SignagePreviewPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.4);
+  // `autoFit` lo computa el ResizeObserver para que el iframe siempre quepa
+  // sin scroll. `userZoom` es el multiplicador manual del operador (1.0 =
+  // 100% del auto-fit). El scale efectivo es `autoFit * userZoom`. Separar
+  // ambos evita que el ResizeObserver pise el zoom manual cuando el panel
+  // se redimensiona o el contenido del iframe reorganiza.
+  const [autoFit, setAutoFit] = useState(0.4);
+  const [userZoom, setUserZoom] = useState(1);
   const [fullScreen, setFullScreen] = useState(false);
-  const [formatKey, setFormatKey] = useState<DeviceFormat['key']>('digital-display');
-  const format = DEVICE_FORMATS.find((f) => f.key === formatKey) ?? DEVICE_FORMATS[0];
+  const format = DEVICE_FORMATS.find((f) => f.key === orientation) ?? DEVICE_FORMATS[0];
+  const scale = autoFit * userZoom;
 
   useEffect(() => {
     const holder = containerRef.current?.parentElement;
@@ -95,13 +104,19 @@ export function SignagePreviewPanel({
       const availH = holder.clientHeight - padding * 2;
       if (availW <= 0 || availH <= 0) return;
       const fit = Math.min(availW / format.width, availH / format.height);
-      setScale(Math.min(0.6, Math.max(0.15, fit)));
+      setAutoFit(Math.max(0.05, fit));
     };
     compute();
     const ro = new ResizeObserver(compute);
     ro.observe(holder);
     return () => ro.disconnect();
   }, [format.width, format.height]);
+
+  // Reset zoom manual al cambiar de display u orientation para no quedar
+  // con un zoom raro heredado del display anterior.
+  useEffect(() => {
+    setUserZoom(1);
+  }, [orientation, displaySlug]);
 
   if (!displaySlug) {
     return <NoDisplaysState clientSlug={clientSlug} />;
@@ -114,17 +129,12 @@ export function SignagePreviewPanel({
       {/* Toolbar */}
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 px-6 pb-3 pt-4">
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-900 dark:bg-zinc-950">
-            {DEVICE_FORMATS.map((f) => (
-              <DeviceTab
-                key={f.key}
-                active={formatKey === f.key}
-                onClick={() => setFormatKey(f.key)}
-                icon={f.glyph === 'tv' ? <TvGlyph /> : <KioskGlyph />}
-                label={`${f.label} · ${f.width}×${f.height}`}
-                badge={!f.available ? 'Soon' : undefined}
-              />
-            ))}
+          <div className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-[11px] dark:border-zinc-900 dark:bg-zinc-950">
+            {format.glyph === 'tv-landscape' ? <TvLandscapeGlyph /> : <TvPortraitGlyph />}
+            <span className="text-zinc-700 dark:text-zinc-300">{format.label}</span>
+            <span className="font-mono text-zinc-500">
+              {format.width}×{format.height}
+            </span>
           </div>
         </div>
 
@@ -133,20 +143,26 @@ export function SignagePreviewPanel({
             type="button"
             className="grid h-7 w-7 place-items-center rounded-md text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-zinc-900 dark:hover:text-zinc-200"
             aria-label="Zoom out 10%"
-            disabled={scale <= 0.15}
-            onClick={() => setScale((s) => Math.max(0.15, Math.round((s - 0.1) * 100) / 100))}
+            disabled={userZoom <= 0.4}
+            onClick={() => setUserZoom((z) => Math.max(0.4, Math.round((z - 0.1) * 100) / 100))}
           >
             <Minus className="h-3.5 w-3.5" />
           </button>
-          <span className="min-w-[44px] rounded border border-zinc-200 bg-white px-2 py-0.5 text-center font-mono dark:border-zinc-900 dark:bg-zinc-950">
+          <button
+            type="button"
+            className="min-w-[44px] rounded border border-zinc-200 bg-white px-2 py-0.5 text-center font-mono text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-900 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
+            aria-label="Reset zoom to fit"
+            title="Reset zoom to fit"
+            onClick={() => setUserZoom(1)}
+          >
             {Math.round(scale * 100)}%
-          </span>
+          </button>
           <button
             type="button"
             className="grid h-7 w-7 place-items-center rounded-md text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-zinc-900 dark:hover:text-zinc-200"
             aria-label="Zoom in 10%"
-            disabled={scale >= 1}
-            onClick={() => setScale((s) => Math.min(1, Math.round((s + 0.1) * 100) / 100))}
+            disabled={userZoom >= 2.5}
+            onClick={() => setUserZoom((z) => Math.min(2.5, Math.round((z + 0.1) * 100) / 100))}
           >
             <Plus className="h-3.5 w-3.5" />
           </button>
@@ -171,8 +187,9 @@ export function SignagePreviewPanel({
         </div>
       </div>
 
-      {/* Frame holder + nav controls (80px below iframe) */}
-      <div className="flex flex-1 flex-col items-center justify-center overflow-hidden p-6">
+      {/* Frame holder + nav controls. overflow-auto permite scroll cuando el
+          operador hace zoom in y el iframe es más grande que el panel. */}
+      <div className="flex flex-1 flex-col items-center justify-center overflow-auto p-6">
         <div
           ref={containerRef}
           className="relative overflow-hidden rounded-lg shadow-2xl ring-1 ring-zinc-200 dark:ring-zinc-800"
@@ -180,11 +197,12 @@ export function SignagePreviewPanel({
             width: format.width * scale,
             height: format.height * scale,
             backgroundColor: '#000',
+            flexShrink: 0,
           }}
         >
           <iframe
             ref={iframeRef}
-            key={`${clientSlug}-${displaySlug}-${reloadKey}-${formatKey}`}
+            key={`${clientSlug}-${displaySlug}-${reloadKey}`}
             src={runtimeUrl}
             title={`${displayName ?? displaySlug} live preview`}
             className="absolute left-0 top-0 block border-0"
@@ -198,21 +216,6 @@ export function SignagePreviewPanel({
             loading="eager"
             onLoad={onIframeLoad}
           />
-          {!format.available ? (
-            <div className="absolute inset-0 grid place-items-center bg-zinc-950/90 text-center">
-              <div className="max-w-[320px] px-6">
-                <Smartphone className="mx-auto h-10 w-10 text-zinc-500" strokeWidth={1.5} />
-                <p className="mt-3 font-display text-[15px] font-semibold text-white">
-                  Kiosk Portrait coming soon
-                </p>
-                <p className="mt-1 text-[12.5px] text-zinc-400">
-                  El runtime portrait 1080×1920 está en desarrollo. Mientras tanto, puedes editar el
-                  contenido y publicarlo — al activarse, se renderizará automáticamente en kioskos
-                  verticales.
-                </p>
-              </div>
-            </div>
-          ) : null}
         </div>
 
         {/* Nav controls — 80px debajo del iframe, grande y colorido. */}
@@ -278,6 +281,7 @@ export function SignagePreviewPanel({
           clientSlug={clientSlug}
           displaySlug={displaySlug}
           displayName={displayName}
+          orientation={orientation}
           onClose={() => setFullScreen(false)}
         />
       ) : null}
@@ -309,27 +313,30 @@ function FullScreenPreview({
   clientSlug,
   displaySlug,
   displayName,
+  orientation,
   onClose,
 }: {
   clientSlug: string;
   displaySlug: string;
   displayName: string | null;
+  orientation: SignageOrientation;
   onClose: () => void;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  const dims = SIGNAGE_ORIENTATION_DIMENSIONS[orientation];
 
   useEffect(() => {
     function fit() {
       const padding = 80;
       const availH = window.innerHeight - padding * 2;
       const availW = window.innerWidth - padding * 2;
-      setScale(Math.min(availH / DEVICE_FORMATS[0].height, availW / DEVICE_FORMATS[0].width, 1));
+      setScale(Math.min(availH / dims.h, availW / dims.w, 1));
     }
     fit();
     window.addEventListener('resize', fit);
     return () => window.removeEventListener('resize', fit);
-  }, []);
+  }, [dims.h, dims.w]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -370,8 +377,8 @@ function FullScreenPreview({
         ref={wrapRef}
         className="relative overflow-hidden shadow-2xl"
         style={{
-          width: DEVICE_FORMATS[0].width * scale,
-          height: DEVICE_FORMATS[0].height * scale,
+          width: dims.w * scale,
+          height: dims.h * scale,
           backgroundColor: '#000',
         }}
       >
@@ -380,8 +387,8 @@ function FullScreenPreview({
           title={`${label} full screen`}
           className="absolute left-0 top-0 block border-0"
           style={{
-            width: DEVICE_FORMATS[0].width,
-            height: DEVICE_FORMATS[0].height,
+            width: dims.w,
+            height: dims.h,
             transform: `scale(${scale})`,
             transformOrigin: '0 0',
           }}
@@ -391,8 +398,7 @@ function FullScreenPreview({
       </div>
 
       <span className="absolute bottom-6 left-1/2 -translate-x-1/2 font-mono text-[11.5px] text-zinc-500 dark:text-zinc-500">
-        {label} · {DEVICE_FORMATS[0].width}×{DEVICE_FORMATS[0].height} · {Math.round(scale * 100)}%
-        · ESC to close
+        {label} · {dims.w}×{dims.h} · {Math.round(scale * 100)}% · ESC to close
       </span>
     </div>
   );
@@ -415,59 +421,7 @@ function labelFromTemplate(templateId: string): string {
     .join(' + ');
 }
 
-function DeviceTab({
-  active,
-  onClick,
-  icon,
-  label,
-  badge,
-}: {
-  active: boolean;
-  onClick: () => void;
-  icon: React.ReactNode;
-  label: string;
-  badge?: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] transition ${
-        active
-          ? 'bg-zinc-100 text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-zinc-100'
-          : 'text-zinc-500 hover:text-zinc-800 dark:text-zinc-500 dark:hover:text-zinc-300'
-      }`}
-    >
-      {icon}
-      <span>{label}</span>
-      {badge ? (
-        <span className="rounded bg-zinc-200 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
-          {badge}
-        </span>
-      ) : null}
-    </button>
-  );
-}
-
-function KioskGlyph() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="4.5" y="1.5" width="7" height="13" rx="1" />
-      <line x1="7" y1="13" x2="9" y2="13" />
-    </svg>
-  );
-}
-
-function TvGlyph() {
+function TvLandscapeGlyph() {
   return (
     <svg
       width="14"
@@ -481,6 +435,24 @@ function TvGlyph() {
     >
       <rect x="1.5" y="3" width="13" height="9" rx="1" />
       <line x1="6" y1="14" x2="10" y2="14" />
+    </svg>
+  );
+}
+
+function TvPortraitGlyph() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="1.5" width="9" height="13" rx="1" />
+      <line x1="6" y1="12.5" x2="9" y2="12.5" />
     </svg>
   );
 }

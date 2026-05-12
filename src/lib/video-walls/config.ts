@@ -151,30 +151,50 @@ export const loadVideoWallClient = cache(
   },
 );
 
+async function loadVideoWallFromFs(
+  clientSlug: string,
+  wallSlug: string,
+): Promise<VideoWallConfig | null> {
+  const root = VIDEO_WALL_ROOT();
+  const wallPath = path.join(root, clientSlug, 'walls', wallSlug, 'wall.json');
+  if (await fileExists(wallPath)) {
+    const raw = await readJson(wallPath);
+    return VideoWallConfigSchema.parse(raw);
+  }
+  if (clientSlug !== 'default') {
+    const fallbackPath = path.join(root, 'default', 'walls', wallSlug, 'wall.json');
+    if (await fileExists(fallbackPath)) {
+      const raw = await readJson(fallbackPath);
+      return VideoWallConfigSchema.parse(raw);
+    }
+  }
+  return null;
+}
+
 export const loadVideoWall = cache(
   async (clientSlug: string, wallSlug: string): Promise<VideoWallConfig | null> => {
     // 1. KV first.
+    let kvWall: VideoWallConfig | null = null;
     try {
-      const kvWall = await kvVideoWall.get(clientSlug, wallSlug);
-      if (kvWall) return kvWall;
+      kvWall = await kvVideoWall.get(clientSlug, wallSlug);
     } catch {
       // KV unreachable.
     }
 
-    // 2. fs fallback.
-    const root = VIDEO_WALL_ROOT();
-    const wallPath = path.join(root, clientSlug, 'walls', wallSlug, 'wall.json');
-    if (!(await fileExists(wallPath))) {
-      // Fallback secundario a default si el cliente cayó allí.
-      const fallbackPath = path.join(root, 'default', 'walls', wallSlug, 'wall.json');
-      if (clientSlug !== 'default' && (await fileExists(fallbackPath))) {
-        const raw = await readJson(fallbackPath);
-        return VideoWallConfigSchema.parse(raw);
-      }
-      return null;
+    // 2. Cuando el KV tiene playlist vacía pero el fs tiene playlist con
+    //    contenido, preferimos fs: el operador no ha editado el wall en el
+    //    Studio (KV está como bootstrap inicial) y el fs es el seed canónico
+    //    publicado vía git. Esto evita que ediciones al template de fs (eg.
+    //    seed pixel-perfect, nuevos templates) queden invisibles en
+    //    producción hasta que alguien abra el editor y guarde.
+    if (kvWall && kvWall.playlist.length === 0) {
+      const fsWall = await loadVideoWallFromFs(clientSlug, wallSlug);
+      if (fsWall && fsWall.playlist.length > 0) return fsWall;
     }
-    const raw = await readJson(wallPath);
-    return VideoWallConfigSchema.parse(raw);
+    if (kvWall) return kvWall;
+
+    // 3. fs fallback (sin KV).
+    return loadVideoWallFromFs(clientSlug, wallSlug);
   },
 );
 

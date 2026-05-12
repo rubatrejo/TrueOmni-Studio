@@ -97,9 +97,20 @@ Antes de declarar la pantalla "hecha":
    ```bash
    qlmanage -t -s 1080 -o /tmp/thumbs "designs/NN-pantalla.svg"
    ```
-2. Tomar screenshot del render via Playwright MCP a la misma resolución.
-3. Invocar el subagent `revisor-visual` (vive en `.claude/agents/`) para
-   hacer overlay/diff.
+2. Tomar screenshot del render con `agent-browser` (vercel-labs) a la misma
+   resolución 1080×1920:
+   ```bash
+   agent-browser set viewport 1080 1920 \
+     && agent-browser open http://localhost:3000/$ruta \
+     && agent-browser wait --load networkidle \
+     && agent-browser screenshot .planning/verifications/NN-pantalla-render.png
+   ```
+3. Calcular diff visual contra el PNG del SVG:
+   ```bash
+   agent-browser diff screenshot --baseline /tmp/thumbs/NN-pantalla.png
+   ```
+   o invocar al subagent `revisor-visual` (vive en `.claude/agents/`) que
+   automatiza el overlay/diff y devuelve un informe estructurado.
 4. Si hay drift > 2px en **cualquier** bloque del SVG → volver al paso 1.
 
 "Pixel-perfect ±2px" no es negociable. Lo dice CLAUDE.md §6.

@@ -2,15 +2,16 @@
 
 > Hallazgo S-39 del audit panorámico v2 · 2026-05-08.
 >
-> Este archivo documenta el spec listo para Playwright. **No se commitea
-> como `.spec.ts` todavía** porque el repo aún no tiene Playwright
-> instalado (`@playwright/test` faltante). Cuando se instale, copiar el
-> bloque de código a `tests/e2e/studio-create-client.spec.ts` y añadir
-> los scripts a `package.json`.
+> **Fuente de verdad ejecutable:** [`tests/e2e/studio-create-client.json`](../../tests/e2e/studio-create-client.json),
+> que corre con `agent-browser batch --bail < tests/e2e/studio-create-client.json`.
+> Ese spec no requiere instalar nada nuevo en el repo (solo `agent-browser`
+> global, que ya es el toolchain oficial de `/verificar-visual`).
 >
-> El audit lista S-39 como P2 — el plan es instalarlo en Sprint 5 junto
-> a CI workflow `pnpm test:e2e`. Mientras tanto, este documento sirve
-> como referencia ejecutable manual y como base del spec.
+> Este archivo se mantiene como **referencia secundaria** del camino
+> Playwright, por si en el futuro la suite crece y se decide migrar a
+> `@playwright/test`. **NO es roadmap obligatorio**: el plan original (S-39
+> "instalar @playwright/test en Sprint 5") quedó superado por la decisión
+> 2026-05-11 de centralizar QA visual en agent-browser.
 
 ## Objetivo
 
@@ -152,9 +153,17 @@ test.describe('Studio · create client + activate DD + edit branding', () => {
 - **S-44** New Display creation: spec separado
   `studio-new-display.spec.ts` — sigue la misma estructura
 
-## Pendiente para Sprint 5
+## Pendiente (solo si se decide migrar a Playwright)
+
+Estos pasos NO son obligatorios: el spec ya corre como JSON con
+agent-browser. Solo aplican si en el futuro se decide reemplazar
+agent-browser por Playwright para QA del Studio:
 
 1. Instalar `@playwright/test` + `playwright install`.
-2. Mover este spec a `tests/e2e/` y eliminar el `.md`.
+2. Convertir `tests/e2e/studio-create-client.json` al `.spec.ts` de
+   arriba y eliminar el `.json`.
 3. Añadir GitHub Action `e2e.yml` que corre `pnpm test:e2e` en PRs.
 4. Mock del KV para tests CI (sin Upstash en GitHub Actions).
+
+Mientras tanto, el CI puede correr el JSON con `agent-browser batch`
+sin ninguno de estos pasos.

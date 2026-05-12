@@ -132,7 +132,7 @@ Sin `<verify>` y `<done>` no hay plan válido.
 
 El producto es visual. No vale solo con "el typecheck pasa". Herramientas obligatorias:
 
-- **Screenshot vs SVG** (MCP Chrome, skill `webapp-testing`).
+- **Screenshot vs SVG** con `agent-browser` (vercel-labs). Comando rápido: `pnpm verify:visual --ruta /home`.
 - **Subagent `revisor-visual`** para el diff automatizado.
 - **Subagent `auditor-white-label`** para cazar hardcoded antes de commit.
 - **Audit `web-design-guidelines`** (Tier 2) antes de cerrar pantalla.
@@ -200,6 +200,8 @@ El subagent `auditor-white-label` fuerza estas reglas antes de cada commit.
 - ❌ Committear un fix de build sin verificar antes que `pnpm kiosk:dev` sigue funcionando. Lección 2026-04-29: añadí `src/pages/_document.tsx` para arreglar SSG `/404` en `pnpm build`, pero rompió el dev con `ENOENT: open .next/server/pages/_document.js` (Next dev no precompila Pages Router al inicio). Tuve que revertir. Trade-off correcto: dev > deploy futuro. **Regla:** todo fix de build se valida primero con `pnpm kiosk:dev` arrancando limpio antes del commit.
 - ❌ Entregar fix de white-label parcial. Cuando se hace sweep de brand colors o reemplazo de strings hardcoded del template (Arizona/Phoenix/etc.), ejecutar `grep -rE '#[0-9a-fA-F]{6}|\brgba\(' src/components` Y `grep -rE '\b(Arizona|Phoenix|Mesa|Glendale|...)\b' src/ clients/` ANTES de declarar listo. Lección sesión 2026-05-04 nocturna: 11 issues iterados sobre fixes parciales — Tickets BUY button azul cyan escapó al primer sweep, "Itinerary Builder" texto estaba en 26 archivos, brand shades secundarios (`#0f6fa0/#0e518a`) en otros 17. Si dejas un componente residual, el cliente lo ve y te lo regresa.
 - ❌ Pushear sin verificar `git config user.email`. Vercel rechaza deploys silenciosamente cuando el commit author email no está vinculado a una cuenta GitHub con acceso al proyecto (Hobby tier no admite collaboration). El proyecto Vercel está bajo `ruba.trejo@gmail.com` / `rubatrejo` — usar ese email local, no `designers@trueomni.com`. Lección sesión 2026-05-04: 9 deploys ERROR antes de descubrir el mismatch. Verificar con `git log -1 --format='%ae'` antes de push.
+- ❌ Usar herramientas distintas a **`agent-browser`** (vercel-labs) para capturar screenshots o automatizar QA del kiosk. Decisión 2026-05-11: queda como toolchain único — sustituye a Playwright MCP y al skill `webapp-testing`. Flujo: `/verificar-visual <ruta>` delega al subagent `revisor-visual` que llama a `agent-browser`. Equivalente scriptable: `pnpm verify:visual --ruta <ruta>`. Specs E2E del Studio viven en `tests/e2e/*.json` y se ejecutan con `agent-browser batch --bail < tests/e2e/<spec>.json`. NO añadir `@playwright/test` como dep salvo que la suite E2E pase de 10 specs y haga falta paralelismo/reporters formales.
+- ❌ Dejar PNGs sueltos en la raíz al cerrar sesión. `/*.png` está en `.gitignore`, pero ensucian disco local y `ls` para Claude. Antes de `/terminar`: `pnpm clean:screenshots` los mueve a `.planning/verifications/_orphans-<fecha>/`. Lección 2026-05-11: la raíz tenía 264 PNGs (147 MB) acumulados.
 
 ---
 

@@ -21,10 +21,38 @@ Español. Siempre. Informes, comentarios, todo.
 2. **Verifica que el dev server responde.** Intenta `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000` (o el puerto que esté configurado). Si no está arriba:
    - No lo levantes tú por defecto. Reporta al orquestador que hace falta `pnpm dev` y para.
    - Si el orquestador te indica explícitamente que lo levantes, hazlo en background.
-3. **Toma screenshot** de la ruta a 1080×1920 usando:
-   - Primera opción: MCP `Claude in Chrome` si está disponible.
-   - Fallback: skill `webapp-testing` (Playwright).
-   - Guarda el PNG en `.planning/verifications/` con formato `NN-nombre-YYYY-MM-DD.png`.
+3. **Toma screenshot** de la ruta a 1080×1920 con `agent-browser` (vercel-labs).
+   Es la herramienta oficial del proyecto (no usar otras alternativas como capturas vía MCP de browser-testing).
+
+   Si `command -v agent-browser` falla, parar y reportar al orquestador:
+   "Falta agent-browser. Instálalo con `npm i -g agent-browser && agent-browser install` y reintenta."
+
+   Comandos en orden (ejecutar como cadena con `&&` para reutilizar el daemon):
+
+   ```bash
+   agent-browser set viewport 1080 1920 \
+     && agent-browser open http://localhost:3000$ruta \
+     && agent-browser wait --load networkidle \
+     && agent-browser screenshot .planning/verifications/NN-nombre-YYYY-MM-DD.png
+   ```
+
+   Guarda el PNG en `.planning/verifications/` con formato `NN-nombre-YYYY-MM-DD.png`
+   para tener histórico (nunca sobrescribas; añade sufijo `-v2`, `-v3` si re-capturas).
+
+   **Opcional 3b — diff automático:** si el SVG ya fue renderizado a PNG (paso 1
+   del PIXEL-PERFECT-PROTOCOL con `qlmanage`), correr además:
+
+   ```bash
+   agent-browser diff screenshot --baseline /tmp/thumbs/NN-pantalla.png
+   ```
+
+   Esto da un porcentaje de mismatch y resalta píxeles en rojo. Si el mismatch
+   es > 1% reportar como "diferencias visibles" sin asumir que son bugs (puede
+   ser que el SVG esté desactualizado).
+
+   **Secundario solo si el orquestador lo pide explícitamente:** MCP `Claude in
+   Chrome` cuando el usuario tenga la extensión conectada. No es fallback
+   automático.
 4. **Extrae medidas del SVG.** Para cada bloque principal del SVG (los hijos directos de la raíz) obtén `x, y, width, height`.
 5. **Extrae medidas del render.** Del screenshot, localiza bloques equivalentes. Si no puedes automatizar la detección, reporta las diferencias percibidas a ojo con honestidad (**di claramente "detección manual"** en el informe).
 6. **Calcula diff** por bloque: `|render - svg|` en px.

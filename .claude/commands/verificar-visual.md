@@ -11,6 +11,11 @@ Claude, vamos a verificar visualmente la pantalla en la ruta **`$ARGUMENTS`**. H
 
 Comprueba:
 
+- `command -v agent-browser` debe responder. Si no, parar y proponer al usuario:
+  ```bash
+  npm i -g agent-browser && agent-browser install
+  ```
+  El proyecto usa exclusivamente `agent-browser` (vercel-labs) para screenshots.
 - Existe `package.json` y hay script `dev` (`pnpm dev`).
 - Existe el SVG correspondiente. Deduce el nombre de pantalla por la ruta:
   - `/` → `designs/NN-home.svg`
@@ -24,8 +29,10 @@ Comprueba:
 Usa la herramienta de subagentes (`Agent` / `Task`) con `subagent_type: "revisor-visual"` y pásale un prompt como:
 
 > "Verifica la ruta `$ARGUMENTS` del kiosk contra `designs/NN-X.svg`.
-> Levanta el dev server si no está arriba (`pnpm dev`), captura screenshot de la ruta a 1080×1920,
-> compara con el SVG y devuelve: (1) diff visual en px del bounding box de cada bloque principal,
+> Levanta el dev server si no está arriba (`pnpm dev`), captura screenshot de la ruta a 1080×1920
+> con `agent-browser` (set viewport → open → wait networkidle → screenshot),
+> compara con el SVG (opcional: `agent-browser diff screenshot --baseline /tmp/thumbs/NN-X.png`)
+> y devuelve: (1) diff visual en px del bounding box de cada bloque principal,
 > (2) hallazgos donde el diff > ±2px, (3) ruta del screenshot guardado en `.planning/verifications/`."
 
 ## 3. Reportarme el resultado

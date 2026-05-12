@@ -1,0 +1,19 @@
+[
+  ["set", "viewport", "1440", "900"],
+  ["open", "http://localhost:3000/studio"],
+  ["wait", "--load", "networkidle"],
+  ["screenshot", ".planning/verifications/e2e-studio-01-dashboard.png"],
+  ["find", "role", "button", "click", "--name", "Create a new client"],
+  ["wait", "--text", "New client"],
+  ["screenshot", ".planning/verifications/e2e-studio-02-modal.png"],
+  ["find", "label", "Name", "fill", "E2E Test Client"],
+  ["find", "label", "Also activate Digital Displays", "click"],
+  ["find", "role", "button", "click", "--name", "Create"],
+  ["wait", "--url", "**/studio/**"],
+  ["screenshot", ".planning/verifications/e2e-studio-03-redirect.png"],
+  ["find", "role", "tab", "click", "--name", "Brand colors"],
+  ["wait", "--load", "networkidle"],
+  ["screenshot", ".planning/verifications/e2e-studio-04-branding.png"],
+  ["wait", "--text", "Pending changes"],
+  ["screenshot", ".planning/verifications/e2e-studio-05-pending.png"]
+]

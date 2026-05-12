@@ -50,14 +50,9 @@ coverage/
 *.tmp
 *.bak
 
-# Playwright MCP (screenshots ephemeros de /verificar-visual)
-.playwright-mcp/
+# Screenshots transitorios de /verificar-visual (agent-browser) y dev scratchpad.
+# Anclados a la raíz para no atrapar assets bajo clients/, clients-signage/, etc.
 *-render.png
-# Screenshots dev scratchpad (billboard-*.png, b*-*.png)
-# Anclados a la raíz para no atrapar assets en clients/, clients-signage/, etc.
 /billboard-*.png
 /b*-*.png
-
-# Debug screenshots de Playwright (transient)
 /*.png
-.playwright-mcp/

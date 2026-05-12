@@ -18,10 +18,11 @@
 
 ## Tier 2 — De revisión (cargar solo al cerrar pantalla)
 
-| Skill                         | Para qué                                                |
-| ----------------------------- | ------------------------------------------------------- |
-| `web-design-guidelines`       | Audit contra Web Interface Guidelines (a11y, UX, perf). |
-| `vercel-react-best-practices` | Patrones correctos de Next.js + React.                  |
+| Skill                         | Para qué                                                                                 |
+| ----------------------------- | ---------------------------------------------------------------------------------------- |
+| `web-design-guidelines`       | Audit contra Web Interface Guidelines (a11y, UX, perf).                                  |
+| `vercel-react-best-practices` | Patrones correctos de Next.js + React.                                                   |
+| `agent-browser`               | Screenshots + diff visual del kiosk en `/verificar-visual` y smoke E2E del Studio.       |
 
 ---
 
@@ -34,7 +35,6 @@
 | `ui-component-libraries` | Explorar librerías adicionales de componentes.                                |
 | `brainstorming`          | **Antes** de trabajo creativo (features, componentes nuevos). GSD "discutir". |
 | `audit-website`          | Auditoría amplia del kiosk desplegado (SEO, perf, a11y, seguridad).           |
-| `agent-browser`          | Automatizar clicks/forms en verificación E2E o para scraping.                 |
 
 ---
 
@@ -62,7 +62,6 @@ Estos los mencionaba la propuesta original pero **no venían en el `skills.zip` 
 | `brand-guidelines`      | Tier 3          | Onboarding de clientes con identidad propia fuerte.            |
 | `web-artifacts-builder` | Tier 3          | Prototipos HTML complejos fuera del kiosk.                     |
 | `canvas-design`         | Tier 3          | Piezas estáticas (posters, mockups marketing).                 |
-| `webapp-testing`        | Tier 2          | Playwright para screenshots del render en `/verificar-visual`. |
 
 > **Nota:** Claude Code puede tener skills globales en `~/.claude/skills/` además de los del proyecto. Si tu instalación global los incluye, funcionan igual aunque no estén en el repo. Lo ideal para portabilidad es que todo lo crítico esté en `.claude/skills/` del repo.
 

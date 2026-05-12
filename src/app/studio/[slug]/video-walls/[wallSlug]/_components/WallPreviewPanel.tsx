@@ -1,16 +1,6 @@
 'use client';
 
-import {
-  ChevronLeft,
-  ChevronRight,
-  ExternalLink,
-  Maximize,
-  Minus,
-  Monitor,
-  Plus,
-  RotateCcw,
-} from 'lucide-react';
-import Link from 'next/link';
+import { ChevronLeft, ChevronRight, Maximize, Minus, Monitor, Plus, RotateCcw } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { canvasDimensionsOf, GRID_CONFIGS, type GridConfig } from '@/lib/video-walls/dimensions';
@@ -89,7 +79,9 @@ export function WallPreviewPanel({
     if (focusedCell) qs.set('cell', `${focusedCell.row},${focusedCell.col}`);
     if (!showBezels) qs.set('bezels', '0');
     if (currentSlideIndex > 0) qs.set('slide', String(currentSlideIndex));
-    qs.set('source', 'fs');
+    // El editor preview consume KV (donde el operador guarda) — sin
+    // `?source=fs` para que los cambios de branding/header/events/social
+    // se reflejen al instante en el iframe.
     const tail = qs.toString();
     return `/video-walls/${clientSlug}/${wallSlug}${tail ? `?${tail}` : ''}`;
   }, [clientSlug, wallSlug, focusedCell, showBezels, currentSlideIndex]);
@@ -130,9 +122,15 @@ export function WallPreviewPanel({
           >
             <Minus className="h-3.5 w-3.5" />
           </button>
-          <span className="min-w-[42px] text-center font-mono tabular-nums">
+          <button
+            type="button"
+            className="min-w-[44px] rounded border border-zinc-200 bg-white px-2 py-0.5 text-center font-mono text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-900 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
+            aria-label="Reset zoom to fit"
+            title="Reset zoom to fit"
+            onClick={() => setUserZoom(1)}
+          >
             {Math.round(scale * 100)}%
-          </span>
+          </button>
           <button
             type="button"
             className="grid h-7 w-7 place-items-center rounded-md text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-zinc-900 dark:hover:text-zinc-200"
@@ -144,22 +142,22 @@ export function WallPreviewPanel({
           </button>
           <button
             type="button"
-            className="grid h-7 w-7 place-items-center rounded-md text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 dark:hover:bg-zinc-900 dark:hover:text-zinc-200"
-            aria-label="Reset zoom"
-            onClick={() => setUserZoom(1)}
+            className="ml-1 grid h-7 w-7 place-items-center rounded-md text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 dark:hover:bg-zinc-900 dark:hover:text-zinc-200"
+            aria-label="Reload preview"
+            title="Reload iframe"
+            onClick={() => window.location.reload()}
           >
             <RotateCcw className="h-3.5 w-3.5" />
           </button>
-          <span className="mx-1 block h-4 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden />
-          <Link
-            href={iframeSrc}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-7 items-center gap-1 rounded-md border border-zinc-200 px-2 text-[11px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+          <button
+            type="button"
+            className="ml-1 inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-900"
+            aria-label="Open in full screen"
+            onClick={() => window.open(iframeSrc, '_blank', 'noopener,noreferrer')}
           >
-            <ExternalLink className="h-3 w-3" />
-            Open
-          </Link>
+            <Maximize className="h-3.5 w-3.5" />
+            Full screen
+          </button>
         </div>
       </div>
 
@@ -231,9 +229,9 @@ export function WallPreviewPanel({
           />
         </div>
 
-        {/* Slide navigator pill — debajo del iframe, clone visual del DD. */}
+        {/* Slide navigator pill — 80px debajo del iframe (igual que DD). */}
         {slides.length > 0 ? (
-          <div className="mt-8 inline-flex items-center gap-3 rounded-2xl border border-sky-500/30 bg-gradient-to-r from-sky-500 to-sky-600 px-3 py-2 shadow-lg shadow-sky-500/20 dark:border-sky-400/40 dark:from-sky-500 dark:to-sky-700 dark:shadow-sky-500/30">
+          <div className="mt-20 inline-flex items-center gap-3 rounded-2xl border border-sky-500/30 bg-gradient-to-r from-sky-500 to-sky-600 px-3 py-2 shadow-lg shadow-sky-500/20 dark:border-sky-400/40 dark:from-sky-500 dark:to-sky-700 dark:shadow-sky-500/30">
             <button
               type="button"
               onClick={() => onNavSlide('prev')}

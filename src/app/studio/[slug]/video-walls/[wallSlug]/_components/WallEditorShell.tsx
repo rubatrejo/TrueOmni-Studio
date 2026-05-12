@@ -17,6 +17,7 @@ import {
   SignageSidebarTabs,
   type SignageSection,
 } from '@/app/studio/digital-displays/_components/shell/SignageSidebarTabs';
+import { SignageTopBar } from '@/app/studio/digital-displays/_components/shell/SignageTopBar';
 import { BrandingTab } from '@/app/studio/digital-displays/_components/tabs/BrandingTab';
 import { EventsTab } from '@/app/studio/digital-displays/_components/tabs/EventsTab';
 import { HeaderTab } from '@/app/studio/digital-displays/_components/tabs/HeaderTab';
@@ -32,7 +33,6 @@ import type { VideoWallConfig } from '@/lib/video-walls/schema';
 import { PlaylistPanel } from './PlaylistPanel';
 import { SettingsPanel } from './SettingsPanel';
 import { WallPreviewPanel } from './WallPreviewPanel';
-import { WallTopBar } from './WallTopBar';
 
 /**
  * <WallEditorShell> — shell del editor de Video Walls.
@@ -148,6 +148,24 @@ export function WallEditorShell({
     return () => window.clearTimeout(t);
   }, [themeDirty, themeDraft]);
 
+  // Reload iframe cuando los tabs (events/social/news/theme) guardan al KV.
+  // Emiten `signage-content-saved` / `signage-theme-saved` via save-content
+  // / save-theme. Filtramos por clientSlug del wall actual.
+  useEffect(() => {
+    function onSaved(e: Event) {
+      const detail = (e as CustomEvent<{ clientSlug?: string }>).detail;
+      if (!detail || detail.clientSlug === clientSlug) {
+        setPreviewKey((k) => k + 1);
+      }
+    }
+    window.addEventListener('signage-content-saved', onSaved);
+    window.addEventListener('signage-theme-saved', onSaved);
+    return () => {
+      window.removeEventListener('signage-content-saved', onSaved);
+      window.removeEventListener('signage-theme-saved', onSaved);
+    };
+  }, [clientSlug]);
+
   // Bridge live editor↔iframe queda como sub-fase futura. Por ahora
   // bumpamos previewKey al guardar para forzar reload del iframe.
   const handleWallChange = (next: VideoWallConfig) => {
@@ -181,14 +199,16 @@ export function WallEditorShell({
 
   return (
     <div className="studio-shell flex h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
-      <WallTopBar
+      <SignageTopBar
         slug={`${clientSlug} / ${wallSlug}`}
         clientSlug={clientSlug}
-        clientName={clientName}
-        wallName={wallName}
-        saveState="saved"
-        isDirty={false}
+        nombre={wallName}
+        saveState={themeDirty ? 'saving' : 'saved'}
+        isDirty={themeDirty}
         previewHref={previewHref}
+        productLabel="Video Walls"
+        productHref={`/studio/${clientSlug}/video-walls`}
+        clientLabel={clientName}
       />
 
       <div className="flex flex-1 overflow-hidden">

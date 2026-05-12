@@ -27,6 +27,12 @@ export interface SignageTopBarProps {
   isDirty: boolean;
   previewHref: string | null;
   onPublish?: () => void;
+  /** Override del breadcrumb del producto. Default "Digital Displays". */
+  productLabel?: string;
+  /** Override del href del breadcrumb del producto. Default `/studio/<slug>`. */
+  productHref?: string;
+  /** Label del cliente en el breadcrumb. Default reusa `clientSlug`. */
+  clientLabel?: string;
 }
 
 export function SignageTopBar({
@@ -37,6 +43,9 @@ export function SignageTopBar({
   isDirty,
   previewHref,
   onPublish,
+  productLabel = 'Digital Displays',
+  productHref,
+  clientLabel,
 }: SignageTopBarProps) {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-5 dark:border-zinc-900 dark:bg-zinc-950">
@@ -54,11 +63,25 @@ export function SignageTopBar({
             className="hidden h-3.5 w-3.5 text-zinc-400 dark:text-zinc-700 xl:block"
             aria-hidden="true"
           />
+          {clientLabel ? (
+            <>
+              <Link
+                href={`/studio/${clientSlug}`}
+                className="hidden transition hover:text-zinc-800 dark:hover:text-zinc-300 xl:inline"
+              >
+                {clientLabel}
+              </Link>
+              <ChevronRight
+                className="hidden h-3.5 w-3.5 text-zinc-400 dark:text-zinc-700 xl:block"
+                aria-hidden="true"
+              />
+            </>
+          ) : null}
           <Link
-            href={`/studio/${clientSlug}`}
+            href={productHref ?? `/studio/${clientSlug}`}
             className="hidden transition hover:text-zinc-800 dark:hover:text-zinc-300 xl:inline"
           >
-            Digital Displays
+            {productLabel}
           </Link>
           <ChevronRight
             className="hidden h-3.5 w-3.5 text-zinc-400 dark:text-zinc-700 xl:block"

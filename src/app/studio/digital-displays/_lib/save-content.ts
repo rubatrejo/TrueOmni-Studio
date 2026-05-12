@@ -21,6 +21,14 @@ async function putContent(
       return { ok: false, error: json.error ?? `HTTP ${res.status}` };
     }
     const json = (await res.json()) as { savedAt: number };
+    // Notificar a editores que escuchan (eg. WallEditorShell del producto
+    // Video Walls bumpa previewKey para que el iframe recargue con la data
+    // nueva). Sin acoplar el tab a un editor específico.
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('signage-content-saved', { detail: { clientSlug, kind } }),
+      );
+    }
     return { ok: true, savedAt: json.savedAt };
   } catch (e) {
     return { ok: false, error: (e as Error).message };

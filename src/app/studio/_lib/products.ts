@@ -10,8 +10,8 @@ import type { LucideIcon } from 'lucide-react';
  * ahora son cards en la vista del cliente. La jerarquía vive en la URL:
  *   `/studio/[client]/kiosk`
  *   `/studio/[client]/digital-displays`
+ *   `/studio/[client]/video-walls`
  *   `/studio/[client]/mobile-pwa`     (coming soon)
- *   `/studio/[client]/video-walls`    (coming soon)
  *   `/studio/[client]/tablets`        (coming soon)
  */
 
@@ -61,9 +61,7 @@ export const STUDIO_PRODUCTS: readonly StudioProduct[] = [
     label: 'Video Walls',
     segment: 'video-walls',
     icon: LayoutGrid,
-    status: 'soon',
-    comingSoonCopy:
-      'Compose synchronized content across a grid of displays. Layout-aware editing so a hero asset can span multiple screens or stay per-tile.',
+    status: 'live',
   },
   {
     id: 'tablets',

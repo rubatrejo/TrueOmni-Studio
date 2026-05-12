@@ -39,10 +39,17 @@ export default async function VideoWallPage({ params, searchParams }: PageProps)
   const bezelParam = Array.isArray(search?.bezels) ? search.bezels[0] : search?.bezels;
   const showBezels = bezelParam !== '0';
   const debug = search?.debug === '1';
+  const slideParam = Array.isArray(search?.slide) ? search.slide[0] : search?.slide;
+  const slideIndex = slideParam ? Math.max(0, Number.parseInt(slideParam, 10) || 0) : 0;
 
   return (
     <VideoWallStage grid={wallCfg.grid} cell={cell ?? undefined} debug={debug}>
-      <VideoWallRuntime client={clientCfg} wall={wallCfg} showBezels={showBezels && !cell} />
+      <VideoWallRuntime
+        client={clientCfg}
+        wall={wallCfg}
+        showBezels={showBezels && !cell}
+        slideIndex={slideIndex}
+      />
     </VideoWallStage>
   );
 }

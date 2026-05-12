@@ -28,6 +28,8 @@ export interface VideoWallRuntimeProps {
   wall: VideoWallConfig;
   weather?: SignageHeaderWeather;
   showBezels?: boolean;
+  /** Índice del slide a renderizar (clamp a playlist length). Default 0. */
+  slideIndex?: number;
 }
 
 export function VideoWallRuntime({
@@ -35,8 +37,13 @@ export function VideoWallRuntime({
   wall,
   weather,
   showBezels = true,
+  slideIndex = 0,
 }: VideoWallRuntimeProps) {
-  const slide = useMemo(() => wall.playlist[0] ?? null, [wall.playlist]);
+  const slide = useMemo(() => {
+    if (wall.playlist.length === 0) return null;
+    const i = Math.max(0, Math.min(slideIndex, wall.playlist.length - 1));
+    return wall.playlist[i] ?? null;
+  }, [wall.playlist, slideIndex]);
   const template = slide ? getTemplate(slide.templateId, wall.grid) : null;
 
   return (

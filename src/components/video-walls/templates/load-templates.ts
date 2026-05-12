@@ -7,9 +7,6 @@
  * consistente con misma paleta de slot renderers.
  */
 
-// Placeholder 3×2 (debug, no se muestra en AddSlideModal).
-import './3x2/00-placeholder';
-
 // 3×2 — pixel-perfect targets contra `designs/video-walls/3x2/`.
 import './3x2/01-video-image-full';
 import './3x2/02-video-image-ad';

@@ -2,7 +2,11 @@ import { SignageHeader } from '@/components/signage/header/SignageHeader';
 import { SignageI18nProvider } from '@/components/signage/i18n/SignageI18nProvider';
 import { SignagePlayer } from '@/components/signage/player/SignagePlayer';
 import { formatSignageClock, formatSignageDate } from '@/lib/signage/dates';
-import type { SignageClientResolved, SignageDisplayConfig } from '@/lib/signage/schema';
+import type {
+  SignageClientResolved,
+  SignageDisplayConfig,
+  SignageOrientation,
+} from '@/lib/signage/schema';
 import type { SignageHeaderWeather } from '@/lib/signage/weather-adapter';
 
 import { SignageOrientationWrapper } from './SignageOrientationWrapper';
@@ -26,9 +30,19 @@ export interface SignageRuntimeProps {
   display: SignageDisplayConfig;
   weather: SignageHeaderWeather;
   i18nBag: Record<string, string>;
+  /** Orientation efectiva (resuelta en page.tsx con cascada query >
+   *  defaultOrientation > landscape). El runtime ya no lee del display
+   *  config directamente; es el page quien decide qué pintar. */
+  orientation: SignageOrientation;
 }
 
-export function SignageRuntime({ client, display, weather, i18nBag }: SignageRuntimeProps) {
+export function SignageRuntime({
+  client,
+  display,
+  weather,
+  i18nBag,
+  orientation,
+}: SignageRuntimeProps) {
   const now = new Date();
   const initialClock = {
     clockText: formatSignageClock(now, client.locale, client.timezone, client.header.clockFormat),
@@ -42,7 +56,7 @@ export function SignageRuntime({ client, display, weather, i18nBag }: SignageRun
           client={client}
           weather={weather}
           initialClock={initialClock}
-          orientation={display.settings.orientation ?? 'landscape'}
+          orientation={orientation}
         />
         <div className="flex-1 overflow-hidden">
           <SignagePlayer
@@ -50,6 +64,7 @@ export function SignageRuntime({ client, display, weather, i18nBag }: SignageRun
             display={display}
             settings={display.settings}
             playlist={display.playlist}
+            orientation={orientation}
           />
         </div>
         <SignageSleepGate

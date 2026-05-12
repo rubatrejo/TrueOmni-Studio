@@ -6,6 +6,7 @@ import { SignageRuntime } from '@/components/signage/runtime/SignageRuntime';
 import { SignageStage } from '@/components/signage/stage/SignageStage';
 import { loadSignageClient, loadSignageDisplay } from '@/lib/signage/config';
 import { loadSignageI18n } from '@/lib/signage/i18n';
+import { SIGNAGE_ORIENTATIONS, type SignageOrientation } from '@/lib/signage/schema';
 import { mapWeatherToHeader } from '@/lib/signage/weather-adapter';
 import { fetchWeather } from '@/lib/weather';
 
@@ -30,6 +31,24 @@ export default async function SignageDisplayPage({ params, searchParams }: PageP
     notFound();
   }
 
+  // Orientation efectiva: query param > defaultOrientation del display. El
+  // query permite que el operador físico instale la URL `?orientation=portrait`
+  // en un TV portrait y la URL plain en un TV landscape, ambas pintando el
+  // mismo display config con sus templates pixel-perfect respectivos. El
+  // bridge del editor overridea desde el cliente vía `displayPatch` y se
+  // resuelve dentro del Stage (server-side aquí sólo seteamos el valor
+  // inicial). Valores inválidos caen al default sin warning.
+  const queryOrientationRaw = Array.isArray(search?.orientation)
+    ? search.orientation[0]
+    : search?.orientation;
+  const queryOrientation: SignageOrientation | null =
+    typeof queryOrientationRaw === 'string' &&
+    (SIGNAGE_ORIENTATIONS as readonly string[]).includes(queryOrientationRaw)
+      ? (queryOrientationRaw as SignageOrientation)
+      : null;
+  const initialOrientation: SignageOrientation =
+    queryOrientation ?? displayCfg.settings.defaultOrientation ?? 'landscape';
+
   // i18n bag + weather en paralelo (server-side, cached).
   const [i18nBag, weatherData] = await Promise.all([
     loadSignageI18n(clientCfg.slug, clientCfg.locale),
@@ -46,10 +65,16 @@ export default async function SignageDisplayPage({ params, searchParams }: PageP
   const weather = mapWeatherToHeader(weatherData, clientCfg.locale, clientCfg.timezone, 5);
 
   return (
-    <SignageStage orientation={displayCfg.settings.orientation} debug={debug}>
+    <SignageStage orientation={initialOrientation} debug={debug}>
       <SignageBridge clientSlug={clientCfg.slug} displaySlug={displayCfg.slug} />
       <SignageBridgeStyleApplier />
-      <SignageRuntime client={clientCfg} display={displayCfg} weather={weather} i18nBag={i18nBag} />
+      <SignageRuntime
+        client={clientCfg}
+        display={displayCfg}
+        weather={weather}
+        i18nBag={i18nBag}
+        orientation={initialOrientation}
+      />
     </SignageStage>
   );
 }

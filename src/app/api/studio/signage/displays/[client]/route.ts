@@ -45,6 +45,10 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
     slug?: unknown;
     name?: unknown;
     sourceDisplaySlug?: unknown;
+    /** Nuevo nombre canónico. */
+    defaultOrientation?: unknown;
+    /** Legacy: NewDisplayCard antiguo enviaba `orientation`. Aceptamos
+     *  ambos para no romper deployments en transición. */
     orientation?: unknown;
   };
   let body: BodyShape | null = null;
@@ -58,10 +62,15 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
   const name = typeof body?.name === 'string' ? body.name.trim() : '';
   const sourceDisplaySlug =
     typeof body?.sourceDisplaySlug === 'string' ? body.sourceDisplaySlug.trim() : '';
-  const orientation: SignageOrientation =
-    typeof body?.orientation === 'string' &&
-    (SIGNAGE_ORIENTATIONS as readonly string[]).includes(body.orientation)
-      ? (body.orientation as SignageOrientation)
+  const rawOrientation =
+    typeof body?.defaultOrientation === 'string'
+      ? body.defaultOrientation
+      : typeof body?.orientation === 'string'
+        ? body.orientation
+        : null;
+  const defaultOrientation: SignageOrientation =
+    rawOrientation && (SIGNAGE_ORIENTATIONS as readonly string[]).includes(rawOrientation)
+      ? (rawOrientation as SignageOrientation)
       : 'landscape';
 
   if (!slug || !name) {
@@ -115,7 +124,7 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
     ...cloned,
     slug,
     name,
-    settings: { ...cloned.settings, orientation },
+    settings: { ...cloned.settings, defaultOrientation },
   };
   // Si el operador eligió portrait, el playlist del template default está
   // armado contra templates landscape. Como los template-ids landscape

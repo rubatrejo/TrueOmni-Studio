@@ -41,10 +41,14 @@ export function SignageStage({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [scale, setScale] = useState(1);
 
-  // El editor del Studio puede patchear orientation en vivo via postMessage
-  // (toggle del PreviewPanel). Cuando hay patch en el bridge, gana sobre la
-  // prop server-rendered.
-  const patchOrientation = useSignageBridgeStore((s) => s.displayPatch?.settings?.orientation);
+  // El editor del Studio puede patchear `defaultOrientation` en vivo via
+  // postMessage (toggle del PreviewPanel). Cuando hay patch en el bridge,
+  // gana sobre la prop server-rendered. La página resuelve la cascada
+  // searchParams → defaultOrientation; aquí solo cubrimos el caso del
+  // editor en vivo (que no se refresca con cada toggle).
+  const patchOrientation = useSignageBridgeStore(
+    (s) => s.displayPatch?.settings?.defaultOrientation,
+  );
   const orientation: SignageOrientation =
     patchOrientation && (SIGNAGE_ORIENTATIONS as readonly string[]).includes(patchOrientation)
       ? patchOrientation

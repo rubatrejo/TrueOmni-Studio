@@ -270,7 +270,7 @@ export const listSignageDisplays = cache(
           slug: display.slug,
           name: display.name,
           slidesCount: display.playlist.length,
-          orientation: display.settings.orientation ?? 'landscape',
+          orientation: display.settings.defaultOrientation ?? 'landscape',
         });
       } catch {
         // Skip displays inválidos.

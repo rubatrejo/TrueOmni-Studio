@@ -76,7 +76,11 @@ export function NewDisplayCard({
       const res = await fetch(`/api/studio/signage/displays/${clientSlug}`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ slug, name: name.trim(), orientation }),
+        body: JSON.stringify({
+          slug,
+          name: name.trim(),
+          defaultOrientation: orientation,
+        }),
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => null)) as { error?: string } | null;

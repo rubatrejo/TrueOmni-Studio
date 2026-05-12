@@ -61,9 +61,19 @@ export function SignageHeader({
   client: serverClient,
   weather,
   initialClock,
-  orientation = 'landscape',
+  orientation: initialOrientation = 'landscape',
 }: SignageHeaderProps) {
   const clientPatch = useSignageBridgeStore((s) => s.clientPatch);
+  // Bridge override de orientation — igual que SignageStage y SignagePlayer.
+  // Cuando el editor togglea landscape/portrait, el header debe re-escalar
+  // sus elementos (logo height, weather scale, clock fontSize) en vivo.
+  const bridgeOrientation = useSignageBridgeStore(
+    (s) => s.displayPatch?.settings?.defaultOrientation,
+  );
+  const orientation: SignageOrientation =
+    bridgeOrientation && (bridgeOrientation === 'landscape' || bridgeOrientation === 'portrait')
+      ? bridgeOrientation
+      : initialOrientation;
   const header: SignageHeaderConfig = clientPatch?.header
     ? { ...serverClient.header, ...clientPatch.header }
     : serverClient.header;

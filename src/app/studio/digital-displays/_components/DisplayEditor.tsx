@@ -141,6 +141,7 @@ export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps
   const markSaving = useDisplayEditStore((s) => s.markSaving);
   const markSaved = useDisplayEditStore((s) => s.markSaved);
   const setError = useDisplayEditStore((s) => s.setError);
+  const updateSettings = useDisplayEditStore((s) => s.updateSettings);
 
   // Theme draft (branding/header) — compartido entre displays del mismo client.
   const initTheme = useThemeEditStore((s) => s.init);
@@ -294,7 +295,10 @@ export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps
                     <BrandingTab client={client} tokensCss={tokensCss} />
                   ) : null}
                   {activeTab === 'header' ? (
-                    <HeaderTab client={client} displayOrientation={draft.settings.orientation} />
+                    <HeaderTab
+                      client={client}
+                      displayOrientation={draft.settings.defaultOrientation}
+                    />
                   ) : null}
                   {activeTab === 'settings' ? <DisplaySettingsPanel /> : null}
                   {activeTab === 'playlist' ? <PlaylistPanel /> : null}
@@ -347,7 +351,8 @@ export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps
                 onReload={() => setPreviewKey((k) => k + 1)}
                 activeSlide={bridge.activeSlide}
                 onNavSlide={bridge.navSlide}
-                orientation={draft.settings.orientation}
+                orientation={draft.settings.defaultOrientation}
+                onOrientationChange={(o) => updateSettings({ defaultOrientation: o })}
               />
             </div>
           </main>

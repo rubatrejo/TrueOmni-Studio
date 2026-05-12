@@ -215,24 +215,46 @@ export const SIGNAGE_ORIENTATION_DIMENSIONS: Record<SignageOrientation, { w: num
     portrait: { w: 1080, h: 1920 },
   };
 
-export const SignageDisplaySettingsSchema = z.object({
-  targetResolution: z.enum(['1080p', '4k']),
-  audio: z.boolean(),
-  defaultDurationMs: z.number().int().min(1000).max(600_000),
-  defaultTransition: z.enum(['cut', 'fade', 'slide-left', 'slide-up']),
-  /** Orientación física del display. `landscape` es el default histórico
-   *  (Signage v1 solo soportaba 1920×1080). `portrait` (1080×1920) llegó
-   *  en esta sesión con 8 templates pixel-perfect propios. Optional al
-   *  parsear para no romper displays preexistentes en KV. */
-  orientation: z.enum(SIGNAGE_ORIENTATIONS).default('landscape'),
-  sleepSchedule: z
-    .object({
-      enabled: z.boolean(),
-      startTime: z.string().regex(/^\d{2}:\d{2}$/),
-      endTime: z.string().regex(/^\d{2}:\d{2}$/),
-    })
-    .optional(),
-});
+/**
+ * Preprocess que acepta el nombre legacy `orientation` y lo migra a
+ * `defaultOrientation`. Sin migration batch — al primer save desde el
+ * editor el KV se reescribe con el nuevo nombre.
+ */
+const renameLegacyOrientation = (raw: unknown): unknown => {
+  if (!raw || typeof raw !== 'object') return raw;
+  const obj = raw as Record<string, unknown>;
+  if ('defaultOrientation' in obj || !('orientation' in obj)) return raw;
+  const { orientation, ...rest } = obj;
+  return { ...rest, defaultOrientation: orientation };
+};
+
+export const SignageDisplaySettingsSchema = z.preprocess(
+  renameLegacyOrientation,
+  z.object({
+    targetResolution: z.enum(['1080p', '4k']),
+    audio: z.boolean(),
+    defaultDurationMs: z.number().int().min(1000).max(600_000),
+    defaultTransition: z.enum(['cut', 'fade', 'slide-left', 'slide-up']),
+    /**
+     * Orientación por defecto del display. Define qué templates pinta el
+     * runtime cuando la URL no especifica `?orientation=`. Los displays
+     * sirven a las DOS orientations: la URL `/signage/<c>/<d>` usa el
+     * default; `?orientation=portrait` o `?orientation=landscape` lo
+     * override sin tocar el config. El operador físico instala una URL
+     * u otra según el hardware (TV portrait vs landscape).
+     *
+     * Optional al parsear; preprocess acepta legacy `orientation`.
+     */
+    defaultOrientation: z.enum(SIGNAGE_ORIENTATIONS).default('landscape'),
+    sleepSchedule: z
+      .object({
+        enabled: z.boolean(),
+        startTime: z.string().regex(/^\d{2}:\d{2}$/),
+        endTime: z.string().regex(/^\d{2}:\d{2}$/),
+      })
+      .optional(),
+  }),
+);
 export type SignageDisplaySettings = z.infer<typeof SignageDisplaySettingsSchema>;
 
 export const SignageSlideScheduleSchema = z.object({

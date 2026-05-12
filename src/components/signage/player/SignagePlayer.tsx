@@ -7,6 +7,7 @@ import type {
   SignageClientResolved,
   SignageDisplayConfig,
   SignageDisplaySettings,
+  SignageOrientation,
   SignageSlide,
 } from '@/lib/signage/schema';
 
@@ -33,6 +34,9 @@ export interface SignagePlayerProps {
   display: SignageDisplayConfig;
   settings: SignageDisplaySettings;
   playlist: SignageSlide[];
+  /** Orientation efectiva (page.tsx → runtime → player). Define qué
+   *  variante del template registry se resuelve para cada slide. */
+  orientation: SignageOrientation;
 }
 
 type TransitionKind = 'cut' | 'fade' | 'slide-left' | 'slide-up';
@@ -68,7 +72,20 @@ export function SignagePlayer({
   display: serverDisplay,
   settings: serverSettings,
   playlist: serverPlaylist,
+  orientation: initialOrientation,
 }: SignagePlayerProps) {
+  // Bridge override: cuando el operador togglea landscape/portrait en el
+  // PreviewPanel, el draft del editor patchea `defaultOrientation` y se
+  // propaga via postMessage. El Player tiene que reaccionar — si no, el
+  // Stage redimensiona pero el slot sigue pintando los templates de la
+  // orientation server-rendered.
+  const bridgeOrientation = useSignageBridgeStore(
+    (s) => s.displayPatch?.settings?.defaultOrientation,
+  );
+  const orientation: SignageOrientation =
+    bridgeOrientation && (bridgeOrientation === 'landscape' || bridgeOrientation === 'portrait')
+      ? bridgeOrientation
+      : initialOrientation;
   const t = useSignageT();
 
   // DSS5: overrides reactivos del display vía bridge. Si el editor pushea
@@ -381,6 +398,7 @@ export function SignagePlayer({
           slide={outgoingSlide}
           client={client}
           display={display}
+          orientation={orientation}
           animationClass={EXIT_CLASS[transitionKind]}
         />
       ) : null}
@@ -389,6 +407,7 @@ export function SignagePlayer({
         slide={slide}
         client={client}
         display={display}
+        orientation={orientation}
         animationClass={transitionKind === 'cut' ? '' : ENTER_CLASS[transitionKind]}
       />
     </div>
@@ -399,12 +418,13 @@ interface SlideHostProps {
   slide: SignageSlide;
   client: SignageClientResolved;
   display: SignageDisplayConfig;
+  orientation: SignageOrientation;
   animationClass: string;
 }
 
-function SlideHost({ slide, client, display, animationClass }: SlideHostProps) {
+function SlideHost({ slide, client, display, orientation, animationClass }: SlideHostProps) {
   const t = useSignageT();
-  const template = getTemplate(slide.templateId, display.settings.orientation);
+  const template = getTemplate(slide.templateId, orientation);
   if (!template) {
     return (
       <div

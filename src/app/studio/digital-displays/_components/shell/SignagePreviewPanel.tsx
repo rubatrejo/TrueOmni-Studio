@@ -65,10 +65,13 @@ export interface SignagePreviewPanelProps {
   onReload: () => void;
   activeSlide?: SignageActiveSlide | null;
   onNavSlide?: (direction: 'prev' | 'next') => void;
-  /** Orientation fija del display (se elige al crear, no se cambia en
-   *  preview). Controla el aspect-ratio del iframe wrapper y se muestra
-   *  como label en la toolbar. */
+  /** Orientation activa del preview. Refleja el `defaultOrientation` del
+   *  display draft; el toggle de la toolbar la cambia y el editor
+   *  persiste via autosave. Sin reload — SignageStage la lee del bridge. */
   orientation?: SignageOrientation;
+  /** Callback al togglear: el editor llama updateSettings({
+   *  defaultOrientation: o }) que autosavea y propaga al iframe via bridge. */
+  onOrientationChange?: (o: SignageOrientation) => void;
 }
 
 export function SignagePreviewPanel({
@@ -82,6 +85,7 @@ export function SignagePreviewPanel({
   activeSlide,
   onNavSlide,
   orientation = 'landscape',
+  onOrientationChange,
 }: SignagePreviewPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   // `autoFit` lo computa el ResizeObserver para que el iframe siempre quepa
@@ -126,15 +130,21 @@ export function SignagePreviewPanel({
 
   return (
     <div className="flex h-full w-full flex-col">
-      {/* Toolbar */}
+      {/* Toolbar: device tabs landscape/portrait con toggle live. El editor
+          autosavea defaultOrientation y SignageStage actualiza via bridge
+          sin reload del iframe. */}
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 px-6 pb-3 pt-4">
         <div className="flex items-center gap-2">
-          <div className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-[11px] dark:border-zinc-900 dark:bg-zinc-950">
-            {format.glyph === 'tv-landscape' ? <TvLandscapeGlyph /> : <TvPortraitGlyph />}
-            <span className="text-zinc-700 dark:text-zinc-300">{format.label}</span>
-            <span className="font-mono text-zinc-500">
-              {format.width}×{format.height}
-            </span>
+          <div className="flex items-center gap-0.5 rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-900 dark:bg-zinc-950">
+            {DEVICE_FORMATS.map((f) => (
+              <DeviceTab
+                key={f.key}
+                active={orientation === f.key}
+                onClick={() => onOrientationChange?.(f.key)}
+                icon={f.glyph === 'tv-landscape' ? <TvLandscapeGlyph /> : <TvPortraitGlyph />}
+                label={`${f.label.replace('Digital Display · ', '')} · ${f.width}×${f.height}`}
+              />
+            ))}
           </div>
         </div>
 
@@ -419,6 +429,34 @@ function labelFromTemplate(templateId: string): string {
       return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
     })
     .join(' + ');
+}
+
+function DeviceTab({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] transition ${
+        active
+          ? 'bg-zinc-100 text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-zinc-100'
+          : 'text-zinc-500 hover:text-zinc-800 dark:text-zinc-500 dark:hover:text-zinc-300'
+      }`}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
+  );
 }
 
 function TvLandscapeGlyph() {

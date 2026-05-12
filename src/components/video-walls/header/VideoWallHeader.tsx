@@ -8,23 +8,27 @@ import { canvasDimensionsOf, HEADER_H, type GridConfig } from '@/lib/video-walls
 import type { VideoWallClientResolved } from '@/lib/video-walls/schema';
 
 /**
- * <VideoWallHeader> — banda top continua del producto Video Walls.
+ * <VideoWallHeader> — header pixel-perfect contra el SVG Adobe XD del
+ * catálogo 3×2.
  *
- * Layout verbatim de los SVGs Adobe XD del catálogo 3×2:
- *   - Canvas: `cols × 1920 × 335 px`. Background `--signage-header-bg`.
- *   - Logo cliente: x=80, y=92, alto ~165px.
- *   - Weather: x=2198, y=38. Current temp grande + 3 forecast cards.
- *     (En grids más anchos como 4×2 el bloque se desliza al centro
- *     proporcionalmente.)
- *   - Clock + date: x derecha-5277 desde el borde izquierdo del XD del
- *     3×2 (= 483px del borde derecho del canvas 5760). Para grids
- *     distintos lo anclamos a `right: 483px`.
+ * El componente es un SVG inline que reproduce el `Display_Info_Header`
+ * del XD verbatim:
+ *   - Background `#004f8b` rect 5760×335 con stroke `#707070` 1px.
+ *   - Logo TrueOmni en (80, 92.402) — paths verbatim del XD.
+ *   - Weather block en (2198, 38) — 3 forecast cards (FRI/SAT/SUN) con
+ *     coords exactas: Group_1 translate(-633 59), Group_8 translate
+ *     (-223.309 59), Group_9 translate(167.191 18). Cada card tiene su
+ *     dayLabel (fontSize 96), high/low (fontSize 48) y separator
+ *     vertical (rect 2×161/158/186 rotate 90).
+ *   - Icono sol en (225.514, 24) rotate(11) — path "icon" verbatim.
+ *   - Iconos weather adicionales (cloud rain Group_4 + cloud ic_weather).
+ *   - Clock + date en (5277, 61) — "3:08 PM" fontSize 92, "Mon Apr 15"
+ *     fontSize 72. Texto dinámico del cliente.
  *
- * Reusa CSS vars del cliente (--signage-* tokens) para colores. El XD
- * usa `#004f8b` que coincide con el header signage del cliente default.
- *
- * Cells (0,*) muestran su porción 1920×335 top + 1920×745 body. Cells
- * (1+, *) NO ven header — `cellRectToPx` ajusta el offset.
+ * Para grids distintos del 3×2: el ancho del rect bg escala a
+ * `cols × 1920`; las coords absolutas de logo/weather/clock se
+ * preservan (anclados al margen izquierdo / derecho según
+ * corresponda).
  */
 export interface VideoWallHeaderProps {
   client: VideoWallClientResolved;
@@ -32,14 +36,15 @@ export interface VideoWallHeaderProps {
   grid: GridConfig;
 }
 
+const HEADER_TEXT_FILL = 'hsl(var(--signage-header-text, 0 0% 100%))';
+const HEADER_BG_FILL = 'hsl(var(--signage-header-bg, 210 100% 27%))';
+
 export function VideoWallHeader({ client, weather, grid }: VideoWallHeaderProps) {
   const { width: canvasW } = canvasDimensionsOf(grid);
 
-  // Clock + date actualizados en vivo (re-render cada minuto).
   const [now, setNow] = useState<Date>(() => new Date());
   useEffect(() => {
-    const tick = () => setNow(new Date());
-    const id = window.setInterval(tick, 60_000);
+    const id = window.setInterval(() => setNow(new Date()), 60_000);
     return () => window.clearInterval(id);
   }, []);
   const clockText = formatSignageClock(
@@ -50,7 +55,7 @@ export function VideoWallHeader({ client, weather, grid }: VideoWallHeaderProps)
   );
   const dateText = formatSignageDate(now, client.locale, client.timezone);
 
-  // Logo resolution (igual que SignageHeader).
+  // Logo custom del cliente (override). Si no, usar el SVG TrueOmni verbatim.
   const logoRel = client.branding.logos?.default ?? '';
   const isExternalLogo =
     logoRel.startsWith('http') || logoRel.startsWith('/') || logoRel.startsWith('data:');
@@ -61,204 +66,362 @@ export function VideoWallHeader({ client, weather, grid }: VideoWallHeaderProps)
       : `/signage-assets/${client.slug}/${logoRel}`
     : null;
 
-  // Forecast cards (cap a 3 — el XD del 3×2 muestra exactamente 3).
-  const forecasts = weather.forecast.slice(0, 3);
-  // Center the weather block: en 3×2 está en x=2198. Para mantener
-  // proporción en otros grids, centramos al canvas total.
-  // Pero al ser pixel-perfect contra 3×2, mantenemos x=2198 cuando cols=3.
-  const weatherLeft = grid === '3x2' ? 2198 : Math.round(canvasW / 2 - 600);
+  const fc = weather.forecast.slice(0, 3);
+  const fc1 = fc[0] ?? { dayLabel: 'FRI', highText: '--°', lowText: '--°' };
+  const fc2 = fc[1] ?? { dayLabel: 'SAT', highText: '--°', lowText: '--°' };
+  const fc3 = fc[2] ?? { dayLabel: 'SUN', highText: '--°', lowText: '--°' };
 
-  // Clock anchor right: en 3×2 el clock empieza en x=5277, canvas=5760
-  // → right offset = 483. Aplicable a cualquier grid manteniendo el
-  // mismo padding desde el borde derecho.
-  const clockRight = 483;
+  // El clock va anclado a la derecha. En 3×2 el XD lo tiene en x=5277
+  // (canvas=5760 → offset desde la derecha = 483). Mantener ese offset
+  // para grids más anchos/angostos.
+  const clockX = canvasW - 483;
 
-  return (
-    <div
-      className="pointer-events-none absolute left-0 top-0"
-      style={{
-        width: canvasW,
-        height: HEADER_H,
-        zIndex: 20,
-        backgroundColor: 'hsl(var(--signage-header-bg, 210 100% 27%))',
-        color: 'hsl(var(--signage-header-text, 0 0% 100%))',
-        fontFamily: 'var(--signage-font-body, "Open Sans"), system-ui, sans-serif',
-      }}
-    >
-      {/* Logo zone: x=80, y=92 */}
-      <div className="absolute" style={{ left: 80, top: 92, height: 165 }}>
-        {resolvedLogoSrc ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={resolvedLogoSrc}
-            alt={client.name}
-            style={{ height: '100%', width: 'auto', objectFit: 'contain' }}
-          />
-        ) : (
-          <TrueOmniLogoInline height={165} />
-        )}
-      </div>
-
-      {/* Weather zone: x=2198, y=38 */}
-      <div
-        className="absolute"
-        style={{ left: weatherLeft, top: 38, display: 'flex', alignItems: 'flex-start', gap: 40 }}
-      >
-        <div
-          style={{
-            fontFamily: 'var(--signage-font-display, "Montserrat"), system-ui, sans-serif',
-            fontSize: 180,
-            fontWeight: 700,
-            lineHeight: 1,
-            color: 'hsl(var(--signage-header-text, 0 0% 100%))',
-          }}
-        >
-          {weather.currentTempText}
-        </div>
-        {forecasts.map((f, i) => (
-          <ForecastCard key={i} forecast={f} />
-        ))}
-      </div>
-
-      {/* Clock zone: right-anchored */}
-      <div className="absolute" style={{ right: clockRight, top: 61, textAlign: 'right' }}>
-        <div
-          style={{
-            fontFamily: 'var(--signage-font-display, "Montserrat"), system-ui, sans-serif',
-            fontSize: 92,
-            fontWeight: 700,
-            lineHeight: 1,
-            color: 'hsl(var(--signage-header-text, 0 0% 100%))',
-          }}
-        >
-          {clockText}
-        </div>
-        <div
-          style={{
-            marginTop: 24,
-            fontSize: 72,
-            fontWeight: 400,
-            lineHeight: 1,
-            opacity: 0.85,
-            color: 'hsl(var(--signage-header-text, 0 0% 100%))',
-          }}
-        >
-          {dateText}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ForecastCard({ forecast }: { forecast: SignageHeaderWeather['forecast'][number] }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-      <div
-        style={{
-          fontFamily: 'var(--signage-font-display, "Montserrat"), system-ui, sans-serif',
-          fontSize: 96,
-          fontWeight: 700,
-          lineHeight: 1,
-        }}
-      >
-        {forecast.dayLabel}
-      </div>
-      <div style={{ display: 'flex', gap: 16, fontSize: 48, fontWeight: 600 }}>
-        <span>{forecast.highText}</span>
-        <span style={{ opacity: 0.65 }}>{forecast.lowText}</span>
-      </div>
-    </div>
-  );
-}
-
-/** Isotipo TrueOmni verbatim del SVG Adobe XD. Mismos paths que usa el
- *  SignageHeader del producto Digital Displays. Brand identity de
- *  TrueOmni, los dos puntos `#0088ce` cyan se preservan literal — no
- *  son tokens del cliente. */
-function TrueOmniLogoInline({ height }: { height: number }) {
-  const width = Math.round(height * (316 / 58));
   return (
     <svg
-      width={width}
-      height={height}
-      viewBox="0 0 316 58"
+      className="pointer-events-none absolute left-0 top-0"
+      width={canvasW}
+      height={HEADER_H}
+      viewBox={`0 0 ${canvasW} ${HEADER_H}`}
       xmlns="http://www.w3.org/2000/svg"
-      aria-label="TrueOmni"
-      style={{ display: 'block' }}
+      style={{ zIndex: 20 }}
+      aria-hidden="true"
     >
+      {/* Background band */}
       <g>
-        <path
-          d="M209.257,30.981h-11.8V61.61h-7.124V30.981h.069V24.688h18.86Z"
-          transform="translate(-103.941 -13.483)"
-          fill="hsl(var(--signage-header-text, 0 0% 100%))"
-        />
-        <path
-          d="M247.114,51.593a13.748,13.748,0,0,0-5.672,1.224,7.152,7.152,0,0,0-3.584,3.508V72.81H230.89V45.56h6.4v5.825A12.422,12.422,0,0,1,239,48.863a13.2,13.2,0,0,1,2.132-1.949,9.868,9.868,0,0,1,2.314-1.274,6.386,6.386,0,0,1,2.262-.442h.857a2.836,2.836,0,0,1,.545.051Z"
-          transform="translate(-126.092 -24.683)"
-          fill="hsl(var(--signage-header-text, 0 0% 100%))"
-        />
-        <path
-          d="M286.1,73.768a7.735,7.735,0,0,1-6.4-2.7q-2.183-2.7-2.184-8.008V46h6.968V61.549q0,6.293,4.524,6.293a7.156,7.156,0,0,0,3.927-1.222,8.783,8.783,0,0,0,3.094-3.718V46H303V65.239a2.448,2.448,0,0,0,.393,1.56,1.7,1.7,0,0,0,1.274.524v5.928a14.853,14.853,0,0,1-1.742.262c-.468.034-.893.052-1.274.052a5.017,5.017,0,0,1-3.042-.859,3.376,3.376,0,0,1-1.378-2.36l-.156-2.184a11.619,11.619,0,0,1-4.68,4.212,14.079,14.079,0,0,1-6.293,1.4"
-          transform="translate(-151.559 -25.121)"
-          fill="hsl(var(--signage-header-text, 0 0% 100%))"
-        />
-        <path
-          d="M362.336,73.206a15.13,15.13,0,0,1-5.928-1.118A13.372,13.372,0,0,1,349,64.573a14.342,14.342,0,0,1-1.014-5.357,15.172,15.172,0,0,1,.989-5.487,13.385,13.385,0,0,1,2.859-4.524,13.647,13.647,0,0,1,4.551-3.094,15.152,15.152,0,0,1,6.007-1.145,14.775,14.775,0,0,1,5.955,1.145,13.711,13.711,0,0,1,4.472,3.068,13.068,13.068,0,0,1,2.808,4.472,14.91,14.91,0,0,1,.962,5.3q0,.676-.026,1.3a5.344,5.344,0,0,1-.131,1.04H355.366a8.077,8.077,0,0,0,.787,2.859A7,7,0,0,0,360,67.639a7.35,7.35,0,0,0,2.6.468,8.041,8.041,0,0,0,3.933-1.013,5.375,5.375,0,0,0,2.521-2.678l5.981,1.665a12.155,12.155,0,0,1-4.81,5.122,14.91,14.91,0,0,1-7.878,2m7.073-16.432a7.25,7.25,0,0,0-2.261-4.914,7.028,7.028,0,0,0-11.18,2.158,7.5,7.5,0,0,0-.7,2.753Z"
-          transform="translate(-190.04 -24.559)"
-          fill="hsl(var(--signage-header-text, 0 0% 100%))"
-        />
-        <path
-          d="M438.576,61.557a15.265,15.265,0,0,1-7.021-1.611,18.121,18.121,0,0,1-5.461-4.212,18.815,18.815,0,0,1-3.54-5.981,19.82,19.82,0,0,1-1.248-6.916,19.193,19.193,0,0,1,1.33-7.073,19.779,19.779,0,0,1,3.641-5.981,17.418,17.418,0,0,1,5.487-4.134,15.556,15.556,0,0,1,6.865-1.534,15.229,15.229,0,0,1,7.047,1.637,17.7,17.7,0,0,1,5.46,4.29,19.829,19.829,0,0,1,3.51,6.006,19.554,19.554,0,0,1-3.718,19.867,17.617,17.617,0,0,1-5.487,4.107,15.555,15.555,0,0,1-6.865,1.534M423.963,42.835a17.763,17.763,0,0,0,1.066,6.111,16.482,16.482,0,0,0,3.015,5.2,14.842,14.842,0,0,0,4.659,3.616,13.058,13.058,0,0,0,5.928,1.352,12.742,12.742,0,0,0,6.006-1.4,14.662,14.662,0,0,0,4.577-3.718A17.629,17.629,0,0,0,452.1,36.726a16.912,16.912,0,0,0-3.042-5.2,15.053,15.053,0,0,0-4.6-3.613,12.636,12.636,0,0,0-5.825-1.352,12.893,12.893,0,0,0-6.031,1.4,14.858,14.858,0,0,0-4.628,3.718,17.081,17.081,0,0,0-2.964,5.227,17.481,17.481,0,0,0-1.041,5.928"
-          transform="translate(-230.086 -13.169)"
-          fill="hsl(var(--signage-header-text, 0 0% 100%))"
-        />
-        <path
-          d="M551.781,72.941h-2.6V57.864q0-5.147-1.586-7.592a5.393,5.393,0,0,0-4.863-2.444,8.21,8.21,0,0,0-3.173.624,9.609,9.609,0,0,0-2.753,1.742,11.229,11.229,0,0,0-2.158,2.652,13.952,13.952,0,0,0-1.43,3.409V72.941h-2.6V57.864q0-5.2-1.56-7.618a5.348,5.348,0,0,0-4.836-2.419,8.334,8.334,0,0,0-3.147.6,9.272,9.272,0,0,0-2.731,1.716,12.323,12.323,0,0,0-2.21,2.652,12.807,12.807,0,0,0-1.483,3.409V72.941h-2.6V45.9h2.444v6.446a13.167,13.167,0,0,1,4.368-5.1,10.478,10.478,0,0,1,5.981-1.82,7.735,7.735,0,0,1,5.564,2.028,8.553,8.553,0,0,1,2.554,5.306q3.848-7.333,10.609-7.333a6.8,6.8,0,0,1,6.319,3.146,17.121,17.121,0,0,1,1.9,8.815Z"
-          transform="translate(-279.64 -24.813)"
-          fill="hsl(var(--signage-header-text, 0 0% 100%))"
-        />
-        <path
-          d="M639.56,72.936h-2.6V57.859q0-5.251-1.483-7.643a5.128,5.128,0,0,0-4.705-2.393,9.763,9.763,0,0,0-3.409.624,11.525,11.525,0,0,0-3.147,1.769,12.908,12.908,0,0,0-2.549,2.678,11.03,11.03,0,0,0-1.612,3.3V72.936h-2.6V45.895H619.9v6.446a12.707,12.707,0,0,1,2.054-2.834,12.948,12.948,0,0,1,2.753-2.184,13.9,13.9,0,0,1,3.255-1.405,12.729,12.729,0,0,1,3.54-.494q4.419,0,6.24,3.094a17.673,17.673,0,0,1,1.82,8.866Z"
-          transform="translate(-337.206 -24.808)"
-          fill="hsl(var(--signage-header-text, 0 0% 100%))"
-        />
+        <rect width={canvasW} height={HEADER_H} fill={HEADER_BG_FILL} />
         <rect
-          width="2.6"
-          height="27.041"
-          transform="translate(310.466 21.087)"
-          fill="hsl(var(--signage-header-text, 0 0% 100%))"
-        />
-        <path
-          d="M56.969,85.458a10.374,10.374,0,0,1-5.192-1.392l-8.146,8.15a21.7,21.7,0,0,0,26.863-.139l-8.128-8.128a10.373,10.373,0,0,1-5.4,1.51"
-          transform="translate(-23.828 -45.846)"
-          fill="hsl(var(--signage-header-text, 0 0% 100%))"
-        />
-        <path
-          d="M57,16.305a21.658,21.658,0,0,0-13.317,4.573l8.149,8.149a10.373,10.373,0,0,1,10.537.122l8.128-8.128a21.67,21.67,0,0,0-13.5-4.712"
-          transform="translate(-23.854 -8.904)"
-          fill="hsl(var(--signage-header-text, 0 0% 100%))"
-        />
-        <path
-          d="M103.9,37.758a21.57,21.57,0,0,0,0-17.155L117.165,0l-16.04,15.888-.033-.046-8.148,8.149a10.383,10.383,0,0,1,.014,10.357h-.014l1.725,1.7,6.44,6.44.026-.035,16.03,15.883Z"
-          transform="translate(-50.758)"
-          fill="hsl(var(--signage-header-text, 0 0% 100%))"
-        />
-        <path
-          d="M13.261,37.758a21.57,21.57,0,0,1,0-17.155L0,0,16.04,15.888l.033-.046,8.148,8.149a10.383,10.383,0,0,0-.014,10.357h.014l-1.725,1.7-6.44,6.44-.026-.035L0,58.341Z"
-          fill="hsl(var(--signage-header-text, 0 0% 100%))"
-        />
-        <path
-          d="M175.794,27.554a3.738,3.738,0,1,1-3.738-3.738,3.738,3.738,0,0,1,3.738,3.738"
-          transform="translate(-91.922 -13.007)"
-          fill="#0088ce"
-        />
-        <path
-          d="M686.49,28.487a3.738,3.738,0,1,1-3.738-3.738,3.738,3.738,0,0,1,3.738,3.738"
-          transform="translate(-370.822 -13.519)"
-          fill="#0088ce"
+          x={0.5}
+          y={0.5}
+          width={canvasW - 1}
+          height={HEADER_H - 1}
+          fill="none"
+          stroke="#707070"
+          strokeWidth="1"
         />
       </g>
+
+      {/* Display_Weather_Info translate(2198 38) — verbatim XD */}
+      <g transform="translate(2198 38)">
+        {/* Group_1 — FRI card translate(-633 59) */}
+        <g transform="translate(-633 59)">
+          <text
+            transform="translate(711.5 78)"
+            fill={HEADER_TEXT_FILL}
+            fontSize="96"
+            fontFamily="'Open Sans', system-ui, sans-serif"
+            fontWeight="600"
+          >
+            <tspan x="-70.875" y="0">
+              {fc1.dayLabel}
+            </tspan>
+          </text>
+          <text
+            transform="translate(633 146)"
+            fill={HEADER_TEXT_FILL}
+            fontSize="48"
+            fontFamily="'Open Sans', system-ui, sans-serif"
+            fontWeight="600"
+          >
+            <tspan x="0" y="0">
+              {fc1.highText}
+            </tspan>
+          </text>
+          <text
+            transform="translate(720 146)"
+            fill={HEADER_TEXT_FILL}
+            fontSize="48"
+            fontFamily="'Open Sans', system-ui, sans-serif"
+            fontWeight="300"
+          >
+            <tspan x="0" y="0">
+              {fc1.lowText}
+            </tspan>
+          </text>
+          <rect
+            width="2"
+            height="161.5"
+            rx="1"
+            transform="translate(794.5 93.5) rotate(90)"
+            fill={HEADER_TEXT_FILL}
+          />
+        </g>
+
+        {/* Group_8 — SAT card translate(-223.309 59) */}
+        <g transform="translate(-223.309 59)">
+          <text
+            transform="translate(781.5 78)"
+            fill={HEADER_TEXT_FILL}
+            fontSize="96"
+            fontFamily="'Open Sans', system-ui, sans-serif"
+            fontWeight="600"
+          >
+            <tspan x="-81.938" y="0">
+              {fc2.dayLabel}
+            </tspan>
+          </text>
+          <text
+            transform="translate(704 146)"
+            fill={HEADER_TEXT_FILL}
+            fontSize="48"
+            fontFamily="'Open Sans', system-ui, sans-serif"
+            fontWeight="600"
+          >
+            <tspan x="0" y="0">
+              {fc2.highText}
+            </tspan>
+          </text>
+          <text
+            transform="translate(787 146)"
+            fill={HEADER_TEXT_FILL}
+            fontSize="48"
+            fontFamily="'Open Sans', system-ui, sans-serif"
+            fontWeight="300"
+          >
+            <tspan x="0" y="0">
+              {fc2.lowText}
+            </tspan>
+          </text>
+          <rect
+            width="2"
+            height="158.063"
+            rx="1"
+            transform="translate(861.563 94) rotate(90)"
+            fill={HEADER_TEXT_FILL}
+          />
+        </g>
+
+        {/* Group_9 — SUN card translate(167.191 18) */}
+        <g transform="translate(167.191 18)">
+          <text
+            transform="translate(882 119)"
+            fill={HEADER_TEXT_FILL}
+            fontSize="96"
+            fontFamily="'Open Sans', system-ui, sans-serif"
+            fontWeight="600"
+          >
+            <tspan x="-99.609" y="0">
+              {fc3.dayLabel}
+            </tspan>
+          </text>
+          <text
+            transform="translate(790 187)"
+            fill={HEADER_TEXT_FILL}
+            fontSize="48"
+            fontFamily="'Open Sans', system-ui, sans-serif"
+            fontWeight="600"
+          >
+            <tspan x="0" y="0">
+              {fc3.highText}
+            </tspan>
+          </text>
+          <text
+            transform="translate(899 187)"
+            fill={HEADER_TEXT_FILL}
+            fontSize="48"
+            fontFamily="'Open Sans', system-ui, sans-serif"
+            fontWeight="300"
+          >
+            <tspan x="0" y="0">
+              {fc3.lowText}
+            </tspan>
+          </text>
+          <rect
+            width="2"
+            height="186.646"
+            rx="1"
+            transform="translate(973 135) rotate(90)"
+            fill={HEADER_TEXT_FILL}
+          />
+        </g>
+
+        {/* Sun icon verbatim — translate(225.514 24) rotate(11) */}
+        <path
+          d="M87.445,175.8a6.752,6.752,0,0,1-6.726-6.762V155.518a6.727,6.727,0,1,1,13.453,0v13.524A6.752,6.752,0,0,1,87.445,175.8Zm57.078-23.764a6.653,6.653,0,0,1-4.755-1.981l-9.515-9.564a6.794,6.794,0,0,1,0-9.561,6.7,6.7,0,0,1,9.512,0l9.515,9.564a6.794,6.794,0,0,1,0,9.561A6.669,6.669,0,0,1,144.524,152.04Zm-114.157,0a6.653,6.653,0,0,1-4.755-1.981,6.792,6.792,0,0,1,0-9.561l9.514-9.564a6.7,6.7,0,0,1,9.512,0,6.792,6.792,0,0,1,0,9.561l-9.514,9.564A6.657,6.657,0,0,1,30.367,152.04Zm57.078-16.807A47.332,47.332,0,1,1,134.532,87.9,47.262,47.262,0,0,1,87.445,135.233Zm0-81.14A33.809,33.809,0,1,0,121.078,87.9,33.759,33.759,0,0,0,87.445,54.093Zm80.719,40.57H154.712a6.762,6.762,0,0,1,0-13.524h13.453a6.762,6.762,0,0,1,0,13.524Zm-147.985,0H6.727a6.762,6.762,0,0,1,0-13.524H20.18a6.762,6.762,0,0,1,0,13.524Zm114.83-47.811a6.657,6.657,0,0,1-4.756-1.981,6.794,6.794,0,0,1,0-9.561l9.515-9.564a6.7,6.7,0,0,1,9.512,0,6.794,6.794,0,0,1,0,9.561l-9.515,9.564A6.653,6.653,0,0,1,135.009,46.852Zm-95.127,0a6.657,6.657,0,0,1-4.756-1.981l-9.514-9.564a6.792,6.792,0,0,1,0-9.561,6.7,6.7,0,0,1,9.512,0l9.514,9.564a6.792,6.792,0,0,1,0,9.561A6.653,6.653,0,0,1,39.882,46.852ZM87.445,27.046a6.751,6.751,0,0,1-6.726-6.761V6.761a6.727,6.727,0,1,1,13.453,0V20.285A6.752,6.752,0,0,1,87.445,27.046Z"
+          transform="translate(225.514 24) rotate(11)"
+          fill={HEADER_TEXT_FILL}
+        />
+
+        {/* Separator vertical 1 — Rectangle_Copy translate(893.191) */}
+        <rect
+          width="6"
+          height="254"
+          rx="3"
+          transform="translate(893.191 0)"
+          fill={HEADER_TEXT_FILL}
+        />
+
+        {/* Group_4 — cloud rain icon translate(680.191 52) */}
+        <g transform="translate(680.191 52)">
+          <g>
+            <path
+              d="M137.226,10.295c0-1.744.066-3.491-.014-5.231A5.1,5.1,0,0,0,131.986,0a5.01,5.01,0,0,0-4.872,5.2c-.041,3.262-.035,6.526,0,9.788a5,5,0,0,0,4.934,5.3,5.085,5.085,0,0,0,5.179-5.272c.046-1.574.008-3.15,0-4.725m57.259,27.93a4.989,4.989,0,0,0-7.519-4.437c-2.965,1.6-5.869,3.324-8.766,5.052a5.044,5.044,0,1,0,5.013,8.753c2.957-1.62,5.861-3.339,8.765-5.054a4.862,4.862,0,0,0,2.507-4.314"
+              transform="translate(-69.742 0)"
+              fill={HEADER_TEXT_FILL}
+            />
+            <path
+              d="M0,217.621a8.765,8.765,0,0,1,4.112-3.982c2.331-1.23,4.573-2.625,6.866-3.927,2.853-1.62,5.847-.934,7.308,1.651,1.431,2.532.568,5.421-2.159,7.049-2.359,1.41-4.75,2.768-7.13,4.144-4.264,2.467-6.536,1.9-9-2.233Z"
+              transform="translate(0 -114.607)"
+              fill={HEADER_TEXT_FILL}
+            />
+            <path
+              d="M0,77.069c2.414-4.135,4.726-4.715,8.988-2.256,2.332,1.346,4.676,2.671,7,4.037,2.831,1.666,3.756,4.577,2.308,7.15-1.479,2.627-4.5,3.274-7.45,1.586C8.6,86.3,6.4,84.946,4.123,83.742A8.908,8.908,0,0,1,0,79.77Z"
+              transform="translate(0 -40.254)"
+              fill={HEADER_TEXT_FILL}
+            />
+            <path
+              d="M67.222,142.843a43.241,43.241,0,0,1-10.338-9.5c-18.522-23.677-4.639-59.545,24.988-64.531,18.175-3.058,35.207,5.585,43.551,22.143a1.916,1.916,0,0,0,1.881,1.228Q150.36,93.6,160.64,114.324a2.193,2.193,0,0,0,2.363,1.5c18.136-.291,32.779,11.748,36.074,29.591,3.4,18.44-9.62,37.292-28.141,40.58a50.754,50.754,0,0,1-8.711.689q-35.2.081-70.407.018c-14.381-.03-25.7-9.339-28.521-23.426-1.447-7.222.042-13.96,3.926-20.43m60.847,33.733v-.056c12.21,0,24.421.043,36.632-.012,12.93-.058,24.111-10.932,24.689-23.91a25.318,25.318,0,0,0-29-26.395c-4.82.675-6.373-.233-7.747-4.528a27.832,27.832,0,0,0-53.432,1.3,27.169,27.169,0,0,0-.733,10.531c.5,3.893-1.727,6.334-5.565,6.269-.731-.012-1.463-.041-2.194-.029a18.413,18.413,0,0,0,.721,36.816c12.21.074,24.421.017,36.632.017M115.3,93.545c-.285-.495-.525-1-.842-1.447C107.3,81.926,97.56,77.166,85.149,78.6a30.139,30.139,0,0,0-25.678,22.87,30.638,30.638,0,0,0,12.085,32.11c1.825,1.285,3.333,1.872,5.091.1a3.644,3.644,0,0,1,1.311-.747c3.289-1.231,6.589-2.434,10.023-3.7C89.3,111.758,98.327,99.71,115.3,93.545"
+              transform="translate(-26.618 -37.426)"
+              fill={HEADER_TEXT_FILL}
+            />
+            <path
+              d="M137.228,10.295c0,1.575.04,3.151-.005,4.725a5.085,5.085,0,0,1-5.179,5.272,5,5,0,0,1-4.934-5.3c-.031-3.262-.037-6.526,0-9.788A5.01,5.01,0,0,1,131.985,0a5.1,5.1,0,0,1,5.226,5.062c.08,1.74.015,3.487.017,5.231"
+              transform="translate(-69.741 0)"
+              fill={HEADER_TEXT_FILL}
+            />
+            <path
+              d="M253.449,78.505a4.866,4.866,0,0,1-2.508,4.313c-2.9,1.715-5.808,3.433-8.765,5.054a5.044,5.044,0,1,1-5.013-8.753c2.9-1.728,5.8-3.448,8.766-5.052a4.991,4.991,0,0,1,7.521,4.438"
+              transform="translate(-128.703 -40.28)"
+              fill={HEADER_TEXT_FILL}
+            />
+          </g>
+        </g>
+
+        {/* Separator vertical 2 — Rectangle_Copy-2 translate(424.829) */}
+        <rect
+          width="6"
+          height="254"
+          rx="3"
+          transform="translate(424.829 0)"
+          fill={HEADER_TEXT_FILL}
+        />
+
+        {/* ic_weather — cloud icon translate(1189.191 71.5) */}
+        <path
+          d="M147.5,45.986A46,46,0,0,0,60.245,25.639,24.549,24.549,0,0,0,22.271,44.433,33.8,33.8,0,0,0,33.845,110h110a31.129,31.129,0,0,0,3.6-62.052C147.483,47.276,147.5,46.626,147.5,45.986Z"
+          transform="translate(1189.191 71.5)"
+          fill="none"
+          stroke={HEADER_TEXT_FILL}
+          strokeMiterlimit="10"
+          strokeWidth="5"
+        />
+      </g>
+
+      {/* Display_Time_Info — clock + date, anclado a la derecha */}
+      <g transform={`translate(${clockX} 61)`}>
+        <text
+          transform="translate(383 98)"
+          fill={HEADER_TEXT_FILL}
+          fontSize="92"
+          fontFamily="'Open Sans', system-ui, sans-serif"
+          fontWeight="600"
+        >
+          <tspan x="-348.234" y="0">
+            {clockText}
+          </tspan>
+        </text>
+        <text
+          transform="translate(381 187)"
+          fill={HEADER_TEXT_FILL}
+          fontSize="72"
+          fontFamily="'Open Sans', system-ui, sans-serif"
+          fontWeight="300"
+        >
+          <tspan x="-380.602" y="0">
+            {dateText}
+          </tspan>
+        </text>
+      </g>
+
+      {/* Logo — translate(80 92.402). Si el cliente tiene logo custom,
+          se usa <image>. Si no, paths TrueOmni verbatim del XD. */}
+      <g transform="translate(80 92.402)">
+        {resolvedLogoSrc ? (
+          <image
+            href={resolvedLogoSrc}
+            width="819"
+            height="150"
+            preserveAspectRatio="xMidYMid meet"
+          />
+        ) : (
+          <TrueOmniLogoPaths />
+        )}
+      </g>
     </svg>
+  );
+}
+
+/** Paths verbatim del logo "Logo-White-Footer" del SVG XD (group dim
+ *  818.999 × 150.196). Texto + isotipo del producto TrueOmni. */
+function TrueOmniLogoPaths() {
+  const F = HEADER_TEXT_FILL;
+  return (
+    <g>
+      <path
+        d="M272.984,61.664a35.891,35.891,0,0,0-14.706,3.147,18.488,18.488,0,0,0-9.31,9.036v42.44h-18.08V46.133h16.6v15a31.96,31.96,0,0,1,4.452-6.493,34.141,34.141,0,0,1,5.531-5.02,25.663,25.663,0,0,1,6-3.28,16.682,16.682,0,0,1,5.869-1.138h2.226a7.413,7.413,0,0,1,1.417.133Z"
+        transform="translate(41.006 7.617)"
+        fill={F}
+      />
+      <path
+        d="M299.782,117.49q-10.929,0-16.6-6.962T277.52,89.911V46H295.6V86.028q0,16.2,11.738,16.2a18.667,18.667,0,0,0,10.186-3.147,22.658,22.658,0,0,0,8.028-9.572V46h18.081V95.534a6.266,6.266,0,0,0,1.012,4.016,4.438,4.438,0,0,0,3.306,1.339v15.262a38.8,38.8,0,0,1-4.52.67c-1.215.088-2.317.134-3.307.134a13.09,13.09,0,0,1-7.892-2.21,8.678,8.678,0,0,1-3.575-6.091l-.405-5.623a30.064,30.064,0,0,1-12.143,10.844,36.764,36.764,0,0,1-16.325,3.615"
+        transform="translate(49.284 7.751)"
+        fill={F}
+      />
+      <path
+        d="M385.221,117.664a39.519,39.519,0,0,1-15.38-2.878,35.275,35.275,0,0,1-11.738-7.832,34.705,34.705,0,0,1-7.488-11.513,36.678,36.678,0,0,1-2.631-13.789,38.794,38.794,0,0,1,2.564-14.125,34.429,34.429,0,0,1,7.42-11.646,35.425,35.425,0,0,1,11.805-7.966,39.577,39.577,0,0,1,15.584-2.946A38.594,38.594,0,0,1,400.8,47.914a35.588,35.588,0,0,1,11.6,7.9,33.6,33.6,0,0,1,7.286,11.513,38.12,38.12,0,0,1,2.5,13.656q0,1.742-.068,3.347a13.638,13.638,0,0,1-.338,2.678H367.141a20.673,20.673,0,0,0,2.024,7.363,18.118,18.118,0,0,0,9.984,8.971,19.2,19.2,0,0,0,6.746,1.2,20.986,20.986,0,0,0,10.187-2.61,13.869,13.869,0,0,0,6.543-6.9l15.516,4.285a31.393,31.393,0,0,1-12.48,13.187q-8.571,5.155-20.441,5.154M403.57,75.358A18.6,18.6,0,0,0,397.7,62.707a19.046,19.046,0,0,0-19.429-3.481,17.819,17.819,0,0,0-5.6,3.548,18.373,18.373,0,0,0-3.98,5.49,19.2,19.2,0,0,0-1.822,7.1Z"
+        transform="translate(61.801 7.576)"
+        fill={F}
+      />
+      <path
+        d="M466.1,120.507a39.86,39.86,0,0,1-18.214-4.149,46.978,46.978,0,0,1-14.168-10.845,48.364,48.364,0,0,1-9.175-15.4,50.669,50.669,0,0,1-3.237-17.806A49.082,49.082,0,0,1,424.75,54.1a50.851,50.851,0,0,1,9.444-15.4,45.161,45.161,0,0,1,14.235-10.643,40.619,40.619,0,0,1,17.809-3.95,39.762,39.762,0,0,1,18.282,4.217,45.872,45.872,0,0,1,14.168,11.045,50.959,50.959,0,0,1,9.106,15.463,49.683,49.683,0,0,1-.2,35.813,49.95,49.95,0,0,1-9.444,15.33,45.677,45.677,0,0,1-14.234,10.576,40.622,40.622,0,0,1-17.81,3.948m-37.913-48.2a45.416,45.416,0,0,0,2.766,15.732,42.357,42.357,0,0,0,7.825,13.388,38.464,38.464,0,0,0,12.075,9.3,34.1,34.1,0,0,0,15.381,3.481,33.269,33.269,0,0,0,15.583-3.615,37.98,37.98,0,0,0,11.875-9.572,45.1,45.1,0,0,0,7.487-44.447,43.489,43.489,0,0,0-7.892-13.389,39.015,39.015,0,0,0-11.942-9.3,32.994,32.994,0,0,0-15.111-3.481,33.663,33.663,0,0,0-15.65,3.614,38.5,38.5,0,0,0-12.008,9.572,43.892,43.892,0,0,0-7.69,13.455,44.707,44.707,0,0,0-2.7,15.262"
+        transform="translate(74.824 4.062)"
+        fill={F}
+      />
+      <path
+        d="M615.129,116.248h-6.745V77.422q0-13.253-4.116-19.546t-12.616-6.292a21.444,21.444,0,0,0-8.23,1.607,24.959,24.959,0,0,0-7.151,4.485,28.946,28.946,0,0,0-5.6,6.828,35.767,35.767,0,0,0-3.711,8.77v42.975h-6.746V77.422q0-13.384-4.046-19.612t-12.548-6.226a21.774,21.774,0,0,0-8.162,1.54,24.085,24.085,0,0,0-7.084,4.418,31.789,31.789,0,0,0-5.734,6.828,32.838,32.838,0,0,0-3.846,8.768v43.109H512.05V46.631h6.34v16.6a33.979,33.979,0,0,1,11.334-13.12,27.337,27.337,0,0,1,15.516-4.686q8.9,0,14.436,5.221A21.956,21.956,0,0,1,566.289,64.3q9.982-18.877,27.523-18.876,11.466,0,16.393,8.1t4.924,22.693Z"
+        transform="translate(90.938 7.654)"
+        fill={F}
+      />
+      <path
+        d="M674.8,116.248h-6.745V77.422q0-13.519-3.846-19.679T652,51.584a25.507,25.507,0,0,0-8.838,1.607A29.97,29.97,0,0,0,635,57.743a33.359,33.359,0,0,0-6.611,6.894,28.315,28.315,0,0,0-4.183,8.5v43.109h-6.745V46.631h6.34v16.6a32.731,32.731,0,0,1,5.33-7.3,33.556,33.556,0,0,1,7.152-5.623,36.183,36.183,0,0,1,8.431-3.615,33.266,33.266,0,0,1,9.175-1.271q11.465,0,16.191,7.966T674.8,76.218Z"
+        transform="translate(109.659 7.654)"
+        fill={F}
+      />
+      <rect width="6.745" height="69.617" transform="translate(805.504 54.287)" fill={F} />
+      <path
+        d="M78.238,87.845a27.073,27.073,0,0,1-13.467-3.581L43.631,105.24a56.637,56.637,0,0,0,69.7-.358L92.23,83.948a27.07,27.07,0,0,1-13.992,3.9"
+        transform="translate(7.75 14.144)"
+        fill={F}
+      />
+      <path
+        d="M78.23,16.305A56.473,56.473,0,0,0,43.678,28.076L64.823,49.058a27.093,27.093,0,0,1,27.338.315l21.1-20.94A56.5,56.5,0,0,0,78.23,16.305"
+        transform="translate(7.757 2.746)"
+        fill={F}
+      />
+      <path
+        d="M121.381,97.191a55.138,55.138,0,0,0-.014-44.165L155.785,0,114.169,40.9c-.029-.039-.055-.079-.085-.117L92.944,61.762a26.552,26.552,0,0,1,.038,26.666v0l-.039,0,4.475,4.4,16.707,16.578c.024-.029.044-.063.067-.092L155.785,150.2Z"
+        transform="translate(16.507)"
+        fill={F}
+      />
+      <path
+        d="M34.4,97.191a55.139,55.139,0,0,1,.014-44.165L0,0,41.616,40.9c.029-.039.055-.079.085-.117l21.14,20.977A26.552,26.552,0,0,0,62.8,88.429v0l.039,0-4.475,4.4L41.66,109.41c-.024-.029-.044-.063-.067-.092L0,150.2Z"
+        fill={F}
+      />
+      <path
+        d="M187.714,33.439a9.7,9.7,0,1,1-9.7-9.623,9.66,9.66,0,0,1,9.7,9.623"
+        transform="translate(29.892 4.015)"
+        fill={F}
+      />
+      <path
+        d="M698.41,34.376a9.7,9.7,0,1,1-9.7-9.623,9.66,9.66,0,0,1,9.7,9.623"
+        transform="translate(120.59 4.172)"
+        fill={F}
+      />
+      <path
+        d="M239.441,40.887H208.814v78.855H190.329V40.887h.179v-16.2h48.933Z"
+        transform="translate(33.801 4.16)"
+        fill={F}
+      />
+    </g>
   );
 }
 

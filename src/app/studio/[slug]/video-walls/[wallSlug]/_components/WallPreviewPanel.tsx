@@ -1,10 +1,20 @@
 'use client';
 
-import { ExternalLink, Maximize, Minus, Monitor, Plus, RotateCcw } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  Maximize,
+  Minus,
+  Monitor,
+  Plus,
+  RotateCcw,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { canvasDimensionsOf, GRID_CONFIGS, type GridConfig } from '@/lib/video-walls/dimensions';
+import type { VideoWallSlide } from '@/lib/video-walls/schema';
 
 /**
  * <WallPreviewPanel> — clone visual del SignagePreviewPanel del DD.
@@ -23,6 +33,12 @@ export interface WallPreviewPanelProps {
   wallName: string;
   grid: GridConfig;
   reloadKey: number;
+  /** Playlist completa para el slide navigator pill. */
+  slides: VideoWallSlide[];
+  /** Índice del slide activo en el preview (0-based). */
+  currentSlideIndex: number;
+  /** Navegar prev/next desde el pill. */
+  onNavSlide: (direction: 'prev' | 'next') => void;
 }
 
 export function WallPreviewPanel({
@@ -31,6 +47,9 @@ export function WallPreviewPanel({
   wallName,
   grid,
   reloadKey,
+  slides,
+  currentSlideIndex,
+  onNavSlide,
 }: WallPreviewPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [autoFit, setAutoFit] = useState(0.1);
@@ -69,9 +88,13 @@ export function WallPreviewPanel({
     const qs = new URLSearchParams();
     if (focusedCell) qs.set('cell', `${focusedCell.row},${focusedCell.col}`);
     if (!showBezels) qs.set('bezels', '0');
+    if (currentSlideIndex > 0) qs.set('slide', String(currentSlideIndex));
+    qs.set('source', 'fs');
     const tail = qs.toString();
     return `/video-walls/${clientSlug}/${wallSlug}${tail ? `?${tail}` : ''}`;
-  }, [clientSlug, wallSlug, focusedCell, showBezels]);
+  }, [clientSlug, wallSlug, focusedCell, showBezels, currentSlideIndex]);
+
+  const activeSlide = slides[currentSlideIndex] ?? null;
 
   return (
     <div className="flex h-full w-full flex-col">
@@ -183,7 +206,7 @@ export function WallPreviewPanel({
       </div>
 
       {/* Iframe holder con scale */}
-      <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-zinc-100 dark:bg-zinc-950/60">
+      <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-zinc-100 dark:bg-zinc-950/60">
         <div
           ref={containerRef}
           className="relative overflow-hidden rounded-lg border border-zinc-300 bg-black shadow-xl dark:border-zinc-700"
@@ -193,7 +216,7 @@ export function WallPreviewPanel({
           }}
         >
           <iframe
-            key={reloadKey}
+            key={`${reloadKey}-${currentSlideIndex}`}
             src={iframeSrc}
             title={`Preview ${wallName}`}
             className="absolute left-0 top-0"
@@ -207,6 +230,42 @@ export function WallPreviewPanel({
             sandbox="allow-scripts allow-same-origin"
           />
         </div>
+
+        {/* Slide navigator pill — debajo del iframe, clone visual del DD. */}
+        {slides.length > 0 ? (
+          <div className="mt-8 inline-flex items-center gap-3 rounded-2xl border border-sky-500/30 bg-gradient-to-r from-sky-500 to-sky-600 px-3 py-2 shadow-lg shadow-sky-500/20 dark:border-sky-400/40 dark:from-sky-500 dark:to-sky-700 dark:shadow-sky-500/30">
+            <button
+              type="button"
+              onClick={() => onNavSlide('prev')}
+              aria-label="Previous slide"
+              title="Previous slide"
+              disabled={slides.length <= 1}
+              className="grid h-10 w-10 place-items-center rounded-xl bg-white/15 text-white transition hover:bg-white/30 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <ChevronLeft className="h-5 w-5" strokeWidth={2.5} />
+            </button>
+            <div className="flex min-w-[200px] flex-col items-center gap-0.5 px-3 text-center">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
+                Slide {currentSlideIndex + 1} / {slides.length}
+              </span>
+              {activeSlide?.templateId ? (
+                <span className="font-display text-[14px] font-semibold leading-tight text-white">
+                  {labelFromTemplate(activeSlide.templateId)}
+                </span>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              onClick={() => onNavSlide('next')}
+              aria-label="Next slide"
+              title="Next slide"
+              disabled={slides.length <= 1}
+              className="grid h-10 w-10 place-items-center rounded-xl bg-white/15 text-white transition hover:bg-white/30 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <ChevronRight className="h-5 w-5" strokeWidth={2.5} />
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {/* Footer */}
@@ -220,4 +279,23 @@ export function WallPreviewPanel({
       </div>
     </div>
   );
+}
+
+/** Stringify del templateId para mostrar en el pill. `02-video-image-ad`
+ *  → "Video + Ad". Replica el patrón signage `labelFromTemplate`. */
+function labelFromTemplate(templateId: string): string {
+  // Quita prefijo numérico opcional ("02-").
+  const stripped = templateId.replace(/^\d+-/, '');
+  return stripped
+    .split('-')
+    .map((part) => {
+      if (part === 'video' || part === 'image') return 'Video/Image';
+      if (part === 'ad' || part === 'ads') return 'Ad';
+      if (part === 'social' || part === 'wall') return 'Social';
+      if (part === 'events') return 'Events';
+      if (part === 'full') return 'Full';
+      return part.charAt(0).toUpperCase() + part.slice(1);
+    })
+    .filter((s, i, arr) => arr.indexOf(s) === i)
+    .join(' + ');
 }

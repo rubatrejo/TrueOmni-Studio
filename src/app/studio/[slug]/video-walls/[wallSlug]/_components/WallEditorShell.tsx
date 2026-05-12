@@ -93,12 +93,35 @@ export function WallEditorShell({
   const [tab, setTab] = useState<TabKey>('playlist');
   const [wall, setWall] = useState<VideoWallConfig>(initialWall);
   const [previewKey, setPreviewKey] = useState(0);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+
   // Bridge live editor↔iframe queda como sub-fase futura. Por ahora
   // bumpamos previewKey al guardar para forzar reload del iframe.
   const handleWallChange = (next: VideoWallConfig) => {
     setWall(next);
     setPreviewKey((k) => k + 1);
+    // Clamp slide index si la playlist se acortó.
+    if (currentSlideIndex >= next.playlist.length) {
+      setCurrentSlideIndex(Math.max(0, next.playlist.length - 1));
+    }
   };
+
+  const activeSlideId = wall.playlist[currentSlideIndex]?.id ?? null;
+  const handleSelectSlide = (slideId: string) => {
+    const idx = wall.playlist.findIndex((s) => s.id === slideId);
+    if (idx >= 0) setCurrentSlideIndex(idx);
+  };
+  const handleNavSlide = (direction: 'prev' | 'next') => {
+    if (wall.playlist.length === 0) return;
+    setCurrentSlideIndex((i) => {
+      const next = direction === 'next' ? i + 1 : i - 1;
+      // Wrap-around.
+      if (next < 0) return wall.playlist.length - 1;
+      if (next >= wall.playlist.length) return 0;
+      return next;
+    });
+  };
+
   const bridgeStatus: SignageBridgeStatus = 'connected';
   const { cols, rows } = GRID_CONFIGS[grid];
   const previewHref = `/video-walls/${clientSlug}/${wallSlug}`;
@@ -134,6 +157,8 @@ export function WallEditorShell({
                     clientSlug={clientSlug}
                     wall={wall}
                     onWallChange={handleWallChange}
+                    activeSlideId={activeSlideId}
+                    onSelectSlide={handleSelectSlide}
                   />
                 )}
                 {tab === 'settings' && (
@@ -211,6 +236,9 @@ export function WallEditorShell({
               wallName={wallName}
               grid={grid}
               reloadKey={previewKey}
+              slides={wall.playlist}
+              currentSlideIndex={currentSlideIndex}
+              onNavSlide={handleNavSlide}
             />
           </div>
         </main>

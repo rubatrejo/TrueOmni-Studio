@@ -30,9 +30,19 @@ export interface PlaylistPanelProps {
   clientSlug: string;
   wall: VideoWallConfig;
   onWallChange: (next: VideoWallConfig) => void;
+  /** Slide actualmente visible en el iframe preview. Resaltado en la lista. */
+  activeSlideId?: string | null;
+  /** Click en una slide → notifica al editor para sync con iframe preview. */
+  onSelectSlide?: (slideId: string) => void;
 }
 
-export function PlaylistPanel({ clientSlug, wall, onWallChange }: PlaylistPanelProps) {
+export function PlaylistPanel({
+  clientSlug,
+  wall,
+  onWallChange,
+  activeSlideId,
+  onSelectSlide,
+}: PlaylistPanelProps) {
   const [draft, setDraft] = useState<VideoWallConfig>(wall);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -146,44 +156,57 @@ export function PlaylistPanel({ clientSlug, wall, onWallChange }: PlaylistPanelP
           </div>
         ) : (
           <ul className="space-y-2">
-            {draft.playlist.map((slide, i) => (
-              <li
-                key={slide.id}
-                className="rounded-lg border border-zinc-200 bg-white p-3 text-[12px] dark:border-zinc-800 dark:bg-zinc-950"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="font-semibold text-zinc-900 dark:text-white">
-                      {i + 1}. {slide.templateId}
-                    </div>
-                    <div className="text-[10.5px] text-zinc-500">
-                      {slide.slots.length} slot{slide.slots.length === 1 ? '' : 's'} ·{' '}
-                      {(slide.durationMs / 1000).toFixed(1)}s
+            {draft.playlist.map((slide, i) => {
+              const isActive = activeSlideId === slide.id;
+              return (
+                <li
+                  key={slide.id}
+                  className={`rounded-lg border p-3 text-[12px] transition ${
+                    isActive
+                      ? 'border-sky-500 bg-sky-50 ring-2 ring-sky-500/20 dark:border-sky-500/70 dark:bg-sky-500/10 dark:ring-sky-500/30'
+                      : 'border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onSelectSlide?.(slide.id)}
+                      className="min-w-0 flex-1 text-left"
+                    >
+                      <div
+                        className={`font-semibold ${isActive ? 'text-sky-900 dark:text-sky-100' : 'text-zinc-900 dark:text-white'}`}
+                      >
+                        {i + 1}. {slide.templateId}
+                      </div>
+                      <div className="text-[10.5px] text-zinc-500">
+                        {slide.slots.length} slot{slide.slots.length === 1 ? '' : 's'} ·{' '}
+                        {(slide.durationMs / 1000).toFixed(1)}s
+                      </div>
+                    </button>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <IconBtn onClick={() => moveSlide(slide.id, -1)} label="Move up">
+                        <ArrowUp className="h-3 w-3" />
+                      </IconBtn>
+                      <IconBtn onClick={() => moveSlide(slide.id, 1)} label="Move down">
+                        <ArrowDown className="h-3 w-3" />
+                      </IconBtn>
+                      <IconBtn onClick={() => removeSlide(slide.id)} label="Remove" tone="danger">
+                        <Trash2 className="h-3 w-3" />
+                      </IconBtn>
                     </div>
                   </div>
-                  <div className="flex shrink-0 items-center gap-1">
-                    <IconBtn onClick={() => moveSlide(slide.id, -1)} label="Move up">
-                      <ArrowUp className="h-3 w-3" />
-                    </IconBtn>
-                    <IconBtn onClick={() => moveSlide(slide.id, 1)} label="Move down">
-                      <ArrowDown className="h-3 w-3" />
-                    </IconBtn>
-                    <IconBtn onClick={() => removeSlide(slide.id)} label="Remove" tone="danger">
-                      <Trash2 className="h-3 w-3" />
-                    </IconBtn>
+                  <div className="mt-2 space-y-1.5">
+                    {slide.slots.map((slot) => (
+                      <SlotEditor
+                        key={slot.slotKey}
+                        slot={slot}
+                        onUrlChange={(url) => setSlotModuleUrl(slide.id, slot.slotKey, url)}
+                      />
+                    ))}
                   </div>
-                </div>
-                <div className="mt-2 space-y-1.5">
-                  {slide.slots.map((slot) => (
-                    <SlotEditor
-                      key={slot.slotKey}
-                      slot={slot}
-                      onUrlChange={(url) => setSlotModuleUrl(slide.id, slot.slotKey, url)}
-                    />
-                  ))}
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

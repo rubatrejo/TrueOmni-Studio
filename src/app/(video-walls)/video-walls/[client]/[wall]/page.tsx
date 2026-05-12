@@ -2,8 +2,10 @@ import { notFound } from 'next/navigation';
 
 import { VideoWallRuntime } from '@/components/video-walls/runtime/VideoWallRuntime';
 import { VideoWallStage } from '@/components/video-walls/stage/VideoWallStage';
+import { mapWeatherToHeader } from '@/lib/signage/weather-adapter';
 import { loadVideoWall, loadVideoWallClient } from '@/lib/video-walls/config';
 import { parseCellParam } from '@/lib/video-walls/dimensions';
+import { fetchWeather } from '@/lib/weather';
 
 interface PageProps {
   params: Promise<{ client: string; wall: string }>;
@@ -38,6 +40,17 @@ export default async function VideoWallPage({ params, searchParams }: PageProps)
   ]);
   if (!clientCfg || !wallCfg) notFound();
 
+  // Weather real (server-side, cached): mismo adapter que signage. Si el
+  // fetch falla, `mapWeatherToHeader` retorna placeholder con "--°".
+  const weatherData = await fetchWeather(clientCfg.location.lat, clientCfg.location.lon).catch(
+    (err: unknown) => {
+      // eslint-disable-next-line no-console
+      console.warn(`[video-walls] weather fetch falló para ${clientSlug}:`, (err as Error).message);
+      return null;
+    },
+  );
+  const weather = mapWeatherToHeader(weatherData, clientCfg.locale, clientCfg.timezone, 3);
+
   const cell = parseCellParam(search?.cell, wallCfg.grid);
   const bezelParam = Array.isArray(search?.bezels) ? search.bezels[0] : search?.bezels;
   const showBezels = bezelParam !== '0';
@@ -50,6 +63,7 @@ export default async function VideoWallPage({ params, searchParams }: PageProps)
       <VideoWallRuntime
         client={clientCfg}
         wall={wallCfg}
+        weather={weather}
         showBezels={showBezels && !cell}
         slideIndex={slideIndex}
       />

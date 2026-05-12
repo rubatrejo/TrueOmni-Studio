@@ -75,21 +75,6 @@ export async function getConfig(
   return http<{ config: KioskConfig; meta: ConfigMeta | null }>(`/api/studio/configs/${slug}`);
 }
 
-export async function createConfig(input: {
-  slug: string;
-  nombre: string;
-  orientation?: string;
-  website?: string;
-  location?: string;
-  emptyMode?: boolean;
-}): Promise<ConfigEntry> {
-  const data = await http<{ slug: string; config: KioskConfig; meta: ConfigMeta }>(
-    '/api/studio/configs',
-    { method: 'POST', body: input },
-  );
-  return { ...data.config, meta: data.meta };
-}
-
 /* ────────────────────────────────────────────────────────────────────────── */
 /*  Clients API (unified, Fase 4 cliente-primero)                            */
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -121,12 +106,10 @@ export interface CreateClientInput {
 /**
  * Crea un cliente unificado vía `POST /api/studio/clients` (Fase 4).
  *
- * A diferencia del legacy `createConfig`, este helper:
- *  - Recibe `products` para activar kiosks + digital-displays + más
- *    productos en un solo round-trip.
- *  - Devuelve el manifest unificado + unified branding (no `KioskConfig`),
- *    porque el cliente puede no tener kiosk activo.
- *  - Aplica los rewrites del template Arizona/Phoenix igual que el legacy.
+ * Recibe `products` para activar kiosks + digital-displays + más productos
+ * en un solo round-trip. Devuelve el manifest unificado + unified branding
+ * (no `KioskConfig`), porque el cliente puede no tener kiosk activo. Aplica
+ * los rewrites del template Arizona/Phoenix internamente.
  */
 export async function createClient(input: CreateClientInput): Promise<{
   slug: string;

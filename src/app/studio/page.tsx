@@ -123,10 +123,6 @@ export default function StudioHome() {
   }) => {
     setCreatingClient(input.nombre);
     try {
-      // Endpoint unified (Fase 4 cliente-primero): crea kiosk + DD en un
-      // solo round-trip + manifest + unified branding. Reemplaza el flujo
-      // legacy createConfig + activate-DD que requería 2 calls y dependía
-      // de la auto-migración para generar el manifest.
       const locationFull = input.location?.trim() || undefined;
       const cityFromFull = locationFull?.split(',')[0]?.trim();
       await createClient({

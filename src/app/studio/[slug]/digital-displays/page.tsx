@@ -144,16 +144,30 @@ export default async function ClientDisplaysPage({ params }: PageProps) {
                   <h3 className="font-display text-[15px] font-semibold leading-tight text-zinc-900 dark:text-white">
                     {d.name ?? d.slug}
                   </h3>
-                  <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
-                      d.orientation === 'portrait'
-                        ? 'bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300'
-                        : 'bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300'
-                    }`}
-                    title={d.orientation === 'portrait' ? '1080 × 1920' : '1920 × 1080'}
+                  <div
+                    className="flex shrink-0 items-center gap-1"
+                    title={`Default: ${d.orientation === 'portrait' ? '1080 × 1920 (portrait)' : '1920 × 1080 (landscape)'} · Serves both orientations`}
+                    aria-label={`Default ${d.orientation}, serves both orientations`}
                   >
-                    {d.orientation}
-                  </span>
+                    <span
+                      className={`grid h-5 w-5 place-items-center rounded text-[10px] font-bold tracking-tight ${
+                        d.orientation === 'landscape'
+                          ? 'bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300'
+                          : 'border border-zinc-200 text-zinc-400 dark:border-zinc-700 dark:text-zinc-600'
+                      }`}
+                    >
+                      L
+                    </span>
+                    <span
+                      className={`grid h-5 w-5 place-items-center rounded text-[10px] font-bold tracking-tight ${
+                        d.orientation === 'portrait'
+                          ? 'bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300'
+                          : 'border border-zinc-200 text-zinc-400 dark:border-zinc-700 dark:text-zinc-600'
+                      }`}
+                    >
+                      P
+                    </span>
+                  </div>
                 </div>
                 <span className="mt-1 font-mono text-[11px] text-zinc-500">{d.slug}</span>
                 <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-medium text-zinc-700 dark:text-zinc-300">

@@ -29,9 +29,12 @@ export default async function VideoWallPage({ params, searchParams }: PageProps)
   const { client: clientSlug, wall: wallSlug } = await params;
   const search = await searchParams;
 
+  const sourceParam = Array.isArray(search?.source) ? search.source[0] : search?.source;
+  const preferFs = sourceParam === 'fs';
+
   const [clientCfg, wallCfg] = await Promise.all([
     loadVideoWallClient(clientSlug),
-    loadVideoWall(clientSlug, wallSlug),
+    loadVideoWall(clientSlug, wallSlug, { preferFs }),
   ]);
   if (!clientCfg || !wallCfg) notFound();
 

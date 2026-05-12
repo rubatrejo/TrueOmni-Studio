@@ -172,7 +172,18 @@ async function loadVideoWallFromFs(
 }
 
 export const loadVideoWall = cache(
-  async (clientSlug: string, wallSlug: string): Promise<VideoWallConfig | null> => {
+  async (
+    clientSlug: string,
+    wallSlug: string,
+    options?: { preferFs?: boolean },
+  ): Promise<VideoWallConfig | null> => {
+    // Modo override: forzar fs siempre. Útil para validación pixel-perfect
+    // o cuando se necesita ignorar el KV (vía `?source=fs`).
+    if (options?.preferFs) {
+      const fsWall = await loadVideoWallFromFs(clientSlug, wallSlug);
+      if (fsWall) return fsWall;
+    }
+
     // 1. KV first.
     let kvWall: VideoWallConfig | null = null;
     try {
@@ -181,17 +192,17 @@ export const loadVideoWall = cache(
       // KV unreachable.
     }
 
-    // 2. Cuando el KV tiene playlist vacía pero el fs tiene playlist con
-    //    contenido, preferimos fs: el operador no ha editado el wall en el
-    //    Studio (KV está como bootstrap inicial) y el fs es el seed canónico
-    //    publicado vía git. Esto evita que ediciones al template de fs (eg.
-    //    seed pixel-perfect, nuevos templates) queden invisibles en
-    //    producción hasta que alguien abra el editor y guarde.
-    if (kvWall && kvWall.playlist.length === 0) {
+    // 2. Cuando el fs tiene una playlist más completa que el KV (eg. fs
+    //    publicó nuevos slides y el operador no ha sincronizado), preferimos
+    //    fs. Esto evita que ediciones al template de fs queden invisibles
+    //    en producción hasta que alguien abra el editor.
+    if (kvWall) {
       const fsWall = await loadVideoWallFromFs(clientSlug, wallSlug);
-      if (fsWall && fsWall.playlist.length > 0) return fsWall;
+      if (fsWall && fsWall.playlist.length > kvWall.playlist.length) {
+        return fsWall;
+      }
+      return kvWall;
     }
-    if (kvWall) return kvWall;
 
     // 3. fs fallback (sin KV).
     return loadVideoWallFromFs(clientSlug, wallSlug);

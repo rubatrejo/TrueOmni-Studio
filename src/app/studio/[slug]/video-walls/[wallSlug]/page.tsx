@@ -76,6 +76,7 @@ export default async function VideoWallEditorPage({ params }: PageProps) {
         wallSlug={wall.slug}
         wallName={wall.name}
         grid={wall.grid}
+        initialWall={wall}
       />
     </div>
   );

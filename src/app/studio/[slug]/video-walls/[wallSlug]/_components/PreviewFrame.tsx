@@ -18,9 +18,13 @@ export interface PreviewFrameProps {
   clientSlug: string;
   wallSlug: string;
   grid: GridConfig;
+  /** Cualquier cambio en el wall que requiera reload del iframe.
+   *  El editor pasa una key derivada del JSON del wall para forzar
+   *  reload cuando autosave persiste cambios. */
+  reloadKey?: string;
 }
 
-export function PreviewFrame({ clientSlug, wallSlug, grid }: PreviewFrameProps) {
+export function PreviewFrame({ clientSlug, wallSlug, grid, reloadKey }: PreviewFrameProps) {
   const [focusedCell, setFocusedCell] = useState<{ row: number; col: number } | null>(null);
   const [showBezels, setShowBezels] = useState(true);
 
@@ -121,6 +125,7 @@ export function PreviewFrame({ clientSlug, wallSlug, grid }: PreviewFrameProps) 
           style={{ aspectRatio: previewAspect }}
         >
           <iframe
+            key={reloadKey}
             src={iframeSrc}
             title={`Preview ${wallSlug}`}
             className="absolute inset-0 h-full w-full"

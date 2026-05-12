@@ -2,11 +2,35 @@
  * Side-effect entrypoint: importar este archivo registra TODOS los
  * templates video-walls en el `registry` singleton.
  *
- * El SignagePlayer del producto signage hace el mismo patrón con
- * `import '../templates/load-templates'` antes de usar `getTemplate`.
- *
- * VW3..VW8 expanden este registro con los 23 templates pixel-perfect
- * (6 grids 3×2 + 6 grids 4×2 + 5 grids 2×2 + 3 grids 2×1 + 3 grids 1×2).
+ * VW3 + VW8 — 18 templates v1 totales (6 + 3 + 2 + 2 + 2 + 1 placeholder).
+ * Pixel-perfect contra XD para los 6 del 3×2. Resto: geometría
+ * consistente con misma paleta de slot renderers.
  */
 
+// Placeholder 3×2 (debug, no se muestra en AddSlideModal).
 import './3x2/00-placeholder';
+
+// 3×2 — pixel-perfect targets contra `designs/video-walls/3x2/`.
+import './3x2/01-video-image-full';
+import './3x2/02-video-image-ad';
+import './3x2/03-video-image-events';
+import './3x2/04-video-image-ad-events';
+import './3x2/05-video-image-social-wall';
+import './3x2/06-video-image-ad-social-wall';
+
+// 4×2 (canvas 7680×2160, 32:9 ultra-wide).
+import './4x2/01-video-image-full';
+import './4x2/02-video-image-ad';
+import './4x2/03-video-image-social';
+
+// 2×2 (canvas 3840×2160, 16:9).
+import './2x2/01-video-image-full';
+import './2x2/02-quad-mix';
+
+// 2×1 (canvas 3840×1080, 32:9 strip horizontal).
+import './2x1/01-video-image-full';
+import './2x1/02-video-image-ad';
+
+// 1×2 (canvas 1920×2160, portrait stacked).
+import './1x2/01-video-image-full';
+import './1x2/02-video-ad-stack';

@@ -1,11 +1,15 @@
 'use client';
 
-import { Image, Layers, Palette, Settings } from 'lucide-react';
+import { Image, Layers, Palette, Send, Settings } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import { GRID_CONFIGS, type GridConfig } from '@/lib/video-walls/dimensions';
+import type { VideoWallConfig } from '@/lib/video-walls/schema';
 
+import { PlaylistPanel } from './PlaylistPanel';
 import { PreviewFrame } from './PreviewFrame';
+import { SettingsPanel } from './SettingsPanel';
 
 /**
  * <WallEditorShell> — VW5 minimal shell.
@@ -25,9 +29,10 @@ export interface WallEditorShellProps {
   wallSlug: string;
   wallName: string;
   grid: GridConfig;
+  initialWall: VideoWallConfig;
 }
 
-type TabId = 'playlist' | 'branding' | 'settings' | 'versions';
+type TabId = 'playlist' | 'branding' | 'settings' | 'versions' | 'publish';
 
 const TABS: { id: TabId; label: string; icon: typeof Layers; description: string }[] = [
   {
@@ -54,10 +59,24 @@ const TABS: { id: TabId; label: string; icon: typeof Layers; description: string
     icon: Image,
     description: 'Snapshots history and restore.',
   },
+  {
+    id: 'publish',
+    label: 'Publish',
+    icon: Send,
+    description: 'Promote KV draft to the filesystem via GitHub PR.',
+  },
 ];
 
-export function WallEditorShell({ wallSlug, wallName, grid }: WallEditorShellProps) {
+export function WallEditorShell({
+  clientSlug,
+  clientName,
+  wallSlug,
+  wallName,
+  grid,
+  initialWall,
+}: WallEditorShellProps) {
   const [tab, setTab] = useState<TabId>('playlist');
+  const [wall, setWall] = useState<VideoWallConfig>(initialWall);
   const { cols, rows } = GRID_CONFIGS[grid];
 
   return (
@@ -97,16 +116,44 @@ export function WallEditorShell({ wallSlug, wallName, grid }: WallEditorShellPro
             {TABS.find((t) => t.id === tab)?.description}
           </p>
         </div>
-        <div className="flex-1 overflow-auto p-4">
-          <div className="rounded-lg border border-dashed border-zinc-300 bg-white p-6 text-center text-[12px] text-zinc-500 dark:border-zinc-700 dark:bg-zinc-950">
-            <p className="font-medium">Coming in VW6 / VW7</p>
-            <p className="mt-1.5 text-[11px] leading-relaxed">
-              The shell + preview pipeline is wired (VW5). Playlist editing and module forms land in
-              VW6; branding / header / settings / versions / publish in VW7.
-            </p>
-          </div>
-
+        <div className="flex flex-1 flex-col overflow-hidden">
+          {tab === 'playlist' && (
+            <PlaylistPanel clientSlug={clientSlug} wall={wall} onWallChange={setWall} />
+          )}
           {tab === 'settings' && (
+            <SettingsPanel clientSlug={clientSlug} wall={wall} onWallChange={setWall} />
+          )}
+          {tab === 'branding' && (
+            <div className="space-y-4 overflow-auto p-4 text-[12px]">
+              <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+                <h3 className="text-[11.5px] font-semibold uppercase tracking-wider text-zinc-500">
+                  Branding is client-scoped
+                </h3>
+                <p className="mt-2 leading-relaxed text-zinc-600 dark:text-zinc-400">
+                  Logos, brand colors and fonts live on the client manifest and sync with every
+                  product (Kiosks, Digital Displays, Video Walls). Edit them from the client view so
+                  the changes propagate everywhere at once.
+                </p>
+                <Link
+                  href={`/studio/${clientSlug}`}
+                  className="mt-3 inline-flex items-center gap-1 text-sky-600 dark:text-sky-400"
+                >
+                  → Edit branding for {clientName}
+                </Link>
+              </div>
+            </div>
+          )}
+          {tab === 'versions' && (
+            <div className="space-y-4 overflow-auto p-4 text-[12px]">
+              <div className="rounded-lg border border-dashed border-zinc-300 bg-white p-6 text-center text-zinc-500 dark:border-zinc-700 dark:bg-zinc-950">
+                Snapshots history and restore — wires into the same KV snapshot pattern used by
+                signage. Pending sub-phase VW9.5.
+              </div>
+            </div>
+          )}
+          {tab === 'publish' && <PublishStubPanel clientSlug={clientSlug} wallSlug={wallSlug} />}
+
+          {tab !== 'playlist' && tab !== 'settings' && tab !== 'branding' && (
             <div className="mt-4 space-y-2 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
               <h3 className="text-[11.5px] font-semibold uppercase tracking-wider text-zinc-500">
                 Read-only summary
@@ -134,17 +181,80 @@ export function WallEditorShell({ wallSlug, wallName, grid }: WallEditorShellPro
 
       {/* Preview */}
       <main className="flex flex-1 flex-col bg-white dark:bg-zinc-950">
-        <PreviewFrame wallSlug={wallSlug} clientSlug={useClientSlugFromUrl()} grid={grid} />
+        <PreviewFrame
+          wallSlug={wallSlug}
+          clientSlug={clientSlug}
+          grid={grid}
+          reloadKey={JSON.stringify(wall)}
+        />
       </main>
     </div>
   );
 }
 
-/** Hack barato para evitar prop-drilling del clientSlug por toda la prop chain.
- *  Lee el slug del path (`/studio/{slug}/video-walls/{wallSlug}`). */
-function useClientSlugFromUrl(): string {
-  if (typeof window === 'undefined') return '';
-  const parts = window.location.pathname.split('/').filter(Boolean);
-  // Esperado: ['studio', '{slug}', 'video-walls', '{wallSlug}']
-  return parts[1] ?? '';
+function PublishStubPanel({ clientSlug, wallSlug }: { clientSlug: string; wallSlug: string }) {
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+
+  const handlePublish = async () => {
+    setSubmitting(true);
+    setResult(null);
+    try {
+      const res = await fetch(`/api/studio/video-walls/walls/${clientSlug}/${wallSlug}/publish`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+      });
+      const body = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        prUrl?: string;
+        error?: string;
+      } | null;
+      if (!res.ok || !body?.ok) {
+        setResult({ ok: false, message: body?.error ?? `HTTP ${res.status}` });
+      } else {
+        setResult({
+          ok: true,
+          message: body?.prUrl ? `PR created: ${body.prUrl}` : 'Published successfully',
+        });
+      }
+    } catch (err) {
+      setResult({ ok: false, message: err instanceof Error ? err.message : 'Publish failed' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4 overflow-auto p-4 text-[12px]">
+      <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+        <h3 className="text-[11.5px] font-semibold uppercase tracking-wider text-zinc-500">
+          Publish wall to filesystem
+        </h3>
+        <p className="mt-2 leading-relaxed text-zinc-600 dark:text-zinc-400">
+          Creates a PR on GitHub with the wall config JSON. The runtime hardware reads from the
+          filesystem (after merge) or from KV (live edit). Publishing locks the current draft as the
+          deployed version.
+        </p>
+        <button
+          type="button"
+          onClick={handlePublish}
+          disabled={submitting}
+          className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+        >
+          {submitting ? 'Publishing…' : 'Publish wall'}
+        </button>
+        {result && (
+          <div
+            className={`mt-3 rounded-md p-2.5 text-[11.5px] ${
+              result.ok
+                ? 'border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200'
+                : 'border border-red-200 bg-red-50 text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200'
+            }`}
+          >
+            {result.message}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

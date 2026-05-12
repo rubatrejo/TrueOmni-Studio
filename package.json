@@ -20,7 +20,17 @@
     "typecheck": "tsc --noEmit",
     "validate:configs": "node scripts/validate-configs.mjs",
     "verify:visual": "node scripts/verify-visual.mjs",
-    "clean:screenshots": "node scripts/clean-dev-screenshots.mjs"
+    "clean:screenshots": "node scripts/clean-dev-screenshots.mjs",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx,js,jsx}": [
+      "prettier --write",
+      "next lint --fix --file"
+    ],
+    "*.{ts,tsx,js,jsx,cjs,mjs,json,md,css}": [
+      "prettier --write"
+    ]
   },
   "engines": {
     "node": ">=20"
@@ -70,6 +80,8 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.4",
     "postcss": "^8.5.10",
     "postcss-import": "^16.1.1",
     "prettier": "^3.8.3",

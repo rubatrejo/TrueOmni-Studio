@@ -71,9 +71,11 @@ Decisión y ejecución de la fase puntual **MIG-AB-1** (plan en `.planning/MIG-A
 4. **Test E2E ejecutable** — instalar `@playwright/test` + mover spec documentado a `tests/e2e/`.
 5. **Fase 4 — primer cliente real** — bloqueada por negocio.
 
-**Última sesión (2026-05-08 tarde-noche):** Audit panorámico v2 cerrado al 96% en producción (45/47 hallazgos). 9 commits + 5 deploys verdes consecutivos: 4 sprints del audit + format histórico Prettier + maintenance mode sign-in + super-admin hardcoded + fix Pending Changes deep-equal. Detalles completos abajo en historial de sesiones.
+**Última sesión (2026-05-13):** Video Walls audit cleanup (G1-G8 todos cerrados) + Bloque D editor completo (bridge live + Versions + Publish PR) + grid picker dropdown + multi-playlist UI + 4 templates faltantes (catálogo 27) + 2 bugs críticos arreglados (`pxToCss` style en slot renderers genéricos rompía todos los grids no-3x2; `loadVideoWall` heurística KV vs fs ahora compara set de templateIds). 14 commits + 14 deploys verdes. Detalles en historial de sesiones abajo.
 
-**Siguiente acción concreta:** **Fase 4 — primer cliente real** (bloqueada por negocio: necesita cliente firmado). Mientras tanto, los pendientes operativos del audit cerrado: verificar `STUDIO_ADMIN_EMAILS` en Vercel + DNS `studio.trueomni.com` (sin acceso provider) + setup pre-commit hook + ejecutar test E2E spec.
+**Último deploy verde:** `dpl_FtZjRs5FBhCaGPnzLZbnuCrBaVQe` — commit `fe27365` (fix loadVideoWall templateIds dispares).
+
+**Siguiente acción concreta:** **Validación visual templates derivados** (21 templates 4×2/2×2/2×1/1×2 que el fix `pxToCss` desbloqueó) — tomar screenshots contra producción y verificar que cada slide rendea bien estructuralmente. Alternativa: **smoke E2E full flow con auth GitHub** ejecutando `agent-browser batch < tests/e2e/video-walls-full-flow.json` autenticado. **Fase 4 — primer cliente real** sigue bloqueada por negocio.
 
 **Bloqueos:**
 
@@ -3124,6 +3126,64 @@ D — **PlaylistPanel Asset upload**: validar end-to-end que el upload real func
 - **CI `format:check` archivos preexistentes** — auto-formaté con prettier 7 archivos no míos para desbloquear el CI verde. Si en el futuro se modifica `.claude/`, `.planning/`, `scripts/` o `src/auth.ts`, ya están formateados.
 
 **Fase:** Video Walls editor end-to-end funcional. Templates 01-06 pixel-perfect (3×2). BrandingTab/HeaderTab/EventsTab/SocialTab/NewsTab editables. PlaylistPanel con drag-drop + asset upload. Header HTML+flex respeta TODO el config. Tokens CSS inyectados. Reactividad real (cualquier cambio refleja en iframe). **Próxima sesión: probar flow con cliente real (no default) + Versions/Publish tabs**.
+
+---
+
+### Sesión 2026-05-13 — Video Walls audit cleanup + editor UX completo + bugfixes pixel
+
+**Hecho — 14 commits, todos deployados a producción (`trueomni-studio.vercel.app`):**
+
+Lote 1 — Cierre audit + Bloque D editor:
+
+- `32df0aa` PlaylistPanel rich con AddSlideModal/SchedulePopover/SlideRowExpanded (paridad funcional DD).
+- `8a7c1e7` 8 templates derivados 4×2/2×2/2×1/1×2 (catálogo 15→23).
+- `4b0ba97` Fix G2 audit — `pickRicherEvents/Social` fallback no-null (rompía parse Zod y perdía branding KV recién activado).
+- `758e358` audit 2026-05-12 + seed `clients-walls/test-real/`.
+- `8911d32` G1+G3+G4+G5 — `bootstrap-from-fs.ts::cloneVideoWallsFromFs` reusado por activate y POST clients; manifest gate en signage PUT.
+- `cc56b33` G6+G7+G8 — endpoint `/api/studio/video-walls/clients/[slug]` GET/PUT; asset endpoint 404 directo en lugar de redirect ruidoso; `slug-validation.ts` con regex VW_SLUG_REGEX aplicado a todos los handlers.
+- `098771e0` Bloque D — bridge live (`useVideoWallBridge`, postMessage debounce 120ms, sin reload FOUC); Versions tab (snapshots CRUD FIFO cap 10 con auto-snapshot pre-restore); Publish tab (GitHub PR sync reusando `publishToGitHub` del signage con auto-merge, fallback `kv-only`).
+- `097c6a1` Bridge live para tabs Events/Social/News + `BridgeStatus` shared type DD↔VW.
+- `8cf9af4` Fix `@@username` literal en social cards (data tenía `@username` y template añadía otro `@`).
+- `0f6b97f` Validación visual 6 templates 3×2 contra PNG XD baselines (todos pixel-perfect estructurales) + spec `tests/e2e/video-walls-full-flow.json` ejecutable + 12 screenshots versionados.
+- `4e60d4a` 4 templates faltantes 2×1/1×2 social-wall + ad-social-wall (catálogo 23→27).
+- `48adf57` Grid picker dropdown clickeable en `WallPreviewPanel` + PlaylistsBar multi-playlist (clone DD) con add/rename/delete; migración legacy `wall.playlist[]` → `wall.playlists[{id:'main', name:'Main', slides:...}]`.
+
+Lote 2 — Issues UI reportados por Rubén + bugs encontrados:
+
+- `08b9bf7` Grid change no-destructivo: `template-remap.ts` con matriz de equivalencias por categoría (full/ad/events/ad-events/social-wall/ad-social-wall); slides se adaptan al nuevo grid en lugar de borrarse. Header responsive (`widthScale = clamp(canvasW/5760, 0.5, 1)` aplicado a padding y gap; clampForecastDays evita solapado en grids angostos). Verificado que bezels ya parametrizan por cols/rows correctamente.
+- `5a6b986` Fix crítico `pxToCss` — los 4 slot renderers compartidos pasaban `PixelRect = {x,y,w,h}` directo al style del div, pero esos NO son keys CSS válidos. El div quedaba sin dimensiones y los `<img>/<video>` tomaban su tamaño natural (pool.png 1280×720). Templates 3×2 funcionaban porque usan SVG inline con dims hardcoded; **todos los 21 templates 4×2/2×2/2×1/1×2 estaban rotos en preview**.
+- `fe27365` Fix `loadVideoWall` heurística KV vs fs — comparar SET de templateIds además de length. KV tenía slide 6 con `templateId='05-...'` stale en lugar del `06-...` del fs (mismo count → KV stale ganaba). Con la nueva heurística, si fs tiene IDs que KV no tiene → preferir fs.
+
+**Verificado:**
+
+- `pnpm typecheck` + `pnpm lint` + `pnpm format:check` limpios en cada commit (husky pre-commit corre).
+- 14 deploys Vercel READY consecutivos (último: `dpl_FtZjRs5FBhCaGPnzLZbnuCrBaVQe` sha `fe27365`).
+- Smoke E2E sin auth (10/10 chequeos) en `.planning/2026-05-13-vw-smoke-prod.md`.
+- Validación visual templates 3×2 en `.planning/2026-05-13-vw-visual-validation-3x2.md`.
+- Confirmación con `agent-browser eval` post-fix: slide 6 ahora renderea con `translate(3844 330)` (ad horizontal) + `translate(1766 1092)` (play icon template 06).
+
+**Pendiente / siguiente:**
+
+A — **Validación visual templates derivados (21 templates 4×2/2×2/2×1/1×2)**: el commit `5a6b986` arregló el bug `pxToCss` que rompía todos estos templates. Falta tomar screenshots de cada uno contra producción (no hay PNG XD baselines para grids no-3×2, pero validar que cada slide rendea bien estructuralmente).
+
+B — **Smoke E2E full flow con auth GitHub**: el spec `tests/e2e/video-walls-full-flow.json` está listo. Rubén debe correr `agent-browser batch < tests/e2e/video-walls-full-flow.json` autenticado. Valida: crear cliente nuevo → activar VW → editor → add slide → publish PR → runtime.
+
+C — **Templates 4×2/2×2/2×1/1×2 pixel-perfect contra XD del cliente** (cuando los provea): hoy son derivados proporcionales del 3×2 con slot renderers genéricos. Si el cliente da SVG XD para esos grids, hay que rehacerlos como SVG inline verbatim (como los 3×2).
+
+D — **Bridge live para PlaylistPanel** (cambios en slides): hoy autosave del PlaylistPanel hace PUT al endpoint, pero el iframe runtime se actualiza vía `pushWall()` del bridge. Verificar que NO hay reload cuando el operador añade/edita un slide.
+
+E — **Resync KV obsoletos**: el fix `fe27365` cubre el caso futuro (fs nuevo > KV stale), pero los walls que YA quedaron stale en KV de producción siguen así hasta que alguien edite o ejecute `/resync`. Considerar un script de migration que limpie KV walls obsoletos.
+
+**Decisiones:**
+
+- **Re-mapeo de templates por categoría**, no por templateId literal. Razón: los templateIds difieren entre grids (e.g. `02-video-image-ad` en 3×2 vs `02-quad-mix` en 2×2 vs `02-video-ad-stack` en 1×2). Una matriz por categoría es la abstracción correcta.
+- **Header NO escala tipografías** en grids angostos — solo paddings/gaps. Razón: legibilidad desde lejos en cualquier grid es prioridad. Solo distribución espacial responde.
+- **Bezels no se tocaron** — el componente ya parametriza por `cols/rows` y `strokeWidth=3` es uniforme. Cada bezel separa exactamente 2 TVs físicos 1920×1080.
+- **Helper `pxToCss(px)` obligatorio** en cualquier renderer nuevo que use `PixelRect`. Pasar `style={px}` directo es un bug silencioso que rompe layout sin error visible. Documentado en JSDoc del helper.
+- **Heurística KV vs fs basada en set de templateIds**: si fs tiene IDs que el KV no tiene, fs gana. Si coinciden, KV gana (mantiene customizaciones del operador sobre assets/schedule). Cubre el caso "seed git publicó nuevos templates pero el operador no abrió el editor".
+- **Multi-playlist con migración legacy automática**: si el wall solo tiene `playlist[]` (sin `playlists[]`), el PlaylistPanel sintetiza al primer render como `[{ id: 'main', name: 'Main', slides: wall.playlist }]`. Mantiene `wall.playlist` sincronizado con la activa para retro-compat con runtime/clientes no migrados.
+
+**Fase:** Video Walls editor end-to-end completo + validación visual + cierre audit (G1-G8 todos cerrados) + 27 templates + bug pxToCss arreglado + heurística KV-fs robusta. **Próxima sesión: validar visualmente templates derivados (Pendiente A) o ejecutar smoke E2E con auth (Pendiente B)**.
 
 ---
 

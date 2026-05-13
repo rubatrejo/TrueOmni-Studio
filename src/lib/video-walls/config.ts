@@ -5,7 +5,12 @@ import path from 'node:path';
 
 import { cache } from 'react';
 
-import { kvSignageEvents, kvSignageNews, kvSignageSocial } from '@/lib/signage/kv-store';
+import {
+  kvSignageClient,
+  kvSignageEvents,
+  kvSignageNews,
+  kvSignageSocial,
+} from '@/lib/signage/kv-store';
 
 import {
   kvVideoWall,
@@ -79,6 +84,12 @@ async function readClientFiles(slug: string) {
 
 export const loadVideoWallClient = cache(
   async (slug: string): Promise<VideoWallClientResolved | null> => {
+    // Cliente signage del KV — fuente de verdad para branding/header
+    // (los tabs BrandingTab/HeaderTab guardan ahí vía `saveTheme`). El
+    // runtime VW lo prefiere para que los cambios del editor se reflejen
+    // en el iframe del preview sin lag.
+    const kvSigClient = await kvSignageClient.get(slug).catch(() => null);
+
     // 1. KV first.
     try {
       const kvClient = await kvVideoWallClient.get(slug);
@@ -96,6 +107,14 @@ export const loadVideoWallClient = cache(
         );
         return VideoWallClientResolvedSchema.parse({
           ...kvClient,
+          // Branding/header del signage KV ganan (fuente de verdad).
+          branding: kvSigClient?.branding ?? kvClient.branding,
+          header: kvSigClient?.header ?? kvClient.header,
+          name: kvSigClient?.name ?? kvClient.name,
+          locale: kvSigClient?.locale ?? kvClient.locale,
+          timezone: kvSigClient?.timezone ?? kvClient.timezone,
+          location: kvSigClient?.location ?? kvClient.location,
+          website: kvSigClient?.website ?? kvClient.website,
           events: kvEvents ?? kvSigEvents ?? fsFiles?.events ?? [],
           social: kvSocial ?? kvSigSocial ?? fsFiles?.social ?? { posts: [] },
           news: kvNews ??
@@ -123,6 +142,14 @@ export const loadVideoWallClient = cache(
       ]);
       return VideoWallClientResolvedSchema.parse({
         ...files.client,
+        // Branding/header del signage KV ganan sobre fs (fuente de verdad).
+        branding: kvSigClient?.branding ?? files.client.branding,
+        header: kvSigClient?.header ?? files.client.header,
+        name: kvSigClient?.name ?? files.client.name,
+        locale: kvSigClient?.locale ?? files.client.locale,
+        timezone: kvSigClient?.timezone ?? files.client.timezone,
+        location: kvSigClient?.location ?? files.client.location,
+        website: kvSigClient?.website ?? files.client.website,
         events: kvEvents ?? kvSigEvents ?? files.events,
         social: kvSocial ?? kvSigSocial ?? files.social,
         news: kvNews ?? kvSigNews ?? files.news,

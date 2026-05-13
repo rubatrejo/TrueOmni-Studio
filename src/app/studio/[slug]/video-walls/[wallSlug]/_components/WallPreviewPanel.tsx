@@ -1,6 +1,15 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Maximize, Minus, Monitor, Plus, RotateCcw } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Maximize,
+  Minus,
+  Monitor,
+  Plus,
+  RotateCcw,
+  X,
+} from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { canvasDimensionsOf, GRID_CONFIGS, type GridConfig } from '@/lib/video-walls/dimensions';
@@ -46,6 +55,7 @@ export function WallPreviewPanel({
   const [userZoom, setUserZoom] = useState(1);
   const [focusedCell, setFocusedCell] = useState<{ row: number; col: number } | null>(null);
   const [showBezels, setShowBezels] = useState(true);
+  const [fullScreen, setFullScreen] = useState(false);
 
   const { cols, rows } = GRID_CONFIGS[grid];
   const { width: canvasW, height: canvasH } = canvasDimensionsOf(grid);
@@ -153,13 +163,23 @@ export function WallPreviewPanel({
             type="button"
             className="ml-1 inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-900"
             aria-label="Open in full screen"
-            onClick={() => window.open(iframeSrc, '_blank', 'noopener,noreferrer')}
+            onClick={() => setFullScreen(true)}
           >
             <Maximize className="h-3.5 w-3.5" />
             Full screen
           </button>
         </div>
       </div>
+
+      {fullScreen ? (
+        <FullScreenWallPreview
+          iframeSrc={iframeSrc}
+          wallName={wallName}
+          viewportW={viewportW}
+          viewportH={viewportH}
+          onClose={() => setFullScreen(false)}
+        />
+      ) : null}
 
       {/* Cell selector */}
       <div className="flex items-center gap-3 border-y border-zinc-200 bg-zinc-50 px-6 py-2 dark:border-zinc-800 dark:bg-zinc-900/40">
@@ -275,6 +295,93 @@ export function WallPreviewPanel({
         </span>
         <span className="font-mono">{iframeSrc}</span>
       </div>
+    </div>
+  );
+}
+
+function FullScreenWallPreview({
+  iframeSrc,
+  wallName,
+  viewportW,
+  viewportH,
+  onClose,
+}: {
+  iframeSrc: string;
+  wallName: string;
+  viewportW: number;
+  viewportH: number;
+  onClose: () => void;
+}) {
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    function fit() {
+      const padding = 80;
+      const availH = window.innerHeight - padding * 2;
+      const availW = window.innerWidth - padding * 2;
+      setScale(Math.min(availH / viewportH, availW / viewportW, 1));
+    }
+    fit();
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, [viewportW, viewportH]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Full screen preview of ${wallName}`}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-100 dark:bg-zinc-950"
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute left-6 top-6 z-10 inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3.5 py-2 text-[13px] font-medium text-zinc-800 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-700 dark:hover:bg-zinc-800"
+      >
+        <span aria-hidden="true">←</span>
+        Back to editor
+      </button>
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close full screen"
+        className="absolute right-6 top-6 z-10 grid h-9 w-9 place-items-center rounded-lg border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-700 dark:hover:bg-zinc-800"
+      >
+        <X className="h-4 w-4" />
+      </button>
+      <div
+        className="relative overflow-hidden shadow-2xl"
+        style={{
+          width: viewportW * scale,
+          height: viewportH * scale,
+          backgroundColor: '#000',
+        }}
+      >
+        <iframe
+          src={iframeSrc}
+          title={`${wallName} full screen`}
+          className="absolute left-0 top-0 block border-0"
+          style={{
+            width: viewportW,
+            height: viewportH,
+            transform: `scale(${scale})`,
+            transformOrigin: '0 0',
+          }}
+          allow="autoplay; fullscreen"
+          loading="eager"
+        />
+      </div>
+      <span className="absolute bottom-6 left-1/2 -translate-x-1/2 font-mono text-[11.5px] text-zinc-500 dark:text-zinc-500">
+        {wallName} · {viewportW}×{viewportH} · {Math.round(scale * 100)}% · ESC to close
+      </span>
     </div>
   );
 }

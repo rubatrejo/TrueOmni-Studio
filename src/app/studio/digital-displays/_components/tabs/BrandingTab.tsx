@@ -1,6 +1,6 @@
 'use client';
 
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, X } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { HslColorPicker, type HslColor } from 'react-colorful';
 
@@ -333,7 +333,16 @@ function BrandTokenCard({
       </button>
 
       {open ? (
-        <div className="flex flex-col items-center gap-2 rounded-md bg-zinc-50 p-3 dark:bg-zinc-900/50">
+        <div className="relative flex flex-col items-center gap-2 rounded-md bg-zinc-50 p-3 dark:bg-zinc-900/50">
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Close color picker"
+            title="Close color picker"
+            className="absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded text-zinc-500 transition hover:bg-zinc-200 hover:text-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
           <HslColorPicker
             color={hslObj}
             onChange={(c: HslColor) => onChange(formatHsl(c))}

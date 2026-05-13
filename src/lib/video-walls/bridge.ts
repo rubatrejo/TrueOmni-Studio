@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import type { BridgeStatus } from '@/lib/bridge/types';
+import type { SignageEvent, SignageNewsConfig, SignageSocialData } from '@/lib/signage/schema';
+
 import type { VideoWallClientFile, VideoWallConfig } from './schema';
 
 /**
@@ -24,12 +27,19 @@ import type { VideoWallClientFile, VideoWallConfig } from './schema';
  */
 type ReadyAck = { type: 'videowall:ready'; clientSlug?: string; wallSlug?: string };
 
-export type VideoWallBridgeStatus = 'connecting' | 'connected' | 'stale' | 'lost';
+/**
+ * Re-export del type compartido `BridgeStatus`. Mantenido para retro-compat
+ * con consumidores que ya importan `VideoWallBridgeStatus`.
+ */
+export type VideoWallBridgeStatus = BridgeStatus;
 
 export function useVideoWallBridge() {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const lastClientRef = useRef<Partial<VideoWallClientFile> | null>(null);
   const lastWallRef = useRef<Partial<VideoWallConfig> | null>(null);
+  const lastEventsRef = useRef<SignageEvent[] | null>(null);
+  const lastSocialRef = useRef<SignageSocialData | null>(null);
+  const lastNewsRef = useRef<SignageNewsConfig | null>(null);
   const clientDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wallDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -66,6 +76,44 @@ export function useVideoWallBridge() {
     }
   }, []);
 
+  // Pushes para contenido (events/social/news) — entidades que viven en
+  // `client.events/social/news` del runtime resolved, pero que se guardan
+  // por endpoints separados del KV (`/api/studio/signage/clients/:slug/
+  // content?kind=...`). Cuando alguno de los Tabs reusados del Digital
+  // Displays guarda, queremos propagar al iframe del wall sin reload.
+  const sendEventsNow = useCallback((events: SignageEvent[]) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'videowall:events-update', events }, '*');
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('[videowall:bridge:editor] events postMessage failed', e);
+    }
+  }, []);
+
+  const sendSocialNow = useCallback((social: SignageSocialData) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'videowall:social-update', social }, '*');
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('[videowall:bridge:editor] social postMessage failed', e);
+    }
+  }, []);
+
+  const sendNewsNow = useCallback((news: SignageNewsConfig) => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'videowall:news-update', news }, '*');
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('[videowall:bridge:editor] news postMessage failed', e);
+    }
+  }, []);
+
   // Listener del handshake/heartbeat del runtime.
   useEffect(() => {
     function handler(event: MessageEvent) {
@@ -77,11 +125,14 @@ export function useVideoWallBridge() {
         // Resendear pushes pendientes (race).
         if (lastClientRef.current) sendClientNow(lastClientRef.current);
         if (lastWallRef.current) sendWallNow(lastWallRef.current);
+        if (lastEventsRef.current) sendEventsNow(lastEventsRef.current);
+        if (lastSocialRef.current) sendSocialNow(lastSocialRef.current);
+        if (lastNewsRef.current) sendNewsNow(lastNewsRef.current);
       }
     }
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
-  }, [sendClientNow, sendWallNow]);
+  }, [sendClientNow, sendWallNow, sendEventsNow, sendSocialNow, sendNewsNow]);
 
   const pushClient = useCallback(
     (client: Partial<VideoWallClientFile>) => {
@@ -111,6 +162,32 @@ export function useVideoWallBridge() {
       }
     },
     [sendWallNow],
+  );
+
+  // Sin debounce — los saves de events/social/news ya son discretos (Save
+  // explícito desde el Tab) y queremos feedback instantáneo en el preview.
+  const pushEvents = useCallback(
+    (events: SignageEvent[]) => {
+      lastEventsRef.current = events;
+      sendEventsNow(events);
+    },
+    [sendEventsNow],
+  );
+
+  const pushSocial = useCallback(
+    (social: SignageSocialData) => {
+      lastSocialRef.current = social;
+      sendSocialNow(social);
+    },
+    [sendSocialNow],
+  );
+
+  const pushNews = useCallback(
+    (news: SignageNewsConfig) => {
+      lastNewsRef.current = news;
+      sendNewsNow(news);
+    },
+    [sendNewsNow],
   );
 
   const onIframeLoad = useCallback(() => {
@@ -145,11 +222,38 @@ export function useVideoWallBridge() {
             // ignored
           }
         }
+        if (lastEventsRef.current) {
+          try {
+            win.postMessage(
+              { type: 'videowall:events-update', events: lastEventsRef.current },
+              '*',
+            );
+          } catch {
+            // ignored
+          }
+        }
+        if (lastSocialRef.current) {
+          try {
+            win.postMessage(
+              { type: 'videowall:social-update', social: lastSocialRef.current },
+              '*',
+            );
+          } catch {
+            // ignored
+          }
+        }
+        if (lastNewsRef.current) {
+          try {
+            win.postMessage({ type: 'videowall:news-update', news: lastNewsRef.current }, '*');
+          } catch {
+            // ignored
+          }
+        }
       }, delay);
     });
   }, []);
 
-  const bridgeStatus: VideoWallBridgeStatus = (() => {
+  const bridgeStatus: BridgeStatus = (() => {
     const now = Date.now();
     if (lastAckAt === null) {
       return now - mountAt < 5000 ? 'connecting' : 'lost';
@@ -164,6 +268,9 @@ export function useVideoWallBridge() {
     iframeRef,
     pushClient,
     pushWall,
+    pushEvents,
+    pushSocial,
+    pushNews,
     onIframeLoad,
     isReady,
     bridgeStatus,

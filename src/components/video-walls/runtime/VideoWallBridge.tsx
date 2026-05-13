@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 
+import type { SignageEvent, SignageNewsConfig, SignageSocialData } from '@/lib/signage/schema';
 import type { VideoWallClientFile, VideoWallConfig } from '@/lib/video-walls/schema';
 
 import { useVideoWallBridgeStore } from './video-wall-bridge-store';
@@ -32,6 +33,9 @@ export interface VideoWallBridgeProps {
 export function VideoWallBridge({ clientSlug, wallSlug }: VideoWallBridgeProps) {
   const setClientPatch = useVideoWallBridgeStore((s) => s.setClientPatch);
   const setWallPatch = useVideoWallBridgeStore((s) => s.setWallPatch);
+  const setEventsPatch = useVideoWallBridgeStore((s) => s.setEventsPatch);
+  const setSocialPatch = useVideoWallBridgeStore((s) => s.setSocialPatch);
+  const setNewsPatch = useVideoWallBridgeStore((s) => s.setNewsPatch);
 
   useEffect(() => {
     const target = window.parent;
@@ -56,6 +60,9 @@ export function VideoWallBridge({ clientSlug, wallSlug }: VideoWallBridgeProps) 
         type?: string;
         client?: Partial<VideoWallClientFile>;
         wall?: Partial<VideoWallConfig>;
+        events?: SignageEvent[];
+        social?: SignageSocialData;
+        news?: SignageNewsConfig;
       } | null;
       if (!data || typeof data.type !== 'string') return;
 
@@ -63,6 +70,12 @@ export function VideoWallBridge({ clientSlug, wallSlug }: VideoWallBridgeProps) 
         setClientPatch(data.client);
       } else if (data.type === 'videowall:wall-update' && data.wall) {
         setWallPatch(data.wall);
+      } else if (data.type === 'videowall:events-update' && Array.isArray(data.events)) {
+        setEventsPatch(data.events);
+      } else if (data.type === 'videowall:social-update' && data.social) {
+        setSocialPatch(data.social);
+      } else if (data.type === 'videowall:news-update' && data.news) {
+        setNewsPatch(data.news);
       }
     }
 
@@ -71,7 +84,15 @@ export function VideoWallBridge({ clientSlug, wallSlug }: VideoWallBridgeProps) 
       window.clearInterval(heartbeat);
       window.removeEventListener('message', onMessage);
     };
-  }, [clientSlug, wallSlug, setClientPatch, setWallPatch]);
+  }, [
+    clientSlug,
+    wallSlug,
+    setClientPatch,
+    setWallPatch,
+    setEventsPatch,
+    setSocialPatch,
+    setNewsPatch,
+  ]);
 
   return null;
 }

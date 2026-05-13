@@ -47,23 +47,35 @@ export function VideoWallRuntime({
 }: VideoWallRuntimeProps) {
   const clientPatch = useVideoWallBridgeStore((s) => s.clientPatch);
   const wallPatch = useVideoWallBridgeStore((s) => s.wallPatch);
+  const eventsPatch = useVideoWallBridgeStore((s) => s.eventsPatch);
+  const socialPatch = useVideoWallBridgeStore((s) => s.socialPatch);
+  const newsPatch = useVideoWallBridgeStore((s) => s.newsPatch);
 
   // Merge no-destructivo: el patch tiene precedencia sobre la prop server.
   // El styling (tokens CSS / fonts) lo aplica el StyleApplier; aquí solo
   // mergeamos data estructural usada por el header + templates.
+  //
+  // Eventos/social/news llegan por canales independientes (los Tabs DD
+  // guardan vía endpoints `/content?kind=...`) pero se mergean aquí sobre
+  // el client resolved para que los templates VW (events / social / news
+  // slots) reciban la versión más fresca sin reload del iframe.
   const effectiveClient = useMemo<VideoWallClientResolved>(() => {
-    if (!clientPatch) return client;
+    const base: VideoWallClientResolved = clientPatch
+      ? {
+          ...client,
+          ...clientPatch,
+          branding: { ...client.branding, ...(clientPatch.branding ?? {}) },
+          header: { ...client.header, ...(clientPatch.header ?? {}) },
+          location: { ...client.location, ...(clientPatch.location ?? {}) },
+        }
+      : client;
     return {
-      ...client,
-      ...clientPatch,
-      // Para subcampos críticos del runtime hacemos merge shallow controlado
-      // — evitamos que un patch parcial (e.g. solo branding) borre header,
-      // events, social, news.
-      branding: { ...client.branding, ...(clientPatch.branding ?? {}) },
-      header: { ...client.header, ...(clientPatch.header ?? {}) },
-      location: { ...client.location, ...(clientPatch.location ?? {}) },
+      ...base,
+      events: eventsPatch ?? base.events,
+      social: socialPatch ?? base.social,
+      news: newsPatch ?? base.news,
     };
-  }, [client, clientPatch]);
+  }, [client, clientPatch, eventsPatch, socialPatch, newsPatch]);
 
   const effectiveWall = useMemo<VideoWallConfig>(() => {
     if (!wallPatch) return wall;

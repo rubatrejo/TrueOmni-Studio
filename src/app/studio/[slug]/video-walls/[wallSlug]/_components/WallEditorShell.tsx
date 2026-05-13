@@ -23,6 +23,7 @@ import { EventsTab } from '@/app/studio/digital-displays/_components/tabs/Events
 import { HeaderTab } from '@/app/studio/digital-displays/_components/tabs/HeaderTab';
 import { NewsTab } from '@/app/studio/digital-displays/_components/tabs/NewsTab';
 import { SocialTab } from '@/app/studio/digital-displays/_components/tabs/SocialTab';
+import type { SignageContentSavedDetail } from '@/app/studio/digital-displays/_lib/save-content';
 import { useDebouncedAutosave } from '@/app/studio/digital-displays/_lib/save-display';
 import { saveTheme } from '@/app/studio/digital-displays/_lib/save-theme';
 import { SignageEditorProvider } from '@/app/studio/digital-displays/_lib/signage-editor-context';
@@ -116,7 +117,16 @@ export function WallEditorShell({
   // lugar de reload del iframe. Drástica mejora de UX (sin flicker 500ms
   // por cada autosave). El runtime hace merge no-destructivo entre el patch
   // del bridge y la prop server.
-  const { iframeRef, pushClient, pushWall, onIframeLoad, bridgeStatus } = useVideoWallBridge();
+  const {
+    iframeRef,
+    pushClient,
+    pushWall,
+    pushEvents,
+    pushSocial,
+    pushNews,
+    onIframeLoad,
+    bridgeStatus,
+  } = useVideoWallBridge();
 
   // Theme store (branding/header) compartido con Digital Displays — la data
   // del cliente vive en `signage:client:{slug}` KV y syncea entre productos.
@@ -170,23 +180,53 @@ export function WallEditorShell({
   }, [pushClient]);
   useDebouncedAutosave(themeDraft, themeDirty, onThemeAutosave, 1000);
 
-  // Reload iframe cuando los tabs (events/social/news/theme) guardan al KV.
-  // Emiten `signage-content-saved` / `signage-theme-saved` via save-content
-  // / save-theme. Filtramos por clientSlug del wall actual.
+  // Listener legacy `signage-theme-saved` — fallback defensivo si el bridge
+  // está caído (status `lost`). Con bridge conectado, el `pushClient` del
+  // autosave ya propagó la data sin reload; el bump del previewKey haría
+  // flicker innecesario, así que lo skipeamos.
   useEffect(() => {
-    function onSaved(e: Event) {
+    function onThemeSaved(e: Event) {
       const detail = (e as CustomEvent<{ clientSlug?: string }>).detail;
-      if (!detail || detail.clientSlug === clientSlug) {
-        setPreviewKey((k) => k + 1);
-      }
+      if (detail && detail.clientSlug !== clientSlug) return;
+      if (bridgeStatus === 'connected') return; // bridge ya propagó
+      setPreviewKey((k) => k + 1);
     }
-    window.addEventListener('signage-content-saved', onSaved);
-    window.addEventListener('signage-theme-saved', onSaved);
-    return () => {
-      window.removeEventListener('signage-content-saved', onSaved);
-      window.removeEventListener('signage-theme-saved', onSaved);
-    };
-  }, [clientSlug]);
+    window.addEventListener('signage-theme-saved', onThemeSaved);
+    return () => window.removeEventListener('signage-theme-saved', onThemeSaved);
+  }, [clientSlug, bridgeStatus]);
+
+  // Listener `signage-content-saved` — los Tabs DD (Events/Social/News) lo
+  // emiten tras un PUT exitoso al KV. Si el bridge está vivo, propagamos el
+  // payload por postMessage al iframe (sin reload). Si está `lost`, caemos a
+  // bumpear `previewKey` para forzar reload como fallback. Backwards-compat:
+  // el listener acepta el detail viejo (sin payload) y el nuevo.
+  useEffect(() => {
+    function onContentSaved(e: Event) {
+      const detail = (e as CustomEvent<SignageContentSavedDetail>).detail;
+      if (!detail || detail.clientSlug !== clientSlug) return;
+
+      const bridgeAlive = bridgeStatus === 'connected' || bridgeStatus === 'connecting';
+      if (bridgeAlive) {
+        if (detail.kind === 'events' && detail.events) {
+          pushEvents(detail.events);
+          return;
+        }
+        if (detail.kind === 'social' && detail.social) {
+          pushSocial(detail.social);
+          return;
+        }
+        if (detail.kind === 'news' && detail.news) {
+          pushNews(detail.news);
+          return;
+        }
+      }
+      // Fallback: sin payload en el detail o bridge perdido — recargar
+      // iframe para que el runtime relea desde el KV via server props.
+      setPreviewKey((k) => k + 1);
+    }
+    window.addEventListener('signage-content-saved', onContentSaved);
+    return () => window.removeEventListener('signage-content-saved', onContentSaved);
+  }, [clientSlug, bridgeStatus, pushEvents, pushSocial, pushNews]);
 
   // Bridge live editor↔iframe — el host empuja el wall completo al iframe
   // con cada cambio. El runtime hace merge no-destructivo (ver
@@ -222,10 +262,15 @@ export function WallEditorShell({
   // Empuja el estado inicial del wall/client al iframe en cuanto el bridge
   // monta — el editor puede tener el preview cargado antes del primer
   // autosave y queremos que el iframe vea exactamente lo que el operador
-  // tiene en pantalla.
+  // tiene en pantalla. Incluimos events/social/news para que los slots de
+  // contenido se rendericen con la versión del cliente actual aunque el
+  // operador nunca toque esos tabs.
   useEffect(() => {
     pushWall(wall);
-    // Solo en mount: handleWallChange empuja los cambios posteriores.
+    if (client.events) pushEvents(client.events);
+    if (client.social) pushSocial(client.social);
+    if (client.news) pushNews(client.news);
+    // Solo en mount: handleWallChange / listeners de save empujan cambios.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

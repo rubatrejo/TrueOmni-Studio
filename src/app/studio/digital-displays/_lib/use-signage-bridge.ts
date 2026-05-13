@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import type { BridgeStatus } from '@/lib/bridge/types';
 import type { SignageClientFile, SignageDisplayConfig } from '@/lib/signage/schema';
 
 /**
@@ -43,7 +44,13 @@ export interface SignageActiveSlide {
   templateId?: string;
 }
 
-export type SignageBridgeStatus = 'connecting' | 'connected' | 'stale' | 'lost';
+/**
+ * Re-export del type compartido para retro-compat con cualquier consumidor
+ * que importe `SignageBridgeStatus` directamente desde este módulo. Bajo el
+ * capó es el mismo `BridgeStatus` que usa el bridge de Video Walls — así el
+ * `<SignageSidebarTabs>` puede reusarse en ambos editores sin cast.
+ */
+export type SignageBridgeStatus = BridgeStatus;
 
 export function useSignageBridge() {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -202,7 +209,7 @@ export function useSignageBridge() {
     });
   }, []);
 
-  const bridgeStatus: SignageBridgeStatus = (() => {
+  const bridgeStatus: BridgeStatus = (() => {
     const now = Date.now();
     if (lastAckAt === null) {
       return now - mountAt < 5000 ? 'connecting' : 'lost';

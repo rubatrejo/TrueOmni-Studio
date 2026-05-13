@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useRef, type KeyboardEvent } from 'react';
 
-import type { SignageBridgeStatus } from '../../_lib/use-signage-bridge';
+import type { BridgeStatus } from '@/lib/bridge/types';
 
 /**
  * `<SignageSidebarTabs>` — sidebar vertical del editor signage.
@@ -110,7 +110,7 @@ export interface SignageSidebarTabsProps<K extends string = string> {
   activeKey: K;
   onSelect: (key: K) => void;
   ariaLabel?: string;
-  bridgeStatus: SignageBridgeStatus;
+  bridgeStatus: BridgeStatus;
   onReloadPreview?: () => void;
 }
 
@@ -226,13 +226,7 @@ export function SignageSidebarTabs<K extends string = string>({
   );
 }
 
-function BridgeStatusCard({
-  status,
-  onReload,
-}: {
-  status: SignageBridgeStatus;
-  onReload?: () => void;
-}) {
+function BridgeStatusCard({ status, onReload }: { status: BridgeStatus; onReload?: () => void }) {
   const presets = {
     connecting: {
       dot: 'bg-sky-500 animate-pulse',

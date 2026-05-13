@@ -42,6 +42,34 @@ async function readWallsAsset(slug: string, relPath: string): Promise<Buffer | n
   }
 }
 
+/**
+ * Probe fs para signage assets sin leer el archivo entero — basta con saber si
+ * existe para decidir entre redirect 302 (sí existe) o 404 directo (no existe
+ * en ningún lado). Usar `access`/`stat` es más barato que `readFile` para esto.
+ *
+ * G7 (audit 2026-05-12): antes hacíamos redirect 302 ciego a signage-assets
+ * cuando el archivo no estaba en clients-walls. Si tampoco estaba ahí, el
+ * browser veía 302 → 404 (ruido). Ahora chequeamos primero y devolvemos 404
+ * directo si no existe en ninguna parte.
+ */
+async function signageAssetExists(slug: string, relPath: string): Promise<boolean> {
+  const { access } = await import('node:fs/promises');
+  const candidates = [
+    path.join(process.cwd(), 'clients-signage', slug, relPath),
+    slug !== 'default' ? path.join(process.cwd(), 'clients-signage', 'default', relPath) : null,
+  ].filter((p): p is string => p !== null);
+
+  for (const p of candidates) {
+    try {
+      await access(p);
+      return true;
+    } catch {
+      // sigue al siguiente candidato
+    }
+  }
+  return false;
+}
+
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ client: string; path: string[] }> },
@@ -58,7 +86,13 @@ export async function GET(
     data = await readWallsAsset('default', relPath);
   }
   if (!data) {
-    // Fallback a signage-assets vía redirect (mismos assets, otro endpoint).
+    // G7: chequea fs signage antes de redirigir. Si no existe ahí tampoco,
+    // devolvemos 404 directo en vez de 302 → 404 (que ensucia DevTools).
+    const existsInSignage = await signageAssetExists(client, relPath);
+    if (!existsInSignage) {
+      return new NextResponse('not found', { status: 404 });
+    }
+    // Sí existe: redirect 302 a signage-assets (mismos assets, otro endpoint).
     return NextResponse.redirect(new URL(`/signage-assets/${client}/${relPath}`, _req.url), 302);
   }
 

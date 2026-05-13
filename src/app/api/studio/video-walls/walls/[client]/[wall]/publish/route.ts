@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { getGitHubPublishConfig, publishToGitHub } from '@/lib/studio/github-publisher';
 import { kvVideoWall, kvVideoWallClient } from '@/lib/video-walls/kv-store';
+import { assertVwSlug, VwSlugError } from '@/lib/video-walls/slug-validation';
 
 interface RouteParams {
   params: Promise<{ client: string; wall: string }>;
@@ -26,6 +27,15 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(_req: Request, { params }: RouteParams) {
   const { client, wall } = await params;
+  try {
+    assertVwSlug(client, 'client');
+    assertVwSlug(wall, 'wall');
+  } catch (e) {
+    if (e instanceof VwSlugError) {
+      return NextResponse.json({ error: 'invalid slug' }, { status: 400 });
+    }
+    throw e;
+  }
 
   const [wallData, clientData] = await Promise.all([
     kvVideoWall.get(client, wall),

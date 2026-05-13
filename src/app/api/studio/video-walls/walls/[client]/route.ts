@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { GRID_CONFIG_IDS, type GridConfig } from '@/lib/video-walls/dimensions';
 import { kvVideoWall, kvVideoWallClient } from '@/lib/video-walls/kv-store';
 import { VideoWallConfigSchema, type VideoWallConfig } from '@/lib/video-walls/schema';
+import { assertVwSlug, VwSlugError } from '@/lib/video-walls/slug-validation';
 
 interface RouteParams {
   params: Promise<{ client: string }>;
@@ -10,12 +11,22 @@ interface RouteParams {
 
 export const dynamic = 'force-dynamic';
 
+function badSlug(): NextResponse {
+  return NextResponse.json({ error: 'invalid slug' }, { status: 400 });
+}
+
 /**
  * `GET /api/studio/video-walls/walls/[client]` — lista slugs de walls
  * del cliente. Solo lee el client.json en KV.
  */
 export async function GET(_req: Request, { params }: RouteParams) {
   const { client } = await params;
+  try {
+    assertVwSlug(client, 'client');
+  } catch (e) {
+    if (e instanceof VwSlugError) return badSlug();
+    throw e;
+  }
   const clientFile = await kvVideoWallClient.get(client);
   if (!clientFile) {
     return NextResponse.json({ error: `client "${client}" not found` }, { status: 404 });
@@ -31,6 +42,12 @@ export async function GET(_req: Request, { params }: RouteParams) {
  */
 export async function POST(req: Request, { params }: RouteParams) {
   const { client } = await params;
+  try {
+    assertVwSlug(client, 'client');
+  } catch (e) {
+    if (e instanceof VwSlugError) return badSlug();
+    throw e;
+  }
   const clientFile = await kvVideoWallClient.get(client);
   if (!clientFile) {
     return NextResponse.json({ error: `client "${client}" not found` }, { status: 404 });

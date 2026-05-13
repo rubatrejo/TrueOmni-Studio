@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { kvVideoWallSnapshot } from '@/lib/video-walls/kv-store';
+import { assertVwSlug, VwSlugError } from '@/lib/video-walls/slug-validation';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -18,6 +19,15 @@ interface RouteContext {
  */
 export async function DELETE(_req: NextRequest, ctx: RouteContext) {
   const { client, wall, id } = await ctx.params;
+  try {
+    assertVwSlug(client, 'client');
+    assertVwSlug(wall, 'wall');
+  } catch (e) {
+    if (e instanceof VwSlugError) {
+      return NextResponse.json({ error: 'invalid slug' }, { status: 400 });
+    }
+    throw e;
+  }
   try {
     await kvVideoWallSnapshot.delete(client, wall, id);
     return NextResponse.json({ ok: true });

@@ -1,12 +1,26 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { kvVideoWall, kvVideoWallSnapshot } from '@/lib/video-walls/kv-store';
+import { assertVwSlug, VwSlugError } from '@/lib/video-walls/slug-validation';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 interface RouteContext {
   params: Promise<{ client: string; wall: string }>;
+}
+
+function validateSlugs(client: string, wall: string): NextResponse | null {
+  try {
+    assertVwSlug(client, 'client');
+    assertVwSlug(wall, 'wall');
+    return null;
+  } catch (e) {
+    if (e instanceof VwSlugError) {
+      return NextResponse.json({ error: 'invalid slug' }, { status: 400 });
+    }
+    throw e;
+  }
 }
 
 /**
@@ -17,6 +31,8 @@ interface RouteContext {
  */
 export async function GET(_req: NextRequest, ctx: RouteContext) {
   const { client, wall } = await ctx.params;
+  const slugErr = validateSlugs(client, wall);
+  if (slugErr) return slugErr;
   try {
     const snapshots = await kvVideoWallSnapshot.listMeta(client, wall);
     return NextResponse.json({ snapshots });
@@ -35,6 +51,8 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
  */
 export async function POST(req: NextRequest, ctx: RouteContext) {
   const { client, wall } = await ctx.params;
+  const slugErr = validateSlugs(client, wall);
+  if (slugErr) return slugErr;
 
   let note: string | undefined;
   try {

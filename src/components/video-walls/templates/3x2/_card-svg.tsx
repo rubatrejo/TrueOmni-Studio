@@ -81,7 +81,14 @@ export function EventCardSvg({
       ) : null}
 
       {/* Bottom panel #004f8b opacity 0.8 */}
-      <rect x="0" y={h - 200} width={w} height="200" fill="#004f8b" opacity="0.8" />
+      <rect
+        x="0"
+        y={h - 200}
+        width={w}
+        height="200"
+        fill="hsl(var(--signage-brand-primary, 210 100% 27%))"
+        opacity="0.8"
+      />
 
       {/* Title (2 lines max) */}
       <text
@@ -108,7 +115,13 @@ export function EventCardSvg({
       </text>
 
       {/* Date badge */}
-      <rect x="0" y="30" width="214" height="185.59" fill="#1796d6" />
+      <rect
+        x="0"
+        y="30"
+        width="214"
+        height="185.59"
+        fill="hsl(var(--signage-brand-secondary, 200 78% 47%))"
+      />
       <text
         x="107"
         y="75"
@@ -197,8 +210,12 @@ export function SocialGradientDefs() {
         y2="1"
         gradientUnits="objectBoundingBox"
       >
-        <stop offset="0" stopColor="#444" stopOpacity="0" />
-        <stop offset="1" stopColor="#004f8b" />
+        <stop
+          offset="0"
+          stopColor="hsl(var(--signage-brand-primary, 210 100% 27%))"
+          stopOpacity="0"
+        />
+        <stop offset="1" stopColor="hsl(var(--signage-brand-primary, 210 100% 27%))" />
       </linearGradient>
     </defs>
   );

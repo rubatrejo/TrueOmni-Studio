@@ -25,6 +25,7 @@ import { NewsTab } from '@/app/studio/digital-displays/_components/tabs/NewsTab'
 import { SocialTab } from '@/app/studio/digital-displays/_components/tabs/SocialTab';
 import { useDebouncedAutosave } from '@/app/studio/digital-displays/_lib/save-display';
 import { saveTheme } from '@/app/studio/digital-displays/_lib/save-theme';
+import { SignageEditorProvider } from '@/app/studio/digital-displays/_lib/signage-editor-context';
 import { useThemeEditStore } from '@/app/studio/digital-displays/_lib/theme-edit-store';
 import type { SignageBridgeStatus } from '@/app/studio/digital-displays/_lib/use-signage-bridge';
 import type { SignageClientResolved } from '@/lib/signage/schema';
@@ -201,104 +202,111 @@ export function WallEditorShell({
   const previewHref = `/video-walls/${clientSlug}/${wallSlug}`;
 
   return (
-    <div className="studio-shell flex h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
-      <SignageTopBar
-        slug={`${clientSlug} / ${wallSlug}`}
-        clientSlug={clientSlug}
-        nombre={wallName}
-        saveState={themeError ? 'error' : themeSaving ? 'saving' : themeDirty ? 'idle' : 'saved'}
-        isDirty={themeDirty}
-        previewHref={previewHref}
-        productLabel="Video Walls"
-        productHref={`/studio/${clientSlug}/video-walls`}
-        clientLabel={clientName}
-      />
-
-      <div className="flex flex-1 overflow-hidden">
-        <SignageSidebarTabs<TabKey>
-          sections={SECTIONS}
-          ariaLabel="Wall editor sections"
-          activeKey={tab}
-          onSelect={setTab}
-          bridgeStatus={bridgeStatus}
-          onReloadPreview={() => setPreviewKey((k) => k + 1)}
+    <SignageEditorProvider clientSlug={clientSlug}>
+      <div className="studio-shell flex h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+        <SignageTopBar
+          slug={`${clientSlug} / ${wallSlug}`}
+          clientSlug={clientSlug}
+          nombre={wallName}
+          saveState={themeError ? 'error' : themeSaving ? 'saving' : themeDirty ? 'idle' : 'saved'}
+          isDirty={themeDirty}
+          previewHref={previewHref}
+          productLabel="Video Walls"
+          productHref={`/studio/${clientSlug}/video-walls`}
+          clientLabel={clientName}
         />
 
-        <main className="flex flex-1 overflow-hidden">
-          <div className="flex w-full shrink-0 flex-col overflow-hidden border-r border-zinc-200 dark:border-zinc-900 lg:w-[400px] xl:w-[480px]">
-            <div key={tab} className="studio-tab-fade flex min-h-0 flex-1 flex-col overflow-y-auto">
-              <div className="flex flex-1 flex-col gap-4 px-6 py-6">
-                {tab === 'playlist' && (
-                  <PlaylistPanel
-                    clientSlug={clientSlug}
-                    wall={wall}
-                    onWallChange={handleWallChange}
-                    activeSlideId={activeSlideId}
-                    onSelectSlide={handleSelectSlide}
-                  />
-                )}
-                {tab === 'settings' && (
-                  <SettingsPanel
-                    clientSlug={clientSlug}
-                    wall={wall}
-                    onWallChange={handleWallChange}
-                  />
-                )}
-                {tab === 'branding' && <BrandingTab client={client} tokensCss={tokensCss} />}
-                {tab === 'header' && <HeaderTab client={client} />}
-                {tab === 'events' && (
-                  <EventsTab clientSlug={clientSlug} initialEvents={client.events ?? []} />
-                )}
-                {tab === 'social' && (
-                  <SocialTab
-                    clientSlug={clientSlug}
-                    initialSocial={client.social ?? { posts: [] }}
-                  />
-                )}
-                {tab === 'news' && (
-                  <NewsTab
-                    clientSlug={clientSlug}
-                    initialNews={
-                      client.news ?? {
-                        source: { kind: 'manual', items: [] },
-                        rotationIntervalSec: 8,
+        <div className="flex flex-1 overflow-hidden">
+          <SignageSidebarTabs<TabKey>
+            sections={SECTIONS}
+            ariaLabel="Wall editor sections"
+            activeKey={tab}
+            onSelect={setTab}
+            bridgeStatus={bridgeStatus}
+            onReloadPreview={() => setPreviewKey((k) => k + 1)}
+          />
+
+          <main className="flex flex-1 overflow-hidden">
+            <div className="flex w-full shrink-0 flex-col overflow-hidden border-r border-zinc-200 dark:border-zinc-900 lg:w-[400px] xl:w-[480px]">
+              <div
+                key={tab}
+                className="studio-tab-fade flex min-h-0 flex-1 flex-col overflow-y-auto"
+              >
+                <div className="flex flex-1 flex-col gap-4 px-6 py-6">
+                  {tab === 'playlist' && (
+                    <PlaylistPanel
+                      clientSlug={clientSlug}
+                      wall={wall}
+                      onWallChange={handleWallChange}
+                      activeSlideId={activeSlideId}
+                      onSelectSlide={handleSelectSlide}
+                    />
+                  )}
+                  {tab === 'settings' && (
+                    <SettingsPanel
+                      clientSlug={clientSlug}
+                      wall={wall}
+                      onWallChange={handleWallChange}
+                    />
+                  )}
+                  {tab === 'branding' && <BrandingTab client={client} tokensCss={tokensCss} />}
+                  {tab === 'header' && <HeaderTab client={client} />}
+                  {tab === 'events' && (
+                    <EventsTab clientSlug={clientSlug} initialEvents={client.events ?? []} />
+                  )}
+                  {tab === 'social' && (
+                    <SocialTab
+                      clientSlug={clientSlug}
+                      initialSocial={client.social ?? { posts: [] }}
+                    />
+                  )}
+                  {tab === 'news' && (
+                    <NewsTab
+                      clientSlug={clientSlug}
+                      initialNews={
+                        client.news ?? {
+                          source: { kind: 'manual', items: [] },
+                          rotationIntervalSec: 8,
+                        }
                       }
-                    }
+                    />
+                  )}
+                  {tab === 'versions' && (
+                    <SectionStub
+                      title="Versions"
+                      description="Snapshots history and restore — wires into the same KV snapshot pattern as signage. Sub-phase VW9.5."
+                    />
+                  )}
+                  {tab === 'publish' && (
+                    <PublishPanel clientSlug={clientSlug} wallSlug={wallSlug} />
+                  )}
+                  <WallSummary
+                    wallSlug={wallSlug}
+                    wallName={wallName}
+                    grid={grid}
+                    cols={cols}
+                    rows={rows}
                   />
-                )}
-                {tab === 'versions' && (
-                  <SectionStub
-                    title="Versions"
-                    description="Snapshots history and restore — wires into the same KV snapshot pattern as signage. Sub-phase VW9.5."
-                  />
-                )}
-                {tab === 'publish' && <PublishPanel clientSlug={clientSlug} wallSlug={wallSlug} />}
-                <WallSummary
-                  wallSlug={wallSlug}
-                  wallName={wallName}
-                  grid={grid}
-                  cols={cols}
-                  rows={rows}
-                />
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="relative flex w-full flex-1 items-center justify-center overflow-hidden">
-            <WallPreviewPanel
-              clientSlug={clientSlug}
-              wallSlug={wallSlug}
-              wallName={wallName}
-              grid={grid}
-              reloadKey={previewKey}
-              slides={wall.playlist}
-              currentSlideIndex={currentSlideIndex}
-              onNavSlide={handleNavSlide}
-            />
-          </div>
-        </main>
+            <div className="relative flex w-full flex-1 items-center justify-center overflow-hidden">
+              <WallPreviewPanel
+                clientSlug={clientSlug}
+                wallSlug={wallSlug}
+                wallName={wallName}
+                grid={grid}
+                reloadKey={previewKey}
+                slides={wall.playlist}
+                currentSlideIndex={currentSlideIndex}
+                onNavSlide={handleNavSlide}
+              />
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </SignageEditorProvider>
   );
 }
 

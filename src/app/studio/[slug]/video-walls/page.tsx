@@ -1,4 +1,4 @@
-import { ChevronRight, LayoutGrid } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -196,22 +196,6 @@ export default async function ClientVideoWallsPage({ params }: PageProps) {
 
           <NewWallCard clientSlug={slug} existingSlugs={walls.map((w) => w.slug)} />
         </div>
-
-        <section className="mt-12 rounded-xl border border-zinc-200 bg-white px-6 py-5 dark:border-zinc-800 dark:bg-zinc-900/40">
-          <div className="flex items-center gap-2 text-zinc-700 dark:text-zinc-300">
-            <LayoutGrid className="h-4 w-4" />
-            <h2 className="text-[13px] font-semibold">Runtime URLs</h2>
-          </div>
-          <p className="mt-1.5 text-[12px] text-zinc-500">
-            Each physical TV opens the same wall URL with its <code>?cell=row,col</code> parameter.
-            Without the param, you see the full canvas (used by the editor preview).
-          </p>
-          {walls.length > 0 && (
-            <pre className="mt-3 overflow-x-auto rounded-md bg-zinc-50 px-3 py-2 font-mono text-[11px] text-zinc-700 dark:bg-zinc-950 dark:text-zinc-300">
-              {`/video-walls/${slug}/${walls[0].slug}             (full canvas)\n/video-walls/${slug}/${walls[0].slug}?cell=0,0   (top-left TV)`}
-            </pre>
-          )}
-        </section>
       </main>
     </div>
   );

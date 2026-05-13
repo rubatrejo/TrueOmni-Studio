@@ -3,6 +3,7 @@
 import { ChevronDown, ChevronRight, GripVertical, Loader2, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState, type DragEvent } from 'react';
 
+import { SignageMediaField } from '@/app/studio/digital-displays/_components/display/modules/SignageMediaField';
 import { getTemplatesForGrid } from '@/components/video-walls/templates/registry';
 import '@/components/video-walls/templates/load-templates';
 import type {
@@ -140,11 +141,16 @@ export function PlaylistPanel({
     }));
   };
 
-  const setSlotModuleUrl = (slideId: string, slotKey: string, url: string) => {
+  const setSlotModuleUrl = (
+    slideId: string,
+    slotKey: string,
+    url: string,
+    kind?: 'image' | 'video',
+  ) => {
     updateSlide(slideId, (s) => ({
       ...s,
       slots: s.slots.map((sl) =>
-        sl.slotKey === slotKey ? { ...sl, module: setUrlOf(sl.module, url) } : sl,
+        sl.slotKey === slotKey ? { ...sl, module: setUrlOf(sl.module, url, kind) } : sl,
       ),
     }));
   };
@@ -323,7 +329,9 @@ export function PlaylistPanel({
                         <SlotEditor
                           key={slot.slotKey}
                           slot={slot}
-                          onUrlChange={(url) => setSlotModuleUrl(slide.id, slot.slotKey, url)}
+                          onUrlChange={(url, kind) =>
+                            setSlotModuleUrl(slide.id, slot.slotKey, url, kind)
+                          }
                         />
                       ))}
                     </div>
@@ -363,10 +371,49 @@ function SlotEditor({
   onUrlChange,
 }: {
   slot: VideoWallSlotConfig;
-  onUrlChange: (url: string) => void;
+  onUrlChange: (url: string, kind?: 'image' | 'video') => void;
 }) {
   const kind = slot.module.kind;
-  const hasUrl = kind === 'video-image' || kind === 'ads';
+  const currentUrl =
+    slot.module.kind === 'video-image' || slot.module.kind === 'ads' ? slot.module.asset.url : '';
+  const currentAssetKind =
+    slot.module.kind === 'video-image' || slot.module.kind === 'ads'
+      ? slot.module.asset.kind
+      : 'image';
+
+  if (kind === 'video-image' || kind === 'ads') {
+    return (
+      <div className="rounded border border-zinc-200 bg-zinc-50 p-2 dark:border-zinc-800 dark:bg-zinc-900/40">
+        <div className="mb-1.5 flex items-center gap-2">
+          <span className="rounded bg-zinc-200 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+            {slot.slotKey}
+          </span>
+          <span className="rounded bg-zinc-200 px-1.5 py-0.5 font-mono text-[10px] text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+            {kind}
+          </span>
+        </div>
+        <SignageMediaField
+          label="Asset"
+          hint={
+            kind === 'ads'
+              ? 'Imagen o video del ad. Sube un archivo (≤5MB) o pega un path/URL.'
+              : 'Imagen o video. Sube un archivo (≤5MB) o pega un path/URL.'
+          }
+          aspect="16/9"
+          value={currentUrl || undefined}
+          kind={currentAssetKind}
+          onChange={(next: { src: string; kind: 'image' | 'video' } | undefined) => {
+            if (next) {
+              onUrlChange(next.src, next.kind);
+            } else {
+              onUrlChange('', 'image');
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-2">
       <span className="w-16 shrink-0 truncate font-mono text-[10px] uppercase tracking-wider text-zinc-500">
@@ -375,31 +422,17 @@ function SlotEditor({
       <span className="w-20 shrink-0 truncate rounded bg-zinc-100 px-1.5 py-0.5 text-center font-mono text-[10px] text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
         {kind}
       </span>
-      {hasUrl ? (
-        <input
-          type="text"
-          value={
-            (slot.module.kind === 'video-image' || slot.module.kind === 'ads'
-              ? slot.module.asset.url
-              : '') ?? ''
-          }
-          onChange={(e) => onUrlChange(e.target.value)}
-          placeholder="asset URL or path"
-          className="min-w-0 flex-1 rounded border border-zinc-200 bg-white px-2 py-0.5 font-mono text-[10.5px] text-zinc-800 outline-none focus:border-sky-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200"
-        />
-      ) : (
-        <span className="flex-1 truncate text-[10.5px] text-zinc-500">
-          uses client data (
-          {kind === 'events'
-            ? 'events.json'
-            : kind === 'social'
-              ? 'social.json'
-              : kind === 'news'
-                ? 'news.json'
-                : 'client config'}
-          )
-        </span>
-      )}
+      <span className="flex-1 truncate text-[10.5px] text-zinc-500">
+        uses client data (
+        {kind === 'events'
+          ? 'events.json'
+          : kind === 'social'
+            ? 'social.json'
+            : kind === 'news'
+              ? 'news.json'
+              : 'client config'}
+        )
+      </span>
     </div>
   );
 }
@@ -428,12 +461,16 @@ function defaultModuleFor(kind: VideoWallModuleInstance['kind']): VideoWallModul
   }
 }
 
-function setUrlOf(module: VideoWallModuleInstance, url: string): VideoWallModuleInstance {
+function setUrlOf(
+  module: VideoWallModuleInstance,
+  url: string,
+  kind?: 'image' | 'video',
+): VideoWallModuleInstance {
   if (module.kind === 'video-image') {
-    return { ...module, asset: { ...module.asset, url } };
+    return { ...module, asset: { ...module.asset, url, kind: kind ?? module.asset.kind } };
   }
   if (module.kind === 'ads') {
-    return { ...module, asset: { ...module.asset, url } };
+    return { ...module, asset: { ...module.asset, url, kind: kind ?? module.asset.kind } };
   }
   return module;
 }

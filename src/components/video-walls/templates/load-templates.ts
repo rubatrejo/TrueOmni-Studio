@@ -2,10 +2,13 @@
  * Side-effect entrypoint: importar este archivo registra TODOS los
  * templates video-walls en el `registry` singleton.
  *
- * VW3 + VW8 — 22 templates v1 totales (6 + 6 + 5 + 3 + 3 = 23 — incluye
- * derivados proporcionales para 4×2/2×2/2×1/1×2). Pixel-perfect contra
- * XD solo para los 6 del 3×2. Resto: geometría consistente derivada
- * matemáticamente del 3×2 con los slot renderers compartidos.
+ * VW3 + VW8 + VW9 — 27 templates v1 totales (6 + 6 + 5 + 5 + 5 = 27 —
+ * incluye derivados proporcionales para 4×2/2×2/2×1/1×2). Pixel-perfect
+ * contra XD solo para los 6 del 3×2. Resto: geometría consistente
+ * derivada matemáticamente del 3×2 con los slot renderers compartidos.
+ * Las variantes social-wall y ad-social-wall en grids pequeños (2×1,
+ * 1×2) usan `pxOverride` para sub-dividir cells cuando hay más slots
+ * que TVs físicas.
  */
 
 // 3×2 — pixel-perfect targets contra `designs/video-walls/3x2/`.
@@ -35,8 +38,12 @@ import './2x2/05-video-image-ad';
 import './2x1/01-video-image-full';
 import './2x1/02-video-image-ad';
 import './2x1/03-video-image-events';
+import './2x1/04-video-image-social-wall';
+import './2x1/05-video-image-ad-social-wall';
 
 // 1×2 (canvas 1920×2160, portrait stacked).
 import './1x2/01-video-image-full';
 import './1x2/02-video-ad-stack';
 import './1x2/03-video-image-events';
+import './1x2/04-video-image-social-wall';
+import './1x2/05-video-image-ad-social-wall';

@@ -43,12 +43,14 @@ export function VideoImageSlot({
   client,
   rect,
   module,
+  pxOverride,
 }: {
   client: VideoWallClientResolved;
   rect: CellRect;
   module: VideoWallModuleInstance | null;
+  pxOverride?: { x: number; y: number; w: number; h: number };
 }) {
-  const px = cellRectToPx(rect, false);
+  const px = pxOverride ?? cellRectToPx(rect, false);
   const isVideo = module?.kind === 'video-image' && module.asset.kind === 'video';
   const url =
     module?.kind === 'video-image'
@@ -69,17 +71,22 @@ export function VideoImageSlot({
   );
 }
 
-/** Renderer del slot `ad` (módulo kind=ads). Image-first; soporta video. */
+/** Renderer del slot `ad` (módulo kind=ads). Image-first; soporta video.
+ *  Si `pxOverride` viene definido se usa tal cual (sub-cell rects para
+ *  composiciones donde no hay grid alignment, e.g. ad/social stack
+ *  dentro de un solo TV). */
 export function AdSlot({
   client,
   rect,
   module,
+  pxOverride,
 }: {
   client: VideoWallClientResolved;
   rect: CellRect;
   module: VideoWallModuleInstance | null;
+  pxOverride?: { x: number; y: number; w: number; h: number };
 }) {
-  const px = cellRectToPx(rect, false);
+  const px = pxOverride ?? cellRectToPx(rect, false);
   const isVideo = module?.kind === 'ads' && module.asset.kind === 'video';
   const url =
     module?.kind === 'ads' ? urlOr(client.slug, module.asset.url, 'assets/ads/full-ad.png') : null;
@@ -110,14 +117,16 @@ export function EventsSlot({
   module,
   cols,
   rows,
+  pxOverride,
 }: {
   client: VideoWallClientResolved;
   rect: CellRect;
   module: VideoWallModuleInstance | null;
   cols: number;
   rows: number;
+  pxOverride?: { x: number; y: number; w: number; h: number };
 }) {
-  const px = cellRectToPx(rect, false);
+  const px = pxOverride ?? cellRectToPx(rect, false);
   const maxItems = module?.kind === 'events' ? module.maxItems : cols * rows;
   const events = (client.events ?? []).slice(0, maxItems);
   return (
@@ -186,14 +195,16 @@ export function SocialSlot({
   module,
   cols,
   rows,
+  pxOverride,
 }: {
   client: VideoWallClientResolved;
   rect: CellRect;
   module: VideoWallModuleInstance | null;
   cols: number;
   rows: number;
+  pxOverride?: { x: number; y: number; w: number; h: number };
 }) {
-  const px = cellRectToPx(rect, false);
+  const px = pxOverride ?? cellRectToPx(rect, false);
   const maxPosts = module?.kind === 'social' ? module.maxPosts : cols * rows;
   const posts = (client.social?.posts ?? []).slice(0, Math.min(maxPosts, cols * rows));
   return (

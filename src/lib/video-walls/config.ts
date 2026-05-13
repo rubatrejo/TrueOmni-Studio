@@ -28,7 +28,17 @@ import {
   VideoWallSocialDataSchema,
   type VideoWallClientResolved,
   type VideoWallConfig,
+  type VideoWallEvent,
+  type VideoWallSocialData,
 } from './schema';
+
+/**
+ * Fallback social válido cuando ni KV ni fs tienen data. Necesario porque
+ * `VideoWallClientResolvedSchema` exige `social.posts` array (no nullable):
+ * pasarle `null` rompe el parse y el catch silencioso destruía el branding
+ * KV recién activado (G2 audit 2026-05-12).
+ */
+const EMPTY_SOCIAL: VideoWallSocialData = { posts: [] };
 
 /**
  * Loaders fs/KV híbridos del producto video-walls.
@@ -183,34 +193,32 @@ export const loadVideoWallClient = cache(
 
 /** Devuelve el array de events con más items entre KV-vw, KV-signage y fs.
  *  Permite que seeds nuevos del fs (eg. nuevos events publicados via git)
- *  se vean en producción sin tener que abrir el editor a re-guardar. */
-function pickRicherEvents<T extends { length: number } | null | undefined>(
-  kvVw: T,
-  kvSig: T,
-  fs: T,
-): T {
-  const lens = [
-    [kvVw, kvVw?.length ?? 0] as const,
-    [kvSig, kvSig?.length ?? 0] as const,
-    [fs, fs?.length ?? 0] as const,
-  ];
-  lens.sort((a, b) => b[1] - a[1]);
-  return (lens[0][0] ?? kvVw ?? kvSig ?? fs) as T;
+ *  se vean en producción sin tener que abrir el editor a re-guardar.
+ *  Garantiza `VideoWallEvent[]` (nunca null/undefined) — el schema lo exige. */
+function pickRicherEvents(
+  kvVw: VideoWallEvent[] | null | undefined,
+  kvSig: VideoWallEvent[] | null | undefined,
+  fs: VideoWallEvent[] | null | undefined,
+): VideoWallEvent[] {
+  const candidates = [kvVw, kvSig, fs].filter((x): x is VideoWallEvent[] => Array.isArray(x));
+  if (candidates.length === 0) return [];
+  candidates.sort((a, b) => b.length - a.length);
+  return candidates[0];
 }
 
-/** Devuelve el SignageSocialData con más posts. Igual lógica que events. */
-function pickRicherSocial<T extends { posts?: { length: number } } | null | undefined>(
-  kvVw: T,
-  kvSig: T,
-  fs: T,
-): T {
-  const lens = [
-    [kvVw, kvVw?.posts?.length ?? 0] as const,
-    [kvSig, kvSig?.posts?.length ?? 0] as const,
-    [fs, fs?.posts?.length ?? 0] as const,
-  ];
-  lens.sort((a, b) => b[1] - a[1]);
-  return (lens[0][0] ?? kvVw ?? kvSig ?? fs) as T;
+/** Devuelve el SignageSocialData con más posts. Igual lógica que events.
+ *  Garantiza `VideoWallSocialData` válido (posts: []) si todos son null. */
+function pickRicherSocial(
+  kvVw: VideoWallSocialData | null | undefined,
+  kvSig: VideoWallSocialData | null | undefined,
+  fs: VideoWallSocialData | null | undefined,
+): VideoWallSocialData {
+  const candidates = [kvVw, kvSig, fs].filter(
+    (x): x is VideoWallSocialData => x !== null && x !== undefined,
+  );
+  if (candidates.length === 0) return EMPTY_SOCIAL;
+  candidates.sort((a, b) => (b.posts?.length ?? 0) - (a.posts?.length ?? 0));
+  return candidates[0];
 }
 
 async function loadVideoWallFromFs(

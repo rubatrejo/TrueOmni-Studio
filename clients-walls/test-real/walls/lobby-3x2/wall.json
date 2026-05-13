@@ -1,0 +1,52 @@
+{
+  "slug": "lobby-3x2",
+  "name": "Test Real Lobby 3×2",
+  "grid": "3x2",
+  "settings": {
+    "targetResolution": "1080p",
+    "audio": false,
+    "defaultDurationMs": 8000,
+    "defaultTransition": "cut",
+    "sleepSchedule": {
+      "enabled": false,
+      "startTime": "23:00",
+      "endTime": "06:00"
+    }
+  },
+  "playlist": [
+    {
+      "id": "slide-01",
+      "templateId": "01-video-image-full",
+      "slots": [
+        {
+          "slotKey": "main",
+          "module": {
+            "kind": "video-image",
+            "asset": { "kind": "image", "url": "assets/video-image/pool.png" }
+          }
+        }
+      ],
+      "durationMs": 8000,
+      "schedule": { "kind": "always", "hideOutsideSchedule": true }
+    },
+    {
+      "id": "slide-02",
+      "templateId": "03-video-image-events",
+      "slots": [
+        {
+          "slotKey": "video",
+          "module": {
+            "kind": "video-image",
+            "asset": { "kind": "image", "url": "assets/video-image/pool.png" }
+          }
+        },
+        {
+          "slotKey": "events",
+          "module": { "kind": "events", "maxItems": 6 }
+        }
+      ],
+      "durationMs": 8000,
+      "schedule": { "kind": "always", "hideOutsideSchedule": true }
+    }
+  ]
+}

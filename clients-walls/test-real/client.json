@@ -1,0 +1,34 @@
+{
+  "slug": "test-real",
+  "name": "Test Real (VW seed)",
+  "locale": "en",
+  "timezone": "America/Phoenix",
+  "location": {
+    "city": "Phoenix",
+    "lat": 33.4484,
+    "lon": -112.074
+  },
+  "website": "https://example.com",
+  "branding": {
+    "logos": {
+      "default": "assets/logo.svg"
+    },
+    "fonts": {
+      "display": "Montserrat",
+      "body": "Open Sans"
+    }
+  },
+  "header": {
+    "position": "top",
+    "height": 80,
+    "layout": "logo-left",
+    "background": { "kind": "color", "color": "hsl(var(--signage-header-bg))" },
+    "showLogo": true,
+    "showWeather": true,
+    "showClock": true,
+    "clockFormat": "12h",
+    "weatherUnits": "imperial",
+    "forecastDays": 3
+  },
+  "walls": ["lobby-3x2"]
+}

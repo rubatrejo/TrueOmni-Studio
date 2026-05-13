@@ -159,7 +159,8 @@ export function SocialCardSvg({
   largeUsername: boolean;
 }) {
   const imageUrl = post?.image ? resolveAssetUrl(clientSlug, post.image) : null;
-  const username = post?.author ?? '';
+  // Strip @ prefix si el data ya lo trae — evitamos render "@@username".
+  const username = (post?.author ?? '').replace(/^@+/, '');
   const fontSize = largeUsername ? 30 : 20;
   const usernameX = largeUsername ? 66 : 47;
   const usernameY = largeUsername ? h - 38 : h - 32;

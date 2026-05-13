@@ -10,6 +10,8 @@ import {
   kVideoWallI18n,
   kVideoWallNews,
   kVideoWallRaw,
+  kVideoWallSnap,
+  kVideoWallSnapList,
   kVideoWallSocial,
 } from './kv-keys';
 import {
@@ -24,6 +26,8 @@ import {
   type VideoWallNewsConfig,
   type VideoWallSocialData,
 } from './schema';
+
+const SNAPSHOT_CAP = 10;
 
 /**
  * Wrappers thin sobre `@/lib/studio/kv` para el namespace `videowall:*`.
@@ -116,6 +120,89 @@ export const kvVideoWallNews = {
   },
   async set(client: string, data: VideoWallNewsConfig): Promise<void> {
     await kv.set(kVideoWallNews(client), data);
+  },
+};
+
+export interface VideoWallSnapshotMeta {
+  /** ms epoch como ID estable. */
+  ts: number;
+  /** Optional: email del operador con auth. */
+  savedBy?: string;
+  /** Optional: nota custom (e.g. "pre-restore-of-…"). */
+  note?: string;
+}
+
+export interface VideoWallSnapshotEntry {
+  id: string;
+  meta: VideoWallSnapshotMeta;
+  data: VideoWallConfig;
+}
+
+interface StoredSnapshot {
+  meta: VideoWallSnapshotMeta;
+  data: unknown;
+}
+
+/**
+ * Snapshots por wall — paridad con `kvSignageSnapshot`. FIFO cap 10. UI los
+ * lista en el tab Versions con timestamp + restore. Restore crea snapshot
+ * del current pre-restore (patrón git-like).
+ */
+export const kvVideoWallSnapshot = {
+  async listIds(client: string, wall: string): Promise<string[]> {
+    const raw = await kv.get<string[]>(kVideoWallSnapList(client, wall));
+    return Array.isArray(raw) ? raw : [];
+  },
+
+  async listMeta(
+    client: string,
+    wall: string,
+  ): Promise<{ id: string; meta: VideoWallSnapshotMeta }[]> {
+    const ids = await kvVideoWallSnapshot.listIds(client, wall);
+    const out: { id: string; meta: VideoWallSnapshotMeta }[] = [];
+    for (const id of ids) {
+      const stored = await kv.get<StoredSnapshot>(kVideoWallSnap(client, wall, id));
+      if (stored && stored.meta) out.push({ id, meta: stored.meta });
+    }
+    return out;
+  },
+
+  async get(client: string, wall: string, id: string): Promise<VideoWallSnapshotEntry | null> {
+    const stored = await kv.get<StoredSnapshot>(kVideoWallSnap(client, wall, id));
+    if (!stored) return null;
+    const parsed = VideoWallConfigSchema.safeParse(stored.data);
+    if (!parsed.success) return null;
+    return { id, meta: stored.meta, data: parsed.data };
+  },
+
+  async create(
+    client: string,
+    wall: string,
+    data: VideoWallConfig,
+    meta: Partial<VideoWallSnapshotMeta> = {},
+  ): Promise<string> {
+    const ts = meta.ts ?? Date.now();
+    const id = ts.toString();
+    const stored: StoredSnapshot = {
+      meta: { ts, savedBy: meta.savedBy, note: meta.note },
+      data,
+    };
+    await kv.set(kVideoWallSnap(client, wall, id), stored);
+    const ids = await kvVideoWallSnapshot.listIds(client, wall);
+    const nextIds = [id, ...ids.filter((i) => i !== id)].slice(0, SNAPSHOT_CAP);
+    const trimmed = ids.filter((i) => !nextIds.includes(i));
+    await kv.set(kVideoWallSnapList(client, wall), nextIds);
+    for (const trim of trimmed) {
+      await kv.del(kVideoWallSnap(client, wall, trim));
+    }
+    return id;
+  },
+
+  async delete(client: string, wall: string, id: string): Promise<void> {
+    await kv.del(kVideoWallSnap(client, wall, id));
+    const ids = await kvVideoWallSnapshot.listIds(client, wall);
+    const nextIds = ids.filter((i) => i !== id);
+    await kv.set(kVideoWallSnapList(client, wall), nextIds);
   },
 };
 

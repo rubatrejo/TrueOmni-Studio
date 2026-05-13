@@ -27,13 +27,15 @@ import { useDebouncedAutosave } from '@/app/studio/digital-displays/_lib/save-di
 import { saveTheme } from '@/app/studio/digital-displays/_lib/save-theme';
 import { SignageEditorProvider } from '@/app/studio/digital-displays/_lib/signage-editor-context';
 import { useThemeEditStore } from '@/app/studio/digital-displays/_lib/theme-edit-store';
-import type { SignageBridgeStatus } from '@/app/studio/digital-displays/_lib/use-signage-bridge';
 import type { SignageClientResolved } from '@/lib/signage/schema';
+import { useVideoWallBridge } from '@/lib/video-walls/bridge';
 import { GRID_CONFIGS, type GridConfig } from '@/lib/video-walls/dimensions';
 import type { VideoWallConfig } from '@/lib/video-walls/schema';
 
 import { PlaylistPanel } from './PlaylistPanel';
+import { PublishToolbar } from './PublishToolbar';
 import { SettingsPanel } from './SettingsPanel';
+import { VersionsPanel } from './VersionsPanel';
 import { WallPreviewPanel } from './WallPreviewPanel';
 
 /**
@@ -108,6 +110,13 @@ export function WallEditorShell({
   const [wall, setWall] = useState<VideoWallConfig>(initialWall);
   const [previewKey, setPreviewKey] = useState(0);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [versionsRefreshAt, setVersionsRefreshAt] = useState<number | null>(null);
+
+  // Bridge live editor↔iframe — postMessage al runtime con cada cambio en
+  // lugar de reload del iframe. Drástica mejora de UX (sin flicker 500ms
+  // por cada autosave). El runtime hace merge no-destructivo entre el patch
+  // del bridge y la prop server.
+  const { iframeRef, pushClient, pushWall, onIframeLoad, bridgeStatus } = useVideoWallBridge();
 
   // Theme store (branding/header) compartido con Digital Displays — la data
   // del cliente vive en `signage:client:{slug}` KV y syncea entre productos.
@@ -145,11 +154,20 @@ export function WallEditorShell({
     const result = await saveTheme(cur);
     if (result.ok) {
       useThemeEditStore.getState().markSaved();
-      setPreviewKey((k) => k + 1);
+      // Bridge live: push del client al iframe sin reload. Si el bridge no
+      // está conectado el push no daña; el listener de `signage-theme-saved`
+      // de abajo cae al previewKey bump como fallback defensivo.
+      pushClient({
+        branding: cur.branding,
+        header: cur.header,
+        locale: cur.locale,
+        timezone: cur.timezone,
+        location: cur.location,
+      });
     } else {
       useThemeEditStore.getState().setError(result.error ?? 'Save failed');
     }
-  }, []);
+  }, [pushClient]);
   useDebouncedAutosave(themeDraft, themeDirty, onThemeAutosave, 1000);
 
   // Reload iframe cuando los tabs (events/social/news/theme) guardan al KV.
@@ -170,11 +188,15 @@ export function WallEditorShell({
     };
   }, [clientSlug]);
 
-  // Bridge live editor↔iframe queda como sub-fase futura. Por ahora
-  // bumpamos previewKey al guardar para forzar reload del iframe.
+  // Bridge live editor↔iframe — el host empuja el wall completo al iframe
+  // con cada cambio. El runtime hace merge no-destructivo (ver
+  // VideoWallRuntime). Sin reload del iframe — sin FOUC.
   const handleWallChange = (next: VideoWallConfig) => {
     setWall(next);
-    setPreviewKey((k) => k + 1);
+    pushWall(next);
+    // Bump del trigger de Versions: cada save vale como punto restaurable
+    // potencial (el operador puede crear un snapshot inmediatamente).
+    setVersionsRefreshAt(Date.now());
     // Clamp slide index si la playlist se acortó.
     if (currentSlideIndex >= next.playlist.length) {
       setCurrentSlideIndex(Math.max(0, next.playlist.length - 1));
@@ -197,7 +219,16 @@ export function WallEditorShell({
     });
   };
 
-  const bridgeStatus: SignageBridgeStatus = 'connected';
+  // Empuja el estado inicial del wall/client al iframe en cuanto el bridge
+  // monta — el editor puede tener el preview cargado antes del primer
+  // autosave y queremos que el iframe vea exactamente lo que el operador
+  // tiene en pantalla.
+  useEffect(() => {
+    pushWall(wall);
+    // Solo en mount: handleWallChange empuja los cambios posteriores.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const { cols, rows } = GRID_CONFIGS[grid];
   const previewHref = `/video-walls/${clientSlug}/${wallSlug}`;
 
@@ -272,13 +303,14 @@ export function WallEditorShell({
                     />
                   )}
                   {tab === 'versions' && (
-                    <SectionStub
-                      title="Versions"
-                      description="Snapshots history and restore — wires into the same KV snapshot pattern as signage. Sub-phase VW9.5."
+                    <VersionsPanel
+                      clientSlug={clientSlug}
+                      wallSlug={wallSlug}
+                      refreshTrigger={versionsRefreshAt}
                     />
                   )}
                   {tab === 'publish' && (
-                    <PublishPanel clientSlug={clientSlug} wallSlug={wallSlug} />
+                    <PublishToolbar clientSlug={clientSlug} wallSlug={wallSlug} />
                   )}
                   <WallSummary
                     wallSlug={wallSlug}
@@ -301,21 +333,14 @@ export function WallEditorShell({
                 slides={wall.playlist}
                 currentSlideIndex={currentSlideIndex}
                 onNavSlide={handleNavSlide}
+                iframeRef={iframeRef}
+                onIframeLoad={onIframeLoad}
               />
             </div>
           </main>
         </div>
       </div>
     </SignageEditorProvider>
-  );
-}
-
-function SectionStub({ title, description }: { title: string; description: string }) {
-  return (
-    <div className="rounded-lg border border-dashed border-zinc-300 bg-white p-5 text-[12.5px] text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/40">
-      <h3 className="font-semibold text-zinc-900 dark:text-white">{title}</h3>
-      <p className="mt-2 leading-relaxed">{description}</p>
-    </div>
   );
 }
 
@@ -353,68 +378,6 @@ function WallSummary({
           {cols * 1920} × {rows * 1080}
         </dd>
       </dl>
-    </div>
-  );
-}
-
-function PublishPanel({ clientSlug, wallSlug }: { clientSlug: string; wallSlug: string }) {
-  const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
-
-  const handlePublish = async () => {
-    setSubmitting(true);
-    setResult(null);
-    try {
-      const res = await fetch(`/api/studio/video-walls/walls/${clientSlug}/${wallSlug}/publish`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-      });
-      const body = (await res.json().catch(() => null)) as {
-        ok?: boolean;
-        runtimeUrl?: string;
-        error?: string;
-      } | null;
-      if (!res.ok || !body?.ok) {
-        setResult({ ok: false, message: body?.error ?? `HTTP ${res.status}` });
-      } else {
-        setResult({
-          ok: true,
-          message: body.runtimeUrl ? `Published. Runtime: ${body.runtimeUrl}` : 'Published',
-        });
-      }
-    } catch (err) {
-      setResult({ ok: false, message: err instanceof Error ? err.message : 'Publish failed' });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900/40">
-      <h3 className="text-[13px] font-semibold text-zinc-900 dark:text-white">Publish wall</h3>
-      <p className="mt-2 text-[12.5px] leading-relaxed text-zinc-600 dark:text-zinc-400">
-        Confirms the wall config in KV. The runtime reads from KV first so production picks up
-        changes immediately. GitHub PR sync follows the signage publish pattern (sub-phase VW9.5).
-      </p>
-      <button
-        type="button"
-        onClick={handlePublish}
-        disabled={submitting}
-        className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
-      >
-        {submitting ? 'Publishing…' : 'Publish wall'}
-      </button>
-      {result && (
-        <div
-          className={`mt-3 rounded-md p-2.5 text-[11.5px] ${
-            result.ok
-              ? 'border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200'
-              : 'border border-red-200 bg-red-50 text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200'
-          }`}
-        >
-          {result.message}
-        </div>
-      )}
     </div>
   );
 }

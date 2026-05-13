@@ -10,7 +10,7 @@ import {
   RotateCcw,
   X,
 } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 
 import { canvasDimensionsOf, GRID_CONFIGS, type GridConfig } from '@/lib/video-walls/dimensions';
 import type { VideoWallSlide } from '@/lib/video-walls/schema';
@@ -38,6 +38,13 @@ export interface WallPreviewPanelProps {
   currentSlideIndex: number;
   /** Navegar prev/next desde el pill. */
   onNavSlide: (direction: 'prev' | 'next') => void;
+  /** Ref del iframe gestionado por el bridge live. Si se provee, el host
+   *  puede hacer `postMessage` al runtime sin reload (VW9.5). */
+  iframeRef?: RefObject<HTMLIFrameElement | null>;
+  /** Callback al `load` del iframe para que el bridge resincronice patches
+   *  (race condition: el iframe puede no haber montado el listener todavía
+   *  cuando el editor empuja el primer cambio). */
+  onIframeLoad?: () => void;
 }
 
 export function WallPreviewPanel({
@@ -49,6 +56,8 @@ export function WallPreviewPanel({
   slides,
   currentSlideIndex,
   onNavSlide,
+  iframeRef,
+  onIframeLoad,
 }: WallPreviewPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [autoFit, setAutoFit] = useState(0.1);
@@ -235,8 +244,10 @@ export function WallPreviewPanel({
         >
           <iframe
             key={`${reloadKey}-${currentSlideIndex}`}
+            ref={iframeRef}
             src={iframeSrc}
             title={`Preview ${wallName}`}
+            onLoad={onIframeLoad}
             className="absolute left-0 top-0"
             style={{
               width: viewportW,

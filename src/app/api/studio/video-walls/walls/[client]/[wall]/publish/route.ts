@@ -1,29 +1,32 @@
 import { NextResponse } from 'next/server';
 
+import { getGitHubPublishConfig, publishToGitHub } from '@/lib/studio/github-publisher';
 import { kvVideoWall, kvVideoWallClient } from '@/lib/video-walls/kv-store';
 
 interface RouteParams {
   params: Promise<{ client: string; wall: string }>;
 }
 
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /**
  * `POST /api/studio/video-walls/walls/[client]/[wall]/publish`
  *
- * Publica el wall config actual del KV como deployed. v1 minimal:
- * confirma que el KV tiene el wall + client y devuelve el snapshot
- * (la lectura runtime ya cae a KV primero, así que el KV es la fuente
- * de verdad inmediata).
+ * Crea un PR contra `clients-walls/<client>/walls/<wall>/wall.json` con
+ * auto-merge habilitado, siguiendo el patrón del signage publish (reusa
+ * `github-publisher.ts` del kiosk).
  *
- * VW9.5 cableará el flow de GitHub PR siguiendo el patrón del signage
- * publish (`/api/studio/publish/[slug]`), que crea un branch
- * `studio/<client>/<timestamp>` con los .json del cliente + walls y
- * abre un PR contra main. Por ahora, "publish" = persistir en KV +
- * timestamp para auditoría.
+ * Requiere env:
+ *   STUDIO_GITHUB_TOKEN, STUDIO_GITHUB_OWNER, STUDIO_GITHUB_REPO.
+ *
+ * Fallback: si falta config GitHub, persiste en KV (que ya es source-of-truth
+ * para el runtime) y devuelve `runtimeUrl` para el deploy local. La UI muestra
+ * el aviso para que el operador sepa que el repo no se actualizó.
  */
 export async function POST(_req: Request, { params }: RouteParams) {
   const { client, wall } = await params;
+
   const [wallData, clientData] = await Promise.all([
     kvVideoWall.get(client, wall),
     kvVideoWallClient.get(client),
@@ -33,15 +36,43 @@ export async function POST(_req: Request, { params }: RouteParams) {
 
   const publishedAt = new Date().toISOString();
   // Re-persistir hace bump del "last edited at" implícito del KV y confirma
-  // que el wall pasó validación. Si quisiéramos sello formal, escribimos
-  // un campo `publishedAt` en el wall, pero el schema lo trata como
-  // metadata fuera de scope hoy.
+  // que el wall pasó validación.
   await kvVideoWall.set(client, wall, wallData);
 
-  return NextResponse.json({
-    ok: true,
-    publishedAt,
-    runtimeUrl: `/video-walls/${client}/${wall}`,
-    note: 'Wall published to KV. The runtime reads from KV first, so production picks up changes immediately. GitHub PR sync follows the signage publish pattern (sub-phase VW9.5).',
-  });
+  const config = getGitHubPublishConfig();
+  if (!config) {
+    return NextResponse.json({
+      ok: true,
+      publishedAt,
+      runtimeUrl: `/video-walls/${client}/${wall}`,
+      mode: 'kv-only',
+      note: 'GitHub publish not configured (STUDIO_GITHUB_TOKEN / OWNER / REPO). Wall persisted in KV only — the runtime reads KV first so production picks up changes immediately.',
+    });
+  }
+
+  const filePath = `clients-walls/${client}/walls/${wall}/wall.json`;
+  const files = [
+    {
+      path: filePath,
+      content: `${JSON.stringify(wallData, null, 2)}\n`,
+    },
+  ];
+
+  try {
+    const result = await publishToGitHub(config, `videowall-${client}-${wall}`, files, {
+      commitMessage: `feat(video-walls): publish ${client}/${wall}`,
+      autoMerge: true,
+    });
+    return NextResponse.json({
+      ok: true,
+      publishedAt,
+      runtimeUrl: `/video-walls/${client}/${wall}`,
+      mode: 'pr',
+      ...result,
+    });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('[videowall:api] publish failed', e);
+    return NextResponse.json({ error: `Publish failed: ${(e as Error).message}` }, { status: 500 });
+  }
 }

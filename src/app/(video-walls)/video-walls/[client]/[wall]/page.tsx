@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation';
 
+import { VideoWallBridge } from '@/components/video-walls/runtime/VideoWallBridge';
+import { VideoWallBridgeStyleApplier } from '@/components/video-walls/runtime/VideoWallBridgeStyleApplier';
 import { VideoWallRuntime } from '@/components/video-walls/runtime/VideoWallRuntime';
 import { VideoWallStage } from '@/components/video-walls/stage/VideoWallStage';
 import { mapWeatherToHeader } from '@/lib/signage/weather-adapter';
@@ -69,6 +71,8 @@ export default async function VideoWallPage({ params, searchParams }: PageProps)
 
   return (
     <VideoWallStage grid={wallCfg.grid} cell={cell ?? undefined} debug={debug}>
+      <VideoWallBridge clientSlug={clientCfg.slug} wallSlug={wallCfg.slug} />
+      <VideoWallBridgeStyleApplier />
       <VideoWallRuntime
         client={clientCfg}
         wall={wallCfg}

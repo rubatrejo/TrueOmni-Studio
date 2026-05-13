@@ -262,14 +262,26 @@ export const loadVideoWall = cache(
       // KV unreachable.
     }
 
-    // 2. Cuando el fs tiene una playlist más completa que el KV (eg. fs
-    //    publicó nuevos slides y el operador no ha sincronizado), preferimos
-    //    fs. Esto evita que ediciones al template de fs queden invisibles
-    //    en producción hasta que alguien abra el editor.
+    // 2. Cuando el fs tiene templates que el KV no tiene (mismatch de
+    //    templateIds o playlist más larga), preferimos fs — el seed git
+    //    es ground truth si el operador no editó el wall en KV con esos
+    //    mismos templates. Si los templateIds COINCIDEN exactamente
+    //    (mismo set), KV gana (mantiene customizaciones del operador
+    //    sobre assets/schedule/duration).
     if (kvWall) {
       const fsWall = await loadVideoWallFromFs(clientSlug, wallSlug);
-      if (fsWall && fsWall.playlist.length > kvWall.playlist.length) {
-        return fsWall;
+      if (fsWall) {
+        if (fsWall.playlist.length > kvWall.playlist.length) {
+          return fsWall;
+        }
+        // Comparar templateIds como sets — si fs tiene IDs que KV no
+        // tiene, fs publicó nuevos seeds → prefer fs.
+        const kvIds = new Set(kvWall.playlist.map((s) => s.templateId));
+        const fsIds = new Set(fsWall.playlist.map((s) => s.templateId));
+        const fsHasIdsKvLacks = [...fsIds].some((id) => !kvIds.has(id));
+        if (fsHasIdsKvLacks) {
+          return fsWall;
+        }
       }
       return kvWall;
     }

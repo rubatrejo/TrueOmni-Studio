@@ -104,7 +104,7 @@ export function WallEditorShell({
   tokensCss,
   wallSlug,
   wallName,
-  grid,
+  grid: _grid,
   initialWall,
 }: WallEditorShellProps) {
   const [tab, setTab] = useState<TabKey>('branding');
@@ -243,6 +243,58 @@ export function WallEditorShell({
     }
   };
 
+  // Cambia el grid del wall completo. Los templates están vinculados al grid
+  // actual (e.g. `01-full-events` solo existe para 3x2), así que al cambiar
+  // de grid se vacían playlists. Confirm explícito si hay slides existentes.
+  const handleGridChange = useCallback(
+    async (nextGrid: GridConfig) => {
+      if (nextGrid === wall.grid) return;
+      const totalSlides =
+        (wall.playlists ?? []).reduce((sum, p) => sum + p.slides.length, 0) || wall.playlist.length;
+      if (totalSlides > 0) {
+        const ok = window.confirm(
+          `Switching to ${nextGrid} will remove all ${totalSlides} slide${
+            totalSlides === 1 ? '' : 's'
+          } (templates are specific to the current grid). Continue?`,
+        );
+        if (!ok) return;
+      }
+      const nextWall: VideoWallConfig = {
+        ...wall,
+        grid: nextGrid,
+        playlist: [],
+        playlists: [{ id: 'main', name: 'Main', slides: [] }],
+        activePlaylistId: 'main',
+      };
+      try {
+        const res = await fetch(`/api/studio/video-walls/walls/${clientSlug}/${wall.slug}`, {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ wall: nextWall }),
+        });
+        if (!res.ok) {
+          const body = (await res.json().catch(() => null)) as { error?: string } | null;
+          throw new Error(body?.error ?? `HTTP ${res.status}`);
+        }
+        setWall(nextWall);
+        pushWall(nextWall);
+        setCurrentSlideIndex(0);
+        setVersionsRefreshAt(Date.now());
+        // Bump preview key — cambiar el grid cambia el viewport del iframe;
+        // mejor hacer reload duro para que el runtime recalcule layouts en
+        // lugar de depender del merge no-destructivo del bridge.
+        setPreviewKey((k) => k + 1);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('[video-walls] grid change failed', err);
+        window.alert(
+          `Failed to change grid: ${err instanceof Error ? err.message : 'unknown error'}`,
+        );
+      }
+    },
+    [wall, clientSlug, pushWall],
+  );
+
   const activeSlideId = wall.playlist[currentSlideIndex]?.id ?? null;
   const handleSelectSlide = (slideId: string) => {
     const idx = wall.playlist.findIndex((s) => s.id === slideId);
@@ -274,7 +326,10 @@ export function WallEditorShell({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const { cols, rows } = GRID_CONFIGS[grid];
+  // `wall.grid` es el estado vivo del editor (cambiable via onGridChange).
+  // La prop `grid` del shell es solo el valor inicial del server.
+  const currentGrid = wall.grid;
+  const { cols, rows } = GRID_CONFIGS[currentGrid];
   const previewHref = `/video-walls/${clientSlug}/${wallSlug}`;
 
   return (
@@ -360,7 +415,7 @@ export function WallEditorShell({
                   <WallSummary
                     wallSlug={wallSlug}
                     wallName={wallName}
-                    grid={grid}
+                    grid={currentGrid}
                     cols={cols}
                     rows={rows}
                   />
@@ -373,13 +428,14 @@ export function WallEditorShell({
                 clientSlug={clientSlug}
                 wallSlug={wallSlug}
                 wallName={wallName}
-                grid={grid}
+                grid={currentGrid}
                 reloadKey={previewKey}
                 slides={wall.playlist}
                 currentSlideIndex={currentSlideIndex}
                 onNavSlide={handleNavSlide}
                 iframeRef={iframeRef}
                 onIframeLoad={onIframeLoad}
+                onGridChange={handleGridChange}
               />
             </div>
           </main>

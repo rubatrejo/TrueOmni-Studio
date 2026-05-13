@@ -1,6 +1,8 @@
 'use client';
 
 import {
+  Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Maximize,
@@ -12,7 +14,12 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 
-import { canvasDimensionsOf, GRID_CONFIGS, type GridConfig } from '@/lib/video-walls/dimensions';
+import {
+  canvasDimensionsOf,
+  GRID_CONFIG_IDS,
+  GRID_CONFIGS,
+  type GridConfig,
+} from '@/lib/video-walls/dimensions';
 import type { VideoWallSlide } from '@/lib/video-walls/schema';
 
 /**
@@ -45,6 +52,10 @@ export interface WallPreviewPanelProps {
    *  (race condition: el iframe puede no haber montado el listener todavía
    *  cuando el editor empuja el primer cambio). */
   onIframeLoad?: () => void;
+  /** Cambia el grid del wall (3x2/4x2/2x2/2x1/1x2). El shell decide si pedir
+   *  confirmación según si hay slides en la playlist activa (los templates
+   *  son específicos del grid actual). */
+  onGridChange?: (next: GridConfig) => void;
 }
 
 export function WallPreviewPanel({
@@ -58,6 +69,7 @@ export function WallPreviewPanel({
   onNavSlide,
   iframeRef,
   onIframeLoad,
+  onGridChange,
 }: WallPreviewPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [autoFit, setAutoFit] = useState(0.1);
@@ -65,6 +77,25 @@ export function WallPreviewPanel({
   const [focusedCell, setFocusedCell] = useState<{ row: number; col: number } | null>(null);
   const [showBezels, setShowBezels] = useState(true);
   const [fullScreen, setFullScreen] = useState(false);
+  const [gridMenuOpen, setGridMenuOpen] = useState(false);
+  const gridMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!gridMenuOpen) return;
+    function onClick(e: MouseEvent) {
+      if (!gridMenuRef.current) return;
+      if (!gridMenuRef.current.contains(e.target as Node)) setGridMenuOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setGridMenuOpen(false);
+    }
+    window.addEventListener('mousedown', onClick);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('mousedown', onClick);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [gridMenuOpen]);
 
   const { cols, rows } = GRID_CONFIGS[grid];
   const { width: canvasW, height: canvasH } = canvasDimensionsOf(grid);
@@ -112,13 +143,65 @@ export function WallPreviewPanel({
       {/* Toolbar superior */}
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 px-6 pb-3 pt-4">
         <div className="flex items-center gap-2">
-          <div className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[12px] text-zinc-700 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300">
-            <Monitor className="h-3.5 w-3.5" />
-            <span className="font-mono">{grid}</span>
-            <span className="text-zinc-400">·</span>
-            <span className="font-mono text-zinc-500">
-              {canvasW}×{canvasH}
-            </span>
+          <div className="relative" ref={gridMenuRef}>
+            <button
+              type="button"
+              onClick={() => onGridChange && setGridMenuOpen((v) => !v)}
+              disabled={!onGridChange}
+              aria-haspopup="menu"
+              aria-expanded={gridMenuOpen}
+              title={onGridChange ? 'Change grid configuration' : 'Grid configuration (read-only)'}
+              className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[12px] text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-default disabled:hover:border-zinc-200 disabled:hover:bg-white dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-900 dark:disabled:hover:border-zinc-700 dark:disabled:hover:bg-zinc-950"
+            >
+              <Monitor className="h-3.5 w-3.5" />
+              <span className="font-mono">{grid}</span>
+              <span className="text-zinc-400">·</span>
+              <span className="font-mono text-zinc-500">
+                {canvasW}×{canvasH}
+              </span>
+              {onGridChange ? <ChevronDown className="h-3 w-3 text-zinc-400" /> : null}
+            </button>
+            {gridMenuOpen && onGridChange ? (
+              <div
+                role="menu"
+                className="absolute left-0 top-[calc(100%+4px)] z-50 min-w-[200px] overflow-hidden rounded-md border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-950"
+              >
+                <div className="border-b border-zinc-100 px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500 dark:border-zinc-800">
+                  Grid configuration
+                </div>
+                {GRID_CONFIG_IDS.map((g) => {
+                  const dims = canvasDimensionsOf(g);
+                  const isActive = g === grid;
+                  return (
+                    <button
+                      key={g}
+                      type="button"
+                      role="menuitemradio"
+                      aria-checked={isActive}
+                      onClick={() => {
+                        setGridMenuOpen(false);
+                        if (g !== grid) onGridChange(g);
+                      }}
+                      className={`flex w-full items-center justify-between gap-3 px-3 py-1.5 text-left text-[12px] transition ${
+                        isActive
+                          ? 'bg-sky-50 text-sky-900 dark:bg-sky-500/10 dark:text-sky-200'
+                          : 'text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-900'
+                      }`}
+                    >
+                      <span className="font-mono font-medium">{g}</span>
+                      <span className="font-mono text-[11px] text-zinc-500">
+                        {dims.width}×{dims.height}
+                      </span>
+                      {isActive ? (
+                        <Check className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
+                      ) : (
+                        <span className="h-3.5 w-3.5" aria-hidden="true" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
           </div>
           <label className="inline-flex cursor-pointer items-center gap-1.5 text-[11.5px] text-zinc-600 dark:text-zinc-400">
             <input

@@ -58,6 +58,7 @@ sesión para resolver tres problemas de higiene que estaban arrastrando el repo:
 
     Actualizar `allowed-tools` si hace falta: ya está restringido a Read, Bash,
     Glob, Grep — `agent-browser` corre por Bash, no se necesitan permisos extra.
+
   </action>
   <verify>
     grep -in -E '(playwright|webapp-testing)' .claude/agents/revisor-visual.md
@@ -65,6 +66,7 @@ sesión para resolver tres problemas de higiene que estaban arrastrando el repo:
 
     Lectura humana: el bloque del paso 3 contiene los 4 comandos de
     `agent-browser` exactamente.
+
   </verify>
   <done>
     El subagente revisor-visual instruye usar `agent-browser` por defecto y
@@ -108,6 +110,7 @@ sesión para resolver tres problemas de higiene que estaban arrastrando el repo:
 
     Mantener el step 1 (`qlmanage -t -s 1080 -o /tmp/thumbs ...`) intacto: ese
     convierte el SVG a PNG y lo usa el `diff screenshot` como baseline.
+
   </action>
   <verify>
     grep -in playwright .planning/PIXEL-PERFECT-PROTOCOL.md → 0 hits.
@@ -131,6 +134,7 @@ sesión para resolver tres problemas de higiene que estaban arrastrando el repo:
 
     Actualizar el prompt sugerido al subagente para mencionar explícitamente
     `agent-browser` en lugar de "Playwright MCP".
+
   </action>
   <verify>
     grep -in playwright .claude/commands/verificar-visual.md → 0 hits.
@@ -153,6 +157,7 @@ sesión para resolver tres problemas de higiene que estaban arrastrando el repo:
     Reescribir la cabecera del `.md` para que apunte al JSON ejecutable como
     fuente de verdad. Marcar el camino Playwright como **opcional futuro**, no
     obligatorio.
+
   </action>
   <verify>
     Existe tests/e2e/studio-create-client.json y es JSON válido
@@ -160,6 +165,7 @@ sesión para resolver tres problemas de higiene que estaban arrastrando el repo:
 
     El .md referencia el .json y NO instruye instalar @playwright/test como
     paso obligatorio.
+
   </verify>
   <done>
     Existe un spec E2E del Studio ejecutable con `agent-browser batch` sin
@@ -180,12 +186,14 @@ sesión para resolver tres problemas de higiene que estaban arrastrando el repo:
     5. Guarde la salida en `.planning/verifications/`.
 
     Añadir a `package.json` el script `"verify:visual": "node scripts/verify-visual.mjs"`.
+
   </action>
   <verify>
     `node scripts/verify-visual.mjs --help` imprime usage sin error
     (cuando agent-browser no está instalado, falla con mensaje claro).
 
     `pnpm run` lista verify:visual.
+
   </verify>
   <done>
     Existe un comando `pnpm verify:visual --ruta /home` reproducible fuera
@@ -204,6 +212,7 @@ sesión para resolver tres problemas de higiene que estaban arrastrando el repo:
     .gitignore: borrar la línea `.playwright-mcp/` (aparece duplicada) y el
     bloque "Debug screenshots de Playwright". Mantener `/*.png` que ya cubre
     los PNGs sueltos en raíz.
+
   </action>
   <verify>
     grep -in 'playwright' .gitignore CLAUDE.md → solo la nueva prohibición
@@ -228,6 +237,7 @@ sesión para resolver tres problemas de higiene que estaban arrastrando el repo:
        disco local).
 
     Añadir a `package.json` el script `"clean:screenshots": "node scripts/clean-dev-screenshots.mjs"`.
+
   </action>
   <verify>
     `node scripts/clean-dev-screenshots.mjs --help` imprime usage.

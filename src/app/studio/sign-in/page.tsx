@@ -121,9 +121,8 @@ function SignInContent() {
             >
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
               <span>
-                The login process is currently under maintenance. The Studio
-                is temporarily restricted while we finalize multi-client
-                onboarding. Please try again later.
+                The login process is currently under maintenance. The Studio is temporarily
+                restricted while we finalize multi-client onboarding. Please try again later.
               </span>
             </div>
           ) : null}

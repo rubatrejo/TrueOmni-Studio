@@ -38,7 +38,13 @@ Salida:
 `;
 
 function parseArgs(argv) {
-  const args = { ruta: null, name: null, baseline: null, viewport: '1080x1920', baseUrl: 'http://localhost:3000' };
+  const args = {
+    ruta: null,
+    name: null,
+    baseline: null,
+    viewport: '1080x1920',
+    baseUrl: 'http://localhost:3000',
+  };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '-h' || a === '--help') {
@@ -59,7 +65,12 @@ function parseArgs(argv) {
 }
 
 function slugifyRoute(ruta) {
-  return ruta.replace(/^\//, '').replace(/\//g, '-').replace(/[^a-zA-Z0-9-]/g, '-') || 'root';
+  return (
+    ruta
+      .replace(/^\//, '')
+      .replace(/\//g, '-')
+      .replace(/[^a-zA-Z0-9-]/g, '-') || 'root'
+  );
 }
 
 function today() {
@@ -106,7 +117,9 @@ if (!which('agent-browser')) {
 }
 
 if (!devServerUp(args.baseUrl)) {
-  console.error(`✖ Dev server caído en ${args.baseUrl}. Arrancá con \`pnpm kiosk:dev\` y reintenta.`);
+  console.error(
+    `✖ Dev server caído en ${args.baseUrl}. Arrancá con \`pnpm kiosk:dev\` y reintenta.`,
+  );
   process.exit(1);
 }
 

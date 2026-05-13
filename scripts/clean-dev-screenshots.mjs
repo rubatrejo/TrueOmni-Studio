@@ -108,4 +108,5 @@ for (const p of pngs) {
 }
 
 console.log(`✔ Movidos ${moved} PNGs (${formatMB(totalBytes)}) a ${destDir}.`);
-if (renamed > 0) console.log(`  (${renamed} archivo(s) con sufijo añadido por colisión de nombre.)`);
+if (renamed > 0)
+  console.log(`  (${renamed} archivo(s) con sufijo añadido por colisión de nombre.)`);

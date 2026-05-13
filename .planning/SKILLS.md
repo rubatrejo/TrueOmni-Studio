@@ -18,11 +18,11 @@
 
 ## Tier 2 — De revisión (cargar solo al cerrar pantalla)
 
-| Skill                         | Para qué                                                                                 |
-| ----------------------------- | ---------------------------------------------------------------------------------------- |
-| `web-design-guidelines`       | Audit contra Web Interface Guidelines (a11y, UX, perf).                                  |
-| `vercel-react-best-practices` | Patrones correctos de Next.js + React.                                                   |
-| `agent-browser`               | Screenshots + diff visual del kiosk en `/verificar-visual` y smoke E2E del Studio.       |
+| Skill                         | Para qué                                                                           |
+| ----------------------------- | ---------------------------------------------------------------------------------- |
+| `web-design-guidelines`       | Audit contra Web Interface Guidelines (a11y, UX, perf).                            |
+| `vercel-react-best-practices` | Patrones correctos de Next.js + React.                                             |
+| `agent-browser`               | Screenshots + diff visual del kiosk en `/verificar-visual` y smoke E2E del Studio. |
 
 ---
 
@@ -57,11 +57,11 @@ Se quedaron instalados por si los necesitas, pero **no** forman parte del flujo 
 
 Estos los mencionaba la propuesta original pero **no venían en el `skills.zip` instalado**. Si aparecen más adelante, añadirlos a `.claude/skills/` y mover la fila al tier correspondiente:
 
-| Skill                   | Dónde encajaría | Por qué importa                                                |
-| ----------------------- | --------------- | -------------------------------------------------------------- |
-| `brand-guidelines`      | Tier 3          | Onboarding de clientes con identidad propia fuerte.            |
-| `web-artifacts-builder` | Tier 3          | Prototipos HTML complejos fuera del kiosk.                     |
-| `canvas-design`         | Tier 3          | Piezas estáticas (posters, mockups marketing).                 |
+| Skill                   | Dónde encajaría | Por qué importa                                     |
+| ----------------------- | --------------- | --------------------------------------------------- |
+| `brand-guidelines`      | Tier 3          | Onboarding de clientes con identidad propia fuerte. |
+| `web-artifacts-builder` | Tier 3          | Prototipos HTML complejos fuera del kiosk.          |
+| `canvas-design`         | Tier 3          | Piezas estáticas (posters, mockups marketing).      |
 
 > **Nota:** Claude Code puede tener skills globales en `~/.claude/skills/` además de los del proyecto. Si tu instalación global los incluye, funcionan igual aunque no estén en el repo. Lo ideal para portabilidad es que todo lo crítico esté en `.claude/skills/` del repo.
 

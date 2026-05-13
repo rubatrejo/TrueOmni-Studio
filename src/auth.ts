@@ -71,9 +71,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Falla cerrada para todos los demás.
       if (!isAuthorizedEmail(email)) {
         if (parseAdminEmails().length === 0) {
-          console.warn(
-            '[auth] STUDIO_ADMIN_EMAILS is empty — only the super-admin can sign in.',
-          );
+          console.warn('[auth] STUDIO_ADMIN_EMAILS is empty — only the super-admin can sign in.');
         }
         return false;
       }

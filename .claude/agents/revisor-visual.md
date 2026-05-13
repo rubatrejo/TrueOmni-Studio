@@ -51,8 +51,9 @@ Español. Siempre. Informes, comentarios, todo.
    ser que el SVG esté desactualizado).
 
    **Secundario solo si el orquestador lo pide explícitamente:** MCP `Claude in
-   Chrome` cuando el usuario tenga la extensión conectada. No es fallback
+Chrome` cuando el usuario tenga la extensión conectada. No es fallback
    automático.
+
 4. **Extrae medidas del SVG.** Para cada bloque principal del SVG (los hijos directos de la raíz) obtén `x, y, width, height`.
 5. **Extrae medidas del render.** Del screenshot, localiza bloques equivalentes. Si no puedes automatizar la detección, reporta las diferencias percibidas a ojo con honestidad (**di claramente "detección manual"** en el informe).
 6. **Calcula diff** por bloque: `|render - svg|` en px.

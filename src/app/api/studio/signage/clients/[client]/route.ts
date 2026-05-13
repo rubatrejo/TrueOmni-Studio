@@ -67,6 +67,37 @@ export async function PUT(req: NextRequest, ctx: RouteContext) {
     );
   }
 
+  // G5 (audit 2026-05-12): el editor VW reusa este PUT para guardar
+  // branding/header compartido (saveTheme). Antes, el endpoint hacía
+  // upsert ciego — creaba `signage:client:<slug>` aunque el cliente no
+  // tuviera Digital Displays activo, contaminando el dashboard signage.
+  //
+  // Regla:
+  //  - DD activo → ALLOW (caso original signage editor).
+  //  - DD inactivo + VW activo → ALLOW (caso editor VW reusa endpoint).
+  //  - Ambos inactivos → REJECT (no debería pasar, indica bug en cliente).
+  //  - Sin manifest → ALLOW (cliente legacy pre-Fase 2 — no romper).
+  try {
+    const { loadClientManifest } = await import('@/lib/studio/client-manifest');
+    const manifest = await loadClientManifest(clientSlug);
+    if (manifest) {
+      const ddActive = manifest.products.digitalDisplays === true;
+      const vwActive = manifest.products.videoWalls === true;
+      if (!ddActive && !vwActive) {
+        return NextResponse.json(
+          {
+            error: `Client "${clientSlug}" has neither Digital Displays nor Video Walls active. Activate one of those products before saving signage data.`,
+          },
+          { status: 409 },
+        );
+      }
+    }
+  } catch (e) {
+    // No bloquees el flow si el chequeo de manifest falla — best-effort.
+    // eslint-disable-next-line no-console
+    console.warn('[signage:api] manifest activation check failed', e);
+  }
+
   try {
     // Snapshot del previo antes de sobrescribir (patrón git-like, mismo que
     // display snapshots). FIFO cap 10 — el más viejo se purga.

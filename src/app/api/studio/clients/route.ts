@@ -35,6 +35,10 @@ import {
   type ConfigMeta,
   type KioskConfig,
 } from '@/lib/studio/schema';
+import { applyClonedWalls, cloneVideoWallsFromFs } from '@/lib/video-walls/bootstrap-from-fs';
+import { loadVideoWallClient } from '@/lib/video-walls/config';
+import { kVideoWallClient, kVideoWallClientList } from '@/lib/video-walls/kv-keys';
+import { VideoWallClientFileSchema, type VideoWallClientFile } from '@/lib/video-walls/schema';
 
 export const dynamic = 'force-dynamic';
 
@@ -173,13 +177,16 @@ export async function POST(request: Request) {
 
   const products = { ...defaultClientProducts(), ...parsed.data.products };
 
-  // Conflict check: slug ya tiene manifest, kiosk config o signage client.
-  const [existingManifest, existingKiosk, existingSignage] = await Promise.all([
+  // Conflict check: slug ya tiene manifest, kiosk config, signage client o
+  // video-walls client. G4 (audit 2026-05-12): el chequeo previo no incluía
+  // VW, así que un cliente legacy solo-VW podría re-crearse y pisar su KV.
+  const [existingManifest, existingKiosk, existingSignage, existingVideoWalls] = await Promise.all([
     loadClientManifest(slug),
     kv.get(kvKeys.cfg(slug)),
     kv.get(kSignageClient(slug)),
+    kv.get(kVideoWallClient(slug)),
   ]);
-  if (existingManifest || existingKiosk || existingSignage) {
+  if (existingManifest || existingKiosk || existingSignage || existingVideoWalls) {
     return NextResponse.json({ error: `slug "${slug}" already exists` }, { status: 409 });
   }
 
@@ -304,6 +311,65 @@ export async function POST(request: Request) {
     } catch (e) {
       return NextResponse.json(
         { error: 'failed to create signage client', message: (e as Error).message },
+        { status: 500 },
+      );
+    }
+  }
+
+  // 2b. Clonar video-walls si toca. G3 (audit 2026-05-12): antes este POST
+  // ignoraba `products.videoWalls = true` y dejaba `videowall:client:<slug>`
+  // vacío. El drift recovery del page lo compensaba lazy; ahora persistimos
+  // de entrada para que el dashboard `clients` no muestre "VW activo" antes
+  // de que el KV exista.
+  if (products.videoWalls) {
+    try {
+      const template = await loadVideoWallClient(TEMPLATE_SLUG);
+      if (!template) {
+        return NextResponse.json(
+          { error: `video-walls template "${TEMPLATE_SLUG}" not available` },
+          { status: 500 },
+        );
+      }
+      const clone: VideoWallClientFile = {
+        slug,
+        name,
+        locale: template.locale,
+        timezone: template.timezone,
+        location: {
+          ...template.location,
+          ...(parsed.data.location?.city ? { city: parsed.data.location.city } : null),
+          ...(parsed.data.location?.lat != null ? { lat: parsed.data.location.lat } : null),
+          ...(parsed.data.location?.lon != null ? { lon: parsed.data.location.lon } : null),
+        },
+        website:
+          (parsed.data.website && parsed.data.website.trim().length > 0
+            ? parsed.data.website.trim()
+            : undefined) ??
+          (template.website && template.website.trim().length > 0
+            ? template.website.trim()
+            : undefined),
+        branding: structuredClone(template.branding),
+        header: structuredClone(template.header),
+        walls: [],
+      };
+
+      // Clonar walls del template fs al KV (idempotente). Reusa el helper
+      // que también usa el endpoint `activate`.
+      const clonedWalls = await cloneVideoWallsFromFs(TEMPLATE_SLUG, slug);
+      applyClonedWalls(clone, clonedWalls);
+
+      const validated = VideoWallClientFileSchema.safeParse(clone);
+      if (!validated.success) {
+        return NextResponse.json(
+          { error: 'video-walls clone validation failed', issues: validated.error.issues },
+          { status: 500 },
+        );
+      }
+      await kv.set(kVideoWallClient(slug), validated.data);
+      await kv.sadd(kVideoWallClientList, slug);
+    } catch (e) {
+      return NextResponse.json(
+        { error: 'failed to create video-walls client', message: (e as Error).message },
         { status: 500 },
       );
     }

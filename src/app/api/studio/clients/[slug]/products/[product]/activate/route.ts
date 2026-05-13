@@ -17,6 +17,7 @@ import {
 } from '@/lib/studio/client-manifest';
 import { kv, kvKeys } from '@/lib/studio/kv';
 import { KioskConfigSchema, makeBlankConfig, type ConfigMeta } from '@/lib/studio/schema';
+import { applyClonedWalls, cloneVideoWallsFromFs } from '@/lib/video-walls/bootstrap-from-fs';
 import { loadVideoWallClient } from '@/lib/video-walls/config';
 import { kVideoWallClient, kVideoWallClientList } from '@/lib/video-walls/kv-keys';
 import { VideoWallClientFileSchema, type VideoWallClientFile } from '@/lib/video-walls/schema';
@@ -266,37 +267,55 @@ export async function POST(_req: Request, { params }: RouteParams) {
     await kv.set(kSignageClient(slug), validated.data);
     await kv.sadd(kSignageClientList, slug);
   } else if (productId === 'videoWalls') {
-    const template = await loadVideoWallClient(TEMPLATE_SLUG);
-    const clone: VideoWallClientFile = template
-      ? {
-          slug,
-          name: manifest.name,
-          locale: template.locale,
-          timezone: template.timezone,
-          location: {
-            ...template.location,
-            ...(branding.location?.city ? { city: branding.location.city } : null),
-            ...(branding.location?.lat != null ? { lat: branding.location.lat } : null),
-            ...(branding.location?.lon != null ? { lon: branding.location.lon } : null),
-          },
-          website: normalizeUrl(branding.website) ?? normalizeUrl(template.website),
-          branding: {
-            ...structuredClone(template.branding),
-            ...unifiedToSignageBranding(branding),
-          },
-          header: structuredClone(template.header),
-          walls: [],
-        }
-      : makeBlankVideoWallClient(slug, manifest.name, branding);
-    const validated = VideoWallClientFileSchema.safeParse(clone);
-    if (!validated.success) {
-      return NextResponse.json(
-        { error: 'video-walls clone validation failed', issues: validated.error.issues },
-        { status: 500 },
+    // Idempotencia extra: si el KV ya tiene un videowall client persistido
+    // (drift recovery del page lo creó antes), no sobrescribir. Solo flippea
+    // el flag del manifest abajo.
+    const existingVwClient = await kv.get(kVideoWallClient(slug));
+    if (existingVwClient) {
+      // eslint-disable-next-line no-console
+      console.info(
+        `[video-walls:activate] KV client "${slug}" already exists, preserving; only flipping manifest flag.`,
       );
+    } else {
+      const template = await loadVideoWallClient(TEMPLATE_SLUG);
+      const clone: VideoWallClientFile = template
+        ? {
+            slug,
+            name: manifest.name,
+            locale: template.locale,
+            timezone: template.timezone,
+            location: {
+              ...template.location,
+              ...(branding.location?.city ? { city: branding.location.city } : null),
+              ...(branding.location?.lat != null ? { lat: branding.location.lat } : null),
+              ...(branding.location?.lon != null ? { lon: branding.location.lon } : null),
+            },
+            website: normalizeUrl(branding.website) ?? normalizeUrl(template.website),
+            branding: {
+              ...structuredClone(template.branding),
+              ...unifiedToSignageBranding(branding),
+            },
+            header: structuredClone(template.header),
+            walls: [],
+          }
+        : makeBlankVideoWallClient(slug, manifest.name, branding);
+
+      // G1 (audit 2026-05-12): clonar walls del template fs al KV del cliente
+      // nuevo. Antes arrancábamos con `walls: []` siempre, descartando el
+      // demo content del template (`clients-walls/default/walls/lobby-3x2/`).
+      const clonedWalls = await cloneVideoWallsFromFs(TEMPLATE_SLUG, slug);
+      applyClonedWalls(clone, clonedWalls);
+
+      const validated = VideoWallClientFileSchema.safeParse(clone);
+      if (!validated.success) {
+        return NextResponse.json(
+          { error: 'video-walls clone validation failed', issues: validated.error.issues },
+          { status: 500 },
+        );
+      }
+      await kv.set(kVideoWallClient(slug), validated.data);
+      await kv.sadd(kVideoWallClientList, slug);
     }
-    await kv.set(kVideoWallClient(slug), validated.data);
-    await kv.sadd(kVideoWallClientList, slug);
   }
   // Para mobile-pwa/tablets: solo flipea el flag por ahora.
   // Cuando se implementen, agregar aquí la lógica de clone.

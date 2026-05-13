@@ -11,7 +11,7 @@ import {
   Settings as SettingsIcon,
   Share2,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import {
   SignageSidebarTabs,
@@ -23,6 +23,7 @@ import { EventsTab } from '@/app/studio/digital-displays/_components/tabs/Events
 import { HeaderTab } from '@/app/studio/digital-displays/_components/tabs/HeaderTab';
 import { NewsTab } from '@/app/studio/digital-displays/_components/tabs/NewsTab';
 import { SocialTab } from '@/app/studio/digital-displays/_components/tabs/SocialTab';
+import { useDebouncedAutosave } from '@/app/studio/digital-displays/_lib/save-display';
 import { saveTheme } from '@/app/studio/digital-displays/_lib/save-theme';
 import { useThemeEditStore } from '@/app/studio/digital-displays/_lib/theme-edit-store';
 import type { SignageBridgeStatus } from '@/app/studio/digital-displays/_lib/use-signage-bridge';
@@ -109,9 +110,14 @@ export function WallEditorShell({
 
   // Theme store (branding/header) compartido con Digital Displays — la data
   // del cliente vive en `signage:client:{slug}` KV y syncea entre productos.
+  // Mismo patrón de save que DisplayEditor: `useDebouncedAutosave(trigger,
+  // dirty, onSave, 1000)`. Sin botón Save manual — el SaveStatusPill del
+  // SignageTopBar refleja el estado (Saving/Saved/Unsaved/Error).
   const initTheme = useThemeEditStore((s) => s.init);
   const themeDraft = useThemeEditStore((s) => s.draft);
   const themeDirty = useThemeEditStore((s) => s.dirty);
+  const themeSaving = useThemeEditStore((s) => s.saving);
+  const themeError = useThemeEditStore((s) => s.error);
 
   useEffect(() => {
     initTheme({
@@ -131,22 +137,19 @@ export function WallEditorShell({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client.slug]);
 
-  // Autosave theme con debounce 1s cuando hay cambios sucios.
-  useEffect(() => {
-    if (!themeDirty || !themeDraft) return;
-    const t = window.setTimeout(async () => {
-      const cur = useThemeEditStore.getState().draft;
-      if (!cur) return;
-      const result = await saveTheme(cur);
-      if (result.ok) {
-        useThemeEditStore.getState().markSaved();
-        setPreviewKey((k) => k + 1);
-      } else {
-        useThemeEditStore.getState().setError(result.error ?? 'Save failed');
-      }
-    }, 1000);
-    return () => window.clearTimeout(t);
-  }, [themeDirty, themeDraft]);
+  const onThemeAutosave = useCallback(async () => {
+    const cur = useThemeEditStore.getState().draft;
+    if (!cur) return;
+    useThemeEditStore.getState().markSaving(true);
+    const result = await saveTheme(cur);
+    if (result.ok) {
+      useThemeEditStore.getState().markSaved();
+      setPreviewKey((k) => k + 1);
+    } else {
+      useThemeEditStore.getState().setError(result.error ?? 'Save failed');
+    }
+  }, []);
+  useDebouncedAutosave(themeDraft, themeDirty, onThemeAutosave, 1000);
 
   // Reload iframe cuando los tabs (events/social/news/theme) guardan al KV.
   // Emiten `signage-content-saved` / `signage-theme-saved` via save-content
@@ -203,7 +206,7 @@ export function WallEditorShell({
         slug={`${clientSlug} / ${wallSlug}`}
         clientSlug={clientSlug}
         nombre={wallName}
-        saveState={themeDirty ? 'saving' : 'saved'}
+        saveState={themeError ? 'error' : themeSaving ? 'saving' : themeDirty ? 'idle' : 'saved'}
         isDirty={themeDirty}
         previewHref={previewHref}
         productLabel="Video Walls"

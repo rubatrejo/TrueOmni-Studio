@@ -49,10 +49,17 @@ export function mapWeatherToHeader(
   locale: string,
   timezone: string,
   forecastDays: 1 | 3 | 5,
+  units: '°F' | '°C' = '°F',
 ): SignageHeaderWeather {
   if (!data) {
     return buildFallback(forecastDays);
   }
+
+  const cFromF = (f: number) => Math.round(((f - 32) * 5) / 9);
+  const tempText = (f: number | undefined): string => {
+    if (f == null) return '--°';
+    return units === '°C' ? `${cFromF(f)}°` : `${f}°`;
+  };
 
   const today = new Date();
   const forecast = Array.from({ length: forecastDays }, (_, i) => {
@@ -62,14 +69,14 @@ export function mapWeatherToHeader(
     const f = data.forecast5[offset];
     return {
       dayLabel: formatDayAbbr(date, locale, timezone),
-      highText: f ? `${f.highF}°` : '--°',
-      lowText: f ? `${f.lowF}°` : '--°',
+      highText: tempText(f?.highF),
+      lowText: tempText(f?.lowF),
       weatherCode: f?.weatherCode ?? null,
     };
   });
 
   return {
-    currentTempText: `${data.currentTempF}°`,
+    currentTempText: tempText(data.currentTempF),
     currentWeatherCode: data.weatherCode,
     forecast,
   };

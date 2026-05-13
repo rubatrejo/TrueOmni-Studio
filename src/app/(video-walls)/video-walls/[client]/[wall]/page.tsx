@@ -49,7 +49,16 @@ export default async function VideoWallPage({ params, searchParams }: PageProps)
       return null;
     },
   );
-  const weather = mapWeatherToHeader(weatherData, clientCfg.locale, clientCfg.timezone, 3);
+  const rawForecastDays = clientCfg.header.forecastDays as 0 | 1 | 3 | 5;
+  const forecastDays: 1 | 3 | 5 = rawForecastDays === 0 ? 1 : rawForecastDays;
+  const weatherUnits = (clientCfg.header.weatherUnits ?? '°F') as '°F' | '°C';
+  const weather = mapWeatherToHeader(
+    weatherData,
+    clientCfg.locale,
+    clientCfg.timezone,
+    forecastDays,
+    weatherUnits,
+  );
 
   const cell = parseCellParam(search?.cell, wallCfg.grid);
   const bezelParam = Array.isArray(search?.bezels) ? search.bezels[0] : search?.bezels;

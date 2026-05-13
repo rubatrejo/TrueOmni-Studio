@@ -1,12 +1,22 @@
 'use client';
 
-import { cellRectToPx, type CellRect } from '@/lib/video-walls/dimensions';
+import { type CSSProperties } from 'react';
+
+import { cellRectToPx, type CellRect, type PixelRect } from '@/lib/video-walls/dimensions';
 import type {
   VideoWallClientResolved,
   VideoWallEvent,
   VideoWallModuleInstance,
   VideoWallSlotConfig,
 } from '@/lib/video-walls/schema';
+
+/** Convierte PixelRect (`{x, y, w, h}`) a CSS válido (`left/top/width/height`).
+ *  Crítico: pasar el PixelRect directo como `style` rompe el render porque
+ *  `x/y/w/h` no son keys CSS — el div queda sin dimensiones y los hijos
+ *  toman su tamaño natural. */
+function pxToCss(px: PixelRect): CSSProperties {
+  return { left: px.x, top: px.y, width: px.w, height: px.h };
+}
 
 /**
  * Renderers compartidos por los templates video-walls. Cada uno recibe
@@ -57,7 +67,7 @@ export function VideoImageSlot({
       ? urlOr(client.slug, module.asset.url, 'assets/video-image/pool.png')
       : null;
   return (
-    <div className="absolute overflow-hidden bg-black" style={px}>
+    <div className="absolute overflow-hidden bg-black" style={pxToCss(px)}>
       {url ? (
         isVideo ? (
           <video src={url} autoPlay loop muted playsInline className="h-full w-full object-cover" />
@@ -93,7 +103,7 @@ export function AdSlot({
   return (
     <div
       className="absolute overflow-hidden"
-      style={{ ...px, backgroundColor: 'hsl(var(--signage-stage-bg, 222 47% 5%))' }}
+      style={{ ...pxToCss(px), backgroundColor: 'hsl(var(--signage-stage-bg, 222 47% 5%))' }}
     >
       {url ? (
         isVideo ? (
@@ -130,7 +140,7 @@ export function EventsSlot({
   const maxItems = module?.kind === 'events' ? module.maxItems : cols * rows;
   const events = (client.events ?? []).slice(0, maxItems);
   return (
-    <div className="absolute bg-black" style={px}>
+    <div className="absolute bg-black" style={pxToCss(px)}>
       <div
         className="h-full w-full p-4"
         style={{
@@ -208,7 +218,7 @@ export function SocialSlot({
   const maxPosts = module?.kind === 'social' ? module.maxPosts : cols * rows;
   const posts = (client.social?.posts ?? []).slice(0, Math.min(maxPosts, cols * rows));
   return (
-    <div className="absolute bg-black" style={px}>
+    <div className="absolute bg-black" style={pxToCss(px)}>
       <div
         className="h-full w-full"
         style={{
@@ -235,7 +245,7 @@ export function SocialSlot({
                     background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)',
                   }}
                 >
-                  <span className="font-mono text-[11px]">@{p.author}</span>
+                  <span className="font-mono text-[11px]">@{p.author.replace(/^@+/, '')}</span>
                 </div>
               )}
             </div>

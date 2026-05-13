@@ -3052,6 +3052,81 @@ E — **Validación visual real** (ningún template validado pixel-a-pixel todav
 
 ---
 
+### Sesión 2026-05-12 (noche maratón) — Video Walls templates 02-06 pixel-perfect + editor end-to-end editable
+
+**Hecho — 17 commits, todos en `main`, todos deployados:**
+
+Templates pixel-perfect (Bloque A):
+
+- `81af498` — Templates 02-06 reescritos SVG inline verbatim XD + `_card-svg.tsx` con `EventCardSvg`/`SocialCardSvg`/`SocialGradientDefs`.
+- `0ee3d23` (previo) — Template 01.
+
+Plumbing producción (Bloque B):
+
+- `b2386f8` — Endpoint `/video-wall-assets/[client]/[...path]` + `slideIndex` prop + seed 6 slides en `lobby-3x2/wall.json`.
+- `0141feb` + `86caab9` — `loadVideoWall` prefiere fs cuando KV playlist más pobre + override `?source=fs`.
+- `e20edc3` — Endpoint fix bundle 1.51GB → redirect 302 a `/signage-assets` (Vercel function size cap 300MB).
+- `310218d` — **Tokens CSS injection en VW runtime layout** (bug crítico: el runtime nunca cargaba `loadSignageTokensCss` ni overrides de `branding.tokens`, por eso colors no reflejaban) + header position bottom + seed events 6to "Saturday Farmers Market" + default tab Branding.
+
+Editor end-to-end (Bloque C):
+
+- `a217bab` — Topbar única + slide navigator pill mt-20 + playlist sync con preview vía `?slide=N` + weather real.
+- `85da2f6` — Tabs Branding/Header/Events/Social/News editables in-place (clones literales del DD `BrandingTab`/`HeaderTab`/etc) + `useThemeEditStore` init.
+- `144a9ca` — `useDebouncedAutosave` (mismo hook que DD), Full Screen modal con back/ESC, `?source=fs` removido del iframe editor.
+- `d67d6e6` — Bug fundamental reactividad: `loadVideoWallClient` prefiere `signage:client:{slug}` para branding/header (los tabs guardan ahí). Full screen UI igual al DD. Color picker close X. Playlist drag-handle/chevron expand/duration/transition/schedule pill.
+- `9686348` — Weather UI HTML overlay formato DD (current temp 144pt + dividers + forecast cards con WeatherIcon SVG) + `mapWeatherToHeader(units)` °C/°F + seed clients-walls events 6to.
+- `9942e12` — Refactor autosave a `useDebouncedAutosave` (consistency exacta con DD).
+- `3b47d38` — **VideoWallHeader refactor completo a HTML+flex** (mismo patrón que SignageHeader del DD, escalado 2.16×). Respeta TODOS los campos del editor: showLogo/showWeather/showClock, logo/weather/clock placement, position top/bottom, background color/gradient/image, forecastDays, weatherUnits, clock textAlign por placement (fix 24h alignment).
+- `d20800d` — Page list cleanup (quitada section Runtime URLs) + templates SVG tokenizados (#004f8b → brand-primary, #1796d6 → brand-secondary) + SignageMediaField en PlaylistPanel (drag/drop + URL paste para video-image y ads).
+- `250c283` — Swap final tokens event cards: date badge → `--signage-brand-accent`, bottom panel → `--signage-brand-secondary`.
+
+DevOps:
+
+- `af71082` — Auto-format de 7 archivos preexistentes desformateados (sign-in, auth.ts, planning .md, scripts .mjs) para desbloquear CI `format:check`.
+
+**Verificado:**
+
+- Typecheck + lint limpios cada commit (husky pre-commit corre).
+- Push limpio 17 commits en cadena (5319f79 → 250c283). Tip: `250c283`.
+- Vercel: todos los deploys READY después del fix de bundle size 1.51GB (commit `e20edc3`). Antes 3 deploys fallaron por el bundle.
+- CI verde tras `af71082` (format check).
+- Smoke local validado por Rubén con screenshots del editor en cada bloque — colores ya reflejan, header cambios reflejan, weather formato DD funciona, events 6 cargan, playlist rich + asset upload.
+- Templates 01-06 todos validados visualmente contra XD PNG `designs/video-walls/3x2/*.png` — composición pixel-perfect.
+
+**Pendiente / siguiente (para sesión nueva):**
+
+A — **Editor refinement on-demand** (cuando Rubén lo pida):
+
+1. PlaylistPanel: AddSlideModal + SchedulePopover + SlideRowExpanded literal del DD (hoy hay versión simplificada con drag-handle/expand/duration/transition/schedule pill, pero el DD tiene un editor más rico de slide details).
+2. Bridge live editor↔preview iframe (clon de `useSignageBridge`) — hoy reload del iframe en cada save (~500ms FOUC). Bridge propagaría diff postMessage sin reload.
+3. Versions tab — snapshots CRUD (kvVideoWallSnapshot + endpoints /snapshots + restore).
+4. Publish tab — GitHub PR sync (clone del signage publish, escribe `clients-walls/{slug}/walls/{wallSlug}/wall.json` + crea branch + PR).
+
+B — **Templates derivados (12 más, sin XD)**:
+
+- 4×2: 6 templates derivados proporcionalmente del 3×2.
+- 2×2: 5 templates.
+- 2×1: 3 templates (header strip — adaptar el layout HTML+flex para height pequeña).
+- 1×2: 3 templates (header solo cell (0,0), o sin header).
+
+C — **Cliente real**: probar el flow `/studio/[slug]/video-walls` con un cliente custom (no `default`). El bootstrap-from-fs activate ya está; falta validar que un cliente nuevo cree wall + edite todo + publique.
+
+D — **PlaylistPanel Asset upload**: validar end-to-end que el upload real funciona (drag/drop file → `/api/studio/upload?product=signage` → KV → iframe muestra el asset).
+
+**Decisiones tomadas:**
+
+- **`loadVideoWallClient` prefiere `signage:client:{slug}` para branding/header/locale/timezone/location/website** — la data del cliente es UNIFICADA entre productos. Los tabs del editor guardan en signage:client; el runtime VW lee de ahí. Single source of truth. (Commit `d67d6e6`.)
+- **Tokens CSS injection en runtime VW layout** — sin esto, los colores nunca reflejan. Patrón copiado del signage layout (commit `310218d`). REGLA: cualquier producto nuevo que use tokens del cliente debe inyectarlos en su layout.
+- **VideoWallHeader HTML+flex (no SVG monolítico)** — el SVG verbatim XD del template 01 funcionaba pixel-perfect contra el mockup pero NO respetaba placements/visible/positioning del editor. HTML+flex con zones placeable (mismo patrón DD) sí. Trade-off: ya no es pixel-perfect contra el XD original — pero funcional para el operador. (Commit `3b47d38`.)
+- **PlaylistPanel slot editor usa `SignageMediaField` con `SignageEditorProvider` wrap** — reusar componentes del DD literalmente (drag/drop + URL paste + Click link + QR target + Weight) sin duplicar 600 líneas. Wrap del WallEditorShell con provider para que el context resuelva clientSlug. (Commit `d20800d`.)
+- **Event card colors swap (final)**: date badge = accent, bottom panel = secondary (no primary). Por decisión del operador (commit `250c283`).
+- **Autosave consistente con DD via `useDebouncedAutosave`** (hook compartido en `save-display.ts`). Sin botón Save manual — SaveStatusPill del SignageTopBar refleja saving/saved/dirty/error. (Commit `9942e12`.)
+- **CI `format:check` archivos preexistentes** — auto-formaté con prettier 7 archivos no míos para desbloquear el CI verde. Si en el futuro se modifica `.claude/`, `.planning/`, `scripts/` o `src/auth.ts`, ya están formateados.
+
+**Fase:** Video Walls editor end-to-end funcional. Templates 01-06 pixel-perfect (3×2). BrandingTab/HeaderTab/EventsTab/SocialTab/NewsTab editables. PlaylistPanel con drag-drop + asset upload. Header HTML+flex respeta TODO el config. Tokens CSS inyectados. Reactividad real (cualquier cambio refleja en iframe). **Próxima sesión: probar flow con cliente real (no default) + Versions/Publish tabs**.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

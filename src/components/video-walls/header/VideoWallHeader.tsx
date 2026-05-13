@@ -81,15 +81,21 @@ export function VideoWallHeader({ client, weather, grid }: VideoWallHeaderProps)
     return 3;
   })();
 
+  // Position del header — top (default) o bottom. Cuando bottom, el header
+  // se ancla al fondo del canvas. Los templates SVG ya pintan full canvas,
+  // así que se ven enteros y el header tapa la franja inferior.
+  const headerPosition = client.header.position ?? 'top';
+  const verticalAnchor = headerPosition === 'bottom' ? { bottom: 0 } : { top: 0 };
+
   return (
     <>
       <svg
-        className="pointer-events-none absolute left-0 top-0"
+        className="pointer-events-none absolute left-0"
         width={canvasW}
         height={HEADER_H}
         viewBox={`0 0 ${canvasW} ${HEADER_H}`}
         xmlns="http://www.w3.org/2000/svg"
-        style={{ zIndex: 20 }}
+        style={{ zIndex: 20, ...verticalAnchor }}
         aria-hidden="true"
       >
         {/* Background band */}
@@ -358,7 +364,12 @@ export function VideoWallHeader({ client, weather, grid }: VideoWallHeaderProps)
 
       {/* Weather block — HTML overlay con formato DD (current temp +
         dividers + forecast cards con day label + icon + high/low). */}
-      <WeatherZone weather={weather} forecastDays={forecastDays} clockX={clockX} />
+      <WeatherZone
+        weather={weather}
+        forecastDays={forecastDays}
+        clockX={clockX}
+        verticalAnchor={verticalAnchor}
+      />
     </>
   );
 }
@@ -371,10 +382,12 @@ function WeatherZone({
   weather,
   forecastDays,
   clockX,
+  verticalAnchor,
 }: {
   weather: SignageHeaderWeather;
   forecastDays: 1 | 3 | 5;
   clockX: number;
+  verticalAnchor: { top: number } | { bottom: number };
 }) {
   // Zona disponible: entre el final del logo (~x=900) y el inicio del
   // clock (x=clockX). Centramos el bloque en esa zona.
@@ -389,7 +402,7 @@ function WeatherZone({
       className="pointer-events-none absolute"
       style={{
         left,
-        top: 0,
+        ...verticalAnchor,
         width,
         height: HEADER_H,
         display: 'flex',

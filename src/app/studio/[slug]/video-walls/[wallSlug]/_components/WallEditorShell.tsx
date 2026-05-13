@@ -102,7 +102,7 @@ export function WallEditorShell({
   grid,
   initialWall,
 }: WallEditorShellProps) {
-  const [tab, setTab] = useState<TabKey>('playlist');
+  const [tab, setTab] = useState<TabKey>('branding');
   const [wall, setWall] = useState<VideoWallConfig>(initialWall);
   const [previewKey, setPreviewKey] = useState(0);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);

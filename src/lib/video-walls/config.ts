@@ -115,8 +115,11 @@ export const loadVideoWallClient = cache(
           timezone: kvSigClient?.timezone ?? kvClient.timezone,
           location: kvSigClient?.location ?? kvClient.location,
           website: kvSigClient?.website ?? kvClient.website,
-          events: kvEvents ?? kvSigEvents ?? fsFiles?.events ?? [],
-          social: kvSocial ?? kvSigSocial ?? fsFiles?.social ?? { posts: [] },
+          // Events/social/news: si el fs tiene más items que el KV, preferir
+          // fs (asume seeds nuevos no sincronizados). El operador puede
+          // sobrescribir desde el editor — el KV gana si tiene >= items.
+          events: pickRicherEvents(kvEvents, kvSigEvents, fsFiles?.events),
+          social: pickRicherSocial(kvSocial, kvSigSocial, fsFiles?.social),
           news: kvNews ??
             kvSigNews ??
             fsFiles?.news ?? {
@@ -150,8 +153,8 @@ export const loadVideoWallClient = cache(
         timezone: kvSigClient?.timezone ?? files.client.timezone,
         location: kvSigClient?.location ?? files.client.location,
         website: kvSigClient?.website ?? files.client.website,
-        events: kvEvents ?? kvSigEvents ?? files.events,
-        social: kvSocial ?? kvSigSocial ?? files.social,
+        events: pickRicherEvents(kvEvents, kvSigEvents, files.events),
+        social: pickRicherSocial(kvSocial, kvSigSocial, files.social),
         news: kvNews ?? kvSigNews ?? files.news,
       });
     } catch (err) {
@@ -177,6 +180,38 @@ export const loadVideoWallClient = cache(
     }
   },
 );
+
+/** Devuelve el array de events con más items entre KV-vw, KV-signage y fs.
+ *  Permite que seeds nuevos del fs (eg. nuevos events publicados via git)
+ *  se vean en producción sin tener que abrir el editor a re-guardar. */
+function pickRicherEvents<T extends { length: number } | null | undefined>(
+  kvVw: T,
+  kvSig: T,
+  fs: T,
+): T {
+  const lens = [
+    [kvVw, kvVw?.length ?? 0] as const,
+    [kvSig, kvSig?.length ?? 0] as const,
+    [fs, fs?.length ?? 0] as const,
+  ];
+  lens.sort((a, b) => b[1] - a[1]);
+  return (lens[0][0] ?? kvVw ?? kvSig ?? fs) as T;
+}
+
+/** Devuelve el SignageSocialData con más posts. Igual lógica que events. */
+function pickRicherSocial<T extends { posts?: { length: number } } | null | undefined>(
+  kvVw: T,
+  kvSig: T,
+  fs: T,
+): T {
+  const lens = [
+    [kvVw, kvVw?.posts?.length ?? 0] as const,
+    [kvSig, kvSig?.posts?.length ?? 0] as const,
+    [fs, fs?.posts?.length ?? 0] as const,
+  ];
+  lens.sort((a, b) => b[1] - a[1]);
+  return (lens[0][0] ?? kvVw ?? kvSig ?? fs) as T;
+}
 
 async function loadVideoWallFromFs(
   clientSlug: string,

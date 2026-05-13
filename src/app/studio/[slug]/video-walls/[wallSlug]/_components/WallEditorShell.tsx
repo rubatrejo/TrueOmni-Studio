@@ -32,6 +32,7 @@ import type { SignageClientResolved } from '@/lib/signage/schema';
 import { useVideoWallBridge } from '@/lib/video-walls/bridge';
 import { GRID_CONFIGS, type GridConfig } from '@/lib/video-walls/dimensions';
 import type { VideoWallConfig } from '@/lib/video-walls/schema';
+import { countRemappedTemplates, remapPlaylistToGrid } from '@/lib/video-walls/template-remap';
 
 import { PlaylistPanel } from './PlaylistPanel';
 import { PublishToolbar } from './PublishToolbar';
@@ -244,27 +245,37 @@ export function WallEditorShell({
   };
 
   // Cambia el grid del wall completo. Los templates están vinculados al grid
-  // actual (e.g. `01-full-events` solo existe para 3x2), así que al cambiar
-  // de grid se vacían playlists. Confirm explícito si hay slides existentes.
+  // (e.g. `01-full-events` solo existe para 3x2), pero los templateIds no
+  // siempre son consistentes entre grids (`02-video-image-ad` en 3x2 vs
+  // `02-quad-mix` en 2x2 vs `02-video-ad-stack` en 1x2). En lugar de borrar
+  // los slides, usamos `remapPlaylistToGrid` que mapea cada slide al
+  // template equivalente más cercano por categoría/intent, preservando las
+  // configs de slot cuando los slotKeys coinciden.
   const handleGridChange = useCallback(
     async (nextGrid: GridConfig) => {
       if (nextGrid === wall.grid) return;
-      const totalSlides =
-        (wall.playlists ?? []).reduce((sum, p) => sum + p.slides.length, 0) || wall.playlist.length;
-      if (totalSlides > 0) {
-        const ok = window.confirm(
-          `Switching to ${nextGrid} will remove all ${totalSlides} slide${
-            totalSlides === 1 ? '' : 's'
-          } (templates are specific to the current grid). Continue?`,
+      const remappedPlaylist = remapPlaylistToGrid(wall.playlist, nextGrid);
+      const remappedPlaylists = (wall.playlists ?? []).map((p) => ({
+        ...p,
+        slides: remapPlaylistToGrid(p.slides, nextGrid),
+      }));
+      const totalChanged = countRemappedTemplates(wall.playlist, remappedPlaylist);
+      if (totalChanged > 0) {
+        // Feedback no-bloqueante: el operador sabe que algunos slides
+        // cambiaron a un template equivalente (no se perdieron).
+        // eslint-disable-next-line no-console
+        console.info(
+          `[video-walls] grid ${wall.grid} → ${nextGrid}: ${totalChanged} slide(s) remapped to closest equivalent template`,
         );
-        if (!ok) return;
       }
       const nextWall: VideoWallConfig = {
         ...wall,
         grid: nextGrid,
-        playlist: [],
-        playlists: [{ id: 'main', name: 'Main', slides: [] }],
-        activePlaylistId: 'main',
+        playlist: remappedPlaylist,
+        playlists: remappedPlaylists.length
+          ? remappedPlaylists
+          : [{ id: 'main', name: 'Main', slides: remappedPlaylist }],
+        activePlaylistId: wall.activePlaylistId ?? 'main',
       };
       try {
         const res = await fetch(`/api/studio/video-walls/walls/${clientSlug}/${wall.slug}`, {

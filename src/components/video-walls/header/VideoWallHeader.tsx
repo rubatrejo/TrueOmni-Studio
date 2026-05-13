@@ -32,11 +32,37 @@ export interface VideoWallHeaderProps {
   grid: GridConfig;
 }
 
-const PADDING_X = 80;
+const PADDING_X_BASE = 80;
 const PADDING_Y = 38;
 /** Factor de escala vs SignageHeader del DD (HEADER_HEIGHT=155). VW=335 →
  *  335/155 = 2.16. Los tamaños base del DD escalados por esto. */
 const SCALE = 335 / 155;
+/** Canvas baseline del header — 3x2 (5760×335). Otros grids escalan el
+ *  spacing horizontal proporcionalmente para que las 3 zonas
+ *  (logo/weather/clock) no se solapen en grids angostos (1x2: 1920, 2x2/2x1:
+ *  3840) ni queden muy separadas en grids anchos (4x2: 7680). */
+const BASE_CANVAS_W = 5760;
+
+/**
+ * Factor de escala horizontal aplicado a padding lateral y gaps internos.
+ * Clamp [0.5, 1.0] — abajo 50% para no pegar contenido al borde en 1x2;
+ * arriba 100% porque el baseline ya es generoso y aumentar más no aporta
+ * legibilidad.
+ */
+function horizontalScaleFor(canvasW: number): number {
+  return Math.min(1, Math.max(0.5, canvasW / BASE_CANVAS_W));
+}
+
+/**
+ * Clamp de forecastDays — si el canvas es muy angosto (1x2: 1920) no caben
+ * 5 cards de forecast sin solapar con logo/clock. Reduce a 1 día (current
+ * temp + 1 forecast). 3 días caben razonablemente en 3840 (2x2/2x1).
+ */
+function clampForecastDays(forecastDays: 1 | 3 | 5, canvasW: number): 1 | 3 | 5 {
+  if (canvasW <= 1920) return 1;
+  if (canvasW <= 3840 && forecastDays === 5) return 3;
+  return forecastDays;
+}
 
 /** Weather placeholder usado por el runtime cuando no se pasa weather real. */
 export const PLACEHOLDER_WEATHER: SignageHeaderWeather = {
@@ -51,6 +77,8 @@ export const PLACEHOLDER_WEATHER: SignageHeaderWeather = {
 
 export function VideoWallHeader({ client, weather, grid }: VideoWallHeaderProps) {
   const { width: canvasW } = canvasDimensionsOf(grid);
+  const widthScale = horizontalScaleFor(canvasW);
+  const paddingX = Math.round(PADDING_X_BASE * widthScale);
 
   const [now, setNow] = useState<Date>(() => new Date());
   useEffect(() => {
@@ -81,7 +109,10 @@ export function VideoWallHeader({ client, weather, grid }: VideoWallHeaderProps)
 
   // forecastDays — el schema permite 0/1/3/5; mapeo 0 → 1 para que siempre haya al menos 1.
   const rawForecastDays = header.forecastDays as 0 | 1 | 3 | 5;
-  const forecastDays: 1 | 3 | 5 = rawForecastDays === 0 ? 1 : rawForecastDays;
+  const requestedForecastDays: 1 | 3 | 5 = rawForecastDays === 0 ? 1 : rawForecastDays;
+  // Clamp por ancho de canvas — en 1x2 (1920) un forecast de 5 días se
+  // solapa con logo y clock; clamp a 1. En 2x2/2x1 (3840) clamp 5 → 3.
+  const forecastDays: 1 | 3 | 5 = clampForecastDays(requestedForecastDays, canvasW);
 
   return (
     <div
@@ -106,12 +137,16 @@ export function VideoWallHeader({ client, weather, grid }: VideoWallHeaderProps)
         }}
         aria-hidden
       />
-      {header.showLogo ? <LogoZone placement={header.layout} customSrc={resolvedLogoSrc} /> : null}
+      {header.showLogo ? (
+        <LogoZone placement={header.layout} customSrc={resolvedLogoSrc} paddingX={paddingX} />
+      ) : null}
       {header.showWeather ? (
         <WeatherZone
           placement={header.weatherPlacement ?? 'center'}
           weather={weather}
           forecastDays={forecastDays}
+          paddingX={paddingX}
+          widthScale={widthScale}
         />
       ) : null}
       {header.showClock ? (
@@ -119,13 +154,14 @@ export function VideoWallHeader({ client, weather, grid }: VideoWallHeaderProps)
           placement={header.clockPlacement ?? 'right'}
           clockText={clockText}
           dateText={dateText}
+          paddingX={paddingX}
         />
       ) : null}
     </div>
   );
 }
 
-function placementToCss(placement: 'left' | 'center' | 'right'): CSSProperties {
+function placementToCss(placement: 'left' | 'center' | 'right', paddingX: number): CSSProperties {
   const base: CSSProperties = {
     position: 'absolute',
     top: PADDING_Y,
@@ -133,23 +169,25 @@ function placementToCss(placement: 'left' | 'center' | 'right'): CSSProperties {
     display: 'flex',
     alignItems: 'center',
   };
-  if (placement === 'left') return { ...base, left: PADDING_X };
-  if (placement === 'right') return { ...base, right: PADDING_X };
+  if (placement === 'left') return { ...base, left: paddingX };
+  if (placement === 'right') return { ...base, right: paddingX };
   return { ...base, left: '50%', transform: 'translateX(-50%)' };
 }
 
 function LogoZone({
   placement,
   customSrc,
+  paddingX,
 }: {
   placement: 'logo-left' | 'logo-center' | 'logo-right';
   customSrc: string | null;
+  paddingX: number;
 }) {
   const simple: 'left' | 'center' | 'right' =
     placement === 'logo-center' ? 'center' : placement === 'logo-right' ? 'right' : 'left';
   const logoHeight = Math.round(HEADER_H * 0.45);
   return (
-    <div style={placementToCss(simple)}>
+    <div style={placementToCss(simple, paddingX)}>
       <div style={{ height: logoHeight, display: 'flex', alignItems: 'center' }}>
         {customSrc ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -170,15 +208,22 @@ function WeatherZone({
   placement,
   weather,
   forecastDays,
+  paddingX,
+  widthScale,
 }: {
   placement: 'left' | 'center' | 'right';
   weather: SignageHeaderWeather;
   forecastDays: 1 | 3 | 5;
+  paddingX: number;
+  widthScale: number;
 }) {
   const forecastBlockScale = forecastDays === 5 ? 0.75 : 1;
   const totalScale = SCALE * forecastBlockScale;
   const tempFontSize = Math.round(64 * totalScale);
-  const gap = Math.round(28 * totalScale);
+  // Gap horizontal entre forecast cards — escalado por widthScale para
+  // que no queden separadas excesivamente en grids angostos. Mantiene el
+  // tamaño de tipografía (legibilidad) pero comprime el spacing.
+  const gap = Math.round(28 * totalScale * widthScale);
   const dividerH = Math.round(88 * totalScale);
 
   return (
@@ -187,7 +232,7 @@ function WeatherZone({
         gap,
         whiteSpace: 'nowrap',
         fontFamily: "'Open Sans', system-ui, sans-serif",
-        ...placementToCss(placement),
+        ...placementToCss(placement, paddingX),
       }}
     >
       <span style={{ fontSize: tempFontSize, fontWeight: 700, lineHeight: 1 }}>
@@ -270,10 +315,12 @@ function ClockZone({
   placement,
   clockText,
   dateText,
+  paddingX,
 }: {
   placement: 'left' | 'center' | 'right';
   clockText: string;
   dateText: string;
+  paddingX: number;
 }) {
   const clockFs = Math.round(42 * SCALE);
   const dateFs = Math.round(28 * SCALE);
@@ -285,7 +332,7 @@ function ClockZone({
         textAlign,
         lineHeight: 1.15,
         fontFamily: "'Open Sans', system-ui, sans-serif",
-        ...placementToCss(placement),
+        ...placementToCss(placement, paddingX),
       }}
     >
       <div>

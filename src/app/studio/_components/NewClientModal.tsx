@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { LayoutGrid, Monitor, Smartphone, Tablet, Tv, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { useEscapeClose, useFocusTrap } from '../_lib/use-modal-a11y';
@@ -11,7 +11,38 @@ const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
 // 2 letras mayúsculas (US states). Acepta sufijos opcionales tipo " 12345".
 const LOCATION_REGEX = /^[A-Za-z][A-Za-z .'-]{1,60},\s*[A-Z]{2}$/;
 
-type Orientation = 'portrait' | 'landscape' | 'mobile-pwa';
+export type ProductId = 'kiosks' | 'digitalDisplays' | 'mobilePwa' | 'videoWalls' | 'tablets';
+
+export interface NewClientProducts {
+  kiosks: boolean;
+  digitalDisplays: boolean;
+  mobilePwa: boolean;
+  videoWalls: boolean;
+  tablets: boolean;
+}
+
+const PRODUCT_OPTIONS: ReadonlyArray<{
+  id: ProductId;
+  label: string;
+  sub: string;
+  Icon: typeof Monitor;
+}> = [
+  { id: 'kiosks', label: 'Kiosk', sub: 'Portrait + landscape', Icon: Monitor },
+  { id: 'mobilePwa', label: 'Mobile PWA', sub: 'Phone web app', Icon: Smartphone },
+  { id: 'digitalDisplays', label: 'Display', sub: 'Signage 1920×1080', Icon: Tv },
+  { id: 'videoWalls', label: 'Video Wall', sub: 'Multi-TV grids', Icon: LayoutGrid },
+  { id: 'tablets', label: 'Tablet', sub: 'In-room tablet', Icon: Tablet },
+];
+
+function allProductsOn(): NewClientProducts {
+  return {
+    kiosks: true,
+    digitalDisplays: true,
+    mobilePwa: true,
+    videoWalls: true,
+    tablets: true,
+  };
+}
 
 export function NewClientModal({
   open,
@@ -25,11 +56,10 @@ export function NewClientModal({
   onCreate: (input: {
     slug: string;
     nombre: string;
-    orientation: Orientation;
     website: string;
     location: string;
     emptyMode: boolean;
-    activateDigitalDisplays: boolean;
+    products: NewClientProducts;
   }) => Promise<void>;
 }) {
   const [nombre, setNombre] = useState('');
@@ -37,19 +67,12 @@ export function NewClientModal({
   const [website, setWebsite] = useState('');
   const [location, setLocation] = useState('');
   // Flag explícito: el slug solo deja de auto-seguir al nombre cuando el
-  // usuario lo edita a mano. La heurística vieja `if (curr) return curr`
-  // mataba el auto-suggest desde la primera letra (curr siempre dejaba de
-  // estar vacío tras el primer cambio del nombre).
+  // usuario lo edita a mano.
   const [slugTouched, setSlugTouched] = useState(false);
-  const [orientation, setOrientation] = useState<Orientation>('portrait');
+  const [products, setProducts] = useState<NewClientProducts>(allProductsOn);
   // Empty mode: arranca el kiosk sin mock data (listings/events/passes/deals/
-  // trails/itinerary local_listings/social-wall posts). Útil cuando el cliente
-  // quiere poblar todo a mano y no heredar el contenido demo de TrueOmni.
+  // trails/itinerary local_listings/social-wall posts).
   const [emptyMode, setEmptyMode] = useState(false);
-  // S-10: activar Digital Displays junto al kiosk en el create. Si está
-  // marcado, tras el create se llama al endpoint activate de DD. Saves a
-  // round-trip y un reload manual.
-  const [activateDigitalDisplays, setActivateDigitalDisplays] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const nombreRef = useRef<HTMLInputElement>(null);
@@ -61,30 +84,25 @@ export function NewClientModal({
     setWebsite('');
     setLocation('');
     setSlugTouched(false);
-    setOrientation('portrait');
+    setProducts(allProductsOn());
     setEmptyMode(false);
-    setActivateDigitalDisplays(false);
     setError(null);
     setSubmitting(false);
-    // Auto-focus al abrir.
     setTimeout(() => nombreRef.current?.focus(), 50);
   }, [open]);
 
-  // Auto-suggest slug a partir del nombre. Sigue actualizándose mientras el
-  // usuario no haya editado el slug a mano.
   useEffect(() => {
     if (slugTouched) return;
     setSlug(slugify(nombre));
   }, [nombre, slugTouched]);
 
-  // Escape cierra el modal — hallazgo S-28 del audit panorámico v2,
-  // ahora unificado vía hook reusable. El hook se aplica a TODOS los
-  // modales del Studio en este sprint.
   useEscapeClose(open, onClose);
-  // Focus trap: hallazgo S-29 — Tab/Shift+Tab no escapa al body mientras
-  // el modal está abierto. Restaura foco al cerrar.
   const dialogRef = useRef<HTMLDivElement | null>(null);
   useFocusTrap(open, dialogRef);
+
+  const toggleProduct = (id: ProductId) => {
+    setProducts((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const validateSlug = (): string | null => {
     if (!slug) return 'Slug is required';
@@ -96,6 +114,8 @@ export function NewClientModal({
     }
     return null;
   };
+
+  const hasAnyProduct = Object.values(products).some(Boolean);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,16 +143,19 @@ export function NewClientModal({
       setError('Website must start with http:// or https://');
       return;
     }
+    if (!hasAnyProduct) {
+      setError('Select at least one product to activate for this client.');
+      return;
+    }
     setSubmitting(true);
     try {
       await onCreate({
         slug,
         nombre: nombre.trim(),
-        orientation,
         website: trimmedWebsite,
         location: trimmedLocation,
         emptyMode,
-        activateDigitalDisplays,
+        products,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create');
@@ -260,65 +283,30 @@ export function NewClientModal({
                 </div>
 
                 <div>
-                  <span className="mb-1.5 block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
-                    Orientation
-                  </span>
-                  <div className="grid grid-cols-3 gap-2">
-                    <OrientationOption
-                      active={orientation === 'portrait'}
-                      onClick={() => setOrientation('portrait')}
-                      label="Portrait"
-                      sub="1080 × 1920"
-                      glyph={
-                        <svg
-                          width="22"
-                          height="22"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.6"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <rect x="7" y="2.5" width="10" height="19" rx="1.5" />
-                          <line x1="10.5" y1="19" x2="13.5" y2="19" />
-                        </svg>
-                      }
-                    />
-                    <OrientationOption
-                      active={orientation === 'landscape'}
-                      onClick={() => setOrientation('landscape')}
-                      label="Landscape"
-                      sub="1920 × 1080"
-                      glyph={
-                        <svg
-                          width="22"
-                          height="22"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.6"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <rect x="2.5" y="7" width="19" height="10" rx="1.5" />
-                          <line x1="19" y1="10.5" x2="19" y2="13.5" />
-                        </svg>
-                      }
-                    />
-                    {/* Hallazgo S-47: la opción "Mobile PWA" estaba aquí
-                      visible aunque el producto sigue en estado "Coming
-                      soon · Q3 2026". Confunde al operador (cree que el
-                      producto existe). La ocultamos hasta que el editor
-                      Mobile PWA aterrice (Sprint S8 en el roadmap). El
-                      tipo Orientation 'mobile-pwa' se mantiene en el
-                      schema para no romper kiosks viejos que ya lo
-                      tengan persistido. */}
+                  <div className="mb-1.5 flex items-baseline justify-between">
+                    <span className="text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+                      Products
+                    </span>
+                    <span className="text-[11px] text-zinc-500 dark:text-zinc-500">
+                      All selected by default — uncheck the ones you don&apos;t need.
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {PRODUCT_OPTIONS.map((opt) => (
+                      <ProductOption
+                        key={opt.id}
+                        active={products[opt.id]}
+                        onClick={() => toggleProduct(opt.id)}
+                        label={opt.label}
+                        sub={opt.sub}
+                        Icon={opt.Icon}
+                      />
+                    ))}
                   </div>
                   <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-500">
-                    This is the primary view that opens in the editor. All three formats (Portrait,
-                    Landscape, Mobile PWA) are generated automatically — you can switch between them
-                    inside the editor and export any of them at publish time.
+                    Every selected product is created automatically when the client is saved.
+                    Branding, content and modules are cloned from the TrueOmni template — you can
+                    customize anything in the editor afterwards.
                   </p>
                 </div>
 
@@ -330,29 +318,6 @@ export function NewClientModal({
                     {error}
                   </p>
                 )}
-
-                {/* Activar Digital Displays junto al kiosk. Hallazgo S-10. */}
-                <div className="flex items-start gap-3 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-[12px] leading-relaxed text-zinc-700 transition hover:border-zinc-300 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-900">
-                  <input
-                    id="kiosk-activate-dd"
-                    type="checkbox"
-                    checked={activateDigitalDisplays}
-                    onChange={(e) => setActivateDigitalDisplays(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 text-sky-600 focus:ring-sky-500/40 dark:border-zinc-600"
-                  />
-                  <label
-                    htmlFor="kiosk-activate-dd"
-                    className="flex cursor-pointer flex-col gap-0.5"
-                  >
-                    <span className="font-medium text-zinc-800 dark:text-zinc-200">
-                      Also activate Digital Displays
-                    </span>
-                    <span className="text-[11px] text-zinc-500 dark:text-zinc-500">
-                      Clones the signage default (header, weather, clock, branding) and creates an
-                      empty playlist. You can add displays from the editor.
-                    </span>
-                  </label>
-                </div>
 
                 {/* Empty mode toggle: arranca sin mock data (listings/events/etc.) */}
                 <div className="flex items-start gap-3 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-[12px] leading-relaxed text-zinc-700 transition hover:border-zinc-300 hover:bg-white dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-900">
@@ -378,12 +343,6 @@ export function NewClientModal({
                   </label>
                 </div>
 
-                <p className="text-[11.5px] leading-relaxed text-zinc-500">
-                  {emptyMode
-                    ? 'Cloning the TrueOmni Default kiosk: brand palette and modules only — no demo listings or events. You can populate content from the editor.'
-                    : 'Cloning the TrueOmni Default kiosk: brand palette, modules, and full mock content (listings, events, passes, deals, trails). You can change anything in the editor afterwards.'}
-                </p>
-
                 <div className="flex items-center justify-end gap-2 border-t border-zinc-100 pt-4 dark:border-zinc-800">
                   <button
                     type="button"
@@ -394,7 +353,7 @@ export function NewClientModal({
                   </button>
                   <button
                     type="submit"
-                    disabled={submitting || !nombre.trim() || !slug}
+                    disabled={submitting || !nombre.trim() || !slug || !hasAnyProduct}
                     className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
                   >
                     {submitting ? 'Creating…' : 'Create client'}
@@ -409,28 +368,29 @@ export function NewClientModal({
   );
 }
 
-function OrientationOption({
+function ProductOption({
   active,
   onClick,
   label,
   sub,
-  glyph,
+  Icon,
 }: {
   active: boolean;
   onClick: () => void;
   label: string;
   sub: string;
-  glyph: React.ReactNode;
+  Icon: typeof Monitor;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-pressed={active}
-      className={`flex items-center gap-3 rounded-md border px-3 py-2.5 text-left transition ${
+      role="checkbox"
+      aria-checked={active}
+      className={`relative flex items-center gap-3 rounded-md border px-3 py-2.5 text-left transition ${
         active
           ? 'border-sky-500 bg-sky-50 text-sky-900 dark:border-sky-500/60 dark:bg-sky-500/10 dark:text-sky-100'
-          : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-900'
+          : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-900'
       }`}
     >
       <span
@@ -441,11 +401,21 @@ function OrientationOption({
         }`}
         aria-hidden="true"
       >
-        {glyph}
+        <Icon className="h-4 w-4" strokeWidth={1.7} />
       </span>
       <span className="flex min-w-0 flex-col">
         <span className="whitespace-nowrap text-[13px] font-semibold leading-tight">{label}</span>
-        <span className="whitespace-nowrap font-mono text-[11px] opacity-70">{sub}</span>
+        <span className="whitespace-nowrap text-[11px] opacity-70">{sub}</span>
+      </span>
+      <span
+        aria-hidden
+        className={`pointer-events-none absolute right-2 top-2 grid h-4 w-4 place-items-center rounded-[4px] border text-[10px] ${
+          active
+            ? 'border-sky-500 bg-sky-500 text-white'
+            : 'border-zinc-300 bg-white text-transparent dark:border-zinc-600 dark:bg-zinc-900'
+        }`}
+      >
+        ✓
       </span>
     </button>
   );

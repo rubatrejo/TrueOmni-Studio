@@ -115,11 +115,16 @@ export default function StudioHome() {
   const handleCreate = async (input: {
     slug: string;
     nombre: string;
-    orientation?: string;
     website?: string;
     location?: string;
     emptyMode?: boolean;
-    activateDigitalDisplays?: boolean;
+    products: {
+      kiosks: boolean;
+      digitalDisplays: boolean;
+      mobilePwa: boolean;
+      videoWalls: boolean;
+      tablets: boolean;
+    };
   }) => {
     setCreatingClient(input.nombre);
     try {
@@ -132,10 +137,7 @@ export default function StudioHome() {
         location: cityFromFull ? { city: cityFromFull } : undefined,
         locationFull,
         emptyMode: input.emptyMode || undefined,
-        products: {
-          kiosks: true,
-          digitalDisplays: input.activateDigitalDisplays || undefined,
-        },
+        products: input.products,
       });
       setShowNewModal(false);
       router.push(`/studio/${input.slug}`);

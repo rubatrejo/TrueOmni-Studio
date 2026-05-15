@@ -284,24 +284,32 @@ export function defaultModules(): ModulesConfig {
 export const BILLBOARD_VARIANTS = [0, 1, 2, 3] as const;
 export type BillboardVariant = (typeof BILLBOARD_VARIANTS)[number];
 
-export const BILLBOARD_LOGO_SIZES = ['S', 'M', 'L'] as const;
+export const BILLBOARD_LOGO_SIZES = ['S', 'M', 'L', 'XL'] as const;
 export type BillboardLogoSize = (typeof BILLBOARD_LOGO_SIZES)[number];
 
-/** Mapa logoSize → altura en px del logo idle del Billboard. */
+/**
+ * Mapa logoSize → altura en px del logo idle del Billboard.
+ * `XL` = doble de `L` para clientes con logos largos o pictogramas que se
+ * benefician de un hero idle mucho más prominente (pedido del operador).
+ */
 export const BILLBOARD_LOGO_SIZE_PX: Record<BillboardLogoSize, number> = {
   S: 80,
   M: 128,
   L: 180,
+  XL: 360,
 };
 
 /**
  * Mapa footerLogoSize → altura en px del logo del footer del Billboard.
  * Más pequeño que el hero (BILLBOARD_LOGO_SIZE_PX) — el SVG original era 65px.
+ * `XL` = doble de `L` (96 → 192) por simetría con el hero, aunque en la
+ * mayoría de variants el footer XL queda apretado contra el "Powered by".
  */
 export const BILLBOARD_FOOTER_LOGO_SIZE_PX: Record<BillboardLogoSize, number> = {
   S: 48,
   M: 65,
   L: 96,
+  XL: 192,
 };
 
 /**

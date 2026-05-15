@@ -17,6 +17,10 @@ import {
 } from '@/lib/studio/client-manifest';
 import { kv, kvKeys } from '@/lib/studio/kv';
 import { KioskConfigSchema, makeBlankConfig, type ConfigMeta } from '@/lib/studio/schema';
+import {
+  applyClonedDisplays,
+  cloneSignageContentFromTemplate,
+} from '@/lib/studio/signage-bootstrap';
 import { applyClonedWalls, cloneVideoWallsFromFs } from '@/lib/video-walls/bootstrap-from-fs';
 import { loadVideoWallClient } from '@/lib/video-walls/config';
 import { kVideoWallClient, kVideoWallClientList } from '@/lib/video-walls/kv-keys';
@@ -257,6 +261,15 @@ export async function POST(_req: Request, { params }: RouteParams) {
           displays: [],
         }
       : makeBlankSignageClient(slug, manifest.name, branding);
+
+    // Clonar displays + events/social/news del template al KV del cliente.
+    // Solo cuando hay template — el blank fallback no tiene contenido que
+    // heredar.
+    if (template) {
+      const clonedDisplays = await cloneSignageContentFromTemplate(slug);
+      applyClonedDisplays(clone, clonedDisplays);
+    }
+
     const validated = SignageClientFileSchema.safeParse(clone);
     if (!validated.success) {
       return NextResponse.json(

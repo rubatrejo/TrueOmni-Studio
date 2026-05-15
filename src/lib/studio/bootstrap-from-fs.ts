@@ -192,12 +192,15 @@ export function bootstrapStudioFromFs(
     const footerSizeRaw = fsConfig.features?.billboard_footer_logo_size;
     const modulesRaw = fsConfig.features?.billboard_modules;
     if (variant === 0 || variant === 1 || variant === 2 || variant === 3) {
-      const logoSize: 'S' | 'M' | 'L' =
-        logoSizeRaw === 'S' || logoSizeRaw === 'M' || logoSizeRaw === 'L'
+      const logoSize: 'S' | 'M' | 'L' | 'XL' =
+        logoSizeRaw === 'S' || logoSizeRaw === 'M' || logoSizeRaw === 'L' || logoSizeRaw === 'XL'
           ? logoSizeRaw
           : DEFAULT_BILLBOARD.logoSize;
-      const footerLogoSize: 'S' | 'M' | 'L' =
-        footerSizeRaw === 'S' || footerSizeRaw === 'M' || footerSizeRaw === 'L'
+      const footerLogoSize: 'S' | 'M' | 'L' | 'XL' =
+        footerSizeRaw === 'S' ||
+        footerSizeRaw === 'M' ||
+        footerSizeRaw === 'L' ||
+        footerSizeRaw === 'XL'
           ? footerSizeRaw
           : DEFAULT_BILLBOARD.footerLogoSize;
       const modules = Array.isArray(modulesRaw)

@@ -29,6 +29,7 @@ const LOGO_SIZE_INFO: Record<BillboardLogoSize, { label: string; px: string }> =
   S: { label: 'Small', px: '80px' },
   M: { label: 'Medium', px: '128px' },
   L: { label: 'Large', px: '180px' },
+  XL: { label: 'Extra Large', px: '360px' },
 };
 
 /** Mapping de tamaño del logo del footer (más pequeño que el hero). */
@@ -36,6 +37,7 @@ const FOOTER_LOGO_SIZE_INFO: Record<BillboardLogoSize, { label: string; px: stri
   S: { label: 'Small', px: '48px' },
   M: { label: 'Medium', px: '65px' },
   L: { label: 'Large', px: '96px' },
+  XL: { label: 'Extra Large', px: '192px' },
 };
 
 /** Cuántos slots de módulos pinta cada variant (B0 = 0, no tiene grid). */

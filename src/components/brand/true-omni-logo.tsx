@@ -35,9 +35,23 @@ interface TrueOmniLogoProps {
    *   - `brand`: NUNCA se sobrescribe (Powered by TrueOmni — marca propia).
    */
   slot?: 'default' | 'idle' | 'footer' | 'brand';
+  /**
+   * Alineación del logo dentro de su bounding box cuando el aspect ratio
+   * del logo es menor que el del slot (logos más cuadrados o más estrechos).
+   *  - `center` (default): comportamiento histórico — centra horizontalmente.
+   *  - `left`: alinea a la izquierda del slot, útil en headers donde el logo
+   *    debe pegarse al borde izquierdo aunque sea más corto que el espacio
+   *    reservado.
+   */
+  align?: 'left' | 'center';
 }
 
-function TrueOmniLogoBase({ className, title = 'TrueOmni', slot = 'default' }: TrueOmniLogoProps) {
+function TrueOmniLogoBase({
+  className,
+  title = 'TrueOmni',
+  slot = 'default',
+  align = 'center',
+}: TrueOmniLogoProps) {
   const [override, setOverride] = useState<string | null>(null);
 
   useEffect(() => {
@@ -62,19 +76,25 @@ function TrueOmniLogoBase({ className, title = 'TrueOmni', slot = 'default' }: T
 
   if (override) {
     // El logo subido por el usuario suele ser un raster con aspect ratio propio.
-    // `object-contain` + `block` evita stretching y mantiene centrado dentro
+    // `object-contain` + `block` evita stretching y mantiene el aspect dentro
     // del bounding box que dicta `className` (h-X w-auto).
     //
     // Si el override es un PNG/JPG cuadrado (1:1), `w-auto` lo encoge a ser
     // = a la altura → logo se ve diminuto en headers anchos. Forzamos
     // min-width a 4× la altura del componente para garantizar visibilidad
     // mínima razonable, dejando que `object-contain` mantenga el aspect.
+    //
+    // `align="left"` mueve el `object-contain` al borde izquierdo en lugar
+    // del centro — clave para headers que reservan un slot ancho y quieren
+    // que el logo se pegue a la izquierda aunque sea más estrecho.
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={override}
         alt={title}
-        className={`${className ?? ''} block object-contain`}
+        className={`${className ?? ''} block object-contain ${
+          align === 'left' ? 'object-left' : 'object-center'
+        }`}
         style={{ minWidth: '120px' }}
       />
     );
@@ -84,6 +104,7 @@ function TrueOmniLogoBase({ className, title = 'TrueOmni', slot = 'default' }: T
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 353.697 65.369"
+      preserveAspectRatio={align === 'left' ? 'xMinYMid meet' : 'xMidYMid meet'}
       role="img"
       aria-label={title}
       className={className}

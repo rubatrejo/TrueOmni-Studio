@@ -35,6 +35,10 @@ import {
   type ConfigMeta,
   type KioskConfig,
 } from '@/lib/studio/schema';
+import {
+  applyClonedDisplays,
+  cloneSignageContentFromTemplate,
+} from '@/lib/studio/signage-bootstrap';
 import { applyClonedWalls, cloneVideoWallsFromFs } from '@/lib/video-walls/bootstrap-from-fs';
 import { loadVideoWallClient } from '@/lib/video-walls/config';
 import { kVideoWallClient, kVideoWallClientList } from '@/lib/video-walls/kv-keys';
@@ -298,6 +302,14 @@ export async function POST(request: Request) {
         header: structuredClone(template.header),
         displays: [],
       };
+
+      // Clonar displays + events/social/news del template al KV del cliente
+      // nuevo. Sin esto el operador abría el editor signage "limpio" en
+      // lugar de heredar el contenido demo de TrueOmni (lobby-tv playlist
+      // + eventos + posts + news).
+      const clonedDisplays = await cloneSignageContentFromTemplate(slug);
+      applyClonedDisplays(clone, clonedDisplays);
+
       const validated = SignageClientFileSchema.safeParse(clone);
       if (!validated.success) {
         return NextResponse.json(

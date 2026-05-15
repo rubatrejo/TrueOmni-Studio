@@ -97,15 +97,16 @@ export async function HomeHeader({
       />
 
       {/* Logo del cliente @ (65, 38) — slot="default".
-          Slot fijo 360×90 con object-contain (presencia visual notable sin
-          desbordar el área del clock/weather a la derecha). El SVG TrueOmni
-          y los logos custom raster comparten el mismo bounding box
-          garantizando consistencia visual entre clientes. */}
+          Slot fijo 360×90 con object-contain alineado a la izquierda. Si el
+          logo del cliente es más estrecho que 360px (logo cuadrado, monograma,
+          etc.) se pega al borde izquierdo del slot en lugar de centrarse —
+          mantiene la lectura "esto es la marca del lugar" en el extremo
+          izquierdo del header, sin importar el aspect ratio del archivo. */}
       <div
-        className="absolute flex items-center"
+        className="absolute flex items-center justify-start"
         style={{ left: '65px', top: '38px', width: '360px', height: '90px' }}
       >
-        <TrueOmniLogo slot="default" className="h-full w-full text-white" />
+        <TrueOmniLogo slot="default" align="left" className="h-full w-full text-white" />
       </div>
 
       {/* Weather + clock widget @ (744, 40.5) */}

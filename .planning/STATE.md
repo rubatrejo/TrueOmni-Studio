@@ -3187,6 +3187,66 @@ E — **Resync KV obsoletos**: el fix `fe27365` cubre el caso futuro (fs nuevo >
 
 ---
 
+### Sesión 2026-05-15 — Studio UX polish: products multi-select + DD inheritance + logo idle posicionable
+
+**Hecho — 2 commits, ambos deployados a producción (`trueomni-studio.vercel.app`):**
+
+Commit 1 — `7c0201e` `feat(studio): products multi-select + DD hereda template + hero logo left + XL logo size`:
+
+- **NewClientModal refactor** (`src/app/studio/_components/NewClientModal.tsx`): el selector de Orientation se reemplaza por un multi-select de **Products** (Kiosk · Mobile PWA · Display · Video Wall · Tablet). Todos seleccionados por default; el operador deselecciona los que no use. Elimina el checkbox redundante "Also activate Digital Displays". Validación: al menos 1 producto debe estar seleccionado.
+- **Digital Display hereda contenido del template**: helper nuevo `src/lib/studio/signage-bootstrap.ts` con `cloneSignageContentFromTemplate(targetSlug)` que clona `displays[]` + events + social + news del `clients-signage/default/` al KV del cliente nuevo. Cableado en `POST /api/studio/clients` (creación) y en `POST .../products/digital-displays/activate` (activación post-create). Antes el editor signage arrancaba con `displays: []` y events/social/news vacíos.
+- **Logo hero header alineado a la izquierda** (`src/components/brand/true-omni-logo.tsx`): nuevo prop `align?: 'left' | 'center'` (default `center` para retrocompat). Cuando `align="left"`: `<img>` override → `object-left`, SVG inline → `preserveAspectRatio="xMinYMid meet"`. `src/components/home/header.tsx` pasa `align="left"` para que el slot 360×90 del hero alinee el logo al borde izquierdo. Aplica al template TrueOmni y a todos los kiosks futuros.
+- **Logo Size "Extra Large"** (`src/lib/studio/schema.ts`): `BILLBOARD_LOGO_SIZES = ['S', 'M', 'L', 'XL']`. `BILLBOARD_LOGO_SIZE_PX.XL = 360` (doble de L=180). `BILLBOARD_FOOTER_LOGO_SIZE_PX.XL = 192` por simetría. El BillboardEditor lo muestra en ambos pickers; los runtime billboards consumen via `useBillboardLogoHeight()` sin cambios adicionales. Type-fix en `bootstrap-from-fs.ts` para aceptar `'XL'` en `billboard_logo_size`/`billboard_footer_logo_size`.
+
+Commit 2 — `a8476b1` `feat(studio): NewClientCard altura uniforme + logo idle posicionable (B0/B2/B3)`:
+
+- **NewClientCard tamaño uniforme** (`src/app/studio/page.tsx`): `h-full min-h-[296px]` iguala visualmente la altura del card "+ New client" con los ClientCard del grid (hero 160 + body con badges + footer ≈ 296px). Antes el card "+" quedaba muy bajo y el grid se veía desbalanceado.
+- **Logo idle posicionable** — schema + bridge + editor + runtime:
+  - **Schema** (`src/lib/studio/schema.ts`): `billboard.logoPosition?: { x, y }` opcional. Si `undefined`, cada variant usa su posición histórica del SVG (`B0=(193,371)`, `B2=(193,120)`, `B3=(193,720)`).
+  - **Editor** (`src/app/studio/_components/BillboardEditor.tsx`): nueva sección **"Logo position"** (solo variants con logo grande: B0/B2/B3) con 9-point anchor picker (Top-Left, Top-Center, …, Bottom-Right) + sliders X/Y (0–1080 × 0–1920 step 5px) con inputs numéricos. Botón **Reset** que vuelve al default histórico del variant. Componente helper `LogoSliderRow` (renombrado para no colisionar con el `SliderRow` existente del editor).
+  - **Bridge** (`src/components/studio-bridge.tsx` + `use-billboard-override.ts`): `BillboardPatch` incluye `logoPosition`. Hook `useBillboardLogoPosition(variant)` devuelve la posición resolvida (override o default). Constante exportada `BILLBOARD_LOGO_SLOT_WIDTH = 694`.
+  - **Runtime B0/B2** (`billboard-0.tsx`, `billboard-2.tsx`): el slot del logo aplica `{left: pos.x, top: pos.y, width: 694, height: logoH}` en lugar del hardcoded.
+  - **Runtime B3** (`billboard-3.tsx`): refactor del banner central. El flex column con logo + TOUCH TO START se separa — el TOUCH se queda centrado en el banner area (`top: 500px` dentro del banner) y el logo idle se renderiza absolute al canvas root con `logoPos`. Da máxima libertad: el operador puede mover el logo dentro del banner azul o fuera (e.g. encima de los slot tiles).
+
+**Verificado:**
+
+- `pnpm typecheck` + `pnpm lint` + `pnpm format:check` limpios antes de cada commit (husky pre-commit corre).
+- `pnpm kiosk:dev` arranca limpio en localhost:3000 (HTTP 200 en `/`) — sanity check del refactor de B3 y los cambios en el hero header.
+- Push limpio: `8fe99a4 → 7c0201e → a8476b1`. Author email correcto (`ruba.trejo@gmail.com`).
+- Vercel: deploys triggered tras cada push.
+
+**Pendiente / siguiente:**
+
+A — **Validar visualmente** los cambios en producción con `agent-browser`: NewClientCard alineado en grid, modal nuevo con products multi-select, logo idle moviéndose live en el iframe del editor, "Discover Odessa" creándose con displays + events del template.
+
+B — Pendientes heredados de la sesión 2026-05-13 que siguen abiertos:
+
+1. Validación visual templates derivados 4×2/2×2/2×1/1×2 (tras fix `pxToCss` de `5a6b986`).
+2. Smoke E2E full flow con auth GitHub (`tests/e2e/video-walls-full-flow.json`).
+3. Templates 4×2/2×2/2×1/1×2 pixel-perfect contra XD del cliente (cuando los provea).
+4. Bridge live para PlaylistPanel (verificar no-reload al editar slides).
+5. Script de migración para limpiar walls KV stale.
+
+C — Possible follow-ups del Studio polish de esta sesión:
+
+1. Aplicar el mismo "logo posicionable" al hero header del kiosk (no solo al Billboard idle) — el operador podría querer mover el logo del header también.
+2. Drag-and-drop visual del logo en el preview iframe (en lugar de sliders) — más intuitivo pero requiere overlay interactivo + sincronización iframe ↔ editor.
+3. Persistir la elección "products" del último cliente creado como default del modal (UX).
+4. Verificar que el `Discover Odessa` real creado por Rubén tenga el contenido correcto del template DD (sanity de end-to-end).
+
+**Decisiones:**
+
+- **Multi-select de products reemplaza Orientation** — Orientation era un misnomer: los 3 layouts (Portrait/Landscape/Mobile PWA) se generan automáticamente para todos los kiosks, y la "orientation" era solo el preview default del editor. El user quería realmente elegir qué productos están activos. Cambio semántico (UI), no técnico: los productos siempre estuvieron en el manifest unificado.
+- **Helper `cloneSignageContentFromTemplate` centralizado** — antes el clone signage hacía `displays: []` en 2 endpoints distintos (POST clients, POST activate). Duplicar el fix invitaba al drift; el helper unifica events + social + news + cada `display.json` con su playlist. Cubre el caso "operador activa DD post-creación".
+- **`align="left"` aplica solo al hero header (no a billboards/itinerary/etc.)** — el prop existe en el componente común `TrueOmniLogo` pero el default sigue siendo `center` para no romper los usos históricos en billboards, itinerary header, etc. Solo `src/components/home/header.tsx` pasa `align="left"`. Aplica al theme TrueOmni y a todos los kiosks que se creen (modificación al componente común del header).
+- **XL aplica también a Footer logo size** (192px) — el array `BILLBOARD_LOGO_SIZES` es compartido entre hero y footer; mantener simetría evita un runtime error si el operador setea XL en el footer. El user pidió solo el hero, pero la simetría no perjudica.
+- **9-point anchor + sliders X/Y para logo idle** — más intuitivo que un control puro de píxeles, y suficiente sin meterse en drag-and-drop visual del iframe. Los 9 anchors cubren los casos típicos (top-center, bottom-center, etc.); los sliders permiten fine-tune. La barra reset garantiza que el operador siempre puede volver al SVG original.
+- **B3 logo absolute al canvas root, no al banner area** — alternative era mantener el logo dentro del banner overflow:hidden, pero eso limitaba la libertad del operador (no podría sacarlo). Romper la cohesión visual del banner es trade-off aceptable porque el operador es quien decide poner el logo donde quiera; el TOUCH TO START queda centrado en su sitio histórico.
+
+**Fase:** Studio UX polish post-Video Walls. Modal de creación coherente con el modelo unificado de productos, contenido demo del DD heredado correctamente, hero header y editor del Billboard idle más flexibles. **Próxima sesión: smoke visual de los cambios en prod (Pendiente A) o continuar con los pendientes de Video Walls (Pendiente B)**.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

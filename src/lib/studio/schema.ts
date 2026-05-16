@@ -447,6 +447,22 @@ export const BillboardSchema = z.object({
    */
   footerLogoSize: z.enum(BILLBOARD_LOGO_SIZES).default('M'),
   /**
+   * Posición absoluta (top-left) del slot del logo idle dentro del canvas
+   * 1080×1920. Solo aplica a las variantes con logo grande (B0/B2/B3).
+   * Opcional — si `undefined`, cada variant renderiza el logo en su
+   * posición histórica del SVG original. El operador puede arrastrar el
+   * logo via el 9-point picker o los sliders del editor.
+   *
+   * El slot ocupa `694×logoSize` independientemente de la posición — el
+   * logo se mantiene contenido (object-fit) dentro de ese rectángulo.
+   */
+  logoPosition: z
+    .object({
+      x: z.number().int().min(0).max(1080),
+      y: z.number().int().min(0).max(1920),
+    })
+    .optional(),
+  /**
    * Lista ordenada de IDs de módulos a mostrar en los slots del Billboard
    * (B1/B2/B3 — B0 no tiene grid). Máximo 4. Los IDs corresponden a
    * `modules.tiles[].key` activos en el Modules tab.

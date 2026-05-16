@@ -369,9 +369,11 @@ type BillboardVariantPatch = {
 type BillboardPatch = {
   variant: 0 | 1 | 2 | 3;
   idleTimeoutSec: number;
-  logoSize?: 'S' | 'M' | 'L';
+  logoSize?: 'S' | 'M' | 'L' | 'XL';
   /** Tamaño del logo del footer (mismo enum, mapping diferente). */
-  footerLogoSize?: 'S' | 'M' | 'L';
+  footerLogoSize?: 'S' | 'M' | 'L' | 'XL';
+  /** Posición absoluta (top-left) del slot del logo idle. */
+  logoPosition?: { x: number; y: number };
   modules?: string[];
   /** Background compartido por las 4 variants. Tiene prioridad sobre el
    *  `b{N}.background` (legacy). */

@@ -11,7 +11,9 @@ import { AccessibilityIcon } from './billboard-footer-parts';
 import { OverlayLayer } from './billboard-overlay';
 import { MODULE_BILLBOARD_INFO, resolveSlotHref } from './module-info';
 import {
+  BILLBOARD_LOGO_SLOT_WIDTH,
   useBillboardLogoHeight,
+  useBillboardLogoPosition,
   useBillboardOverride,
   useBillboardSettings,
 } from './use-billboard-override';
@@ -53,6 +55,7 @@ const DEFAULT_CARDS: readonly CardData[] = [
 export function Billboard2() {
   const t = useTextosMap();
   const logoH = useBillboardLogoHeight();
+  const logoPos = useBillboardLogoPosition(2);
   const { modules } = useBillboardOverride();
   const { background, touchHere, overlayOpacity, overlay } = useBillboardSettings(2);
   const heroSrc = background.src || '/assets/billboard-2/hero.png';
@@ -124,13 +127,18 @@ export function Billboard2() {
       />
       <OverlayLayer overlayOpacity={overlayOpacity} overlay={overlay} />
 
-      {/* Logo TrueOmni blanco centrado — height configurable desde Studio
-          (S=80 / M=128 / L=180 — default M para preservar el SVG original). */}
+      {/* Logo TrueOmni blanco — posición configurable desde Studio (9-point
+          picker + sliders). Default top-center según el SVG original. */}
       <div
-        className="absolute flex justify-center"
-        style={{ left: '0', right: '0', top: '120px', height: `${logoH}px` }}
+        className="absolute flex items-center justify-center"
+        style={{
+          left: `${logoPos.x}px`,
+          top: `${logoPos.y}px`,
+          width: `${BILLBOARD_LOGO_SLOT_WIDTH}px`,
+          height: `${logoH}px`,
+        }}
       >
-        <TrueOmniLogo slot="idle" className="h-full w-auto text-white" />
+        <TrueOmniLogo slot="idle" className="h-full w-auto max-w-full text-white" />
       </div>
 
       {/* Peek izquierda — más chica y en Y más alto (retranqueada) */}

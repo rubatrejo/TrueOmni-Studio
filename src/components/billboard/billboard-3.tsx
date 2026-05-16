@@ -11,8 +11,10 @@ import { OverlayLayer } from './billboard-overlay';
 import { resolveSlotHref, resolveSlotImage, resolveSlotLabel } from './module-info';
 import { SlotImage } from './slot-image';
 import {
+  BILLBOARD_LOGO_SLOT_WIDTH,
   useBillboardFooterLogoHeight,
   useBillboardLogoHeight,
+  useBillboardLogoPosition,
   useBillboardOverride,
   useBillboardSettings,
 } from './use-billboard-override';
@@ -31,6 +33,7 @@ import {
 export function Billboard3() {
   const t = useTextosMap();
   const logoH = useBillboardLogoHeight();
+  const logoPos = useBillboardLogoPosition(3);
   const { modules } = useBillboardOverride();
   const { background, touchHere, overlayOpacity, overlay } = useBillboardSettings(3);
   const heroSrc = background.src || '/assets/billboard-0/hero.jpg';
@@ -131,38 +134,53 @@ export function Billboard3() {
           style={{ backgroundColor: 'hsl(var(--brand-primary) / 0.6)' }}
         />
         <OverlayLayer overlayOpacity={overlayOpacity} overlay={overlay} />
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-16">
-          {/* Logo height configurable desde Studio (S=80 / M=128 / L=180).
-              SVG original era 110px → cae cerca del L. */}
-          <div className="flex items-center justify-center" style={{ height: `${logoH}px` }}>
-            <TrueOmniLogo slot="idle" className="h-full w-auto text-white" />
-          </div>
-          <div className="flex items-center gap-10">
-            <span
-              className="font-display font-bold uppercase text-white"
-              style={{
-                fontSize: `${touchHere.fontSize}px`,
-                letterSpacing: '0.02em',
-                whiteSpace: 'pre-line',
-              }}
-            >
-              {touchLabel}
-            </span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="110"
-              height="110"
-              viewBox="-10 -10 120 120"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="10"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M46.023,72.912,67.534,51.4m0,0L46.023,29.889M67.534,51.4H3m8.15,26.889a48.4,48.4,0,1,0,0-53.778" />
-            </svg>
-          </div>
+        {/* TOUCH TO START — centrado abajo en el banner area. El logo idle
+            se renderiza FUERA de este overflow:hidden para que el operador
+            pueda moverlo a cualquier parte del canvas desde el Studio. */}
+        <div
+          className="absolute inset-x-0 flex items-center justify-center gap-10"
+          style={{ top: '500px' }}
+        >
+          <span
+            className="font-display font-bold uppercase text-white"
+            style={{
+              fontSize: `${touchHere.fontSize}px`,
+              letterSpacing: '0.02em',
+              whiteSpace: 'pre-line',
+            }}
+          >
+            {touchLabel}
+          </span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="110"
+            height="110"
+            viewBox="-10 -10 120 120"
+            fill="none"
+            stroke="#fff"
+            strokeWidth="10"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M46.023,72.912,67.534,51.4m0,0L46.023,29.889M67.534,51.4H3m8.15,26.889a48.4,48.4,0,1,0,0-53.778" />
+          </svg>
         </div>
+      </div>
+
+      {/* Logo idle — posición editable desde el Studio (9-point picker +
+          sliders). Render absolute al canvas root para máxima libertad:
+          el operador puede dejarlo dentro del banner azul (default) o
+          moverlo a cualquier parte del idle. */}
+      <div
+        className="absolute flex items-center justify-center"
+        style={{
+          left: `${logoPos.x}px`,
+          top: `${logoPos.y}px`,
+          width: `${BILLBOARD_LOGO_SLOT_WIDTH}px`,
+          height: `${logoH}px`,
+        }}
+      >
+        <TrueOmniLogo slot="idle" className="h-full w-auto max-w-full text-white" />
       </div>
 
       {/* Fila 2 — slots 2 (bottom-left) y 3 (bottom-right). y=1245..1720 */}

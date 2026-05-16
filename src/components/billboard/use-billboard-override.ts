@@ -16,6 +16,12 @@ import { KIOSK_BILLBOARD_OVERRIDE_EVENT } from '../studio-bridge';
 type BillboardOverride = {
   logoSize?: BillboardLogoSize;
   footerLogoSize?: BillboardLogoSize;
+  /**
+   * Posición absoluta (top-left, px) del slot del logo idle dentro del
+   * canvas 1080×1920. Aplica a B0/B2/B3. Si `undefined`, cada variant usa
+   * su posición histórica del SVG original.
+   */
+  logoPosition?: { x: number; y: number };
   modules?: string[];
   /** Background compartido por las 4 variants (gana sobre b{N}.background). */
   background?: BillboardB0Config['background'];
@@ -59,6 +65,7 @@ export function useBillboardOverride(): BillboardOverride {
       const next: BillboardOverride = {
         logoSize: detail.logoSize,
         footerLogoSize: detail.footerLogoSize,
+        logoPosition: detail.logoPosition,
         modules: Array.isArray(detail.modules) ? detail.modules : undefined,
         background: detail.background,
         b0: detail.b0,
@@ -88,6 +95,35 @@ export function useBillboardLogoHeight(): number {
 export function useBillboardFooterLogoHeight(): number {
   const { footerLogoSize } = useBillboardOverride();
   return BILLBOARD_FOOTER_LOGO_SIZE_PX[footerLogoSize ?? 'M'];
+}
+
+/**
+ * Posiciones históricas del slot del logo idle dentro del canvas 1080×1920.
+ * Coincide con los `left/top` hardcoded de cada billboard ANTES de que el
+ * operador pudiera mover el logo. Se usan como fallback cuando
+ * `logoPosition` está `undefined` en el override.
+ *
+ * El slot del logo tiene un ancho fijo de 694px en B0/B2 y se mantiene en
+ * B3 por consistencia. La altura la determina `logoSize` (S/M/L/XL).
+ */
+export const BILLBOARD_LOGO_SLOT_WIDTH = 694;
+
+export const DEFAULT_LOGO_POSITION: Record<0 | 1 | 2 | 3, { x: number; y: number }> = {
+  0: { x: 193, y: 371 },
+  1: { x: 193, y: 60 }, // B1 no usa logo grande, valor placeholder.
+  2: { x: 193, y: 120 },
+  3: { x: 193, y: 720 },
+};
+
+/**
+ * Devuelve la posición resolvida (top-left px) del slot del logo idle
+ * para una variant. Si el operador no movió el logo, retorna la posición
+ * histórica del SVG. Si lo movió desde el editor, retorna las coords
+ * absolutas del override.
+ */
+export function useBillboardLogoPosition(variant: 0 | 1 | 2 | 3): { x: number; y: number } {
+  const { logoPosition } = useBillboardOverride();
+  return logoPosition ?? DEFAULT_LOGO_POSITION[variant];
 }
 
 /**

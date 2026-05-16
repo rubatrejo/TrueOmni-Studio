@@ -6,15 +6,18 @@ import { useTextosMap } from '@/components/i18n-provider';
 
 import { OverlayLayer } from './billboard-overlay';
 import {
+  BILLBOARD_LOGO_SLOT_WIDTH,
   useBillboardB0,
   useBillboardFooterLogoHeight,
   useBillboardLogoHeight,
+  useBillboardLogoPosition,
 } from './use-billboard-override';
 
 export function Billboard0() {
   const t = useTextosMap();
   const logoH = useBillboardLogoHeight();
   const footerLogoH = useBillboardFooterLogoHeight();
+  const logoPos = useBillboardLogoPosition(0);
   const { background, touchHere, overlayOpacity, overlay } = useBillboardB0();
   const touchLeft = (1080 - touchHere.width) / 2;
   const touchTop = 947 - touchHere.height / 2;
@@ -46,7 +49,12 @@ export function Billboard0() {
 
       <div
         className="absolute flex items-center justify-center"
-        style={{ left: '193px', top: '371px', width: '694px', height: `${logoH}px` }}
+        style={{
+          left: `${logoPos.x}px`,
+          top: `${logoPos.y}px`,
+          width: `${BILLBOARD_LOGO_SLOT_WIDTH}px`,
+          height: `${logoH}px`,
+        }}
       >
         <TrueOmniLogo slot="idle" className="h-full w-auto max-w-full text-white" />
       </div>

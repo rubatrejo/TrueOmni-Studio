@@ -606,12 +606,16 @@ function NewClientCard({ onClick }: { onClick: () => void }) {
   // Hallazgo S-24: aria-label distinto del botón header — el screen reader
   // anunciaba "+ New client, button" dos veces seguidas. Aquí distinguimos
   // el card-CTA inline al final del grid del botón pill del header.
+  //
+  // `h-full min-h-[296px]` iguala la altura visual de un ClientCard (hero
+  // 160 + body con título + product badges + footer ≈ 296px). Sin esto el
+  // card "+" quedaba mucho más bajo que sus hermanos en el grid.
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label="Create a new client (inline shortcut)"
-      className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50/40 px-6 py-12 text-zinc-500 transition hover:border-sky-400 hover:bg-sky-50/40 hover:text-sky-700 dark:border-zinc-800 dark:bg-zinc-900/20 dark:text-zinc-500 dark:hover:border-sky-500/60 dark:hover:bg-sky-500/5 dark:hover:text-sky-300"
+      className="flex h-full min-h-[296px] flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50/40 px-6 py-12 text-zinc-500 transition hover:border-sky-400 hover:bg-sky-50/40 hover:text-sky-700 dark:border-zinc-800 dark:bg-zinc-900/20 dark:text-zinc-500 dark:hover:border-sky-500/60 dark:hover:bg-sky-500/5 dark:hover:text-sky-300"
     >
       <span
         aria-hidden

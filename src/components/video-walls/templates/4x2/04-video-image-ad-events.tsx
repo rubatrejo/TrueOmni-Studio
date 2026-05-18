@@ -5,7 +5,6 @@ import { findSlot } from '../_shared/slot-renderers';
 import { registerTemplate } from '../registry';
 import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
 
-
 /** Template 4×2 `04-video-image-ad-events` — XD Slide 4. SIMÉTRICO: cada
  *  sidebar (col 0 y col 3) tiene Ad arriba + 3 Events abajo. Video centro. */
 const BODY_Y = 335;

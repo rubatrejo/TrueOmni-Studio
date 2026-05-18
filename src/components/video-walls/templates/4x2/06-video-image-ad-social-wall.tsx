@@ -5,7 +5,6 @@ import { findSlot } from '../_shared/slot-renderers';
 import { registerTemplate } from '../registry';
 import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
 
-
 /** Template 4×2 `06-video-image-ad-social-wall` — XD Slide 6. SIMÉTRICO:
  *  Cada sidebar (col 0 y col 3) tiene Ad arriba + Social 2×2 grid abajo.
  *  Video centro (cols 1-2). */

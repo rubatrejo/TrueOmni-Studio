@@ -5,7 +5,6 @@ import { findSlot } from '../_shared/slot-renderers';
 import { registerTemplate } from '../registry';
 import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
 
-
 /**
  * Template 4×2 `01-video-image-full` — pixel-perfect XD `4x2/Slide 1`.
  * Canvas 7680×2160. Hero full-bleed bajo header (HEADER_H=335).

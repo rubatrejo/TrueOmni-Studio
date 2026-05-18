@@ -5,7 +5,6 @@ import { findSlot } from '../_shared/slot-renderers';
 import { registerTemplate } from '../registry';
 import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
 
-
 /**
  * Template 4×2 `03-video-image-events` — pixel-perfect XD `4x2/Slide 3`.
  * SIMÉTRICO: Events 3 cards col 0 + Video centro cols 1-2 + Events 3 cards

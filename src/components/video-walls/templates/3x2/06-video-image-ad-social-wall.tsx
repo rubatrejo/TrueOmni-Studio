@@ -5,7 +5,6 @@ import { findSlot } from '../_shared/slot-renderers';
 import { registerTemplate } from '../registry';
 import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
 
-
 /**
  * Template 3×2 `06-video-image-ad-social-wall` — pixel-perfect contra
  * `designs/video-walls/3x2/3x2 Video-Image + Ad + Social Wall.svg`.

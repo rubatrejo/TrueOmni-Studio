@@ -5,7 +5,6 @@ import { findSlot } from '../_shared/slot-renderers';
 import { registerTemplate } from '../registry';
 import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
 
-
 /** Template 4×2 `05-video-image-social-wall` — XD Slide 5. SIMÉTRICO:
  *  Social 2×4 grid en col 0 + Video centro + Social 2×4 grid en col 3
  *  (mirror). 8 posts únicos espejados a ambos lados. */

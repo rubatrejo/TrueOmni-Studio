@@ -5,7 +5,6 @@ import { findSlot } from '../_shared/slot-renderers';
 import { registerTemplate } from '../registry';
 import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
 
-
 /**
  * Template 4×2 `02-video-image-ad` — pixel-perfect XD `4x2/Slide 2`.
  * Video cols 0-2 (5760×1825) + Ad col 3 (1920×1825), debajo del header.

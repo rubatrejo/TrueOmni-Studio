@@ -22,7 +22,7 @@ import './3x2/06-video-image-ad-social-wall';
 // 4×2 (canvas 7680×2160, 32:9 ultra-wide).
 import './4x2/01-video-image-full';
 import './4x2/02-video-image-ad';
-import './4x2/03-video-image-social';
+import './4x2/03-video-image-events';
 import './4x2/04-video-image-ad-events';
 import './4x2/05-video-image-social-wall';
 import './4x2/06-video-image-ad-social-wall';

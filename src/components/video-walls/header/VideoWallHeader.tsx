@@ -138,7 +138,13 @@ export function VideoWallHeader({ client, weather, grid }: VideoWallHeaderProps)
         aria-hidden
       />
       {header.showLogo ? (
-        <LogoZone placement={header.layout} customSrc={resolvedLogoSrc} paddingX={paddingX} />
+        <LogoZone
+          placement={header.layout}
+          customSrc={resolvedLogoSrc}
+          paddingX={paddingX}
+          widthScale={widthScale}
+          canvasW={canvasW}
+        />
       ) : null}
       {header.showWeather ? (
         <WeatherZone
@@ -155,6 +161,7 @@ export function VideoWallHeader({ client, weather, grid }: VideoWallHeaderProps)
           clockText={clockText}
           dateText={dateText}
           paddingX={paddingX}
+          widthScale={widthScale}
         />
       ) : null}
     </div>
@@ -178,23 +185,47 @@ function LogoZone({
   placement,
   customSrc,
   paddingX,
+  widthScale,
+  canvasW,
 }: {
   placement: 'logo-left' | 'logo-center' | 'logo-right';
   customSrc: string | null;
   paddingX: number;
+  widthScale: number;
+  canvasW: number;
 }) {
   const simple: 'left' | 'center' | 'right' =
     placement === 'logo-center' ? 'center' : placement === 'logo-right' ? 'right' : 'left';
-  const logoHeight = Math.round(HEADER_H * 0.45);
+  // Logo height escala con widthScale para que en grids estrechos (1x2,
+  // widthScale=0.5) no domine el header. Antes era fijo 0.45 * HEADER_H =
+  // 151px, y con el isotipo TrueOmni (aspect 5.46:1) el logo ocupaba
+  // ~824px de los 1920px del canvas 1x2 → overlap con weather/clock.
+  const baseLogoHeight = HEADER_H * 0.45;
+  const logoHeight = Math.round(baseLogoHeight * Math.max(0.55, widthScale));
+  // Cap del ancho del logo al 30% del canvas para que nunca invada las
+  // otras zonas, sin importar el aspect del logo custom.
+  const maxLogoWidth = Math.floor(canvasW * 0.3);
   return (
     <div style={placementToCss(simple, paddingX)}>
-      <div style={{ height: logoHeight, display: 'flex', alignItems: 'center' }}>
+      <div
+        style={{
+          height: logoHeight,
+          maxWidth: maxLogoWidth,
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
         {customSrc ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={customSrc}
             alt=""
-            style={{ height: '100%', width: 'auto', objectFit: 'contain' }}
+            style={{
+              height: '100%',
+              maxWidth: '100%',
+              width: 'auto',
+              objectFit: 'contain',
+            }}
           />
         ) : (
           <TrueOmniIsotipo height={logoHeight} />
@@ -218,7 +249,11 @@ function WeatherZone({
   widthScale: number;
 }) {
   const forecastBlockScale = forecastDays === 5 ? 0.75 : 1;
-  const totalScale = SCALE * forecastBlockScale;
+  // Escalar TODO el weather (no solo gaps/dividers) por widthScale para
+  // que en 1x2 (widthScale=0.5) el "73°" no se monte con el logo. Antes
+  // los font sizes eran independientes del canvas width → en grids
+  // angostos el texto era demasiado grande relativo al espacio.
+  const totalScale = SCALE * forecastBlockScale * Math.max(0.55, widthScale);
   const tempFontSize = Math.round(64 * totalScale);
   // Gap horizontal entre forecast cards — escalado por widthScale para
   // que no queden separadas excesivamente en grids angostos. Mantiene el
@@ -316,14 +351,19 @@ function ClockZone({
   clockText,
   dateText,
   paddingX,
+  widthScale,
 }: {
   placement: 'left' | 'center' | 'right';
   clockText: string;
   dateText: string;
   paddingX: number;
+  widthScale: number;
 }) {
-  const clockFs = Math.round(42 * SCALE);
-  const dateFs = Math.round(28 * SCALE);
+  // Mismo razonamiento que WeatherZone — escalar fonts por widthScale para
+  // canvas estrechos. Clamp inferior 0.55 para no perder legibilidad.
+  const clockScale = SCALE * Math.max(0.55, widthScale);
+  const clockFs = Math.round(42 * clockScale);
+  const dateFs = Math.round(28 * clockScale);
   const textAlign: CSSProperties['textAlign'] =
     placement === 'left' ? 'left' : placement === 'right' ? 'right' : 'center';
   return (

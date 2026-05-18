@@ -19,17 +19,15 @@ function pxToCss(px: PixelRect): CSSProperties {
 }
 
 /**
- * Renderers compartidos por los templates video-walls. Cada uno recibe
- * un slot (cellRect) + el módulo del slide + el client resuelto y
- * pinta SU porción del canvas total con coordenadas absolutas.
+ * Renderers compartidos por los templates video-walls (1x2/2x1/2x2/4x2).
+ * Cada uno recibe un slot (cellRect) + el módulo del slide + el client
+ * resuelto y pinta SU porción del canvas total con coordenadas absolutas.
  *
- * Patrón: el template padre define los slots, este file los renderea.
- * Esto evita duplicar el JSX de video/ad/events/social en cada template.
- *
- * Asset URL resolution: si el módulo trae una URL absoluta o relativa
- * `/...`, se usa tal cual. Si trae path relativo, se resuelve a
- * `/video-wall-assets/{slug}/{path}` (endpoint que VW9 implementa; por
- * ahora cae a 404 y los templates muestran placeholder).
+ * **Events / Social cards** replican el design pixel-perfect del 3x2 pero
+ * con dimensiones fluidas — el card adapta layout (horizontal vs portrait)
+ * según el aspect del cell para que la información quede legible en grids
+ * estrechos (1x2 events 1×3 = cards 1920×360 ultra-landscape) y en grids
+ * cuadrados (2x2 events 1×3 = cards 1920×720 portrait-ish).
  *
  * Fallback: si no hay módulo asignado al slot, pinta un placeholder
  * neutro con el nombre del slot para que el editor sepa qué falta.
@@ -118,9 +116,16 @@ export function AdSlot({
   );
 }
 
-/** Renderer del slot `events` (módulo kind=events). Grid Mx2 con event
- *  cards: image + date badge + title. El layout (cols × rows) se
- *  ajusta al `colSpan/rowSpan` del slot pasando `cols` y `rows` props. */
+/** Renderer del slot `events` (módulo kind=events). Grid cols×rows con
+ *  event cards que replican el design del 3x2 (image bg + date badge
+ *  accent + bottom panel secondary con title/subtitle). Las dimensiones
+ *  de cada card se pasan al EventCard para que adapte fuentes/spacing
+ *  fluidamente — mismo design en cualquier aspect.
+ *
+ *  Si el cell es muy landscape (aspect > 1.8), cada card usa layout
+ *  horizontal: date badge a la IZQUIERDA + texto a la derecha sobre la
+ *  imagen. Si es cuadrado/portrait, usa layout estilo 3x2: badge top-left,
+ *  title bottom-overlay. */
 export function EventsSlot({
   client,
   rect,
@@ -139,21 +144,28 @@ export function EventsSlot({
   const px = pxOverride ?? cellRectToPx(rect, false);
   const maxItems = module?.kind === 'events' ? module.maxItems : cols * rows;
   const events = (client.events ?? []).slice(0, maxItems);
+
+  const padding = 16;
+  const gap = 16;
+  const cellW = (px.w - padding * 2 - gap * (cols - 1)) / cols;
+  const cellH = (px.h - padding * 2 - gap * (rows - 1)) / rows;
+
   return (
     <div className="absolute bg-black" style={pxToCss(px)}>
       <div
-        className="h-full w-full p-4"
+        className="h-full w-full"
         style={{
+          padding,
           display: 'grid',
           gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
           gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
-          gap: 16,
+          gap,
         }}
       >
         {Array.from({ length: cols * rows }).map((_, i) => {
           const ev = events[i];
           return ev ? (
-            <EventCard key={ev.id ?? i} event={ev} clientSlug={client.slug} />
+            <EventCard key={ev.id ?? i} event={ev} clientSlug={client.slug} w={cellW} h={cellH} />
           ) : (
             <div
               key={i}
@@ -167,38 +179,151 @@ export function EventsSlot({
   );
 }
 
-function EventCard({ event, clientSlug }: { event: VideoWallEvent; clientSlug: string }) {
+function EventCard({
+  event,
+  clientSlug,
+  w,
+  h,
+}: {
+  event: VideoWallEvent;
+  clientSlug: string;
+  w: number;
+  h: number;
+}) {
   const url = event.image
     ? urlOr(clientSlug, event.image, 'assets/events/yoga.jpg')
     : urlOr(clientSlug, undefined, 'assets/events/yoga.jpg');
   const date = new Date(event.startsAt);
-  const day = Number.isFinite(date.getTime()) ? date.getDate() : '?';
-  const month = Number.isFinite(date.getTime())
-    ? date.toLocaleString('en', { month: 'short' }).toUpperCase()
+  const day = Number.isFinite(date.getTime()) ? String(date.getDate()) : '?';
+  const dayName = Number.isFinite(date.getTime())
+    ? date.toLocaleString('en', { weekday: 'short' }).toUpperCase()
     : '';
+
+  const aspect = w / h;
+  const minDim = Math.min(w, h);
+  // Layout switch: muy landscape → row layout (badge izq + texto centro);
+  // cuadrado/portrait → 3x2-style con badge top-left + title bottom panel.
+  const isHorizontal = aspect > 1.8;
+
+  if (isHorizontal) {
+    // Row layout — badge cuadrado izquierda, image fills rest, title bottom strip.
+    const badgeSize = Math.min(h * 0.78, w * 0.22);
+    const dayFs = Math.round(badgeSize * 0.42);
+    const dayNameFs = Math.round(badgeSize * 0.16);
+    const titleFs = Math.round(minDim * 0.13);
+    const subtitleFs = Math.round(minDim * 0.085);
+
+    return (
+      <div className="relative overflow-hidden rounded-md bg-zinc-900">
+        <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        {/* Date badge — accent color, square, anchored top-left con margen. */}
+        <div
+          className="absolute flex flex-col items-center justify-center font-display text-white shadow-lg"
+          style={{
+            left: 12,
+            top: 12,
+            width: badgeSize,
+            height: badgeSize,
+            background: 'hsl(var(--signage-brand-accent, 200 78% 47%))',
+            lineHeight: 1,
+          }}
+        >
+          <div style={{ fontSize: dayNameFs, fontWeight: 500, letterSpacing: '0.04em' }}>
+            {dayName}
+          </div>
+          <div style={{ fontSize: dayFs, fontWeight: 700, marginTop: 2 }}>{day}</div>
+        </div>
+        {/* Bottom strip — secondary brand color con title + subtitle. */}
+        <div
+          className="absolute inset-x-0 bottom-0 flex flex-col justify-center text-white"
+          style={{
+            padding: '8px 16px',
+            background: 'hsl(var(--signage-brand-secondary, 210 100% 27%) / 0.92)',
+          }}
+        >
+          <div
+            className="line-clamp-1 font-display font-semibold"
+            style={{ fontSize: titleFs, lineHeight: 1.2 }}
+          >
+            {event.title}
+          </div>
+          {event.location ? (
+            <div
+              className="line-clamp-1 opacity-90"
+              style={{ fontSize: subtitleFs, lineHeight: 1.2 }}
+            >
+              {event.location}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  // Portrait/square layout — 3x2 style.
+  const badgeW = Math.min(w * 0.35, 220);
+  const badgeH = badgeW * 0.87;
+  const dayFs = Math.round(badgeH * 0.5);
+  const dayNameFs = Math.round(badgeH * 0.16);
+  const titleFs = Math.round(minDim * 0.075);
+  const subtitleFs = Math.round(minDim * 0.058);
+  const bottomPanelH = Math.round(h * 0.27);
+
   return (
     <div className="relative overflow-hidden rounded-md bg-zinc-900">
       <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      <div className="absolute right-3 top-3 rounded bg-white px-2 py-1 text-center text-zinc-900">
-        <div className="font-display text-3xl font-extrabold leading-none">{day}</div>
-        <div className="font-mono text-[10px] tracking-widest">{month}</div>
-      </div>
+      {/* Date badge — accent color, top-left. */}
       <div
-        className="absolute inset-x-0 bottom-0 px-3 py-3"
+        className="absolute flex flex-col items-center justify-center font-display text-white shadow-lg"
         style={{
-          background:
-            'linear-gradient(to top, hsl(var(--signage-brand-primary, 211 100% 25%)) 0%, hsl(var(--signage-brand-primary, 211 100% 25%) / 0) 100%)',
-          color: 'white',
+          left: 0,
+          top: 16,
+          width: badgeW,
+          height: badgeH,
+          background: 'hsl(var(--signage-brand-accent, 200 78% 47%))',
+          lineHeight: 1,
         }}
       >
-        <div className="line-clamp-2 font-display text-sm font-semibold">{event.title}</div>
+        <div style={{ fontSize: dayNameFs, fontWeight: 500, letterSpacing: '0.04em' }}>
+          {dayName}
+        </div>
+        <div style={{ fontSize: dayFs, fontWeight: 700, marginTop: 4 }}>{day}</div>
+      </div>
+      {/* Bottom panel — secondary brand color, ~27% del card height. */}
+      <div
+        className="absolute inset-x-0 bottom-0 flex flex-col justify-center text-white"
+        style={{
+          height: bottomPanelH,
+          padding: '12px 18px',
+          background: 'hsl(var(--signage-brand-secondary, 210 100% 27%) / 0.92)',
+        }}
+      >
+        <div
+          className="line-clamp-2 font-display font-semibold"
+          style={{ fontSize: titleFs, lineHeight: 1.2 }}
+        >
+          {event.title}
+        </div>
+        {event.location ? (
+          <div
+            className="line-clamp-1 opacity-90"
+            style={{ fontSize: subtitleFs, lineHeight: 1.2, marginTop: 4 }}
+          >
+            {event.location}
+          </div>
+        ) : null}
       </div>
     </div>
   );
 }
 
-/** Renderer del slot `social` (módulo kind=social). Grid N×N de
- *  posts con image + @username overlay. */
+/** Renderer del slot `social` (módulo kind=social). Grid de posts con
+ *  image + @username overlay y gradient brand-primary. Las dimensiones
+ *  se pasan a cada SocialCard para que el username se escale fluidamente.
+ *
+ *  Cuando el cell es muy estrecho (cols=1 con muchas rows) y el aspect
+ *  resultante de cada tile es extremo (>3 o <0.33), se recomputan
+ *  cols/rows automáticamente para mantener tiles más cuadrados. */
 export function SocialSlot({
   client,
   rect,
@@ -215,22 +340,46 @@ export function SocialSlot({
   pxOverride?: { x: number; y: number; w: number; h: number };
 }) {
   const px = pxOverride ?? cellRectToPx(rect, false);
-  const maxPosts = module?.kind === 'social' ? module.maxPosts : cols * rows;
-  const posts = (client.social?.posts ?? []).slice(0, Math.min(maxPosts, cols * rows));
+
+  // Auto-fix de cols/rows cuando el resultado es ultra-stretched. Mantiene
+  // el total cols*rows lo más cercano posible al original. Ej: cols=1
+  // rows=3 en cell 1920×1080 → tiles 1920×360 aspect 5.3 → recomputa
+  // cols=3 rows=2 para 640×540 aspect 1.18.
+  const tileAspectInitial = px.w / cols / (px.h / rows);
+  let effectiveCols = cols;
+  let effectiveRows = rows;
+  if (tileAspectInitial > 3) {
+    // Tiles muy wide — añadir columnas.
+    effectiveCols = Math.max(cols, Math.round(Math.sqrt((cols * rows * px.w) / px.h)));
+    effectiveRows = Math.max(1, Math.round((cols * rows) / effectiveCols));
+  } else if (tileAspectInitial < 0.33) {
+    // Tiles muy tall — añadir rows.
+    effectiveRows = Math.max(rows, Math.round(Math.sqrt((cols * rows * px.h) / px.w)));
+    effectiveCols = Math.max(1, Math.round((cols * rows) / effectiveRows));
+  }
+
+  const maxPosts = module?.kind === 'social' ? module.maxPosts : effectiveCols * effectiveRows;
+  const slots = effectiveCols * effectiveRows;
+  const posts = (client.social?.posts ?? []).slice(0, Math.min(maxPosts, slots));
+  const tileW = px.w / effectiveCols;
+  const tileH = px.h / effectiveRows;
+
   return (
     <div className="absolute bg-black" style={pxToCss(px)}>
       <div
         className="h-full w-full"
         style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
-          gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
+          gridTemplateColumns: `repeat(${effectiveCols}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${effectiveRows}, minmax(0, 1fr))`,
           gap: 0,
         }}
       >
-        {Array.from({ length: cols * rows }).map((_, i) => {
+        {Array.from({ length: slots }).map((_, i) => {
           const p = posts[i];
           const url = p?.image ? urlOr(client.slug, p.image, 'assets/social/post-1.jpg') : null;
+          const author = p?.author?.replace(/^@+/, '') ?? '';
+          const usernameFs = Math.max(12, Math.round(Math.min(tileW, tileH) * 0.06));
           return (
             <div key={i} className="relative overflow-hidden">
               {url ? (
@@ -238,14 +387,28 @@ export function SocialSlot({
               ) : (
                 <div className="h-full w-full bg-zinc-800" />
               )}
-              {p?.author && (
+              {/* Gradient overlay brand-primary, bottom→top. */}
+              <div
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background:
+                    'linear-gradient(to top, hsl(var(--signage-brand-primary, 210 100% 27%)) 0%, hsl(var(--signage-brand-primary, 210 100% 27%) / 0) 50%)',
+                }}
+              />
+              {author && (
                 <div
                   className="absolute inset-x-0 bottom-0 px-3 py-2 text-white"
-                  style={{
-                    background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)',
-                  }}
+                  style={{ fontFamily: "'Open Sans', system-ui, sans-serif" }}
                 >
-                  <span className="font-mono text-[11px]">@{p.author.replace(/^@+/, '')}</span>
+                  <span
+                    style={{
+                      fontSize: usernameFs,
+                      fontWeight: 700,
+                      letterSpacing: '0.026em',
+                    }}
+                  >
+                    @{author}
+                  </span>
                 </div>
               )}
             </div>

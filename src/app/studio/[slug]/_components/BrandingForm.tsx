@@ -85,12 +85,16 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
         className="px-3"
       />
 
-      {/* Active panel */}
+      {/* Active panel — altura fija con scroll interno. El usuario quería
+          que el card no cambie de tamaño al saltar entre General/Brand/
+          Logos/Fonts/Media; antes cada tab dictaba su altura (Fonts ~340px
+          vs Media con hero 9:16 ~1700px) y el layout brincaba. Ahora la
+          carta siempre mide 620px aunque el contenido sea más alto. */}
       <div
         role="tabpanel"
         id={`${tabsId}-panel-${tab}`}
         aria-labelledby={`${tabsId}-tab-${tab}`}
-        className="p-6"
+        className="h-[620px] overflow-y-auto p-6"
       >
         {tab === 'general' ? (
           <Panel>
@@ -291,7 +295,10 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
         ) : null}
 
         {tab === 'media' ? (
-          <div className="space-y-5">
+          // Media usa grid 2-col en desktop para que el hero portrait y el
+          // favicon vivan lado a lado en lugar de stack vertical (lo que
+          // hacía el tabpanel mucho más alto que los demás).
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field
               label="Kiosk hero (image or video)"
               hint="Full-bleed background for the kiosk home hero. Drop a file or paste a CDN URL."

@@ -115,12 +115,14 @@ export function WallPreviewPanel({
   //  4. visibilitychange / focus listeners para hidden→visible
   //     transitions que algunos browsers no propagan via RO.
   useLayoutEffect(() => {
-    const stage = containerRef.current;
-    if (!stage) return;
+    const holder = containerRef.current?.parentElement;
+    if (!holder) return;
     let raf: number | undefined;
     const compute = () => {
-      const availW = stage.clientWidth;
-      const availH = stage.clientHeight;
+      const availW = holder.clientWidth;
+      // Reserva ~150px para el pill (mt-20 + ~50 height) que vive
+      // dentro del holder debajo del container.
+      const availH = holder.clientHeight - 150;
       if (availW <= 0 || availH <= 0) {
         raf = requestAnimationFrame(compute);
         return;
@@ -130,7 +132,7 @@ export function WallPreviewPanel({
     };
     compute();
     const ro = new ResizeObserver(compute);
-    ro.observe(stage);
+    ro.observe(holder);
     const onVis = () => {
       raf = requestAnimationFrame(compute);
     };
@@ -339,17 +341,17 @@ export function WallPreviewPanel({
         </div>
       </div>
 
-      {/* Stage holder. El "stage" (card negro con bezel) llena el holder
-          completo dejando solo `p-6` de breathing room. El iframe se
-          posiciona absolutamente CENTRADO dentro del stage con fit-contain
-          (size = viewportW*scale × viewportH*scale). Así el card visible
-          siempre se ve grande y consistente entre grids; los walls con
-          aspect extremo (4x2 32:9, 1x2 8:9) tienen letterbox negro
-          natural alrededor del wall sin que el card se vea diminuto. */}
-      <div className="relative flex flex-1 flex-col items-stretch justify-stretch overflow-hidden bg-zinc-100 p-6 dark:bg-zinc-950/60">
+      {/* Stage holder. Wall card sized al aspect del wall (autoFit*viewport).
+          Pill abajo con mt-20. items-center/justify-center mantienen ambos
+          centrados sin stretching. */}
+      <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-zinc-100 dark:bg-zinc-950/60">
         <div
           ref={containerRef}
-          className="relative flex flex-1 items-center justify-center overflow-hidden rounded-lg border border-zinc-300 bg-black shadow-xl dark:border-zinc-700"
+          className="relative overflow-hidden rounded-lg border border-zinc-300 bg-black shadow-xl dark:border-zinc-700"
+          style={{
+            width: viewportW * scale,
+            height: viewportH * scale,
+          }}
         >
           <iframe
             key={`${reloadKey}-${currentSlideIndex}`}
@@ -357,16 +359,17 @@ export function WallPreviewPanel({
             src={iframeSrc}
             title={`Preview ${wallName}`}
             onLoad={onIframeLoad}
+            className="absolute left-0 top-0"
             style={{
-              width: viewportW * scale,
-              height: viewportH * scale,
+              width: viewportW,
+              height: viewportH,
+              transform: `scale(${scale})`,
+              transformOrigin: 'top left',
               border: 0,
-              display: 'block',
             }}
             sandbox="allow-scripts allow-same-origin"
           />
         </div>
-        {/* Slide pill — fuera del stage, en su propia row debajo */}
 
         {/* Slide navigator pill — 80px debajo del iframe (igual que DD). */}
         {slides.length > 0 ? (

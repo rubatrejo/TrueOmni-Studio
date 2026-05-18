@@ -208,7 +208,7 @@ export function ClientView({ slug, initialManifest, initialBranding }: ClientVie
             title="Branding & info"
             subtitle="Name, location, colors, logos, fonts and media. Changes autosave after ~1s."
           />
-          <BrandingForm value={branding} onChange={handleChange} />
+          <BrandingForm slug={slug} value={branding} onChange={handleChange} />
         </section>
 
         {/* Hallazgo S-11: diff pre-publish unificado. Lista los cambios
@@ -392,6 +392,13 @@ function PendingChangesPanel({ slug, manifest }: { slug: string; manifest: Clien
 
   // Si el cliente no tiene productos publicables activos, ocultar.
   if (!manifest.products.kiosks && !manifest.products.digitalDisplays) return null;
+
+  // En Vercel el filesystem es read-only — el diff KV↔fs no aplica. El
+  // panel solo aporta valor cuando se puede inspeccionar drift real (dev
+  // local con fs writable). Sin fs no hay nada accionable, así que lo
+  // ocultamos completo en lugar de mostrar el banner "Filesystem read-only".
+  // El diff real se computa al hacer click en Publish del editor del producto.
+  if (data && !data.fsAvailable) return null;
 
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40">

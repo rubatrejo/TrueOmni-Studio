@@ -6,7 +6,10 @@ import { HslColorPicker, type HslColor } from 'react-colorful';
 
 import type { UnifiedClientBranding } from '@/lib/studio/client-branding-sync';
 
+import { CustomFontField } from '../../_components/CustomFontField';
+import { MediaField } from '../../_components/MediaField';
 import { TabStrip, type TabStripItem } from '../../_components/TabStrip';
+import { hexToHsl, hslToHex } from '../../digital-displays/_components/tabs/BrandingTab';
 
 // Hallazgo S-31: contexto del id del Field para que TextInput / FontSelect
 // lean el id auto-generado y lo apliquen al input concreto. Antes el Field
@@ -26,6 +29,9 @@ const FieldIdContext = createContext<string | null>(null);
  * Plan: `~/.claude/plans/ok-listo-ahora-quiero-wondrous-sphinx.md`.
  */
 export interface BrandingFormProps {
+  /** Slug del cliente — usado por MediaField/CustomFontField para subir
+   *  assets a Blob storage con path `<product>/<slug>/...`. */
+  slug: string;
   value: UnifiedClientBranding;
   onChange: (next: UnifiedClientBranding) => void;
 }
@@ -58,7 +64,7 @@ const GOOGLE_FONTS = [
   'Geist',
 ];
 
-export function BrandingForm({ value, onChange }: BrandingFormProps) {
+export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
   const [tab, setTab] = useState<TabKey>('general');
   // Hallazgo S-15: TabStrip reutilizable + role=tablist. El idBase asocia
   // cada `<button role="tab">` con su `<div role="tabpanel">` por aria.
@@ -181,91 +187,142 @@ export function BrandingForm({ value, onChange }: BrandingFormProps) {
 
         {tab === 'logos' ? (
           <Panel>
-            <Field label="Default" hint="Main logo — used by every product.">
-              <TextInput
-                value={value.logos.default ?? ''}
-                onChange={(v) => setField('logos', { ...value.logos, default: v })}
-                placeholder="assets/logo.svg or https://..."
+            <Field
+              label="Default"
+              hint="Main logo — used by every product. Drop a file or paste a URL."
+            >
+              <MediaField
+                label="Default logo"
+                hint="PNG, SVG or WEBP. Max 5MB."
+                aspect="3/1"
+                slug={slug}
+                value={value.logos.default}
+                kind="image"
+                onChange={(next) => setField('logos', { ...value.logos, default: next?.src ?? '' })}
               />
             </Field>
             <Field
               label="Dark"
               hint="Variant for light backgrounds (signage). Falls back to default if empty."
             >
-              <TextInput
-                value={value.logos.dark ?? ''}
-                onChange={(v) => setField('logos', { ...value.logos, dark: v })}
-                placeholder="assets/logo-dark.svg"
+              <MediaField
+                label="Dark logo"
+                hint="Used by signage on light themes."
+                aspect="3/1"
+                slug={slug}
+                value={value.logos.dark}
+                kind="image"
+                onChange={(next) => setField('logos', { ...value.logos, dark: next?.src ?? '' })}
               />
             </Field>
             <Field label="Idle" hint="Large variant for the kiosk Billboard idle screen.">
-              <TextInput
-                value={value.logos.idle ?? ''}
-                onChange={(v) => setField('logos', { ...value.logos, idle: v })}
-                placeholder="assets/logo-idle.svg"
+              <MediaField
+                label="Idle logo"
+                hint="Big format. Shown on Billboard idle."
+                aspect="3/1"
+                slug={slug}
+                value={value.logos.idle}
+                kind="image"
+                onChange={(next) => setField('logos', { ...value.logos, idle: next?.src ?? '' })}
               />
             </Field>
             <Field label="Footer" hint="Compact variant for the kiosk footer band.">
-              <TextInput
-                value={value.logos.footer ?? ''}
-                onChange={(v) => setField('logos', { ...value.logos, footer: v })}
-                placeholder="assets/logo-footer.svg"
+              <MediaField
+                label="Footer logo"
+                hint="Compact. Used in footer band."
+                aspect="3/1"
+                slug={slug}
+                value={value.logos.footer}
+                kind="image"
+                onChange={(next) => setField('logos', { ...value.logos, footer: next?.src ?? '' })}
               />
             </Field>
           </Panel>
         ) : null}
 
         {tab === 'fonts' ? (
-          <Panel>
-            <Field label="Display font" hint="Used for headlines, CTAs and large numbers.">
-              <FontSelect
-                value={value.fonts.display}
-                onChange={(v) => setField('fonts', { ...value.fonts, display: v })}
-              />
-            </Field>
-            <Field label="Body font" hint="Used for body copy and supporting text.">
-              <FontSelect
-                value={value.fonts.body}
-                onChange={(v) => setField('fonts', { ...value.fonts, body: v })}
-              />
-            </Field>
-          </Panel>
+          <div className="space-y-6">
+            <Panel>
+              <Field label="Display font" hint="Used for headlines, CTAs and large numbers.">
+                <FontSelect
+                  value={value.fonts.display}
+                  onChange={(v) => setField('fonts', { ...value.fonts, display: v })}
+                />
+              </Field>
+              <Field label="Body font" hint="Used for body copy and supporting text.">
+                <FontSelect
+                  value={value.fonts.body}
+                  onChange={(v) => setField('fonts', { ...value.fonts, body: v })}
+                />
+              </Field>
+            </Panel>
+            <div className="space-y-4 border-t border-zinc-200 pt-5 dark:border-zinc-800">
+              <p className="text-[12.5px] font-medium text-zinc-700 dark:text-zinc-300">
+                Custom fonts (optional)
+              </p>
+              <p className="text-[11px] text-zinc-500">
+                Drop a <code>.woff2 / .woff / .ttf / .otf</code> file (≤600KB). Overrides the Google
+                Font selected above when present.
+              </p>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <CustomFontField
+                  slot="display"
+                  value={value.fonts.displayCustom}
+                  onChange={(next) =>
+                    setField('fonts', {
+                      ...value.fonts,
+                      displayCustom: next ?? undefined,
+                    })
+                  }
+                />
+                <CustomFontField
+                  slot="body"
+                  value={value.fonts.bodyCustom}
+                  onChange={(next) =>
+                    setField('fonts', {
+                      ...value.fonts,
+                      bodyCustom: next ?? undefined,
+                    })
+                  }
+                />
+              </div>
+            </div>
+          </div>
         ) : null}
 
         {tab === 'media' ? (
-          <Panel>
-            <Field label="Kiosk hero kind">
-              <select
-                value={value.homeHero?.kind ?? 'image'}
-                onChange={(e) =>
-                  setField('homeHero', {
-                    kind: e.target.value as 'image' | 'video',
-                    src: value.homeHero?.src ?? '',
-                  })
+          <div className="space-y-5">
+            <Field
+              label="Kiosk hero (image or video)"
+              hint="Full-bleed background for the kiosk home hero. Drop a file or paste a CDN URL."
+            >
+              <MediaField
+                label="Kiosk hero"
+                hint="9:16 portrait. Image ≤5MB, video ≤5MB (mp4/webm)."
+                aspect="9/16"
+                slug={slug}
+                value={value.homeHero?.src}
+                kind={value.homeHero?.kind ?? 'image'}
+                onChange={(next) =>
+                  setField(
+                    'homeHero',
+                    next ? { kind: next.kind, src: next.src } : { kind: 'image', src: '' },
+                  )
                 }
-                className="h-9 w-full rounded-md border border-zinc-200 bg-white px-2.5 text-[12.5px] outline-none transition focus:border-sky-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200"
-              >
-                <option value="image">Image</option>
-                <option value="video">Video</option>
-              </select>
-            </Field>
-            <Field label="Kiosk hero URL">
-              <TextInput
-                value={value.homeHero?.src ?? ''}
-                onChange={(v) =>
-                  setField('homeHero', { kind: value.homeHero?.kind ?? 'image', src: v })
-                }
-                placeholder="assets/home/hero.jpg or https://...mp4"
               />
             </Field>
-            <Field label="Favicon">
-              <TextInput
-                value={value.favicon ?? ''}
-                onChange={(v) => setField('favicon', v)}
-                placeholder="assets/favicon.ico"
+            <Field label="Favicon" hint="Square icon. ICO, PNG or SVG.">
+              <MediaField
+                label="Favicon"
+                hint="Square 1:1. Used by browsers and the kiosk taskbar."
+                aspect="1/1"
+                slug={slug}
+                value={value.favicon}
+                kind="image"
+                onChange={(next) => setField('favicon', next?.src ?? '')}
               />
             </Field>
-          </Panel>
+          </div>
         ) : null}
       </div>
     </div>
@@ -386,10 +443,10 @@ function ColorRow({
   return (
     <div
       ref={popoverRef}
-      className="relative flex items-center justify-between gap-3 rounded-md border border-zinc-200 bg-white p-2 dark:border-zinc-800 dark:bg-zinc-950"
+      className="relative flex flex-col gap-2 rounded-md border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950"
     >
-      <span className="text-[12.5px] font-medium text-zinc-700 dark:text-zinc-300">{label}</span>
-      <span className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[12.5px] font-medium text-zinc-700 dark:text-zinc-300">{label}</span>
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
@@ -398,14 +455,40 @@ function ColorRow({
           className="h-7 w-7 rounded border border-zinc-200 transition hover:scale-110 focus:outline-none focus:ring-2 focus:ring-sky-400 dark:border-zinc-800"
           style={{ backgroundColor: hsl ? `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)` : '#888' }}
         />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
         <input
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-32 rounded border border-zinc-200 bg-white px-2 py-1 font-mono text-[11px] text-zinc-700 outline-none transition focus:border-sky-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300"
+          className="w-full rounded border border-zinc-200 bg-white px-2 py-1 font-mono text-[11px] text-zinc-700 outline-none transition focus:border-sky-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300"
           placeholder="H S% L%"
+          aria-label={`${label} HSL value`}
         />
-      </span>
+        {hsl ? (
+          <HexInput
+            hsl={hsl}
+            ariaLabel={`${label} hex value`}
+            onChange={(c) => onChange(`${Math.round(c.h)} ${Math.round(c.s)}% ${Math.round(c.l)}%`)}
+          />
+        ) : (
+          <input
+            type="text"
+            value=""
+            onChange={(e) => {
+              const parsed = hexToHsl(e.target.value);
+              if (parsed) {
+                onChange(
+                  `${Math.round(parsed.h)} ${Math.round(parsed.s)}% ${Math.round(parsed.l)}%`,
+                );
+              }
+            }}
+            placeholder="#RRGGBB"
+            aria-label={`${label} hex value`}
+            className="w-full rounded border border-zinc-200 bg-white px-2 py-1 font-mono text-[11px] uppercase text-zinc-700 outline-none transition focus:border-sky-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300"
+          />
+        )}
+      </div>
       {open && hsl ? (
         <div className="absolute right-2 top-12 z-20 rounded-md border border-zinc-200 bg-white p-3 shadow-lg dark:border-zinc-800 dark:bg-zinc-950">
           <HslColorPicker
@@ -425,6 +508,47 @@ function ColorRow({
         </div>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * `<HexInput>` — input controlado que muestra el HSL como #RRGGBB y actualiza
+ * el HSL parent cuando el operator pega un hex válido. Sincroniza el draft
+ * cuando el HSL externo cambia (picker, reset, HSL input paralelo).
+ */
+function HexInput({
+  hsl,
+  onChange,
+  ariaLabel,
+}: {
+  hsl: HslColor;
+  onChange: (c: HslColor) => void;
+  ariaLabel: string;
+}) {
+  const computed = hslToHex(hsl);
+  const [draft, setDraft] = useState(computed);
+  const lastSyncRef = useRef(computed);
+  if (computed !== lastSyncRef.current) {
+    lastSyncRef.current = computed;
+    setDraft(computed);
+  }
+  return (
+    <input
+      type="text"
+      value={draft}
+      onChange={(e) => {
+        const v = e.target.value;
+        setDraft(v);
+        const parsed = hexToHsl(v);
+        if (parsed) onChange(parsed);
+      }}
+      onBlur={() => {
+        if (!hexToHsl(draft)) setDraft(computed);
+      }}
+      placeholder="#RRGGBB"
+      aria-label={ariaLabel}
+      className="w-full rounded border border-zinc-200 bg-white px-2 py-1 font-mono text-[11px] uppercase text-zinc-700 outline-none transition focus:border-sky-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300"
+    />
   );
 }
 

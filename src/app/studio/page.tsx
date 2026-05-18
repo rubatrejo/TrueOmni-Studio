@@ -65,6 +65,11 @@ export default function StudioHome() {
   // filtro corre sobre `clients` ya en memoria. Match contra slug + name +
   // products activos (e.g. "kiosks", "displays").
   const [search, setSearch] = useState('');
+  // Sort selector. Default `pinned-recent` replica el orden del backend
+  // (pinned > default > recientes > alfabético). Resto re-ordena en memoria.
+  const [sortBy, setSortBy] = useState<'pinned-recent' | 'newest' | 'oldest' | 'az' | 'za'>(
+    'pinned-recent',
+  );
 
   const refresh = useCallback(async () => {
     setError(null);
@@ -97,20 +102,40 @@ export default function StudioHome() {
 
   const filteredClients = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return clients;
-    return clients.filter((c) => {
-      if (c.slug.toLowerCase().includes(q)) return true;
-      if (c.name.toLowerCase().includes(q)) return true;
-      // Match contra "kiosks", "displays", "pwa", etc.
-      const productLabels: string[] = [];
-      if (c.products.kiosks) productLabels.push('kiosks');
-      if (c.products.digitalDisplays) productLabels.push('displays');
-      if (c.products.mobilePwa) productLabels.push('pwa');
-      if (c.products.videoWalls) productLabels.push('walls');
-      if (c.products.tablets) productLabels.push('tablets');
-      return productLabels.some((p) => p.includes(q));
-    });
-  }, [clients, search]);
+    const matches = q
+      ? clients.filter((c) => {
+          if (c.slug.toLowerCase().includes(q)) return true;
+          if (c.name.toLowerCase().includes(q)) return true;
+          // Match contra "kiosks", "displays", "pwa", etc.
+          const productLabels: string[] = [];
+          if (c.products.kiosks) productLabels.push('kiosks');
+          if (c.products.digitalDisplays) productLabels.push('displays');
+          if (c.products.mobilePwa) productLabels.push('pwa');
+          if (c.products.videoWalls) productLabels.push('walls');
+          if (c.products.tablets) productLabels.push('tablets');
+          return productLabels.some((p) => p.includes(q));
+        })
+      : clients;
+
+    if (sortBy === 'pinned-recent') return matches; // backend ya devuelve ese orden
+    const ts = (c: ClientSummary) => new Date(c.lastEditedAt).getTime();
+    const cmp = matches.slice();
+    switch (sortBy) {
+      case 'newest':
+        cmp.sort((a, b) => ts(b) - ts(a));
+        break;
+      case 'oldest':
+        cmp.sort((a, b) => ts(a) - ts(b));
+        break;
+      case 'az':
+        cmp.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'za':
+        cmp.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+    }
+    return cmp;
+  }, [clients, search, sortBy]);
 
   const handleCreate = async (input: {
     slug: string;
@@ -270,6 +295,18 @@ export default function StudioHome() {
                 </button>
               )}
             </div>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              aria-label="Sort clients"
+              className="h-9 rounded-lg border border-zinc-200 bg-white px-2.5 pr-7 text-[13px] text-zinc-900 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white"
+            >
+              <option value="pinned-recent">Pinned + recent</option>
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="az">Name A → Z</option>
+              <option value="za">Name Z → A</option>
+            </select>
             <NewClientButton onClick={() => setShowNewModal(true)} />
           </div>
         </div>
@@ -449,9 +486,9 @@ function ClientCard({
                 alt=""
                 loading="lazy"
                 decoding="async"
-                width={200}
-                height={48}
-                className="h-10 w-auto max-w-[60%] object-contain drop-shadow"
+                width={400}
+                height={120}
+                className="h-24 w-auto max-w-[78%] object-contain drop-shadow"
               />
             ) : (
               <span className="font-display text-base font-semibold uppercase tracking-[0.18em] text-white/90 drop-shadow">

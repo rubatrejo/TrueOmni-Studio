@@ -98,221 +98,228 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
         className="flex h-[430px] flex-col justify-center p-6"
       >
         {tab === 'general' ? (
-          <Panel>
-            <Field label="Name">
-              <TextInput
-                value={value.name}
-                onChange={(v) => setField('name', v)}
-                placeholder="TrueOmni Theme"
-              />
-            </Field>
-            <Field label="Website">
-              <TextInput
-                value={value.website ?? ''}
-                onChange={(v) => setField('website', v)}
-                placeholder="https://"
-              />
-            </Field>
-            <Field label="City">
-              <TextInput
-                value={value.location?.city ?? ''}
-                onChange={(v) => setField('location', { ...value.location, city: v })}
-                placeholder="Phoenix, AZ"
-              />
-            </Field>
-            <div className="grid grid-cols-2 gap-3">
-              <Field
-                label="Latitude"
-                hint={
-                  value.location?.lat != null && Math.abs(value.location.lat) > 90
-                    ? '⚠ Out of range (-90 to 90)'
-                    : undefined
-                }
-              >
-                <TextInput
-                  value={value.location?.lat?.toString() ?? ''}
-                  onChange={(v) => {
-                    const num = v === '' ? undefined : Number(v);
-                    if (v !== '' && Number.isNaN(num)) return;
-                    // S-18: clamp suave a rango válido de latitud.
-                    const clamped = num != null ? Math.max(-90, Math.min(90, num)) : undefined;
-                    setField('location', { ...value.location, lat: clamped });
-                  }}
-                  placeholder="33.4484"
-                />
-              </Field>
-              <Field
-                label="Longitude"
-                hint={
-                  value.location?.lon != null && Math.abs(value.location.lon) > 180
-                    ? '⚠ Out of range (-180 to 180)'
-                    : undefined
-                }
-              >
-                <TextInput
-                  value={value.location?.lon?.toString() ?? ''}
-                  onChange={(v) => {
-                    const num = v === '' ? undefined : Number(v);
-                    if (v !== '' && Number.isNaN(num)) return;
-                    // S-18: clamp suave a rango válido de longitud.
-                    const clamped = num != null ? Math.max(-180, Math.min(180, num)) : undefined;
-                    setField('location', { ...value.location, lon: clamped });
-                  }}
-                  placeholder="-112.0740"
-                />
-              </Field>
-            </div>
-          </Panel>
+          // 2 secciones lógicas: Identity (Name + Website) + Location
+          // (City + Lat/Lon). Antes 4 fields sueltos en 2-col grid leían
+          // como una sopa de inputs sin jerarquía.
+          <div className="space-y-5">
+            <Section title="Identity" hint="Customer-facing name and main URL.">
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Name">
+                  <TextInput
+                    value={value.name}
+                    onChange={(v) => setField('name', v)}
+                    placeholder="TrueOmni Theme"
+                  />
+                </Field>
+                <Field label="Website">
+                  <TextInput
+                    value={value.website ?? ''}
+                    onChange={(v) => setField('website', v)}
+                    placeholder="https://"
+                  />
+                </Field>
+              </div>
+            </Section>
+            <Section title="Location" hint="Used by weather widget and maps.">
+              <div className="grid grid-cols-[1fr_140px_140px] gap-3">
+                <Field label="City">
+                  <TextInput
+                    value={value.location?.city ?? ''}
+                    onChange={(v) => setField('location', { ...value.location, city: v })}
+                    placeholder="Phoenix, AZ"
+                  />
+                </Field>
+                <Field
+                  label="Latitude"
+                  hint={
+                    value.location?.lat != null && Math.abs(value.location.lat) > 90
+                      ? '⚠ Out of range'
+                      : undefined
+                  }
+                >
+                  <TextInput
+                    value={value.location?.lat?.toString() ?? ''}
+                    onChange={(v) => {
+                      const num = v === '' ? undefined : Number(v);
+                      if (v !== '' && Number.isNaN(num)) return;
+                      const clamped = num != null ? Math.max(-90, Math.min(90, num)) : undefined;
+                      setField('location', { ...value.location, lat: clamped });
+                    }}
+                    placeholder="33.4484"
+                  />
+                </Field>
+                <Field
+                  label="Longitude"
+                  hint={
+                    value.location?.lon != null && Math.abs(value.location.lon) > 180
+                      ? '⚠ Out of range'
+                      : undefined
+                  }
+                >
+                  <TextInput
+                    value={value.location?.lon?.toString() ?? ''}
+                    onChange={(v) => {
+                      const num = v === '' ? undefined : Number(v);
+                      if (v !== '' && Number.isNaN(num)) return;
+                      const clamped = num != null ? Math.max(-180, Math.min(180, num)) : undefined;
+                      setField('location', { ...value.location, lon: clamped });
+                    }}
+                    placeholder="-112.0740"
+                  />
+                </Field>
+              </div>
+            </Section>
+          </div>
         ) : null}
 
         {tab === 'brand' ? (
-          <Panel>
-            <ColorRow
-              label="Primary"
-              value={value.brand.primary}
-              onChange={(v) => setField('brand', { ...value.brand, primary: v })}
-            />
-            <ColorRow
-              label="Secondary"
-              value={value.brand.secondary}
-              onChange={(v) => setField('brand', { ...value.brand, secondary: v })}
-            />
-            <ColorRow
-              label="Accent"
-              value={value.brand.accent}
-              onChange={(v) => setField('brand', { ...value.brand, accent: v })}
-            />
-            <ColorRow
-              label="Neutral"
-              value={value.brand.neutral ?? '0 0% 7%'}
-              onChange={(v) => setField('brand', { ...value.brand, neutral: v })}
-            />
-          </Panel>
+          // Cada ColorRow lleva descripción de su rol para que el operador
+          // sepa qué cambia visualmente (antes era sólo "Primary/Secondary/
+          // Accent/Neutral" sin contexto). 2x2 grid en desktop.
+          <Section title="Brand palette" hint="3 tokens recolor every product.">
+            <div className="grid grid-cols-2 gap-3">
+              <ColorRow
+                label="Primary"
+                description="Buttons, headers, key CTAs."
+                value={value.brand.primary}
+                onChange={(v) => setField('brand', { ...value.brand, primary: v })}
+              />
+              <ColorRow
+                label="Secondary"
+                description="Supporting accents and panels."
+                value={value.brand.secondary}
+                onChange={(v) => setField('brand', { ...value.brand, secondary: v })}
+              />
+              <ColorRow
+                label="Accent"
+                description="Highlights, badges, selection."
+                value={value.brand.accent}
+                onChange={(v) => setField('brand', { ...value.brand, accent: v })}
+              />
+              <ColorRow
+                label="Neutral"
+                description="Backgrounds and surfaces."
+                value={value.brand.neutral ?? '0 0% 7%'}
+                onChange={(v) => setField('brand', { ...value.brand, neutral: v })}
+              />
+            </div>
+          </Section>
         ) : null}
 
         {tab === 'logos' ? (
-          // Logos compactos: dropzones aspect 6:1 (mucho más bajos que el
-          // 3:1 anterior), sin Field wrapper (MediaField ya tiene label/hint
-          // internos) y sin URL row (los logos se suben directo, paste URL
-          // se reserva para Media). Las 4 cards caben en 2x2 dentro de los
-          // 430px del card.
-          <div className="grid grid-cols-2 gap-3">
-            <MediaField
-              label="Default logo"
-              hint="Main logo — used by every product."
-              aspect="6/1"
-              slug={slug}
-              value={value.logos.default}
-              kind="image"
-              hideUrlInput
-              onChange={(next) => setField('logos', { ...value.logos, default: next?.src ?? '' })}
-            />
-            <MediaField
-              label="Dark logo"
-              hint="Variant for light backgrounds."
-              aspect="6/1"
-              slug={slug}
-              value={value.logos.dark}
-              kind="image"
-              hideUrlInput
-              onChange={(next) => setField('logos', { ...value.logos, dark: next?.src ?? '' })}
-            />
-            <MediaField
-              label="Idle logo"
-              hint="Big variant for Billboard idle."
-              aspect="6/1"
-              slug={slug}
-              value={value.logos.idle}
-              kind="image"
-              hideUrlInput
-              onChange={(next) => setField('logos', { ...value.logos, idle: next?.src ?? '' })}
-            />
-            <MediaField
-              label="Footer logo"
-              hint="Compact, for footer band."
-              aspect="6/1"
-              slug={slug}
-              value={value.logos.footer}
-              kind="image"
-              hideUrlInput
-              onChange={(next) => setField('logos', { ...value.logos, footer: next?.src ?? '' })}
-            />
-          </div>
+          <Section
+            title="Logo variants"
+            hint="Default applies to every product. Other variants override per surface."
+          >
+            <div className="grid grid-cols-2 gap-3">
+              <MediaField
+                label="Default"
+                hint="Used by every product."
+                aspect="6/1"
+                slug={slug}
+                value={value.logos.default}
+                kind="image"
+                hideUrlInput
+                onChange={(next) => setField('logos', { ...value.logos, default: next?.src ?? '' })}
+              />
+              <MediaField
+                label="Dark"
+                hint="For light backgrounds."
+                aspect="6/1"
+                slug={slug}
+                value={value.logos.dark}
+                kind="image"
+                hideUrlInput
+                onChange={(next) => setField('logos', { ...value.logos, dark: next?.src ?? '' })}
+              />
+              <MediaField
+                label="Idle"
+                hint="Big — Billboard idle screen."
+                aspect="6/1"
+                slug={slug}
+                value={value.logos.idle}
+                kind="image"
+                hideUrlInput
+                onChange={(next) => setField('logos', { ...value.logos, idle: next?.src ?? '' })}
+              />
+              <MediaField
+                label="Footer"
+                hint="Compact — footer band."
+                aspect="6/1"
+                slug={slug}
+                value={value.logos.footer}
+                kind="image"
+                hideUrlInput
+                onChange={(next) => setField('logos', { ...value.logos, footer: next?.src ?? '' })}
+              />
+            </div>
+          </Section>
         ) : null}
 
         {tab === 'fonts' ? (
           <div className="space-y-4">
-            <Panel>
-              <Field label="Display font" hint="Used for headlines, CTAs and large numbers.">
-                <FontSelect
+            <Section title="Typefaces" hint="Display for headlines, Body for paragraphs.">
+              <div className="grid grid-cols-2 gap-3">
+                <FontField
+                  label="Display"
+                  hint="Headlines, CTAs, big numbers."
+                  preview="Aa"
                   value={value.fonts.display}
                   onChange={(v) => setField('fonts', { ...value.fonts, display: v })}
                 />
-              </Field>
-              <Field label="Body font" hint="Used for body copy and supporting text.">
-                <FontSelect
+                <FontField
+                  label="Body"
+                  hint="Paragraphs and supporting text."
+                  preview="The quick brown fox jumps over."
                   value={value.fonts.body}
                   onChange={(v) => setField('fonts', { ...value.fonts, body: v })}
                 />
-              </Field>
-            </Panel>
-            <div className="space-y-2 border-t border-zinc-200 pt-4 dark:border-zinc-800">
-              <p className="text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
-                Custom fonts (optional) — overrides Google Font.
-                <span className="ml-1 font-normal text-zinc-500">
-                  Drop <code>.woff2/.woff/.ttf/.otf</code> ≤600KB.
-                </span>
-              </p>
+              </div>
+            </Section>
+            <Section
+              title="Custom upload"
+              hint="Optional — overrides Google Font. .woff2 / .woff / .ttf / .otf · ≤600KB."
+            >
               <div className="grid grid-cols-2 gap-3">
                 <CustomFontField
                   slot="display"
                   value={value.fonts.displayCustom}
                   onChange={(next) =>
-                    setField('fonts', {
-                      ...value.fonts,
-                      displayCustom: next ?? undefined,
-                    })
+                    setField('fonts', { ...value.fonts, displayCustom: next ?? undefined })
                   }
                 />
                 <CustomFontField
                   slot="body"
                   value={value.fonts.bodyCustom}
                   onChange={(next) =>
-                    setField('fonts', {
-                      ...value.fonts,
-                      bodyCustom: next ?? undefined,
-                    })
+                    setField('fonts', { ...value.fonts, bodyCustom: next ?? undefined })
                   }
                 />
               </div>
-            </div>
+            </Section>
           </div>
         ) : null}
 
         {tab === 'media' ? (
-          // Media en grid 2-col. Hero usa aspect 3:2 (landscape) para que
-          // entre en los 430px del card aunque el asset real sea 9:16
-          // portrait — el preview es solo un thumbnail. Favicon en 1:1
-          // pero con max-w-[140px] para que no domine la columna.
-          <div className="grid grid-cols-2 gap-4">
-            <MediaField
-              label="Kiosk hero"
-              hint="9:16 portrait asset. Image/video ≤5MB."
-              aspect="3/2"
-              slug={slug}
-              value={value.homeHero?.src}
-              kind={value.homeHero?.kind ?? 'image'}
-              onChange={(next) =>
-                setField(
-                  'homeHero',
-                  next ? { kind: next.kind, src: next.src } : { kind: 'image', src: '' },
-                )
-              }
-            />
-            <div className="mx-auto w-full max-w-[200px]">
+          <Section title="Brand media" hint="Hero background and favicon icon.">
+            <div className="grid grid-cols-[1fr_220px] gap-4">
+              <MediaField
+                label="Kiosk hero"
+                hint="9:16 portrait — image or video, ≤5MB."
+                aspect="3/2"
+                slug={slug}
+                value={value.homeHero?.src}
+                kind={value.homeHero?.kind ?? 'image'}
+                onChange={(next) =>
+                  setField(
+                    'homeHero',
+                    next ? { kind: next.kind, src: next.src } : { kind: 'image', src: '' },
+                  )
+                }
+              />
               <MediaField
                 label="Favicon"
-                hint="Square 1:1. ICO, PNG or SVG."
+                hint="Square 1:1 — ICO, PNG or SVG."
                 aspect="1/1"
                 slug={slug}
                 value={value.favicon}
@@ -321,7 +328,7 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
                 onChange={(next) => setField('favicon', next?.src ?? '')}
               />
             </div>
-          </div>
+          </Section>
         ) : null}
       </div>
     </div>
@@ -332,8 +339,29 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
 //  Primitives
 // ---------------------------------------------------------------------------
 
-function Panel({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-1 gap-4 md:grid-cols-2">{children}</div>;
+/**
+ * `<Section>` — encabezado pequeño + bloque de contenido. Da jerarquía
+ * visual a cada tab del BrandingForm sin gastar mucho alto vertical
+ * (label 13px + hint 11px ≈ 32px de cabecera).
+ */
+function Section({
+  title,
+  hint,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-2.5">
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 className="text-[13px] font-semibold text-zinc-900 dark:text-white">{title}</h3>
+        {hint ? <span className="text-[11px] text-zinc-500">{hint}</span> : null}
+      </div>
+      {children}
+    </div>
+  );
 }
 
 function Field({
@@ -406,12 +434,68 @@ function FontSelect({ value, onChange }: { value: string; onChange: (v: string) 
   );
 }
 
-function ColorRow({
+/**
+ * `<FontField>` — combo de selector + preview. El preview renderea el
+ * texto con la font seleccionada para que el operador vea cómo se
+ * verán los headlines / body antes de guardar.
+ *
+ * Carga el font de Google al vuelo (`<link>` inyectado al `<head>`).
+ */
+function FontField({
   label,
+  hint,
+  preview,
   value,
   onChange,
 }: {
   label: string;
+  hint: string;
+  preview: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  // Inyecta el `<link>` de Google Fonts para el font seleccionado.
+  // Cada cambio de font añade un nuevo link (browser deduplica por href).
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const family = value.replace(/\s+/g, '+');
+    const href = `https://fonts.googleapis.com/css2?family=${family}:wght@400;600&display=swap`;
+    if (document.querySelector(`link[href="${href}"]`)) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+  }, [value]);
+
+  const fieldId = useId();
+  return (
+    <FieldIdContext.Provider value={fieldId}>
+      <div className="flex flex-col gap-1.5 text-[12.5px]">
+        <label htmlFor={fieldId} className="font-medium text-zinc-700 dark:text-zinc-300">
+          {label}
+        </label>
+        <FontSelect value={value} onChange={onChange} />
+        <div
+          className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950/60 dark:text-zinc-100"
+          style={{ fontFamily: `"${value}", system-ui, sans-serif` }}
+        >
+          <span className="text-[18px] font-semibold leading-tight">{preview}</span>
+        </div>
+        <span className="text-[11px] text-zinc-500">{hint}</span>
+      </div>
+    </FieldIdContext.Provider>
+  );
+}
+
+function ColorRow({
+  label,
+  description,
+  value,
+  onChange,
+}: {
+  label: string;
+  /** Texto corto bajo el label explicando dónde se usa este color. */
+  description?: string;
   value: string;
   onChange: (v: string) => void;
 }) {
@@ -444,14 +528,21 @@ function ColorRow({
       ref={popoverRef}
       className="relative flex flex-col gap-2 rounded-md border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950"
     >
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-[12.5px] font-medium text-zinc-700 dark:text-zinc-300">{label}</span>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <span className="block text-[12.5px] font-medium text-zinc-700 dark:text-zinc-300">
+            {label}
+          </span>
+          {description ? (
+            <span className="block text-[11px] leading-snug text-zinc-500">{description}</span>
+          ) : null}
+        </div>
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-label={`${open ? 'Close' : 'Open'} ${label} picker`}
-          className="h-7 w-7 rounded border border-zinc-200 transition hover:scale-110 focus:outline-none focus:ring-2 focus:ring-sky-400 dark:border-zinc-800"
+          className="h-9 w-9 shrink-0 rounded-md border border-zinc-200 transition hover:scale-105 focus:outline-none focus:ring-2 focus:ring-sky-400 dark:border-zinc-800"
           style={{ backgroundColor: hsl ? `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)` : '#888' }}
         />
       </div>

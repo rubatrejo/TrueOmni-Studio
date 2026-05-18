@@ -28,6 +28,10 @@ interface MediaFieldProps {
   slug?: string;
   value?: string;
   kind?: 'image' | 'video';
+  /** Esconde el row "Or paste CDN URL" debajo del dropzone. Útil cuando el
+   *  campo es para assets pequeños (logos, favicons) donde el paste-URL es
+   *  innecesario y solo añade ruido vertical en el formulario. */
+  hideUrlInput?: boolean;
   onChange: (next: { src: string; kind: 'image' | 'video' } | undefined) => void;
 }
 
@@ -57,6 +61,7 @@ export function MediaField({
   slug: slugProp,
   value,
   kind,
+  hideUrlInput = false,
   onChange,
 }: MediaFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -331,30 +336,32 @@ export function MediaField({
       ) : null}
 
       {/* Or paste URL — alternativa para videos grandes via CDN */}
-      <div className="flex items-center gap-1.5 pt-1">
-        <LinkIcon className="h-3 w-3 shrink-0 text-zinc-400" />
-        <input
-          type="url"
-          value={urlInput}
-          onChange={(e) => setUrlInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              applyUrl();
-            }
-          }}
-          placeholder="Or paste a CDN URL (https://…/hero.mp4)"
-          className="flex-1 rounded-md border border-zinc-200 bg-white px-2 py-1 text-[11.5px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
-        />
-        <button
-          type="button"
-          onClick={applyUrl}
-          disabled={!urlInput.trim()}
-          className="rounded-md bg-zinc-900 px-2 py-1 text-[11px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-40 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
-        >
-          Use URL
-        </button>
-      </div>
+      {!hideUrlInput && (
+        <div className="flex items-center gap-1.5 pt-1">
+          <LinkIcon className="h-3 w-3 shrink-0 text-zinc-400" />
+          <input
+            type="url"
+            value={urlInput}
+            onChange={(e) => setUrlInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                applyUrl();
+              }
+            }}
+            placeholder="Or paste a CDN URL (https://…/hero.mp4)"
+            className="flex-1 rounded-md border border-zinc-200 bg-white px-2 py-1 text-[11.5px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
+          />
+          <button
+            type="button"
+            onClick={applyUrl}
+            disabled={!urlInput.trim()}
+            className="rounded-md bg-zinc-900 px-2 py-1 text-[11px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-40 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+          >
+            Use URL
+          </button>
+        </div>
+      )}
     </div>
   );
 }

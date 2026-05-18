@@ -85,16 +85,17 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
         className="px-3"
       />
 
-      {/* Active panel — altura fija con scroll interno. El usuario quería
-          que el card no cambie de tamaño al saltar entre General/Brand/
-          Logos/Fonts/Media; antes cada tab dictaba su altura (Fonts ~340px
-          vs Media con hero 9:16 ~1700px) y el layout brincaba. Ahora la
-          carta siempre mide 620px aunque el contenido sea más alto. */}
+      {/* Active panel — altura fija 430px (≈30% menos que el 620 anterior),
+          sin scroll. El contenido de cada tab se compactó para caber sin
+          recortes: Logos con dropzones aspect 6:1 sin URL row, Media con
+          aspect 3:2 y favicon más chico, etc. El flex justify-center
+          centra el contenido cuando la suma natural es menor a 430px
+          (Fonts, Brand colors) para no dejar hueco visible debajo. */}
       <div
         role="tabpanel"
         id={`${tabsId}-panel-${tab}`}
         aria-labelledby={`${tabsId}-tab-${tab}`}
-        className="h-[620px] overflow-y-auto p-6"
+        className="flex h-[430px] flex-col justify-center p-6"
       >
         {tab === 'general' ? (
           <Panel>
@@ -190,62 +191,57 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
         ) : null}
 
         {tab === 'logos' ? (
-          <Panel>
-            <Field
-              label="Default"
-              hint="Main logo — used by every product. Drop a file or paste a URL."
-            >
-              <MediaField
-                label="Default logo"
-                hint="PNG, SVG or WEBP. Max 5MB."
-                aspect="3/1"
-                slug={slug}
-                value={value.logos.default}
-                kind="image"
-                onChange={(next) => setField('logos', { ...value.logos, default: next?.src ?? '' })}
-              />
-            </Field>
-            <Field
-              label="Dark"
-              hint="Variant for light backgrounds (signage). Falls back to default if empty."
-            >
-              <MediaField
-                label="Dark logo"
-                hint="Used by signage on light themes."
-                aspect="3/1"
-                slug={slug}
-                value={value.logos.dark}
-                kind="image"
-                onChange={(next) => setField('logos', { ...value.logos, dark: next?.src ?? '' })}
-              />
-            </Field>
-            <Field label="Idle" hint="Large variant for the kiosk Billboard idle screen.">
-              <MediaField
-                label="Idle logo"
-                hint="Big format. Shown on Billboard idle."
-                aspect="3/1"
-                slug={slug}
-                value={value.logos.idle}
-                kind="image"
-                onChange={(next) => setField('logos', { ...value.logos, idle: next?.src ?? '' })}
-              />
-            </Field>
-            <Field label="Footer" hint="Compact variant for the kiosk footer band.">
-              <MediaField
-                label="Footer logo"
-                hint="Compact. Used in footer band."
-                aspect="3/1"
-                slug={slug}
-                value={value.logos.footer}
-                kind="image"
-                onChange={(next) => setField('logos', { ...value.logos, footer: next?.src ?? '' })}
-              />
-            </Field>
-          </Panel>
+          // Logos compactos: dropzones aspect 6:1 (mucho más bajos que el
+          // 3:1 anterior), sin Field wrapper (MediaField ya tiene label/hint
+          // internos) y sin URL row (los logos se suben directo, paste URL
+          // se reserva para Media). Las 4 cards caben en 2x2 dentro de los
+          // 430px del card.
+          <div className="grid grid-cols-2 gap-3">
+            <MediaField
+              label="Default logo"
+              hint="Main logo — used by every product."
+              aspect="6/1"
+              slug={slug}
+              value={value.logos.default}
+              kind="image"
+              hideUrlInput
+              onChange={(next) => setField('logos', { ...value.logos, default: next?.src ?? '' })}
+            />
+            <MediaField
+              label="Dark logo"
+              hint="Variant for light backgrounds."
+              aspect="6/1"
+              slug={slug}
+              value={value.logos.dark}
+              kind="image"
+              hideUrlInput
+              onChange={(next) => setField('logos', { ...value.logos, dark: next?.src ?? '' })}
+            />
+            <MediaField
+              label="Idle logo"
+              hint="Big variant for Billboard idle."
+              aspect="6/1"
+              slug={slug}
+              value={value.logos.idle}
+              kind="image"
+              hideUrlInput
+              onChange={(next) => setField('logos', { ...value.logos, idle: next?.src ?? '' })}
+            />
+            <MediaField
+              label="Footer logo"
+              hint="Compact, for footer band."
+              aspect="6/1"
+              slug={slug}
+              value={value.logos.footer}
+              kind="image"
+              hideUrlInput
+              onChange={(next) => setField('logos', { ...value.logos, footer: next?.src ?? '' })}
+            />
+          </div>
         ) : null}
 
         {tab === 'fonts' ? (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <Panel>
               <Field label="Display font" hint="Used for headlines, CTAs and large numbers.">
                 <FontSelect
@@ -260,15 +256,14 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
                 />
               </Field>
             </Panel>
-            <div className="space-y-4 border-t border-zinc-200 pt-5 dark:border-zinc-800">
-              <p className="text-[12.5px] font-medium text-zinc-700 dark:text-zinc-300">
-                Custom fonts (optional)
+            <div className="space-y-2 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+              <p className="text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
+                Custom fonts (optional) — overrides Google Font.
+                <span className="ml-1 font-normal text-zinc-500">
+                  Drop <code>.woff2/.woff/.ttf/.otf</code> ≤600KB.
+                </span>
               </p>
-              <p className="text-[11px] text-zinc-500">
-                Drop a <code>.woff2 / .woff / .ttf / .otf</code> file (≤600KB). Overrides the Google
-                Font selected above when present.
-              </p>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-2 gap-3">
                 <CustomFontField
                   slot="display"
                   value={value.fonts.displayCustom}
@@ -295,40 +290,37 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
         ) : null}
 
         {tab === 'media' ? (
-          // Media usa grid 2-col en desktop para que el hero portrait y el
-          // favicon vivan lado a lado en lugar de stack vertical (lo que
-          // hacía el tabpanel mucho más alto que los demás).
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Field
-              label="Kiosk hero (image or video)"
-              hint="Full-bleed background for the kiosk home hero. Drop a file or paste a CDN URL."
-            >
-              <MediaField
-                label="Kiosk hero"
-                hint="9:16 portrait. Image ≤5MB, video ≤5MB (mp4/webm)."
-                aspect="9/16"
-                slug={slug}
-                value={value.homeHero?.src}
-                kind={value.homeHero?.kind ?? 'image'}
-                onChange={(next) =>
-                  setField(
-                    'homeHero',
-                    next ? { kind: next.kind, src: next.src } : { kind: 'image', src: '' },
-                  )
-                }
-              />
-            </Field>
-            <Field label="Favicon" hint="Square icon. ICO, PNG or SVG.">
+          // Media en grid 2-col. Hero usa aspect 3:2 (landscape) para que
+          // entre en los 430px del card aunque el asset real sea 9:16
+          // portrait — el preview es solo un thumbnail. Favicon en 1:1
+          // pero con max-w-[140px] para que no domine la columna.
+          <div className="grid grid-cols-2 gap-4">
+            <MediaField
+              label="Kiosk hero"
+              hint="9:16 portrait asset. Image/video ≤5MB."
+              aspect="3/2"
+              slug={slug}
+              value={value.homeHero?.src}
+              kind={value.homeHero?.kind ?? 'image'}
+              onChange={(next) =>
+                setField(
+                  'homeHero',
+                  next ? { kind: next.kind, src: next.src } : { kind: 'image', src: '' },
+                )
+              }
+            />
+            <div className="mx-auto w-full max-w-[200px]">
               <MediaField
                 label="Favicon"
-                hint="Square 1:1. Used by browsers and the kiosk taskbar."
+                hint="Square 1:1. ICO, PNG or SVG."
                 aspect="1/1"
                 slug={slug}
                 value={value.favicon}
                 kind="image"
+                hideUrlInput
                 onChange={(next) => setField('favicon', next?.src ?? '')}
               />
-            </Field>
+            </div>
           </div>
         ) : null}
       </div>

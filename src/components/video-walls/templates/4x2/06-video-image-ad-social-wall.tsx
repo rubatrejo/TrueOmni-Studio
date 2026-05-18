@@ -5,15 +5,31 @@ import { findSlot } from '../_shared/slot-renderers';
 import { registerTemplate } from '../registry';
 import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
 
-/** Template 4×2 `06-video-image-ad-social-wall` — XD Slide 6. SIMÉTRICO:
- *  Cada sidebar (col 0 y col 3) tiene Ad arriba + Social 2×2 grid abajo.
- *  Video centro (cols 1-2). */
-const BODY_Y = 335;
-const AD_H = 1080;
-const SOCIAL_Y = BODY_Y + AD_H;
-const SOCIAL_H = 745;
-const TILE_W = 960;
-const TILE_H = Math.round(SOCIAL_H / 2);
+/**
+ * Template 4×2 `06-video-image-ad-social-wall` — pixel-perfect XD
+ * `4x2/Slide 6 - 4x2 Video-Image + Ad + Social Wall.svg`.
+ *
+ * Layout verbatim XD (cada sidebar):
+ *   - Ad     y=330, w=1916, h=750 (banner horizontal).
+ *   - Row 1  y=1080, 4 cards SMALL 480×540 (x=0/480/960/1440).
+ *   - Row 2  y=1620, 4 cards SMALL 480×540 (x=0/480/960/1440).
+ *   - 8 social cards únicos por sidebar (mirror izq=der).
+ *
+ * Video centro x=1920 y=335 w=3840 h=1825 (cols 1-2).
+ */
+const VIDEO_X = 1920;
+const VIDEO_Y = 335;
+const VIDEO_W = 3840;
+const VIDEO_H = 1825;
+const AD_Y = 330;
+const AD_W = 1916;
+const AD_H = 750;
+const SMALL_W = 480;
+const SMALL_H = 540;
+const ROW1_Y = 1080;
+const ROW2_Y = 1620;
+const LEFT_X = 0;
+const RIGHT_X = 5760;
 
 function Render({ client, slots }: VideoWallTemplateRenderProps) {
   const videoMod = findSlot(slots, 'video');
@@ -26,12 +42,12 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
   const adUrl = adMod?.kind === 'ads' ? resolveAssetUrl(client.slug, adMod.asset.url) : null;
   const adIsVideo = adMod?.kind === 'ads' && adMod.asset.kind === 'video';
 
-  const maxPosts = socialMod?.kind === 'social' ? socialMod.maxPosts : 4;
-  const posts = (client.social?.posts ?? []).slice(0, Math.min(maxPosts, 4));
+  const maxPosts = socialMod?.kind === 'social' ? socialMod.maxPosts : 8;
+  const posts = (client.social?.posts ?? []).slice(0, Math.min(maxPosts, 8));
 
   const sides: { x: number; key: 'l' | 'r' }[] = [
-    { x: 0, key: 'l' },
-    { x: 5760, key: 'r' },
+    { x: LEFT_X, key: 'l' },
+    { x: RIGHT_X, key: 'r' },
   ];
 
   return (
@@ -46,50 +62,66 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
       >
         <SocialGradientDefs />
         <rect width="7680" height="2160" fill="#000" />
-        <g transform="translate(1920 335)">
-          <rect width="3840" height="1825" fill="#000" />
+
+        {/* Video centro (cols 1-2) */}
+        <g transform={`translate(${VIDEO_X} ${VIDEO_Y})`}>
+          <rect width={VIDEO_W} height={VIDEO_H} fill="#000" />
           {videoUrl && !isVideo ? (
             <image
               href={videoUrl}
               x="0"
               y="0"
-              width="3840"
-              height="1825"
+              width={VIDEO_W}
+              height={VIDEO_H}
               preserveAspectRatio="xMidYMid slice"
             />
           ) : null}
         </g>
+
         {sides.flatMap((s) => [
-          <g key={`${s.key}-ad`} transform={`translate(${s.x} ${BODY_Y})`}>
-            <rect width="1920" height={AD_H} fill="#0a0a0a" />
+          /* Ad banner top */
+          <g key={`${s.key}-ad`} transform={`translate(${s.x} ${AD_Y})`}>
+            <rect width={AD_W} height={AD_H} fill="#0a0a0a" />
             {adUrl && !adIsVideo ? (
               <image
                 href={adUrl}
                 x="0"
                 y="0"
-                width="1920"
+                width={AD_W}
                 height={AD_H}
                 preserveAspectRatio="xMidYMid slice"
               />
             ) : null}
           </g>,
-          ...Array.from({ length: 4 }).map((_, i) => {
-            const c = i % 2;
-            const r = Math.floor(i / 2);
-            return (
-              <SocialCardSvg
-                key={`${s.key}-soc-${i}`}
-                x={s.x + c * TILE_W}
-                y={SOCIAL_Y + r * TILE_H}
-                w={TILE_W}
-                h={TILE_H}
-                post={posts[i] ?? null}
-                clientSlug={client.slug}
-                largeUsername={false}
-              />
-            );
-          }),
+          /* Row 1: 4 small social cards */
+          ...[0, 1, 2, 3].map((i) => (
+            <SocialCardSvg
+              key={`${s.key}-r1-${i}`}
+              x={s.x + i * SMALL_W}
+              y={ROW1_Y}
+              w={SMALL_W}
+              h={SMALL_H}
+              post={posts[i] ?? null}
+              clientSlug={client.slug}
+              largeUsername={false}
+            />
+          )),
+          /* Row 2: 4 small social cards */
+          ...[0, 1, 2, 3].map((i) => (
+            <SocialCardSvg
+              key={`${s.key}-r2-${i}`}
+              x={s.x + i * SMALL_W}
+              y={ROW2_Y}
+              w={SMALL_W}
+              h={SMALL_H}
+              post={posts[4 + i] ?? null}
+              clientSlug={client.slug}
+              largeUsername={false}
+            />
+          )),
         ])}
+
+        {/* Play icon centrado sobre video */}
         <g transform="translate(3684 1092)">
           <path
             d="M156,312C69.981,312,0,242.018,0,156S69.981,0,156,0,312,69.981,312,156,242.018,312,156,312ZM115.3,88.173V223.825L230.607,156Z"
@@ -98,6 +130,7 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
           />
         </g>
       </svg>
+
       {videoUrl && isVideo ? (
         <video
           src={videoUrl}
@@ -107,14 +140,15 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
           playsInline
           style={{
             position: 'absolute',
-            left: 1920,
-            top: 335,
-            width: 3840,
-            height: 1825,
+            left: VIDEO_X,
+            top: VIDEO_Y,
+            width: VIDEO_W,
+            height: VIDEO_H,
             objectFit: 'cover',
           }}
         />
       ) : null}
+
       {adUrl && adIsVideo ? (
         <>
           <video
@@ -125,9 +159,9 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
             playsInline
             style={{
               position: 'absolute',
-              left: 0,
-              top: BODY_Y,
-              width: 1920,
+              left: LEFT_X,
+              top: AD_Y,
+              width: AD_W,
               height: AD_H,
               objectFit: 'cover',
             }}
@@ -140,9 +174,9 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
             playsInline
             style={{
               position: 'absolute',
-              left: 5760,
-              top: BODY_Y,
-              width: 1920,
+              left: RIGHT_X,
+              top: AD_Y,
+              width: AD_W,
               height: AD_H,
               objectFit: 'cover',
             }}

@@ -1,32 +1,35 @@
 'use client';
 
-import { EventCardSvg, resolveAssetUrl, SocialGradientDefs } from '../_shared/_card-svg';
+import { resolveAssetUrl, SocialCardSvg, SocialGradientDefs } from '../_shared/_card-svg';
 import { findSlot } from '../_shared/slot-renderers';
 import { registerTemplate } from '../registry';
 import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
 
 /**
- * Template 2×2 `03-video-image-events` — pixel-perfect XD
- * `2x2/Slide 3 - 2x2 Video-Image + Events.svg`.
+ * Template 2×2 `05-video-image-social-wall` — pixel-perfect XD
+ * `2x2/Slide 5 - 2x2 Image + Social.svg`.
  *
  * Layout verbatim XD (canvas 3840×2160):
  *   - Header full width y=0..335.
  *   - Video col 0: x=0 y=335 w=1920 h=1825.
- *   - Events col 1 (x=1920):
- *       · Row top y=335,  h=745  → 3 cards 640×745  (x=1920/2560/3200).
- *       · Row bot y=1080, h=1080 → 3 cards 640×1080 (x=1920/2560/3200).
- *   - 6 event cards en col 1 (top usa events[0..3], bot usa events[3..6]).
+ *   - Social col 1 (x=1920) listing:
+ *       · Row 0 (y=336): 3 cards LARGE 640×744 (x=1920/2560/3200).
+ *       · Row 1 (y=1080): 3 cards SMALL 640×540 (x=1920/2560/3200).
+ *       · Row 2 (y=1620): 3 cards SMALL 640×540 (x=1920/2560/3200).
+ *   - 9 social cards en col 1.
  */
 const VIDEO_X = 0;
 const VIDEO_Y = 335;
 const VIDEO_W = 1920;
 const VIDEO_H = 1825;
-const EVENTS_X = 1920;
-const ROW1_Y = 335;
-const ROW1_H = 745;
-const ROW2_Y = 1080;
-const ROW2_H = 1080;
-const CARD_W = 640;
+const SOCIAL_X = 1920;
+const LARGE_W = 640;
+const LARGE_H = 744;
+const SMALL_W = 640;
+const SMALL_H = 540;
+const ROW0_Y = 336;
+const ROW1_Y = 1080;
+const ROW2_Y = 1620;
 
 function Render({ client, slots }: VideoWallTemplateRenderProps) {
   const videoMod = findSlot(slots, 'video');
@@ -34,9 +37,9 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
     videoMod?.kind === 'video-image' ? resolveAssetUrl(client.slug, videoMod.asset.url) : null;
   const isVideo = videoMod?.kind === 'video-image' && videoMod.asset.kind === 'video';
 
-  const eventsMod = findSlot(slots, 'events');
-  const maxItems = eventsMod?.kind === 'events' ? eventsMod.maxItems : 6;
-  const events = (client.events ?? []).slice(0, Math.min(maxItems, 6));
+  const socialMod = findSlot(slots, 'social');
+  const maxPosts = socialMod?.kind === 'social' ? socialMod.maxPosts : 9;
+  const posts = (client.social?.posts ?? []).slice(0, Math.min(maxPosts, 9));
 
   return (
     <>
@@ -66,27 +69,43 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
           ) : null}
         </g>
 
-        {/* Events col 1: row top (3 cards 640×745) + row bot (3 cards 640×1080) */}
+        {/* Row 0: 3 large cards 640×744 */}
         {[0, 1, 2].map((i) => (
-          <EventCardSvg
-            key={`r1-${i}`}
-            x={EVENTS_X + i * CARD_W}
-            y={ROW1_Y}
-            w={CARD_W}
-            h={ROW1_H}
-            event={events[i] ?? null}
+          <SocialCardSvg
+            key={`r0-${i}`}
+            x={SOCIAL_X + i * LARGE_W}
+            y={ROW0_Y}
+            w={LARGE_W}
+            h={LARGE_H}
+            post={posts[i] ?? null}
             clientSlug={client.slug}
+            largeUsername
           />
         ))}
+        {/* Row 1: 3 small cards 640×540 */}
         {[0, 1, 2].map((i) => (
-          <EventCardSvg
-            key={`r2-${i}`}
-            x={EVENTS_X + i * CARD_W}
-            y={ROW2_Y}
-            w={CARD_W}
-            h={ROW2_H}
-            event={events[i + 3] ?? null}
+          <SocialCardSvg
+            key={`r1-${i}`}
+            x={SOCIAL_X + i * SMALL_W}
+            y={ROW1_Y}
+            w={SMALL_W}
+            h={SMALL_H}
+            post={posts[3 + i] ?? null}
             clientSlug={client.slug}
+            largeUsername={false}
+          />
+        ))}
+        {/* Row 2: 3 small cards 640×540 */}
+        {[0, 1, 2].map((i) => (
+          <SocialCardSvg
+            key={`r2-${i}`}
+            x={SOCIAL_X + i * SMALL_W}
+            y={ROW2_Y}
+            w={SMALL_W}
+            h={SMALL_H}
+            post={posts[6 + i] ?? null}
+            clientSlug={client.slug}
+            largeUsername={false}
           />
         ))}
 
@@ -122,8 +141,8 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
 }
 
 const Template: VideoWallTemplate = {
-  id: '03-video-image-events',
-  label: '03 · Video + Events',
+  id: '05-video-image-social-wall',
+  label: '05 · Video + Social Wall',
   category: 'composed',
   grid: '2x2',
   slots: [
@@ -134,10 +153,10 @@ const Template: VideoWallTemplate = {
       acceptedModules: ['video-image'],
     },
     {
-      key: 'events',
+      key: 'social',
       kind: 'sidebar',
       cellRect: { row: 0, col: 1, rowSpan: 2, colSpan: 1 },
-      acceptedModules: ['events'],
+      acceptedModules: ['social'],
     },
   ],
   Render,

@@ -1,42 +1,41 @@
 'use client';
 
-import { EventCardSvg, resolveAssetUrl, SocialGradientDefs } from '../_shared/_card-svg';
+import { resolveAssetUrl } from '../_shared/_card-svg';
 import { findSlot } from '../_shared/slot-renderers';
 import { registerTemplate } from '../registry';
 import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
 
 /**
- * Template 2×2 `03-video-image-events` — pixel-perfect XD
- * `2x2/Slide 3 - 2x2 Video-Image + Events.svg`.
+ * Template 2×2 `02-video-image-ad` — pixel-perfect XD
+ * `2x2/Slide 2 - 2x2 Video-Image + Ad.svg`.
  *
  * Layout verbatim XD (canvas 3840×2160):
  *   - Header full width y=0..335.
  *   - Video col 0: x=0 y=335 w=1920 h=1825.
- *   - Events col 1 (x=1920):
- *       · Row top y=335,  h=745  → 3 cards 640×745  (x=1920/2560/3200).
- *       · Row bot y=1080, h=1080 → 3 cards 640×1080 (x=1920/2560/3200).
- *   - 6 event cards en col 1 (top usa events[0..3], bot usa events[3..6]).
+ *   - Ad BIG SQUARE col 1: x=1920 y=335 w=1920 h=1825.
+ *
+ * Antes era `02-quad-mix` (4 tiles mezclados). El XD del wall 2×2
+ * Slide 2 es un ad de tipo "Big Square" (no banner horizontal) que
+ * cubre toda la columna derecha.
  */
 const VIDEO_X = 0;
 const VIDEO_Y = 335;
 const VIDEO_W = 1920;
 const VIDEO_H = 1825;
-const EVENTS_X = 1920;
-const ROW1_Y = 335;
-const ROW1_H = 745;
-const ROW2_Y = 1080;
-const ROW2_H = 1080;
-const CARD_W = 640;
+const AD_X = 1920;
+const AD_Y = 335;
+const AD_W = 1920;
+const AD_H = 1825;
 
 function Render({ client, slots }: VideoWallTemplateRenderProps) {
   const videoMod = findSlot(slots, 'video');
+  const adMod = findSlot(slots, 'ad');
+
   const videoUrl =
     videoMod?.kind === 'video-image' ? resolveAssetUrl(client.slug, videoMod.asset.url) : null;
   const isVideo = videoMod?.kind === 'video-image' && videoMod.asset.kind === 'video';
-
-  const eventsMod = findSlot(slots, 'events');
-  const maxItems = eventsMod?.kind === 'events' ? eventsMod.maxItems : 6;
-  const events = (client.events ?? []).slice(0, Math.min(maxItems, 6));
+  const adUrl = adMod?.kind === 'ads' ? resolveAssetUrl(client.slug, adMod.asset.url) : null;
+  const adIsVideo = adMod?.kind === 'ads' && adMod.asset.kind === 'video';
 
   return (
     <>
@@ -48,7 +47,6 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="xMidYMid slice"
       >
-        <SocialGradientDefs />
         <rect width="3840" height="2160" fill="#000" />
 
         {/* Video col 0 */}
@@ -66,29 +64,20 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
           ) : null}
         </g>
 
-        {/* Events col 1: row top (3 cards 640×745) + row bot (3 cards 640×1080) */}
-        {[0, 1, 2].map((i) => (
-          <EventCardSvg
-            key={`r1-${i}`}
-            x={EVENTS_X + i * CARD_W}
-            y={ROW1_Y}
-            w={CARD_W}
-            h={ROW1_H}
-            event={events[i] ?? null}
-            clientSlug={client.slug}
-          />
-        ))}
-        {[0, 1, 2].map((i) => (
-          <EventCardSvg
-            key={`r2-${i}`}
-            x={EVENTS_X + i * CARD_W}
-            y={ROW2_Y}
-            w={CARD_W}
-            h={ROW2_H}
-            event={events[i + 3] ?? null}
-            clientSlug={client.slug}
-          />
-        ))}
+        {/* Ad Big Square col 1 */}
+        <g transform={`translate(${AD_X} ${AD_Y})`}>
+          <rect width={AD_W} height={AD_H} fill="#0a0a0a" />
+          {adUrl && !adIsVideo ? (
+            <image
+              href={adUrl}
+              x="0"
+              y="0"
+              width={AD_W}
+              height={AD_H}
+              preserveAspectRatio="xMidYMid slice"
+            />
+          ) : null}
+        </g>
 
         {/* Play icon centrado en video col 0 — XD verbatim translate(804 1092) */}
         <g transform="translate(804 1092)">
@@ -117,13 +106,31 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
           }}
         />
       ) : null}
+
+      {adUrl && adIsVideo ? (
+        <video
+          src={adUrl}
+          autoPlay
+          loop
+          muted
+          playsInline
+          style={{
+            position: 'absolute',
+            left: AD_X,
+            top: AD_Y,
+            width: AD_W,
+            height: AD_H,
+            objectFit: 'cover',
+          }}
+        />
+      ) : null}
     </>
   );
 }
 
 const Template: VideoWallTemplate = {
-  id: '03-video-image-events',
-  label: '03 · Video + Events',
+  id: '02-video-image-ad',
+  label: '02 · Video + Ad',
   category: 'composed',
   grid: '2x2',
   slots: [
@@ -134,10 +141,10 @@ const Template: VideoWallTemplate = {
       acceptedModules: ['video-image'],
     },
     {
-      key: 'events',
+      key: 'ad',
       kind: 'sidebar',
       cellRect: { row: 0, col: 1, rowSpan: 2, colSpan: 1 },
-      acceptedModules: ['events'],
+      acceptedModules: ['ads'],
     },
   ],
   Render,

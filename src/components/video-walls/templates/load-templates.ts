@@ -27,12 +27,13 @@ import './4x2/04-video-image-ad-events';
 import './4x2/05-video-image-social-wall';
 import './4x2/06-video-image-ad-social-wall';
 
-// 2×2 (canvas 3840×2160, 16:9).
+// 2×2 (canvas 3840×2160, 16:9). Pixel-perfect contra `designs/video-walls/2x2/`.
 import './2x2/01-video-image-full';
-import './2x2/02-quad-mix';
+import './2x2/02-video-image-ad';
 import './2x2/03-video-image-events';
-import './2x2/04-video-image-social-wall';
-import './2x2/05-video-image-ad';
+import './2x2/04-video-image-ad-events';
+import './2x2/05-video-image-social-wall';
+import './2x2/06-video-image-ad-social-wall';
 
 // 2×1 (canvas 3840×1080, 32:9 strip horizontal).
 import './2x1/01-video-image-full';

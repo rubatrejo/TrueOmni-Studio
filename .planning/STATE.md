@@ -4,6 +4,73 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+## 2026-05-18 · Studio UX iterativo + Video Walls 4x2 pixel-perfect
+
+Sesión larga con dos bloques principales:
+
+### Bloque 1 — Studio UX (commits ec4a8ae → bd74fe4)
+
+- **Delete client cascade**: nuevo endpoint `DELETE /api/studio/clients/[slug]`
+  que purga kiosk + signage + video walls + manifest unified. Modal copy
+  cambia a "Delete client". Antes el delete legacy solo desactivaba el
+  producto kiosk dejando manifest huérfano.
+- **Dashboard polish**: logo XL en ClientCard hero (h-10 → h-24), sort
+  dropdown (Pinned + Newest + Oldest + A→Z + Z→A), hex input en Brand
+  colors (HSL + HEX paralelos), drag&drop en Logos/Fonts/Media via
+  MediaField + CustomFontField, "Pending publish" panel oculto cuando
+  fs read-only.
+- **Branding card height**: ajustado a 430px sin scroll, contenido
+  compacto (aspect 6:1 logos, sin URL row), tabpanel centrado.
+- **Branding card org interna**: nuevo `<Section title hint>` primitive,
+  General split en Identity + Location, Brand colors con description
+  por token, Fonts split en Typefaces + Custom upload con preview live
+  via `<link>` Google Fonts dinámico.
+
+### Bloque 2 — Video Walls 4x2 pixel-perfect (commits fb50c40 → 732488e)
+
+Comienzo con fixes generales (`fb50c40`: EventsSlot/SocialSlot adaptativos
+
+- VideoWallHeader escalado). Después varias iteraciones del sizing del
+  preview iframe que el usuario rechazó. **Decisión final**: el sizing
+  estaba bien, el problema real era el CONTENIDO de los slides.
+
+User pasó XD designs nuevos en `/Users/rubenramirez/Desktop/Video Wall/4x2/`
+para los 6 slides. **Insight clave**: el layout 4x2 es SIMÉTRICO — video
+al CENTRO (cols 1-2) con módulos en AMBOS sidebars (cols 0 y 3), no
+"3x2 + columna extra".
+
+**Refactor pixel-perfect 4x2 (commit `da0e58b` + fix `768b06b` + format
+`732488e`):**
+
+- Movido `_card-svg.tsx` de `3x2/` a `_shared/` (1 fuente de verdad
+  EventCardSvg/SocialCardSvg para 3x2 + 4x2).
+- 6 templates 4x2 reescritos con SVG inline `<svg width=7680 height=2160>`
+  y coords XD. Slides 3-6 con sidebars MIRROR (mismo contenido izq/der).
+- IDs alineados con 3x2 para preservar template-remap. Solo cambia
+  `03-video-image-social` → `03-video-image-events`.
+- `template-remap.ts` actualizado.
+
+**Bugs introducidos y corregidos en sesión:**
+
+- Edit a `load-templates.ts` falló silenciosamente (file not read first),
+  Vercel build falló con Module not found. Hotfix `768b06b`.
+- Prettier formatting issues en 10 archivos. Fix `732488e`.
+
+**Deploy live final**: `dpl_8BVgAAWxXFZUpk6EfLh43ukfGKmR` (commit
+`768b06b`) en `trueomni-studio.vercel.app`. CI verde tras `732488e`.
+
+**Plan persistido**: `~/.claude/plans/magical-snacking-platypus.md` (plan
+aprobado del refactor 4x2).
+
+### Pendiente para próxima sesión
+
+1. Feedback visual del usuario sobre los 6 slides 4x2 en producción
+   (comparar contra XD PNGs `/Users/rubenramirez/Desktop/Video Wall/4x2/`).
+2. Refinar coords/sizes específicos donde no matche pixel-perfect.
+3. Extender el mismo refactor a 2x2, 2x1, 1x2 cuando lleguen XD designs.
+
+---
+
 ## 2026-05-11 · MIG-AB-1: migración Playwright → agent-browser + higiene
 
 Decisión y ejecución de la fase puntual **MIG-AB-1** (plan en `.planning/MIG-AB-1-PLAN.md`).

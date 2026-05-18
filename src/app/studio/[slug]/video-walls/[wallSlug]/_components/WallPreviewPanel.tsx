@@ -12,7 +12,7 @@ import {
   RotateCcw,
   X,
 } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react';
 
 import {
   canvasDimensionsOf,
@@ -103,31 +103,47 @@ export function WallPreviewPanel({
   const viewportH = focusedCell ? 1080 : canvasH;
   const scale = autoFit * userZoom;
 
-  // autoFit ahora se delega al browser via CSS `aspect-ratio` +
-  // `max-width/max-height` 100% en el container (ver el holder más abajo).
-  // El cálculo JS previo tenía race condition: si el panel preview estaba
-  // dentro de un tab oculto al primer mount, `holder.clientWidth/Height`
-  // leían 0 y el early-return dejaba `autoFit` atascado en el init 0.1 →
-  // iframe minúsculo en top-left.
+  // Compute autoFit del holder. Estrategia robusta contra la race
+  // condition que antes dejaba el iframe minúsculo cuando el panel se
+  // montaba dentro de un tab oculto (display:none → clientWidth=0).
   //
-  // Conservamos el state `autoFit` solo para el indicador "{N}%" en la
-  // toolbar y para que `userZoom` siga funcionando como multiplicador
-  // sobre un baseline conocido. Lo medimos via ResizeObserver sobre el
-  // CONTAINER (no el holder) — el container ya viene dimensionado por
-  // CSS, así su `clientWidth / viewportW` es el scale real efectivo.
-  useEffect(() => {
-    const node = containerRef.current;
-    if (!node) return;
+  // Pipeline:
+  //  1. useLayoutEffect lee dims DESPUÉS del layout, no antes.
+  //  2. Si el holder reporta 0×0 (todavía no laid out), retry vía
+  //     requestAnimationFrame hasta que reporte dims válidas.
+  //  3. ResizeObserver para tracking continuo de cambios de size.
+  //  4. visibilitychange / focus listeners para hidden→visible
+  //     transitions que algunos browsers no propagan via RO.
+  useLayoutEffect(() => {
+    const holder = containerRef.current?.parentElement;
+    if (!holder) return;
+    let raf: number | undefined;
+    const padding = 24;
     const compute = () => {
-      const w = node.clientWidth;
-      if (w <= 0) return;
-      setAutoFit(Math.max(0.02, w / viewportW));
+      const availW = holder.clientWidth - padding * 2;
+      const availH = holder.clientHeight - padding * 2;
+      if (availW <= 0 || availH <= 0) {
+        raf = requestAnimationFrame(compute);
+        return;
+      }
+      const fit = Math.min(availW / viewportW, availH / viewportH);
+      setAutoFit(Math.max(0.02, fit));
     };
     compute();
     const ro = new ResizeObserver(compute);
-    ro.observe(node);
-    return () => ro.disconnect();
-  }, [viewportW]);
+    ro.observe(holder);
+    const onVis = () => {
+      raf = requestAnimationFrame(compute);
+    };
+    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('focus', onVis);
+    return () => {
+      ro.disconnect();
+      if (raf !== undefined) cancelAnimationFrame(raf);
+      document.removeEventListener('visibilitychange', onVis);
+      window.removeEventListener('focus', onVis);
+    };
+  }, [viewportW, viewportH]);
 
   useEffect(() => {
     setUserZoom(1);
@@ -324,31 +340,18 @@ export function WallPreviewPanel({
         </div>
       </div>
 
-      {/* Iframe holder. El container usa CSS `aspect-ratio` para mantener
-          el ratio del wall + `max-width/max-height` 100% para encajar en
-          el holder. No requiere JS — el browser hace fit-contain nativo.
-          `userZoom` se aplica como `transform: scale()` adicional para
-          permitir zoom in/out manual del operador sin desencajar el
-          aspect. El runtime dentro del iframe lee viewport real (no
-          logical) y aplica su propio fit-contain via VideoWallStage. */}
-      <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-zinc-100 p-6 dark:bg-zinc-950/60">
+      {/* Iframe holder. autoFit es el scale base computado por JS para
+          que el wall encaje en el holder respetando aspect. userZoom es
+          un multiplicador del operador. El container se dimensiona
+          explícitamente (px) — más predictible que CSS aspect-ratio que
+          tiene quirks combinado con max-w/max-h. */}
+      <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-zinc-100 dark:bg-zinc-950/60">
         <div
           ref={containerRef}
           className="relative overflow-hidden rounded-lg border border-zinc-300 bg-black shadow-xl dark:border-zinc-700"
           style={{
-            aspectRatio: `${viewportW} / ${viewportH}`,
-            // El container nunca excede el holder — el browser hace
-            // fit-contain combinando aspect-ratio con max-width/max-height.
-            // Funciona para landscape (4x2/2x1), square (2x2) y portrait (1x2)
-            // sin condicionales.
-            maxWidth: '100%',
-            maxHeight: '100%',
-            // Width 100% intenta llenar horizontal; si la altura resultante
-            // excede el holder, max-height entra y el aspect-ratio devuelve
-            // el width al cap correcto.
-            width: '100%',
-            transform: userZoom !== 1 ? `scale(${userZoom})` : undefined,
-            transformOrigin: 'center center',
+            width: viewportW * scale,
+            height: viewportH * scale,
           }}
         >
           <iframe
@@ -357,11 +360,13 @@ export function WallPreviewPanel({
             src={iframeSrc}
             title={`Preview ${wallName}`}
             onLoad={onIframeLoad}
+            className="absolute left-0 top-0"
             style={{
-              width: '100%',
-              height: '100%',
+              width: viewportW,
+              height: viewportH,
+              transform: `scale(${scale})`,
+              transformOrigin: 'top left',
               border: 0,
-              display: 'block',
             }}
             sandbox="allow-scripts allow-same-origin"
           />

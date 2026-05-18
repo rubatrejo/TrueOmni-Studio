@@ -302,11 +302,16 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
 
         {tab === 'media' ? (
           <Section title="Brand media" hint="Hero background and favicon icon.">
-            <div className="grid grid-cols-[1fr_220px] gap-4">
+            {/* max-w + mx-auto: limita ancho del grid para que aspect 16:9
+                del Kiosk hero no exceda los 430px de alto del panel.
+                Antes con `grid-cols-[1fr_220px]` full-width y aspect 3:2
+                la card hero crecía a ~570px de alto y empujaba la columna
+                Favicon fuera del card padre. */}
+            <div className="mx-auto grid max-w-[640px] grid-cols-[1fr_200px] gap-4">
               <MediaField
                 label="Kiosk hero"
                 hint="9:16 portrait — image or video, ≤5MB."
-                aspect="3/2"
+                aspect="16/9"
                 slug={slug}
                 value={value.homeHero?.src}
                 kind={value.homeHero?.kind ?? 'image'}

@@ -1,10 +1,10 @@
 'use client';
 
+import { EventCardSvg, resolveAssetUrl, SocialGradientDefs } from '../_shared/_card-svg';
 import { findSlot } from '../_shared/slot-renderers';
 import { registerTemplate } from '../registry';
 import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
 
-import { EventCardSvg, resolveAssetUrl, SocialGradientDefs } from './_card-svg';
 
 /**
  * Template 3×2 `03-video-image-events` — pixel-perfect contra

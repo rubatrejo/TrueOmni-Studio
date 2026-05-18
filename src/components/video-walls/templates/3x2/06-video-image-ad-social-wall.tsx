@@ -1,10 +1,10 @@
 'use client';
 
+import { resolveAssetUrl, SocialCardSvg, SocialGradientDefs } from '../_shared/_card-svg';
 import { findSlot } from '../_shared/slot-renderers';
 import { registerTemplate } from '../registry';
 import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
 
-import { resolveAssetUrl, SocialCardSvg, SocialGradientDefs } from './_card-svg';
 
 /**
  * Template 3×2 `06-video-image-ad-social-wall` — pixel-perfect contra

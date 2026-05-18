@@ -40,9 +40,9 @@ export type VideoWallTemplateCategory =
 /**
  * Deriva la categoría del templateId. Función pura sin side effects.
  * - `02-quad-mix` (2x2) y `02-video-ad-stack` (1x2) → `video-image-ad`.
- * - `03-video-image-social` (4x2) → `video-image-social-wall` (es el slot
- *   social wall a sidebar 1/4, mismo intent que el `05-video-image-social-wall`
- *   de otros grids).
+ * Antes 4x2 tenía un `03-video-image-social` (alias social) que ahora se
+ * llama `03-video-image-events` (XD Slide 3 = events). El alias legacy se
+ * mantiene en el lookup por compatibilidad con walls KV antiguos.
  */
 export function categoryOfTemplateId(id: string): VideoWallTemplateCategory {
   const stripped = id.replace(/^\d+-/, '');
@@ -94,7 +94,7 @@ const TEMPLATE_EQUIVALENTS: Record<VideoWallTemplateCategory, Record<GridConfig,
   },
   'video-image-events': {
     '3x2': '03-video-image-events',
-    '4x2': null, // 4x2 no tiene events solo — fallback a ad-events
+    '4x2': '03-video-image-events', // XD Slide 3: events simétrico en ambos sidebars
     '2x2': '03-video-image-events',
     '2x1': '03-video-image-events',
     '1x2': '03-video-image-events',

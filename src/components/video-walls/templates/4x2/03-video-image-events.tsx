@@ -7,31 +7,20 @@ import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
 
 
 /**
- * Template 3×2 `04-video-image-ad-events` — pixel-perfect contra
- * `designs/video-walls/3x2/3x2 Video-Image + Ad + Events.svg`.
- *
- * Composición XD verbatim:
- *   - Splash-Background-2 translate(0 335) 3840×1825 video/image bg.
- *   - Play_Icon translate(1766 1092).
- *   - Video_Wall_Add_Horizontal translate(3844 330) 1916×750 ad horizontal
- *     en col 3 fila 1.
- *   - Events_Listing fila 2 (col 3, y=1080..2160): 3 cards 640×1080.
+ * Template 4×2 `03-video-image-events` — pixel-perfect XD `4x2/Slide 3`.
+ * SIMÉTRICO: Events 3 cards col 0 + Video centro cols 1-2 + Events 3 cards
+ * col 3 (espejo, mismos eventos).
  */
-
-const COL3_X = 3840;
-const CARD_W = 640;
-const ROW2_Y = 1080;
-const ROW2_H = 1080;
+const BODY_Y = 335;
+const BODY_H = 1825;
+const CARD_W = 1920;
+const CARD_H = Math.round(BODY_H / 3); // ~608
 
 function Render({ client, slots }: VideoWallTemplateRenderProps) {
   const videoMod = findSlot(slots, 'video');
   const videoUrl =
     videoMod?.kind === 'video-image' ? resolveAssetUrl(client.slug, videoMod.asset.url) : null;
   const isVideo = videoMod?.kind === 'video-image' && videoMod.asset.kind === 'video';
-
-  const adMod = findSlot(slots, 'ad');
-  const adUrl = adMod?.kind === 'ads' ? resolveAssetUrl(client.slug, adMod.asset.url) : null;
-  const isAdVideo = adMod?.kind === 'ads' && adMod.asset.kind === 'video';
 
   const eventsMod = findSlot(slots, 'events');
   const maxItems = eventsMod?.kind === 'events' ? eventsMod.maxItems : 3;
@@ -41,17 +30,17 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
     <>
       <svg
         className="absolute inset-0"
-        width="5760"
+        width="7680"
         height="2160"
-        viewBox="0 0 5760 2160"
+        viewBox="0 0 7680 2160"
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="xMidYMid slice"
       >
         <SocialGradientDefs />
-        <rect width="5760" height="2160" fill="#fff" />
+        <rect width="7680" height="2160" fill="#000" />
 
-        {/* Splash-Background-2 translate(0 335) — 3840×1825 video/image bg */}
-        <g transform="translate(0 335)">
+        {/* Video centro (cols 1-2): x=1920, w=3840 */}
+        <g transform="translate(1920 335)">
           <rect width="3840" height="1825" fill="#000" />
           {videoUrl && !isVideo ? (
             <image
@@ -65,36 +54,34 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
           ) : null}
         </g>
 
-        {/* Ad horizontal translate(3844 330) — 1916×750 */}
-        <g transform="translate(3844 330)">
-          <rect width="1916" height="750" fill="#000" />
-          {adUrl && !isAdVideo ? (
-            <image
-              href={adUrl}
-              x="0"
-              y="0"
-              width="1916"
-              height="750"
-              preserveAspectRatio="xMidYMid slice"
-            />
-          ) : null}
-        </g>
-
-        {/* Events_Listing fila 2 — 3 cards 640×1080 en col 3 */}
+        {/* Events sidebar IZQUIERDO (col 0): 3 cards stacked */}
         {[0, 1, 2].map((i) => (
           <EventCardSvg
-            key={`r2-${i}`}
-            x={COL3_X + i * CARD_W}
-            y={ROW2_Y}
+            key={`l-${i}`}
+            x={0}
+            y={BODY_Y + i * CARD_H}
             w={CARD_W}
-            h={ROW2_H}
+            h={CARD_H}
             event={events[i] ?? null}
             clientSlug={client.slug}
           />
         ))}
 
-        {/* Play Icon translate(1766 1092) — verbatim XD */}
-        <g transform="translate(1766 1092)">
+        {/* Events sidebar DERECHO (col 3): 3 cards stacked — MIRROR */}
+        {[0, 1, 2].map((i) => (
+          <EventCardSvg
+            key={`r-${i}`}
+            x={5760}
+            y={BODY_Y + i * CARD_H}
+            w={CARD_W}
+            h={CARD_H}
+            event={events[i] ?? null}
+            clientSlug={client.slug}
+          />
+        ))}
+
+        {/* Play icon centrado en video block */}
+        <g transform="translate(3684 1092)">
           <path
             d="M156,312C69.981,312,0,242.018,0,156S69.981,0,156,0,312,69.981,312,156,242.018,312,156,312ZM115.3,88.173V223.825L230.607,156Z"
             fill="#fff"
@@ -112,27 +99,10 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
           playsInline
           style={{
             position: 'absolute',
-            left: 0,
+            left: 1920,
             top: 335,
             width: 3840,
             height: 1825,
-            objectFit: 'cover',
-          }}
-        />
-      ) : null}
-      {adUrl && isAdVideo ? (
-        <video
-          src={adUrl}
-          autoPlay
-          loop
-          muted
-          playsInline
-          style={{
-            position: 'absolute',
-            left: 3844,
-            top: 330,
-            width: 1916,
-            height: 750,
             objectFit: 'cover',
           }}
         />
@@ -142,27 +112,21 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
 }
 
 const Template: VideoWallTemplate = {
-  id: '04-video-image-ad-events',
-  label: '04 · Video + Ad + Events',
+  id: '03-video-image-events',
+  label: '03 · Video + Events',
   category: 'composed',
-  grid: '3x2',
+  grid: '4x2',
   slots: [
     {
       key: 'video',
       kind: 'hero',
-      cellRect: { row: 0, col: 0, rowSpan: 2, colSpan: 2 },
+      cellRect: { row: 0, col: 1, rowSpan: 2, colSpan: 2 },
       acceptedModules: ['video-image'],
     },
     {
-      key: 'ad',
-      kind: 'tile',
-      cellRect: { row: 0, col: 2, rowSpan: 1, colSpan: 1 },
-      acceptedModules: ['ads'],
-    },
-    {
       key: 'events',
-      kind: 'strip',
-      cellRect: { row: 1, col: 2, rowSpan: 1, colSpan: 1 },
+      kind: 'sidebar',
+      cellRect: { row: 0, col: 0, rowSpan: 2, colSpan: 1 },
       acceptedModules: ['events'],
     },
   ],

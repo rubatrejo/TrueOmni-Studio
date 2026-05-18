@@ -8,9 +8,9 @@ import { useEscapeClose, useFocusTrap } from '../_lib/use-modal-a11y';
 
 interface DeleteKioskModalProps {
   open: boolean;
-  /** Nombre legible del kiosk a eliminar (mostrado al operador). */
+  /** Nombre legible del cliente a eliminar (mostrado al operador). */
   kioskName: string;
-  /** Slug del kiosk — se usa solo en el confirmation copy. */
+  /** Slug del cliente — se usa solo en el confirmation copy. */
   kioskSlug: string;
   deleting?: boolean;
   onCancel: () => void;
@@ -18,10 +18,11 @@ interface DeleteKioskModalProps {
 }
 
 /**
- * Modal de warning antes de eliminar un kiosk. Reemplaza el `confirm()`
- * nativo del browser por un diálogo consistente con el resto del Studio
- * (`<UnsavedChangesModal>`). Acción destructiva → botón rojo "Delete"
- * y cancel default.
+ * Modal de warning antes de eliminar un cliente unified entero (kiosk +
+ * signage + video walls + mobile pwa + tablets + manifest + branding).
+ * Reemplaza el `confirm()` nativo del browser por un diálogo consistente
+ * con el resto del Studio (`<UnsavedChangesModal>`). Acción destructiva →
+ * botón rojo "Delete client" y cancel default.
  */
 export function DeleteKioskModal({
   open,
@@ -74,10 +75,11 @@ export function DeleteKioskModal({
                     Delete &quot;{kioskName}&quot;?
                   </h2>
                   <p className="mt-1 text-[12.5px] leading-relaxed text-zinc-600 dark:text-zinc-400">
-                    This will permanently remove the kiosk{' '}
+                    This will permanently remove the client{' '}
                     <span className="font-mono text-zinc-800 dark:text-zinc-200">{kioskSlug}</span>{' '}
-                    and all its content (branding, modules, listings, events, integrations, version
-                    history). This action cannot be undone.
+                    and every product it owns (kiosks, digital displays, video walls, mobile PWA,
+                    tablets) along with all its branding, content, integrations and version history.
+                    This action cannot be undone.
                   </p>
                 </div>
               </div>
@@ -97,7 +99,7 @@ export function DeleteKioskModal({
                   disabled={deleting}
                   className="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
                 >
-                  {deleting ? 'Deleting…' : 'Delete kiosk'}
+                  {deleting ? 'Deleting…' : 'Delete client'}
                 </button>
               </div>
             </motion.div>

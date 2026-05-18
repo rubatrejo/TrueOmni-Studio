@@ -13,7 +13,7 @@ import { NewClientModal } from './_components/NewClientModal';
 import { OnboardingTour, replayOnboardingTour } from './_components/OnboardingTour';
 import { StudioPageHeader } from './_components/PageHeader';
 import { SystemStatusBadge } from './_components/SystemStatusBadge';
-import { cloneConfig, createClient, deleteConfig } from './_lib/api-client';
+import { cloneConfig, createClient, deleteClient } from './_lib/api-client';
 
 /**
  * `/studio` — Dashboard de Clientes (post Fase 3).
@@ -205,7 +205,7 @@ export default function StudioHome() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      await deleteConfig(deleteTarget.slug);
+      await deleteClient(deleteTarget.slug);
       setDeleteTarget(null);
       await refresh();
     } finally {

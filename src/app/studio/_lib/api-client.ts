@@ -187,6 +187,20 @@ export async function deleteConfig(slug: string): Promise<void> {
 }
 
 /**
+ * Borra el cliente unified entero (kiosk + signage + video walls + manifest +
+ * unified branding + entries en todas las listas). Reemplaza al legacy
+ * `deleteConfig` cuando el contexto es "Delete client" desde el dashboard
+ * `/studio` — el endpoint legacy solo desactivaba el producto kiosk y dejaba
+ * el manifest vivo si el cliente tenía otros productos activos, lo que dejaba
+ * la card fantasma en el dashboard.
+ */
+export async function deleteClient(slug: string): Promise<void> {
+  await http<{ slug: string; deleted: true }>(`/api/studio/clients/${slug}`, {
+    method: 'DELETE',
+  });
+}
+
+/**
  * Trigger del download del config completo como JSON. Hallazgo #25 del audit.
  * Usa el endpoint que devuelve `Content-Disposition: attachment` para que el
  * browser fuerce save-as.

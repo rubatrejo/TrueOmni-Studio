@@ -311,8 +311,14 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
             title="Brand media"
             hint="Hero, idle background, brand video and favicon — used across kiosk, displays and walls."
           >
-            <div className="mx-auto grid max-w-[800px] grid-cols-4 items-start gap-3">
-              <MediaCard title="Kiosk hero" hint="9:16 · image or video ≤5MB">
+            {/* Grid 4 columns. Aspect ratios reflejan el target real de
+                cada media: Kiosk hero & Brand video 16:9 landscape, Idle
+                background 9:16 portrait (kiosk 1080×1920), Favicon 1:1.
+                La columna Favicon es ~120px (la mitad de las demás) para
+                que se vea proporcional al contenido (icon ~32px) y no
+                robe area visual. */}
+            <div className="mx-auto grid max-w-[760px] grid-cols-[1fr_1fr_1fr_120px] items-start gap-3">
+              <MediaCard title="Kiosk hero" hint="16:9 · image or video ≤5MB">
                 <MediaField
                   label="Click or drop"
                   hint=""
@@ -331,7 +337,8 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
               </MediaCard>
               <BrandMediaWithUrl
                 title="Idle background"
-                hint="1080×1920 · image, video or YouTube"
+                hint="9:16 · image, video or YouTube"
+                aspect="9/16"
                 slug={slug}
                 value={
                   value.idleBackground
@@ -358,7 +365,8 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
               />
               <BrandMediaWithUrl
                 title="Brand video"
-                hint="MP4 / WebM or YouTube · used in displays, walls, kiosk"
+                hint="MP4/WebM or YouTube · displays, walls, kiosk"
+                aspect="16/9"
                 slug={slug}
                 value={
                   value.brandVideo
@@ -378,9 +386,9 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
                   setField('brandVideo', { kind: k, src: next.src });
                 }}
               />
-              <MediaCard title="Favicon" hint="Square 1:1 — ICO, PNG, SVG">
+              <MediaCard title="Favicon" hint="1:1 — ICO, PNG, SVG">
                 <MediaField
-                  label="Click or drop"
+                  label="Drop"
                   hint=""
                   aspect="1/1"
                   slug={slug}
@@ -449,6 +457,7 @@ function MediaCard({
 function BrandMediaWithUrl({
   title,
   hint,
+  aspect = '16/9',
   slug,
   value,
   allowImage,
@@ -456,6 +465,8 @@ function BrandMediaWithUrl({
 }: {
   title: string;
   hint?: string;
+  /** CSS aspect-ratio del dropzone y del thumbnail YouTube. */
+  aspect?: string;
   slug: string;
   value: BrandMediaValue | undefined;
   /** True para Idle background (acepta imágenes). False para Brand video. */
@@ -494,7 +505,7 @@ function BrandMediaWithUrl({
       <MediaCard title={title} hint={hint} rightAction={toggleButton}>
         <div
           className="relative grid place-items-center overflow-hidden rounded-lg border border-dashed border-zinc-300 bg-zinc-50/60 dark:border-zinc-700 dark:bg-zinc-900/40"
-          style={{ aspectRatio: '16/9' }}
+          style={{ aspectRatio: aspect }}
         >
           {youtubeId ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -537,7 +548,7 @@ function BrandMediaWithUrl({
       <MediaField
         label={allowImage ? 'Click or drop' : 'Drop video'}
         hint=""
-        aspect="16/9"
+        aspect={aspect}
         slug={slug}
         value={mediaSrc}
         kind={mediaKind}

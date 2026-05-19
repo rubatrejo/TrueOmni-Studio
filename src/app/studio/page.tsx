@@ -640,27 +640,32 @@ function ClientCard({
 }
 
 function NewClientCard({ onClick }: { onClick: () => void }) {
-  // Hallazgo S-24: aria-label distinto del botón header — el screen reader
-  // anunciaba "+ New client, button" dos veces seguidas. Aquí distinguimos
-  // el card-CTA inline al final del grid del botón pill del header.
-  //
-  // `h-full min-h-[296px]` iguala la altura visual de un ClientCard (hero
-  // 160 + body con título + product badges + footer ≈ 296px). Sin esto el
-  // card "+" quedaba mucho más bajo que sus hermanos en el grid.
+  // Replica la estructura de ClientCard (hero h-40 + body p-5) para que
+  // la altura del card "+" matchee EXACTAMENTE la del resto en el grid
+  // sin depender de min-h hardcoded — el contenido natural alinea.
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label="Create a new client (inline shortcut)"
-      className="flex h-full min-h-[296px] flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50/40 px-6 py-12 text-zinc-500 transition hover:border-sky-400 hover:bg-sky-50/40 hover:text-sky-700 dark:border-zinc-800 dark:bg-zinc-900/20 dark:text-zinc-500 dark:hover:border-sky-500/60 dark:hover:bg-sky-500/5 dark:hover:text-sky-300"
+      className="group flex flex-col overflow-hidden rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50/40 text-zinc-500 transition hover:border-sky-400 hover:bg-sky-50/40 hover:text-sky-700 dark:border-zinc-800 dark:bg-zinc-900/20 dark:text-zinc-500 dark:hover:border-sky-500/60 dark:hover:bg-sky-500/5 dark:hover:text-sky-300"
     >
-      <span
+      <div
         aria-hidden
-        className="grid h-10 w-10 place-items-center rounded-full bg-zinc-100 text-2xl font-light dark:bg-zinc-800"
+        className="grid h-40 w-full place-items-center bg-zinc-100/40 transition group-hover:bg-sky-100/30 dark:bg-zinc-900/30 dark:group-hover:bg-sky-500/5"
       >
-        +
-      </span>
-      <span className="text-sm font-medium">New client</span>
+        <span className="grid h-12 w-12 place-items-center rounded-full bg-white text-2xl font-light shadow-sm ring-1 ring-zinc-200 transition group-hover:ring-sky-300 dark:bg-zinc-900 dark:ring-zinc-800 dark:group-hover:ring-sky-500/40">
+          +
+        </span>
+      </div>
+      <div aria-hidden className="flex flex-1 flex-col items-start p-5">
+        <h3 className="font-display text-[16px] font-semibold leading-tight text-zinc-700 transition group-hover:text-sky-700 dark:text-zinc-300 dark:group-hover:text-sky-300">
+          New client
+        </h3>
+        <p className="mt-3 text-[12px] text-zinc-500 dark:text-zinc-500">
+          Start from default branding and tune it for the new account.
+        </p>
+      </div>
     </button>
   );
 }

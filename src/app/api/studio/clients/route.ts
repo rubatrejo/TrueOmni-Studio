@@ -190,8 +190,42 @@ export async function POST(request: Request) {
     kv.get(kSignageClient(slug)),
     kv.get(kVideoWallClient(slug)),
   ]);
-  if (existingManifest || existingKiosk || existingSignage || existingVideoWalls) {
+
+  // Cliente válido (con manifest) → conflicto real, bloquear el create.
+  if (existingManifest) {
     return NextResponse.json({ error: `slug "${slug}" already exists` }, { status: 409 });
+  }
+
+  // Orphan recovery: si NO existe el manifest pero sí alguna key legacy de
+  // kiosk/signage/videowall, fue un DELETE parcial (catch silencioso o
+  // network flake). Auto-purga esos huérfanos en lugar de bloquear el
+  // create — el operador ya borró el cliente en su mental model y solo
+  // quiere recrearlo. Mantener un 409 aquí lo dejaba sin recurso.
+  if (existingKiosk || existingSignage || existingVideoWalls) {
+    const { buildPrefixesToPurge, purgePrefix } = await import('@/lib/studio/purge-client');
+    const orphanedBuckets = [
+      existingKiosk ? 'kiosk' : null,
+      existingSignage ? 'signage' : null,
+      existingVideoWalls ? 'video-walls' : null,
+    ].filter(Boolean);
+    console.warn(
+      `[POST /api/studio/clients] Orphan keys detected for slug "${slug}" (${orphanedBuckets.join(', ')}). Auto-purging before create.`,
+    );
+    for (const prefix of buildPrefixesToPurge(slug)) {
+      try {
+        await purgePrefix(prefix);
+      } catch (err) {
+        console.warn(`[POST /api/studio/clients] orphan purgePrefix(${prefix}) failed`, err);
+      }
+    }
+    // También limpia membership en SETs por si quedaron stale.
+    try {
+      await kv.srem('clients:list', slug);
+      await kv.srem(kSignageClientList, slug);
+      await kv.srem(kVideoWallClientList, slug);
+    } catch (err) {
+      console.warn('[POST /api/studio/clients] orphan srem cleanup failed', err);
+    }
   }
 
   // 1. Clonar kiosk si toca.

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { removeClientFromList } from '@/lib/studio/client-manifest';
 import { kv } from '@/lib/studio/kv';
+import { buildPrefixesToPurge, purgePrefix } from '@/lib/studio/purge-client';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,68 +10,6 @@ type RouteParams = { params: Promise<{ slug: string }> };
 
 const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
 const PROTECTED_SLUGS = new Set(['default']);
-
-/**
- * Prefijos KV bajo los que viven todos los datos de un cliente unified
- * (kiosk + signage + video walls + manifest). Cada uno puede ser una key
- * directa (`<prefix>`) o tener sub-keys (`<prefix>:...`). El purge borra
- * ambos casos.
- *
- * Mantener sincronizado con:
- *  - `@/lib/studio/kv` (kvKeys.cfg / cfgMeta / cfgVersion / cfgSnap / ...).
- *  - `@/lib/signage/kv-keys` (kSignageClient / kSignageDisplay / ...).
- *  - `@/lib/video-walls/kv-keys` (kVideoWallClient / kVideoWall / ...).
- *  - `@/lib/studio/client-manifest` (clientKeys.manifest / branding / ...).
- */
-function buildPrefixesToPurge(slug: string): string[] {
-  return [
-    // Kiosk
-    `cfg:${slug}`,
-    `i18n:${slug}`,
-    `pub:${slug}`,
-    `changelog:${slug}`,
-    // Signage
-    `signage:client:${slug}`,
-    `signage:display:${slug}`,
-    `signage:displayRaw:${slug}`,
-    `signage:displaySnap:${slug}`,
-    `signage:displaySnapList:${slug}`,
-    `signage:themeSnap:${slug}`,
-    `signage:themeSnapList:${slug}`,
-    `signage:events:${slug}`,
-    `signage:social:${slug}`,
-    `signage:news:${slug}`,
-    `signage:i18n:${slug}`,
-    // Video walls
-    `videowall:client:${slug}`,
-    `videowall:wall:${slug}`,
-    `videowall:wallRaw:${slug}`,
-    `videowall:cfgSnap:${slug}`,
-    `videowall:cfgSnapList:${slug}`,
-    `videowall:themeSnap:${slug}`,
-    `videowall:themeSnapList:${slug}`,
-    `videowall:events:${slug}`,
-    `videowall:social:${slug}`,
-    `videowall:news:${slug}`,
-    `videowall:i18n:${slug}`,
-    // Unified manifest + unified branding + sync-errors + migrating lock
-    `client:${slug}`,
-  ];
-}
-
-async function purgePrefix(prefix: string): Promise<number> {
-  let removed = 0;
-  // Direct key.
-  await kv.del(prefix);
-  removed += 1;
-  // Sub-keys con separador `:`.
-  const subKeys = await kv.keys(`${prefix}:*`);
-  for (const k of subKeys) {
-    await kv.del(k);
-    removed += 1;
-  }
-  return removed;
-}
 
 /**
  * `DELETE /api/studio/clients/[slug]` — purga un cliente unified completo

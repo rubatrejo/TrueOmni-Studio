@@ -7,6 +7,7 @@ import {
   getCachedHeroOverride,
   type HeroOverrideDetail,
 } from '@/components/studio-bridge';
+import { buildYouTubeEmbedUrl, isYouTubeUrl } from '@/lib/studio/youtube';
 
 interface HeroBackgroundLayerProps {
   /** URL inicial del hero del SSR (puede ser el default o un override del KV). */
@@ -77,10 +78,36 @@ export function HeroBackgroundLayer({
     return () => window.removeEventListener(KIOSK_HERO_OVERRIDE_EVENT, onOverride);
   }, [listenForOverride]);
 
+  // Si el src es una URL de YouTube, renderizamos un iframe embed en
+  // lugar de un `<video>` HTML — el `<video>` solo reproduce archivos
+  // MP4/WebM directos. Para Brand Video tipo YouTube, este branch
+  // permite que el operador pegue una URL de YouTube en Branding →
+  // Media → Brand Video, haga click en "▶ Use brand video" en el Hero
+  // Header del Home Dashboard, y vea el video reproduciéndose en el
+  // kiosk runtime.
+  const isYouTube = kind === 'video' && src && isYouTubeUrl(src);
+  const ytEmbedUrl = isYouTube ? buildYouTubeEmbedUrl(src!) : null;
+
   return (
     <>
       {src ? (
-        kind === 'video' ? (
+        ytEmbedUrl ? (
+          <iframe
+            key={src}
+            src={ytEmbedUrl}
+            title="Hero video"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            className="absolute inset-0 h-full w-full border-0"
+            // Scale up para cubrir el área sin franjas negras del iframe
+            // (el video conserva ratio, pero el iframe es 16:9 fijo).
+            style={{
+              transform: 'scale(1.5)',
+              transformOrigin: 'center center',
+              pointerEvents: 'none',
+            }}
+          />
+        ) : kind === 'video' ? (
           <video
             key={src}
             src={src}

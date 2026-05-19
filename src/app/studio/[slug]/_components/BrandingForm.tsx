@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useId, useRef, useState } from 'r
 import { HslColorPicker, type HslColor } from 'react-colorful';
 
 import type { UnifiedClientBranding } from '@/lib/studio/client-branding-sync';
+import { extractYouTubeId } from '@/lib/studio/youtube';
 
 import { CustomFontField } from '../../_components/CustomFontField';
 import { MediaField } from '../../_components/MediaField';
@@ -355,26 +356,6 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
 // ---------------------------------------------------------------------------
 
 type BrandVideo = NonNullable<UnifiedClientBranding['brandVideo']>;
-
-/**
- * Extrae el video ID de una URL de YouTube. Acepta `youtube.com/watch?v=ID`,
- * `youtu.be/ID`, `youtube.com/embed/ID`, `youtube.com/shorts/ID`. Devuelve
- * `null` si no es una URL válida de YouTube.
- */
-function extractYouTubeId(url: string): string | null {
-  const trimmed = url.trim();
-  if (!trimmed) return null;
-  // youtu.be/ID
-  let m = trimmed.match(/youtu\.be\/([\w-]{11})/i);
-  if (m) return m[1];
-  // youtube.com/watch?v=ID
-  m = trimmed.match(/[?&]v=([\w-]{11})/i);
-  if (m) return m[1];
-  // youtube.com/embed/ID or /shorts/ID
-  m = trimmed.match(/youtube\.com\/(?:embed|shorts)\/([\w-]{11})/i);
-  if (m) return m[1];
-  return null;
-}
 
 function BrandVideoField({
   slug,

@@ -195,8 +195,8 @@ export function NewWallCard({
                   <span className="mb-1.5 block text-[12.5px] font-medium text-zinc-700 dark:text-zinc-300">
                     Grid configuration
                   </span>
-                  <div className="grid grid-cols-5 gap-2">
-                    {(['3x2', '4x2', '2x2', '2x1', '1x2'] as const).map((g) => (
+                  <div className="grid grid-cols-3 gap-2">
+                    {(['3x2', '4x2', '2x2'] as const).map((g) => (
                       <GridButton key={g} grid={g} active={grid === g} onClick={() => setGrid(g)} />
                     ))}
                   </div>
@@ -255,10 +255,8 @@ function slugify(input: string): string {
 /** SVG glyph que renderiza un grid M×N en una caja 36×24 (landscape-ish). */
 export function GridGlyph({ grid, size = 36 }: { grid: GridConfig; size?: number }) {
   const { cols, rows } = GRID_CONFIGS[grid];
-  // Boundary 36×24 base; ajustamos para portrait (1x2) que es más alto que ancho.
-  const isPortrait = cols < rows;
   const w = size;
-  const h = isPortrait ? Math.round(size * 1.4) : Math.round(size * 0.667);
+  const h = Math.round(size * 0.667);
   const cellW = w / cols;
   const cellH = h / rows;
   const lines: { x1: number; y1: number; x2: number; y2: number }[] = [];

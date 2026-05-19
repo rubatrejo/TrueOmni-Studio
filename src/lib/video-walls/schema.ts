@@ -86,8 +86,10 @@ export type VideoWallClientResolved = z.infer<typeof VideoWallClientResolvedSche
 export const VideoWallConfigSchema = z.object({
   slug: z.string().min(1),
   name: z.string().min(1),
-  /** Grid configuration fija. Ver `dimensions.ts` para canvas dims derivadas. */
-  grid: z.enum(GRID_CONFIG_IDS),
+  /** Grid configuration fija. Ver `dimensions.ts` para canvas dims derivadas.
+   *  Preprocess defensivo: walls antiguos con grids legacy '2x1' o '1x2'
+   *  (descontinuados 2026-05-18) se promueven a '2x2' al cargar. */
+  grid: z.preprocess((v) => (v === '2x1' || v === '1x2' ? '2x2' : v), z.enum(GRID_CONFIG_IDS)),
   settings: VideoWallSettingsSchema,
   playlist: z.array(VideoWallSlideSchema).default([]),
   playlists: z

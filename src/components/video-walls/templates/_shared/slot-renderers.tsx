@@ -19,15 +19,14 @@ function pxToCss(px: PixelRect): CSSProperties {
 }
 
 /**
- * Renderers compartidos por los templates video-walls (1x2/2x1/2x2/4x2).
+ * Renderers compartidos por los templates video-walls (3x2/4x2/2x2).
  * Cada uno recibe un slot (cellRect) + el módulo del slide + el client
  * resuelto y pinta SU porción del canvas total con coordenadas absolutas.
  *
  * **Events / Social cards** replican el design pixel-perfect del 3x2 pero
  * con dimensiones fluidas — el card adapta layout (horizontal vs portrait)
- * según el aspect del cell para que la información quede legible en grids
- * estrechos (1x2 events 1×3 = cards 1920×360 ultra-landscape) y en grids
- * cuadrados (2x2 events 1×3 = cards 1920×720 portrait-ish).
+ * según el aspect del cell para que la información quede legible en
+ * cualquier grid del catálogo.
  *
  * Fallback: si no hay módulo asignado al slot, pinta un placeholder
  * neutro con el nombre del slot para que el editor sepa qué falta.

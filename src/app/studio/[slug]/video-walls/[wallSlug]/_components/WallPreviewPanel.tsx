@@ -52,7 +52,7 @@ export interface WallPreviewPanelProps {
    *  (race condition: el iframe puede no haber montado el listener todavía
    *  cuando el editor empuja el primer cambio). */
   onIframeLoad?: () => void;
-  /** Cambia el grid del wall (3x2/4x2/2x2/2x1/1x2). El shell decide si pedir
+  /** Cambia el grid del wall (3x2/4x2/2x2). El shell decide si pedir
    *  confirmación según si hay slides en la playlist activa (los templates
    *  son específicos del grid actual). */
   onGridChange?: (next: GridConfig) => void;

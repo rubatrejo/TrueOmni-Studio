@@ -82,43 +82,31 @@ const TEMPLATE_EQUIVALENTS: Record<VideoWallTemplateCategory, Record<GridConfig,
     '3x2': '01-video-image-full',
     '4x2': '01-video-image-full',
     '2x2': '01-video-image-full',
-    '2x1': '01-video-image-full',
-    '1x2': '01-video-image-full',
   },
   'video-image-ad': {
     '3x2': '02-video-image-ad',
     '4x2': '02-video-image-ad',
-    '2x2': '02-video-image-ad', // alineado con XD Slide 2 (Big Square)
-    '2x1': '02-video-image-ad',
-    '1x2': '02-video-ad-stack', // variante stack vertical
+    '2x2': '02-video-image-ad',
   },
   'video-image-events': {
     '3x2': '03-video-image-events',
-    '4x2': '03-video-image-events', // XD Slide 3: events simétrico en ambos sidebars
+    '4x2': '03-video-image-events',
     '2x2': '03-video-image-events',
-    '2x1': '03-video-image-events',
-    '1x2': '03-video-image-events',
   },
   'video-image-ad-events': {
     '3x2': '04-video-image-ad-events',
     '4x2': '04-video-image-ad-events',
-    '2x2': '04-video-image-ad-events', // XD Slide 4: events top + video+ad bot
-    '2x1': null,
-    '1x2': null,
+    '2x2': '04-video-image-ad-events',
   },
   'video-image-social-wall': {
     '3x2': '05-video-image-social-wall',
     '4x2': '05-video-image-social-wall',
     '2x2': '05-video-image-social-wall',
-    '2x1': '04-video-image-social-wall',
-    '1x2': '04-video-image-social-wall',
   },
   'video-image-ad-social-wall': {
     '3x2': '06-video-image-ad-social-wall',
     '4x2': '06-video-image-ad-social-wall',
-    '2x2': '06-video-image-ad-social-wall', // XD Slide 6: ad+video col 0 + social col 1
-    '2x1': '05-video-image-ad-social-wall',
-    '1x2': '05-video-image-ad-social-wall',
+    '2x2': '06-video-image-ad-social-wall',
   },
 };
 

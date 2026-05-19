@@ -176,7 +176,13 @@ export function MediaField({
     const trimmed = urlInput.trim();
     if (!trimmed) return;
     const looksVideo = /\.(mp4|webm|mov)(\?|$)/i.test(trimmed);
-    onChange({ src: trimmed, kind: looksVideo ? 'video' : 'image' });
+    // YouTube URLs son video, aunque la URL no termine en `.mp4`. Antes
+    // se guardaban como kind='image' y el runtime hero-background-layer
+    // intentaba renderizarlas con `<img>` (que falla). Ahora detectamos
+    // youtube.com/youtu.be y forzamos kind='video' para que el runtime
+    // active la rama YouTube embed (iframe).
+    const looksYouTube = /youtube\.com|youtu\.be/i.test(trimmed);
+    onChange({ src: trimmed, kind: looksVideo || looksYouTube ? 'video' : 'image' });
     setBytes(null);
     setUrlInput('');
     setError(null);

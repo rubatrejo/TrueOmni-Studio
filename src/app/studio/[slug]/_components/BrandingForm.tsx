@@ -317,7 +317,13 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
                 La columna Favicon es ~120px (la mitad de las demás) para
                 que se vea proporcional al contenido (icon ~32px) y no
                 robe area visual. */}
-            <div className="mx-auto grid max-w-[760px] grid-cols-[1fr_1fr_1fr_120px] items-start gap-3">
+            {/* Grid 4 cols con widths ajustadas para que el idle background
+                9:16 entre en la altura disponible del panel sin estirarse:
+                190px col → 190×16/9 ≈ 337px alto del idle (cabe en ~340px
+                disponibles tras title+hint). Favicon 80px (1:1) ≈ 80px alto.
+                Gap 5 (20px) entre cards para que se vean separadas. mx-auto
+                centra el grid dentro del panel padre. */}
+            <div className="mx-auto grid max-w-[680px] grid-cols-[190px_190px_190px_80px] items-start gap-5">
               <MediaCard title="Kiosk hero" hint="16:9 · image or video ≤5MB">
                 <MediaField
                   label="Click or drop"
@@ -816,7 +822,13 @@ function ColorRow({
         )}
       </div>
       {open && hsl ? (
-        <div className="absolute right-2 top-12 z-20 rounded-md border border-zinc-200 bg-white p-3 shadow-lg dark:border-zinc-800 dark:bg-zinc-950">
+        // Picker abre HACIA ARRIBA (`bottom-full mb-2`) en lugar de hacia
+        // abajo (`top-12`). Antes el picker del color Tertiary (último
+        // del grid) overflowed por debajo del card padre `h-[430px]` y
+        // quedaba parcialmente fuera. Abrir hacia arriba garantiza que
+        // siempre quepa porque hay más espacio sobre el swatch (header
+        // + tabs) que debajo (al estar el Tertiary cerca del bottom).
+        <div className="absolute bottom-full right-0 z-20 mb-2 rounded-md border border-zinc-200 bg-white p-3 shadow-lg dark:border-zinc-800 dark:bg-zinc-950">
           <HslColorPicker
             color={hsl}
             onChange={(c: HslColor) =>

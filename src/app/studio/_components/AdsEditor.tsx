@@ -286,12 +286,12 @@ function AdRow({
  * con el ratio correcto antes de subirlo. Sincronizado con:
  *  - `ad-hero.tsx` (1080×620 — hero header del módulo).
  *  - `ad-bottom.tsx` (height 185px — strip horizontal bottom).
- *  - `ad-popup.tsx` (1080×1920 modal — full screen blocker).
+ *  - `ad-popup.tsx` (865×960 modal centrado — interstitial con QR).
  */
 export const AD_KIND_DIMENSIONS: Record<AdKind, string> = {
   hero: '1080×620',
   bottom: '1080×185',
-  popup: '1080×1920',
+  popup: '865×960',
 };
 
 /**

@@ -150,12 +150,10 @@ export function PreviewPanel({
             icon={<LandscapeGlyph />}
             label="Landscape · 1920×1080"
           />
-          <DeviceTab
-            active={orientation === 'mobile-pwa'}
-            onClick={() => setOrientation('mobile-pwa')}
-            icon={<MobilePwaGlyph />}
-            label="PWA · 390×844"
-          />
+          {/* PWA tab retirado del editor kiosk (2026-05-18). PWA pasa a
+              ser un producto independiente con su propio editor. La data
+              `orientation === 'mobile-pwa'` queda viva pero ya no tiene
+              entry point desde aquí. */}
         </div>
 
         <div className="flex items-center gap-1 text-[11px] text-zinc-500">
@@ -594,25 +592,6 @@ function LandscapeGlyph() {
     >
       <rect x="1.5" y="4" width="13" height="8" rx="1.2" />
       <line x1="13" y1="6.8" x2="13" y2="9.2" />
-    </svg>
-  );
-}
-
-function MobilePwaGlyph() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="5" y="1.5" width="6" height="13" rx="1.2" />
-      <line x1="7" y1="12.6" x2="9" y2="12.6" />
-      <line x1="6.5" y1="3.2" x2="9.5" y2="3.2" />
     </svg>
   );
 }

@@ -105,6 +105,15 @@ export const BrandingSchema = z.object({
       src: z.string().default(''),
     })
     .optional(),
+  /** Idle background del Billboard — imagen, video o YouTube URL. Editado
+   *  desde Branding → Media (4ta card) y desde el Billboard editor; el
+   *  runtime billboard lo usa como override del default. */
+  idleBackground: z
+    .object({
+      kind: z.enum(['image', 'video', 'youtube']).default('image'),
+      src: z.string().default(''),
+    })
+    .optional(),
 });
 
 /** Lista curada de Google Fonts disponibles en el Font selector. */

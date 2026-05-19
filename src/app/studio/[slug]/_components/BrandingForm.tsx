@@ -301,20 +301,21 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
         ) : null}
 
         {tab === 'media' ? (
-          // Layout horizontal compacto: 3 cards en una fila (Kiosk hero ·
-          // Brand video · Favicon) para que entren todos en el card de
-          // 430px sin scroll. El YouTube URL del Brand video se mueve a
-          // un input compacto debajo del card en lugar de una sección
-          // separada con preview iframe.
+          // Layout horizontal compacto: 4 cards alineadas por arriba, cada
+          // una con su título encima del dropzone (Kiosk hero · Idle
+          // background · Brand video · Favicon). `items-start` mantiene el
+          // alineamiento top aunque la altura natural de cada card sea
+          // distinta. `aspectRatio` consistente 16:9 entre las 3 primeras
+          // + 1:1 para favicon.
           <Section
             title="Brand media"
-            hint="Hero, brand video and favicon — used across kiosk, displays and walls."
+            hint="Hero, idle background, brand video and favicon — used across kiosk, displays and walls."
           >
-            <div className="mx-auto grid max-w-[720px] grid-cols-3 gap-3">
-              <div className="space-y-1.5">
+            <div className="mx-auto grid max-w-[800px] grid-cols-4 items-start gap-3">
+              <MediaCard title="Kiosk hero" hint="9:16 · image or video ≤5MB">
                 <MediaField
-                  label="Kiosk hero"
-                  hint="9:16 · image or video ≤5MB"
+                  label="Click or drop"
+                  hint=""
                   aspect="16/9"
                   slug={slug}
                   value={value.homeHero?.src}
@@ -327,22 +328,68 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
                     )
                   }
                 />
-              </div>
-              <BrandVideoFieldCompact
+              </MediaCard>
+              <BrandMediaWithUrl
+                title="Idle background"
+                hint="1080×1920 · image, video or YouTube"
                 slug={slug}
-                value={value.brandVideo}
-                onChange={(next) => setField('brandVideo', next)}
+                value={
+                  value.idleBackground
+                    ? {
+                        kind:
+                          value.idleBackground.kind === 'image'
+                            ? 'image'
+                            : value.idleBackground.kind === 'youtube'
+                              ? 'youtube'
+                              : 'video',
+                        src: value.idleBackground.src,
+                      }
+                    : undefined
+                }
+                allowImage
+                onChange={(next) => {
+                  if (!next) {
+                    setField('idleBackground', undefined);
+                    return;
+                  }
+                  const k = next.kind === 'image' || next.kind === 'youtube' ? next.kind : 'video';
+                  setField('idleBackground', { kind: k, src: next.src });
+                }}
               />
-              <MediaField
-                label="Favicon"
-                hint="Square 1:1 — ICO, PNG, SVG"
-                aspect="1/1"
+              <BrandMediaWithUrl
+                title="Brand video"
+                hint="MP4 / WebM or YouTube · used in displays, walls, kiosk"
                 slug={slug}
-                value={value.favicon}
-                kind="image"
-                hideUrlInput
-                onChange={(next) => setField('favicon', next?.src ?? '')}
+                value={
+                  value.brandVideo
+                    ? {
+                        kind: value.brandVideo.kind === 'youtube' ? 'youtube' : 'video',
+                        src: value.brandVideo.src,
+                      }
+                    : undefined
+                }
+                allowImage={false}
+                onChange={(next) => {
+                  if (!next) {
+                    setField('brandVideo', undefined);
+                    return;
+                  }
+                  const k = next.kind === 'youtube' ? 'youtube' : 'upload';
+                  setField('brandVideo', { kind: k, src: next.src });
+                }}
               />
+              <MediaCard title="Favicon" hint="Square 1:1 — ICO, PNG, SVG">
+                <MediaField
+                  label="Click or drop"
+                  hint=""
+                  aspect="1/1"
+                  slug={slug}
+                  value={value.favicon}
+                  kind="image"
+                  hideUrlInput
+                  onChange={(next) => setField('favicon', next?.src ?? '')}
+                />
+              </MediaCard>
             </div>
           </Section>
         ) : null}
@@ -355,46 +402,96 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
 //  Brand video field — upload (drag&drop) o URL de YouTube
 // ---------------------------------------------------------------------------
 
-type BrandVideo = NonNullable<UnifiedClientBranding['brandVideo']>;
+/**
+ * Shape genérico de un campo de Brand Media que soporta upload + YouTube
+ * URL. `brandVideo` y `idleBackground` lo comparten (con kinds distintos).
+ */
+type BrandMediaValue =
+  | { kind: 'image'; src: string }
+  | { kind: 'video'; src: string }
+  | { kind: 'youtube'; src: string };
 
 /**
- * `<BrandVideoFieldCompact>` — versión condensada que vive en una columna
- * de 3 del grid del tab Media. Tab interno (Upload | YouTube URL) en
- * lugar de stack vertical, para que el card no crezca verticalmente y
- * mantenga la altura fija del panel (430px).
+ * `<MediaCard>` — wrapper visual uniforme: título 12px arriba, contenido
+ * (dropzone) en el centro, hint debajo. Garantiza que todas las cards del
+ * grid del tab Media estén alineadas por arriba y tengan el mismo título
+ * en la misma posición.
  */
-function BrandVideoFieldCompact({
+function MediaCard({
+  title,
+  hint,
+  rightAction,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  rightAction?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex h-5 items-center justify-between gap-2">
+        <span className="text-[12px] font-medium text-zinc-800 dark:text-zinc-200">{title}</span>
+        {rightAction}
+      </div>
+      {children}
+      {hint ? <p className="text-[10px] text-zinc-500 dark:text-zinc-500">{hint}</p> : null}
+    </div>
+  );
+}
+
+/**
+ * `<BrandMediaWithUrl>` — card que combina upload (drag&drop) + YouTube
+ * URL en un mismo footprint. Toggle "YouTube URL" / "Use upload" para
+ * alternar entre los dos modos sin crecer verticalmente. Compartido por
+ * Idle background (allowImage=true) y Brand video (allowImage=false).
+ */
+function BrandMediaWithUrl({
+  title,
+  hint,
   slug,
   value,
+  allowImage,
   onChange,
 }: {
+  title: string;
+  hint?: string;
   slug: string;
-  value: BrandVideo | undefined;
-  onChange: (next: BrandVideo | undefined) => void;
+  value: BrandMediaValue | undefined;
+  /** True para Idle background (acepta imágenes). False para Brand video. */
+  allowImage: boolean;
+  onChange: (next: BrandMediaValue | undefined) => void;
 }) {
   const [showYouTube, setShowYouTube] = useState(value?.kind === 'youtube');
   const [youtubeInput, setYoutubeInput] = useState(value?.kind === 'youtube' ? value.src : '');
   const youtubeId = value?.kind === 'youtube' ? extractYouTubeId(value.src) : null;
 
+  const toggleButton = (
+    <button
+      type="button"
+      onClick={() => {
+        setShowYouTube((s) => {
+          const next = !s;
+          if (!next && value?.kind === 'youtube') {
+            setYoutubeInput('');
+            onChange(undefined);
+          }
+          return next;
+        });
+      }}
+      className={
+        showYouTube
+          ? 'text-[10.5px] text-zinc-500 underline-offset-2 hover:text-zinc-700 hover:underline dark:hover:text-zinc-300'
+          : 'text-[10.5px] text-sky-600 underline-offset-2 hover:text-sky-700 hover:underline dark:text-sky-400 dark:hover:text-sky-300'
+      }
+    >
+      {showYouTube ? 'Use upload' : 'YouTube URL'}
+    </button>
+  );
+
   if (showYouTube) {
     return (
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
-            Brand video
-          </span>
-          <button
-            type="button"
-            onClick={() => {
-              setShowYouTube(false);
-              setYoutubeInput('');
-              if (value?.kind === 'youtube') onChange(undefined);
-            }}
-            className="text-[10.5px] text-zinc-500 underline-offset-2 hover:text-zinc-700 hover:underline dark:hover:text-zinc-300"
-          >
-            Use upload
-          </button>
-        </div>
+      <MediaCard title={title} hint={hint} rightAction={toggleButton}>
         <div
           className="relative grid place-items-center overflow-hidden rounded-lg border border-dashed border-zinc-300 bg-zinc-50/60 dark:border-zinc-700 dark:bg-zinc-900/40"
           style={{ aspectRatio: '16/9' }}
@@ -407,9 +504,7 @@ function BrandVideoFieldCompact({
               className="h-full w-full object-cover"
             />
           ) : (
-            <span className="px-3 text-center text-[10.5px] text-zinc-500">
-              Paste YouTube URL below
-            </span>
+            <span className="px-3 text-center text-[10.5px] text-zinc-500">Paste YouTube URL</span>
           )}
         </div>
         <input
@@ -427,31 +522,25 @@ function BrandVideoFieldCompact({
           placeholder="https://youtu.be/…"
           className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1 font-mono text-[11px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
         />
-      </div>
+      </MediaCard>
     );
   }
 
+  // Upload mode. Idle background acepta image+video; Brand video solo
+  // video. El kind 'youtube' se filtra (modo URL gestionado arriba).
+  const isUpload = value?.kind === 'image' || value?.kind === 'video';
+  const mediaSrc = isUpload ? value!.src : undefined;
+  const mediaKind: 'image' | 'video' = value?.kind === 'image' ? 'image' : 'video';
+
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
-          Brand video
-        </span>
-        <button
-          type="button"
-          onClick={() => setShowYouTube(true)}
-          className="text-[10.5px] text-sky-600 underline-offset-2 hover:text-sky-700 hover:underline dark:text-sky-400 dark:hover:text-sky-300"
-        >
-          YouTube URL
-        </button>
-      </div>
+    <MediaCard title={title} hint={hint} rightAction={toggleButton}>
       <MediaField
-        label="Drop video"
-        hint="MP4 / WebM ≤2MB"
+        label={allowImage ? 'Click or drop' : 'Drop video'}
+        hint=""
         aspect="16/9"
         slug={slug}
-        value={value?.kind === 'upload' ? value.src : undefined}
-        kind="video"
+        value={mediaSrc}
+        kind={mediaKind}
         hideUrlInput
         maxVideoBytes={2 * 1024 * 1024}
         onChange={(next) => {
@@ -459,10 +548,15 @@ function BrandVideoFieldCompact({
             onChange(undefined);
             return;
           }
-          onChange({ kind: 'upload', src: next.src });
+          // Idle background y Brand video: usamos 'image' | 'video' del
+          // MediaField. El upper-layer mapea 'video' → 'upload' para el
+          // shape específico de brandVideo. allowImage solo afecta qué
+          // tipos de archivo acepta visualmente; el shape interno es el
+          // mismo.
+          onChange({ kind: next.kind, src: next.src });
         }}
       />
-    </div>
+    </MediaCard>
   );
 }
 

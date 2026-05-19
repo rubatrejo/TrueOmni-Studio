@@ -121,6 +121,19 @@ export const UnifiedClientBrandingSchema = z.object({
     })
     .optional(),
 
+  /**
+   * Idle background del Billboard — imagen, video subido o URL de YouTube.
+   * Cuando está poblado, el runtime del Billboard lo usa como background
+   * de las 4 variants idle en lugar del default `/assets/billboard-0/hero.jpg`.
+   * Editable también desde el Billboard editor (mismo data target).
+   */
+  idleBackground: z
+    .object({
+      kind: z.enum(['image', 'video', 'youtube']).default('image'),
+      src: z.string().default(''),
+    })
+    .optional(),
+
   /** Favicon — usado por kiosk; ignorado por signage. */
   favicon: z.string().optional().default(''),
 });
@@ -178,6 +191,9 @@ export function unifiedToKioskBranding(unified: UnifiedClientBranding): Branding
   if (unified.homeHero) out.homeHero = unified.homeHero;
   if (unified.heroGradient) out.heroGradient = unified.heroGradient;
   if (unified.brandVideo && unified.brandVideo.src) out.brandVideo = unified.brandVideo;
+  if (unified.idleBackground && unified.idleBackground.src) {
+    out.idleBackground = unified.idleBackground;
+  }
   return out;
 }
 
@@ -217,6 +233,7 @@ export function kioskToUnifiedBranding(
     homeHero: kioskBranding.homeHero,
     heroGradient: kioskBranding.heroGradient,
     brandVideo: kioskBranding.brandVideo,
+    idleBackground: kioskBranding.idleBackground,
     favicon: kioskBranding.favicon ?? '',
   });
 }

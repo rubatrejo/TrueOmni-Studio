@@ -9,6 +9,7 @@ import {
   BILLBOARD_LOGO_SLOT_WIDTH,
   useBillboardB0,
   useBillboardFooterLogoHeight,
+  useBillboardFooterLogoPosition,
   useBillboardLogoHeight,
   useBillboardLogoPosition,
 } from './use-billboard-override';
@@ -17,6 +18,7 @@ export function Billboard0() {
   const t = useTextosMap();
   const logoH = useBillboardLogoHeight();
   const footerLogoH = useBillboardFooterLogoHeight();
+  const footerLogoPos = useBillboardFooterLogoPosition();
   const logoPos = useBillboardLogoPosition(0);
   const { background, touchHere, overlayOpacity, overlay } = useBillboardB0();
   const touchLeft = (1080 - touchHere.width) / 2;
@@ -105,9 +107,17 @@ export function Billboard0() {
             clipPath: 'polygon(0 0, 1080px 83.636px, 1080px 218px, 0 218px)',
           }}
         />
+        {/* Footer logo. Coords absolutas en canvas 1080×1920, dentro de
+            este block que está anchored bottom (y=1702..1920). Convertimos
+            la y absoluta a top relativo restando 1702 (offset del block). */}
         <div
           className="absolute flex items-center"
-          style={{ left: '60px', top: '103px', height: footerLogoH, width: '360px' }}
+          style={{
+            left: `${footerLogoPos.x}px`,
+            top: `${Math.max(0, footerLogoPos.y - 1702)}px`,
+            height: footerLogoH,
+            width: '360px',
+          }}
         >
           <TrueOmniLogo slot="footer" className="h-full w-auto max-w-full text-white" />
         </div>

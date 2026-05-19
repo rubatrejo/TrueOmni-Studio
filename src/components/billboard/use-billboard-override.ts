@@ -22,6 +22,12 @@ type BillboardOverride = {
    * su posición histórica del SVG original.
    */
   logoPosition?: { x: number; y: number };
+  /**
+   * Posición absoluta del logo del FOOTER ("Powered by") dentro del canvas.
+   * Aplica solo a B0 (los demás variants usan flex layout en el footer y
+   * ignoran este override). Default histórico: { x: 60, y: 1805 }.
+   */
+  footerLogoPosition?: { x: number; y: number };
   modules?: string[];
   /** Background compartido por las 4 variants (gana sobre b{N}.background). */
   background?: BillboardB0Config['background'];
@@ -66,6 +72,7 @@ export function useBillboardOverride(): BillboardOverride {
         logoSize: detail.logoSize,
         footerLogoSize: detail.footerLogoSize,
         logoPosition: detail.logoPosition,
+        footerLogoPosition: detail.footerLogoPosition,
         modules: Array.isArray(detail.modules) ? detail.modules : undefined,
         background: detail.background,
         b0: detail.b0,
@@ -124,6 +131,23 @@ export const DEFAULT_LOGO_POSITION: Record<0 | 1 | 2 | 3, { x: number; y: number
 export function useBillboardLogoPosition(variant: 0 | 1 | 2 | 3): { x: number; y: number } {
   const { logoPosition } = useBillboardOverride();
   return logoPosition ?? DEFAULT_LOGO_POSITION[variant];
+}
+
+/**
+ * Posición histórica del logo del FOOTER en B0 (canvas 1080×1920).
+ * Coincide con `left: 60px` + el footer block que arranca en y=1702
+ * (218px tall, anchored bottom) + `top: 103px` dentro del block.
+ */
+export const DEFAULT_FOOTER_LOGO_POSITION_B0 = { x: 60, y: 1805 };
+
+/**
+ * Devuelve la posición resolvida del logo del footer. Solo B0 lo aplica
+ * (los demás variants usan flex layout y este hook retorna el override
+ * pero el render lo ignora).
+ */
+export function useBillboardFooterLogoPosition(): { x: number; y: number } {
+  const { footerLogoPosition } = useBillboardOverride();
+  return footerLogoPosition ?? DEFAULT_FOOTER_LOGO_POSITION_B0;
 }
 
 /**

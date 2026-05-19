@@ -349,8 +349,8 @@ export function BillboardEditor({
           )}
           <SliderRow
             label="Font size"
-            min={36}
-            max={160}
+            min={24}
+            max={220}
             step={2}
             unit="px"
             value={b0.touchHere.fontSize}
@@ -523,6 +523,11 @@ export function BillboardEditor({
 
       {/* ───────────── Logo position (B0/B2/B3) ───────────── */}
       {hasLogo && <LogoPositionSection billboard={billboard} onChange={onChange} />}
+
+      {/* ───────────── Footer logo position (solo B0 lo aplica) ───────────── */}
+      {billboard.variant === 0 && (
+        <FooterLogoPositionSection billboard={billboard} onChange={onChange} />
+      )}
 
       {/* ───────────── Footer logo size (todos los variants) ───────────── */}
       <section>
@@ -876,6 +881,79 @@ function LogoPositionSection({
             {!isOverridden && <span className="ml-1.5 italic">(default)</span>}
           </p>
         </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Sección "Footer logo position" — mismo patrón que `LogoPositionSection`
+ * pero opera sobre `billboard.footerLogoPosition` y solo aplica visualmente
+ * al Variant 1 (B0). Default histórico: { x: 60, y: 1805 } (footer block
+ * arranca en y=1702, logo a 103px dentro del block).
+ */
+const DEFAULT_FOOTER_LOGO_POS = { x: 60, y: 1805 };
+
+function FooterLogoPositionSection({
+  billboard,
+  onChange,
+}: {
+  billboard: BillboardConfig;
+  onChange: (next: BillboardConfig) => void;
+}) {
+  const pos = billboard.footerLogoPosition ?? DEFAULT_FOOTER_LOGO_POS;
+  const isOverridden = billboard.footerLogoPosition !== undefined;
+
+  const setPos = (next: { x: number; y: number }) => {
+    onChange({ ...billboard, footerLogoPosition: next });
+  };
+  const reset = () => {
+    onChange({ ...billboard, footerLogoPosition: undefined });
+  };
+
+  return (
+    <section>
+      <header className="mb-3 flex items-start justify-between gap-2">
+        <div>
+          <h3 className="font-display text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500 dark:text-zinc-400">
+            Footer logo position
+          </h3>
+          <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
+            Where the &quot;Powered by&quot; logo sits in the footer of Variant 1. X/Y are absolute
+            coords in the 1080×1920 canvas.
+          </p>
+        </div>
+        {isOverridden && (
+          <button
+            type="button"
+            onClick={reset}
+            className="shrink-0 rounded-md border border-zinc-200 bg-white px-2 py-1 text-[10.5px] font-medium text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800"
+          >
+            Reset
+          </button>
+        )}
+      </header>
+      <div className="flex w-full min-w-0 flex-col gap-2">
+        <LogoSliderRow
+          label="X"
+          min={0}
+          max={1080}
+          step={5}
+          value={pos.x}
+          onChange={(x) => setPos({ x, y: pos.y })}
+        />
+        <LogoSliderRow
+          label="Y"
+          min={1702}
+          max={1900}
+          step={2}
+          value={pos.y}
+          onChange={(y) => setPos({ x: pos.x, y })}
+        />
+        <p className="mt-0.5 font-mono text-[10.5px] text-zinc-400 dark:text-zinc-600">
+          x={pos.x}px · y={pos.y}px
+          {!isOverridden && <span className="ml-1.5 italic">(default)</span>}
+        </p>
       </div>
     </section>
   );

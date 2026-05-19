@@ -279,7 +279,108 @@ export function EditorPanel({
           <BrandingEditor branding={branding} onChange={onBrandingChange} />
         )}
         {sectionKey === 'home-dashboard' && (
-          <HomeDashboardEditor modules={modules} listings={listings} onChange={onModulesChange} />
+          <div className="space-y-6">
+            {/* Hero header (background + gradient overlay) — movido aquí
+                desde Branding (2026-05-18) porque solo afecta visualmente
+                a la Home y a las module screens que heredan su background. */}
+            <Group
+              title="Hero header"
+              hint="Background image or video for the Home Dashboard and module screens, plus the gradient overlay over it."
+            >
+              <MediaField
+                label="Drop image or video"
+                hint="1080×620 recommended · JPG/PNG/WebP up to 5MB · MP4/WebM up to 2MB · paste a CDN URL below for larger videos"
+                aspect="16/9"
+                maxImageBytes={5 * 1024 * 1024}
+                maxVideoBytes={2 * 1024 * 1024}
+                value={branding.homeHero?.src || undefined}
+                kind={branding.homeHero?.kind}
+                onChange={(next) => {
+                  if (!next) {
+                    onBrandingChange({ ...branding, homeHero: undefined });
+                    return;
+                  }
+                  onBrandingChange({
+                    ...branding,
+                    homeHero: { kind: next.kind, src: next.src },
+                  });
+                }}
+              />
+              <p className="mt-3 text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
+                Gradient overlay
+              </p>
+              <p className="mb-1.5 text-[10.5px] text-zinc-500">
+                Layer between the hero photo and the logo + clock so they remain readable. Use
+                8-digit hex (#rrggbbAA) for transparency in the To color.
+              </p>
+              <HexRow
+                label="From"
+                value={branding.heroGradient?.from ?? '#004f8be6'}
+                onChange={(v) =>
+                  onBrandingChange({
+                    ...branding,
+                    heroGradient: {
+                      from: v,
+                      to: branding.heroGradient?.to ?? '#004f8b00',
+                      angle: branding.heroGradient?.angle ?? 180,
+                    },
+                  })
+                }
+              />
+              <HexRow
+                label="To"
+                value={branding.heroGradient?.to ?? '#004f8b00'}
+                onChange={(v) =>
+                  onBrandingChange({
+                    ...branding,
+                    heroGradient: {
+                      from: branding.heroGradient?.from ?? '#004f8be6',
+                      to: v,
+                      angle: branding.heroGradient?.angle ?? 180,
+                    },
+                  })
+                }
+              />
+              <div className="mt-2 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11.5px] text-zinc-700 dark:text-zinc-300">Angle</span>
+                  <span className="font-mono text-[11px] text-zinc-500">
+                    {branding.heroGradient?.angle ?? 180}°
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={360}
+                  step={15}
+                  value={branding.heroGradient?.angle ?? 180}
+                  onChange={(e) =>
+                    onBrandingChange({
+                      ...branding,
+                      heroGradient: {
+                        from: branding.heroGradient?.from ?? '#004f8be6',
+                        to: branding.heroGradient?.to ?? '#004f8b00',
+                        angle: Number(e.target.value),
+                      },
+                    })
+                  }
+                  className="w-full accent-sky-500"
+                  aria-label="Gradient angle"
+                />
+              </div>
+              {branding.heroGradient ? (
+                <button
+                  type="button"
+                  onClick={() => onBrandingChange({ ...branding, heroGradient: undefined })}
+                  className="mt-1 text-[11px] text-zinc-500 underline-offset-2 hover:text-zinc-700 hover:underline dark:hover:text-zinc-300"
+                >
+                  Reset gradient to default
+                </button>
+              ) : null}
+            </Group>
+
+            <HomeDashboardEditor modules={modules} listings={listings} onChange={onModulesChange} />
+          </div>
         )}
         {sectionKey === 'modules' && (
           <SystemModulesEditor
@@ -527,90 +628,11 @@ function BrandingEditor({
         </div>
       </Group>
 
-      {/* Hero header (image/video + gradient overlay) */}
-      <Group
-        title="Hero header"
-        hint="Background image or video for the Home Dashboard and module screens, plus the gradient overlay over it."
-      >
-        <MediaField
-          label="Drop image or video"
-          hint="1080×620 recommended · JPG/PNG/WebP up to 5MB · MP4/WebM up to 2MB · paste a CDN URL below for larger videos"
-          aspect="16/9"
-          maxImageBytes={5 * 1024 * 1024}
-          maxVideoBytes={2 * 1024 * 1024}
-          value={branding.homeHero?.src || undefined}
-          kind={branding.homeHero?.kind}
-          onChange={(next) => {
-            if (!next) {
-              setField('homeHero', undefined);
-              return;
-            }
-            setField('homeHero', { kind: next.kind, src: next.src });
-          }}
-        />
-        <p className="mt-3 text-[11px] font-medium text-zinc-700 dark:text-zinc-300">
-          Gradient overlay
-        </p>
-        <p className="mb-1.5 text-[10.5px] text-zinc-500">
-          Layer between the hero photo and the logo + clock so they remain readable. Use 8-digit hex
-          (#rrggbbAA) for transparency in the To color.
-        </p>
-        <HexRow
-          label="From"
-          value={branding.heroGradient?.from ?? '#004f8be6'}
-          onChange={(v) =>
-            setField('heroGradient', {
-              from: v,
-              to: branding.heroGradient?.to ?? '#004f8b00',
-              angle: branding.heroGradient?.angle ?? 180,
-            })
-          }
-        />
-        <HexRow
-          label="To"
-          value={branding.heroGradient?.to ?? '#004f8b00'}
-          onChange={(v) =>
-            setField('heroGradient', {
-              from: branding.heroGradient?.from ?? '#004f8be6',
-              to: v,
-              angle: branding.heroGradient?.angle ?? 180,
-            })
-          }
-        />
-        <div className="mt-2 space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-[11.5px] text-zinc-700 dark:text-zinc-300">Angle</span>
-            <span className="font-mono text-[11px] text-zinc-500">
-              {branding.heroGradient?.angle ?? 180}°
-            </span>
-          </div>
-          <input
-            type="range"
-            min={0}
-            max={360}
-            step={15}
-            value={branding.heroGradient?.angle ?? 180}
-            onChange={(e) =>
-              setField('heroGradient', {
-                from: branding.heroGradient?.from ?? '#004f8be6',
-                to: branding.heroGradient?.to ?? '#004f8b00',
-                angle: Number(e.target.value),
-              })
-            }
-            className="w-full accent-sky-500"
-            aria-label="Gradient angle"
-          />
-        </div>
-        {branding.heroGradient ? (
-          <button
-            type="button"
-            onClick={() => setField('heroGradient', undefined)}
-            className="mt-1 text-[11px] text-zinc-500 underline-offset-2 hover:text-zinc-700 hover:underline dark:hover:text-zinc-300"
-          >
-            Reset gradient to default
-          </button>
-        ) : null}
-      </Group>
+      {/* El Hero header (background + gradient overlay) se editaba aquí
+          en Branding hasta 2026-05-18. Movido al Home Dashboard editor
+          porque visualmente solo aplica a la Home y a las module screens
+          que la heredan — el operador esperaba encontrarlo ahí. La data
+          sigue viviendo en `branding.homeHero` y `branding.heroGradient`. */}
 
       {/* Fonts */}
       <Group

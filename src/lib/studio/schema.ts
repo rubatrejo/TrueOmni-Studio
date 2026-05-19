@@ -338,7 +338,7 @@ export const BillboardB0Schema = z.object({
       /** Alto del botón en px (default SVG: 342). */
       height: z.number().int().min(120).max(500).default(342),
       /** Tamaño de fuente en px. Default SVG: 90. */
-      fontSize: z.number().int().min(36).max(160).default(90),
+      fontSize: z.number().int().min(24).max(220).default(90),
     })
     .default({ label: '', twoLines: true, width: 548, height: 342, fontSize: 90 }),
   /** Opacidad del overlay oscuro entre background y contenido. 0 = sin
@@ -457,6 +457,19 @@ export const BillboardSchema = z.object({
    * logo se mantiene contenido (object-fit) dentro de ese rectángulo.
    */
   logoPosition: z
+    .object({
+      x: z.number().int().min(0).max(1080),
+      y: z.number().int().min(0).max(1920),
+    })
+    .optional(),
+  /**
+   * Posición del logo del FOOTER ("Powered by") dentro del canvas
+   * 1080×1920. Solo aplica al Variant 1 (B0 idle) que tiene footer
+   * con layout absoluto — los demás variants usan flex layout y
+   * ignoran este override. Default histórico SVG: `{ x: 60, y: 1823 }`
+   * (el footer es la franja brand-primary 218px de alto bottom).
+   */
+  footerLogoPosition: z
     .object({
       x: z.number().int().min(0).max(1080),
       y: z.number().int().min(0).max(1920),

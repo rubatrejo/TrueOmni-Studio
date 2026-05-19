@@ -374,6 +374,9 @@ type BillboardPatch = {
   footerLogoSize?: 'S' | 'M' | 'L' | 'XL';
   /** Posición absoluta (top-left) del slot del logo idle. */
   logoPosition?: { x: number; y: number };
+  /** Posición absoluta del logo del footer ("Powered by"). Solo aplica
+   *  visualmente al B0; los demás variants ignoran el override. */
+  footerLogoPosition?: { x: number; y: number };
   modules?: string[];
   /** Background compartido por las 4 variants. Tiene prioridad sobre el
    *  `b{N}.background` (legacy). */

@@ -280,6 +280,41 @@ function AdRow({
   );
 }
 
+/**
+ * Dimensiones físicas que cubre cada tipo de ad cuando se renderiza en el
+ * kiosk 1080×1920. El operator necesita estas dims para preparar el asset
+ * con el ratio correcto antes de subirlo. Sincronizado con:
+ *  - `ad-hero.tsx` (1080×620 — hero header del módulo).
+ *  - `ad-bottom.tsx` (height 185px — strip horizontal bottom).
+ *  - `ad-popup.tsx` (1080×1920 modal — full screen blocker).
+ */
+export const AD_KIND_DIMENSIONS: Record<AdKind, string> = {
+  hero: '1080×620',
+  bottom: '1080×185',
+  popup: '1080×1920',
+};
+
+/**
+ * Rutas comunes pre-seleccionables del kiosk. El operator puede usar el
+ * picker rápido o seguir editando el textarea libre con globs (`/home/*`).
+ */
+const COMMON_ROUTES = [
+  '/home',
+  '/home/restaurants',
+  '/home/things-to-do',
+  '/home/stay',
+  '/home/events',
+  '/home/tickets',
+  '/home/passes',
+  '/home/deals',
+  '/home/trails',
+  '/home/guestbook',
+  '/home/photobooth',
+  '/home/itinerary',
+  '/home/social',
+  '/home/map',
+] as const;
+
 function KindBadge({ kind }: { kind: AdKind }) {
   const colorClass = {
     popup: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
@@ -289,6 +324,7 @@ function KindBadge({ kind }: { kind: AdKind }) {
   return (
     <span
       className={`rounded px-1.5 py-0.5 font-mono text-[9.5px] uppercase tracking-wide ${colorClass}`}
+      title={`${kind.toUpperCase()} ad · ${AD_KIND_DIMENSIONS[kind]}`}
     >
       {kind}
     </span>
@@ -373,11 +409,14 @@ function AdEditPanel({
           />
         </Field>
 
-        <Field label="Kind">
+        <Field
+          label="Kind"
+          hint={`Hero ${AD_KIND_DIMENSIONS.hero} · Bottom ${AD_KIND_DIMENSIONS.bottom} · Popup ${AD_KIND_DIMENSIONS.popup} (canvas 1080×1920)`}
+        >
           <Select value={ad.kind} onChange={(e) => setField('kind', e.target.value as AdKind)}>
             {AD_KINDS.map((k) => (
               <option key={k} value={k}>
-                {k}
+                {k} — {AD_KIND_DIMENSIONS[k]}
               </option>
             ))}
           </Select>
@@ -387,7 +426,7 @@ function AdEditPanel({
           label="Image"
           value={ad.image}
           onChange={(v) => setField('image', v ?? '')}
-          helpText="Path or URL. The QR (if any) must already be embedded in the asset."
+          helpText={`Path or URL. Recommended size: ${AD_KIND_DIMENSIONS[ad.kind]}. The QR (if any) must already be embedded in the asset.`}
         />
 
         <Field label="Alt text" hint="Description for accessibility. Shown to screen readers.">
@@ -396,17 +435,44 @@ function AdEditPanel({
 
         <Field
           label="Routes"
-          hint="One route per line. Use /home/* for prefix matching. Empty = never shown."
+          hint="Pick the screens where this ad should show. Toggle multiple — the textarea below stays in sync. Use /home/* in the textarea for prefix matching."
         >
-          <Textarea
-            value={routesText}
-            onChange={(e) => setRoutes(e.target.value)}
-            rows={Math.max(3, Math.min(8, ad.routes.length + 1))}
-            spellCheck={false}
-            mono
-            className="resize-y"
-            placeholder="/home&#10;/home/restaurants/*"
-          />
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-1.5">
+              {COMMON_ROUTES.map((route) => {
+                const active = ad.routes.includes(route);
+                return (
+                  <button
+                    key={route}
+                    type="button"
+                    onClick={() => {
+                      const next = active
+                        ? ad.routes.filter((r) => r !== route)
+                        : [...ad.routes, route];
+                      setField('routes', next);
+                    }}
+                    className={
+                      'rounded-md border px-2 py-1 font-mono text-[10.5px] transition ' +
+                      (active
+                        ? 'border-sky-500 bg-sky-500 text-white shadow-sm'
+                        : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800')
+                    }
+                  >
+                    {route}
+                  </button>
+                );
+              })}
+            </div>
+            <Textarea
+              value={routesText}
+              onChange={(e) => setRoutes(e.target.value)}
+              rows={Math.max(3, Math.min(8, ad.routes.length + 1))}
+              spellCheck={false}
+              mono
+              className="resize-y"
+              placeholder="/home&#10;/home/restaurants/*"
+            />
+          </div>
         </Field>
 
         <div className="grid grid-cols-2 gap-3">

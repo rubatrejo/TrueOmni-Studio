@@ -138,11 +138,11 @@ Decisión y ejecución de la fase puntual **MIG-AB-1** (plan en `.planning/MIG-A
 4. **Test E2E ejecutable** — instalar `@playwright/test` + mover spec documentado a `tests/e2e/`.
 5. **Fase 4 — primer cliente real** — bloqueada por negocio.
 
-**Última sesión (2026-05-13):** Video Walls audit cleanup (G1-G8 todos cerrados) + Bloque D editor completo (bridge live + Versions + Publish PR) + grid picker dropdown + multi-playlist UI + 4 templates faltantes (catálogo 27) + 2 bugs críticos arreglados (`pxToCss` style en slot renderers genéricos rompía todos los grids no-3x2; `loadVideoWall` heurística KV vs fs ahora compara set de templateIds). 14 commits + 14 deploys verdes. Detalles en historial de sesiones abajo.
+**Última sesión (2026-05-18 noche):** Maratón Studio iterativo — Video Walls 4×2/2×2 pixel-perfect XD (12 templates), retiro grids 2×1/1×2 del catálogo (preprocess migra legacy → 2×2), kiosk editor UX (touch font 24-220, footer logo pos, ads dims+multi-route, hero header movido), Brand Media tab nuevo (Brand video + Idle background con YouTube URL, layout 4 cards alineadas), runtime YouTube embed en hero-background-layer, color picker overflow fix, dashboard cards (Rubén Ramírez + star icon + new client card height), delete client orphan recovery, custom font signage SSR, Discover Dekalb auto-hidratación signage. 15 commits + 15 deploys verdes.
 
-**Último deploy verde:** `dpl_FtZjRs5FBhCaGPnzLZbnuCrBaVQe` — commit `fe27365` (fix loadVideoWall templateIds dispares).
+**Último deploy verde:** commit `1da1dbd` (media cards spacing + color picker overflow + YT en URL paste).
 
-**Siguiente acción concreta:** **Validación visual templates derivados** (21 templates 4×2/2×2/2×1/1×2 que el fix `pxToCss` desbloqueó) — tomar screenshots contra producción y verificar que cada slide rendea bien estructuralmente. Alternativa: **smoke E2E full flow con auth GitHub** ejecutando `agent-browser batch < tests/e2e/video-walls-full-flow.json` autenticado. **Fase 4 — primer cliente real** sigue bloqueada por negocio.
+**Siguiente acción concreta:** **Cablear auto-uso del brandVideo en signage/videowall runtime** — propagar `branding.brandVideo` y `branding.idleBackground` vía bridge al iframe para que los video slots vacíos los usen como fallback. Schema + UI ya están listos; falta el wiring del runtime. Alternativa: **smoke visual de los cambios live** (4 cards Media alineadas, color picker, 4×2/2×2 pixel-perfect en producción). **Fase 4 — primer cliente real** sigue bloqueada por negocio.
 
 **Bloqueos:**
 
@@ -3311,6 +3311,59 @@ C — Possible follow-ups del Studio polish de esta sesión:
 - **B3 logo absolute al canvas root, no al banner area** — alternative era mantener el logo dentro del banner overflow:hidden, pero eso limitaba la libertad del operador (no podría sacarlo). Romper la cohesión visual del banner es trade-off aceptable porque el operador es quien decide poner el logo donde quiera; el TOUCH TO START queda centrado en su sitio histórico.
 
 **Fase:** Studio UX polish post-Video Walls. Modal de creación coherente con el modelo unificado de productos, contenido demo del DD heredado correctamente, hero header y editor del Billboard idle más flexibles. **Próxima sesión: smoke visual de los cambios en prod (Pendiente A) o continuar con los pendientes de Video Walls (Pendiente B)**.
+
+---
+
+### Sesión 2026-05-18 (noche) — Studio iterativo: VW 4×2/2×2 pixel-perfect + retiro 2×1/1×2 + kiosk editor UX + Brand video field
+
+Sesión maratón de ~15 commits iterando sobre feedback continuo del usuario. Bloques principales:
+
+**Hecho:**
+
+- **Video Walls 4×2 (slides 3-6 pixel-perfect XD verbatim)** — reescritos con coords XD de `~/Desktop/Video Wall/4x2/`: 6 events cards por sidebar (3 top 640×745 + 3 bot 640×1080) en slide 3, Ad 1916×750 + 3 events 640×1080 en slide 4, 11 social cards (3 large 640×744 + 8 small 480×540) en slide 5, ad + 8 social en slide 6. Mirror izq=der.
+- **Video Walls 2×2 catálogo completo XD** — 6 templates pixel-perfect (`01-video-image-full` → `06-video-image-ad-social-wall`). Eliminados los legacy `02-quad-mix`, `04-video-image-social-wall`, `05-video-image-ad`. `template-remap.ts` ahora mapea todas las categorías a 2×2.
+- **Retiro grids 2×1 y 1×2** — eliminados del catálogo (10 templates borrados), `dimensions.ts` reducido a `['3x2','4x2','2x2']`, `template-remap.ts` solo 3 grids. Preprocess defensivo en `schema.ts` migra walls KV legacy `'2x1'|'1x2'` → `'2x2'`. Grid picker UI 5-way → 3-way (NewWallCard + WallPreviewPanel via GRID_CONFIG_IDS).
+- **Kiosk editor — Touch Here font** rango 36..160 → **24..220 px** en schema + slider.
+- **Kiosk editor — Footer logo position** nuevo control X/Y solo Variant 1 (B0). Schema `billboard.footerLogoPosition?: {x,y}`, default `{60, 1805}`. Bridge + billboard-0.tsx leen el override; los demás variants ignoran.
+- **Kiosk editor — Ads dimensions per kind** mostradas en dropdown + hint Image field + tooltip badge: Hero 1080×620, Bottom 1080×185, Popup **865×960** (fix posterior, no 1080×1920 como original).
+- **Kiosk editor — Ads multi-route quick picker** 14 rutas comunes como toggles + textarea libre para globs.
+- **Kiosk editor — Hero Header movido** de Branding a Home Dashboard editor. Data sigue en `branding.homeHero` + `branding.heroGradient` (zero migration).
+- **Kiosk editor — PWA tab eliminado** del preview toolbar (futuro producto independiente).
+- **Branding Media tab — Brand Video field** nuevo: drag&drop video upload (MP4/WebM ≤2MB) o pegar URL YouTube. Helper `src/lib/studio/youtube.ts` con `extractYouTubeId` / `buildYouTubeEmbedUrl`. Schema unified `brandVideo?: { kind: 'upload'|'youtube', src }`.
+- **Branding Media tab — Idle background field** (4ta card): image / video / YouTube. Schema unified `idleBackground?: {...}`. Compartido con `<BrandMediaWithUrl>` reusable.
+- **Brand Media layout 4 cards alineadas** — grid `[190px_190px_190px_80px] gap-5`, `items-start`, `<MediaCard>` wrapper con título arriba uniforme. Idle background 9:16, Kiosk hero/Brand video 16:9, Favicon 1:1 (col más chica).
+- **Runtime YouTube embed** — `hero-background-layer.tsx` detecta URL de YouTube y renderiza `<iframe>` con autoplay+loop+mute. MediaField paste URL también detecta YouTube y guarda kind='video'.
+- **Color picker overflow fix** — abre hacia arriba (`bottom-full mb-2`) en lugar de hacia abajo, evita corte en color Tertiary.
+- **Dashboard fixes**: ClientCard footer muestra `Rubén Ramírez` (helper `formatEditorName` con tabla email→nombre); icon estrella ★ reemplaza pin; NewClientCard altura matchea ClientCards reales (hero h-40 + body p-5).
+- **Delete client orphan recovery** — extraído `purgeAllClientKeys` a `src/lib/studio/purge-client.ts`. El POST detecta huérfanos (no manifest pero sí legacy keys) y auto-purga antes de recrear. Resuelve el bug "slug already exists" tras delete con catch silencioso.
+- **Discover Dekalb fix** — drift recovery en `/studio/[slug]/digital-displays/page.tsx` ahora también clona displays + events/social/news del template via `cloneSignageContentFromTemplate`.
+- **VW forecastDays 5** — removido el clamp que bajaba 5→3 en grids ≤3840 (defensivo para 1x2/2x1 retirados); ahora respeta lo que el operador configura.
+- **Custom font signage SSR** — el layout `app/(signage)/signage/[client]/[display]/layout.tsx` inyecta `@font-face` + `--signage-font-display/body` cuando hay `displayCustom/bodyCustom`. Antes solo el bridge editor lo aplicaba.
+- **Branding Media tab altura fija 430px** — layout horizontal compacto para que no crezca el card al añadir Brand video.
+
+**Verificado:**
+
+- `pnpm typecheck` limpio tras cada bloque de cambios (~15 typechecks).
+- Cada commit pusheado verde a `main` → Vercel deploy automático.
+- Validación visual contra XD PNGs de `~/Desktop/Video Wall/{4x2,2x2}/` aprobada por el usuario para los 6 slides de cada grid.
+
+**Pendiente / siguiente:**
+
+- **Auto-uso del brandVideo en Digital Display + Video Wall runtime** — propagar `branding.brandVideo` via bridge al runtime signage/videowall para que video slots vacíos usen el brand video como fallback. Schema + UI listo; runtime cabling pendiente.
+- **Soporte YouTube embed en billboards** `billboard-{0,1,2,3}.tsx` cuando se usa "Use brand video" con URL de YouTube en Idle Background.
+- **Auto-uso del idleBackground en runtime billboard** — `branding.idleBackground` como override del default `/assets/billboard-0/hero.jpg` cuando esté poblado.
+- **Issue 5 del feedback iterativo** — un evento en VW 3×2 no carga (fondo rosa visible en card sin imagen). Sin reproducir; necesita slug del cliente + index del slide afectado.
+- **Issue del Hero Header video upload no se refleja** — el flow del bridge parece correcto en código; requiere repro con consola del iframe abierta para identificar dónde se pierde.
+
+**Decisiones:**
+
+- **Retirar grids 2×1 y 1×2** definitivamente del catálogo — el operador no los va a usar. Preprocess defensivo migra walls KV legacy a `'2x2'` para no romper data en producción.
+- **Brand Video como campo opcional** (no obligatorio para hero header) — pickers "▶ Use brand video" son opt-in en Billboard idle + Hero Header. El video va automáticamente a Display/Wall (TBD).
+- **Layout 4 cards Brand Media** con widths fijos en lugar de `1fr` — el aspect 9:16 del Idle background necesita ancho controlado para no exceder altura del panel `h-[430px]`.
+- **Color picker dropdown abre hacia arriba** — el panel `h-[430px]` no tiene scroll y el picker abriendo hacia abajo overflowed por debajo del card padre. Hacia arriba siempre cabe.
+- **Orphan recovery en POST clients** — preferimos auto-purgar y continuar create vs bloquear con 409. El operador ya borró el cliente mentalmente y no debe quedar sin recurso si el DELETE fue parcial.
+
+**Fase:** Studio iterativo post-Video Walls. 15 commits + 15 deploys verdes. Catálogo Video Walls limpio (3×2/4×2/2×2 todos pixel-perfect XD). Kiosk editor con Brand Video field y pickers opt-in para Idle Background y Hero Header. **Próxima sesión: cablear el runtime auto-uso del brandVideo en signage/videowall + smoke visual de todos los cambios en prod**.
 
 ---
 

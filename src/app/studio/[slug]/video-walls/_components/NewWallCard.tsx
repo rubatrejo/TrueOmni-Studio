@@ -14,7 +14,7 @@ import { useEscapeClose, useFocusTrap } from '../../../_lib/use-modal-a11y';
  *
  * Pasos:
  *  1. Name + slug (auto-generado, editable).
- *  2. Grid picker 5-way (3×2 · 4×2 · 2×2 · 2×1 · 1×2) con SVG glyphs.
+ *  2. Grid picker 3-way (3×2 · 4×2 · 2×2) con SVG glyphs.
  *  3. POST `/api/studio/video-walls/walls/{client}` → redirect al editor.
  */
 export function NewWallCard({
@@ -106,7 +106,7 @@ export function NewWallCard({
         </span>
         <span className="text-sm font-medium">Add wall</span>
         <span className="text-[10.5px] uppercase tracking-wider text-zinc-400">
-          Choose grid · 3×2 / 4×2 / 2×2 / 2×1 / 1×2
+          Choose grid · 3×2 / 4×2 / 2×2
         </span>
       </button>
 

@@ -6,7 +6,7 @@ import type { VideoWallTemplate } from './types';
  * Registry singleton de templates video-walls. Cada template se
  * auto-registra al ser importado por `load-templates.ts`. La clave
  * interna del Map combina id + grid: un mismo `01-video-image-full`
- * tiene variantes 3×2 / 4×2 / 2×2 / 2×1 / 1×2 que viven en archivos
+ * tiene variantes 3×2 / 4×2 / 2×2 que viven en archivos
  * distintos (`templates/<grid>/<id>.tsx`).
  */
 

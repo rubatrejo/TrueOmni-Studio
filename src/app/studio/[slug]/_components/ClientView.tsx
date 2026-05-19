@@ -270,7 +270,7 @@ export function ClientView({ slug, initialManifest, initialBranding }: ClientVie
               segment="video-walls"
               productSegment="video-walls"
               label="Video Walls"
-              description="Grid de displays sincronizados (3×2 / 4×2 / 2×2 / 2×1 / 1×2). Slots cell-anchored, crop por TV con ?cell=row,col."
+              description="Grid de displays sincronizados (3×2 / 4×2 / 2×2). Slots cell-anchored, crop por TV con ?cell=row,col."
               icon={LayoutGrid}
               status="live"
               active={initialManifest.products.videoWalls}

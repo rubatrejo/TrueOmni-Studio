@@ -86,19 +86,16 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
         className="px-3"
       />
 
-      {/* Active panel — min-height 430px para los tabs cortos (Brand colors,
-          Fonts) y permitir crecer en Media (kiosk hero + favicon + brand
-          video con YouTube URL ocupa más alto). Para tabs cortos se usa
-          justify-center para no dejar hueco; Media usa layout fluido. */}
+      {/* Active panel — altura fija 430px para todos los tabs (incluido
+          Media tras refactor 2026-05-18). El contenido del tab Media se
+          reorganizó en una sola fila horizontal (Kiosk hero · Brand video
+          · Favicon) con YouTube URL compacto debajo del Brand video para
+          que entre sin crecer el card. */}
       <div
         role="tabpanel"
         id={`${tabsId}-panel-${tab}`}
         aria-labelledby={`${tabsId}-tab-${tab}`}
-        className={
-          tab === 'media'
-            ? 'flex min-h-[430px] flex-col gap-5 p-6'
-            : 'flex h-[430px] flex-col justify-center p-6'
-        }
+        className="flex h-[430px] flex-col justify-center p-6"
       >
         {tab === 'general' ? (
           // 2 secciones lógicas: Identity (Name + Website) + Location
@@ -304,16 +301,25 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
         ) : null}
 
         {tab === 'media' ? (
-          <>
-            <Section title="Brand media" hint="Hero background and favicon icon.">
-              <div className="mx-auto grid max-w-[640px] grid-cols-[1fr_200px] gap-4">
+          // Layout horizontal compacto: 3 cards en una fila (Kiosk hero ·
+          // Brand video · Favicon) para que entren todos en el card de
+          // 430px sin scroll. El YouTube URL del Brand video se mueve a
+          // un input compacto debajo del card en lugar de una sección
+          // separada con preview iframe.
+          <Section
+            title="Brand media"
+            hint="Hero, brand video and favicon — used across kiosk, displays and walls."
+          >
+            <div className="mx-auto grid max-w-[720px] grid-cols-3 gap-3">
+              <div className="space-y-1.5">
                 <MediaField
                   label="Kiosk hero"
-                  hint="9:16 portrait — image or video, ≤5MB."
+                  hint="9:16 · image or video ≤5MB"
                   aspect="16/9"
                   slug={slug}
                   value={value.homeHero?.src}
                   kind={value.homeHero?.kind ?? 'image'}
+                  hideUrlInput
                   onChange={(next) =>
                     setField(
                       'homeHero',
@@ -321,30 +327,24 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
                     )
                   }
                 />
-                <MediaField
-                  label="Favicon"
-                  hint="Square 1:1 — ICO, PNG or SVG."
-                  aspect="1/1"
-                  slug={slug}
-                  value={value.favicon}
-                  kind="image"
-                  hideUrlInput
-                  onChange={(next) => setField('favicon', next?.src ?? '')}
-                />
               </div>
-            </Section>
-
-            <Section
-              title="Brand video"
-              hint="Used as fallback video in Digital Display, Video Wall, kiosk idle and hero header."
-            >
-              <BrandVideoField
+              <BrandVideoFieldCompact
                 slug={slug}
                 value={value.brandVideo}
                 onChange={(next) => setField('brandVideo', next)}
               />
-            </Section>
-          </>
+              <MediaField
+                label="Favicon"
+                hint="Square 1:1 — ICO, PNG, SVG"
+                aspect="1/1"
+                slug={slug}
+                value={value.favicon}
+                kind="image"
+                hideUrlInput
+                onChange={(next) => setField('favicon', next?.src ?? '')}
+              />
+            </div>
+          </Section>
         ) : null}
       </div>
     </div>
@@ -357,7 +357,13 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
 
 type BrandVideo = NonNullable<UnifiedClientBranding['brandVideo']>;
 
-function BrandVideoField({
+/**
+ * `<BrandVideoFieldCompact>` — versión condensada que vive en una columna
+ * de 3 del grid del tab Media. Tab interno (Upload | YouTube URL) en
+ * lugar de stack vertical, para que el card no crezca verticalmente y
+ * mantenga la altura fija del panel (430px).
+ */
+function BrandVideoFieldCompact({
   slug,
   value,
   onChange,
@@ -366,86 +372,96 @@ function BrandVideoField({
   value: BrandVideo | undefined;
   onChange: (next: BrandVideo | undefined) => void;
 }) {
+  const [showYouTube, setShowYouTube] = useState(value?.kind === 'youtube');
   const [youtubeInput, setYoutubeInput] = useState(value?.kind === 'youtube' ? value.src : '');
   const youtubeId = value?.kind === 'youtube' ? extractYouTubeId(value.src) : null;
 
-  return (
-    <div className="space-y-4">
-      <div className="mx-auto max-w-[640px]">
-        <MediaField
-          label="Drop video"
-          hint="MP4 / WebM up to 2MB. For longer clips, paste a YouTube URL below."
-          aspect="16/9"
-          slug={slug}
-          value={value?.kind === 'upload' ? value.src : undefined}
-          kind="video"
-          maxVideoBytes={2 * 1024 * 1024}
-          onChange={(next) => {
-            if (!next) {
-              onChange(undefined);
-              return;
-            }
-            onChange({ kind: 'upload', src: next.src });
-          }}
-        />
-      </div>
-
-      <div className="mx-auto max-w-[640px] space-y-1.5">
-        <label
-          htmlFor="brand-video-yt"
-          className="block text-[11.5px] font-medium text-zinc-700 dark:text-zinc-300"
-        >
-          Or paste a YouTube URL
-        </label>
-        <div className="flex items-center gap-2">
-          <input
-            id="brand-video-yt"
-            type="url"
-            value={youtubeInput}
-            onChange={(e) => setYoutubeInput(e.target.value)}
-            placeholder="https://www.youtube.com/watch?v=…"
-            className="flex-1 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-[12.5px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
-          />
+  if (showYouTube) {
+    return (
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+            Brand video
+          </span>
           <button
             type="button"
-            disabled={!extractYouTubeId(youtubeInput)}
             onClick={() => {
-              const id = extractYouTubeId(youtubeInput);
-              if (!id) return;
-              onChange({ kind: 'youtube', src: youtubeInput.trim() });
+              setShowYouTube(false);
+              setYoutubeInput('');
+              if (value?.kind === 'youtube') onChange(undefined);
             }}
-            className="rounded-md bg-sky-500 px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm transition hover:bg-sky-600 disabled:opacity-40 dark:bg-sky-500 dark:text-white"
+            className="text-[10.5px] text-zinc-500 underline-offset-2 hover:text-zinc-700 hover:underline dark:hover:text-zinc-300"
           >
-            Use URL
+            Use upload
           </button>
         </div>
-        {youtubeId ? (
-          <div className="mt-2 overflow-hidden rounded-md border border-zinc-200 dark:border-zinc-800">
-            <iframe
-              title="YouTube preview"
-              src={`https://www.youtube.com/embed/${youtubeId}?autoplay=0&modestbranding=1`}
-              className="aspect-video w-full"
-              allowFullScreen
+        <div
+          className="relative grid place-items-center overflow-hidden rounded-lg border border-dashed border-zinc-300 bg-zinc-50/60 dark:border-zinc-700 dark:bg-zinc-900/40"
+          style={{ aspectRatio: '16/9' }}
+        >
+          {youtubeId ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`}
+              alt=""
+              className="h-full w-full object-cover"
             />
-          </div>
-        ) : youtubeInput.trim().length > 0 ? (
-          <p className="text-[11px] text-amber-600 dark:text-amber-400">
-            Not a recognized YouTube URL.
-          </p>
-        ) : null}
-        {value?.kind === 'youtube' && (
-          <button
-            type="button"
-            onClick={() => {
-              setYoutubeInput('');
+          ) : (
+            <span className="px-3 text-center text-[10.5px] text-zinc-500">
+              Paste YouTube URL below
+            </span>
+          )}
+        </div>
+        <input
+          type="url"
+          value={youtubeInput}
+          onChange={(e) => {
+            const next = e.target.value;
+            setYoutubeInput(next);
+            if (extractYouTubeId(next)) {
+              onChange({ kind: 'youtube', src: next.trim() });
+            } else if (value?.kind === 'youtube') {
               onChange(undefined);
-            }}
-            className="text-[11px] text-zinc-500 underline-offset-2 hover:text-zinc-700 hover:underline dark:hover:text-zinc-300"
-          >
-            Clear YouTube URL
-          </button>
-        )}
+            }
+          }}
+          placeholder="https://youtu.be/…"
+          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1 font-mono text-[11px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
+        />
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+          Brand video
+        </span>
+        <button
+          type="button"
+          onClick={() => setShowYouTube(true)}
+          className="text-[10.5px] text-sky-600 underline-offset-2 hover:text-sky-700 hover:underline dark:text-sky-400 dark:hover:text-sky-300"
+        >
+          YouTube URL
+        </button>
+      </div>
+      <MediaField
+        label="Drop video"
+        hint="MP4 / WebM ≤2MB"
+        aspect="16/9"
+        slug={slug}
+        value={value?.kind === 'upload' ? value.src : undefined}
+        kind="video"
+        hideUrlInput
+        maxVideoBytes={2 * 1024 * 1024}
+        onChange={(next) => {
+          if (!next) {
+            onChange(undefined);
+            return;
+          }
+          onChange({ kind: 'upload', src: next.src });
+        }}
+      />
     </div>
   );
 }

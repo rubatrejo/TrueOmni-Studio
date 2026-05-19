@@ -529,24 +529,22 @@ function ClientCard({
             <span>
               Edited <time dateTime={client.lastEditedAt}>{relativeTime(client.lastEditedAt)}</time>
             </span>
-            <span className="font-mono">
-              {(client.lastEditor ?? 'ruben@trueomni.com').split('@')[0]}
-            </span>
+            <span className="font-mono">{formatEditorName(client.lastEditor)}</span>
           </div>
         </div>
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-sky-400/50 to-transparent opacity-0 transition group-hover:opacity-100" />
       </Link>
 
-      {/* Pin badge siempre visible si está pinned (sin hover). S-13. */}
+      {/* Pinned badge (estrella) siempre visible si está pinned. S-13. */}
       {client.pinned && (
         <span
           className="pointer-events-none absolute left-3 top-3 z-10 grid h-6 w-6 place-items-center rounded-full bg-amber-400/95 text-zinc-900 shadow-sm"
-          title="Pinned"
-          aria-label="Pinned"
+          title="Favorite"
+          aria-label="Favorite"
         >
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-            <path d="M16 4l4 4-5 5 1 5-2 2-5-5-5 1-2-2 5-5-1-5 2-2 5 1 3-3z" />
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
           </svg>
         </span>
       )}
@@ -559,17 +557,21 @@ function ClientCard({
               e.preventDefault();
               onPinToggle(client.slug);
             }}
-            title={client.pinned ? 'Unpin' : 'Pin to top'}
+            title={client.pinned ? 'Remove from favorites' : 'Add to favorites'}
             className={`grid h-7 w-7 place-items-center rounded-md shadow-sm ring-1 backdrop-blur transition ${
               client.pinned
                 ? 'bg-amber-100 text-amber-700 ring-amber-300 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800/50'
                 : 'bg-white/90 text-zinc-700 ring-zinc-200 hover:bg-white hover:text-zinc-900 dark:bg-zinc-900/90 dark:text-zinc-300 dark:ring-zinc-800 dark:hover:bg-zinc-900'
             }`}
-            aria-label={client.pinned ? `Unpin ${client.name}` : `Pin ${client.name} to top`}
+            aria-label={
+              client.pinned
+                ? `Remove ${client.name} from favorites`
+                : `Add ${client.name} to favorites`
+            }
           >
             <svg
-              width="13"
-              height="13"
+              width="14"
+              height="14"
               viewBox="0 0 24 24"
               fill={client.pinned ? 'currentColor' : 'none'}
               stroke="currentColor"
@@ -578,7 +580,7 @@ function ClientCard({
               strokeLinejoin="round"
               aria-hidden
             >
-              <path d="M16 4l4 4-5 5 1 5-2 2-5-5-5 1-2-2 5-5-1-5 2-2 5 1 3-3z" />
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
             </svg>
           </button>
           <button
@@ -716,6 +718,30 @@ function SkeletonCard() {
       </div>
     </div>
   );
+}
+
+/**
+ * Mapeo email → nombre legible para el footer de las ClientCards.
+ * Antes mostraba solo el local-part del email (`ruba.trejo`) que se ve
+ * técnico. Los super-admins conocidos tienen una entrada explícita; el
+ * resto cae a un title-case del local-part.
+ */
+const EDITOR_NAME_BY_EMAIL: Record<string, string> = {
+  'ruba.trejo@gmail.com': 'Rubén Ramírez',
+  'ruben@trueomni.com': 'Rubén Ramírez',
+  'designers@trueomni.com': 'Rubén Ramírez',
+};
+
+function formatEditorName(email?: string): string {
+  if (!email) return 'Rubén Ramírez';
+  const known = EDITOR_NAME_BY_EMAIL[email.toLowerCase()];
+  if (known) return known;
+  const local = email.split('@')[0] ?? email;
+  return local
+    .split(/[.\-_]+/)
+    .filter(Boolean)
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
+    .join(' ');
 }
 
 function relativeTime(iso: string): string {

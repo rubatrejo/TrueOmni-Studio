@@ -54,13 +54,13 @@ function horizontalScaleFor(canvasW: number): number {
 }
 
 /**
- * Clamp de forecastDays — si el canvas es muy angosto (1x2: 1920) no caben
- * 5 cards de forecast sin solapar con logo/clock. Reduce a 1 día (current
- * temp + 1 forecast). 3 días caben razonablemente en 3840 (2x2/2x1).
+ * Forecast days passa-tal-cual. Anteriormente había un clamp 5→3 en
+ * canvases angostos (1x2/2x1: 1920/3840), pero esos grids fueron
+ * retirados del catálogo (2026-05-18) y el clamp además contradecía
+ * la intención del operador. El `forecastBlockScale = 0.75` (línea
+ * ~251) se encarga de ajustar el tamaño de las cards cuando son 5.
  */
-function clampForecastDays(forecastDays: 1 | 3 | 5, canvasW: number): 1 | 3 | 5 {
-  if (canvasW <= 1920) return 1;
-  if (canvasW <= 3840 && forecastDays === 5) return 3;
+function clampForecastDays(forecastDays: 1 | 3 | 5, _canvasW: number): 1 | 3 | 5 {
   return forecastDays;
 }
 

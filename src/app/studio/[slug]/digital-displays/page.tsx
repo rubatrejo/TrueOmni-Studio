@@ -8,6 +8,10 @@ import { SignageClientFileSchema, type SignageClientFile } from '@/lib/signage/s
 import { loadUnifiedBranding, unifiedToSignageBranding } from '@/lib/studio/client-branding-sync';
 import { loadClientManifest } from '@/lib/studio/client-manifest';
 import { kv } from '@/lib/studio/kv';
+import {
+  applyClonedDisplays,
+  cloneSignageContentFromTemplate,
+} from '@/lib/studio/signage-bootstrap';
 
 import { StudioBrand } from '../../_components/StudioBrand';
 import { ThemeToggle } from '../../_components/ThemeToggle';
@@ -72,6 +76,16 @@ export default async function ClientDisplaysPage({ params }: PageProps) {
         header: structuredClone(template.header),
         displays: [],
       };
+
+      // Clonar displays + events/social/news del template ANTES de
+      // persistir el client file, para que el cliente arranque con la
+      // playlist `lobby-tv` y demás contenido demo en lugar de la lista
+      // vacía. Fix 2026-05-18: el POST de clients/route.ts hace este
+      // clone; el drift recovery no lo hacía y dejaba a "Discover Dekalb"
+      // y similares sin displays.
+      const clonedDisplays = await cloneSignageContentFromTemplate(slug);
+      applyClonedDisplays(fileShape, clonedDisplays);
+
       const validated = SignageClientFileSchema.safeParse(fileShape);
       if (validated.success) {
         await kv.set(kSignageClient(slug), validated.data);

@@ -287,6 +287,21 @@ export function EditorPanel({
               title="Hero header"
               hint="Background image or video for the Home Dashboard and module screens, plus the gradient overlay over it."
             >
+              {branding.brandVideo?.src ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onBrandingChange({
+                      ...branding,
+                      homeHero: { kind: 'video', src: branding.brandVideo!.src },
+                    })
+                  }
+                  className="mb-2 inline-flex items-center gap-1 rounded-md border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-medium text-sky-700 transition hover:border-sky-300 hover:bg-sky-100 dark:border-sky-900/40 dark:bg-sky-950/40 dark:text-sky-300 dark:hover:border-sky-800 dark:hover:bg-sky-950/60"
+                  title="Use the client's brand video from Branding → Media"
+                >
+                  ▶ Use brand video
+                </button>
+              ) : null}
               <MediaField
                 label="Drop image or video"
                 hint="1080×620 recommended · JPG/PNG/WebP up to 5MB · MP4/WebM up to 2MB · paste a CDN URL below for larger videos"
@@ -398,6 +413,7 @@ export function EditorPanel({
             onChange={onBillboardChange}
             modulesAvailable={modules.tiles.filter((t) => t.enabled && t.key !== 'wayfinding')}
             onBillboardPreview={onBillboardPreview}
+            brandVideo={branding.brandVideo}
           />
         )}
         {sectionKey === 'ai-avatar' && (

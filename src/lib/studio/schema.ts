@@ -95,6 +95,16 @@ export const BrandingSchema = z.object({
       angle: z.number().min(0).max(360).default(180),
     })
     .optional(),
+  /** Brand video del cliente (upload o YouTube URL). Source of truth en
+   *  unified branding (`client:<slug>:branding.brandVideo`). El kiosk lo
+   *  recibe vía sync para que el operador pueda seleccionarlo como Idle
+   *  Background y Hero Header con un click. */
+  brandVideo: z
+    .object({
+      kind: z.enum(['upload', 'youtube']).default('upload'),
+      src: z.string().default(''),
+    })
+    .optional(),
 });
 
 /** Lista curada de Google Fonts disponibles en el Font selector. */

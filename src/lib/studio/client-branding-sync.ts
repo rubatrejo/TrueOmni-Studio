@@ -104,6 +104,23 @@ export const UnifiedClientBrandingSchema = z.object({
     })
     .optional(),
 
+  /**
+   * Brand video — un video del cliente (upload o URL YouTube) que se usa
+   * automáticamente como fallback en los slots de video de Digital Display
+   * y Video Wall, y que el operador puede seleccionar manualmente en el
+   * Kiosk editor para Idle Background y Hero Header.
+   *
+   *   - `kind: 'upload'`  → `src` es un data URL o /path local.
+   *   - `kind: 'youtube'` → `src` es la URL completa de YouTube; el runtime
+   *     extrae el video ID y embebe vía iframe.
+   */
+  brandVideo: z
+    .object({
+      kind: z.enum(['upload', 'youtube']).default('upload'),
+      src: z.string().default(''),
+    })
+    .optional(),
+
   /** Favicon — usado por kiosk; ignorado por signage. */
   favicon: z.string().optional().default(''),
 });
@@ -160,6 +177,7 @@ export function unifiedToKioskBranding(unified: UnifiedClientBranding): Branding
   }
   if (unified.homeHero) out.homeHero = unified.homeHero;
   if (unified.heroGradient) out.heroGradient = unified.heroGradient;
+  if (unified.brandVideo && unified.brandVideo.src) out.brandVideo = unified.brandVideo;
   return out;
 }
 
@@ -198,6 +216,7 @@ export function kioskToUnifiedBranding(
     fonts: kioskBranding.fonts ?? { display: 'Montserrat', body: 'Open Sans' },
     homeHero: kioskBranding.homeHero,
     heroGradient: kioskBranding.heroGradient,
+    brandVideo: kioskBranding.brandVideo,
     favicon: kioskBranding.favicon ?? '',
   });
 }

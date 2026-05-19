@@ -86,6 +86,7 @@ export function BillboardEditor({
   onChange,
   modulesAvailable,
   onBillboardPreview,
+  brandVideo,
 }: {
   billboard: BillboardConfig;
   onChange: (next: BillboardConfig) => void;
@@ -98,6 +99,9 @@ export function BillboardEditor({
   /** Audit F-23: al elegir un variant nuevo, también disparamos el preview
    *  del idle en el iframe para que el operador vea el cambio sin clic extra. */
   onBillboardPreview?: () => void;
+  /** Brand video del cliente — si está poblado, muestra el botón
+   *  "Use brand video" en la sección Background para un picker rápido. */
+  brandVideo?: { kind: 'upload' | 'youtube'; src: string };
 }) {
   const slots = VARIANT_SLOTS[billboard.variant];
   const hasLogo = VARIANT_HAS_LOGO[billboard.variant];
@@ -215,14 +219,31 @@ export function BillboardEditor({
 
       {/* ───────────── Background (shared across all 4 variants) ───────────── */}
       <section className="space-y-3 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
-        <header>
-          <h3 className="font-display text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500 dark:text-zinc-400">
-            Background (shared across all variants)
-          </h3>
-          <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
-            One image/video applies to the hero of all 4 idle layouts so the kiosk identity stays
-            consistent when switching variants.
-          </p>
+        <header className="flex items-start justify-between gap-3">
+          <div>
+            <h3 className="font-display text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500 dark:text-zinc-400">
+              Background (shared across all variants)
+            </h3>
+            <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
+              One image/video applies to the hero of all 4 idle layouts so the kiosk identity stays
+              consistent when switching variants.
+            </p>
+          </div>
+          {brandVideo?.src ? (
+            <button
+              type="button"
+              onClick={() =>
+                onChange({
+                  ...billboard,
+                  background: { type: 'video', src: brandVideo.src },
+                })
+              }
+              className="shrink-0 rounded-md border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-medium text-sky-700 transition hover:border-sky-300 hover:bg-sky-100 dark:border-sky-900/40 dark:bg-sky-950/40 dark:text-sky-300 dark:hover:border-sky-800 dark:hover:bg-sky-950/60"
+              title="Use the client's brand video from Branding → Media"
+            >
+              ▶ Use brand video
+            </button>
+          ) : null}
         </header>
         <MediaField
           label="Drop image or video"

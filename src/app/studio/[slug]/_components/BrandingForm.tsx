@@ -85,17 +85,19 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
         className="px-3"
       />
 
-      {/* Active panel — altura fija 430px (≈30% menos que el 620 anterior),
-          sin scroll. El contenido de cada tab se compactó para caber sin
-          recortes: Logos con dropzones aspect 6:1 sin URL row, Media con
-          aspect 3:2 y favicon más chico, etc. El flex justify-center
-          centra el contenido cuando la suma natural es menor a 430px
-          (Fonts, Brand colors) para no dejar hueco visible debajo. */}
+      {/* Active panel — min-height 430px para los tabs cortos (Brand colors,
+          Fonts) y permitir crecer en Media (kiosk hero + favicon + brand
+          video con YouTube URL ocupa más alto). Para tabs cortos se usa
+          justify-center para no dejar hueco; Media usa layout fluido. */}
       <div
         role="tabpanel"
         id={`${tabsId}-panel-${tab}`}
         aria-labelledby={`${tabsId}-tab-${tab}`}
-        className="flex h-[430px] flex-col justify-center p-6"
+        className={
+          tab === 'media'
+            ? 'flex min-h-[430px] flex-col gap-5 p-6'
+            : 'flex h-[430px] flex-col justify-center p-6'
+        }
       >
         {tab === 'general' ? (
           // 2 secciones lógicas: Identity (Name + Website) + Location
@@ -301,40 +303,167 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
         ) : null}
 
         {tab === 'media' ? (
-          <Section title="Brand media" hint="Hero background and favicon icon.">
-            {/* max-w + mx-auto: limita ancho del grid para que aspect 16:9
-                del Kiosk hero no exceda los 430px de alto del panel.
-                Antes con `grid-cols-[1fr_220px]` full-width y aspect 3:2
-                la card hero crecía a ~570px de alto y empujaba la columna
-                Favicon fuera del card padre. */}
-            <div className="mx-auto grid max-w-[640px] grid-cols-[1fr_200px] gap-4">
-              <MediaField
-                label="Kiosk hero"
-                hint="9:16 portrait — image or video, ≤5MB."
-                aspect="16/9"
+          <>
+            <Section title="Brand media" hint="Hero background and favicon icon.">
+              <div className="mx-auto grid max-w-[640px] grid-cols-[1fr_200px] gap-4">
+                <MediaField
+                  label="Kiosk hero"
+                  hint="9:16 portrait — image or video, ≤5MB."
+                  aspect="16/9"
+                  slug={slug}
+                  value={value.homeHero?.src}
+                  kind={value.homeHero?.kind ?? 'image'}
+                  onChange={(next) =>
+                    setField(
+                      'homeHero',
+                      next ? { kind: next.kind, src: next.src } : { kind: 'image', src: '' },
+                    )
+                  }
+                />
+                <MediaField
+                  label="Favicon"
+                  hint="Square 1:1 — ICO, PNG or SVG."
+                  aspect="1/1"
+                  slug={slug}
+                  value={value.favicon}
+                  kind="image"
+                  hideUrlInput
+                  onChange={(next) => setField('favicon', next?.src ?? '')}
+                />
+              </div>
+            </Section>
+
+            <Section
+              title="Brand video"
+              hint="Used as fallback video in Digital Display, Video Wall, kiosk idle and hero header."
+            >
+              <BrandVideoField
                 slug={slug}
-                value={value.homeHero?.src}
-                kind={value.homeHero?.kind ?? 'image'}
-                onChange={(next) =>
-                  setField(
-                    'homeHero',
-                    next ? { kind: next.kind, src: next.src } : { kind: 'image', src: '' },
-                  )
-                }
+                value={value.brandVideo}
+                onChange={(next) => setField('brandVideo', next)}
               />
-              <MediaField
-                label="Favicon"
-                hint="Square 1:1 — ICO, PNG or SVG."
-                aspect="1/1"
-                slug={slug}
-                value={value.favicon}
-                kind="image"
-                hideUrlInput
-                onChange={(next) => setField('favicon', next?.src ?? '')}
-              />
-            </div>
-          </Section>
+            </Section>
+          </>
         ) : null}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+//  Brand video field — upload (drag&drop) o URL de YouTube
+// ---------------------------------------------------------------------------
+
+type BrandVideo = NonNullable<UnifiedClientBranding['brandVideo']>;
+
+/**
+ * Extrae el video ID de una URL de YouTube. Acepta `youtube.com/watch?v=ID`,
+ * `youtu.be/ID`, `youtube.com/embed/ID`, `youtube.com/shorts/ID`. Devuelve
+ * `null` si no es una URL válida de YouTube.
+ */
+function extractYouTubeId(url: string): string | null {
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  // youtu.be/ID
+  let m = trimmed.match(/youtu\.be\/([\w-]{11})/i);
+  if (m) return m[1];
+  // youtube.com/watch?v=ID
+  m = trimmed.match(/[?&]v=([\w-]{11})/i);
+  if (m) return m[1];
+  // youtube.com/embed/ID or /shorts/ID
+  m = trimmed.match(/youtube\.com\/(?:embed|shorts)\/([\w-]{11})/i);
+  if (m) return m[1];
+  return null;
+}
+
+function BrandVideoField({
+  slug,
+  value,
+  onChange,
+}: {
+  slug: string;
+  value: BrandVideo | undefined;
+  onChange: (next: BrandVideo | undefined) => void;
+}) {
+  const [youtubeInput, setYoutubeInput] = useState(value?.kind === 'youtube' ? value.src : '');
+  const youtubeId = value?.kind === 'youtube' ? extractYouTubeId(value.src) : null;
+
+  return (
+    <div className="space-y-4">
+      <div className="mx-auto max-w-[640px]">
+        <MediaField
+          label="Drop video"
+          hint="MP4 / WebM up to 2MB. For longer clips, paste a YouTube URL below."
+          aspect="16/9"
+          slug={slug}
+          value={value?.kind === 'upload' ? value.src : undefined}
+          kind="video"
+          maxVideoBytes={2 * 1024 * 1024}
+          onChange={(next) => {
+            if (!next) {
+              onChange(undefined);
+              return;
+            }
+            onChange({ kind: 'upload', src: next.src });
+          }}
+        />
+      </div>
+
+      <div className="mx-auto max-w-[640px] space-y-1.5">
+        <label
+          htmlFor="brand-video-yt"
+          className="block text-[11.5px] font-medium text-zinc-700 dark:text-zinc-300"
+        >
+          Or paste a YouTube URL
+        </label>
+        <div className="flex items-center gap-2">
+          <input
+            id="brand-video-yt"
+            type="url"
+            value={youtubeInput}
+            onChange={(e) => setYoutubeInput(e.target.value)}
+            placeholder="https://www.youtube.com/watch?v=…"
+            className="flex-1 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-[12.5px] text-zinc-900 placeholder:text-zinc-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
+          />
+          <button
+            type="button"
+            disabled={!extractYouTubeId(youtubeInput)}
+            onClick={() => {
+              const id = extractYouTubeId(youtubeInput);
+              if (!id) return;
+              onChange({ kind: 'youtube', src: youtubeInput.trim() });
+            }}
+            className="rounded-md bg-sky-500 px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm transition hover:bg-sky-600 disabled:opacity-40 dark:bg-sky-500 dark:text-white"
+          >
+            Use URL
+          </button>
+        </div>
+        {youtubeId ? (
+          <div className="mt-2 overflow-hidden rounded-md border border-zinc-200 dark:border-zinc-800">
+            <iframe
+              title="YouTube preview"
+              src={`https://www.youtube.com/embed/${youtubeId}?autoplay=0&modestbranding=1`}
+              className="aspect-video w-full"
+              allowFullScreen
+            />
+          </div>
+        ) : youtubeInput.trim().length > 0 ? (
+          <p className="text-[11px] text-amber-600 dark:text-amber-400">
+            Not a recognized YouTube URL.
+          </p>
+        ) : null}
+        {value?.kind === 'youtube' && (
+          <button
+            type="button"
+            onClick={() => {
+              setYoutubeInput('');
+              onChange(undefined);
+            }}
+            className="text-[11px] text-zinc-500 underline-offset-2 hover:text-zinc-700 hover:underline dark:hover:text-zinc-300"
+          >
+            Clear YouTube URL
+          </button>
+        )}
       </div>
     </div>
   );

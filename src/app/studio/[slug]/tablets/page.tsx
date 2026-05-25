@@ -1,3 +1,5 @@
+import { loadClientManifest } from '@/lib/studio/client-manifest';
+
 import { ComingSoon } from '../_components/ComingSoon';
 
 export const metadata = {
@@ -6,9 +8,11 @@ export const metadata = {
 
 export default async function TabletsStub({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  const manifest = await loadClientManifest(slug).catch(() => null);
   return (
     <ComingSoon
       slug={slug}
+      clientName={manifest?.name}
       product="Tablets"
       timeline="Exploring · 2027"
       tone="exploring"

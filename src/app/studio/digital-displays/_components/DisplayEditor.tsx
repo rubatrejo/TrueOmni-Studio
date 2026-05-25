@@ -266,7 +266,10 @@ export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps
         <SignageTopBar
           slug={`${client.slug} / ${draft.slug}`}
           clientSlug={client.slug}
-          nombre={`${client.name} · ${draft.name}`}
+          clientLabel={client.name}
+          productLabel="Digital Displays"
+          productHref={`/studio/${client.slug}/digital-displays`}
+          nombre={draft.name}
           saveState={saveState}
           isDirty={dirty}
           previewHref={previewHref}

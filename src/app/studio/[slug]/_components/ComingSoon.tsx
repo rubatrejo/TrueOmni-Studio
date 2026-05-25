@@ -1,8 +1,11 @@
 'use client';
 
-import { ArrowLeft, Bell, Check, ExternalLink } from 'lucide-react';
+import { Bell, Check, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+
+import { Breadcrumb } from '../../_components/Breadcrumb';
+import { StudioBrand } from '../../_components/StudioBrand';
 
 /**
  * Stub visual rico para productos del cliente que aún no están construidos.
@@ -16,6 +19,8 @@ import { useState } from 'react';
  */
 export interface ComingSoonProps {
   slug: string;
+  /** Nombre legible del cliente para el breadcrumb. Cae al slug si falta. */
+  clientName?: string;
   product: 'Mobile PWA' | 'Video Walls' | 'Tablets';
   /** Resumen breve del producto. */
   description: string;
@@ -51,6 +56,7 @@ const TONE_PRESETS = {
 
 export function ComingSoon({
   slug,
+  clientName,
   product,
   description,
   features,
@@ -77,13 +83,17 @@ export function ComingSoon({
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
       <header className="sticky top-0 z-30 flex h-14 items-center border-b border-zinc-200 bg-white/95 px-5 backdrop-blur dark:border-zinc-900 dark:bg-zinc-950/95">
-        <Link
-          href={`/studio/${slug}`}
-          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back to client
-        </Link>
+        <div className="flex items-center gap-4">
+          <StudioBrand />
+          <span className="block h-5 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden />
+          <Breadcrumb
+            items={[
+              { label: 'Clients', href: '/studio' },
+              { label: clientName ?? slug, href: `/studio/${slug}` },
+              { label: product },
+            ]}
+          />
+        </div>
       </header>
 
       <main className="mx-auto max-w-[840px] px-6 py-12 sm:px-10 sm:py-16">

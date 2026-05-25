@@ -1,4 +1,3 @@
-import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -10,6 +9,7 @@ import { GRID_CONFIGS } from '@/lib/video-walls/dimensions';
 import { kVideoWallClient, kVideoWallClientList } from '@/lib/video-walls/kv-keys';
 import { VideoWallClientFileSchema, type VideoWallClientFile } from '@/lib/video-walls/schema';
 
+import { Breadcrumb } from '../../_components/Breadcrumb';
 import { StudioBrand } from '../../_components/StudioBrand';
 import { ThemeToggle } from '../../_components/ThemeToggle';
 
@@ -118,23 +118,13 @@ export default async function ClientVideoWallsPage({ params }: PageProps) {
         <div className="flex items-center gap-4">
           <StudioBrand />
           <span className="block h-5 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden />
-          <nav className="flex items-center gap-1.5 text-[13px] text-zinc-500">
-            <Link
-              href="/studio"
-              className="transition hover:text-zinc-800 dark:hover:text-zinc-300"
-            >
-              Clients
-            </Link>
-            <ChevronRight className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-700" aria-hidden />
-            <Link
-              href={`/studio/${slug}`}
-              className="transition hover:text-zinc-800 dark:hover:text-zinc-300"
-            >
-              {manifest.name}
-            </Link>
-            <ChevronRight className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-700" aria-hidden />
-            <span className="font-medium text-zinc-900 dark:text-zinc-100">Video Walls</span>
-          </nav>
+          <Breadcrumb
+            items={[
+              { label: 'Clients', href: '/studio' },
+              { label: manifest.name, href: `/studio/${slug}` },
+              { label: 'Video Walls' },
+            ]}
+          />
         </div>
         <ThemeToggle />
       </header>

@@ -18,6 +18,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { UnifiedClientBranding } from '@/lib/studio/client-branding-sync';
 import type { ClientManifest } from '@/lib/studio/client-manifest';
 
+import { Breadcrumb } from '../../_components/Breadcrumb';
 import { StudioBrand } from '../../_components/StudioBrand';
 import { ThemeToggle } from '../../_components/ThemeToggle';
 
@@ -157,16 +158,7 @@ export function ClientView({ slug, initialManifest, initialBranding }: ClientVie
         <div className="flex items-center gap-4">
           <StudioBrand />
           <span className="block h-5 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden />
-          <nav className="flex items-center gap-1.5 text-[13px] text-zinc-500">
-            <Link
-              href="/studio"
-              className="transition hover:text-zinc-800 dark:hover:text-zinc-300"
-            >
-              Clients
-            </Link>
-            <ChevronRight className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-700" aria-hidden />
-            <span className="font-medium text-zinc-900 dark:text-zinc-100">{branding.name}</span>
-          </nav>
+          <Breadcrumb items={[{ label: 'Clients', href: '/studio' }, { label: branding.name }]} />
         </div>
         <div className="flex items-center gap-3">
           {isDirty && (

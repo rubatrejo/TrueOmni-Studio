@@ -1,11 +1,12 @@
 'use client';
 
-import { ChevronRight, Download, Eye, History, Send, Undo2, Redo2, Upload } from 'lucide-react';
+import { Download, Eye, History, Send, Undo2, Redo2, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 
 import { downloadConfigExport, importConfig } from '../_lib/api-client';
 
+import { Breadcrumb } from './Breadcrumb';
 import { FaviconBadge } from './FaviconBadge';
 import { StudioBrand } from './StudioBrand';
 import { ThemeToggle } from './ThemeToggle';
@@ -47,27 +48,25 @@ export function TopBar({
       <div className="flex items-center gap-4">
         <StudioBrand />
         <span className="block h-5 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden="true" />
-        <nav className="flex items-center gap-1.5 text-[13px] text-zinc-500">
-          {/* Breadcrumb dinámico: "Clients > {client} > kiosk" en xl+, solo el
-              cliente en pantallas más estrechas. */}
-          <Link
-            href="/studio"
-            className="hidden transition hover:text-zinc-800 dark:hover:text-zinc-300 xl:inline"
-          >
-            Clients
-          </Link>
-          <ChevronRight
-            className="hidden h-3.5 w-3.5 text-zinc-400 dark:text-zinc-700 xl:block"
-            aria-hidden="true"
-          />
-          <FaviconBadge
-            favicon={favicon}
-            slug={slug}
-            className="block h-4 w-4 rounded-sm object-cover ring-1 ring-zinc-200 dark:ring-zinc-800"
-          />
-          <span className="font-medium text-zinc-900 dark:text-zinc-100">{nombre}</span>
-          <VersionBadge currentVersion={currentVersion} />
-        </nav>
+        {/* Breadcrumb canónico compartido: Clients › {Cliente} › Kiosk. */}
+        <Breadcrumb
+          items={[
+            { label: 'Clients', href: '/studio' },
+            { label: nombre, href: `/studio/${slug}` },
+            {
+              label: 'Kiosk',
+              icon: (
+                <FaviconBadge
+                  favicon={favicon}
+                  slug={slug}
+                  className="block h-4 w-4 rounded-sm object-cover ring-1 ring-zinc-200 dark:ring-zinc-800"
+                />
+              ),
+              slug,
+            },
+          ]}
+        />
+        <VersionBadge currentVersion={currentVersion} />
       </div>
 
       <div className="flex items-center gap-2">

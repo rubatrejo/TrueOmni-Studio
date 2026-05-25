@@ -1,8 +1,9 @@
 'use client';
 
-import { ChevronRight, Eye, Send } from 'lucide-react';
+import { Eye, Send } from 'lucide-react';
 import Link from 'next/link';
 
+import { Breadcrumb, ScreenCrumbIcon } from '../../../_components/Breadcrumb';
 import { StudioBrand } from '../../../_components/StudioBrand';
 import { ThemeToggle } from '../../../_components/ThemeToggle';
 
@@ -52,65 +53,16 @@ export function SignageTopBar({
       <div className="flex items-center gap-4">
         <StudioBrand />
         <span className="block h-5 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden="true" />
-        <nav className="flex items-center gap-1.5 text-[13px] text-zinc-500">
-          <Link
-            href="/studio"
-            className="hidden transition hover:text-zinc-800 dark:hover:text-zinc-300 xl:inline"
-          >
-            Clients
-          </Link>
-          <ChevronRight
-            className="hidden h-3.5 w-3.5 text-zinc-400 dark:text-zinc-700 xl:block"
-            aria-hidden="true"
-          />
-          {clientLabel ? (
-            <>
-              <Link
-                href={`/studio/${clientSlug}`}
-                className="hidden transition hover:text-zinc-800 dark:hover:text-zinc-300 xl:inline"
-              >
-                {clientLabel}
-              </Link>
-              <ChevronRight
-                className="hidden h-3.5 w-3.5 text-zinc-400 dark:text-zinc-700 xl:block"
-                aria-hidden="true"
-              />
-            </>
-          ) : null}
-          <Link
-            href={productHref ?? `/studio/${clientSlug}`}
-            className="hidden transition hover:text-zinc-800 dark:hover:text-zinc-300 xl:inline"
-          >
-            {productLabel}
-          </Link>
-          <ChevronRight
-            className="hidden h-3.5 w-3.5 text-zinc-400 dark:text-zinc-700 xl:block"
-            aria-hidden="true"
-          />
-          <span className="grid h-4 w-4 place-items-center rounded-sm bg-zinc-100 text-zinc-500 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800">
-            <svg
-              width="10"
-              height="10"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-            >
-              <rect x="1.5" y="3" width="13" height="9" rx="1" />
-              <line x1="6" y1="14" x2="10" y2="14" />
-            </svg>
-          </span>
-          <span className="font-medium text-zinc-900 dark:text-zinc-100">{nombre}</span>
-          <span
-            className="ml-1 rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-[11px] text-zinc-500 dark:bg-zinc-900 dark:text-zinc-500"
-            title={`Theme slug: ${slug}`}
-          >
-            {slug}
-          </span>
-        </nav>
+        {/* Breadcrumb canónico compartido (mismo componente que el kiosk).
+            Trail: Clients › {Cliente} › {Producto} › {Ítem}. */}
+        <Breadcrumb
+          items={[
+            { label: 'Clients', href: '/studio' },
+            ...(clientLabel ? [{ label: clientLabel, href: `/studio/${clientSlug}` }] : []),
+            { label: productLabel, href: productHref ?? `/studio/${clientSlug}` },
+            { label: nombre, icon: <ScreenCrumbIcon />, slug },
+          ]}
+        />
       </div>
 
       <div className="flex items-center gap-2">

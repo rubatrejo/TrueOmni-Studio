@@ -6,6 +6,7 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
+import { BillboardBackground } from './billboard-background';
 import { AccessibilityIcon } from './billboard-footer-parts';
 import { OverlayLayer } from './billboard-overlay';
 import { CameraIcon } from './icons/camera-icon';
@@ -276,19 +277,7 @@ export function Billboard1() {
           borderRadius: '9px',
         }}
       >
-        {heroIsVideo ? (
-          <video
-            src={heroSrc}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        ) : (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={heroSrc} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        )}
+        <BillboardBackground src={heroSrc} type={heroIsVideo ? 'video' : 'image'} />
         {/* Overlay base de identidad (legibilidad del TOUCH TO START sobre la
             foto). Encima, OverlayLayer aplica el overlay configurable del
             Studio si el operador definió mode/color/opacity propios. */}

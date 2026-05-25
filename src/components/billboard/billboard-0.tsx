@@ -4,6 +4,7 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
+import { BillboardBackground } from './billboard-background';
 import { OverlayLayer } from './billboard-overlay';
 import {
   BILLBOARD_LOGO_SLOT_WIDTH,
@@ -34,18 +35,7 @@ export function Billboard0() {
       className="relative h-full w-full overflow-hidden"
       style={{ backgroundColor: '#000' }}
     >
-      {background.type === 'video' ? (
-        <video
-          src={background.src}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      ) : (
-        <img src={background.src} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      )}
+      <BillboardBackground src={background.src} type={background.type} />
 
       <OverlayLayer overlayOpacity={overlayOpacity} overlay={overlay} />
 

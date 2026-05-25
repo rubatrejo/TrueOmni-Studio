@@ -31,6 +31,14 @@ type BillboardOverride = {
   modules?: string[];
   /** Background compartido por las 4 variants (gana sobre b{N}.background). */
   background?: BillboardB0Config['background'];
+  /**
+   * Idle background a nivel de branding (`branding.idleBackground`). Cuando
+   * está poblado y NO hay un `background` explícito del Billboard editor, se
+   * usa como fondo de las 4 variants idle en lugar del default per-variant.
+   * `kind: 'youtube'` se mapea a `type: 'video'` y el `BillboardBackground`
+   * detecta la URL para embeber el iframe.
+   */
+  idleBackground?: { kind: 'image' | 'video' | 'youtube'; src: string };
   /** Settings idle del variant 0 (Dark Hero). */
   b0?: Partial<BillboardVariantSettings>;
   /** Settings idle del variant 1 (Grid + Hero). */
@@ -75,6 +83,7 @@ export function useBillboardOverride(): BillboardOverride {
         footerLogoPosition: detail.footerLogoPosition,
         modules: Array.isArray(detail.modules) ? detail.modules : undefined,
         background: detail.background,
+        idleBackground: detail.idleBackground,
         b0: detail.b0,
         b1: detail.b1,
         b2: detail.b2,
@@ -187,14 +196,27 @@ function withDefaults(
 }
 
 /**
+ * Mapea el `idleBackground` (branding) al shape `background` del Billboard.
+ * `kind: 'youtube'` → `type: 'video'`: el `BillboardBackground` detecta la URL
+ * de YouTube en el `src` y embebe un iframe en lugar de un `<video>`.
+ */
+function idleBackgroundToBackground(idle: {
+  kind: 'image' | 'video' | 'youtube';
+  src: string;
+}): BillboardB0Config['background'] {
+  return { type: idle.kind === 'image' ? 'image' : 'video', src: idle.src };
+}
+
+/**
  * Devuelve los settings idle de la variante pedida con defaults aplicados.
  * Si el Studio no envió override aún, retorna los defaults canónicos del
  * variant (background per-variant, touchHere/overlay compartidos con B0).
  *
  * Background resolution order:
- *   1. `override.background` (shared, nuevo) — si está poblado gana siempre.
+ *   1. `override.background` (shared, explícito del Billboard editor) — gana.
  *   2. `override.b{N}.background` (legacy per-variant) — back-compat.
- *   3. `VARIANT_DEFAULT_BACKGROUND[N]` — fallback canónico del variant.
+ *   3. `override.idleBackground` (branding) — fallback cuando no hay 1 ni 2.
+ *   4. `VARIANT_DEFAULT_BACKGROUND[N]` — fallback canónico del variant.
  */
 export function useBillboardSettings(variant: 0 | 1 | 2 | 3): BillboardB0Config {
   const override = useBillboardOverride();
@@ -207,7 +229,11 @@ export function useBillboardSettings(variant: 0 | 1 | 2 | 3): BillboardB0Config 
           ? override.b2
           : override.b3;
   const base = withDefaults(slot, variant);
-  return override.background ? { ...base, background: override.background } : base;
+  if (override.background) return { ...base, background: override.background };
+  if (!slot?.background && override.idleBackground?.src) {
+    return { ...base, background: idleBackgroundToBackground(override.idleBackground) };
+  }
+  return base;
 }
 
 /**

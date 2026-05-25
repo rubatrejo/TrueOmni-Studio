@@ -6,6 +6,7 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
+import { BillboardBackground } from './billboard-background';
 import { AccessibilityIcon } from './billboard-footer-parts';
 import { OverlayLayer } from './billboard-overlay';
 import { resolveSlotHref, resolveSlotImage, resolveSlotLabel } from './module-info';
@@ -112,19 +113,7 @@ export function Billboard3() {
 
       {/* Banner central (y=475..1245): grass/city + logo + TOUCH TO START */}
       <div className="absolute inset-x-0 overflow-hidden" style={{ top: '475px', height: '770px' }}>
-        {heroIsVideo ? (
-          <video
-            src={heroSrc}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        ) : (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={heroSrc} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        )}
+        <BillboardBackground src={heroSrc} type={heroIsVideo ? 'video' : 'image'} />
         {/* Overlay base de identidad de marca: brand-primary 60% asegura
             legibilidad del logo + TOUCH TO START sobre cualquier hero. Encima,
             OverlayLayer aplica el overlay configurable del Studio si el

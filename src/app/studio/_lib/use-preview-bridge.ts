@@ -80,6 +80,7 @@ export type BrandingPatch = {
   };
   homeHero?: { kind: 'image' | 'video'; src: string };
   heroGradient?: { from: string; to: string; angle: number };
+  idleBackground?: { kind: 'image' | 'video' | 'youtube'; src: string };
   clientName?: string;
   clientCoords?: { lat: number; lng: number };
 };
@@ -175,6 +176,7 @@ export function usePreviewBridge() {
             fonts: branding.fonts,
             homeHero: branding.homeHero,
             heroGradient: branding.heroGradient,
+            idleBackground: branding.idleBackground,
             clientName: branding.clientName,
             clientCoords: branding.clientCoords,
           },

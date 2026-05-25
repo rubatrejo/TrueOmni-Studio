@@ -7,6 +7,7 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
+import { BillboardBackground } from './billboard-background';
 import { AccessibilityIcon } from './billboard-footer-parts';
 import { OverlayLayer } from './billboard-overlay';
 import { MODULE_BILLBOARD_INFO, resolveSlotHref } from './module-info';
@@ -103,19 +104,7 @@ export function Billboard2() {
       style={{ backgroundColor: '#000' }}
     >
       {/* Hero full-bleed (overrideable per kiosk) */}
-      {heroIsVideo ? (
-        <video
-          src={heroSrc}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      ) : (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={heroSrc} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      )}
+      <BillboardBackground src={heroSrc} type={heroIsVideo ? 'video' : 'image'} />
       {/* Overlay base de identidad (gradient negro vertical para legibilidad
           del logo + cards). Encima, OverlayLayer aplica el overlay configurable
           del Studio si el operador definió mode/color/opacity propios. */}

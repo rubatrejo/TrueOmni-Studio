@@ -333,6 +333,13 @@ function applyModulesAndTiles(
     image: imageByKey.get(t.key) ?? '',
   }));
 
+  // Tamaño global de la tipografía de los títulos de los tiles (px).
+  if (typeof modules.tileTitleFontSize === 'number') {
+    home.tileTitleFontSize = modules.tileTitleFontSize;
+  } else {
+    delete home.tileTitleFontSize;
+  }
+
   if (wayfindingTile) {
     const cur = obj(home, 'wayfinding');
     cur.enabled = wayfindingTile.enabled;

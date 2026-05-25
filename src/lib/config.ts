@@ -851,6 +851,9 @@ export interface KioskConfig {
     /** Configuración del Main Dashboard / Home. */
     home?: {
       tiles: HomeTile[];
+      /** Tamaño global (px) de la tipografía de los títulos de los tiles del
+       *  grid. Si `undefined`, el runtime usa el default de 50px. */
+      tileTitleFontSize?: number;
       wayfinding?: {
         enabled: boolean;
         label: string;

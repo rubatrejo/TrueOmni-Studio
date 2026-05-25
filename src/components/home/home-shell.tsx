@@ -11,6 +11,8 @@ import { SearchOverlay } from './search-overlay';
 
 type ModulesOverridePayload = {
   tiles: Array<{ key: string; label: string; enabled: boolean }>;
+  /** Tamaño global de la tipografía de los títulos de los tiles (px). */
+  tileTitleFontSize?: number;
 };
 
 type SystemModulesPayload = Record<string, boolean>;
@@ -49,11 +51,15 @@ export function HomeShell({
   listings,
   allTiles,
   survey,
+  tileTitleFontSize,
 }: {
   header: ReactNode;
   listings: readonly HomeListing[];
   allTiles: readonly HomeTile[];
   survey?: SurveyConfig;
+  /** Tamaño global (px) de los títulos de los tiles — del config publicado.
+   *  El override live del Studio (si llega) tiene prioridad. */
+  tileTitleFontSize?: number;
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [override, setOverride] = useState<ModulesOverridePayload | null>(null);
@@ -126,7 +132,11 @@ export function HomeShell({
         className="scrollbar-hide flex-1 overflow-y-auto overflow-x-hidden overscroll-contain"
         style={{ paddingTop: '40px', paddingBottom: '120px' }}
       >
-        <CategoryGrid tiles={visibleTiles} onSurveyTap={openSurvey} />
+        <CategoryGrid
+          tiles={visibleTiles}
+          onSurveyTap={openSurvey}
+          titleFontSize={override?.tileTitleFontSize ?? tileTitleFontSize}
+        />
       </main>
       <div
         aria-hidden

@@ -114,6 +114,10 @@ export const BrandingSchema = z.object({
       src: z.string().default(''),
     })
     .optional(),
+  /** Tamaño del logo del Hero Header del Home (S/M/L/XL). Escala el slot del
+   *  logo del header (default M = 360×90), igual que el logo idle del
+   *  Billboard. Si `undefined`, usa M. */
+  heroLogoSize: z.enum(['S', 'M', 'L', 'XL']).optional(),
 });
 
 /** Lista curada de Google Fonts disponibles en el Font selector. */
@@ -213,6 +217,13 @@ export const ModulesSchema = z.object({
    * Mismas dimensiones que un Lucide para coherencia visual.
    */
   customIcons: z.record(z.string(), z.string()).default({}),
+  /**
+   * Tamaño global (px) de la tipografía de los títulos de los tiles del Home
+   * Dashboard. Aplica a TODOS los tiles por igual (grid uniforme). Si
+   * `undefined`, el runtime usa el default de `category-tile` (50px verbatim
+   * del SVG Dashboard).
+   */
+  tileTitleFontSize: z.number().int().min(20).max(120).optional(),
 });
 
 export type ModuleEntry = z.infer<typeof ModuleEntrySchema>;
@@ -329,6 +340,19 @@ export const BILLBOARD_FOOTER_LOGO_SIZE_PX: Record<BillboardLogoSize, number> = 
   M: 65,
   L: 96,
   XL: 192,
+};
+
+/**
+ * Mapa heroLogoSize → dimensiones (px) del slot del logo del Hero Header del
+ * Home Dashboard (y módulos que heredan el header). Mantiene el ratio 4:1 del
+ * slot original (360×90 = M, default). Escala el slot completo; el logo
+ * (object-contain / preserveAspectRatio) se ajusta dentro alineado a la izq.
+ */
+export const HERO_LOGO_SIZE_PX: Record<BillboardLogoSize, { w: number; h: number }> = {
+  S: { w: 280, h: 70 },
+  M: { w: 360, h: 90 },
+  L: { w: 480, h: 120 },
+  XL: { w: 600, h: 150 },
 };
 
 /**

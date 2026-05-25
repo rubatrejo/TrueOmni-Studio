@@ -56,6 +56,7 @@ export default async function HomePage() {
         listings={home.listings}
         allTiles={allTiles}
         survey={home.survey}
+        tileTitleFontSize={home.tileTitleFontSize}
       />
       <AdsSlot ads={ads} />
       <SurveyHost survey={home.survey} client={{ slug: config.client.slug }} />

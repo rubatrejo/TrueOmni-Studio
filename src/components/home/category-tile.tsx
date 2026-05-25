@@ -5,10 +5,16 @@ import Link from 'next/link';
 import { useTextos } from '@/components/i18n-provider';
 import type { HomeTile } from '@/lib/config';
 
+/** Tamaño por defecto del título del tile (px). Verbatim del SVG Dashboard. */
+export const DEFAULT_TILE_TITLE_FONT_SIZE = 50;
+
 interface Props {
   tile: HomeTile;
   /** Si se provee, el tile dispara el callback en lugar de navegar. */
   onClick?: () => void;
+  /** Tamaño de la tipografía del título (px). Global a todos los tiles del
+   *  dashboard — editable desde el Studio (Home Dashboard → Home tiles). */
+  titleFontSize?: number;
 }
 
 /**
@@ -20,7 +26,11 @@ interface Props {
  * (con `-` reemplazado por `_`); si no existe, fallback al `tile.label`
  * literal del config.
  */
-export function CategoryTile({ tile, onClick }: Props) {
+export function CategoryTile({
+  tile,
+  onClick,
+  titleFontSize = DEFAULT_TILE_TITLE_FONT_SIZE,
+}: Props) {
   const t = useTextos();
   const i18nKey = `tile_label_${tile.key.replace(/-/g, '_')}`;
   const resolved = t(i18nKey);
@@ -31,18 +41,18 @@ export function CategoryTile({ tile, onClick }: Props) {
       <img src={tile.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
       <div className="absolute inset-0" style={{ backgroundColor: 'rgba(17,16,13,0.352)' }} />
       <span
-        className="absolute flex items-center justify-center text-center font-display font-bold uppercase leading-[1.22] text-white"
+        className="absolute flex items-center justify-center text-center font-display font-bold leading-[1.22] text-white"
         style={{
           left: '0',
           right: '0',
           top: '0',
           bottom: '0',
-          fontSize: '50px',
+          fontSize: `${titleFontSize}px`,
           letterSpacing: '0.02em',
           whiteSpace: 'pre-line',
         }}
       >
-        {label.toUpperCase()}
+        {label}
       </span>
     </>
   );

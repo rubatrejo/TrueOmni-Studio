@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
 
-import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { getConfig } from '@/lib/config';
+import type { BillboardLogoSize } from '@/lib/studio/schema';
 import { fetchWeather } from '@/lib/weather';
 
 import { HeroBackgroundLayer } from './hero-background-layer';
+import { HeroLogoSlot } from './hero-logo-slot';
 import { LanguageDropdown } from './language-dropdown';
 import { WeatherClock } from './weather-clock';
 
@@ -71,6 +72,10 @@ export async function HomeHeader({
   const overrideHero = brand?.homeHero?.src ? brand.homeHero : null;
   const heroSrc = overrideHero?.src ?? heroImage;
   const heroKind: 'image' | 'video' = overrideHero?.kind ?? 'image';
+  // Tamaño del logo del hero — branding-level, aplica en TODAS las rutas que
+  // usan el header (no solo el Dashboard), por eso se lee siempre del config.
+  const heroLogoSize = (config as unknown as { branding?: { heroLogoSize?: BillboardLogoSize } })
+    .branding?.heroLogoSize;
   const grad = brand?.heroGradient;
   const gradientCss = grad
     ? `linear-gradient(${grad.angle}deg, ${grad.from}, ${grad.to})`
@@ -96,18 +101,11 @@ export async function HomeHeader({
         listenForOverride={applyDashboardOverride}
       />
 
-      {/* Logo del cliente @ (65, 38) — slot="default".
-          Slot fijo 360×90 con object-contain alineado a la izquierda. Si el
-          logo del cliente es más estrecho que 360px (logo cuadrado, monograma,
-          etc.) se pega al borde izquierdo del slot en lugar de centrarse —
-          mantiene la lectura "esto es la marca del lugar" en el extremo
-          izquierdo del header, sin importar el aspect ratio del archivo. */}
-      <div
-        className="absolute flex items-center justify-start"
-        style={{ left: '65px', top: '38px', width: '360px', height: '90px' }}
-      >
-        <TrueOmniLogo slot="default" align="left" className="h-full w-full text-white" />
-      </div>
+      {/* Logo del cliente @ (65, 38) — slot="default", alineado a la izquierda.
+          El tamaño del slot (default M = 360×90) es editable desde el Studio
+          (Home Dashboard → Hero header → Logo size) vía HeroLogoSlot, que
+          escucha el bridge para reaccionar en vivo. */}
+      <HeroLogoSlot initialSize={heroLogoSize} />
 
       {/* Weather + clock widget @ (744, 40.5) */}
       <div

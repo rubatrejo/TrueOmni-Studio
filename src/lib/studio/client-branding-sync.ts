@@ -134,6 +134,9 @@ export const UnifiedClientBrandingSchema = z.object({
     })
     .optional(),
 
+  /** Tamaño del logo del Hero Header del kiosk (S/M/L/XL). Kiosk-only. */
+  heroLogoSize: z.enum(['S', 'M', 'L', 'XL']).optional(),
+
   /** Favicon — usado por kiosk; ignorado por signage. */
   favicon: z.string().optional().default(''),
 });
@@ -194,6 +197,7 @@ export function unifiedToKioskBranding(unified: UnifiedClientBranding): Branding
   if (unified.idleBackground && unified.idleBackground.src) {
     out.idleBackground = unified.idleBackground;
   }
+  if (unified.heroLogoSize) out.heroLogoSize = unified.heroLogoSize;
   return out;
 }
 
@@ -234,6 +238,7 @@ export function kioskToUnifiedBranding(
     heroGradient: kioskBranding.heroGradient,
     brandVideo: kioskBranding.brandVideo,
     idleBackground: kioskBranding.idleBackground,
+    heroLogoSize: kioskBranding.heroLogoSize,
     favicon: kioskBranding.favicon ?? '',
   });
 }

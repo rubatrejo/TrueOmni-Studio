@@ -322,6 +322,8 @@ type BrandingPatch = BrandPatch & {
   };
   homeHero?: { kind: 'image' | 'video'; src: string };
   heroGradient?: { from: string; to: string; angle: number };
+  /** Tamaño del logo del hero header (S/M/L/XL). */
+  heroLogoSize?: 'S' | 'M' | 'L' | 'XL';
   /** Idle background del Billboard (`branding.idleBackground`). Se propaga al
    *  canal de override del Billboard para que las 4 variants lo usen como
    *  fondo cuando no hay un background explícito del Billboard editor. */
@@ -341,11 +343,15 @@ export const KIOSK_CLIENT_COORDS_OVERRIDE_EVENT = 'kiosk:client-coords-override'
 export type HeroOverrideDetail = {
   homeHero?: { kind: 'image' | 'video'; src: string };
   heroGradient?: { from: string; to: string; angle: number };
+  /** Tamaño del logo del hero header (S/M/L/XL). Consumido por HeroLogoSlot. */
+  heroLogoSize?: 'S' | 'M' | 'L' | 'XL';
 };
 
 type ModulesPatch = {
   tiles: Array<{ key: string; label: string; enabled: boolean }>;
   systemModules?: { ads: boolean; languages: boolean; aiAvatar: boolean };
+  /** Tamaño global de la tipografía de los títulos de los tiles (px). */
+  tileTitleFontSize?: number;
 };
 
 /** Settings idle de una variante del Billboard. Mismo shape que `b0`
@@ -430,7 +436,7 @@ function applyModulesOverride(modules: ModulesPatch) {
   if (typeof window === 'undefined') return;
   window.dispatchEvent(
     new CustomEvent(KIOSK_MODULES_OVERRIDE_EVENT, {
-      detail: { tiles: modules.tiles },
+      detail: { tiles: modules.tiles, tileTitleFontSize: modules.tileTitleFontSize },
     }),
   );
   if (modules.systemModules) {
@@ -664,16 +670,22 @@ function applyBranding(branding: BrandingPatch) {
   // event + cache en window para que componentes que se monten DESPUÉS
   // del último dispatch (ej. nav entre rutas dentro del iframe) puedan
   // leer el override actual.
-  if (branding.homeHero !== undefined || branding.heroGradient !== undefined) {
+  if (
+    branding.homeHero !== undefined ||
+    branding.heroGradient !== undefined ||
+    branding.heroLogoSize !== undefined
+  ) {
     const heroCache = (window as KioskBridgeWindow).__kioskHero ?? {};
     if (branding.homeHero !== undefined) heroCache.homeHero = branding.homeHero;
     if (branding.heroGradient !== undefined) heroCache.heroGradient = branding.heroGradient;
+    if (branding.heroLogoSize !== undefined) heroCache.heroLogoSize = branding.heroLogoSize;
     (window as KioskBridgeWindow).__kioskHero = heroCache;
     window.dispatchEvent(
       new CustomEvent(KIOSK_HERO_OVERRIDE_EVENT, {
         detail: {
           homeHero: branding.homeHero,
           heroGradient: branding.heroGradient,
+          heroLogoSize: branding.heroLogoSize,
         },
       }),
     );

@@ -430,6 +430,44 @@ export function HomeDashboardEditor({
           </div>
         </header>
 
+        {/* Tamaño global de la tipografía de los títulos de los tiles. Aplica
+            a TODOS los tiles por igual para mantener el grid uniforme. */}
+        <div className="mb-3 flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-900 dark:bg-zinc-900/40">
+          <label
+            htmlFor="tile-title-font-size"
+            className="shrink-0 text-[11.5px] font-medium text-zinc-700 dark:text-zinc-300"
+          >
+            Title size
+          </label>
+          <input
+            id="tile-title-font-size"
+            type="range"
+            min={20}
+            max={120}
+            step={1}
+            value={modules.tileTitleFontSize ?? 50}
+            onChange={(e) => onChange({ ...modules, tileTitleFontSize: Number(e.target.value) })}
+            className="h-1.5 flex-1 cursor-pointer accent-sky-500"
+          />
+          <span className="w-12 shrink-0 text-right font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
+            {modules.tileTitleFontSize ?? 50}px
+          </span>
+          {modules.tileTitleFontSize !== undefined && modules.tileTitleFontSize !== 50 ? (
+            <button
+              type="button"
+              onClick={() => {
+                const next = { ...modules };
+                delete next.tileTitleFontSize;
+                onChange(next);
+              }}
+              title="Reset to default (50px)"
+              className="shrink-0 rounded-md border border-zinc-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-zinc-500 transition hover:border-sky-500/30 hover:text-sky-700 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-400 dark:hover:text-sky-300"
+            >
+              Reset
+            </button>
+          ) : null}
+        </div>
+
         {visibleTiles.length === 0 ? (
           <div className="rounded-lg border border-dashed border-zinc-300 bg-zinc-50/50 p-6 text-center text-[12px] text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/20">
             No modules enabled. Turn modules on in the <strong>Modules</strong> tab to start

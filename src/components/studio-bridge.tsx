@@ -324,10 +324,6 @@ type BrandingPatch = BrandPatch & {
   heroGradient?: { from: string; to: string; angle: number };
   /** Tamaño del logo del hero header (S/M/L/XL). */
   heroLogoSize?: 'S' | 'M' | 'L' | 'XL';
-  /** Idle background del Billboard (`branding.idleBackground`). Se propaga al
-   *  canal de override del Billboard para que las 4 variants lo usen como
-   *  fondo cuando no hay un background explícito del Billboard editor. */
-  idleBackground?: { kind: 'image' | 'video' | 'youtube'; src: string };
   /** Nombre del cliente — interpola `{client_name}` en textos del kiosk
    *  reactivamente, sin esperar a publish. */
   clientName?: string;
@@ -391,9 +387,6 @@ type BillboardPatch = {
   /** Background compartido por las 4 variants. Tiene prioridad sobre el
    *  `b{N}.background` (legacy). */
   background?: { type?: 'image' | 'video'; src?: string };
-  /** Idle background a nivel branding. Lo inyecta el bridge (no el editor del
-   *  Billboard) para que un `billboard-update` no lo borre del cache. */
-  idleBackground?: { kind: 'image' | 'video' | 'youtube'; src: string };
   /** Settings idle compartidos: shape unificado para los 4 variants. */
   b0?: BillboardVariantPatch;
   b1?: BillboardVariantPatch;
@@ -446,22 +439,9 @@ function applyModulesOverride(modules: ModulesPatch) {
   }
 }
 
-interface BillboardCacheWindow extends Window {
-  __kioskBillboardOverride?: BillboardPatch;
-}
-
 function applyBillboardOverride(b: BillboardPatch) {
   if (typeof window === 'undefined') return;
-  // Preservamos el `idleBackground` que el bridge pudo haber inyectado vía
-  // `branding-update` (llega por otro canal): sin esto, un `billboard-update`
-  // posterior lo borraría del cache del runtime.
-  const cached = (window as BillboardCacheWindow).__kioskBillboardOverride;
-  const detail: BillboardPatch = {
-    ...b,
-    idleBackground: b.idleBackground ?? cached?.idleBackground,
-  };
-  (window as BillboardCacheWindow).__kioskBillboardOverride = detail;
-  window.dispatchEvent(new CustomEvent(KIOSK_BILLBOARD_OVERRIDE_EVENT, { detail }));
+  window.dispatchEvent(new CustomEvent(KIOSK_BILLBOARD_OVERRIDE_EVENT, { detail: b }));
 }
 
 function applyAiAvatarOverride(ai: AiAvatarPatch) {
@@ -689,18 +669,6 @@ function applyBranding(branding: BrandingPatch) {
         },
       }),
     );
-  }
-
-  // Idle background del Billboard. Vive en branding pero los billboards solo
-  // escuchan el canal de override del Billboard, así que lo inyectamos en su
-  // cache (`__kioskBillboardOverride`) y re-disparamos el evento, preservando
-  // el resto de overrides del Billboard que ya estuvieran aplicados.
-  if (branding.idleBackground !== undefined) {
-    const w = window as BillboardCacheWindow;
-    const cache: BillboardPatch = w.__kioskBillboardOverride ?? { variant: 0, idleTimeoutSec: 0 };
-    cache.idleBackground = branding.idleBackground?.src ? branding.idleBackground : undefined;
-    w.__kioskBillboardOverride = cache;
-    window.dispatchEvent(new CustomEvent(KIOSK_BILLBOARD_OVERRIDE_EVENT, { detail: cache }));
   }
 }
 

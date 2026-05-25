@@ -3367,6 +3367,40 @@ Sesión maratón de ~15 commits iterando sobre feedback continuo del usuario. Bl
 
 ---
 
+### Sesión 2026-05-25 — Brand video runtime + kiosk editor + breadcrumb/SaveStatusPill unificados
+
+**Hecho (7 commits, todos pusheados a `main` y deployados READY en Vercel):**
+
+- `ccdfc5e` **Billboard idleBackground + YouTube** — `<BillboardBackground>` compartido (image/video/YouTube iframe) en B0-B3.
+- `7094366` **Video Wall brand video fallback** — `brandVideo` en `SignageBranding` + `unifiedToSignageBranding` + `resolveBrandVideoSource` + `<BrandVideoFallback>` aditivo en los 18 templates (3×2/4×2/2×2 × 01-06).
+- `b97c020` **Signage brand video fallback** — `<SignageBrandVideoOverlay>` (foreignObject) aditivo en los 12 templates (03-08 landscape+portrait).
+- `c3d5982` **Kiosk editor (3 cambios pedidos)** — (1) tiles dejan de forzar MAYÚSCULAS (respetan el label); (2) slider global `tileTitleFontSize` (Home tiles); (3) `heroLogoSize` S/M/L/XL del logo del hero header. Cableado schema + bridge live + publish-merger + SSR.
+- `acb5268` **Breadcrumb canónico único** — `_components/Breadcrumb.tsx` reemplaza 5+ breadcrumbs duplicados. Trail `Clients › {Cliente} › {Producto} › {Ítem}`, niveles clickeables, en kiosk/DD/VW/listas/ClientView/ComingSoon. Kiosk pasó de 2 → 3 niveles con link al cliente; DD dejó de juntar "cliente·display".
+- `5089dfd` **Revert idleBackground→billboard** — el auto-override hacía que un video en Branding→Media secuestrara el idle; ahora el billboard muestra SIEMPRE su imagen, video solo vía botón "Use brand video".
+- `4214323` **SaveStatusPill compartido** — un solo componente en kiosk + DD/VW; borrado `WallTopBar.tsx` (código muerto con pill viejo).
+
+**Verificado:**
+
+- typecheck/lint/format limpios en cada commit; husky pre-commit verde.
+- Screenshots `agent-browser`: 4 billboards sin regresión; casing de tiles en title-case; logo hero reescalando a XL vía bridge; breadcrumb kiosk (3 niveles) + lista VW consistentes.
+- Los 7 deploys de Vercel confirmados READY (no ERROR); email `ruba.trejo@gmail.com`.
+
+**Pendiente / siguiente:**
+
+- Validación visual del brand-video fallback en VW/Signage runtime **con un brand video real** (vive en KV; no se pudo probar local). Lo valida el operador en el Studio/prod.
+- `WallTopBar` borrado; si se quiere, igualar también los botones extra del kiosk (Versions/Undo-Redo/Export-Import) en DD/VW — quedó fuera de alcance (no son de "Save").
+- Hereda: Issue 5 (evento VW fondo rosa) = config del cliente (token `brand-accent` rosa), no bug — necesita slug para confirmar.
+
+**Decisiones:**
+
+- **No auto-overridear contenido del usuario sin opt-in explícito.** El idleBackground auto-override (de un pendiente viejo) secuestró el billboard idle; se revirtió. La vía explícita ("Use brand video") es la correcta.
+- **Componentes UI duplicados → fuente única.** Breadcrumb y SaveStatusPill extraídos a `_components/` compartidos para garantizar consistencia entre productos sin drift.
+- **Sweeps en pixel-perfect = aditivos.** Los fallbacks de brand video se insertaron como overlays aditivos (retornan null sin brandVideo) → cero cambio cuando hay asset o no hay brand video.
+
+**Fase:** Studio iterativo post-Video Walls (milestones Studio/Signage cerrados).
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

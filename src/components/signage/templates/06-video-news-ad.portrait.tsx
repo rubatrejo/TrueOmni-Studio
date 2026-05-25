@@ -2,6 +2,7 @@ import { QRCodeSVG } from 'qrcode.react';
 
 import { SignageNewsTicker } from '@/components/signage/news/SignageNewsTicker';
 
+import { SignageBrandVideoOverlay } from './_shared/brand-video-overlay';
 import { registerTemplate } from './registry';
 import type { SignageTemplate, SignageTemplateRenderProps } from './types';
 
@@ -82,6 +83,12 @@ function NewsQrCode({ url }: { url: string }) {
 
 function Render({ client, slots }: SignageTemplateRenderProps) {
   const videoUrl = getVideoUrl(client.slug, slots);
+  const videoMod = slots.find((s) => s.module.kind === 'video-image');
+  const hasVideoAsset = !!(
+    videoMod &&
+    videoMod.module.kind === 'video-image' &&
+    videoMod.module.asset.url
+  );
   const adUrl = getAdUrl(client.slug, slots);
   const newsItems = client.news.source.kind === 'manual' ? client.news.source.items : [];
   const newsInterval = client.news.rotationIntervalSec;
@@ -120,6 +127,13 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
       {/* Video translate(-238 155) rect 1556×875 */}
       <g transform="translate(-238 155)">
         <rect width="1556" height="875" fill="url(#p06-video)" />
+        {!hasVideoAsset ? (
+          <SignageBrandVideoOverlay
+            brandVideo={client.branding.brandVideo}
+            width={1556}
+            height={875}
+          />
+        ) : null}
         <PlayIconOverlay x={703} y={363} />
       </g>
 

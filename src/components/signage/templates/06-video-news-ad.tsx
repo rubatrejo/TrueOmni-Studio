@@ -2,6 +2,7 @@ import { QRCodeSVG } from 'qrcode.react';
 
 import { SignageNewsTicker } from '@/components/signage/news/SignageNewsTicker';
 
+import { SignageBrandVideoOverlay } from './_shared/brand-video-overlay';
 import { registerTemplate } from './registry';
 import type { SignageTemplate, SignageTemplateRenderProps } from './types';
 
@@ -83,6 +84,12 @@ function NewsQrCode({ url }: { url: string }) {
 function Render({ client, slots }: SignageTemplateRenderProps) {
   const videoUrl = getVideoUrl(client.slug, slots);
   const adUrl = getAdUrl(client.slug, slots);
+  const videoMod = slots.find((s) => s.module.kind === 'video-image');
+  const hasVideoAsset = !!(
+    videoMod &&
+    videoMod.module.kind === 'video-image' &&
+    videoMod.module.asset.url
+  );
   // Para DS8 con source manual, items vienen directamente del client.news.
   // Cuando rss/api: el page.tsx debe pre-resolver via resolveNewsItems() y
   // pasarlos como prop. Sub-fase tardía añade el cableo runtime.
@@ -117,6 +124,13 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
       {/* Video — translate(0 155), rect 1144×644 */}
       <g transform="translate(0 155)">
         <rect width="1144" height="644" fill="url(#vna-video)" />
+        {!hasVideoAsset ? (
+          <SignageBrandVideoOverlay
+            brandVideo={client.branding.brandVideo}
+            width={1144}
+            height={644}
+          />
+        ) : null}
         <PlayIconOverlay x={497} y={247} />
       </g>
 

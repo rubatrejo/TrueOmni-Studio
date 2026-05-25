@@ -1,3 +1,4 @@
+import { SignageBrandVideoOverlay } from './_shared/brand-video-overlay';
 import { registerTemplate } from './registry';
 import type { SignageTemplate, SignageTemplateRenderProps } from './types';
 
@@ -21,6 +22,11 @@ function urlOr(clientSlug: string, raw: string | undefined, fallback: string): s
 
 function Render({ client, slots }: SignageTemplateRenderProps) {
   const videoMod = slots.find((s) => s.module.kind === 'video-image');
+  const hasVideoAsset = !!(
+    videoMod &&
+    videoMod.module.kind === 'video-image' &&
+    videoMod.module.asset.url
+  );
   const adMods = slots.filter((s) => s.module.kind === 'ads');
   const videoUrl = urlOr(
     client.slug,
@@ -87,6 +93,13 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
       {/* Video translate(-238 155) rect 1556×875 */}
       <g transform="translate(-238 155)">
         <rect width="1556" height="875" fill="url(#p05-video)" />
+        {!hasVideoAsset ? (
+          <SignageBrandVideoOverlay
+            brandVideo={client.branding.brandVideo}
+            width={1556}
+            height={875}
+          />
+        ) : null}
         <g transform="translate(703 363)">
           <path
             d="M75,150a75,75,0,1,1,75-75A75.085,75.085,0,0,1,75,150ZM55.434,42.391v65.217L110.869,75Z"

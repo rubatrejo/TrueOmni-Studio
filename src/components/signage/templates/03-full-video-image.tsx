@@ -1,3 +1,4 @@
+import { SignageBrandVideoOverlay } from './_shared/brand-video-overlay';
 import { registerTemplate } from './registry';
 import type { SignageTemplate, SignageTemplateRenderProps } from './types';
 
@@ -53,6 +54,12 @@ function PlayIconOverlay() {
 function Render({ client, display, slots }: SignageTemplateRenderProps) {
   const asset = getAsset(client.slug, slots);
   const audioEnabled = display.settings.audio === true;
+  const videoMod = slots.find((s) => s.module.kind === 'video-image');
+  const hasVideoAsset = !!(
+    videoMod &&
+    videoMod.module.kind === 'video-image' &&
+    videoMod.module.asset.url
+  );
 
   if (asset.kind === 'video') {
     // Video: usamos foreignObject porque <video> es HTML, no SVG. El video
@@ -109,6 +116,14 @@ function Render({ client, display, slots }: SignageTemplateRenderProps) {
       </defs>
       {/* Rect 1920×1080 (full screen). El viewBox clipea el top 155px. */}
       <rect width="1920" height="1080" fill="url(#vi-fullbleed)" />
+      {!hasVideoAsset ? (
+        <SignageBrandVideoOverlay
+          brandVideo={client.branding.brandVideo}
+          width={1920}
+          height={1080}
+          audioEnabled={display.settings.audio === true}
+        />
+      ) : null}
       <PlayIconOverlay />
     </svg>
   );

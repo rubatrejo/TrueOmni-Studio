@@ -1,3 +1,4 @@
+import { SignageBrandVideoOverlay } from './_shared/brand-video-overlay';
 import { registerTemplate } from './registry';
 import type { SignageTemplate, SignageTemplateRenderProps } from './types';
 
@@ -65,6 +66,12 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
     'bottom-ad',
     'assets/ads/bottom-banner-pizza.png',
   );
+  const videoMod = slots.find((s) => s.module.kind === 'video-image');
+  const hasVideoAsset = !!(
+    videoMod &&
+    videoMod.module.kind === 'video-image' &&
+    videoMod.module.asset.url
+  );
 
   return (
     <svg
@@ -107,6 +114,13 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
       {/* Video — translate(0 155), rect 1144×644 */}
       <g transform="translate(0 155)">
         <rect width="1144" height="644" fill="url(#v2a-video)" />
+        {!hasVideoAsset ? (
+          <SignageBrandVideoOverlay
+            brandVideo={client.branding.brandVideo}
+            width={1144}
+            height={644}
+          />
+        ) : null}
         <PlayIconOverlay x={497} y={247} />
       </g>
 

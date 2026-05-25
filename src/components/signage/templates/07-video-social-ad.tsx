@@ -1,3 +1,4 @@
+import { SignageBrandVideoOverlay } from './_shared/brand-video-overlay';
 import { registerTemplate } from './registry';
 import type { SignageTemplate, SignageTemplateRenderProps } from './types';
 
@@ -77,6 +78,12 @@ const GRID_POSITIONS: Array<{ x: number; y: number }> = [
 function Render({ client, slots }: SignageTemplateRenderProps) {
   const videoUrl = getVideoUrl(client.slug, slots);
   const adUrl = getAdUrl(client.slug, slots);
+  const videoMod = slots.find((s) => s.module.kind === 'video-image');
+  const hasVideoAsset = !!(
+    videoMod &&
+    videoMod.module.kind === 'video-image' &&
+    videoMod.module.asset.url
+  );
   const posts = client.social.posts.slice(0, 9);
   const postUrls = posts.map((p, i) =>
     buildAssetUrl(client.slug, p.image, `assets/social/post-${i + 1}.jpg`),
@@ -130,6 +137,13 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
       {/* Video — translate(0 155), rect 1144×644 */}
       <g transform="translate(0 155)">
         <rect width="1144" height="644" fill="url(#vsa-video)" />
+        {!hasVideoAsset ? (
+          <SignageBrandVideoOverlay
+            brandVideo={client.branding.brandVideo}
+            width={1144}
+            height={644}
+          />
+        ) : null}
         <PlayIconOverlay x={497} y={247} />
       </g>
 

@@ -1,3 +1,4 @@
+import { SignageBrandVideoOverlay } from './_shared/brand-video-overlay';
 import { registerTemplate } from './registry';
 import type { SignageTemplate, SignageTemplateRenderProps } from './types';
 
@@ -25,6 +26,11 @@ interface SocialPostLike {
 
 function Render({ client, slots }: SignageTemplateRenderProps) {
   const videoMod = slots.find((s) => s.module.kind === 'video-image');
+  const hasVideoAsset = !!(
+    videoMod &&
+    videoMod.module.kind === 'video-image' &&
+    videoMod.module.asset.url
+  );
   const videoUrl = urlOr(
     client.slug,
     videoMod && videoMod.module.kind === 'video-image' ? videoMod.module.asset.url : undefined,
@@ -82,6 +88,13 @@ function Render({ client, slots }: SignageTemplateRenderProps) {
       {/* Video translate(0 155) 1080×608 */}
       <g transform="translate(0 155)">
         <rect width="1080" height="608" fill="url(#p08-video)" />
+        {!hasVideoAsset ? (
+          <SignageBrandVideoOverlay
+            brandVideo={client.branding.brandVideo}
+            width={1080}
+            height={608}
+          />
+        ) : null}
         <g transform="translate(465 267)">
           <path
             d="M75,150a75,75,0,1,1,75-75A75.085,75.085,0,0,1,75,150ZM55.434,42.391v65.217L110.869,75Z"

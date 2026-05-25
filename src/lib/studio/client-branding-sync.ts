@@ -268,6 +268,8 @@ export function unifiedToSignageBranding(unified: UnifiedClientBranding): Signag
       bodyCustom: unified.fonts.bodyCustom,
     },
     tokens,
+    // Brand video → fallback de slots de video vacíos en Display/Video Wall.
+    ...(unified.brandVideo && unified.brandVideo.src ? { brandVideo: unified.brandVideo } : null),
   };
 }
 

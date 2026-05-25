@@ -63,6 +63,17 @@ export const SignageBrandingSchema = z.object({
     })),
   /** Overrides puntuales de tokens CSS (key: nombre sin --signage-, value: HSL "H S% L%"). */
   tokens: z.record(z.string(), z.string()).optional(),
+  /**
+   * Brand video del cliente (upload o URL de YouTube). Se usa como fallback
+   * en los slots de video VACÍOS de los templates de Digital Display y Video
+   * Wall. Propagado desde el unified branding (`unifiedToSignageBranding`).
+   */
+  brandVideo: z
+    .object({
+      kind: z.enum(['upload', 'youtube']).default('upload'),
+      src: z.string().default(''),
+    })
+    .optional(),
 });
 export type SignageBranding = z.infer<typeof SignageBrandingSchema>;
 

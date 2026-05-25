@@ -1,6 +1,7 @@
 'use client';
 
 import { EventCardSvg, resolveAssetUrl, SocialGradientDefs } from '../_shared/_card-svg';
+import { BrandVideoFallback } from '../_shared/brand-video-fallback';
 import { findSlot } from '../_shared/slot-renderers';
 import { registerTemplate } from '../registry';
 import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
@@ -130,6 +131,12 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
             height: VIDEO_H,
             objectFit: 'cover',
           }}
+        />
+      ) : null}
+      {!videoUrl ? (
+        <BrandVideoFallback
+          brandVideo={client.branding.brandVideo}
+          rect={{ left: VIDEO_X, top: VIDEO_Y, width: VIDEO_W, height: VIDEO_H }}
         />
       ) : null}
 

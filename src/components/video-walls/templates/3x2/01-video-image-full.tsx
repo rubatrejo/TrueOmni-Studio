@@ -1,5 +1,6 @@
 'use client';
 
+import { BrandVideoFallback } from '../_shared/brand-video-fallback';
 import { findSlot } from '../_shared/slot-renderers';
 import { registerTemplate } from '../registry';
 import type { VideoWallTemplate, VideoWallTemplateRenderProps } from '../types';
@@ -62,6 +63,7 @@ function Render({ client, slots }: VideoWallTemplateRenderProps) {
           className="absolute inset-0 h-full w-full object-cover"
         />
       ) : null}
+      {!url ? <BrandVideoFallback brandVideo={client.branding.brandVideo} /> : null}
     </>
   );
 }

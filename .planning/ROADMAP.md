@@ -180,6 +180,26 @@ aprobado por Rubén. Listo para Milestone Signage Studio (DSS0+).
 
 ---
 
+## Milestone PWA Mobile — Companion app white-label ⏳ EN CURSO (desde 2026-05-25)
+
+> Detalles completos en `.planning/PWA-PROJECT.md` y `.planning/PWA-ROADMAP.md`.
+> Brainstorming aprobado: `~/.claude/plans/quiero-que-ahora-dise-emos-lazy-harbor.md`.
+
+PWA mobile (companion del kiosk) white-label. Reutiliza branding + data del kiosk con
+**diseño mobile propio** y flujo distinto (Welcome → Login → Dashboard + Bottom Nav + módulos
+PWA-only). **Canvas 390×844**, ruta `/pwa`, cliente por `KIOSK_CLIENT`. Alcance del milestone:
+**solo frontend pixel-perfect** (auth/data mockeados); backend real (login, sync, push, wallet,
+offline) en milestone posterior. Integración al Studio en la fase final.
+
+- [ ] **P0** — Bootstrap del runtime (route group `(pwa)`, canvas 390×844, bottom nav shell).
+- [ ] **P1** — Flujo de arranque: Welcome → Login → Dashboard.
+- [ ] **P2…Pn** — Módulos reutilizados con diseño mobile (bajo demanda).
+- [ ] **Px** — Módulos PWA-only (Profile, Notifications, More, Scavenger Hunt…).
+- [ ] **Py** — Transversales (i18n + ads mobile).
+- [ ] **Pz** — Integración al Studio (editor, clone, branding-sync, publish, preview bridge).
+
+---
+
 ## Dependencias
 
 ```

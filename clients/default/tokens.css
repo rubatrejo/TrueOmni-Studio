@@ -24,6 +24,7 @@
   /*  NEUTRALES (no son brand del cliente — fondo y texto base del kiosk)   */
   /* ---------------------------------------------------------------------- */
   --brand-neutral: 0 0% 7%; /* #131313 Black Tetramine */
+  --pwa-primary: 201 95% 46%; /* #079EE2 — PWA: botón de acción (Login/CTA), azul brillante */
 
   /* ---------------------------------------------------------------------- */
   /*  TOKENS SEMÁNTICOS (consumidos por Tailwind y componentes)             */

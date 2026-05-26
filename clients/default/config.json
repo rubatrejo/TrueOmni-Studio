@@ -10075,6 +10075,102 @@
           "enabled": true
         }
       ]
+    },
+    "pwa": {
+      "welcome": {
+        "background": "assets/pwa/welcome-bg.jpg",
+        "autoAdvanceMs": 2500
+      },
+      "login": {
+        "loginWith": "LOGIN WITH",
+        "emailPlaceholder": "Email Address",
+        "passwordPlaceholder": "Password",
+        "forgotPassword": "Forgot your password?",
+        "loginCta": "LOGIN",
+        "createAccountCta": "CREATE NEW ACCOUNT",
+        "skipLogin": "Skip Login"
+      },
+      "dashboard": {
+        "heroTitle": "Interactive Self-Service Solutions",
+        "heroImage": "assets/pwa/dashboard/hero.jpg",
+        "quickAccess": [
+          {
+            "key": "regions",
+            "label": "REGIONS",
+            "image": "assets/pwa/dashboard/quick-regions.jpg"
+          },
+          {
+            "key": "trip-planner",
+            "label": "TRIP PLANNER",
+            "image": "assets/pwa/dashboard/quick-trip-planner.jpg"
+          },
+          {
+            "key": "places-to-stay",
+            "label": "PLACES TO STAY",
+            "image": "assets/pwa/dashboard/quick-places-to-stay.jpg"
+          },
+          { "key": "events", "label": "EVENTS", "image": "assets/pwa/dashboard/quick-events.jpg" }
+        ],
+        "tiles": [
+          {
+            "key": "restaurants",
+            "label": "RESTAURANTS",
+            "image": "assets/pwa/dashboard/tile-restaurants.jpg"
+          },
+          { "key": "map", "label": "MAP", "image": "assets/pwa/dashboard/tile-map.jpg" },
+          {
+            "key": "wayfinding",
+            "label": "WAYFINDING",
+            "image": "assets/pwa/dashboard/tile-wayfinding.jpg"
+          },
+          {
+            "key": "social-wall",
+            "label": "SOCIAL WALL",
+            "image": "assets/pwa/dashboard/tile-social-wall.jpg"
+          },
+          {
+            "key": "things-to-do",
+            "label": "THINGS TO DO",
+            "image": "assets/pwa/dashboard/tile-things-to-do.jpg",
+            "wide": true
+          },
+          {
+            "key": "digital-brochure",
+            "label": "DIGITAL BROCHURE",
+            "image": "assets/pwa/dashboard/tile-digital-brochure.jpg"
+          },
+          { "key": "trails", "label": "TRAILS", "image": "assets/pwa/dashboard/tile-trails.jpg" },
+          { "key": "passes", "label": "PASSES", "image": "assets/pwa/dashboard/tile-passes.jpg" },
+          {
+            "key": "tickets",
+            "label": "TICKETS",
+            "image": "assets/pwa/dashboard/tile-tickets.jpg"
+          },
+          { "key": "deals", "label": "DEALS", "image": "assets/pwa/dashboard/tile-deals.jpg" },
+          {
+            "key": "scavenger-hunt",
+            "label": "SCAVENGER HUNT",
+            "image": "assets/pwa/dashboard/tile-scavenger-hunt.jpg"
+          }
+        ]
+      },
+      "more": {
+        "searchPlaceholder": "Search in your city",
+        "weatherText": "City, State | Sunny 52°F",
+        "items": [
+          { "key": "my-profile", "label": "My Profile" },
+          { "key": "interactive-trails", "label": "Interactive Trails" },
+          { "key": "hiking-trails", "label": "Hiking Trails" },
+          { "key": "trolley-tracker", "label": "Trolley Tracker" },
+          { "key": "deals", "label": "Deals" },
+          { "key": "tickets", "label": "Tickets" },
+          { "key": "my-favorites", "label": "My Favorites" },
+          { "key": "connect-with-us", "label": "Connect With Us" },
+          { "key": "digital-brochure", "label": "Digital Brochure" },
+          { "key": "passes", "label": "Passes" },
+          { "key": "help", "label": "Help" }
+        ]
+      }
     }
   },
   "integraciones": {

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="375" height="812" viewBox="0 0 375 812">
+  <defs>
+    <clipPath id="clip-MORE">
+      <rect width="375" height="812"/>
+    </clipPath>
+  </defs>
+  <g id="MORE" clip-path="url(#clip-MORE)">
+    <rect width="375" height="812" fill="#fff"/>
+    <g id="Body_Text_Menu" data-name="Body Text Menu" transform="translate(8 -278)">
+      <text id="Help" transform="translate(182 991)" fill="#191919" font-size="16" font-family="OpenSans, Open Sans"><tspan x="-17.316" y="0">Help</tspan></text>
+      <text id="Passes" transform="translate(180 939)" fill="#191919" font-size="16" font-family="OpenSans, Open Sans"><tspan x="-25.203" y="0">Passes</tspan></text>
+      <text id="Digital_Brochure" data-name="Digital Brochure" transform="translate(187.5 887)" fill="#191919" font-size="16" font-family="OpenSans, Open Sans"><tspan x="-59.98" y="0">Digital Brochure</tspan></text>
+      <text id="Connect_With_Us" data-name="Connect With Us" transform="translate(180.145 835)" fill="#191919" font-size="16" font-family="OpenSans, Open Sans"><tspan x="-61.781" y="0">Connect With Us</tspan></text>
+      <text id="Tickets" transform="translate(180 731)" fill="#191919" font-size="16" font-family="OpenSans, Open Sans"><tspan x="-25.426" y="0">Tickets</tspan></text>
+      <text id="Deals" transform="translate(180.145 679)" fill="#191919" font-size="16" font-family="OpenSans, Open Sans"><tspan x="-20.609" y="0">Deals</tspan></text>
+      <text id="Troller_Tracker" data-name="Troller Tracker" transform="translate(180 627)" fill="#191919" font-size="16" font-family="OpenSans, Open Sans"><tspan x="-53.633" y="0">Trolley Tracker</tspan></text>
+      <text id="Hiking_Trails" data-name="Hiking Trails" transform="translate(187.5 575)" fill="#191919" font-size="16" font-family="OpenSans, Open Sans"><tspan x="-44.965" y="0">Hiking Trails</tspan></text>
+      <text id="Interactive_Trails" data-name="Interactive Trails" transform="translate(180 523)" fill="#191919" font-size="16" font-family="OpenSans, Open Sans"><tspan x="-60.684" y="0">Interactive Trails</tspan></text>
+      <text id="My_Favorites" data-name="My Favorites" transform="translate(180 471)" fill="#191919" font-size="16" font-family="OpenSans, Open Sans"><tspan x="-37.332" y="0">My Profile</tspan></text>
+      <text id="My_Favorites-2" data-name="My Favorites" transform="translate(180 783)" fill="#191919" font-size="16" font-family="OpenSans, Open Sans"><tspan x="-47.168" y="0">My Favorites</tspan></text>
+    </g>
+    <g id="PWA_Location_and_Weather_Tab" data-name="PWA Location and Weather Tab" transform="translate(0 110)">
+      <rect id="Rectangle_2" data-name="Rectangle 2" width="375" height="43" fill="#b7bb3a"/>
+      <text id="Breckenridge_CO_" data-name="Breckenridge, CO |" transform="translate(118.5 12)" fill="#fff" font-size="14" font-family="OpenSans, Open Sans"><tspan x="0" y="15">City, State | </tspan></text>
+      <text id="Sunny_52_F" data-name="Sunny 52°F" transform="translate(194.5 12)" fill="#fff" font-size="14" font-family="OpenSans, Open Sans"><tspan x="0" y="15">Sunny 52°F</tspan></text>
+    </g>
+    <g id="PWA_Top_Bar" data-name="PWA Top Bar" transform="translate(23587 15374)">
+      <g id="Home_Top_Tab" data-name="Home Top Tab">
+        <rect id="Background" width="375" height="110" transform="translate(-23587 -15374)" fill="#004e8a"/>
+        <text id="_" data-name="" transform="translate(-23253 -15292)" fill="#fff" font-size="24" font-family="FontAwesome6Pro-Solid, 'Font Awesome \36  Pro'"><tspan x="0" y="0"></tspan></text>
+      </g>
+      <g id="PWA_Time_And_Battery_Tab" data-name="PWA Time And Battery Tab" transform="translate(-23576 -15359.667)">
+        <g id="Battery" transform="translate(325 2.667)">
+          <g id="Border" transform="translate(0.333 0.333)" fill="none" stroke="#fff" stroke-miterlimit="10" stroke-width="1" opacity="0.35">
+            <rect width="22" height="11.333" rx="2.667" stroke="none"/>
+            <rect x="0.5" y="0.5" width="21" height="10.333" rx="2.167" fill="none"/>
+          </g>
+          <path id="Cap" d="M0,0V4A2.17,2.17,0,0,0,1.328,2,2.17,2.17,0,0,0,0,0" transform="translate(23.333 4)" fill="#fff" opacity="0.4"/>
+          <rect id="Capacity" width="18" height="7.333" rx="1.333" transform="translate(2.333 2.333)" fill="#fff"/>
+        </g>
+        <path id="Wifi" d="M7.445,10.907,5.439,8.885a.309.309,0,0,1-.094-.231.314.314,0,0,1,.1-.227,3.437,3.437,0,0,1,4.437,0,.315.315,0,0,1,.009.458L7.889,10.907a.313.313,0,0,1-.445,0Zm3.53-3.542a4.928,4.928,0,0,0-6.612,0,.311.311,0,0,1-.435-.005L2.768,6.189a.322.322,0,0,1,0-.46,7.193,7.193,0,0,1,9.791,0,.322.322,0,0,1,0,.46L11.409,7.36a.311.311,0,0,1-.435.005Zm2.669-2.7a8.68,8.68,0,0,0-11.955,0,.308.308,0,0,1-.435,0L.094,3.5a.323.323,0,0,1,0-.457,10.947,10.947,0,0,1,15.141,0,.323.323,0,0,1,0,.457l-1.161,1.17a.308.308,0,0,1-.435,0Z" transform="translate(305 2.998)" fill="#fff"/>
+        <path id="Cellular_Connection" data-name="Cellular Connection" d="M15,10.667a1,1,0,0,1-1-1V1a1,1,0,0,1,1-1h1a1,1,0,0,1,1,1V9.667a1,1,0,0,1-1,1Zm-4.667,0a1,1,0,0,1-1-1V3.334a1,1,0,0,1,1-1h1a1,1,0,0,1,1,1V9.667a1,1,0,0,1-1,1Zm-4.667,0a1,1,0,0,1-1-1v-4a1,1,0,0,1,1-1h1a1,1,0,0,1,1,1v4a1,1,0,0,1-1,1ZM1,10.667a1,1,0,0,1-1-1v-2a1,1,0,0,1,1-1H2a1,1,0,0,1,1,1v2a1,1,0,0,1-1,1Z" transform="translate(283 3.334)" fill="#fff"/>
+        <text id="Time" fill="#fff" font-size="15" font-family="Helvetica-Bold, Helvetica" font-weight="700" letter-spacing="-0.02em"><tspan x="-14.561" y="12">9:41</tspan></text>
+      </g>
+    </g>
+    <g id="Search_More_Tab" data-name="Search More Tab" transform="translate(20 55.5)">
+      <rect id="Search_bg" data-name="Search bg" width="285" height="32" rx="2" fill="rgba(255,255,255,0.25)"/>
+      <text id="Search_in_your_city" data-name="Search in your city" transform="translate(35.09 5)" fill="#fff" font-size="16" font-family="OpenSans, Open Sans"><tspan x="0" y="17">Search in your city</tspan></text>
+      <rect id="Elements_Bars_Search_Bar_x_-_Glyphs_Search_Glyph_-_On_Light_background" data-name="Elements / Bars / Search Bar / x - Glyphs / Search Glyph - On Light background" width="14" height="14" transform="translate(9.805 9.5)" fill="none"/>
+      <text id="_2" data-name="" transform="translate(10 21.5)" fill="#fff" stroke="rgba(0,0,0,0)" stroke-width="1" font-size="14" font-family="FontAwesome6Pro-Solid, 'Font Awesome \36  Pro'"><tspan x="0" y="0"></tspan></text>
+    </g>
+    <g id="Bottom_Nav_Menu" data-name="Bottom Nav Menu" transform="translate(0 756)">
+      <rect id="Row_bg" data-name="Row bg" width="375" height="56" fill="#004f8b"/>
+      <g id="More-2" data-name="More" transform="translate(300)">
+        <path id="Bounds" d="M0,0H75V56H0Z" fill="#079ee2"/>
+        <text id="_3" data-name="" transform="translate(26 38.65)" fill="#fff" font-size="22" font-family="FontAwesome6Pro-Solid, 'Font Awesome \36  Pro'"><tspan x="0" y="0"></tspan></text>
+      </g>
+      <g id="Discover" transform="translate(225)">
+        <rect id="Bounds-2" data-name="Bounds" width="75" height="56" fill="#004e8a"/>
+        <text id="_4" data-name="" transform="translate(25 35.65)" fill="#fff" font-size="22" font-family="FontAwesome6Pro-Solid, 'Font Awesome \36  Pro'"><tspan x="0" y="0"></tspan></text>
+      </g>
+      <g id="Restaurants" transform="translate(150)">
+        <rect id="Bounds-3" data-name="Bounds" width="75" height="56" fill="#004e8a"/>
+        <text id="_5" data-name="" transform="translate(28 35.65)" fill="#fff" font-size="22" font-family="FontAwesome6Pro-Solid, 'Font Awesome \36  Pro'"><tspan x="0" y="0"></tspan></text>
+      </g>
+      <g id="Events" transform="translate(75)">
+        <rect id="Bounds-4" data-name="Bounds" width="75" height="56" fill="#004e8a"/>
+        <text id="_6" data-name="" transform="translate(28 36)" fill="#fff" font-size="22" font-family="FontAwesome6Pro-Solid, 'Font Awesome \36  Pro'"><tspan x="0" y="0"></tspan></text>
+      </g>
+      <g id="Home">
+        <rect id="Bounds-5" data-name="Bounds" width="75" height="56" fill="#004e8a"/>
+        <text id="_7" data-name="" transform="translate(25 35.65)" fill="#fff" font-size="22" font-family="FontAwesome6Pro-Solid, 'Font Awesome \36  Pro'"><tspan x="0" y="0"></tspan></text>
+      </g>
+    </g>
+  </g>
+</svg>

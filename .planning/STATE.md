@@ -3401,6 +3401,71 @@ Sesión maratón de ~15 commits iterando sobre feedback continuo del usuario. Bl
 
 ---
 
+### Sesión 2026-05-25 (tarde) — Milestone PWA Mobile: P0 + P1 (Welcome, Login, Dashboard, More)
+
+Arranque del **Milestone PWA Mobile** (companion app white-label). Brainstorming + plan
+aprobado (`~/.claude/plans/quiero-que-ahora-dise-emos-lazy-harbor.md`). Alcance: **frontend
+pixel-perfect**, auth/data mock; backend e integración al Studio después.
+
+**Hecho:**
+
+- Docs: `.planning/PWA-PROJECT.md` + `PWA-ROADMAP.md`; milestone añadido a `ROADMAP.md`.
+- **P0 bootstrap**: route group `src/app/(pwa)/` servido en `/pwa`, canvas mobile **390×844**
+  (`MobileCanvas`, dev-view escalado + modo embedded para iframe del Studio), reuse de
+  `getConfig`/tokens/i18n. Token nuevo `--pwa-primary` (#079EE2) en `default` + `_template`.
+  Helper `src/lib/asset-url.ts`. Canvas de ref: artboards XD 375×812 → ×1.04.
+- **Welcome** (`/pwa`): splash fondo + logo (`TrueOmniLogo` slot=idle) con fade-in, auto-avanza
+  a Login. Fondo extraído del SVG → `clients/default/assets/pwa/welcome-bg.jpg`.
+- **Login** (`/pwa/login`): pixel-perfect, auth mock (inputs locales), sociales **verbatim** del
+  SVG (Apple→`--brand-primary`, FB #3c5193 / Google multicolor = logos de marca), botón LOGIN
+  `--pwa-primary`, scrim negro 80%. Welcome→Login cableado.
+- **Dashboard** (`/pwa/dashboard`): header brand-primary (logo 154×29 + search/circle-user/inbox
+  FA6, tamaños/posiciones exactos del XD) · hero (foto + **scrim negro vertical full-width** +
+  título Montserrat 23 + banda `--pwa-primary` + 4 quick-cards con **halo blanco 78%** + labels) ·
+  grid 11 tiles config-driven (THINGS TO DO full-width) · bottom nav. **17 imágenes** extraídas del
+  SVG (84MB) mapeadas por tamaño de bytes (determinista), redimensionadas **84MB→876KB**.
+- **More** (`/pwa/more`): search bar (blanco 25%) + inbox, banda olive (`--brand-tertiary`) con
+  clima, 11 items centrados, nav "more" activo. Iterado bastante por el usuario hasta 100%.
+- **Nav compartido**: extraído `PwaBottomNav` + helper `Layer` (`mobile-layer.tsx`), usado por
+  Dashboard (`home`) y More (`more`). Navegación home↔more cableada.
+- Iconos = **Font Awesome 6** (paths oficiales): home/calendar-day/utensils/map-location-dot/
+  ellipsis + magnifying-glass/circle-user/inbox.
+
+**Verificado:**
+
+- `pnpm typecheck` + `pnpm lint` (cero warnings en PWA) + `pnpm format:check` limpios.
+- `/pwa`, `/pwa/login`, `/pwa/dashboard`, `/pwa/more` → HTTP 200; kiosk `/` sin regresión.
+- Screenshots vs XD en `.planning/verifications/pwa-0*.png`. **Aprobados por Rubén**: Welcome,
+  Login, Dashboard (tras iterar: iconos FA, halo de cards, banda azul, gradiente vertical,
+  header con tamaños del XD), More.
+- White-label: contenido en `config.features.pwa.*`; colores por token. Único hex = logos de
+  marca (FB/Google) en `social-icons.tsx`.
+
+**Pendiente / siguiente (mañana):**
+
+- Pantallas **PWA-only** restantes: Profile, Notifications, Scavenger Hunt, More-items…
+- **Módulos reutilizados** mobile: Listings, Events, Map, Deals, Passes, Tickets, Trails,
+  Digital Brochure, Ask AI, Itinerary/Favoritos.
+- Cablear navegación de **tiles / quick-access / items del More** a sus módulos (cuando existan).
+  Hoy navegan: Welcome→Login→Dashboard, y nav home↔more.
+- **Status bar** del XD (9:41/batería/señal): omitido (lo pone el SO). Confirmar si se dibuja mock.
+- Labels de tiles del Dashboard: centrados (decisión); el XD tiene posiciones custom por tile.
+- **Pz** — integración al Studio (editor PWA real, clone, purge, bootstrap-from-fs, branding-sync,
+  publish, preview bridge 390×844). Stub vive en `src/app/studio/[slug]/mobile-pwa/page.tsx`.
+
+**Decisiones:**
+
+- PWA = **route group propio** con componentes mobile propios; comparte solo data/tokens/config;
+  **kiosk intacto**. Capa `Layer` 375 escalada ×1.04 para fidelidad verbatim.
+- Header: **tamaños/posiciones exactos del XD** (h110, logo y62); el hero solapa 14px bajo el
+  header (z menor) para alinear el contenido a las coords del XD; status bar del SO no se dibuja.
+- Imágenes del hero/cards = assets del cliente (extraídas del SVG y redimensionadas). Iconos FA
+  por paths oficiales (no fuente embebida).
+
+**Fase:** Milestone PWA Mobile — P0 (bootstrap) + P1 (Welcome/Login/Dashboard/More) cerrados.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

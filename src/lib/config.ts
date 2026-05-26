@@ -813,6 +813,90 @@ export interface LanguagesConfig {
   default: string;
 }
 
+/** Pantalla Welcome (splash de arranque) de la PWA Mobile. */
+export interface PwaWelcomeConfig {
+  /** Imagen de fondo fullscreen (path relativo a `assets/` o URL absoluta). */
+  background: string;
+  /** Logo override; si se omite usa `branding.idleLogo` → `branding.logo.default`. */
+  logo?: string;
+  /** Ms antes de auto-avanzar a Login. Default 2500. */
+  autoAdvanceMs?: number;
+}
+
+/** Textos de la pantalla Login de la PWA (white-label, sin hardcodear en JSX). */
+export interface PwaLoginConfig {
+  /** Imagen de fondo; si se omite reutiliza `welcome.background`. */
+  background?: string;
+  loginWith: string;
+  emailPlaceholder: string;
+  passwordPlaceholder: string;
+  forgotPassword: string;
+  loginCta: string;
+  createAccountCta: string;
+  skipLogin: string;
+}
+
+/** Acceso rápido (squircle) de la fila superior del Dashboard PWA. */
+export interface PwaQuickAccess {
+  /** Identificador kebab-case (ruta destino futura). */
+  key: string;
+  label: string;
+  /** Imagen del thumbnail (path relativo a `assets/` o URL). */
+  image: string;
+}
+
+/** Tile del grid del Dashboard PWA. */
+export interface PwaTile {
+  /** Identificador kebab-case (ruta = módulo destino). */
+  key: string;
+  label: string;
+  /** Imagen de fondo del tile. */
+  image: string;
+  /** Si true, ocupa el ancho completo del grid (1 columna span 2). */
+  wide?: boolean;
+}
+
+/** Pantalla Home/Dashboard de la PWA. */
+export interface PwaDashboardConfig {
+  /** Título del hero (soporta varias líneas). */
+  heroTitle: string;
+  /** Imagen del hero banner. */
+  heroImage: string;
+  /** Fila de accesos rápidos (squircles). */
+  quickAccess: PwaQuickAccess[];
+  /** Tiles del grid principal. */
+  tiles: PwaTile[];
+}
+
+/** Ítem de la lista del More Menu. */
+export interface PwaMoreItem {
+  /** Identificador kebab-case (ruta destino futura). */
+  key: string;
+  label: string;
+}
+
+/** Pantalla More Menu de la PWA. */
+export interface PwaMoreConfig {
+  /** Placeholder de la barra de búsqueda. */
+  searchPlaceholder: string;
+  /** Texto de ubicación + clima de la banda olive (placeholder; clima vía integración). */
+  weatherText: string;
+  /** Lista de accesos del menú. */
+  items: PwaMoreItem[];
+}
+
+/**
+ * Configuración de la PWA Mobile (companion app). Es un producto white-label
+ * propio que comparte branding + data con el kiosk pero con diseño mobile.
+ * Se va poblando por pantalla; de momento Welcome (P1) + Login + Dashboard + More.
+ */
+export interface PwaConfig {
+  welcome?: PwaWelcomeConfig;
+  login?: PwaLoginConfig;
+  dashboard?: PwaDashboardConfig;
+  more?: PwaMoreConfig;
+}
+
 /**
  * Configuración tipada de un cliente del kiosk.
  * Refleja `clients/_template/config.schema.json`. La validación runtime
@@ -834,6 +918,10 @@ export interface KioskConfig {
       dark?: string;
       alt: string;
     };
+    /** Logo usado sobre fondos oscuros (billboard idle, splash PWA). Default: `logo.default`. */
+    idleLogo?: string;
+    /** Logo del footer. Default: `logo.default`. */
+    footerLogo?: string;
     favicon?: string;
   };
   textos: Record<string, string>;
@@ -873,6 +961,8 @@ export interface KioskConfig {
     };
     /** Catálogo de ads declarativo (Fase 3.8). */
     advertisements?: AdvertisementsConfig;
+    /** Configuración de la PWA Mobile (companion app). */
+    pwa?: PwaConfig;
   };
   integraciones?: {
     api_base_url?: string;

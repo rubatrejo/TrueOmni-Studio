@@ -15,9 +15,17 @@ const FALLBACK_LOGIN: PwaLoginConfig = {
   skipLogin: 'Skip Login',
 };
 
+/** Fallback de textos del modal de error de login. */
+const FALLBACK_ERROR = {
+  title: 'Oops! Login Failed',
+  body: 'There was an error that prevented you from logging in. Please try again or create a new account.',
+  tryAgainCta: 'Try Again',
+  createAccountCta: 'Create New Account',
+};
+
 /**
  * Pantalla Login de la PWA (`/pwa/login`). Auth mockeado (frontend pixel-perfect).
- * `dashboardHref` se omite hasta que exista el Dashboard.
+ * LOGIN valida email/password (mock); si falla muestra el modal de error.
  */
 export default async function PwaLoginPage() {
   const config = await getConfig();
@@ -32,6 +40,8 @@ export default async function PwaLoginPage() {
         logoAlt={config.branding.logo.alt}
         texts={login}
         dashboardHref="/pwa/dashboard"
+        forgotHref="/pwa/forgot-password"
+        errorTexts={pwa?.loginError ?? FALLBACK_ERROR}
       />
     </MobileCanvas>
   );

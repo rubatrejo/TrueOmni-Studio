@@ -10170,6 +10170,264 @@
           { "key": "passes", "label": "Passes" },
           { "key": "help", "label": "Help" }
         ]
+      },
+      "connectWithUs": {
+        "title": "Connect With Us",
+        "social": {
+          "x": "https://x.com/",
+          "facebook": "https://facebook.com/",
+          "instagram": "https://instagram.com/",
+          "pinterest": "https://pinterest.com/"
+        },
+        "phone": "+16025550100",
+        "website": "https://example.com",
+        "actions": { "call": "Call", "website": "Website", "directions": "Directions" },
+        "address": "Street Address, City, State, 12345, Country",
+        "hours": {
+          "statusTemplate": "Open Now until {close}",
+          "todayClose": "11:00 pm",
+          "modalTitle": "Hours",
+          "schedule": [
+            { "day": "Monday", "open": "9:00 am", "close": "11:00 pm" },
+            { "day": "Tuesday", "open": "9:00 am", "close": "11:00 pm" },
+            { "day": "Wednesday", "open": "9:00 am", "close": "11:00 pm" },
+            { "day": "Thursday", "open": "9:00 am", "close": "11:00 pm" },
+            { "day": "Friday", "open": "9:00 am", "close": "12:00 am" },
+            { "day": "Saturday", "open": "10:00 am", "close": "12:00 am" },
+            { "day": "Sunday", "open": "10:00 am", "close": "10:00 pm" }
+          ]
+        },
+        "copyright": "{client_name} is the official travel authority for the state of {city}©. {year}. All rights reserved."
+      },
+      "forgotPassword": {
+        "title": "Forgot Your Password?",
+        "body": "Enter your email below and we’ll send you a link to reset your password",
+        "emailPlaceholder": "Email Address",
+        "resetCta": "RESET PASSWORD",
+        "createAccountCta": "Create New Account",
+        "sent": {
+          "title": "Check Your Email",
+          "body": "We just sent you instructions on how to reset your password",
+          "createAccountCta": "CREATE ACCOUNT",
+          "tryAgainCta": "TRY AGAIN"
+        }
+      },
+      "loginError": {
+        "title": "Oops! Login Failed",
+        "body": "There was an error that prevented you from logging in. Please try again or create a new account.",
+        "tryAgainCta": "Try Again",
+        "createAccountCta": "Create New Account"
+      },
+      "createAccount": {
+        "title": "Create Account",
+        "namePlaceholder": "Full Name",
+        "emailPlaceholder": "Email Address",
+        "countryPlaceholder": "Country",
+        "statePlaceholder": "State",
+        "zipPlaceholder": "Zip",
+        "passwordPlaceholder": "Password*",
+        "confirmPasswordPlaceholder": "Confirm Password*",
+        "helperText": "Password must contain an upper & lowercase character, number, and special symbol.",
+        "signUpCta": "SIGN UP",
+        "countrySheetTitle": "Select Country",
+        "countries": [
+          { "code": "US", "name": "United States" },
+          { "code": "CA", "name": "Canada" },
+          { "code": "MX", "name": "Mexico" },
+          { "code": "GB", "name": "United Kingdom" },
+          { "code": "FR", "name": "France" },
+          { "code": "DE", "name": "Germany" },
+          { "code": "ES", "name": "Spain" },
+          { "code": "IT", "name": "Italy" },
+          { "code": "PT", "name": "Portugal" },
+          { "code": "NL", "name": "Netherlands" },
+          { "code": "BR", "name": "Brazil" },
+          { "code": "AR", "name": "Argentina" },
+          { "code": "CL", "name": "Chile" },
+          { "code": "CO", "name": "Colombia" },
+          { "code": "JP", "name": "Japan" },
+          { "code": "AU", "name": "Australia" },
+          { "code": "NZ", "name": "New Zealand" },
+          { "code": "IE", "name": "Ireland" },
+          { "code": "SE", "name": "Sweden" },
+          { "code": "CH", "name": "Switzerland" }
+        ],
+        "error": {
+          "title": "Check Your Details",
+          "body": "Please fill every field with a valid email and matching passwords.",
+          "okCta": "OK"
+        },
+        "photo": {
+          "title": "Upload Picture",
+          "subtitle": "Take a minute to upload a profile picture",
+          "addPhoto": "Add photo",
+          "fullNameFallback": "FULL NAME",
+          "skipCta": "SKIP AND FINISH",
+          "saveCta": "SAVE AND FINISH",
+          "cancelCta": "CANCEL",
+          "takePhoto": "Take Photo",
+          "chooseGallery": "Choose From Gallery",
+          "cancelSheet": "Cancel",
+          "sizeHint": "Your image has to weigh less than 5MB to upload it correctly."
+        }
+      },
+      "profile": {
+        "editProfileLink": "Edit Profile",
+        "user": {
+          "name": "Maud Roberts",
+          "location": "Breckenridge, CO",
+          "weather": "52°F",
+          "photo": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&crop=faces",
+          "heroImage": "assets/pwa/dashboard/hero.jpg"
+        },
+        "favorites": {
+          "title": "MY FAVORITES LIST",
+          "viewMore": "VIEW MORE",
+          "items": [
+            {
+              "title": "Japanese Food",
+              "subcategory": "RESTAURANT",
+              "distance": "7.5 mi · Phoenix, AZ",
+              "hours": "Open until 11:00 pm",
+              "image": "assets/pwa/dashboard/tile-restaurants.jpg"
+            },
+            {
+              "title": "Home Bakery",
+              "subcategory": "DESSERTS",
+              "distance": "7.5 mi · Phoenix, AZ",
+              "hours": "Open until 11:00 pm",
+              "image": "assets/pwa/dashboard/tile-deals.jpg"
+            },
+            {
+              "title": "Movie Nights",
+              "subcategory": "ENTERTAINMENT",
+              "distance": "7.5 mi · Phoenix, AZ",
+              "hours": "Open until 11:00 pm",
+              "image": "assets/pwa/dashboard/tile-social-wall.jpg"
+            },
+            {
+              "title": "Desserts",
+              "subcategory": "DESSERTS",
+              "distance": "7.5 mi · Phoenix, AZ",
+              "hours": "Open until 11:00 pm",
+              "image": "assets/pwa/dashboard/tile-things-to-do.jpg"
+            }
+          ]
+        },
+        "upcomingEvents": {
+          "title": "UPCOMING EVENTS",
+          "viewMore": "VIEW MORE",
+          "items": [
+            {
+              "title": "Chicago Cubs at San Franciso Giants",
+              "time": "7:00 pm - Location",
+              "weekday": "Thursday",
+              "day": "27",
+              "image": "assets/pwa/dashboard/quick-events.jpg",
+              "accent": "pwa"
+            },
+            {
+              "title": "Park Ski Tournament",
+              "time": "11:00 pm - Location",
+              "weekday": "Sunday",
+              "day": "30",
+              "image": "assets/pwa/dashboard/tile-trails.jpg",
+              "accent": "pwa"
+            },
+            {
+              "title": "Big Music Festival in Downtown",
+              "time": "11:00 pm - Location",
+              "weekday": "Monday",
+              "day": "1",
+              "image": "assets/pwa/dashboard/tile-map.jpg",
+              "accent": "brand"
+            }
+          ]
+        },
+        "editProfile": {
+          "title": "Edit Profile",
+          "editPhoto": "EDIT PHOTO",
+          "namePlaceholder": "Full Name",
+          "emailPlaceholder": "Email Address",
+          "statePlaceholder": "State",
+          "zipPlaceholder": "Zip",
+          "countryPlaceholder": "Country",
+          "changePasswordCta": "CHANGE PASSWORD",
+          "saveCta": "SAVE",
+          "prefill": {
+            "name": "Maud Roberts",
+            "email": "mroberts@email.com",
+            "state": "Colorado",
+            "zip": "1234556",
+            "country": "United States"
+          }
+        },
+        "changePassword": {
+          "title": "Change Your Password",
+          "body": "This new password replaces the old one that has been set and you will not be able to use it anymore.",
+          "newPlaceholder": "New Password",
+          "confirmPlaceholder": "Confirm New Password",
+          "helper": "Password must contain an upper & lowercase character, number, and special symbol.",
+          "establishCta": "ESTABLISH NEW PASSWORD",
+          "error": {
+            "title": "Something went wrong",
+            "body": "There was an error performing this action. Please try again.",
+            "tryAgainCta": "Try Again",
+            "closeCta": "Close"
+          },
+          "success": { "title": "Password Changed", "doneCta": "DONE" }
+        },
+        "settings": {
+          "title": "Settings",
+          "deleteRow": "Delete my Account"
+        },
+        "delete": {
+          "title": "Delete Profile",
+          "surveyTitle": "Survey",
+          "reason": {
+            "heading": "Please, share with us the reason because you want to delete your account",
+            "options": [
+              "Something was broken",
+              "App Crashes",
+              "I receive so many notifications",
+              "I have a privacy concern",
+              "Other"
+            ],
+            "continueCta": "CONTINUE"
+          },
+          "other": {
+            "heading": "We are working on improve the experience, we'd be so grateful to be aware your feedback",
+            "placeholder": "Your explanation is optional",
+            "continueCta": "CONTINUE"
+          },
+          "confirm": {
+            "heading": "It's advisable for you to request your data to be send by email",
+            "sendDataLabel": "Yes, send my data to my email",
+            "passwordPlaceholder": "Password*",
+            "warning": "You will permanently lose all your notifications and profile info. After this, there is no turning back",
+            "continueCta": "CONTINUE"
+          },
+          "survey": {
+            "question": "Your country of residence is part of :",
+            "options": [
+              "European countries",
+              "Asian countries",
+              "North American Countries",
+              "South American Countries and Antilles",
+              "Other"
+            ],
+            "deleteCta": "DELETE MY ACCOUNT"
+          }
+        }
+      },
+      "search": {
+        "placeholder": "Search destinations, events…",
+        "recentTitle": "RECENT",
+        "browseTitle": "BROWSE",
+        "clearAll": "Clear all",
+        "noResults": "No results for “{query}”",
+        "typeSection": "Section",
+        "typeEvent": "Event"
       }
     }
   },

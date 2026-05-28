@@ -6,7 +6,11 @@ import { useState } from 'react';
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { resolveAssetUrl } from '@/lib/asset-url';
 
+import { LoginErrorModal } from './login-error-modal';
 import { AppleSocialIcon, FacebookSocialIcon, GoogleSocialIcon } from './social-icons';
+
+/** Validación mock de email (sin backend): formato básico. */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** El XD está a 375×812; el canvas es 390×844 → se escala el layer ×1.04. */
 const SCALE = 390 / 375;
@@ -23,6 +27,13 @@ interface LoginTexts {
   skipLogin: string;
 }
 
+interface LoginErrorTexts {
+  title: string;
+  body: string;
+  tryAgainCta: string;
+  createAccountCta: string;
+}
+
 interface LoginScreenProps {
   /** Imagen de fondo fullscreen. */
   background: string;
@@ -32,6 +43,10 @@ interface LoginScreenProps {
   texts: LoginTexts;
   /** Destino tras Login/Skip (Dashboard). Si se omite, los botones no navegan aún. */
   dashboardHref?: string;
+  /** Destino del link "Forgot your password?". */
+  forgotHref?: string;
+  /** Textos del modal de error (validación mock fallida). */
+  errorTexts: LoginErrorTexts;
 }
 
 function MailIcon({ style }: { style?: React.CSSProperties }) {
@@ -82,13 +97,30 @@ function LockIcon({ style }: { style?: React.CSSProperties }) {
  * `--pwa-primary`; textos desde `config.features.pwa.login`. El status bar del
  * XD (placeholder del SO) no se dibuja.
  */
-export function LoginScreen({ background, logoAlt, texts, dashboardHref }: LoginScreenProps) {
+export function LoginScreen({
+  background,
+  logoAlt,
+  texts,
+  dashboardHref,
+  forgotHref = '/pwa/forgot-password',
+  errorTexts,
+}: LoginScreenProps) {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorOpen, setErrorOpen] = useState(false);
 
   const goToDashboard = () => {
     if (dashboardHref) router.push(dashboardHref);
+  };
+
+  // Auth mock: sin email válido + password → muestra el modal de error; si no, entra.
+  const handleLogin = () => {
+    if (!EMAIL_RE.test(email.trim()) || password.length === 0) {
+      setErrorOpen(true);
+      return;
+    }
+    goToDashboard();
   };
 
   return (
@@ -177,6 +209,7 @@ export function LoginScreen({ background, logoAlt, texts, dashboardHref }: Login
         {/* Forgot your password? */}
         <button
           type="button"
+          onClick={() => router.push(forgotHref)}
           className="absolute flex items-center font-medium text-white underline"
           style={{ left: 24.5, top: 471, height: 17, fontSize: 12, ...OPEN_SANS }}
         >
@@ -186,7 +219,7 @@ export function LoginScreen({ background, logoAlt, texts, dashboardHref }: Login
         {/* LOGIN (acción primaria) */}
         <button
           type="button"
-          onClick={goToDashboard}
+          onClick={handleLogin}
           className="absolute flex items-center justify-center rounded-[4px] bg-[hsl(var(--pwa-primary))] font-bold uppercase text-white"
           style={{ left: 23.1, top: 569, width: 328, height: 44, fontSize: 14, letterSpacing: 0.5 }}
         >
@@ -196,6 +229,7 @@ export function LoginScreen({ background, logoAlt, texts, dashboardHref }: Login
         {/* CREATE NEW ACCOUNT (outline) */}
         <button
           type="button"
+          onClick={() => router.push('/pwa/create-account')}
           className="absolute flex items-center justify-center rounded-[4px] border border-white font-bold uppercase text-white"
           style={{ left: 23, top: 633, width: 328, height: 44, fontSize: 14, letterSpacing: 0.5 }}
         >
@@ -212,6 +246,14 @@ export function LoginScreen({ background, logoAlt, texts, dashboardHref }: Login
           {texts.skipLogin}
         </button>
       </div>
+
+      {/* Modal de error (validación mock fallida). "Create Account" lleva al signup. */}
+      <LoginErrorModal
+        open={errorOpen}
+        onClose={() => setErrorOpen(false)}
+        onCreateAccount={() => router.push('/pwa/create-account')}
+        texts={errorTexts}
+      />
     </div>
   );
 }

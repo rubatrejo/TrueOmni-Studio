@@ -28,8 +28,9 @@ const NAV: { key: PwaNavKey; Icon: typeof HomeNavIcon; href?: string }[] = [
 /**
  * Bottom nav compartido de la PWA (Dashboard, More, …). Iconos Font Awesome 6;
  * la celda `active` se resalta con `--pwa-primary`. Fijo (no scrollea).
+ * `active` opcional: las sub-pantallas (p.ej. Connect With Us) lo omiten → sin resaltado.
  */
-export function PwaBottomNav({ active }: { active: PwaNavKey }) {
+export function PwaBottomNav({ active }: { active?: PwaNavKey }) {
   const router = useRouter();
   return (
     <Layer h={56} className="shrink-0" style={{ backgroundColor: BRAND }}>

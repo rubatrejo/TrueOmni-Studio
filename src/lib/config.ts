@@ -885,6 +885,238 @@ export interface PwaMoreConfig {
   items: PwaMoreItem[];
 }
 
+/** Handles sociales de la pantalla Connect With Us (solo se pinta el icono si hay URL). */
+export interface PwaConnectSocial {
+  x?: string;
+  facebook?: string;
+  instagram?: string;
+  pinterest?: string;
+}
+
+/** Un día del horario mostrado en el modal de Connect With Us. */
+export interface PwaConnectHoursDay {
+  /** Etiqueta del día (ya localizada en el config). Ej. "Monday". */
+  day: string;
+  /** Rango de apertura, o `null`/omitido si está cerrado ese día. */
+  open?: string;
+  close?: string;
+  /** Si true, se muestra como "Closed" ignorando open/close. */
+  closed?: boolean;
+}
+
+/** Horario de la pantalla Connect With Us. */
+export interface PwaConnectHours {
+  /** Texto de la barra (soporta `{close}`). Ej. "Open Now until {close}". */
+  statusTemplate: string;
+  /** Hora de cierre de hoy, interpolada en `statusTemplate`. */
+  todayClose?: string;
+  /** Título del modal de horarios. */
+  modalTitle?: string;
+  /** Horario semana completa (modal). */
+  schedule: PwaConnectHoursDay[];
+}
+
+/**
+ * Pantalla Connect With Us de la PWA (`/pwa/connect-with-us`), abierta desde el More.
+ * Contacto + branding del cliente. El logo grande y el footer "powered by" no viven
+ * aquí: el logo es el del cliente (branding) y el footer es marca fija del producto.
+ */
+export interface PwaConnectWithUsConfig {
+  /** Título del header. Default "Connect With Us". */
+  title?: string;
+  /** Nombre bajo el logo; si se omite usa `client.nombre`. */
+  orgName?: string;
+  /** Redes sociales (URLs). */
+  social?: PwaConnectSocial;
+  /** Teléfono para el botón Call (tel:). */
+  phone?: string;
+  /** URL para el botón Website. */
+  website?: string;
+  /** Etiquetas de las 3 acciones (white-label). */
+  actions?: { call: string; website: string; directions: string };
+  /** Dirección mostrada bajo el mapa. */
+  address?: string;
+  /** Horario + modal. */
+  hours?: PwaConnectHours;
+  /**
+   * Copyright del cliente. Soporta `{client_name}`, `{city}`, `{year}`.
+   * Ej. "{client_name} is the official travel authority for the state of {city}©. {year}. All rights reserved."
+   */
+  copyright?: string;
+  /** Ciudad/lugar interpolado en `{city}` del copyright. */
+  city?: string;
+}
+
+/** Pantalla "Check Your Email" (paso 2 del flujo Forgot Password). */
+export interface PwaForgotPasswordSentConfig {
+  title: string;
+  body: string;
+  createAccountCta: string;
+  tryAgainCta: string;
+}
+
+/** Flujo "Forgot Your Password" de la PWA (paso 1 email + paso 2 confirmación). */
+export interface PwaForgotPasswordConfig {
+  /** Paso 1 — Forgot Your Password? */
+  title: string;
+  body: string;
+  emailPlaceholder: string;
+  resetCta: string;
+  createAccountCta: string;
+  /** Paso 2 — Check Your Email. */
+  sent: PwaForgotPasswordSentConfig;
+}
+
+/** Modal compacto de error de login (validación mock fallida). */
+export interface PwaLoginErrorConfig {
+  title: string;
+  body: string;
+  tryAgainCta: string;
+  createAccountCta: string;
+}
+
+/** Paso 2-4 del Create Account (Upload Picture + action sheet de foto). */
+export interface PwaCreateAccountPhotoConfig {
+  title: string;
+  subtitle: string;
+  addPhoto: string;
+  /** Texto que se muestra si no llega el nombre por query param. */
+  fullNameFallback: string;
+  skipCta: string;
+  saveCta: string;
+  cancelCta: string;
+  /** Action sheet de origen de la foto. */
+  takePhoto: string;
+  chooseGallery: string;
+  cancelSheet: string;
+  /** Hint de tamaño máximo (≤5 MB). */
+  sizeHint: string;
+}
+
+/** Flujo "Create Account" (signup) de la PWA. Auth mockeado (solo frontend). */
+export interface PwaCreateAccountConfig {
+  /** Título del header (paso 1). */
+  title: string;
+  /** Placeholders de los campos del form. */
+  namePlaceholder: string;
+  emailPlaceholder: string;
+  countryPlaceholder: string;
+  statePlaceholder: string;
+  zipPlaceholder: string;
+  passwordPlaceholder: string;
+  confirmPasswordPlaceholder: string;
+  /** Texto de ayuda de la contraseña. */
+  helperText: string;
+  signUpCta: string;
+  /** Lista de países (reusa los valores de COMMON_COUNTRIES). */
+  countries: GuestbookCountry[];
+  /** Título del bottom-sheet de selección de país. */
+  countrySheetTitle: string;
+  /** Modal de error de validación (campos inválidos). */
+  error: { title: string; body: string; okCta: string };
+  /** Pasos 2-4 (Upload Picture). */
+  photo: PwaCreateAccountPhotoConfig;
+}
+
+/** Card de "MY FAVORITES LIST" del Profile. */
+export interface PwaProfileFavorite {
+  title: string;
+  subcategory: string;
+  /** Línea superior (ej. "7.5 mi · Phoenix, AZ"). */
+  distance: string;
+  /** Línea inferior (ej. "Open until 11:00 pm"). */
+  hours: string;
+  image: string;
+}
+
+/** Card de "UPCOMING EVENTS" del Profile. */
+export interface PwaProfileEvent {
+  title: string;
+  /** Ej. "7:00 pm - Location". */
+  time: string;
+  /** Día de la semana del badge (ej. "Thursday"). */
+  weekday: string;
+  /** Número del día (ej. "27"). */
+  day: string;
+  image: string;
+  /** Color de la banda inferior: brand o pwa. */
+  accent: 'brand' | 'pwa';
+}
+
+/** Usuario mock del Profile. */
+export interface PwaProfileUser {
+  name: string;
+  location: string;
+  /** Ej. "52°F". */
+  weather: string;
+  /** Foto de perfil (asset o URL). */
+  photo: string;
+  /** Foto de fondo del hero. */
+  heroImage: string;
+}
+
+/** Edit Profile (campos prellenados + acciones). */
+export interface PwaEditProfileConfig {
+  title: string;
+  editPhoto: string;
+  namePlaceholder: string;
+  emailPlaceholder: string;
+  statePlaceholder: string;
+  zipPlaceholder: string;
+  countryPlaceholder: string;
+  changePasswordCta: string;
+  saveCta: string;
+  /** Valores prellenados del usuario. */
+  prefill: { name: string; email: string; state: string; zip: string; country: string };
+}
+
+/** Change Password (form + error + success). */
+export interface PwaChangePasswordConfig {
+  title: string;
+  body: string;
+  newPlaceholder: string;
+  confirmPlaceholder: string;
+  helper: string;
+  establishCta: string;
+  error: { title: string; body: string; tryAgainCta: string; closeCta: string };
+  success: { title: string; doneCta: string };
+}
+
+/** Settings (lista con Delete my Account). */
+export interface PwaSettingsConfig {
+  title: string;
+  deleteRow: string;
+}
+
+/** Flujo Delete Account (reason → [other] → confirm → survey). */
+export interface PwaDeleteFlowConfig {
+  title: string;
+  surveyTitle: string;
+  reason: { heading: string; options: string[]; continueCta: string };
+  other: { heading: string; placeholder: string; continueCta: string };
+  confirm: {
+    heading: string;
+    sendDataLabel: string;
+    passwordPlaceholder: string;
+    warning: string;
+    continueCta: string;
+  };
+  survey: { question: string; options: string[]; deleteCta: string };
+}
+
+/** Sección Profile de la PWA (10 pantallas). */
+export interface PwaProfileConfig {
+  /** Link "Edit Profile" (top-right del Profile). */
+  editProfileLink: string;
+  user: PwaProfileUser;
+  favorites: { title: string; viewMore: string; items: PwaProfileFavorite[] };
+  upcomingEvents: { title: string; viewMore: string; items: PwaProfileEvent[] };
+  editProfile: PwaEditProfileConfig;
+  changePassword: PwaChangePasswordConfig;
+  settings: PwaSettingsConfig;
+  delete: PwaDeleteFlowConfig;
+}
+
 /**
  * Configuración de la PWA Mobile (companion app). Es un producto white-label
  * propio que comparte branding + data con el kiosk pero con diseño mobile.
@@ -895,6 +1127,30 @@ export interface PwaConfig {
   login?: PwaLoginConfig;
   dashboard?: PwaDashboardConfig;
   more?: PwaMoreConfig;
+  connectWithUs?: PwaConnectWithUsConfig;
+  /** Flujo de recuperación de contraseña (2 pantallas). */
+  forgotPassword?: PwaForgotPasswordConfig;
+  /** Textos del modal de error de login. */
+  loginError?: PwaLoginErrorConfig;
+  /** Flujo de registro (Create Account + foto). */
+  createAccount?: PwaCreateAccountConfig;
+  /** Sección Profile (perfil, edición, password, settings, delete). */
+  profile?: PwaProfileConfig;
+  /** Pantalla de búsqueda (abierta desde la lupa del Dashboard). */
+  search?: PwaSearchConfig;
+}
+
+/** Pantalla de Search de la PWA (textos; el índice se construye desde la data). */
+export interface PwaSearchConfig {
+  placeholder: string;
+  recentTitle: string;
+  browseTitle: string;
+  clearAll: string;
+  /** Plantilla "No results for …" (soporta `{query}`). */
+  noResults: string;
+  /** Subtítulo por tipo de resultado. */
+  typeSection: string;
+  typeEvent: string;
 }
 
 /**

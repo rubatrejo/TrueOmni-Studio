@@ -1,5 +1,7 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { resolveAssetUrl } from '@/lib/asset-url';
 import type { PwaQuickAccess, PwaTile } from '@/lib/config';
@@ -44,6 +46,7 @@ export function DashboardScreen({
   quickAccess,
   tiles,
 }: DashboardScreenProps) {
+  const router = useRouter();
   return (
     <div className="flex h-full w-full flex-col bg-background">
       {/* Header fijo — tamaños/posiciones verbatim del XD (110 alto; logo 154×29 a
@@ -54,12 +57,24 @@ export function DashboardScreen({
         <div className="absolute" style={{ left: 20, top: 62, width: 154 }}>
           <TrueOmniLogo className="h-auto w-full text-white" title={logoAlt} slot="default" />
         </div>
-        <div className="absolute text-white" style={{ left: 266, top: 69 }}>
+        <button
+          type="button"
+          aria-label="Search"
+          onClick={() => router.push('/pwa/search')}
+          className="absolute text-white"
+          style={{ left: 266, top: 69 }}
+        >
           <SearchIcon size={19} />
-        </div>
-        <div className="absolute text-white" style={{ left: 298, top: 68 }}>
+        </button>
+        <button
+          type="button"
+          aria-label="Profile"
+          onClick={() => router.push('/pwa/profile')}
+          className="absolute text-white"
+          style={{ left: 298, top: 68 }}
+        >
           <ProfileIcon size={21} />
-        </div>
+        </button>
         <div className="absolute text-white" style={{ left: 334, top: 67 }}>
           <InboxIcon size={24} />
         </div>

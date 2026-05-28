@@ -1,3 +1,7 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+
 import type { PwaMoreItem } from '@/lib/config';
 
 import { PwaBottomNav } from './bottom-nav';
@@ -7,6 +11,15 @@ import { Layer } from './mobile-layer';
 const BRAND = 'hsl(var(--brand-primary))';
 const OLIVE = 'hsl(var(--brand-tertiary))';
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
+
+/**
+ * Destino de cada item del More. Solo se cablean los que ya tienen pantalla;
+ * el resto queda sin navegación hasta que exista su módulo.
+ */
+const ITEM_HREF: Record<string, string> = {
+  'connect-with-us': '/pwa/connect-with-us',
+  'my-profile': '/pwa/profile',
+};
 
 interface MoreScreenProps {
   searchPlaceholder: string;
@@ -23,6 +36,7 @@ interface MoreScreenProps {
  * desde `config.features.pwa.more`; colores por token.
  */
 export function MoreScreen({ searchPlaceholder, weatherText, items }: MoreScreenProps) {
+  const router = useRouter();
   return (
     <div className="flex h-full w-full flex-col bg-background">
       {/* Header: search bar + inbox */}
@@ -59,16 +73,20 @@ export function MoreScreen({ searchPlaceholder, weatherText, items }: MoreScreen
 
       {/* Lista de accesos (centrados, spacing 52 del XD) */}
       <div className="scrollbar-hide flex-1 overflow-y-auto bg-background">
-        {items.map((it) => (
-          <button
-            key={it.key}
-            type="button"
-            className="flex h-[54px] w-full items-center justify-center text-foreground"
-            style={{ fontSize: 16, ...OPEN_SANS }}
-          >
-            {it.label}
-          </button>
-        ))}
+        {items.map((it) => {
+          const href = ITEM_HREF[it.key];
+          return (
+            <button
+              key={it.key}
+              type="button"
+              onClick={() => href && router.push(href)}
+              className="flex h-[54px] w-full items-center justify-center text-foreground"
+              style={{ fontSize: 16, ...OPEN_SANS }}
+            >
+              {it.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Bottom nav fijo, "more" activo */}

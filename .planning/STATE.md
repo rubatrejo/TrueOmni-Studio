@@ -138,11 +138,11 @@ Decisión y ejecución de la fase puntual **MIG-AB-1** (plan en `.planning/MIG-A
 4. **Test E2E ejecutable** — instalar `@playwright/test` + mover spec documentado a `tests/e2e/`.
 5. **Fase 4 — primer cliente real** — bloqueada por negocio.
 
-**Última sesión (2026-05-18 noche):** Maratón Studio iterativo — Video Walls 4×2/2×2 pixel-perfect XD (12 templates), retiro grids 2×1/1×2 del catálogo (preprocess migra legacy → 2×2), kiosk editor UX (touch font 24-220, footer logo pos, ads dims+multi-route, hero header movido), Brand Media tab nuevo (Brand video + Idle background con YouTube URL, layout 4 cards alineadas), runtime YouTube embed en hero-background-layer, color picker overflow fix, dashboard cards (Rubén Ramírez + star icon + new client card height), delete client orphan recovery, custom font signage SSR, Discover Dekalb auto-hidratación signage. 15 commits + 15 deploys verdes.
+**Última sesión (2026-05-27):** Milestone PWA Mobile — 5 flujos nuevos: Connect With Us, Forgot Password (+ Login Error modal), Create Account (form + foto), Profile (10 pantallas: profile/edit/password/settings/delete), y Search (`/pwa/search` desde la lupa, diseño propio). Compartidos nuevos (`PwaSubHeader`, `PhotoSourceSheet`, `PwaAlertModal`, `form-controls`, `InLayerNav`, `signup-icons`). Todo verificado (typecheck/lint/format + screenshots vs XD + audit white-label). **SIN COMMITEAR.** Detalle completo en el historial de abajo.
 
 **Último deploy verde:** commit `1da1dbd` (media cards spacing + color picker overflow + YT en URL paste).
 
-**Siguiente acción concreta:** **Cablear auto-uso del brandVideo en signage/videowall runtime** — propagar `branding.brandVideo` y `branding.idleBackground` vía bridge al iframe para que los video slots vacíos los usen como fallback. Schema + UI ya están listos; falta el wiring del runtime. Alternativa: **smoke visual de los cambios live** (4 cards Media alineadas, color picker, 4×2/2×2 pixel-perfect en producción). **Fase 4 — primer cliente real** sigue bloqueada por negocio.
+**Siguiente acción concreta:** **Commitear lo de la sesión 2026-05-27** (sigue todo sin commitear). Luego continuar el Milestone PWA: pantallas PWA-only restantes (Notifications, Scavenger Hunt…) y/o módulos reutilizados mobile (Listings, Map, Events, Deals, Tickets, Trails, Brochure, Ask AI, Itinerary), cableando tiles/quick-access/More/resultados-de-search a sus módulos cuando existan. Pz = integración al Studio. **Fase 4 — primer cliente real** sigue bloqueada por negocio.
 
 **Bloqueos:**
 
@@ -3463,6 +3463,56 @@ pixel-perfect**, auth/data mock; backend e integración al Studio después.
   por paths oficiales (no fuente embebida).
 
 **Fase:** Milestone PWA Mobile — P0 (bootstrap) + P1 (Welcome/Login/Dashboard/More) cerrados.
+
+---
+
+### Sesión 2026-05-27 — PWA: Connect With Us + Forgot Password + Create Account + Profile + Search
+
+**Hecho (todo sin commitear aún; ~22 archivos nuevos + 7 modificados):**
+
+- **Connect With Us** (`/pwa/connect-with-us`, desde el More): SVG inline verbatim del XD
+  (header, marca omni, 4 sociales, acciones Call/Website/Directions, barra horario → modal,
+  dirección, copyright interpolado, footer producto). Mapa Mapbox interactivo (logo oculto;
+  pin = teardrop azul + círculo blanco igual al mapa de listings del kiosk).
+- **Forgot Password** (`/pwa/forgot-password` + `/check-email`) + **Login Error = modal
+  compacto** (`PwaAlertModal`, disparado por validación mock del login).
+- **Create Account** (`/pwa/create-account` + `/photo`): form con validación mock + country
+  bottom-sheet (reusa `COMMON_COUNTRIES`); Upload Picture con `<input type=file>` real
+  (preview vía objectURL) + action sheet (`PhotoSourceSheet`).
+- **Profile** (10 pantallas, 5 rutas): Profile, Edit Profile, Change Password (form/error/
+  success), Settings, Delete flow (reason→[other]→confirm→survey→delete→`/pwa`). Datos mock
+  en `pwa.profile`. Entradas: Save/Skip del signup, icono perfil del header, "My Profile" del More.
+- **Search** (`/pwa/search`, desde la lupa del Dashboard): índice mock desde config
+  (secciones+listings+events) + filtro en vivo; estado vacío con Recent (sessionStorage) + chips
+  Browse; sin resultados. `src/lib/pwa-search.ts`.
+- Compartidos nuevos: `PwaSubHeader`, `PhotoSourceSheet`, `PwaAlertModal`, `form-controls`
+  (Radio/Checkbox), `InLayerNav`, `signup-icons`. Los 4 botones "Create Account" cableados.
+
+**Verificado:**
+
+- `pnpm typecheck` + `pnpm lint` + `pnpm format` limpios tras cada feature.
+- Screenshots `agent-browser` vs PNGs del XD (±2px) de todas las pantallas con diseño + estados
+  (modales, action sheet, country picker, delete steps, password error/success, foto añadida,
+  search vacío/resultados). Search es diseño propio (sin XD).
+- Auditoría white-label: sin hex de branding (solo `#fff`) ni geográficos en JSX; textos/colores
+  en config/tokens. Pin rojo del mapa → cambiado al azul del kiosk; logo Mapbox oculto.
+
+**Pendiente / siguiente:**
+
+- **Nada commiteado todavía** — primer paso mañana: confirmar y commitear lo de hoy.
+- Cablear navegación de tiles/quick-access/More/resultados-de-search/VIEW-MORE a sus módulos
+  mobile cuando existan (hoy no-op). Sign Up backend, cambio password/borrado reales = mock.
+- Pz: integración de todo esto al Studio (editores, preview bridge 390×844).
+
+**Decisiones:**
+
+- Login Error = modal compacto (no la pantalla full-screen del XD, que el usuario retiró).
+- Delete account: orden Reason→[Other]→Confirm→Survey→DELETE (el botón final vive en Survey).
+- Datos del Profile = mock en config (la foto del signup no persiste; no hay store global).
+- Pantallas con header reutilizan `PwaSubHeader`; nav dentro de layer escalado = `InLayerNav`
+  (evita doble escala de `PwaBottomNav`). Modal de alerta unificado en `PwaAlertModal`.
+
+**Fase:** Milestone PWA Mobile — P2/Px (pantallas PWA-only y módulos reutilizados).
 
 ---
 

@@ -20,7 +20,7 @@ export function SettingsScreen({ title, deleteRow }: { title: string; deleteRow:
         className="absolute left-0 top-0"
         style={{ width: 375, height: 812, transform: `scale(${S})`, transformOrigin: 'top left' }}
       >
-        <PwaSubHeader title={title} backLabel="Back" backHref="/pwa/profile/edit" />
+        <PwaSubHeader title={title} backHref="/pwa/profile/edit" />
 
         <button
           type="button"

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 
+import { ListingsDetailScreen } from '@/components/pwa/listings-detail-screen';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { RestaurantsDetailScreen } from '@/components/pwa/restaurants-detail-screen';
 import { getConfig } from '@/lib/config';
 import { isListingsModule } from '@/lib/itinerary-tabs';
 
@@ -28,7 +28,7 @@ export default async function PwaRestaurantDetailPage({
 
   return (
     <MobileCanvas>
-      <RestaurantsDetailScreen
+      <ListingsDetailScreen
         detail={{
           slug: l.slug,
           title: l.title,
@@ -39,10 +39,19 @@ export default async function PwaRestaurantDetailPage({
           description: l.description,
           coords: l.coords,
           openHours: l.openHours,
-          menuImage: l.menuImage,
           diningGuideUrl: l.diningGuideUrl,
           gallery: l.gallery,
         }}
+        heroPrimaryAction={
+          l.menuImage && r.detail.menu && r.menu
+            ? {
+                kind: 'image-popup',
+                label: r.detail.menu,
+                image: l.menuImage,
+                closeLabel: r.menu.close,
+              }
+            : { kind: 'none' }
+        }
         texts={{
           headerTitle: r.title,
           eyebrow: r.detail.eyebrow,
@@ -50,15 +59,15 @@ export default async function PwaRestaurantDetailPage({
           website: r.detail.website,
           addFavorite: r.detail.addFavorite,
           removeFavorite: r.detail.removeFavorite,
-          menu: r.detail.menu,
           seeDirections: r.detail.seeDirections,
           description: r.detail.description,
           openNowUntil: r.detail.openNowUntil,
           moreHours: r.detail.moreHours,
           openDiningGuide: r.detail.openDiningGuide,
           businessHours: r.businessHours,
-          menuClose: r.menu.close,
         }}
+        basePath="/pwa/restaurants"
+        navActive="dining"
         mapboxToken={config.integraciones?.mapbox_token}
       />
     </MobileCanvas>

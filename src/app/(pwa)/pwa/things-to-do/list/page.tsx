@@ -8,22 +8,22 @@ import type { MapItem } from '@/lib/map-item';
 export const dynamic = 'force-dynamic';
 
 /**
- * Restaurants — lista (#2) + mapa (#3, tab). Reutiliza los listings del kiosk
- * (`home.modules.restaurants.listings`); la distancia se calcula desde las coords
- * del cliente. Textos desde `config.features.pwa.restaurants`.
+ * Things to Do — lista (#2) + mapa (#3, tab). Reutiliza los listings del kiosk
+ * (`home.modules['things-to-do'].listings`); la distancia se calcula desde las coords
+ * del cliente. Textos desde `config.features.pwa.thingsToDo`.
  */
-export default async function PwaRestaurantsListPage({
+export default async function PwaThingsToDoListPage({
   searchParams,
 }: {
   searchParams: Promise<{ cat?: string }>;
 }) {
   const { cat } = await searchParams;
   const config = await getConfig();
-  const r = config.features?.pwa?.restaurants;
-  const mod = config.features?.home?.modules?.restaurants;
+  const t = config.features?.pwa?.thingsToDo;
+  const mod = config.features?.home?.modules?.['things-to-do'];
   const origin = config.client?.coords;
 
-  if (!r || !mod || !isListingsModule(mod)) {
+  if (!t || !mod || !isListingsModule(mod)) {
     return (
       <MobileCanvas>
         <div className="flex h-full w-full items-center justify-center text-foreground">
@@ -47,13 +47,13 @@ export default async function PwaRestaurantsListPage({
     coords: l.coords,
     distanceMi: origin ? haversineMi(origin, l.coords) : 0,
     cityState: cityStateOf(l.address),
-    openUntil: `${r.openUntilPrefix} ${l.hours.split('–')[1]?.trim() ?? l.hours}`,
+    openUntil: `${t.openUntilPrefix} ${l.hours.split('–')[1]?.trim() ?? l.hours}`,
   }));
 
-  // MapItems para `MapCanvas` (pines del kiosk). Source 'restaurants' → pin/color/ícono del kiosk.
+  // MapItems para `MapCanvas` (pines del kiosk). Source 'things-to-do' → pin/color/ícono del kiosk.
   const mapItems: MapItem[] = mod.listings.map((l) => ({
-    source: 'restaurants',
-    moduleSlug: 'restaurants',
+    source: 'things-to-do',
+    moduleSlug: 'things-to-do',
     slug: l.slug,
     title: l.title,
     subcategory: l.subcategory,
@@ -67,25 +67,24 @@ export default async function PwaRestaurantsListPage({
     priceRange: l.priceRange,
   }));
 
-  const categoryLabel = cat ? r.categories.find((c) => c.key === cat)?.label : undefined;
+  const categoryLabel = cat ? t.categories.find((c) => c.key === cat)?.label : undefined;
 
   return (
     <MobileCanvas>
       <ListingsListScreen
-        title={categoryLabel ?? r.title}
-        tabs={r.tabs}
-        resultsLabel={r.resultsLabel}
-        distanceSuffix={r.distanceSuffix}
+        title={categoryLabel ?? t.title}
+        tabs={t.tabs}
+        resultsLabel={t.resultsLabel}
+        distanceSuffix={t.distanceSuffix}
         items={items}
         mapItems={mapItems}
         listings={mod.listings}
         features={mod.features}
         subcategories={mod.subcategories}
-        filterTexts={r.filters}
+        filterTexts={t.filters}
         origin={origin}
         mapboxToken={config.integraciones?.mapbox_token}
-        basePath="/pwa/restaurants"
-        navActive="dining"
+        basePath="/pwa/things-to-do"
       />
     </MobileCanvas>
   );

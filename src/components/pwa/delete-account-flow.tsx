@@ -71,7 +71,7 @@ export function DeleteAccountFlow({
         className="absolute left-0 top-0"
         style={{ width: 375, height: 812, transform: `scale(${S})`, transformOrigin: 'top left' }}
       >
-        <PwaSubHeader title={headerTitle} backLabel="Back" backHref="/pwa/profile/settings" />
+        <PwaSubHeader title={headerTitle} backHref="/pwa/profile/settings" />
 
         {step === 'reason' ? (
           <>

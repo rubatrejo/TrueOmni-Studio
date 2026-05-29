@@ -30,6 +30,7 @@ export default async function PwaDashboardPage() {
         heroImage={d.heroImage}
         quickAccess={d.quickAccess}
         tiles={d.tiles}
+        notifications={config.features?.pwa?.notifications?.seed ?? []}
       />
     </MobileCanvas>
   );

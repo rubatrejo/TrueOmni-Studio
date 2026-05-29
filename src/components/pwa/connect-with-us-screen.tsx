@@ -24,7 +24,7 @@ const OPEN_SANS = 'var(--font-open-sans)';
 
 /* Geometría del XD (canvas 375×921). El header (88) y el nav (56 @ y857) son fijos;
    el bloque central scrollea. Coords locales del centro = canvas_y − HEADER_H. */
-const HEADER_H = 88;
+const HEADER_H = 90;
 const MIDDLE_H = 769; // 857 − 88
 const MAP_TOP = 335; // canvas 423 − 88
 const MAP_H = 182;

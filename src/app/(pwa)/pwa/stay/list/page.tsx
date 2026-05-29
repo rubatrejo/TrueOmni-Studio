@@ -8,22 +8,22 @@ import type { MapItem } from '@/lib/map-item';
 export const dynamic = 'force-dynamic';
 
 /**
- * Restaurants — lista (#2) + mapa (#3, tab). Reutiliza los listings del kiosk
- * (`home.modules.restaurants.listings`); la distancia se calcula desde las coords
- * del cliente. Textos desde `config.features.pwa.restaurants`.
+ * Places to Stay — lista (#2) + mapa (#3, tab). Reutiliza los listings del kiosk
+ * (`home.modules.stay.listings`); la distancia se calcula desde las coords del
+ * cliente. Textos desde `config.features.pwa.stay`.
  */
-export default async function PwaRestaurantsListPage({
+export default async function PwaStayListPage({
   searchParams,
 }: {
   searchParams: Promise<{ cat?: string }>;
 }) {
   const { cat } = await searchParams;
   const config = await getConfig();
-  const r = config.features?.pwa?.restaurants;
-  const mod = config.features?.home?.modules?.restaurants;
+  const s = config.features?.pwa?.stay;
+  const mod = config.features?.home?.modules?.stay;
   const origin = config.client?.coords;
 
-  if (!r || !mod || !isListingsModule(mod)) {
+  if (!s || !mod || !isListingsModule(mod)) {
     return (
       <MobileCanvas>
         <div className="flex h-full w-full items-center justify-center text-foreground">
@@ -47,13 +47,13 @@ export default async function PwaRestaurantsListPage({
     coords: l.coords,
     distanceMi: origin ? haversineMi(origin, l.coords) : 0,
     cityState: cityStateOf(l.address),
-    openUntil: `${r.openUntilPrefix} ${l.hours.split('–')[1]?.trim() ?? l.hours}`,
+    openUntil: `${s.openUntilPrefix} ${l.hours.split('–')[1]?.trim() ?? l.hours}`,
   }));
 
-  // MapItems para `MapCanvas` (pines del kiosk). Source 'restaurants' → pin/color/ícono del kiosk.
+  // MapItems para `MapCanvas` (pines del kiosk). Source 'stay' → pin/color/ícono del kiosk.
   const mapItems: MapItem[] = mod.listings.map((l) => ({
-    source: 'restaurants',
-    moduleSlug: 'restaurants',
+    source: 'stay',
+    moduleSlug: 'stay',
     slug: l.slug,
     title: l.title,
     subcategory: l.subcategory,
@@ -67,25 +67,24 @@ export default async function PwaRestaurantsListPage({
     priceRange: l.priceRange,
   }));
 
-  const categoryLabel = cat ? r.categories.find((c) => c.key === cat)?.label : undefined;
+  const categoryLabel = cat ? s.categories.find((c) => c.key === cat)?.label : undefined;
 
   return (
     <MobileCanvas>
       <ListingsListScreen
-        title={categoryLabel ?? r.title}
-        tabs={r.tabs}
-        resultsLabel={r.resultsLabel}
-        distanceSuffix={r.distanceSuffix}
+        title={categoryLabel ?? s.title}
+        tabs={s.tabs}
+        resultsLabel={s.resultsLabel}
+        distanceSuffix={s.distanceSuffix}
         items={items}
         mapItems={mapItems}
         listings={mod.listings}
         features={mod.features}
         subcategories={mod.subcategories}
-        filterTexts={r.filters}
+        filterTexts={s.filters}
         origin={origin}
         mapboxToken={config.integraciones?.mapbox_token}
-        basePath="/pwa/restaurants"
-        navActive="dining"
+        basePath="/pwa/stay"
       />
     </MobileCanvas>
   );

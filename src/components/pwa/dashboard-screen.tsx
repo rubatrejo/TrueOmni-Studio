@@ -3,11 +3,12 @@
 import { useRouter } from 'next/navigation';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
+import { useNotifications } from '@/hooks/use-notifications';
 import { resolveAssetUrl } from '@/lib/asset-url';
-import type { PwaQuickAccess, PwaTile } from '@/lib/config';
+import type { PwaNotification, PwaQuickAccess, PwaTile } from '@/lib/config';
 
 import { PwaBottomNav } from './bottom-nav';
-import { InboxIcon, ProfileIcon, SearchIcon } from './dashboard-icons';
+import { NotificationIcon, ProfileIcon, SearchIcon } from './dashboard-icons';
 import { Layer, S } from './mobile-layer';
 
 interface DashboardScreenProps {
@@ -16,6 +17,7 @@ interface DashboardScreenProps {
   heroImage: string;
   quickAccess: PwaQuickAccess[];
   tiles: PwaTile[];
+  notifications: PwaNotification[];
 }
 
 const BRAND = 'hsl(var(--brand-primary))';
@@ -45,16 +47,18 @@ export function DashboardScreen({
   heroImage,
   quickAccess,
   tiles,
+  notifications,
 }: DashboardScreenProps) {
   const router = useRouter();
+  const { unreadCount } = useNotifications(notifications);
   return (
     <div className="flex h-full w-full flex-col bg-background">
       {/* Header fijo — tamaños/posiciones verbatim del XD (110 alto; logo 154×29 a
           (20,62); iconos search/profile/inbox a (266/298.5/334, ~68)). El status bar
           (9:41) lo dibuja el SO → su zona superior queda como safe-area azul.
           z-10 para tapar el solape de la foto del hero. */}
-      <Layer h={110} className="relative z-10 shrink-0" style={{ backgroundColor: BRAND }}>
-        <div className="absolute" style={{ left: 20, top: 62, width: 154 }}>
+      <Layer h={90} className="relative z-10 shrink-0" style={{ backgroundColor: BRAND }}>
+        <div className="absolute" style={{ left: 20, top: 48, width: 154 }}>
           <TrueOmniLogo className="h-auto w-full text-white" title={logoAlt} slot="default" />
         </div>
         <button
@@ -62,7 +66,7 @@ export function DashboardScreen({
           aria-label="Search"
           onClick={() => router.push('/pwa/search')}
           className="absolute text-white"
-          style={{ left: 266, top: 69 }}
+          style={{ left: 266, top: 55 }}
         >
           <SearchIcon size={19} />
         </button>
@@ -71,13 +75,37 @@ export function DashboardScreen({
           aria-label="Profile"
           onClick={() => router.push('/pwa/profile')}
           className="absolute text-white"
-          style={{ left: 298, top: 68 }}
+          style={{ left: 298, top: 54 }}
         >
           <ProfileIcon size={21} />
         </button>
-        <div className="absolute text-white" style={{ left: 334, top: 67 }}>
-          <InboxIcon size={24} />
-        </div>
+        <button
+          type="button"
+          aria-label="Notifications"
+          onClick={() => router.push('/pwa/notifications')}
+          className="absolute text-white"
+          style={{ left: 334, top: 53 }}
+        >
+          <NotificationIcon size={24} />
+          {unreadCount > 0 && (
+            <span
+              className="absolute flex items-center justify-center rounded-full font-bold text-white"
+              style={{
+                top: -5,
+                right: -6,
+                minWidth: 16,
+                height: 16,
+                padding: '0 4px',
+                fontSize: 10,
+                lineHeight: 1,
+                backgroundColor: 'hsl(var(--pwa-favorite))',
+                fontFamily: 'var(--font-open-sans)',
+              }}
+            >
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </button>
       </Layer>
 
       {/* Hero fijo (tamaño original del XD). Solapa 14px bajo el header (z menor)
@@ -133,6 +161,7 @@ export function DashboardScreen({
               {/* card */}
               <button
                 type="button"
+                onClick={() => q.key === 'places-to-stay' && router.push('/pwa/stay')}
                 className="absolute bg-cover bg-center"
                 style={{
                   left: CARD_X[i],
@@ -163,7 +192,10 @@ export function DashboardScreen({
             <button
               key={t.key}
               type="button"
-              onClick={() => t.key === 'restaurants' && router.push('/pwa/restaurants')}
+              onClick={() => {
+                if (t.key === 'restaurants') router.push('/pwa/restaurants');
+                else if (t.key === 'things-to-do') router.push('/pwa/things-to-do');
+              }}
               className={`relative h-[125px] overflow-hidden rounded-[6px] bg-cover bg-center ${
                 t.wide ? 'col-span-2' : ''
               }`}

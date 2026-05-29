@@ -7,8 +7,8 @@ import { MapCanvas } from '@/components/map/map-canvas';
 import { resolveAssetUrl } from '@/lib/asset-url';
 import type { MapItem } from '@/lib/map-item';
 
+import type { ListingItem } from './listings-list-screen';
 import { PwaHeart } from './pwa-heart';
-import type { RestaurantListItem } from './restaurants-list-screen';
 
 const OLIVE = 'hsl(var(--brand-tertiary))';
 const FOOTER = 'hsl(0 0% 33%)'; // gris neutro del footer (≈ #555 del card del kiosk)
@@ -20,22 +20,25 @@ const CARD_GAP = 10;
 const IMG_H = Math.round((CARD_W * 9) / 16); // 16:9
 
 /**
- * Restaurants #3 — vista Map. Reutiliza `MapCanvas` del kiosk (pines/cluster/pin
- * seleccionado idénticos) + un carrusel inferior de cards sincronizado con el pin
- * seleccionado. Tap en una card → detalle.
+ * Módulo de listings #3 — vista Map. Reutiliza `MapCanvas` del kiosk (pines/cluster/
+ * pin seleccionado idénticos) + un carrusel inferior de cards sincronizado con el pin
+ * seleccionado. Tap en una card → detalle (`${basePath}/${slug}`).
  */
-export function RestaurantsMap({
+export function ListingsMap({
   token,
   center,
   zoom = 13,
   items,
   mapItems,
+  basePath,
 }: {
   token: string | undefined;
   center: { lat: number; lng: number };
   zoom?: number;
-  items: RestaurantListItem[];
+  items: ListingItem[];
   mapItems: MapItem[];
+  /** Ruta base del módulo, ej. "/pwa/restaurants" o "/pwa/stay". */
+  basePath: string;
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(items[0]?.slug ?? null);
@@ -96,65 +99,68 @@ export function RestaurantsMap({
         {items.map((it) => {
           const isActive = it.slug === selected;
           return (
-            <button
+            // Card = contenedor (no button) para no anidar el botón de favorito
+            // dentro del botón de navegación (HTML inválido → hydration error).
+            <div
               key={it.slug}
-              type="button"
-              onClick={() => router.push(`/pwa/restaurants/${it.slug}`)}
-              className="relative shrink-0 snap-center overflow-hidden rounded-[6px] text-left shadow-md"
+              className="relative shrink-0 snap-center overflow-hidden rounded-[6px] shadow-md"
               style={{ width: CARD_W, opacity: isActive ? 1 : 0.55 }}
             >
-              {/* Imagen 16:9 + corazón */}
-              <div
-                className="relative bg-cover bg-center"
-                style={{ height: IMG_H, backgroundImage: `url("${resolveAssetUrl(it.image)}")` }}
+              <button
+                type="button"
+                onClick={() => router.push(`${basePath}/${it.slug}`)}
+                className="block w-full text-left"
               >
-                <button
-                  type="button"
-                  aria-label="Favorite"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFav(it.slug);
-                  }}
-                  className="absolute flex items-center justify-center rounded-full"
-                  style={{
-                    right: 6,
-                    top: 6,
-                    width: 28,
-                    height: 28,
-                    backgroundColor: 'hsl(0 0% 100% / 0.7)',
-                  }}
-                >
-                  <PwaHeart filled={favs.has(it.slug)} size={16} />
-                </button>
-              </div>
-              {/* Footer */}
-              <div className="px-2.5 py-1.5" style={{ backgroundColor: FOOTER }}>
-                <p
-                  className="truncate uppercase text-white"
-                  style={{ fontSize: 8, letterSpacing: 0.4, fontFamily: OPEN_SANS }}
-                >
-                  {it.subcategory}
-                </p>
-                <p
-                  className="truncate font-semibold text-white"
-                  style={{ fontSize: 13, lineHeight: 1.1, fontFamily: OPEN_SANS }}
-                >
-                  {it.title}
-                </p>
-                <p
-                  className="truncate text-white"
-                  style={{ fontSize: 8.5, fontWeight: 300, marginTop: 2, fontFamily: OPEN_SANS }}
-                >
-                  {it.distanceMi.toFixed(1)} mi · {it.cityState}
-                </p>
-                <p
-                  className="truncate font-semibold"
-                  style={{ fontSize: 8.5, color: OLIVE, marginTop: 1, fontFamily: OPEN_SANS }}
-                >
-                  {it.openUntil}
-                </p>
-              </div>
-            </button>
+                {/* Imagen 16:9 */}
+                <div
+                  className="bg-cover bg-center"
+                  style={{ height: IMG_H, backgroundImage: `url("${resolveAssetUrl(it.image)}")` }}
+                />
+                {/* Footer */}
+                <div className="px-2.5 py-1.5" style={{ backgroundColor: FOOTER }}>
+                  <p
+                    className="truncate uppercase text-white"
+                    style={{ fontSize: 8, letterSpacing: 0.4, fontFamily: OPEN_SANS }}
+                  >
+                    {it.subcategory}
+                  </p>
+                  <p
+                    className="truncate font-semibold text-white"
+                    style={{ fontSize: 13, lineHeight: 1.1, fontFamily: OPEN_SANS }}
+                  >
+                    {it.title}
+                  </p>
+                  <p
+                    className="truncate text-white"
+                    style={{ fontSize: 8.5, fontWeight: 300, marginTop: 2, fontFamily: OPEN_SANS }}
+                  >
+                    {it.distanceMi.toFixed(1)} mi · {it.cityState}
+                  </p>
+                  <p
+                    className="truncate font-semibold"
+                    style={{ fontSize: 8.5, color: OLIVE, marginTop: 1, fontFamily: OPEN_SANS }}
+                  >
+                    {it.openUntil}
+                  </p>
+                </div>
+              </button>
+              {/* Corazón — hermano del botón de navegación (overlay sobre la imagen) */}
+              <button
+                type="button"
+                aria-label="Favorite"
+                onClick={() => toggleFav(it.slug)}
+                className="absolute flex items-center justify-center rounded-full"
+                style={{
+                  right: 6,
+                  top: 6,
+                  width: 28,
+                  height: 28,
+                  backgroundColor: 'hsl(0 0% 100% / 0.7)',
+                }}
+              >
+                <PwaHeart filled={favs.has(it.slug)} size={16} />
+              </button>
+            </div>
           );
         })}
       </div>

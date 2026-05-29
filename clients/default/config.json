@@ -10718,6 +10718,339 @@
           "clearAll": "CLEAR ALL",
           "apply": "APPLY"
         }
+      },
+      "stay": {
+        "title": "Places to Stay",
+        "searchPlaceholder": "Search Places to Stay in your city",
+        "resultsLabel": "{count} RESULTS",
+        "distanceSuffix": "mi away",
+        "openUntilPrefix": "Front desk until",
+        "tabs": {
+          "listings": "Listings",
+          "map": "Map"
+        },
+        "categories": [
+          {
+            "key": "hotels",
+            "label": "Hotels",
+            "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "resorts",
+            "label": "Resorts",
+            "image": "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "boutique",
+            "label": "Boutique",
+            "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "bed-breakfast",
+            "label": "Bed & Breakfast",
+            "image": "https://images.unsplash.com/photo-1568084680786-a84f91d1153c?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "vacation-rentals",
+            "label": "Vacation Rentals",
+            "image": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "luxury",
+            "label": "Luxury",
+            "image": "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "budget",
+            "label": "Budget",
+            "image": "https://images.unsplash.com/photo-1521783988139-89397d761dce?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "pet-friendly",
+            "label": "Pet Friendly",
+            "image": "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "beachfront",
+            "label": "Beachfront",
+            "image": "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "downtown",
+            "label": "Downtown",
+            "image": "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "spa-wellness",
+            "label": "Spa & Wellness",
+            "image": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "family",
+            "label": "Family",
+            "image": "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=600&auto=format&fit=crop&q=80"
+          }
+        ],
+        "detail": {
+          "eyebrow": "HOTEL",
+          "call": "Call",
+          "website": "Website",
+          "addFavorite": "Add to Favorites",
+          "removeFavorite": "Remove from Favorites",
+          "bookNow": "BOOK NOW",
+          "seeDirections": "SEE DIRECTIONS",
+          "description": "Description",
+          "openNowUntil": "Front desk open until",
+          "moreHours": "MORE HOURS"
+        },
+        "businessHours": {
+          "title": "Front Desk Hours",
+          "close": "CLOSE",
+          "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        },
+        "filters": {
+          "title": "Filters",
+          "features": "Features",
+          "category": "Category",
+          "priceRange": "Price Range",
+          "availability": "Availability",
+          "openNow": "Open Now",
+          "clearAll": "CLEAR ALL",
+          "apply": "APPLY"
+        }
+      },
+      "thingsToDo": {
+        "title": "Things to Do",
+        "searchPlaceholder": "Search Things to Do in your city",
+        "resultsLabel": "{count} RESULTS",
+        "distanceSuffix": "mi away",
+        "openUntilPrefix": "Open until",
+        "tabs": {
+          "listings": "Listings",
+          "map": "Map"
+        },
+        "categories": [
+          {
+            "key": "attractions",
+            "label": "Attractions",
+            "image": "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "museums",
+            "label": "Museums",
+            "image": "https://images.unsplash.com/photo-1554907984-15263bfd63bd?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "parks-nature",
+            "label": "Parks & Nature",
+            "image": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "hikes",
+            "label": "Hikes",
+            "image": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "theaters",
+            "label": "Theaters",
+            "image": "https://images.unsplash.com/photo-1503095396549-807759245b35?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "zoos-aquariums",
+            "label": "Zoos & Aquariums",
+            "image": "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "sports",
+            "label": "Sports",
+            "image": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "tours",
+            "label": "Tours",
+            "image": "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "family-fun",
+            "label": "Family Fun",
+            "image": "https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "outdoors",
+            "label": "Outdoors",
+            "image": "https://images.unsplash.com/photo-1533692328991-08159ff19fca?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "art-culture",
+            "label": "Art & Culture",
+            "image": "https://images.unsplash.com/photo-1499781350541-7783f6c6a0c8?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "free-entry",
+            "label": "Free Entry",
+            "image": "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=600&auto=format&fit=crop&q=80"
+          }
+        ],
+        "detail": {
+          "eyebrow": "ATTRACTION",
+          "call": "Call",
+          "website": "Website",
+          "addFavorite": "Add to Favorites",
+          "removeFavorite": "Remove from Favorites",
+          "seeDirections": "SEE DIRECTIONS",
+          "description": "Description",
+          "openNowUntil": "Open until",
+          "moreHours": "MORE HOURS"
+        },
+        "businessHours": {
+          "title": "Hours",
+          "close": "CLOSE",
+          "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        },
+        "filters": {
+          "title": "Filters",
+          "features": "Features",
+          "category": "Category",
+          "priceRange": "Price Range",
+          "availability": "Availability",
+          "openNow": "Open Now",
+          "clearAll": "CLEAR ALL",
+          "apply": "APPLY"
+        }
+      },
+      "help": {
+        "title": "Help",
+        "searchPlaceholder": "Search articles…",
+        "noResults": "No results for “{query}”",
+        "helpfulPrompt": "Was this answer helpful?",
+        "helpfulYes": "YES",
+        "helpfulNo": "NO",
+        "thanks": "Thanks for your feedback!",
+        "needMoreTitle": "Need more help?",
+        "needMoreBody": "We're here for you. Send us a message and our team will get back to you as soon as possible.",
+        "contactCta": "Contact Support",
+        "contact": {
+          "title": "Contact Support",
+          "fromLabel": "From",
+          "fromDefault": "Anonymous User",
+          "messagePlaceholder": "How can we help you?",
+          "send": "SEND MESSAGE",
+          "callCta": "Call us instead",
+          "successTitle": "Message sent!",
+          "successBody": "Thanks for reaching out. Our team will get back to you shortly."
+        },
+        "articles": [
+          {
+            "slug": "getting-around-the-app",
+            "category": "Getting Started",
+            "question": "How do I get around the app?",
+            "answer": "Use the bottom navigation bar to switch between Home, Events, Dining, Map and More. From the Home dashboard you can tap any tile to open a module, and the search icon lets you find places and events across {client_name}."
+          },
+          {
+            "slug": "saving-favorites",
+            "category": "Getting Started",
+            "question": "How do I save my favorites?",
+            "answer": "Tap the heart icon on any listing, restaurant or place to add it to your favorites. You can review everything you've saved later from your profile and favorites section."
+          },
+          {
+            "slug": "finding-directions",
+            "category": "Maps & Directions",
+            "question": "How do I get directions to a place?",
+            "answer": "Open any place or listing and tap “See Directions”. The app opens turn-by-turn directions in your maps application using the destination's location."
+          },
+          {
+            "slug": "location-not-showing",
+            "category": "Maps & Directions",
+            "question": "Why isn't my location showing on the map?",
+            "answer": "Make sure location permissions are enabled for your browser or device. Without location access the map still works, but distances and your current position may not appear."
+          },
+          {
+            "slug": "edit-profile",
+            "category": "Account",
+            "question": "How do I edit my profile?",
+            "answer": "Go to More → My Profile and tap “Edit Profile”. From there you can update your name, photo and personal details, and save your changes."
+          },
+          {
+            "slug": "reset-password",
+            "category": "Account",
+            "question": "How do I reset my password?",
+            "answer": "On the login screen tap “Forgot Password”, enter your email, and follow the instructions we send you to set a new password."
+          },
+          {
+            "slug": "wifi-access",
+            "category": "Popular",
+            "question": "Is there Wi-Fi available?",
+            "answer": "Many locations across {client_name} offer complimentary Wi-Fi. Look for the Wi-Fi feature tag on a listing, or ask the front desk or information staff for the network and password."
+          },
+          {
+            "slug": "parking-info",
+            "category": "Popular",
+            "question": "Where can I park?",
+            "answer": "Listings that offer parking show a Parking tag in their details. Use the filters on any module to show only places with parking, and tap “See Directions” to navigate to the entrance."
+          }
+        ]
+      },
+      "notifications": {
+        "title": "Notifications",
+        "filterAll": "All",
+        "filterUnread": "Unread",
+        "markAllRead": "Mark all read",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "selectAll": "Select All",
+        "deleteSelected": "Delete ({count})",
+        "confirmTitle": "Delete notifications?",
+        "confirmBody": "Are you sure you want to delete these notifications? This action cannot be undone.",
+        "confirmDelete": "DELETE",
+        "confirmCancel": "CANCEL",
+        "emptyTitle": "You're all caught up",
+        "emptyBody": "You have no notifications right now. Check back soon!",
+        "seed": [
+          {
+            "id": "notif-1",
+            "type": "deal",
+            "title": "Weekend special at El Farolito",
+            "body": "Enjoy 20% off all entrées this weekend only. Show this notification at the host stand to redeem.",
+            "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&auto=format&fit=crop&q=80",
+            "timestamp": "2026-05-29T12:00:00Z",
+            "action": { "label": "VIEW RESTAURANT", "href": "/pwa/restaurants/el-farolito" }
+          },
+          {
+            "id": "notif-2",
+            "type": "event",
+            "title": "Garden Nights are back",
+            "body": "Desert Botanical Garden opens its evening trails with live music and food trucks every Friday.",
+            "timestamp": "2026-05-29T09:00:00Z",
+            "action": {
+              "label": "SEE DETAILS",
+              "href": "/pwa/things-to-do/desert-botanical-garden"
+            }
+          },
+          {
+            "id": "notif-3",
+            "type": "info",
+            "title": "Welcome to {client_name}!",
+            "body": "Explore restaurants, things to do and places to stay. Tap the heart on any place to save it to your favorites.",
+            "timestamp": "2026-05-28T18:00:00Z",
+            "action": { "label": "GET HELP", "href": "/pwa/help" }
+          },
+          {
+            "id": "notif-4",
+            "type": "alert",
+            "title": "Heat advisory in effect",
+            "body": "Temperatures are expected to be high today. Stay hydrated and plan outdoor activities for the morning or evening.",
+            "timestamp": "2026-05-28T08:00:00Z"
+          },
+          {
+            "id": "notif-5",
+            "type": "deal",
+            "title": "Save on Things to Do this week",
+            "body": "Selected attractions are offering limited-time discounts. Browse the latest deals before they're gone.",
+            "image": "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?w=400&auto=format&fit=crop&q=80",
+            "timestamp": "2026-05-27T15:00:00Z",
+            "action": { "label": "BROWSE", "href": "/pwa/things-to-do" }
+          }
+        ]
       }
     }
   },

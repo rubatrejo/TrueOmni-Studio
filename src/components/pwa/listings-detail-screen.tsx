@@ -8,7 +8,7 @@ import { useEscapeToClose } from '@/components/listings/use-escape-to-close';
 import { resolveAssetUrl } from '@/lib/asset-url';
 import type { DayOpen } from '@/lib/config';
 
-import { PwaBottomNav } from './bottom-nav';
+import { PwaBottomNav, type PwaNavKey } from './bottom-nav';
 import { S } from './mobile-layer';
 import { PwaHeart } from './pwa-heart';
 
@@ -37,7 +37,7 @@ function todayIndex(): number {
   return (new Date().getDay() + 6) % 7;
 }
 
-export interface RestaurantDetail {
+export interface ListingDetail {
   slug: string;
   title: string;
   image: string;
@@ -47,26 +47,35 @@ export interface RestaurantDetail {
   description: string;
   coords: { lat: number; lng: number };
   openHours?: OpenHours;
-  menuImage?: string;
   diningGuideUrl?: string;
   gallery?: string[];
 }
 
-export interface RestaurantDetailTexts {
+/**
+ * Acción primaria del hero (botón olive centrado), configurable por módulo:
+ * - `image-popup`: abre un popup con una imagen (Restaurants → "MENU").
+ * - `external-link`: abre una URL externa (Places to Stay → "BOOK NOW").
+ * - `none`: sin botón (el título del hero usa el offset bajo).
+ */
+export type HeroPrimaryAction =
+  | { kind: 'image-popup'; label: string; image: string; closeLabel: string }
+  | { kind: 'external-link'; label: string; url: string }
+  | { kind: 'none' };
+
+export interface ListingDetailTexts {
   headerTitle: string;
   eyebrow: string;
   call: string;
   website: string;
   addFavorite: string;
   removeFavorite: string;
-  menu: string;
   seeDirections: string;
   description: string;
   openNowUntil: string;
   moreHours: string;
-  openDiningGuide: string;
+  /** "OPEN DINING GUIDE" (Restaurants); omitido en otros módulos. */
+  openDiningGuide?: string;
   businessHours: { title: string; close: string; days: string[] };
-  menuClose: string;
 }
 
 /* ---- iconos de la barra de acciones (Call/Website blancos; favorito rojo) ---- */
@@ -99,23 +108,34 @@ function ActionIcon({ kind, filled }: { kind: 'call' | 'website' | 'fav'; filled
 }
 
 /**
- * Restaurants #4–#7 / #10 — detalle. Hero + barra de acciones (Call/Website/Favorite),
- * fila opcional de horario (#10), mapa, dirección y descripción. Popups: menú (#9) y
- * Business Hours (#11). Variantes data-driven: MENU si `menuImage`, fila de horario si
- * `openHours`, dining guide si `diningGuideUrl`.
+ * Módulo de listings #4–#7 / #10 — detalle. Hero + barra de acciones
+ * (Call/Website/Favorite), fila opcional de horario (#10), mapa, dirección y
+ * descripción. Popups: imagen del hero (#9, p.ej. menú) y Business Hours (#11).
+ * Variantes data-driven: acción del hero según `heroPrimaryAction`, fila de horario
+ * si `openHours`, dining guide si `texts.openDiningGuide && diningGuideUrl`.
+ * Reutilizado por Restaurants, Places to Stay y futuros módulos vía `basePath`.
  */
-export function RestaurantsDetailScreen({
+export function ListingsDetailScreen({
   detail,
   texts,
+  heroPrimaryAction,
+  basePath,
+  navActive,
   mapboxToken,
 }: {
-  detail: RestaurantDetail;
-  texts: RestaurantDetailTexts;
+  detail: ListingDetail;
+  texts: ListingDetailTexts;
+  heroPrimaryAction: HeroPrimaryAction;
+  /** Ruta base del módulo, ej. "/pwa/restaurants" o "/pwa/stay". */
+  basePath: string;
+  /** Celda del bottom nav a resaltar (opcional). */
+  navActive?: PwaNavKey;
   mapboxToken?: string;
 }) {
   const router = useRouter();
   const [fav, setFav] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const hasHeroAction = heroPrimaryAction.kind !== 'none';
   const [hoursOpen, setHoursOpen] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
   useEscapeToClose(menuOpen, () => setMenuOpen(false));
@@ -147,16 +167,16 @@ export function RestaurantsDetailScreen({
   return (
     <div className="relative flex h-full w-full flex-col bg-background">
       {/* Header fijo */}
-      <div className="relative z-10 shrink-0" style={{ height: 88 * S, backgroundColor: BRAND }}>
+      <div className="relative z-10 shrink-0" style={{ height: 90 * S, backgroundColor: BRAND }}>
         <div
           className="absolute left-0 top-0"
-          style={{ width: 375, height: 88, transform: `scale(${S})`, transformOrigin: 'top left' }}
+          style={{ width: 375, height: 90, transform: `scale(${S})`, transformOrigin: 'top left' }}
         >
           <button
             type="button"
             aria-label="Back"
             onClick={() =>
-              window.history.length > 1 ? router.back() : router.push('/pwa/restaurants/list')
+              window.history.length > 1 ? router.back() : router.push(`${basePath}/list`)
             }
             className="absolute"
             style={{ left: 12, top: 44, width: 40, height: 40 }}
@@ -185,11 +205,16 @@ export function RestaurantsDetailScreen({
             className="absolute text-white"
             style={{ left: 335, top: 48, width: 26, height: 26 }}
           >
-            <svg width={22} height={22} viewBox="0 0 24 24" fill="none" aria-hidden>
-              <circle cx="6" cy="12" r="2.4" stroke="#fff" strokeWidth="1.8" />
-              <circle cx="18" cy="5.5" r="2.4" stroke="#fff" strokeWidth="1.8" />
-              <circle cx="18" cy="18.5" r="2.4" stroke="#fff" strokeWidth="1.8" />
-              <path d="M8 11l8-4.5M8 13l8 4.5" stroke="#fff" strokeWidth="1.8" />
+            <svg
+              width={20}
+              height={22.3}
+              viewBox="0 0 72.914 81.25"
+              fill="currentColor"
+              aria-hidden
+            >
+              <g transform="translate(-13.543 -9.375)">
+                <path d="M70.832,9.375a15.625,15.625,0,1,1-11.52,26.18L43.9,44.8a15.61,15.61,0,0,1,0,10.395l15.41,9.246A15.607,15.607,0,1,1,56.094,69.8l-15.41-9.25a15.623,15.623,0,1,1,0-21.113l15.41-9.25A15.627,15.627,0,0,1,70.832,9.375Z" />
+              </g>
             </svg>
           </button>
         </div>
@@ -213,7 +238,7 @@ export function RestaurantsDetailScreen({
             className="absolute font-semibold uppercase tracking-wide text-white/90"
             style={{
               left: 16,
-              bottom: detail.menuImage ? 78 : 52,
+              bottom: hasHeroAction ? 78 : 52,
               fontSize: 11,
               fontFamily: OPEN_SANS,
             }}
@@ -224,17 +249,21 @@ export function RestaurantsDetailScreen({
             className="absolute font-bold text-white"
             style={{
               left: 16,
-              bottom: detail.menuImage ? 50 : 18,
+              bottom: hasHeroAction ? 50 : 18,
               fontSize: 24,
               fontFamily: OPEN_SANS,
             }}
           >
             {detail.title}
           </span>
-          {detail.menuImage && (
+          {hasHeroAction && (
             <button
               type="button"
-              onClick={() => setMenuOpen(true)}
+              onClick={
+                heroPrimaryAction.kind === 'image-popup'
+                  ? () => setMenuOpen(true)
+                  : () => open(heroPrimaryAction.url)
+              }
               className="absolute left-1/2 -translate-x-1/2 rounded-[4px] font-bold uppercase text-white"
               style={{
                 bottom: 12,
@@ -244,7 +273,7 @@ export function RestaurantsDetailScreen({
                 fontFamily: OPEN_SANS,
               }}
             >
-              {texts.menu}
+              {heroPrimaryAction.label}
             </button>
           )}
           <button
@@ -320,7 +349,7 @@ export function RestaurantsDetailScreen({
         )}
 
         {/* Open Dining Guide (#10) */}
-        {detail.diningGuideUrl && (
+        {texts.openDiningGuide && detail.diningGuideUrl && (
           <button
             type="button"
             onClick={() => open(detail.diningGuideUrl)}
@@ -381,20 +410,20 @@ export function RestaurantsDetailScreen({
         </div>
       </div>
 
-      <PwaBottomNav active="dining" />
+      <PwaBottomNav active={navActive} />
 
-      {/* Popup menú (#9) */}
-      {detail.menuImage && menuOpen && (
+      {/* Popup de imagen del hero (#9, p.ej. menú) */}
+      {heroPrimaryAction.kind === 'image-popup' && menuOpen && (
         <button
           type="button"
-          aria-label={texts.menuClose}
+          aria-label={heroPrimaryAction.closeLabel}
           onClick={() => setMenuOpen(false)}
           className="absolute inset-0 z-50 flex items-center justify-center"
           style={{ backgroundColor: 'hsl(0 0% 0% / 0.82)' }}
         >
           <span
             className="block aspect-square w-[86%] overflow-hidden rounded-[8px] bg-contain bg-center bg-no-repeat"
-            style={{ backgroundImage: `url("${resolveAssetUrl(detail.menuImage)}")` }}
+            style={{ backgroundImage: `url("${resolveAssetUrl(heroPrimaryAction.image)}")` }}
           />
         </button>
       )}

@@ -1145,24 +1145,125 @@ export interface PwaConfig {
   /** Pantalla de búsqueda (abierta desde la lupa del Dashboard). */
   search?: PwaSearchConfig;
   /** Módulo Restaurants (grid de subcategorías + lista + mapa + detalle). */
-  restaurants?: PwaRestaurantsConfig;
+  restaurants?: PwaListingsModuleConfig;
+  /** Módulo Places to Stay (mismo shape; data en home.modules.stay). */
+  stay?: PwaListingsModuleConfig;
+  /** Módulo Things to Do (mismo shape; data en home.modules['things-to-do']). */
+  thingsToDo?: PwaListingsModuleConfig;
+  /** Centro de ayuda (FAQs + búsqueda + contacto). */
+  help?: PwaHelpConfig;
+  /** Notificaciones (abiertas desde la campana del Dashboard). */
+  notifications?: PwaNotificationsConfig;
 }
 
-/** Tile temática del grid de subcategorías del módulo Restaurants (#1). */
-export interface PwaRestaurantCategory {
+/** Notificación seed (mock). El estado read/deleted vive client-side. */
+export interface PwaNotification {
+  id: string;
+  /** Tipo → icono + color de acento cuando no hay imagen. */
+  type: 'event' | 'deal' | 'info' | 'alert';
+  title: string;
+  body: string;
+  /** Imagen/thumbnail opcional (si falta, se usa el acento por tipo). */
+  image?: string;
+  /** ISO timestamp para el time-ago. */
+  timestamp: string;
+  /** Acción opcional: botón "ACTION TEXT" que navega a una ruta PWA existente. */
+  action?: { label: string; href: string };
+}
+
+/**
+ * Pantalla Notifications de la PWA (`/pwa/notifications`). Textos white-label +
+ * seed de notificaciones; el estado read/deleted se persiste client-side
+ * (localStorage), no en config.
+ */
+export interface PwaNotificationsConfig {
+  title: string;
+  filterAll: string;
+  filterUnread: string;
+  markAllRead: string;
+  /** Texto del botón que entra a modo selección. */
+  delete: string;
+  cancel: string;
+  selectAll: string;
+  /** Botón de borrado en modo selección (admite `{count}`). */
+  deleteSelected: string;
+  confirmTitle: string;
+  confirmBody: string;
+  confirmDelete: string;
+  confirmCancel: string;
+  emptyTitle: string;
+  emptyBody: string;
+  seed: PwaNotification[];
+}
+
+/** Artículo FAQ del centro de ayuda. La respuesta admite `{client_name}`. */
+export interface PwaHelpArticle {
+  slug: string;
+  /** Categoría para agrupar en el landing (ej. "Getting Started"). */
+  category: string;
+  /** Pregunta/título (searchable). */
+  question: string;
+  /** Cuerpo de la respuesta (searchable). */
+  answer: string;
+}
+
+/**
+ * Centro de ayuda de la PWA (`/pwa/help`): búsqueda de artículos + FAQs agrupadas
+ * por categoría + contacto (formulario mock + llamada). La data del teléfono se
+ * reutiliza de `connectWithUs.phone`; aquí viven solo los textos white-label.
+ */
+export interface PwaHelpConfig {
+  /** Título del header ("Help"). */
+  title: string;
+  /** Placeholder de la barra de búsqueda. */
+  searchPlaceholder: string;
+  /** Texto sin resultados (admite `{query}`). */
+  noResults: string;
+  /** Pregunta de utilidad del detalle ("Was this answer helpful?"). */
+  helpfulPrompt: string;
+  helpfulYes: string;
+  helpfulNo: string;
+  /** Confirmación tras votar ("Thanks for your feedback!"). */
+  thanks: string;
+  /** Tarjeta "Need more help?" del landing. */
+  needMoreTitle: string;
+  needMoreBody: string;
+  contactCta: string;
+  /** Pantalla de contacto (formulario mock + llamar). */
+  contact: {
+    title: string;
+    fromLabel: string;
+    fromDefault: string;
+    messagePlaceholder: string;
+    send: string;
+    callCta: string;
+    successTitle: string;
+    successBody: string;
+  };
+  /** Artículos FAQ. */
+  articles: PwaHelpArticle[];
+}
+
+/** Tile temática del grid de subcategorías de un módulo de listings (#1). */
+export interface PwaListingCategory {
   key: string;
   label: string;
   image: string;
 }
 
+/** @deprecated Usar `PwaListingCategory`. Alias retrocompatible. */
+export type PwaRestaurantCategory = PwaListingCategory;
+
 /**
- * Textos + tiles del módulo Restaurants de la PWA. La data de los restaurantes
- * (nombre, coords, horarios, dirección, etc.) se reutiliza del kiosk
- * (`features.home.modules.restaurants.listings`); aquí solo viven los textos
- * white-label y las tiles del grid de subcategorías.
+ * Textos + tiles de un módulo de listings de la PWA (Restaurants, Places to
+ * Stay, Things to Do…). La data (nombre, coords, horarios, dirección, etc.) se
+ * reutiliza del kiosk (`features.home.modules.<key>.listings`); aquí solo viven
+ * los textos white-label y las tiles del grid de categorías. Los campos del
+ * detalle propios de gastronomía (`menu`, `openDiningGuide`) son opcionales y
+ * `bookNow` cubre el caso de alojamiento.
  */
-export interface PwaRestaurantsConfig {
-  /** Título del header ("Restaurants"). */
+export interface PwaListingsModuleConfig {
+  /** Título del header ("Restaurants" / "Places to Stay"). */
   title: string;
   /** Placeholder del buscador del grid ("Search Restaurants in your city"). */
   searchPlaceholder: string;
@@ -1170,30 +1271,31 @@ export interface PwaRestaurantsConfig {
   resultsLabel: string;
   /** Sufijo de distancia en las filas ("mi away"). */
   distanceSuffix: string;
-  /** Prefijo de horario en las cards del mapa ("Open until"). */
+  /** Prefijo de horario en las cards del mapa ("Open until" / "Front desk until"). */
   openUntilPrefix: string;
   /** Labels de los tabs Listings / Map. */
   tabs: { listings: string; map: string };
-  /** Tiles del grid de subcategorías (#1). */
-  categories: PwaRestaurantCategory[];
+  /** Tiles del grid de categorías (#1). */
+  categories: PwaListingCategory[];
   /** Labels de la pantalla de detalle. */
   detail: {
-    eyebrow: string; // "RESTAURANT"
+    eyebrow: string; // "RESTAURANT" / "HOTEL"
     call: string;
     website: string;
     addFavorite: string;
     removeFavorite: string;
-    menu: string; // botón "MENU"
+    menu?: string; // botón "MENU" (Restaurants)
+    bookNow?: string; // botón "BOOK NOW" (Places to Stay)
     seeDirections: string;
     description: string; // título "Description"
-    openNowUntil: string; // "Open Now until"
+    openNowUntil: string; // "Open Now until" / "Front desk open until"
     moreHours: string; // "MORE HOURS"
-    openDiningGuide: string; // "OPEN DINING GUIDE"
+    openDiningGuide?: string; // "OPEN DINING GUIDE" (Restaurants)
   };
   /** Modal de horarios (#11). */
   businessHours: { title: string; close: string; days: string[] };
-  /** Popup de menú (#9). */
-  menu: { close: string };
+  /** Popup de menú (#9) — solo Restaurants. */
+  menu?: { close: string };
   /** Pantalla de filtros (mismo UI que el kiosk). */
   filters: {
     title: string;
@@ -1206,6 +1308,9 @@ export interface PwaRestaurantsConfig {
     apply: string;
   };
 }
+
+/** @deprecated Usar `PwaListingsModuleConfig`. Alias retrocompatible. */
+export type PwaRestaurantsConfig = PwaListingsModuleConfig;
 
 /** Pantalla de Search de la PWA (textos; el índice se construye desde la data). */
 export interface PwaSearchConfig {

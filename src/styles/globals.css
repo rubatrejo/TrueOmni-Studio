@@ -135,6 +135,30 @@ body {
 .survey-stagger > *:nth-child(9) {
   animation-delay: 540ms;
 }
+
+/* PWA bottom sheet — scrim fade + hoja deslizando desde abajo. */
+@keyframes pwa-sheet-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pwa-sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.pwa-sheet-backdrop-anim {
+  animation: pwa-sheet-backdrop-in 220ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+.pwa-sheet-up-anim {
+  animation: pwa-sheet-up 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
 .survey-stagger > *:nth-child(10) {
   animation-delay: 600ms;
 }

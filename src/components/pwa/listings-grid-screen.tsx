@@ -3,28 +3,35 @@
 import { useRouter } from 'next/navigation';
 
 import { resolveAssetUrl } from '@/lib/asset-url';
-import type { PwaRestaurantCategory } from '@/lib/config';
+import type { PwaListingCategory } from '@/lib/config';
 
-import { PwaBottomNav } from './bottom-nav';
+import { PwaBottomNav, type PwaNavKey } from './bottom-nav';
 import { ProfileIcon, SearchIcon } from './dashboard-icons';
 import { S } from './mobile-layer';
 
 const BRAND = 'hsl(var(--brand-primary))';
 const MONTSERRAT = { fontFamily: 'var(--font-montserrat)' } as const;
 const OPEN_SANS = 'var(--font-open-sans)';
-const HEADER_H = 92;
+const HEADER_H = 90;
 
 /**
- * Restaurants #1 — Grid de subcategorías. Header brand fijo (circle-user + search
- * estilo More + bookmark) sobre un grid 2×N scrolleable de tiles temáticas. Tap en
- * una tile → lista filtrada.
+ * Módulo de listings #1 — Grid de categorías. Header brand fijo (circle-user +
+ * search estilo More + bookmark) sobre un grid 2×N scrolleable de tiles
+ * temáticas. Tap en una tile → lista con ese título. Reutilizado por Restaurants,
+ * Places to Stay y futuros módulos vía `basePath` (`/pwa/restaurants`, `/pwa/stay`…).
  */
-export function RestaurantsGridScreen({
+export function ListingsGridScreen({
   searchPlaceholder,
   categories,
+  basePath,
+  navActive,
 }: {
   searchPlaceholder: string;
-  categories: PwaRestaurantCategory[];
+  categories: PwaListingCategory[];
+  /** Ruta base del módulo, ej. "/pwa/restaurants" o "/pwa/stay". */
+  basePath: string;
+  /** Celda del bottom nav a resaltar (opcional). */
+  navActive?: PwaNavKey;
 }) {
   const router = useRouter();
 
@@ -47,37 +54,50 @@ export function RestaurantsGridScreen({
           <button
             type="button"
             aria-label="Account"
-            className="absolute text-white"
+            className="absolute flex items-center justify-center text-white"
             style={{ left: 20, top: 52, width: 28, height: 28 }}
           >
             <ProfileIcon size={26} />
           </button>
           <button
             type="button"
-            onClick={() => router.push('/pwa/restaurants/list')}
+            onClick={() => router.push(`${basePath}/list`)}
             aria-label={searchPlaceholder}
-            className="absolute flex items-center gap-[9px] rounded-[2px] px-[12px]"
+            className="absolute flex items-center gap-2 rounded-full px-[14px]"
             style={{
               left: 56,
-              top: 55,
+              top: 46,
               width: 272,
-              height: 32,
+              height: 40,
               backgroundColor: 'hsl(0 0% 100% / 0.25)',
             }}
           >
-            <SearchIcon size={14} className="shrink-0 text-white" />
-            <span className="truncate text-white" style={{ fontSize: 16, fontFamily: OPEN_SANS }}>
+            <SearchIcon size={15} className="shrink-0 text-white" />
+            <span className="truncate text-white" style={{ fontSize: 15, fontFamily: OPEN_SANS }}>
               {searchPlaceholder}
             </span>
           </button>
           <button
             type="button"
             aria-label="Saved"
-            className="absolute text-white"
-            style={{ left: 342, top: 56, width: 18, height: 28 }}
+            className="absolute flex items-center justify-center text-white"
+            style={{ left: 342, top: 52, width: 18, height: 28 }}
           >
-            <svg width={16} height={20} viewBox="0 0 384 512" fill="currentColor" aria-hidden>
-              <path d="M0 48C0 21.5 21.5 0 48 0H336c26.5 0 48 21.5 48 48V487.7c0 13.4-10.9 24.3-24.3 24.3c-5 0-9.9-1.5-14-4.4L192 408 38.3 507.6c-4.1 2.9-9 4.4-14 4.4C10.9 512 0 501.1 0 487.7V48z" />
+            <svg
+              width={18}
+              height={21.4}
+              viewBox="0 0 44.192 52.507"
+              fill="currentColor"
+              aria-hidden
+            >
+              <g transform="translate(-32.26 -28.91)">
+                <g transform="translate(32.26 28.91)">
+                  <path
+                    d="M68.423,80.372l.2.162a5,5,0,0,0,7.83-4.1V36.379a7.475,7.475,0,0,0-7.469-7.469H39.729a7.475,7.475,0,0,0-7.469,7.469V76.438a4.979,4.979,0,0,0,7.818,4.083,1.257,1.257,0,0,0,.2-.162L54.343,68.284Z"
+                    transform="translate(-32.26 -28.91)"
+                  />
+                </g>
+              </g>
             </svg>
           </button>
         </div>
@@ -90,7 +110,7 @@ export function RestaurantsGridScreen({
             <button
               key={c.key}
               type="button"
-              onClick={() => router.push(`/pwa/restaurants/list?cat=${c.key}`)}
+              onClick={() => router.push(`${basePath}/list?cat=${c.key}`)}
               className="relative h-[92px] overflow-hidden rounded-[6px] bg-cover bg-center"
               style={{ backgroundImage: `url("${resolveAssetUrl(c.image)}")` }}
             >
@@ -109,7 +129,7 @@ export function RestaurantsGridScreen({
         </div>
       </div>
 
-      <PwaBottomNav active="dining" />
+      <PwaBottomNav active={navActive} />
     </div>
   );
 }

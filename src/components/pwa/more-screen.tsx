@@ -19,6 +19,7 @@ const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
 const ITEM_HREF: Record<string, string> = {
   'connect-with-us': '/pwa/connect-with-us',
   'my-profile': '/pwa/profile',
+  help: '/pwa/help',
 };
 
 interface MoreScreenProps {
@@ -40,23 +41,23 @@ export function MoreScreen({ searchPlaceholder, weatherText, items }: MoreScreen
   return (
     <div className="flex h-full w-full flex-col bg-background">
       {/* Header: search bar + inbox */}
-      <Layer h={110} className="relative z-10 shrink-0" style={{ backgroundColor: BRAND }}>
+      <Layer h={90} className="relative z-10 shrink-0" style={{ backgroundColor: BRAND }}>
         <div
-          className="absolute flex items-center gap-[9px] rounded-[2px] px-[10px]"
+          className="absolute flex items-center gap-2 rounded-full px-[14px]"
           style={{
             left: 20,
-            top: 56,
+            top: 46,
             width: 285,
-            height: 32,
+            height: 40,
             backgroundColor: 'hsl(0 0% 100% / 0.25)',
           }}
         >
-          <SearchIcon size={14} className="shrink-0 text-white" />
-          <span className="truncate text-white" style={{ fontSize: 16, ...OPEN_SANS }}>
+          <SearchIcon size={15} className="shrink-0 text-white" />
+          <span className="truncate text-white" style={{ fontSize: 15, ...OPEN_SANS }}>
             {searchPlaceholder}
           </span>
         </div>
-        <div className="absolute text-white" style={{ left: 334, top: 61 }}>
+        <div className="absolute text-white" style={{ left: 334, top: 54 }}>
           <InboxIcon size={24} />
         </div>
       </Layer>

@@ -269,7 +269,7 @@ export function ProfileScreen({
         {/* Header (encima del hero) */}
         <div
           className="absolute left-0 top-0 bg-[hsl(var(--brand-primary))]"
-          style={{ width: 375, height: 88 }}
+          style={{ width: 375, height: 90 }}
         />
         <button
           type="button"

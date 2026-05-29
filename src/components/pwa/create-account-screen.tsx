@@ -146,7 +146,7 @@ export function CreateAccountScreen({
         {/* Header brand: back + título centrado */}
         <div
           className="absolute left-0 top-0 bg-[hsl(var(--brand-primary))]"
-          style={{ width: 375, height: 88 }}
+          style={{ width: 375, height: 90 }}
         />
         {/* Título: pointer-events-none para no tapar el botón de back (mismo z, va después en el DOM). */}
         <div

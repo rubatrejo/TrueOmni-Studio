@@ -8,17 +8,17 @@ import type { Listing } from '@/lib/config';
 import { applyFilters, EMPTY_FILTER, isFilterEmpty, type FilterState } from '@/lib/listings-filter';
 import type { MapItem } from '@/lib/map-item';
 
-import { PwaBottomNav } from './bottom-nav';
+import { PwaBottomNav, type PwaNavKey } from './bottom-nav';
+import { ListingsMap } from './listings-map';
 import { S } from './mobile-layer';
 import { PwaFilterOverlay, type FilterTexts } from './pwa-filter-overlay';
 import { PwaHeart } from './pwa-heart';
-import { RestaurantsMap } from './restaurants-map';
 
 const BRAND = 'hsl(var(--brand-primary))';
 const OPEN_SANS = 'var(--font-open-sans)';
 const HEADER_H = 150;
 
-export interface RestaurantListItem {
+export interface ListingItem {
   slug: string;
   title: string;
   subcategory: string;
@@ -36,7 +36,7 @@ interface Props {
   tabs: { listings: string; map: string };
   resultsLabel: string;
   distanceSuffix: string;
-  items: RestaurantListItem[];
+  items: ListingItem[];
   mapItems: MapItem[];
   /** Listings crudos del kiosk para el filtrado (`applyFilters`). */
   listings: Listing[];
@@ -46,14 +46,19 @@ interface Props {
   filterTexts: FilterTexts;
   origin?: { lat: number; lng: number };
   mapboxToken?: string;
+  /** Ruta base del módulo, ej. "/pwa/restaurants" o "/pwa/stay". */
+  basePath: string;
+  /** Celda del bottom nav a resaltar (opcional). */
+  navActive?: PwaNavKey;
 }
 
 /**
- * Restaurants #2/#3 — Listings (lista) + Map (tab). Header brand fijo (back + título +
- * filtro + tabs), cuerpo scrolleable con filas (thumb + nombre + distancia + favorito).
- * La data es la del kiosk (`home.modules.restaurants.listings`).
+ * Módulo de listings #2/#3 — Listings (lista) + Map (tab). Header brand fijo
+ * (back + título + filtro + tabs), cuerpo scrolleable con filas (thumb + nombre +
+ * distancia + favorito). La data es la del kiosk (`home.modules.<key>.listings`).
+ * Reutilizado por Restaurants, Places to Stay y futuros módulos vía `basePath`.
  */
-export function RestaurantsListScreen({
+export function ListingsListScreen({
   title,
   tabs,
   resultsLabel,
@@ -66,6 +71,8 @@ export function RestaurantsListScreen({
   filterTexts,
   origin,
   mapboxToken,
+  basePath,
+  navActive,
 }: Props) {
   const router = useRouter();
   const [tab, setTab] = useState<'listings' | 'map'>('listings');
@@ -106,7 +113,7 @@ export function RestaurantsListScreen({
           <button
             type="button"
             aria-label="Back"
-            onClick={() => router.push('/pwa/restaurants')}
+            onClick={() => router.push(basePath)}
             className="absolute"
             style={{ left: 12, top: 44, width: 40, height: 40 }}
           >
@@ -146,8 +153,10 @@ export function RestaurantsListScreen({
                 }}
               />
             )}
-            <svg width={24} height={22} viewBox="0 0 512 512" fill="currentColor" aria-hidden>
-              <path d="M0 416c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 448c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 384c-17.7 0-32 14.3-32 32zm128 0a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zM320 256a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm32-80c-32.8 0-61 19.7-73.3 48L32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l246.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48l54.7 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-54.7 0c-12.3-28.3-40.5-48-73.3-48zM192 96a32 32 0 1 1 0 64 32 32 0 1 1 0-64zm-73.3 0L32 96C14.3 96 0 110.3 0 128s14.3 32 32 32l86.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 160c17.7 0 32-14.3 32-32s-14.3-32-32-32L265.3 96C253 67.7 224.8 48 192 48s-61 19.7-73.3 48z" />
+            <svg width={24} height={20.6} viewBox="0 0 28 24" fill="currentColor" aria-hidden>
+              <g transform="translate(-2 -4)">
+                <path d="M2,7A1,1,0,0,1,3,6H20.184a2.982,2.982,0,0,1,5.632,0H29a1,1,0,0,1,0,2H25.816a2.982,2.982,0,0,1-5.632,0H3A1,1,0,0,1,2,7Zm27,8H14.816a2.982,2.982,0,0,0-5.632,0H3a1,1,0,0,0,0,2H9.184a2.982,2.982,0,0,0,5.632,0H29a1,1,0,0,0,0-2Zm0,9H25.816a2.982,2.982,0,0,0-5.632,0H3a1,1,0,0,0,0,2H20.184a2.982,2.982,0,0,0,5.632,0H29a1,1,0,0,0,0-2Z" />
+              </g>
             </svg>
           </button>
           {/* Segmented control */}
@@ -202,7 +211,7 @@ export function RestaurantsListScreen({
               >
                 <button
                   type="button"
-                  onClick={() => router.push(`/pwa/restaurants/${it.slug}`)}
+                  onClick={() => router.push(`${basePath}/${it.slug}`)}
                   className="flex min-w-0 flex-1 items-center gap-3 text-left"
                 >
                   <span
@@ -241,15 +250,16 @@ export function RestaurantsListScreen({
           </ul>
         </div>
       ) : (
-        <RestaurantsMap
+        <ListingsMap
           token={mapboxToken}
           center={origin ?? vItems[0]?.coords ?? { lat: 33.4484, lng: -112.074 }}
           items={vItems}
           mapItems={vMapItems}
+          basePath={basePath}
         />
       )}
 
-      <PwaBottomNav active="dining" />
+      <PwaBottomNav active={navActive} />
 
       <PwaFilterOverlay
         open={filterOpen}

@@ -5,14 +5,15 @@ import { getConfig } from '@/lib/config';
 export const dynamic = 'force-dynamic';
 
 /**
- * Restaurants — grid de subcategorías (#1). Entry point del módulo (tile del Dashboard
- * y nav "dining"). Textos + tiles desde `config.features.pwa.restaurants`.
+ * Places to Stay — grid de categorías (#1). Entry point del módulo (quick-access
+ * "PLACES TO STAY" del Dashboard). Textos + tiles desde `config.features.pwa.stay`;
+ * la data de los hoteles se reutiliza del kiosk (`home.modules.stay`).
  */
-export default async function PwaRestaurantsPage() {
+export default async function PwaStayPage() {
   const config = await getConfig();
-  const r = config.features?.pwa?.restaurants;
+  const s = config.features?.pwa?.stay;
 
-  if (!r) {
+  if (!s) {
     return (
       <MobileCanvas>
         <div className="flex h-full w-full items-center justify-center text-foreground">
@@ -25,10 +26,9 @@ export default async function PwaRestaurantsPage() {
   return (
     <MobileCanvas>
       <ListingsGridScreen
-        searchPlaceholder={r.searchPlaceholder}
-        categories={r.categories}
-        basePath="/pwa/restaurants"
-        navActive="dining"
+        searchPlaceholder={s.searchPlaceholder}
+        categories={s.categories}
+        basePath="/pwa/stay"
       />
     </MobileCanvas>
   );

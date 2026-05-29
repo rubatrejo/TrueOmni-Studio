@@ -3516,6 +3516,48 @@ pixel-perfect**, auth/data mock; backend e integración al Studio después.
 
 ---
 
+### Sesión 2026-05-28 — PWA: teclado iOS 26 + módulo Restaurants completo + pulido Profile/Dashboard
+
+**Hecho:**
+
+- **Teclado iOS 26** (`pwa-ios-keyboard.tsx` + `pwa-keyboard-provider.tsx`, montado en `MobileCanvas`):
+  aparece al enfocar cualquier input/textarea, escribe vía native value setter (sin tocar los inputs),
+  sube el contenido, layout Liquid Glass (teclas blancas, fila `123·space·.·return`, emoji+mic). Tokens `--pwa-kb-*`.
+- **Pulido Profile**: cards MY FAVORITES a 16:9, secciones compactas (sin scroll), títulos+VIEW MORE bold
+  consistentes, flecha del SectionBar quitada, scrim en hero, dirección → "Phoenix, AZ" (única).
+- **Dashboard**: título del hero centrado en 2 renglones; tile RESTAURANTS cablea a `/pwa/restaurants`.
+- **Módulo Restaurants (11 pantallas)**: grid de subcategorías (18, Title Case, search estilo More),
+  lista (tabs Listings/Map, corazón rojo `--pwa-favorite`), mapa (reusa `MapCanvas` del kiosk, sin cluster,
+  pin tamaño Google-Maps, cards estilo kiosk 16:9, sin logo Mapbox), detalle (hero+galería slideshow con
+  flechas, Call/Website/Favorite, MENU→popup menú real del XD, Open Now+MORE HOURS→modal, mapa interactivo
+  pin −40%), popups #9/#11, y **pantalla de filtros** (UI del kiosk: Features/Category/Price/Open Now, reusa `applyFilters`).
+- Data 100% reusada del kiosk (`home.modules.restaurants.listings`). Campos opcionales añadidos a `Listing`:
+  `menuImage`, `diningGuideUrl`, `gallery`. Bloque `config.features.pwa.restaurants` (categorías+textos+filtros).
+- `MapCanvas`/`MapboxMap` extendidos con props `selectedPinScale`/`cluster`/`pinScale` (defaults preservan el kiosk).
+
+**Verificado:**
+
+- typecheck + lint (0 errores) + format limpios en cada bloque.
+- Screenshots `agent-browser` de todas las pantallas vs PNGs del XD; auditor-white-label sin hallazgos.
+- Filtro funcional (precio "$" → 30→8 resultados); back buttons OK; kiosk `/` sin regresión.
+
+**Pendiente / siguiente:**
+
+- Cablear navegación de tiles del grid / quick-access / resultados a sus módulos cuando existan.
+- Favoritos persistentes (hoy visual/mock); SEE DIRECTIONS abre Google Maps (sin ruta interna).
+- Pz: integración del módulo Restaurants al Studio (editor + preview bridge 390×844).
+- Otros módulos PWA reutilizados (Events, Things to Do, Map, Deals, Passes, Trails, etc.).
+
+**Decisiones:**
+
+- Pines del mapa = `MapCanvas` del kiosk para consistencia; clustering OFF en la PWA (mapa móvil tipo Google Maps).
+- Excepción white-label documentada: teclado iOS = chrome del SO (tokens `--pwa-kb-*` neutros fijos).
+- Props nuevos en componentes compartidos del kiosk con defaults que no alteran su comportamiento.
+
+**Fase:** Milestone PWA Mobile — P2/Px (módulo Restaurants entregado; faltan más módulos + Pz Studio).
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

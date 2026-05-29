@@ -3558,6 +3558,43 @@ pixel-perfect**, auth/data mock; backend e integración al Studio después.
 
 ---
 
+### Sesión 2026-05-29 — PWA: generalización listings + Stay + Things to Do + Help + Notifications + pulido transversal
+
+**Hecho:**
+
+- **Filtros rediseñados** (`pwa-filter-overlay.tsx`): bottom sheet claro estilo iOS (sube desde abajo, 90% alto, scrim), pills tipo chip (tint del primario / activa sólida), footer APPLY+CLEAR ALL. Tokens nuevos `--pwa-sheet-bg/-fg`; keyframes `pwa-sheet-up/-backdrop-in` en `globals.css`.
+- **Generalización del módulo de listings**: `restaurants-{grid,list,map,detail}` → `listings-*` (git mv) parametrizados por `basePath`/`navActive`/`heroPrimaryAction`. Tipos `PwaRestaurantsConfig→PwaListingsModuleConfig` + alias. Restaurants migrado sin regresión.
+- **Places to Stay** (`/pwa/stay`): 3 pages + config `pwa.stay` (12 categorías, BOOK NOW), data de `home.modules.stay` (30 hoteles), quick-access del Dashboard cableado.
+- **Things to Do** (`/pwa/things-to-do`): 3 pages + config `pwa.thingsToDo` (12 categorías, sin botón hero), data de `home.modules['things-to-do']` (30), tile del Dashboard cableado. Fix bug latente de `<button>` anidado en el mapa (carrusel).
+- **Help** (`/pwa/help` + `[slug]` + `/contact`): centro de ayuda (búsqueda + FAQs por categoría + Contact Support form mock + Call), detalle con "¿útil? YES/NO". Cableado desde More.
+- **Notifications** (`/pwa/notifications` + `[id]`): badge rojo numérico en la campana (sincronizado vía `useNotifications` + localStorage), lista con filtro All/Unread, acento por tipo, time-ago, modo selección + confirm, detalle con ACTION TEXT (deep-link), empty state.
+- **Pulido transversal**: icono Filter nuevo; iconos Save/Share nuevos; `NotificationIcon` (campana); barra de búsqueda unificada (rounded-full); header de sub-páginas solo chevron (sin "Back"); **todos los headers azules unificados a 90px** (Dashboard/More reposicionados de 110→90).
+
+**Verificado:**
+
+- `pnpm typecheck` + `pnpm lint` limpios en cada bloque; `validate-configs` 3/3 OK.
+- Screenshots `agent-browser` (390×844) de todos los módulos y estados (en `.planning/verifications/stay-baseline/`, no commiteados). No-regresión confirmada en Restaurants/Dashboard.
+- White-label: sin hex de branding ni rgba en los componentes nuevos; contenido en config; `{client_name}` interpolado; acentos por token.
+
+**Pendiente / siguiente:**
+
+- Feedback del usuario sobre el módulo **Notifications** (próxima sesión).
+- Seguir con el resto de la PWA (módulos/pantallas restantes).
+- Pz: integración de todo esto al Studio (editores + preview bridge 390×844).
+- Considerar cambiar `InboxIcon`→campana también en More (no pedido aún).
+
+**Decisiones:**
+
+- **No duplicar UI**: un único set de componentes `listings-*` para Restaurants/Stay/Things to Do (y futuros). El detalle usa `heroPrimaryAction` discriminado (image-popup / external-link / none).
+- **Back = solo chevron** (sin la palabra "Back") en toda la PWA; se quitó el prop `backLabel` de `PwaSubHeader` para que no se repita.
+- **Headers azules = 90px** unificado (antes 88/92/110).
+- **Estado mock client-side**: read/deleted de notificaciones en localStorage (no backend); el badge sincroniza con evento custom.
+- Modales de confirmación con `PwaAlertModal` (no el modal plano del XD).
+
+**Fase:** Milestone PWA Mobile — P2/Px (módulos reutilizados + PWA-only).
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

@@ -29,6 +29,13 @@ body {
   height: 0;
 }
 
+/* En la PWA ocultamos el logo/atribución de Mapbox (a petición). */
+[data-pwa-canvas] .mapboxgl-ctrl-logo,
+[data-pwa-canvas] .mapboxgl-ctrl-bottom-left,
+[data-pwa-canvas] .mapboxgl-ctrl-bottom-right {
+  display: none !important;
+}
+
 /* Survey overlay animations — cinematic entrance y stagger per-step. */
 @keyframes survey-backdrop-in {
   from {

@@ -20,7 +20,7 @@ export type PwaNavKey = 'home' | 'events' | 'dining' | 'map' | 'more';
 const NAV: { key: PwaNavKey; Icon: typeof HomeNavIcon; href?: string }[] = [
   { key: 'home', Icon: HomeNavIcon, href: '/pwa/dashboard' },
   { key: 'events', Icon: CalendarNavIcon },
-  { key: 'dining', Icon: DiningNavIcon },
+  { key: 'dining', Icon: DiningNavIcon, href: '/pwa/restaurants' },
   { key: 'map', Icon: MapNavIcon },
   { key: 'more', Icon: MoreNavIcon, href: '/pwa/more' },
 ];

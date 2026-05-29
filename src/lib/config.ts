@@ -361,6 +361,12 @@ export interface Listing {
   description: string;
   /** Turn-by-turn mock para el Directions modal. */
   directions: { icon: string; distance: string; instruction: string }[];
+  /** Imagen del menú (activa el botón MENU + popup en el detalle de la PWA). Opcional. */
+  menuImage?: string;
+  /** URL de la guía gastronómica (activa "OPEN DINING GUIDE" en la PWA). Opcional. */
+  diningGuideUrl?: string;
+  /** Fotos extra para el slideshow del hero (PWA). Opcional. */
+  gallery?: string[];
 }
 
 /** Módulo de listings parametrizado por cliente (Restaurants, Things to Do, Stay). */
@@ -1138,6 +1144,67 @@ export interface PwaConfig {
   profile?: PwaProfileConfig;
   /** Pantalla de búsqueda (abierta desde la lupa del Dashboard). */
   search?: PwaSearchConfig;
+  /** Módulo Restaurants (grid de subcategorías + lista + mapa + detalle). */
+  restaurants?: PwaRestaurantsConfig;
+}
+
+/** Tile temática del grid de subcategorías del módulo Restaurants (#1). */
+export interface PwaRestaurantCategory {
+  key: string;
+  label: string;
+  image: string;
+}
+
+/**
+ * Textos + tiles del módulo Restaurants de la PWA. La data de los restaurantes
+ * (nombre, coords, horarios, dirección, etc.) se reutiliza del kiosk
+ * (`features.home.modules.restaurants.listings`); aquí solo viven los textos
+ * white-label y las tiles del grid de subcategorías.
+ */
+export interface PwaRestaurantsConfig {
+  /** Título del header ("Restaurants"). */
+  title: string;
+  /** Placeholder del buscador del grid ("Search Restaurants in your city"). */
+  searchPlaceholder: string;
+  /** Plantilla del contador de resultados (soporta `{count}`, ej. "{count} RESULTS"). */
+  resultsLabel: string;
+  /** Sufijo de distancia en las filas ("mi away"). */
+  distanceSuffix: string;
+  /** Prefijo de horario en las cards del mapa ("Open until"). */
+  openUntilPrefix: string;
+  /** Labels de los tabs Listings / Map. */
+  tabs: { listings: string; map: string };
+  /** Tiles del grid de subcategorías (#1). */
+  categories: PwaRestaurantCategory[];
+  /** Labels de la pantalla de detalle. */
+  detail: {
+    eyebrow: string; // "RESTAURANT"
+    call: string;
+    website: string;
+    addFavorite: string;
+    removeFavorite: string;
+    menu: string; // botón "MENU"
+    seeDirections: string;
+    description: string; // título "Description"
+    openNowUntil: string; // "Open Now until"
+    moreHours: string; // "MORE HOURS"
+    openDiningGuide: string; // "OPEN DINING GUIDE"
+  };
+  /** Modal de horarios (#11). */
+  businessHours: { title: string; close: string; days: string[] };
+  /** Popup de menú (#9). */
+  menu: { close: string };
+  /** Pantalla de filtros (mismo UI que el kiosk). */
+  filters: {
+    title: string;
+    features: string;
+    category: string;
+    priceRange: string;
+    availability: string;
+    openNow: string;
+    clearAll: string;
+    apply: string;
+  };
 }
 
 /** Pantalla de Search de la PWA (textos; el índice se construye desde la data). */

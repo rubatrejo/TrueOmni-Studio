@@ -41,6 +41,12 @@ interface MapCanvasProps {
   fitRouteBounds?: boolean;
   /** Multiplicador del tamaño de los pins (S=0.75, M=1.0, L=1.3). Default 1. */
   pinScale?: number;
+  /** Escala independiente del pin seleccionado (default = `pinScale`). Útil en
+   *  pantallas chicas (PWA) donde el pin seleccionado del kiosk se ve enorme. */
+  selectedPinScale?: number;
+  /** Agrupar pins cercanos en clusters. Default `true` (kiosk). La PWA lo apaga
+   *  para mostrar pins individuales tipo Google Maps móvil. */
+  cluster?: boolean;
   /**
    * Override de iconKey por categoría. Si el operador asignó `coffee` a
    * `restaurants`, todos los pins de esa categoría usan el icono coffee
@@ -82,6 +88,8 @@ export function MapCanvas({
   flyToPadding,
   fitRouteBounds,
   pinScale = 1,
+  selectedPinScale,
+  cluster = true,
   categoryIcons,
   dynamicListings,
   className,
@@ -130,7 +138,7 @@ export function MapCanvas({
       map.addSource('items', {
         type: 'geojson',
         data: toFeatureCollection(itemsRef.current),
-        cluster: true,
+        cluster,
         // Más agresivo desclustering (antes clusterMaxZoom:14, clusterRadius:50):
         // a partir de zoom 15 se desagrupan; radio de clustering más chico para
         // que más pins se muestren sueltos y el mapa se vea poblado.
@@ -457,12 +465,20 @@ export function MapCanvas({
       return;
     }
 
+    const selScale = selectedPinScale ?? pinScale;
     const el = document.createElement('div');
     el.setAttribute('aria-hidden', 'true');
-    el.style.width = '156px';
-    el.style.height = '210px';
+    el.style.width = `${Math.round(156 * selScale)}px`;
+    el.style.height = `${Math.round(210 * selScale)}px`;
     el.style.pointerEvents = 'none';
     el.innerHTML = selectedPinSvg(item.source);
+    // El SVG trae width/height intrínsecos (156×210); forzarlo a 100% para que
+    // respete el tamaño del div escalado y no se desborde (se veía gigante).
+    const svgEl = el.firstElementChild as SVGElement | null;
+    if (svgEl) {
+      svgEl.setAttribute('width', '100%');
+      svgEl.setAttribute('height', '100%');
+    }
 
     const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
       .setLngLat([item.coords.lng, item.coords.lat])
@@ -513,7 +529,7 @@ export function MapCanvas({
       }
       map.off('moveend', handleMoveEnd);
     };
-  }, [selectedSlug, items, onSelectedPosition, flyToPadding]);
+  }, [selectedSlug, items, onSelectedPosition, flyToPadding, pinScale, selectedPinScale]);
 
   if (!token) {
     return (

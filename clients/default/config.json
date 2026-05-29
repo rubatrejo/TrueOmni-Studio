@@ -534,6 +534,14 @@
               "website": "https://example.com/el-farolito",
               "reserveUrl": "https://www.opentable.com/r/el-farolito",
               "threshold360Url": "https://www.youtube.com/embed/2OzlksZBTiA?autoplay=0&rel=0&modestbranding=1",
+              "menuImage": "assets/pwa/restaurants/menu.png",
+              "diningGuideUrl": "https://example.com/el-farolito/dining-guide",
+              "gallery": [
+                "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=900&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=900&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=900&auto=format&fit=crop&q=80"
+              ],
               "description": "El Farolito brings authentic Mexican flavors to Phoenix, from handmade tortillas and slow-braised meats to fresh salsas and house margaritas. Casual ambiance, perfect for groups and family meals.",
               "directions": [
                 {
@@ -10109,7 +10117,11 @@
             "label": "PLACES TO STAY",
             "image": "assets/pwa/dashboard/quick-places-to-stay.jpg"
           },
-          { "key": "events", "label": "EVENTS", "image": "assets/pwa/dashboard/quick-events.jpg" }
+          {
+            "key": "events",
+            "label": "EVENTS",
+            "image": "assets/pwa/dashboard/quick-events.jpg"
+          }
         ],
         "tiles": [
           {
@@ -10117,7 +10129,11 @@
             "label": "RESTAURANTS",
             "image": "assets/pwa/dashboard/tile-restaurants.jpg"
           },
-          { "key": "map", "label": "MAP", "image": "assets/pwa/dashboard/tile-map.jpg" },
+          {
+            "key": "map",
+            "label": "MAP",
+            "image": "assets/pwa/dashboard/tile-map.jpg"
+          },
           {
             "key": "wayfinding",
             "label": "WAYFINDING",
@@ -10139,14 +10155,26 @@
             "label": "DIGITAL BROCHURE",
             "image": "assets/pwa/dashboard/tile-digital-brochure.jpg"
           },
-          { "key": "trails", "label": "TRAILS", "image": "assets/pwa/dashboard/tile-trails.jpg" },
-          { "key": "passes", "label": "PASSES", "image": "assets/pwa/dashboard/tile-passes.jpg" },
+          {
+            "key": "trails",
+            "label": "TRAILS",
+            "image": "assets/pwa/dashboard/tile-trails.jpg"
+          },
+          {
+            "key": "passes",
+            "label": "PASSES",
+            "image": "assets/pwa/dashboard/tile-passes.jpg"
+          },
           {
             "key": "tickets",
             "label": "TICKETS",
             "image": "assets/pwa/dashboard/tile-tickets.jpg"
           },
-          { "key": "deals", "label": "DEALS", "image": "assets/pwa/dashboard/tile-deals.jpg" },
+          {
+            "key": "deals",
+            "label": "DEALS",
+            "image": "assets/pwa/dashboard/tile-deals.jpg"
+          },
           {
             "key": "scavenger-hunt",
             "label": "SCAVENGER HUNT",
@@ -10158,17 +10186,50 @@
         "searchPlaceholder": "Search in your city",
         "weatherText": "City, State | Sunny 52°F",
         "items": [
-          { "key": "my-profile", "label": "My Profile" },
-          { "key": "interactive-trails", "label": "Interactive Trails" },
-          { "key": "hiking-trails", "label": "Hiking Trails" },
-          { "key": "trolley-tracker", "label": "Trolley Tracker" },
-          { "key": "deals", "label": "Deals" },
-          { "key": "tickets", "label": "Tickets" },
-          { "key": "my-favorites", "label": "My Favorites" },
-          { "key": "connect-with-us", "label": "Connect With Us" },
-          { "key": "digital-brochure", "label": "Digital Brochure" },
-          { "key": "passes", "label": "Passes" },
-          { "key": "help", "label": "Help" }
+          {
+            "key": "my-profile",
+            "label": "My Profile"
+          },
+          {
+            "key": "interactive-trails",
+            "label": "Interactive Trails"
+          },
+          {
+            "key": "hiking-trails",
+            "label": "Hiking Trails"
+          },
+          {
+            "key": "trolley-tracker",
+            "label": "Trolley Tracker"
+          },
+          {
+            "key": "deals",
+            "label": "Deals"
+          },
+          {
+            "key": "tickets",
+            "label": "Tickets"
+          },
+          {
+            "key": "my-favorites",
+            "label": "My Favorites"
+          },
+          {
+            "key": "connect-with-us",
+            "label": "Connect With Us"
+          },
+          {
+            "key": "digital-brochure",
+            "label": "Digital Brochure"
+          },
+          {
+            "key": "passes",
+            "label": "Passes"
+          },
+          {
+            "key": "help",
+            "label": "Help"
+          }
         ]
       },
       "connectWithUs": {
@@ -10181,20 +10242,52 @@
         },
         "phone": "+16025550100",
         "website": "https://example.com",
-        "actions": { "call": "Call", "website": "Website", "directions": "Directions" },
+        "actions": {
+          "call": "Call",
+          "website": "Website",
+          "directions": "Directions"
+        },
         "address": "Street Address, City, State, 12345, Country",
         "hours": {
           "statusTemplate": "Open Now until {close}",
           "todayClose": "11:00 pm",
           "modalTitle": "Hours",
           "schedule": [
-            { "day": "Monday", "open": "9:00 am", "close": "11:00 pm" },
-            { "day": "Tuesday", "open": "9:00 am", "close": "11:00 pm" },
-            { "day": "Wednesday", "open": "9:00 am", "close": "11:00 pm" },
-            { "day": "Thursday", "open": "9:00 am", "close": "11:00 pm" },
-            { "day": "Friday", "open": "9:00 am", "close": "12:00 am" },
-            { "day": "Saturday", "open": "10:00 am", "close": "12:00 am" },
-            { "day": "Sunday", "open": "10:00 am", "close": "10:00 pm" }
+            {
+              "day": "Monday",
+              "open": "9:00 am",
+              "close": "11:00 pm"
+            },
+            {
+              "day": "Tuesday",
+              "open": "9:00 am",
+              "close": "11:00 pm"
+            },
+            {
+              "day": "Wednesday",
+              "open": "9:00 am",
+              "close": "11:00 pm"
+            },
+            {
+              "day": "Thursday",
+              "open": "9:00 am",
+              "close": "11:00 pm"
+            },
+            {
+              "day": "Friday",
+              "open": "9:00 am",
+              "close": "12:00 am"
+            },
+            {
+              "day": "Saturday",
+              "open": "10:00 am",
+              "close": "12:00 am"
+            },
+            {
+              "day": "Sunday",
+              "open": "10:00 am",
+              "close": "10:00 pm"
+            }
           ]
         },
         "copyright": "{client_name} is the official travel authority for the state of {city}©. {year}. All rights reserved."
@@ -10231,26 +10324,86 @@
         "signUpCta": "SIGN UP",
         "countrySheetTitle": "Select Country",
         "countries": [
-          { "code": "US", "name": "United States" },
-          { "code": "CA", "name": "Canada" },
-          { "code": "MX", "name": "Mexico" },
-          { "code": "GB", "name": "United Kingdom" },
-          { "code": "FR", "name": "France" },
-          { "code": "DE", "name": "Germany" },
-          { "code": "ES", "name": "Spain" },
-          { "code": "IT", "name": "Italy" },
-          { "code": "PT", "name": "Portugal" },
-          { "code": "NL", "name": "Netherlands" },
-          { "code": "BR", "name": "Brazil" },
-          { "code": "AR", "name": "Argentina" },
-          { "code": "CL", "name": "Chile" },
-          { "code": "CO", "name": "Colombia" },
-          { "code": "JP", "name": "Japan" },
-          { "code": "AU", "name": "Australia" },
-          { "code": "NZ", "name": "New Zealand" },
-          { "code": "IE", "name": "Ireland" },
-          { "code": "SE", "name": "Sweden" },
-          { "code": "CH", "name": "Switzerland" }
+          {
+            "code": "US",
+            "name": "United States"
+          },
+          {
+            "code": "CA",
+            "name": "Canada"
+          },
+          {
+            "code": "MX",
+            "name": "Mexico"
+          },
+          {
+            "code": "GB",
+            "name": "United Kingdom"
+          },
+          {
+            "code": "FR",
+            "name": "France"
+          },
+          {
+            "code": "DE",
+            "name": "Germany"
+          },
+          {
+            "code": "ES",
+            "name": "Spain"
+          },
+          {
+            "code": "IT",
+            "name": "Italy"
+          },
+          {
+            "code": "PT",
+            "name": "Portugal"
+          },
+          {
+            "code": "NL",
+            "name": "Netherlands"
+          },
+          {
+            "code": "BR",
+            "name": "Brazil"
+          },
+          {
+            "code": "AR",
+            "name": "Argentina"
+          },
+          {
+            "code": "CL",
+            "name": "Chile"
+          },
+          {
+            "code": "CO",
+            "name": "Colombia"
+          },
+          {
+            "code": "JP",
+            "name": "Japan"
+          },
+          {
+            "code": "AU",
+            "name": "Australia"
+          },
+          {
+            "code": "NZ",
+            "name": "New Zealand"
+          },
+          {
+            "code": "IE",
+            "name": "Ireland"
+          },
+          {
+            "code": "SE",
+            "name": "Sweden"
+          },
+          {
+            "code": "CH",
+            "name": "Switzerland"
+          }
         ],
         "error": {
           "title": "Check Your Details",
@@ -10275,7 +10428,7 @@
         "editProfileLink": "Edit Profile",
         "user": {
           "name": "Maud Roberts",
-          "location": "Breckenridge, CO",
+          "location": "Phoenix, AZ",
           "weather": "52°F",
           "photo": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&crop=faces",
           "heroImage": "assets/pwa/dashboard/hero.jpg"
@@ -10357,7 +10510,7 @@
           "prefill": {
             "name": "Maud Roberts",
             "email": "mroberts@email.com",
-            "state": "Colorado",
+            "state": "Arizona",
             "zip": "1234556",
             "country": "United States"
           }
@@ -10375,7 +10528,10 @@
             "tryAgainCta": "Try Again",
             "closeCta": "Close"
           },
-          "success": { "title": "Password Changed", "doneCta": "DONE" }
+          "success": {
+            "title": "Password Changed",
+            "doneCta": "DONE"
+          }
         },
         "settings": {
           "title": "Settings",
@@ -10428,6 +10584,140 @@
         "noResults": "No results for “{query}”",
         "typeSection": "Section",
         "typeEvent": "Event"
+      },
+      "restaurants": {
+        "title": "Restaurants",
+        "searchPlaceholder": "Search Restaurants in your city",
+        "resultsLabel": "{count} RESULTS",
+        "distanceSuffix": "mi away",
+        "openUntilPrefix": "Open until",
+        "tabs": {
+          "listings": "Listings",
+          "map": "Map"
+        },
+        "categories": [
+          {
+            "key": "dining-guide",
+            "label": "Dining Guide",
+            "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "dinner",
+            "label": "Dinner",
+            "image": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "outside",
+            "label": "Outside",
+            "image": "https://images.unsplash.com/photo-1559329007-40df8a9345d8?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "cafes",
+            "label": "Cafe's",
+            "image": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "bars",
+            "label": "Bar's",
+            "image": "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "night",
+            "label": "Night",
+            "image": "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "restaurants",
+            "label": "Restaurants",
+            "image": "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "date-night",
+            "label": "Date Night",
+            "image": "https://images.unsplash.com/photo-1424847651672-bf20a4b0982b?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "brunch",
+            "label": "Brunch",
+            "image": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "seafood",
+            "label": "Seafood",
+            "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "fine-dining",
+            "label": "Fine Dining",
+            "image": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "vegan",
+            "label": "Vegan",
+            "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "desserts",
+            "label": "Desserts",
+            "image": "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "food-trucks",
+            "label": "Food Trucks",
+            "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "breweries",
+            "label": "Breweries",
+            "image": "https://images.unsplash.com/photo-1518176258769-f227c798150e?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "pizza",
+            "label": "Pizza",
+            "image": "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "sushi",
+            "label": "Sushi",
+            "image": "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "happy-hour",
+            "label": "Happy Hour",
+            "image": "https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=600&auto=format&fit=crop&q=80"
+          }
+        ],
+        "detail": {
+          "eyebrow": "RESTAURANT",
+          "call": "Call",
+          "website": "Website",
+          "addFavorite": "Add to Favorites",
+          "removeFavorite": "Remove from Favorites",
+          "menu": "MENU",
+          "seeDirections": "SEE DIRECTIONS",
+          "description": "Description",
+          "openNowUntil": "Open Now until",
+          "moreHours": "MORE HOURS",
+          "openDiningGuide": "OPEN DINING GUIDE"
+        },
+        "businessHours": {
+          "title": "Business Hours",
+          "close": "CLOSE",
+          "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        },
+        "menu": {
+          "close": "Close"
+        },
+        "filters": {
+          "title": "Filters",
+          "features": "Features",
+          "category": "Category",
+          "priceRange": "Price Range",
+          "availability": "Availability",
+          "openNow": "Open Now",
+          "clearAll": "CLEAR ALL",
+          "apply": "APPLY"
+        }
       }
     }
   },

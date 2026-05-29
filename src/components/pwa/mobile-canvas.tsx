@@ -3,6 +3,8 @@
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
+import { PwaKeyboardProvider } from './pwa-keyboard-provider';
+
 /** Canvas de referencia de la PWA (mobile retrato). Adaptado de artboards XD 375×812. */
 const PWA_WIDTH_PX = 390;
 const PWA_HEIGHT_PX = 844;
@@ -65,7 +67,7 @@ export function MobileCanvas({ children }: { children: ReactNode }) {
         className="relative overflow-hidden bg-background text-foreground"
         style={{ width: `${PWA_WIDTH_PX}px`, height: `${PWA_HEIGHT_PX}px` }}
       >
-        {children}
+        <PwaKeyboardProvider>{children}</PwaKeyboardProvider>
       </div>
     );
   }
@@ -87,7 +89,7 @@ export function MobileCanvas({ children }: { children: ReactNode }) {
             transformOrigin: 'top left',
           }}
         >
-          {children}
+          <PwaKeyboardProvider>{children}</PwaKeyboardProvider>
         </div>
       </div>
     </div>

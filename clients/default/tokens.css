@@ -25,6 +25,7 @@
   /* ---------------------------------------------------------------------- */
   --brand-neutral: 0 0% 7%; /* #131313 Black Tetramine */
   --pwa-primary: 201 95% 46%; /* #079EE2 — PWA: botón de acción (Login/CTA), azul brillante */
+  --pwa-favorite: 0 76% 50%; /* ≈ #e02020 — corazón de favoritos (rojo, consistente con el kiosk) */
 
   /* ---------------------------------------------------------------------- */
   /*  TOKENS SEMÁNTICOS (consumidos por Tailwind y componentes)             */
@@ -87,6 +88,19 @@
   --keyboard-submit-bg: var(--brand-primary); /* botón Enter (submit) */
   --keyboard-handle-bg: var(--brand-primary); /* botón flotante drag handle */
   --keyboard-handle-fg: 0 0% 100%; /* color del icono del handle */
+
+  /* ---------------------------------------------------------------------- */
+  /*  TECLADO iOS 26 DE LA PWA (chrome del SO — NEUTRO, no brand)           */
+  /*  Valores fijos para todos los clientes: el teclado de iOS se ve igual  */
+  /*  sin importar la marca (como los logos FB/Google). No exponer en el    */
+  /*  editor de branding del Studio.                                        */
+  /* ---------------------------------------------------------------------- */
+  --pwa-kb-bg: 214 13% 84%; /* fondo del teclado (gris iOS claro) */
+  --pwa-kb-key: 0 0% 100%; /* todas las teclas (blancas, iOS 26) */
+  --pwa-kb-glyph: 213 23% 12%; /* glifo/texto de las teclas (casi negro iOS) */
+  --pwa-kb-return: 201 95% 46%; /* tecla return tintada (azul iOS / acción) */
+  --pwa-kb-return-fg: 0 0% 100%; /* texto del return */
+  --pwa-kb-shadow: 213 30% 30%; /* sombra inferior de las teclas */
 
   /* ---------------------------------------------------------------------- */
   /*  PHOTO BOOTH MODULE (Fase 3.16)                                        */

@@ -25,6 +25,7 @@
   /* ---------------------------------------------------------------------- */
   --brand-neutral: 0 0% 7%; /* #131313 Black Tetramine */
   --pwa-primary: 201 95% 46%; /* #079EE2 — PWA: botón de acción (Login/CTA), azul brillante */
+  --pwa-favorite: 0 76% 50%; /* corazón de favoritos (rojo) */
 
   /* ---------------------------------------------------------------------- */
   /*  TOKENS SEMÁNTICOS (consumidos por Tailwind y componentes)             */
@@ -86,6 +87,14 @@
   --keyboard-submit-bg: var(--brand-primary);
   --keyboard-handle-bg: var(--brand-primary);
   --keyboard-handle-fg: 0 0% 100%;
+
+  /* Teclado iOS 26 de la PWA (chrome del SO — NEUTRO, fijo para todo cliente). */
+  --pwa-kb-bg: 214 13% 84%;
+  --pwa-kb-key: 0 0% 100%;
+  --pwa-kb-glyph: 213 23% 12%;
+  --pwa-kb-return: 201 95% 46%;
+  --pwa-kb-return-fg: 0 0% 100%;
+  --pwa-kb-shadow: 213 30% 30%;
 
   /* ---------------------------------------------------------------------- */
   /*  PHOTO BOOTH MODULE (Fase 3.16)                                        */

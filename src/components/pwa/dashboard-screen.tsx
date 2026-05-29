@@ -101,10 +101,10 @@ export function DashboardScreen({
               'linear-gradient(to bottom, hsl(0 0% 0% / 0.92) 0%, hsl(0 0% 0% / 0) 100%)',
           }}
         />
-        {/* Título */}
+        {/* Título centrado al medio del hero, forzado a 2 renglones */}
         <h1
-          className="absolute font-bold leading-[1.18] text-white"
-          style={{ left: 24, top: 31, width: 142, fontSize: 23, ...MONTSERRAT }}
+          className="absolute text-center font-bold leading-[1.18] text-white"
+          style={{ left: 45, top: 48, width: 285, fontSize: 23, ...MONTSERRAT }}
         >
           {heroTitle}
         </h1>
@@ -163,6 +163,7 @@ export function DashboardScreen({
             <button
               key={t.key}
               type="button"
+              onClick={() => t.key === 'restaurants' && router.push('/pwa/restaurants')}
               className={`relative h-[125px] overflow-hidden rounded-[6px] bg-cover bg-center ${
                 t.wide ? 'col-span-2' : ''
               }`}

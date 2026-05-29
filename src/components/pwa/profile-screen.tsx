@@ -13,6 +13,10 @@ const BRAND = 'hsl(var(--brand-primary))';
 const PWA = 'hsl(var(--pwa-primary))';
 const OLIVE = 'hsl(var(--brand-tertiary))';
 
+/** Tipografía consistente de las barras de sección (título + VIEW MORE). */
+const BAR_FONT = 'Helvetica, Arial, sans-serif';
+const BAR_FONT_SIZE = 14;
+
 interface ProfileScreenProps {
   editProfileLink: string;
   user: { name: string; location: string; weather: string; photo: string; heroImage: string };
@@ -25,7 +29,7 @@ const bg = (src: string): React.CSSProperties => ({
   backgroundImage: `url("${resolveAssetUrl(src)}")`,
 });
 
-/** Barra de sección (brand 242 + pwa 132 + notch flecha + título + VIEW MORE). */
+/** Barra de sección (brand para el título + pwa para VIEW MORE, división recta). */
 function SectionBar({ top, title, viewMore }: { top: number; title: string; viewMore: string }) {
   return (
     <div className="absolute" style={{ left: 0, top, width: 375, height: 35 }}>
@@ -35,37 +39,17 @@ function SectionBar({ top, title, viewMore }: { top: number; title: string; view
       />
       <div
         className="absolute top-0 h-[35px]"
-        style={{ left: 243, width: 132, backgroundColor: PWA }}
+        style={{ left: 242, width: 133, backgroundColor: PWA }}
       />
-      <svg
-        className="absolute"
-        style={{ left: 243, top: 1 }}
-        width={16}
-        height={33}
-        viewBox="0 0 16 33"
-        aria-hidden
-      >
-        <path d="M0,0V33L16,16.192,7.331,7.48Z" fill="#fff" />
-      </svg>
-      <svg
-        className="absolute"
-        style={{ left: 246, top: 1 }}
-        width={16}
-        height={33}
-        viewBox="0 0 16 33"
-        aria-hidden
-      >
-        <path d="M0,0V33L16,16.192,7.331,7.48Z" fill={BRAND} />
-      </svg>
       <span
         className="absolute font-bold text-white"
-        style={{ left: 14, top: 10, fontSize: 14, fontFamily: 'Helvetica, Arial, sans-serif' }}
+        style={{ left: 14, top: 10, fontSize: BAR_FONT_SIZE, fontFamily: BAR_FONT }}
       >
         {title}
       </span>
       <span
-        className="absolute text-white"
-        style={{ left: 272, top: 10, fontSize: 14, fontFamily: 'Helvetica, Arial, sans-serif' }}
+        className="absolute font-bold text-white"
+        style={{ left: 272, top: 10, fontSize: BAR_FONT_SIZE, fontFamily: BAR_FONT }}
       >
         {viewMore}
       </span>
@@ -73,12 +57,16 @@ function SectionBar({ top, title, viewMore }: { top: number; title: string; view
   );
 }
 
-/** Card de favorito (100×140). */
+/** Card de favorito (160×90, ratio 16:9). */
+const FAV_W = 160;
+const FAV_H = 90;
+const FAV_PITCH = FAV_W + 10;
+
 function FavCard({ left, item }: { left: number; item: PwaProfileFavorite }) {
   return (
     <div
       className="absolute overflow-hidden rounded-[6px] bg-cover bg-center"
-      style={{ left, top: 0, width: 100, height: 140, ...bg(item.image) }}
+      style={{ left, top: 0, width: FAV_W, height: FAV_H, ...bg(item.image) }}
     >
       <div
         className="absolute inset-0"
@@ -89,13 +77,13 @@ function FavCard({ left, item }: { left: number; item: PwaProfileFavorite }) {
       />
       <span
         className="absolute text-white/90"
-        style={{ left: 9, top: 88, fontSize: 4, letterSpacing: 0.3, ...OPEN_SANS }}
+        style={{ left: 10, top: 38, fontSize: 5, letterSpacing: 0.3, ...OPEN_SANS }}
       >
         {item.subcategory}
       </span>
       <span
         className="absolute font-bold text-white"
-        style={{ left: 9, top: 95, fontSize: 8.5, ...OPEN_SANS }}
+        style={{ left: 10, top: 45, fontSize: 11, ...OPEN_SANS }}
       >
         {item.title}
       </span>
@@ -103,21 +91,21 @@ function FavCard({ left, item }: { left: number; item: PwaProfileFavorite }) {
         className="absolute"
         style={{
           left: 0,
-          top: 115,
-          width: 100,
-          height: 25,
+          top: 62,
+          width: FAV_W,
+          height: 28,
           backgroundColor: 'hsl(var(--foreground) / 0.8)',
         }}
       >
         <span
           className="absolute text-white"
-          style={{ left: 9, top: 4, fontSize: 7, fontWeight: 300, ...OPEN_SANS }}
+          style={{ left: 10, top: 5, fontSize: 7.5, fontWeight: 300, ...OPEN_SANS }}
         >
           {item.distance}
         </span>
         <span
           className="absolute font-semibold"
-          style={{ left: 9, top: 14, fontSize: 7, color: PWA, ...OPEN_SANS }}
+          style={{ left: 10, top: 16, fontSize: 7.5, color: PWA, ...OPEN_SANS }}
         >
           {item.hours}
         </span>
@@ -193,10 +181,20 @@ export function ProfileScreen({
         className="absolute left-0 top-0"
         style={{ width: 375, height: 812, transform: `scale(${S})`, transformOrigin: 'top left' }}
       >
-        {/* Hero photo + gradiente */}
+        {/* Hero photo + scrim de opacidad + gradiente */}
         <div
           className="absolute bg-cover bg-center"
           style={{ left: 0, top: 87, width: 375, height: 199, ...bg(user.heroImage) }}
+        />
+        <div
+          className="absolute"
+          style={{
+            left: 0,
+            top: 87,
+            width: 375,
+            height: 199,
+            backgroundColor: 'hsl(0 0% 0% / 0.35)',
+          }}
         />
         <div
           className="absolute"
@@ -241,19 +239,22 @@ export function ProfileScreen({
         <SectionBar top={285.5} title={favorites.title} viewMore={favorites.viewMore} />
         <div
           className="scrollbar-hide absolute overflow-x-auto"
-          style={{ left: 20, top: 341, width: 355, height: 140 }}
+          style={{ left: 20, top: 341, width: 355, height: FAV_H }}
         >
-          <div className="relative" style={{ width: favorites.items.length * 110, height: 140 }}>
+          <div
+            className="relative"
+            style={{ width: favorites.items.length * FAV_PITCH, height: FAV_H }}
+          >
             {favorites.items.map((it, i) => (
-              <FavCard key={it.title + i} left={i * 110} item={it} />
+              <FavCard key={it.title + i} left={i * FAV_PITCH} item={it} />
             ))}
           </div>
         </div>
 
-        <SectionBar top={501} title={upcomingEvents.title} viewMore={upcomingEvents.viewMore} />
+        <SectionBar top={446} title={upcomingEvents.title} viewMore={upcomingEvents.viewMore} />
         <div
           className="scrollbar-hide absolute overflow-x-auto"
-          style={{ left: 20, top: 556, width: 355, height: 220 }}
+          style={{ left: 20, top: 501, width: 355, height: 220 }}
         >
           <div
             className="relative"

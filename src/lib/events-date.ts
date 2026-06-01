@@ -137,6 +137,25 @@ export function formatEventDateShort(iso: string): string {
   return `${MONTHS_SHORT[m - 1]} ${d}`;
 }
 
+/** "October 7" — mes largo + día, sin año (para la card/detail). */
+export function formatEventDateMonthDay(iso: string): string {
+  const { m, d } = parseIso(iso);
+  return `${MONTHS_LONG[m - 1]} ${d}`;
+}
+
+/** Componentes del marcador de la timeline: 7 + "OCT" (mes corto en mayúsculas). */
+export function formatTimelineDate(iso: string): { day: number; monthShort: string } {
+  const { m, d } = parseIso(iso);
+  return { day: d, monthShort: MONTHS_SHORT[m - 1].toUpperCase() };
+}
+
+/** "Wednesday, October 7, 8:00 PM" — línea de fecha/hora de la card de evento. */
+export function formatEventCardWhen(iso: string, startHHMM: string): string {
+  const { weekdayLong } = formatDayLabel(iso);
+  const time = formatTime12(startHHMM).toUpperCase();
+  return `${weekdayLong}, ${formatEventDateMonthDay(iso)}, ${time}`;
+}
+
 /** "7:00 pm · 10:00 pm" / "7:00 – 10:00 PM" helpers. */
 export function formatTime12(hhmm: string): string {
   const [hStr, mStr] = hhmm.split(':');

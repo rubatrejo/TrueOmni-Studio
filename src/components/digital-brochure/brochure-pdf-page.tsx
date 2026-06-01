@@ -13,12 +13,16 @@ export function BrochurePdfPage({
   scale,
   className,
   style,
+  canvasStyle,
 }: {
   pdf: PDFDocumentProxy | null;
   pageNumber: number;
   scale: number;
   className?: string;
   style?: React.CSSProperties;
+  /** Override opcional del estilo del `<canvas>` (p.ej. el reader PWA controla el
+   *  ancho visual del zoom). Por defecto el canvas usa `maxWidth:100%` (kiosk). */
+  canvasStyle?: React.CSSProperties;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [loading, setLoading] = useState(true);
@@ -66,6 +70,7 @@ export function BrochurePdfPage({
           boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
           borderRadius: '4px',
           backgroundColor: '#fff',
+          ...canvasStyle,
         }}
       />
       {loading ? (

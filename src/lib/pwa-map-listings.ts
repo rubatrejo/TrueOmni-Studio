@@ -3,6 +3,7 @@ import type { KioskConfig, Listing } from '@/lib/config';
 import { isListingsModule } from '@/lib/itinerary-tabs';
 import { haversineMi } from '@/lib/listings-sort';
 import type { MapItem } from '@/lib/map-item';
+import { eventDateLabel } from '@/lib/map-open-today';
 
 /** "City, ST" derivado de la dirección (igual que los list pages de listings). */
 function cityStateOf(address: string): string {
@@ -45,7 +46,63 @@ export function getPwaMapData(config: KioskConfig): {
 
   for (const cat of categories) {
     const mod = modules[cat.source];
-    if (!mod || !isListingsModule(mod)) continue;
+    if (!mod) continue;
+
+    // Events: módulo `kind: 'events'` (no listings). Mapea cada EventItem a
+    // Listing crudo (para `applyFilters`) + ListingItem + MapItem (pin 'events').
+    if (mod.kind === 'events') {
+      for (const e of mod.events) {
+        const id = uid(cat.source, e.slug);
+        listings.push({
+          slug: id,
+          title: e.title,
+          subcategory: e.category,
+          image: e.image,
+          hours: '',
+          priceRange: e.priceBand ?? 1,
+          features: e.features,
+          popularity: e.popularity,
+          address: e.address,
+          phone: e.phone,
+          coords: e.coords,
+          website: e.website,
+          description: e.description,
+          directions: e.directions,
+        });
+        for (const f of e.features) featureSet.add(f);
+        items.push({
+          slug: id,
+          title: e.title,
+          subcategory: e.category,
+          image: e.image,
+          coords: e.coords,
+          distanceMi: origin ? haversineMi(origin, e.coords) : 0,
+          cityState: cityStateOf(e.address),
+          openUntil: '',
+          moduleSlug: cat.source,
+          detailSlug: e.slug,
+        });
+        mapItems.push({
+          source: 'events',
+          moduleSlug: cat.source,
+          slug: id,
+          title: e.title,
+          subcategory: e.category,
+          image: e.image,
+          coords: e.coords,
+          address: e.address,
+          phone: e.phone,
+          features: e.features,
+          popularity: e.popularity,
+          dateLabel: eventDateLabel(e),
+          priceMode: e.priceMode,
+          priceRange: e.priceBand,
+        });
+      }
+      continue;
+    }
+
+    if (!isListingsModule(mod)) continue;
 
     for (const l of mod.listings) {
       const id = uid(cat.source, l.slug);

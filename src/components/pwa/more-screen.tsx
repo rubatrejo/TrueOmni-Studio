@@ -20,6 +20,7 @@ const ITEM_HREF: Record<string, string> = {
   'connect-with-us': '/pwa/connect-with-us',
   'my-profile': '/pwa/profile',
   help: '/pwa/help',
+  'digital-brochure': '/pwa/digital-brochure',
 };
 
 interface MoreScreenProps {

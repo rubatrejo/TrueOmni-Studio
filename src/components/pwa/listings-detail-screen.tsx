@@ -49,6 +49,12 @@ export interface ListingDetail {
   openHours?: OpenHours;
   diningGuideUrl?: string;
   gallery?: string[];
+  /**
+   * Fecha/hora del evento — solo presente en el módulo Events. Si está, se
+   * renderiza una fila dedicada bajo la barra de acciones. Ausente en
+   * Restaurants/Stay/Things to Do (no se renderiza).
+   */
+  eventWhen?: { dateLabel: string; timeLabel: string };
 }
 
 /**
@@ -239,28 +245,33 @@ export function ListingsDetailScreen({
                 'linear-gradient(to bottom, hsl(0 0% 0% / 0) 35%, hsl(0 0% 0% / 0.7) 100%)',
             }}
           />
-          <span
-            className="absolute font-semibold uppercase tracking-wide text-white/90"
-            style={{
-              left: 16,
-              bottom: hasHeroAction ? 78 : 52,
-              fontSize: 11,
-              fontFamily: OPEN_SANS,
-            }}
+          {/* Eyebrow + título anclados abajo en columna: el título largo crece
+              hacia arriba sin encimar el eyebrow ni el botón/photos (clamp 2 líneas). */}
+          <div
+            className="absolute"
+            style={{ left: 16, right: 56, bottom: hasHeroAction ? 46 : 16 }}
           >
-            {texts.eyebrow}
-          </span>
-          <span
-            className="absolute font-bold text-white"
-            style={{
-              left: 16,
-              bottom: hasHeroAction ? 50 : 18,
-              fontSize: 24,
-              fontFamily: OPEN_SANS,
-            }}
-          >
-            {detail.title}
-          </span>
+            <span
+              className="block font-semibold uppercase tracking-wide text-white/90"
+              style={{ fontSize: 11, fontFamily: OPEN_SANS }}
+            >
+              {texts.eyebrow}
+            </span>
+            <span
+              className="mt-0.5 block font-bold text-white"
+              style={{
+                fontSize: 24,
+                lineHeight: 1.15,
+                fontFamily: OPEN_SANS,
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
+              {detail.title}
+            </span>
+          </div>
           {hasHeroAction && (
             <button
               type="button"
@@ -325,6 +336,35 @@ export function ListingsDetailScreen({
             </button>
           ))}
         </div>
+
+        {/* Fila de fecha/hora (solo Events) */}
+        {detail.eventWhen && (
+          <div
+            className="flex items-center gap-2.5 border-b px-[18px]"
+            style={{ minHeight: 56, borderColor: 'hsl(var(--foreground) / 0.1)' }}
+          >
+            <svg width={18} height={18} viewBox="0 0 448 512" fill={PWA} aria-hidden>
+              <path d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192z" />
+            </svg>
+            <div className="py-2.5">
+              <div
+                className="font-semibold"
+                style={{ fontSize: 13.5, color: FG, fontFamily: OPEN_SANS }}
+              >
+                {detail.eventWhen.dateLabel}
+              </div>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: 'hsl(var(--foreground) / 0.6)',
+                  fontFamily: OPEN_SANS,
+                }}
+              >
+                {detail.eventWhen.timeLabel}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Fila de horario (#10) */}
         {detail.openHours && (

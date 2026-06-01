@@ -28,6 +28,9 @@
   --pwa-favorite: 0 76% 50%; /* corazón de favoritos (rojo) */
   --pwa-sheet-bg: 0 0% 100%; /* fondo de bottom sheets claros de la PWA (neutro) */
   --pwa-sheet-fg: 213 23% 12%; /* texto oscuro de títulos en sheets claros (neutro) */
+  --pwa-events-pin: 36 91% 55%; /* pin de ubicación (ámbar) del header de Events */
+  --pwa-reader-bg: 240 5% 13%; /* fondo del visor de PDF (neutro, chrome del reader) */
+  --pwa-reader-stage: 228 6% 17%; /* stage oscuro tras la página del PDF (neutro) */
 
   /* ---------------------------------------------------------------------- */
   /*  TOKENS SEMÁNTICOS (consumidos por Tailwind y componentes)             */

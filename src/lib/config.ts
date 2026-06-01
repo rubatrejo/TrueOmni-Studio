@@ -1158,6 +1158,12 @@ export interface PwaConfig {
   passes?: PwaPassesModuleConfig;
   /** Módulo Maps (list+map agregado de varias categorías; data en home.modules.*). */
   map?: PwaMapModuleConfig;
+  /** Módulo Events (timeline cronológica; data en home.modules.events). */
+  events?: PwaEventsModuleConfig;
+  /** Módulo Digital Brochure (visor PDF; data en home.modules['digital-brochure']). */
+  digitalBrochure?: PwaDigitalBrochureModuleConfig;
+  /** Módulo Social Wall (muro masonry; data en home.modules['social-wall']). */
+  socialWall?: PwaSocialWallModuleConfig;
 }
 
 /** Una categoría agregada por el módulo Maps (chip + fuente de listings). */
@@ -1199,6 +1205,94 @@ export interface PwaMapModuleConfig {
     clearAll: string;
     apply: string;
   };
+}
+
+/**
+ * Textos UI del módulo Events en la PWA (white-label). La data de los eventos
+ * (fecha, hora, venue, coords, ticketsUrl…) se reutiliza del kiosk en
+ * `home.modules.events`; aquí solo viven las cadenas de interfaz por cliente.
+ *
+ * La primera pantalla es una **timeline cronológica** (no un grid de
+ * categorías); el detalle reutiliza la pantalla de detalle de listings
+ * (`ListingsDetailScreen`) con una fila de fecha/hora y el botón GET TICKETS.
+ */
+export interface PwaEventsModuleConfig {
+  /** Título del header + sub-fila ("Events"). */
+  title: string;
+  /** Placeholder del buscador del header ("Search in your city"). */
+  searchPlaceholder: string;
+  /** Línea de ubicación bajo el título (admite `{client_name}`). */
+  locationLabel: string;
+  /** Texto cuando no hay eventos / la búsqueda no arroja resultados. */
+  emptyState: string;
+  /** Sufijo de distancia (por consistencia con listings; reservado). */
+  distanceSuffix: string;
+  /** Labels de la pantalla de detalle (reutiliza ListingsDetailScreen). */
+  detail: {
+    eyebrow: string; // "EVENT"
+    call: string;
+    website: string;
+    addFavorite: string;
+    removeFavorite: string;
+    seeDirections: string;
+    description: string; // título "Description"
+    getTickets: string; // botón "GET TICKETS"
+  };
+  /** Pantalla de filtros (mismo overlay que listings; con Venue + Free). */
+  filters: {
+    title: string;
+    features: string;
+    category: string;
+    venue: string;
+    priceRange: string;
+    free: string;
+    clearAll: string;
+    apply: string;
+  };
+}
+
+/**
+ * Textos UI del módulo Social Wall en la PWA (white-label). La data del muro
+ * (hero, hashtag, handles, highlights, posts) se reutiliza del kiosk en
+ * `home.modules['social-wall']`; aquí solo viven las cadenas de interfaz.
+ *
+ * Réplica mobile del muro del kiosk: sub-header + fila de Highlights + #hashtag +
+ * tabs por red + masonry 2-col + lightbox por tipo (image/video/gallery/text).
+ */
+export interface PwaSocialWallModuleConfig {
+  /** Título del header (ej. "Social Wall"). */
+  title: string;
+  /** Etiqueta del tab que muestra todas las redes (ej. "All"). */
+  allLabel: string;
+  /** Etiqueta de la fila de highlights (ej. "Highlights"). */
+  highlightsLabel: string;
+}
+
+/**
+ * Textos UI del módulo Digital Brochure en la PWA (white-label). La data de los
+ * brochures (cover, título, pdfUrl, pageCount, fecha) se reutiliza del kiosk en
+ * `home.modules['digital-brochure']`; aquí solo viven las cadenas de interfaz.
+ *
+ * Réplica mobile del visor del kiosk: listado con hero + tabs + cards y un reader
+ * de PDF (pdf.js) con prev/next + slider + zoom + grid de miniaturas + share nativo.
+ */
+export interface PwaDigitalBrochureModuleConfig {
+  /** Título del header del listado (ej. "Digital Brochures"). */
+  title: string;
+  /** Placeholder del buscador del listado. */
+  searchPlaceholder: string;
+  /** Etiqueta del tab que muestra todas las categorías (ej. "All"). */
+  allLabel: string;
+  /** Texto sin resultados de búsqueda (admite `{query}`). */
+  noResults: string;
+  /** Texto mientras carga el PDF (admite `{pct}`). */
+  loadingLabel: string;
+  /** Sufijo "MB descargado" en la barra de progreso. */
+  mbDownloaded: string;
+  /** Título del estado de error de carga del PDF. */
+  errorTitle: string;
+  /** Enlace "Open PDF directly" del estado de error. */
+  openPdfDirectly: string;
 }
 
 /**

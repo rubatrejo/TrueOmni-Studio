@@ -10,6 +10,14 @@ export interface FilterState {
   priceRanges: readonly (1 | 2 | 3 | 4)[];
   /** Solo abiertos ahora (cruza openHours con hora actual). */
   openNow: boolean;
+  /**
+   * Venues activos (multi-select, OR) — solo usado por el overlay de Events.
+   * `applyFilters` (listings) lo ignora; la traducción a `EventsFilterState` la
+   * hace la pantalla de Events.
+   */
+  venues?: readonly string[];
+  /** Chip "Free" (solo Events) — gratis. `applyFilters` lo ignora. */
+  free?: boolean;
 }
 
 /** Estado vacío por defecto. */

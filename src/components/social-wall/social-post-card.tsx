@@ -22,9 +22,13 @@ import { SocialSourceIcon } from './social-source-icon';
 export function SocialPostCard({
   post,
   onOpen,
+  playButtonSize = 84,
 }: {
   post: SocialPost;
   onOpen: (post: SocialPost) => void;
+  /** Diámetro (px) del botón de play sobre los videos. Default 84 (kiosk); la
+   *  PWA lo reduce (~42) por el tamaño del card a 2 columnas. */
+  playButtonSize?: number;
 }) {
   return (
     <button
@@ -44,7 +48,7 @@ export function SocialPostCard({
         <TextBody post={post} />
       ) : (
         <div className="relative">
-          <Media post={post} />
+          <Media post={post} playButtonSize={playButtonSize} />
           {/* Panel overlay al bottom: gradient dark-bottom → transparent-top,
               extenso sobre la imagen. */}
           <div
@@ -85,7 +89,9 @@ export function SocialPostCard({
   );
 }
 
-function Media({ post }: { post: SocialPost }) {
+function Media({ post, playButtonSize = 84 }: { post: SocialPost; playButtonSize?: number }) {
+  const playIconSize = Math.round((playButtonSize * 34) / 84);
+  const playBorder = (playButtonSize * 3) / 84;
   // Respetamos el aspectRatio del config en todos los tipos. Videos sin
   // aspectRatio caen a 16:9 landscape como default; con aspectRatio pueden
   // ser 9:16 (reel/short) o landscape según el cliente.
@@ -130,14 +136,14 @@ function Media({ post }: { post: SocialPost }) {
             left: '50%',
             top: '50%',
             transform: 'translate(-50%, -50%)',
-            width: '84px',
-            height: '84px',
+            width: `${playButtonSize}px`,
+            height: `${playButtonSize}px`,
             borderRadius: '50%',
             backgroundColor: 'rgba(255,255,255,0.35)',
-            border: '3px solid #ffffff',
+            border: `${playBorder}px solid #ffffff`,
           }}
         >
-          <svg width="34" height="34" viewBox="0 0 24 24" aria-hidden>
+          <svg width={playIconSize} height={playIconSize} viewBox="0 0 24 24" aria-hidden>
             <path d="M8 5v14l11-7z" fill="#ffffff" />
           </svg>
         </div>

@@ -4,6 +4,7 @@ import type {
   ListingDetailTexts,
 } from '@/components/pwa/listings-detail-screen';
 import type { KioskConfig, PwaConfig, PwaListingsModuleConfig } from '@/lib/config';
+import { formatDayLabel, formatEventDateLong, formatTimeRange } from '@/lib/events-date';
 import { isListingsModule } from '@/lib/itinerary-tabs';
 
 export interface PwaListingDetailData {
@@ -17,7 +18,61 @@ const PWA_KEY: Record<string, keyof PwaConfig> = {
   restaurants: 'restaurants',
   stay: 'stay',
   'things-to-do': 'thingsToDo',
+  events: 'events',
 };
+
+/**
+ * Caso especial Events: el módulo es `kind: 'events'` (no listings) y su config
+ * tiene un shape propio (`PwaEventsModuleConfig`). Reutiliza la misma pantalla de
+ * detalle adaptando `EventItem` → `ListingDetail` con una fila de fecha/hora
+ * (`eventWhen`) y el botón GET TICKETS si el evento vende boletos. Sin `openHours`
+ * → la fila de horario y el modal de Business Hours no se renderizan.
+ */
+function buildEventDetail(config: KioskConfig, slug: string): PwaListingDetailData | null {
+  const mod = config.features?.home?.modules?.events;
+  const cfg = config.features?.pwa?.events;
+  if (!mod || mod.kind !== 'events' || !cfg) return null;
+
+  const e = mod.events.find((x) => x.slug === slug);
+  if (!e) return null;
+
+  const detail: ListingDetail = {
+    slug: e.slug,
+    title: e.title,
+    image: e.image,
+    address: e.address,
+    phone: e.phone,
+    website: e.website,
+    description: e.description,
+    coords: e.coords,
+    eventWhen: {
+      dateLabel: `${formatDayLabel(e.date).weekdayLong}, ${formatEventDateLong(e.date)}`,
+      timeLabel: formatTimeRange(e.startTime, e.endTime),
+    },
+  };
+
+  const texts: ListingDetailTexts = {
+    headerTitle: cfg.title,
+    eyebrow: cfg.detail.eyebrow,
+    call: cfg.detail.call,
+    website: cfg.detail.website,
+    addFavorite: cfg.detail.addFavorite,
+    removeFavorite: cfg.detail.removeFavorite,
+    seeDirections: cfg.detail.seeDirections,
+    description: cfg.detail.description,
+    // Events no tiene horario; estos campos quedan sin uso (no se renderizan).
+    openNowUntil: '',
+    moreHours: '',
+    businessHours: { title: '', close: '', days: [] },
+  };
+
+  const heroPrimaryAction: HeroPrimaryAction =
+    e.ticketsUrl && cfg.detail.getTickets
+      ? { kind: 'external-link', label: cfg.detail.getTickets, url: e.ticketsUrl }
+      : { kind: 'none' };
+
+  return { detail, texts, heroPrimaryAction };
+}
 
 /**
  * Construye `{ detail, texts, heroPrimaryAction }` de un listing de un módulo dado,
@@ -33,6 +88,9 @@ export function buildPwaListingDetail(
   moduleSlug: string,
   slug: string,
 ): PwaListingDetailData | null {
+  // Events no es un módulo de listings → rama propia (antes del guard).
+  if (moduleSlug === 'events') return buildEventDetail(config, slug);
+
   const mod = config.features?.home?.modules?.[moduleSlug];
   const pwaKey = PWA_KEY[moduleSlug];
   const cfg = pwaKey

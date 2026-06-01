@@ -16,8 +16,14 @@ export interface FilterTexts {
   features: string;
   category: string;
   priceRange: string;
-  availability: string;
-  openNow: string;
+  /** Sección "Availability" — opcional (listings/map la usan; Events no). */
+  availability?: string;
+  /** Pill "Open Now" — opcional; si falta, la sección Availability no se muestra. */
+  openNow?: string;
+  /** Título de la sección "Venue" — opcional (solo Events). */
+  venue?: string;
+  /** Pill "Free" dentro de Price Range — opcional (solo Events). */
+  free?: string;
   clearAll: string;
   apply: string;
 }
@@ -33,6 +39,7 @@ export function PwaFilterOverlay({
   open,
   features,
   subcategories,
+  venues = [],
   initial,
   texts,
   onCancel,
@@ -41,6 +48,8 @@ export function PwaFilterOverlay({
   open: boolean;
   features: string[];
   subcategories: string[];
+  /** Pool de venues (solo Events; vacío en listings/map → sección oculta). */
+  venues?: string[];
   initial: FilterState;
   texts: FilterTexts;
   onCancel: () => void;
@@ -76,6 +85,12 @@ export function PwaFilterOverlay({
         : [...d.priceRanges, p],
     }));
   const toggleOpenNow = () => setDraft((d) => ({ ...d, openNow: !d.openNow }));
+  const toggleVenue = (v: string) =>
+    setDraft((d) => {
+      const cur = d.venues ?? [];
+      return { ...d, venues: cur.includes(v) ? cur.filter((x) => x !== v) : [...cur, v] };
+    });
+  const toggleFree = () => setDraft((d) => ({ ...d, free: !d.free }));
 
   return (
     <div role="dialog" aria-modal="true" className="absolute inset-0 z-50">
@@ -151,7 +166,21 @@ export function PwaFilterOverlay({
             </Section>
           )}
 
+          {texts.venue && venues.length > 0 && (
+            <Section title={texts.venue}>
+              {venues.map((v) => (
+                <Pill
+                  key={v}
+                  label={v}
+                  active={(draft.venues ?? []).includes(v)}
+                  onClick={() => toggleVenue(v)}
+                />
+              ))}
+            </Section>
+          )}
+
           <Section title={texts.priceRange}>
+            {texts.free && <Pill label={texts.free} active={!!draft.free} onClick={toggleFree} />}
             {([1, 2, 3, 4] as const).map((p) => (
               <Pill
                 key={p}
@@ -162,9 +191,11 @@ export function PwaFilterOverlay({
             ))}
           </Section>
 
-          <Section title={texts.availability}>
-            <Pill label={texts.openNow} active={draft.openNow} onClick={toggleOpenNow} />
-          </Section>
+          {texts.openNow && (
+            <Section title={texts.availability ?? ''}>
+              <Pill label={texts.openNow} active={draft.openNow} onClick={toggleOpenNow} />
+            </Section>
+          )}
         </div>
 
         {/* Footer */}

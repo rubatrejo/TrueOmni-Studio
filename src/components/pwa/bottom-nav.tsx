@@ -19,7 +19,7 @@ export type PwaNavKey = 'home' | 'events' | 'dining' | 'map' | 'more';
 /** 5 celdas del nav (75px c/u). `href` undefined → aún sin pantalla destino. */
 const NAV: { key: PwaNavKey; Icon: typeof HomeNavIcon; href?: string }[] = [
   { key: 'home', Icon: HomeNavIcon, href: '/pwa/dashboard' },
-  { key: 'events', Icon: CalendarNavIcon },
+  { key: 'events', Icon: CalendarNavIcon, href: '/pwa/events' },
   { key: 'dining', Icon: DiningNavIcon, href: '/pwa/restaurants' },
   { key: 'map', Icon: MapNavIcon, href: '/pwa/map' },
   { key: 'more', Icon: MoreNavIcon, href: '/pwa/more' },

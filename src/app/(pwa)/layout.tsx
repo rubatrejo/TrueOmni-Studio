@@ -2,6 +2,8 @@ import type { Viewport } from 'next';
 import type { ReactNode } from 'react';
 
 import { I18nProvider } from '@/components/i18n-provider';
+import { PwaAdsProvider } from '@/components/pwa/ads/pwa-ads-context';
+import { getAdsFromConfig } from '@/lib/ads';
 import { getClientSlug } from '@/lib/client-env';
 import { getConfig } from '@/lib/config';
 import { loadAllLocales } from '@/lib/i18n-server';
@@ -29,10 +31,11 @@ export default async function PwaLayout({ children }: { children: ReactNode }) {
   const available = lang?.available ?? ['en'];
   const defaultLocale = lang?.default ?? 'en';
   const localesMap = await loadAllLocales(slug, available);
+  const ads = getAdsFromConfig(config);
 
   return (
     <I18nProvider localesMap={localesMap} defaultLocale={defaultLocale} available={available}>
-      {children}
+      <PwaAdsProvider ads={ads}>{children}</PwaAdsProvider>
     </I18nProvider>
   );
 }

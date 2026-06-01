@@ -161,7 +161,10 @@ export function DashboardScreen({
               {/* card */}
               <button
                 type="button"
-                onClick={() => q.key === 'places-to-stay' && router.push('/pwa/stay')}
+                onClick={() => {
+                  if (q.key === 'places-to-stay') router.push('/pwa/stay');
+                  else if (q.key === 'events') router.push('/pwa/events');
+                }}
                 className="absolute bg-cover bg-center"
                 style={{
                   left: CARD_X[i],
@@ -197,6 +200,8 @@ export function DashboardScreen({
                 else if (t.key === 'things-to-do') router.push('/pwa/things-to-do');
                 else if (t.key === 'passes') router.push('/pwa/passes');
                 else if (t.key === 'map') router.push('/pwa/map');
+                else if (t.key === 'digital-brochure') router.push('/pwa/digital-brochure');
+                else if (t.key === 'social-wall') router.push('/pwa/social-wall');
               }}
               className={`relative h-[125px] overflow-hidden rounded-[6px] bg-cover bg-center ${
                 t.wide ? 'col-span-2' : ''

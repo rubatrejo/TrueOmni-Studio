@@ -272,14 +272,33 @@ const CIRCLE_CX_IN_SCALED = 70; // center x del círculo blanco en el pin 140×1
 const CIRCLE_CY_IN_SCALED = 70; // center y del círculo blanco en el pin 140×188
 const ICON_BOX = 56; // tamaño interior donde cabe el icono (dentro de r=58)
 
+/**
+ * Caja del icono por categoría. El teardrop es idéntico para todas, pero cada glifo
+ * tiene distinto "peso visual" dentro del círculo: los cubiertos de Restaurants
+ * (referencia) llenan bien, mientras la cama de Stay y, sobre todo, la rueda de
+ * Things to Do se ven más pequeños a la misma caja. Agrandamos su caja para que
+ * todos los iconos se vean del mismo tamaño que Restaurants. El resto usa 56.
+ */
+const ICON_BOX_BY_SOURCE: Partial<Record<CanonicalMapSource, number>> = {
+  stay: 66,
+  'things-to-do': 100,
+};
+
+function iconBoxFor(source: MapSource): number {
+  return (
+    (isCanonicalMapSource(source) && ICON_BOX_BY_SOURCE[source as CanonicalMapSource]) || ICON_BOX
+  );
+}
+
 function renderPinIcon(source: MapSource, iconKeyOverride?: string): string {
   const icon =
     (iconKeyOverride && EXTENDED_ICONS[iconKeyOverride]) ||
     (isCanonicalMapSource(source) ? ICONS[source as CanonicalMapSource] : EXTENDED_ICONS.info);
   const fill = resolveMapPinColor(source);
-  const x = CIRCLE_CX_IN_SCALED - ICON_BOX / 2;
-  const y = CIRCLE_CY_IN_SCALED - ICON_BOX / 2;
-  return `<svg x="${x}" y="${y}" width="${ICON_BOX}" height="${ICON_BOX}" viewBox="${icon.viewBox}" fill="${fill}" color="${fill}">${icon.body}</svg>`;
+  const box = iconBoxFor(source);
+  const x = CIRCLE_CX_IN_SCALED - box / 2;
+  const y = CIRCLE_CY_IN_SCALED - box / 2;
+  return `<svg x="${x}" y="${y}" width="${box}" height="${box}" viewBox="${icon.viewBox}" fill="${fill}" color="${fill}">${icon.body}</svg>`;
 }
 
 function buildPinSvg(source: MapSource, iconKeyOverride?: string): string {
@@ -321,7 +340,7 @@ export function selectedPinSvg(source: MapSource, iconKeyOverride?: string): str
   const teardropScale = 2 * scale;
   const circleCx = 35 * teardropScale; // center x del teardrop original
   const circleCy = 35 * teardropScale; // center y (aprox) del círculo interior
-  const iconBox = ICON_BOX * scale;
+  const iconBox = iconBoxFor(source) * scale;
   const iconX = circleCx - iconBox / 2;
   const iconY = circleCy - iconBox / 2;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${SELECTED_W}" height="${SELECTED_H}" viewBox="0 0 ${SELECTED_W} ${SELECTED_H}">

@@ -3,11 +3,11 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import type { Listing } from '@/lib/config';
+import type { Listing, PwaMapCategory } from '@/lib/config';
 import { applyFilters, EMPTY_FILTER, isFilterEmpty, type FilterState } from '@/lib/listings-filter';
 import type { MapItem } from '@/lib/map-item';
 
-import { PwaBottomNav, type PwaNavKey } from './bottom-nav';
+import { PwaBottomNav } from './bottom-nav';
 import { ListingRow, type ListingItem } from './listing-row';
 import { ListingsMap } from './listings-map';
 import { S } from './mobile-layer';
@@ -17,56 +17,49 @@ const BRAND = 'hsl(var(--brand-primary))';
 const OPEN_SANS = 'var(--font-open-sans)';
 const HEADER_H = 150;
 
-export type { ListingItem };
-
 interface Props {
   title: string;
   tabs: { listings: string; map: string };
   resultsLabel: string;
   distanceSuffix: string;
+  allLabel: string;
+  categories: PwaMapCategory[];
   items: ListingItem[];
   mapItems: MapItem[];
-  /** Listings crudos del kiosk para el filtrado (`applyFilters`). */
+  /** Listings crudos (slug = uid) para el overlay de filtros. */
   listings: Listing[];
-  /** Pools del filtro. */
+  /** Pool de features agregado para el overlay. */
   features: string[];
-  subcategories: string[];
   filterTexts: FilterTexts;
   origin?: { lat: number; lng: number };
   mapboxToken?: string;
-  /** Ruta base del módulo, ej. "/pwa/restaurants" o "/pwa/stay". */
-  basePath: string;
-  /** Celda del bottom nav a resaltar (opcional). */
-  navActive?: PwaNavKey;
-  /** Pestaña inicial (default "listings"). */
-  initialTab?: 'listings' | 'map';
 }
 
 /**
- * Módulo de listings #2/#3 — Listings (lista) + Map (tab). Header brand fijo
- * (back + título + filtro + tabs), cuerpo scrolleable con filas (thumb + nombre +
- * distancia + favorito). La data es la del kiosk (`home.modules.<key>.listings`).
- * Reutilizado por Restaurants, Places to Stay y futuros módulos vía `basePath`.
+ * Módulo Maps (`/pwa/map`) — list+map agregado de varias categorías. Mismo patrón
+ * que `ListingsListScreen` (header brand + segmented Listings/Map + cuerpo) pero:
+ * abre en **Map**, agrega los listings de `pwa.map.categories` con pines de color
+ * por categoría, y usa **chips de categoría** en vez del overlay de filtros. El tap
+ * navega al detalle dentro del propio módulo (`/pwa/map/<module>/<slug>`).
  */
-export function ListingsListScreen({
+export function PwaMapScreen({
   title,
   tabs,
   resultsLabel,
   distanceSuffix,
+  allLabel,
+  categories,
   items,
   mapItems,
   listings,
   features,
-  subcategories,
   filterTexts,
   origin,
   mapboxToken,
-  basePath,
-  navActive,
-  initialTab = 'listings',
 }: Props) {
   const router = useRouter();
-  const [tab, setTab] = useState<'listings' | 'map'>(initialTab);
+  const [tab, setTab] = useState<'listings' | 'map'>('map');
+  const [chip, setChip] = useState<string>('all');
   const [favs, setFavs] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<FilterState>(EMPTY_FILTER);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -79,15 +72,22 @@ export function ListingsListScreen({
       return next;
     });
 
-  // Filtro (reusa applyFilters del kiosk sobre los listings crudos).
-  const visibleSlugs = new Set(applyFilters(listings, filter).map((l) => l.slug));
-  const vItems = items.filter((i) => visibleSlugs.has(i.slug));
-  const vMapItems = mapItems.filter((m) => visibleSlugs.has(m.slug));
+  // Filtrado combinado: chip de categoría (por source) AND overlay (applyFilters).
+  const chipSource = chip === 'all' ? null : categories.find((c) => c.key === chip)?.source;
+  const allowedSlugs = new Set(applyFilters(listings, filter).map((l) => l.slug));
+  const keep = (moduleSlug: string | undefined, slug: string) =>
+    (!chipSource || moduleSlug === chipSource) && allowedSlugs.has(slug);
+  const vItems = items.filter((i) => keep(i.moduleSlug, i.slug));
+  const vMapItems = mapItems.filter((m) => keep(m.moduleSlug, m.slug));
   const filterActive = !isFilterEmpty(filter);
+
+  const hrefForItem = (it: ListingItem) => `/pwa/map/${it.moduleSlug}/${it.detailSlug}`;
+
+  const chips = [{ key: 'all', label: allLabel }, ...categories];
 
   return (
     <div className="relative flex h-full w-full flex-col bg-background">
-      {/* Header fijo (brand): back + título + filtro + tabs Listings/Map */}
+      {/* Header brand: back + título + segmented Listings/Map */}
       <div
         className="relative z-10 shrink-0"
         style={{ height: HEADER_H * S, backgroundColor: BRAND }}
@@ -104,7 +104,7 @@ export function ListingsListScreen({
           <button
             type="button"
             aria-label="Back"
-            onClick={() => router.push(basePath)}
+            onClick={() => router.push('/pwa/dashboard')}
             className="absolute"
             style={{ left: 12, top: 44, width: 40, height: 40 }}
           >
@@ -184,6 +184,32 @@ export function ListingsListScreen({
         </div>
       </div>
 
+      {/* Barra de chips de categoría */}
+      <div
+        className="scrollbar-hide flex shrink-0 gap-2 overflow-x-auto border-b px-4 py-2.5"
+        style={{ borderColor: 'hsl(var(--foreground) / 0.1)' }}
+      >
+        {chips.map((c) => {
+          const isActive = chip === c.key;
+          return (
+            <button
+              key={c.key}
+              type="button"
+              onClick={() => setChip(c.key)}
+              className="shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 font-semibold"
+              style={{
+                fontSize: 13,
+                fontFamily: OPEN_SANS,
+                backgroundColor: isActive ? BRAND : 'hsl(var(--brand-primary) / 0.1)',
+                color: isActive ? '#fff' : BRAND,
+              }}
+            >
+              {c.label}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Cuerpo */}
       {tab === 'listings' ? (
         <div className="scrollbar-hide flex-1 overflow-y-auto bg-background">
@@ -198,7 +224,7 @@ export function ListingsListScreen({
               <ListingRow
                 key={it.slug}
                 item={it}
-                href={`${basePath}/${it.slug}`}
+                href={hrefForItem(it)}
                 fav={favs.has(it.slug)}
                 onToggleFav={() => toggleFav(it.slug)}
                 distanceSuffix={distanceSuffix}
@@ -212,16 +238,17 @@ export function ListingsListScreen({
           center={origin ?? vItems[0]?.coords ?? { lat: 33.4484, lng: -112.074 }}
           items={vItems}
           mapItems={vMapItems}
-          basePath={basePath}
+          basePath="/pwa/map"
+          hrefForItem={hrefForItem}
         />
       )}
 
-      <PwaBottomNav active={navActive} />
+      <PwaBottomNav active="map" />
 
       <PwaFilterOverlay
         open={filterOpen}
         features={features}
-        subcategories={subcategories}
+        subcategories={[]}
         initial={filter}
         texts={filterTexts}
         onCancel={() => setFilterOpen(false)}

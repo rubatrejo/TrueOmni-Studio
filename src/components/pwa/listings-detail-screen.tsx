@@ -122,6 +122,7 @@ export function ListingsDetailScreen({
   basePath,
   navActive,
   mapboxToken,
+  backHref,
 }: {
   detail: ListingDetail;
   texts: ListingDetailTexts;
@@ -131,6 +132,8 @@ export function ListingsDetailScreen({
   /** Celda del bottom nav a resaltar (opcional). */
   navActive?: PwaNavKey;
   mapboxToken?: string;
+  /** Fallback del back cuando no hay historial (default `${basePath}/list`). */
+  backHref?: string;
 }) {
   const router = useRouter();
   const [fav, setFav] = useState(false);
@@ -176,7 +179,9 @@ export function ListingsDetailScreen({
             type="button"
             aria-label="Back"
             onClick={() =>
-              window.history.length > 1 ? router.back() : router.push(`${basePath}/list`)
+              window.history.length > 1
+                ? router.back()
+                : router.push(backHref ?? `${basePath}/list`)
             }
             className="absolute"
             style={{ left: 12, top: 44, width: 40, height: 40 }}

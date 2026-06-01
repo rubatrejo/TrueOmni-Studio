@@ -195,6 +195,8 @@ export function DashboardScreen({
               onClick={() => {
                 if (t.key === 'restaurants') router.push('/pwa/restaurants');
                 else if (t.key === 'things-to-do') router.push('/pwa/things-to-do');
+                else if (t.key === 'passes') router.push('/pwa/passes');
+                else if (t.key === 'map') router.push('/pwa/map');
               }}
               className={`relative h-[125px] overflow-hidden rounded-[6px] bg-cover bg-center ${
                 t.wide ? 'col-span-2' : ''

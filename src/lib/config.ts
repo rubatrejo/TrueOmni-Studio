@@ -1154,6 +1154,67 @@ export interface PwaConfig {
   help?: PwaHelpConfig;
   /** Notificaciones (abiertas desde la campana del Dashboard). */
   notifications?: PwaNotificationsConfig;
+  /** Módulo Passes (grid + detalle con actividades; data en home.modules.passes). */
+  passes?: PwaPassesModuleConfig;
+  /** Módulo Maps (list+map agregado de varias categorías; data en home.modules.*). */
+  map?: PwaMapModuleConfig;
+}
+
+/** Una categoría agregada por el módulo Maps (chip + fuente de listings). */
+export interface PwaMapCategory {
+  /** Key del chip (estable). */
+  key: string;
+  /** Módulo del kiosk de donde salen los listings (ej. "restaurants", "stay"). */
+  source: string;
+  /** Etiqueta del chip (white-label). */
+  label: string;
+}
+
+/**
+ * Textos UI del módulo Maps en la PWA (white-label). La data de los listings se
+ * reutiliza del kiosk (`home.modules.<source>.listings`); aquí solo viven las
+ * cadenas de interfaz y la lista de categorías a agregar en el mapa.
+ */
+export interface PwaMapModuleConfig {
+  /** Título del header (ej. "Map"). */
+  title: string;
+  /** Etiquetas del segmented control. */
+  tabs: { listings: string; map: string };
+  /** Plantilla del contador del list view (ej. "{count} RESULTS"). */
+  resultsLabel: string;
+  /** Sufijo de distancia (ej. "mi away"). */
+  distanceSuffix: string;
+  /** Etiqueta del chip que muestra todas las categorías (ej. "All"). */
+  allLabel: string;
+  /** Categorías a agregar (chips + fuentes). Se amplía al sumar Events/Trails. */
+  categories: PwaMapCategory[];
+  /** Pantalla de filtros (mismo overlay que listings; sin subcategorías). */
+  filters: {
+    title: string;
+    features: string;
+    category: string;
+    priceRange: string;
+    availability: string;
+    openNow: string;
+    clearAll: string;
+    apply: string;
+  };
+}
+
+/**
+ * Textos UI del módulo Passes en la PWA (white-label). La data de los passes
+ * (cover, tagline, actividades) se reutiliza del kiosk en `home.modules.passes`;
+ * aquí solo viven las cadenas de interfaz traducibles por cliente.
+ */
+export interface PwaPassesModuleConfig {
+  /** Título del grid y header (ej. "Passes"). */
+  title: string;
+  /** Eyebrow sobre el título del pass en el hero del detalle (ej. "PASS"). */
+  eyebrow: string;
+  /** Etiqueta del enlace externo por actividad (ej. "View Website"). */
+  viewWebsite: string;
+  /** Texto cuando el pass no tiene actividades (ej. "Activities coming soon."). */
+  activitiesEmpty: string;
 }
 
 /** Notificación seed (mock). El estado read/deleted vive client-side. */

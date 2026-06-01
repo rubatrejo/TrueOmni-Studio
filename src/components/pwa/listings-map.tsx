@@ -7,7 +7,7 @@ import { MapCanvas } from '@/components/map/map-canvas';
 import { resolveAssetUrl } from '@/lib/asset-url';
 import type { MapItem } from '@/lib/map-item';
 
-import type { ListingItem } from './listings-list-screen';
+import type { ListingItem } from './listing-row';
 import { PwaHeart } from './pwa-heart';
 
 const OLIVE = 'hsl(var(--brand-tertiary))';
@@ -31,6 +31,7 @@ export function ListingsMap({
   items,
   mapItems,
   basePath,
+  hrefForItem,
 }: {
   token: string | undefined;
   center: { lat: number; lng: number };
@@ -39,6 +40,8 @@ export function ListingsMap({
   mapItems: MapItem[];
   /** Ruta base del módulo, ej. "/pwa/restaurants" o "/pwa/stay". */
   basePath: string;
+  /** Destino del tap por item (default `${basePath}/${slug}`). Útil en agregados. */
+  hrefForItem?: (it: ListingItem) => string;
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(items[0]?.slug ?? null);
@@ -108,7 +111,7 @@ export function ListingsMap({
             >
               <button
                 type="button"
-                onClick={() => router.push(`${basePath}/${it.slug}`)}
+                onClick={() => router.push(hrefForItem?.(it) ?? `${basePath}/${it.slug}`)}
                 className="block w-full text-left"
               >
                 {/* Imagen 16:9 */}

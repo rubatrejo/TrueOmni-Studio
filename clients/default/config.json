@@ -10182,6 +10182,49 @@
           }
         ]
       },
+      "passes": {
+        "title": "Passes",
+        "eyebrow": "PASS",
+        "viewWebsite": "View Website",
+        "activitiesEmpty": "Activities coming soon."
+      },
+      "map": {
+        "title": "Map",
+        "tabs": {
+          "listings": "Listings",
+          "map": "Map"
+        },
+        "resultsLabel": "{count} RESULTS",
+        "distanceSuffix": "mi away",
+        "allLabel": "All",
+        "categories": [
+          {
+            "key": "restaurants",
+            "source": "restaurants",
+            "label": "Restaurants"
+          },
+          {
+            "key": "stay",
+            "source": "stay",
+            "label": "Stay"
+          },
+          {
+            "key": "things-to-do",
+            "source": "things-to-do",
+            "label": "Things to Do"
+          }
+        ],
+        "filters": {
+          "title": "Filters",
+          "features": "Features",
+          "category": "Category",
+          "priceRange": "Price Range",
+          "availability": "Availability",
+          "openNow": "Open Now",
+          "clearAll": "CLEAR ALL",
+          "apply": "APPLY"
+        }
+      },
       "more": {
         "searchPlaceholder": "Search in your city",
         "weatherText": "City, State | Sunny 52°F",
@@ -10221,10 +10264,6 @@
           {
             "key": "digital-brochure",
             "label": "Digital Brochure"
-          },
-          {
-            "key": "passes",
-            "label": "Passes"
           },
           {
             "key": "help",

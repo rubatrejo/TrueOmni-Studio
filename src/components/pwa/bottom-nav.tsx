@@ -21,7 +21,7 @@ const NAV: { key: PwaNavKey; Icon: typeof HomeNavIcon; href?: string }[] = [
   { key: 'home', Icon: HomeNavIcon, href: '/pwa/dashboard' },
   { key: 'events', Icon: CalendarNavIcon },
   { key: 'dining', Icon: DiningNavIcon, href: '/pwa/restaurants' },
-  { key: 'map', Icon: MapNavIcon },
+  { key: 'map', Icon: MapNavIcon, href: '/pwa/map' },
   { key: 'more', Icon: MoreNavIcon, href: '/pwa/more' },
 ];
 

@@ -138,11 +138,9 @@ Decisión y ejecución de la fase puntual **MIG-AB-1** (plan en `.planning/MIG-A
 4. **Test E2E ejecutable** — instalar `@playwright/test` + mover spec documentado a `tests/e2e/`.
 5. **Fase 4 — primer cliente real** — bloqueada por negocio.
 
-**Última sesión (2026-05-27):** Milestone PWA Mobile — 5 flujos nuevos: Connect With Us, Forgot Password (+ Login Error modal), Create Account (form + foto), Profile (10 pantallas: profile/edit/password/settings/delete), y Search (`/pwa/search` desde la lupa, diseño propio). Compartidos nuevos (`PwaSubHeader`, `PhotoSourceSheet`, `PwaAlertModal`, `form-controls`, `InLayerNav`, `signup-icons`). Todo verificado (typecheck/lint/format + screenshots vs XD + audit white-label). **SIN COMMITEAR.** Detalle completo en el historial de abajo.
+**Última sesión (2026-05-31):** Milestone PWA Mobile — 2 módulos nuevos: **Passes** (`/pwa/passes` grid + detalle con actividades, sin GET YOURS, con Share `navigator.share`, contenido −20%) y **Maps** (`/pwa/map` list+map agregado de Restaurants+Stay+Things to Do, abre en Map, chips por categoría + overlay de filtros sin subcategorías, detalle propio en `/pwa/map/[module]/[slug]`). Cableados: celda `map` del bottom nav + tiles `passes`/`map` del Dashboard; quitado `passes` del More. Refactor sin duplicar UI: extraído `ListingRow`; props retrocompat (`initialTab`, `hrefForItem`, `backHref`). Pines del mapa: tamaño de icono por categoría igualado a Restaurants (`ICON_BOX_BY_SOURCE` en `map-pin-icons.ts`: stay 66, things-to-do 100). **SIN COMMITEAR** al iniciar el cierre (se commitea ahora).
 
-**Último deploy verde:** commit `1da1dbd` (media cards spacing + color picker overflow + YT en URL paste).
-
-**Siguiente acción concreta:** **Commitear lo de la sesión 2026-05-27** (sigue todo sin commitear). Luego continuar el Milestone PWA: pantallas PWA-only restantes (Notifications, Scavenger Hunt…) y/o módulos reutilizados mobile (Listings, Map, Events, Deals, Tickets, Trails, Brochure, Ask AI, Itinerary), cableando tiles/quick-access/More/resultados-de-search a sus módulos cuando existan. Pz = integración al Studio. **Fase 4 — primer cliente real** sigue bloqueada por negocio.
+**Siguiente acción concreta:** Continuar el Milestone PWA con los módulos reutilizados mobile que faltan (Events, Trails, Deals, Tickets, Brochure, Ask AI, Itinerary) — al crear Events/Trails, **sumarlos a `features.pwa.map.categories`** + extender `buildPwaListingDetail` para que aparezcan en el mapa. Pendiente feedback de **Notifications**. Pz = integración al Studio (editores + preview bridge 390×844). **Fase 4 — primer cliente real** sigue bloqueada por negocio.
 
 **Bloqueos:**
 
@@ -3590,6 +3588,40 @@ pixel-perfect**, auth/data mock; backend e integración al Studio después.
 - **Headers azules = 90px** unificado (antes 88/92/110).
 - **Estado mock client-side**: read/deleted de notificaciones en localStorage (no backend); el badge sincroniza con evento custom.
 - Modales de confirmación con `PwaAlertModal` (no el modal plano del XD).
+
+**Fase:** Milestone PWA Mobile — P2/Px (módulos reutilizados + PWA-only).
+
+---
+
+### Sesión 2026-05-31 — PWA: módulos Passes + Maps + normalización de pines
+
+**Hecho:**
+
+- **Quitado "Passes" del More** (`/pwa/more`): editado solo `clients/default/config.json → features.pwa.more.items`.
+- **Módulo Passes** (`/pwa/passes` + `/[slug]`): grid de cards (cover + título + tagline) + detalle (hero + tagline + lista de actividades con "View Website" externo). **Sin GET YOURS** (no aplica en mobile), **Share** en el header con `navigator.share` (fallback al `bandwangoUrl`). Componentes `passes-grid-screen.tsx`, `pass-detail-screen.tsx`; tipo `PwaPassesModuleConfig` + `features.pwa.passes`. Tras feedback: contenido **−20%** y **bottom nav** añadido (iba faltando).
+- **Módulo Maps** (`/pwa/map` + `/[module]/[slug]`): list+map agregado de Restaurants+Stay+Things to Do, **abre en Map**, **chips por categoría** (All + 3) que filtran ambas vistas, **overlay de filtros** (features/precio/open-now, sin subcategorías), detalle propio dentro de `/pwa/map` reusando `ListingsDetailScreen`. Componente `pwa-map-screen.tsx`; helpers `getPwaMapData` (agrega con uid anti-colisión + pool de features) y `buildPwaListingDetail`; tipo `PwaMapModuleConfig` + `features.pwa.map` (con `categories` extensible y `filters`).
+- **Refactor sin duplicar UI**: extraído `listing-row.tsx` (usado por listings y Maps); props retrocompat en componentes en producción: `initialTab` (ListingsListScreen), `hrefForItem` (ListingsMap), `backHref` (ListingsDetailScreen). Cero regresión.
+- **Cableado**: celda `map` del bottom nav → `/pwa/map`; tiles `passes` y `map` del Dashboard.
+- **Pines del mapa**: igualado el tamaño visual del icono por categoría a Restaurants vía `ICON_BOX_BY_SOURCE` en `map-pin-icons.ts` (compartido kiosk+PWA): **stay 66, things-to-do 100** (Restaurants 56 ref).
+
+**Verificado:**
+
+- `pnpm typecheck` + `pnpm lint` limpios; `validate-configs` 3/3 OK.
+- Screenshots `agent-browser` (390×844) de Passes (grid/detalle), Maps (map/list/detalle/filtros) y no-regresión de Restaurants en `.planning/verifications/{passes,maps}-pwa/`.
+- Pines: verificados en el **mapa real** seleccionando cada chip (snapshot + click `@eN`), no solo en harness.
+
+**Pendiente / siguiente:**
+
+- Feedback del usuario sobre **Notifications** (de la sesión anterior).
+- Resto de módulos PWA (Events, Trails, Deals, Tickets, Brochure, Ask AI, Itinerary). Al crear Events/Trails, sumarlos a `pwa.map.categories` + extender `buildPwaListingDetail`.
+- Pz: integración al Studio.
+
+**Decisiones:**
+
+- **Passes no es un "listings"** (sin categorías/mapa/filtros): grid → detalle con actividades; componentes propios.
+- **Maps reusa el list+map de listings** (no duplicar): `ListingRow` + `ListingsMap` compartidos; navegación multi-módulo por `hrefForItem`; slugs desambiguados con uid `source__slug`.
+- **Bottom nav va en TODA la PWA** (incluidos drill-downs) — me lo corrigieron.
+- **Tamaño de pines**: igualar peso visual (no bounding box) al **tamaño real** del pin (~55px), no en harness grande; verificar en el mapa real. Me costó 3 intentos.
 
 **Fase:** Milestone PWA Mobile — P2/Px (módulos reutilizados + PWA-only).
 

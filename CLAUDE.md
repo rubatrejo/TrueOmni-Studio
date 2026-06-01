@@ -177,6 +177,7 @@ El subagent `auditor-white-label` fuerza estas reglas antes de cada commit.
 - **Nombres en inglés en código** (variables, funciones). **Comentarios y docs en español**.
 - **Commits:** Conventional Commits en español (`feat(kiosk): añade pantalla menú`).
 - **pnpm** como package manager único.
+- **Portar kiosk → PWA reutilizando componentes compartidos:** extender los componentes/funciones compartidos con **props/campos opcionales** (default = comportamiento del kiosk), nunca cambiar su firma de forma que altere el kiosk. Ejemplos: `eventWhen` (fila de fecha) en `ListingsDetailScreen`, `venues`/`free` en `PwaFilterOverlay`/`FilterState`, `canvasStyle` en `BrochurePdfPage`, `playButtonSize` en `SocialPostCard`. Verificar no-regresión del kiosk tras tocar cualquier componente compartido.
 
 ---
 

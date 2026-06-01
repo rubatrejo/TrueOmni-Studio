@@ -3627,6 +3627,58 @@ pixel-perfect**, auth/data mock; backend e integración al Studio después.
 
 ---
 
+### Sesión 2026-06-01 — PWA: Events + Digital Brochure + Ads + Social Wall
+
+**Hecho:**
+
+- **Events** (`/pwa/events` + `/[slug]`): timeline cronológica agrupada por día (header propio
+  estilo Dashboard con search que filtra por título, pin ámbar `--pwa-events-pin`, botón filtro).
+  Detalle reusa `ListingsDetailScreen` + **fila de fecha dedicada** + GET TICKETS. Filtro = overlay
+  de listings extendido con **Free + Venue** (props opcionales en `FilterState`/`PwaFilterOverlay`;
+  usa `applyEventsFilters`). Se suma al `/pwa/map` (rama events en `getPwaMapData`). Bottom nav
+  celda `events` cableada + activa. Tipos `PwaEventsModuleConfig`.
+- **Digital Brochure** (`/pwa/digital-brochure` + `/[slug]`): listado con header estilo
+  `ListingsListScreen` (back + título + **search bar donde va el segmented**) + tabs + cards;
+  **reader** PDF (reusa `loadPdf` + `BrochurePdfPage`) con header+Share nativo, controles
+  (counter/grid/slider/zoom ±), **swipe + pinch + pan**, grid de miniaturas 2-col, loading/error,
+  bottom nav. Tokens `--pwa-reader-*`.
+- **Ads** (global, route-gated): `PwaAdsSlot` en `MobileCanvas` + `PwaAdsProvider` en
+  `(pwa)/layout`. Componentes `pwa-ad-hero/bottom/popup` (reusan `useAds`/`AdCloseButton`/
+  `useImageCornerTheme`). 3 creatividades nuevas en `assets/ads/` (recortadas a sangre):
+  hero→/pwa/restaurants, bottom→/pwa/events, popup→/pwa/dashboard.
+- **Social Wall** (`/pwa/social-wall`): sub-header + Highlights + #hashtag + tabs por red +
+  **masonry 2-col** (reusa `SocialPostCard`) + **lightbox por tipo** (image/video/gallery/text;
+  gallery con swipe+dots). Reusa `filterPosts`/`timeAgo`/`SocialSourceIcon`. Play de video −50%
+  vía prop `playButtonSize` (default 84 kiosk).
+
+**Verificado:**
+
+- `pnpm typecheck` + `pnpm lint` limpios; `validate:configs` 3/3.
+- Screenshots `agent-browser` (390×844) de cada módulo en `.planning/verifications/{events,
+digital-brochure,ads,social-wall}-pwa/`. Zoom del brochure medido (276→423px); ads dismiss OK;
+  4 modales del social wall OK; filtro por red OK.
+- No-regresión verificada: detalle Restaurants/Stay, overlay de Maps, brochure/social-wall del
+  kiosk intactos (componentes compartidos extendidos solo con props opcionales/aditivos).
+
+**Pendiente / siguiente:**
+
+- Resto de módulos PWA: Trails, Deals, Tickets, Ask AI, Itinerary, Scavenger Hunt.
+- Feedback de Notifications (de sesiones previas).
+- Pz: integración de la PWA al Studio.
+
+**Decisiones:**
+
+- Componentes compartidos kiosk↔PWA se extienden con **props opcionales** (default = kiosk) para
+  no regresionar: `eventWhen`/fila de fecha en `ListingsDetailScreen`, `venues`/`free` en el
+  overlay, `canvasStyle` en `BrochurePdfPage`, `playButtonSize` en `SocialPostCard`.
+- Ads montados **una sola vez** vía contexto en el layout + slot en `MobileCanvas` (route-gated por
+  `useAds`), no por página. Reader PDF: zoom por **ancho %** (no re-render), render a resolución fija.
+- Las creatividades de ads venían como cards con margen transparente → se **recortan a sangre**.
+
+**Fase:** Milestone PWA Mobile — P2/Px (módulos reutilizados + PWA-only).
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

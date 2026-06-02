@@ -3679,6 +3679,40 @@ digital-brochure,ads,social-wall}-pwa/`. Zoom del brochure medido (276→423px);
 
 ---
 
+### Sesión 2026-06-01 (2) — PWA: fix arranque + Survey tweaks + Deals + Tickets
+
+**Hecho:**
+
+- **Fix arranque PWA**: el dev se quedaba en el splash por chunks 404 (`.next` corrupto tras añadir rutas). Patrón de la sesión: reinicio limpio moviendo `.next` a `.next.trash-*` (`rm -rf` bloqueado en el sandbox).
+- **Survey (PWA) — ajustes**: popup −40% alto; contenido y popup "Leave survey?" −15% (`PwaAlertModal` ahora con prop `scale`, que reemplaza el `compact` roto que rompía typecheck); Step 1 "How likely are you / to recommend this kiosk?" en 2 renglones (`\n` en config + `whiteSpace: pre-line`; el kiosk lo colapsa a espacio → sin regresión); contenido centrado vertical; welcome −30% alto (28% vs 40%) y crece a 40% al avanzar; el card se oculta bajo "Leave survey?"; el teclado eleva el card del último step dejando gap (prop opt-in `data-kb-lift`/`data-kb-margin` en `PwaKeyboardProvider`).
+- **Módulo Deals (PWA)** `/pwa/deals`: grid 2-col de cupones (data `home.modules.deals`), búsqueda inline persistente, Sort (`PwaSortOverlay` nuevo) + Filter (reusa `PwaFilterOverlay` solo Features), **popup centrado** de canje con **Share nativo** + **"View Offer"** (sin QR/Phone-Email), badge de precio. Tipo `PwaDealsModuleConfig`, token `--pwa-deals-expiry`, cableado tile Dashboard + item More. Arreglada 1 URL Unsplash muerta del seed (Sephora) → 14/14 imágenes cargan.
+- **Módulo Tickets (PWA)** `/pwa/tickets`: réplica de Events + **WeekPicker** (selector de día, reusa helpers `events-date`) + **badge de precio** + CTA **"BUY TICKET · $price"**. Tickets ⊂ Events (`filterTicketableEvents`); rail horario al filtrar por día. Tipo `PwaTicketsModuleConfig`, `buildTicketDetail` en `pwa-listing-detail`, cableado. Sub-fila azul primary + WeekPicker azul secondary + 3px sobre el primer evento.
+- **Incluye también** el trabajo previo **sin commitear** de **Trails (PWA)** y la base del **Survey (PWA)**, pendientes de antes de esta sesión (nunca documentados/commiteados).
+
+**Verificado:**
+
+- `pnpm typecheck` + `pnpm lint` + `validate:configs` 3/3 limpios tras cada módulo.
+- Screenshots `agent-browser`/playwright (390×844) en `.planning/verifications/{survey,deals,tickets}-pwa/`: grid/sheet/popup/sort/filter/search/empty/detalle/WeekPicker/cambio de día.
+- Imágenes cargan (medido por `naturalWidth`). No-regresión verificada de Events (intacto) y del kiosk (sus componentes no se tocaron).
+- White-label: cero hex de branding ni geográficos en los componentes nuevos; todo por tokens.
+
+**Pendiente / siguiente:**
+
+- Resto de módulos PWA: Ask AI, Itinerary, Scavenger Hunt.
+- Feedback de Notifications (de sesiones previas).
+- Pz: integración de la PWA al Studio (editores, clone, preview bridge 390×844).
+- Limpiar carpetas locales `.next.trash-*` (no commiteadas).
+
+**Decisiones:**
+
+- Adaptaciones a móvil donde el kiosk no se traduce 1:1: Deals usa Share nativo + botón "View Offer" en vez de QR/Phone-Email, canje como popup centrado; Tickets muestra precio y "BUY TICKET" (≠ "GET TICKETS" de Events).
+- `PwaAlertModal` parametrizado con `scale` (default 1 = login/create-account intactos); `PwaKeyboardProvider` con `data-kb-lift`/`data-kb-margin` opt-in (default = comportamiento previo).
+- Commits agrupados por milestone PWA: los módulos comparten archivos (config.json, config.ts, more, dashboard, pwa-listing-detail, pwa-filter-overlay) → separar por módulo no es limpio.
+
+**Fase:** Milestone PWA Mobile — P2/Px (módulos reutilizados + PWA-only).
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

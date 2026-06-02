@@ -91,12 +91,19 @@ export function PwaKeyboardProvider({ children }: { children: ReactNode }) {
     const canvas = wrapperRef.current?.closest('[data-pwa-canvas]') as HTMLElement | null;
     if (!el || !canvas) return;
     const scale = canvasScale();
-    const elRect = el.getBoundingClientRect();
+    // Por defecto se eleva el propio campo a `LIFT_MARGIN` del teclado. Un contenedor
+    // (p. ej. un popup con footer debajo del campo, como el survey) puede pedir
+    // `data-kb-lift` para que se mida SU borde inferior, y `data-kb-margin` para el
+    // gap deseado contra el teclado. Sin esos atributos, el comportamiento es el de antes.
+    const liftEl = (el.closest('[data-kb-lift]') as HTMLElement | null) ?? el;
+    const refRect = liftEl.getBoundingClientRect();
     const canvasRect = canvas.getBoundingClientRect();
-    // Borde inferior del campo en el espacio interno del canvas (390×844).
-    const elBottom = (elRect.bottom - canvasRect.top) / scale;
+    // Borde inferior de referencia en el espacio interno del canvas (390×844).
+    const refBottom = (refRect.bottom - canvasRect.top) / scale;
+    const marginAttr = liftEl.dataset.kbMargin ?? el.dataset.kbMargin;
+    const margin = marginAttr != null ? Number(marginAttr) : LIFT_MARGIN;
     const kbTop = CANVAS_HEIGHT - PWA_KEYBOARD_HEIGHT;
-    setLift(Math.max(0, elBottom - (kbTop - LIFT_MARGIN)));
+    setLift(Math.max(0, refBottom - (kbTop - margin)));
   }, [canvasScale]);
 
   const restoreInputMode = useCallback(() => {

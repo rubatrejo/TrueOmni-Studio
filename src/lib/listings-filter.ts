@@ -18,6 +18,14 @@ export interface FilterState {
   venues?: readonly string[];
   /** Chip "Free" (solo Events) — gratis. `applyFilters` lo ignora. */
   free?: boolean;
+  /**
+   * Dificultades activas (multi-select, OR) — solo módulo Trails. `applyFilters`
+   * filtra por `listing.difficulty` (poblado por `trailToPwaListing`); los listings
+   * normales no tienen ese campo y nunca se ven afectados.
+   */
+  difficulties?: readonly string[];
+  /** Tipos de trail activos (multi-select, OR) — solo módulo Trails. Ver `difficulties`. */
+  trailTypes?: readonly string[];
 }
 
 /** Estado vacío por defecto. */
@@ -33,7 +41,9 @@ export function isFilterEmpty(f: FilterState): boolean {
     f.features.length === 0 &&
     f.subcategories.length === 0 &&
     f.priceRanges.length === 0 &&
-    !f.openNow
+    !f.openNow &&
+    (f.difficulties?.length ?? 0) === 0 &&
+    (f.trailTypes?.length ?? 0) === 0
   );
 }
 
@@ -79,6 +89,21 @@ export function applyFilters(
       return false;
     }
     if (filter.openNow && !isOpenNow(listing, now)) {
+      return false;
+    }
+    // Trails: dificultad y tipo (OR). Solo aplican si el listing trae esos campos.
+    if (
+      filter.difficulties &&
+      filter.difficulties.length > 0 &&
+      (listing.difficulty == null || !filter.difficulties.includes(listing.difficulty))
+    ) {
+      return false;
+    }
+    if (
+      filter.trailTypes &&
+      filter.trailTypes.length > 0 &&
+      (listing.trailType == null || !filter.trailTypes.includes(listing.trailType))
+    ) {
       return false;
     }
     return true;

@@ -88,6 +88,8 @@
   "map_chip_eat": "Manger",
   "map_chip_stay": "Séjour",
   "map_chip_events": "Événements",
+  "survey_start": "COMMENCER",
+  "survey_done": "TERMINÉ",
   "survey_back": "RETOUR",
   "survey_next": "SUIVANT",
   "survey_send": "ENVOYER",

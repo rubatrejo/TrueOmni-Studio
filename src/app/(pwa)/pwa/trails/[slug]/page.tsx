@@ -8,18 +8,18 @@ import { buildPwaListingDetail } from '@/lib/pwa-listing-detail';
 export const dynamic = 'force-dynamic';
 
 /**
- * Map — detalle de un listing agregado (`/pwa/map/[module]/[slug]`). Reutiliza la
- * pantalla de detalle de listings con `basePath`/`backHref` = "/pwa/map" para que el
- * back vuelva al mapa. El armado por módulo vive en `buildPwaListingDetail`.
+ * Trails — detalle (#4–#7). Reutiliza `ListingsDetailScreen` con el panel
+ * Considerations + el mapa de 2 tabs (mapa normal / ruta GeoJSON), armados en
+ * `buildPwaListingDetail` (rama 'trails'). Sin acción de hero ni horario.
  */
-export default async function PwaMapDetailPage({
+export default async function PwaTrailDetailPage({
   params,
 }: {
-  params: Promise<{ module: string; slug: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { module: moduleSlug, slug } = await params;
+  const { slug } = await params;
   const config = await getConfig();
-  const data = buildPwaListingDetail(config, moduleSlug, slug);
+  const data = buildPwaListingDetail(config, 'trails', slug);
   if (!data) notFound();
 
   return (
@@ -30,9 +30,8 @@ export default async function PwaMapDetailPage({
         heroPrimaryAction={data.heroPrimaryAction}
         considerations={data.considerations}
         trailMap={data.trailMap}
-        basePath="/pwa/map"
-        backHref="/pwa/map"
-        navActive="map"
+        basePath="/pwa/trails"
+        backHref="/pwa/trails/list"
         mapboxToken={config.integraciones?.mapbox_token}
       />
     </MobileCanvas>

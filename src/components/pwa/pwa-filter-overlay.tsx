@@ -14,8 +14,10 @@ const OPEN_SANS = 'var(--font-open-sans)';
 export interface FilterTexts {
   title: string;
   features: string;
-  category: string;
-  priceRange: string;
+  /** Título de "Category" — opcional (Trails no lo usa: subcats van en el grid). */
+  category?: string;
+  /** Título de "Price Range" — opcional; si falta, la sección no se muestra (Trails). */
+  priceRange?: string;
   /** Sección "Availability" — opcional (listings/map la usan; Events no). */
   availability?: string;
   /** Pill "Open Now" — opcional; si falta, la sección Availability no se muestra. */
@@ -24,6 +26,10 @@ export interface FilterTexts {
   venue?: string;
   /** Pill "Free" dentro de Price Range — opcional (solo Events). */
   free?: string;
+  /** Título de la sección "Difficulty" — opcional (solo Trails). */
+  difficulty?: string;
+  /** Título de la sección "Trail Type" — opcional (solo Trails). */
+  trailType?: string;
   clearAll: string;
   apply: string;
 }
@@ -40,6 +46,8 @@ export function PwaFilterOverlay({
   features,
   subcategories,
   venues = [],
+  difficulties = [],
+  trailTypes = [],
   initial,
   texts,
   onCancel,
@@ -50,6 +58,10 @@ export function PwaFilterOverlay({
   subcategories: string[];
   /** Pool de venues (solo Events; vacío en listings/map → sección oculta). */
   venues?: string[];
+  /** Pool de dificultades (solo Trails; vacío → sección oculta). */
+  difficulties?: string[];
+  /** Pool de tipos de trail (solo Trails; vacío → sección oculta). */
+  trailTypes?: string[];
   initial: FilterState;
   texts: FilterTexts;
   onCancel: () => void;
@@ -91,6 +103,16 @@ export function PwaFilterOverlay({
       return { ...d, venues: cur.includes(v) ? cur.filter((x) => x !== v) : [...cur, v] };
     });
   const toggleFree = () => setDraft((d) => ({ ...d, free: !d.free }));
+  const toggleDifficulty = (v: string) =>
+    setDraft((d) => {
+      const cur = d.difficulties ?? [];
+      return { ...d, difficulties: cur.includes(v) ? cur.filter((x) => x !== v) : [...cur, v] };
+    });
+  const toggleTrailType = (v: string) =>
+    setDraft((d) => {
+      const cur = d.trailTypes ?? [];
+      return { ...d, trailTypes: cur.includes(v) ? cur.filter((x) => x !== v) : [...cur, v] };
+    });
 
   return (
     <div role="dialog" aria-modal="true" className="absolute inset-0 z-50">
@@ -154,13 +176,39 @@ export function PwaFilterOverlay({
           </Section>
 
           {subcategories.length > 0 && (
-            <Section title={texts.category}>
+            <Section title={texts.category ?? ''}>
               {subcategories.map((s) => (
                 <Pill
                   key={s}
                   label={s}
                   active={draft.subcategories.includes(s)}
                   onClick={() => toggleSub(s)}
+                />
+              ))}
+            </Section>
+          )}
+
+          {texts.difficulty && difficulties.length > 0 && (
+            <Section title={texts.difficulty}>
+              {difficulties.map((d) => (
+                <Pill
+                  key={d}
+                  label={d}
+                  active={(draft.difficulties ?? []).includes(d)}
+                  onClick={() => toggleDifficulty(d)}
+                />
+              ))}
+            </Section>
+          )}
+
+          {texts.trailType && trailTypes.length > 0 && (
+            <Section title={texts.trailType}>
+              {trailTypes.map((t) => (
+                <Pill
+                  key={t}
+                  label={t}
+                  active={(draft.trailTypes ?? []).includes(t)}
+                  onClick={() => toggleTrailType(t)}
                 />
               ))}
             </Section>
@@ -179,17 +227,19 @@ export function PwaFilterOverlay({
             </Section>
           )}
 
-          <Section title={texts.priceRange}>
-            {texts.free && <Pill label={texts.free} active={!!draft.free} onClick={toggleFree} />}
-            {([1, 2, 3, 4] as const).map((p) => (
-              <Pill
-                key={p}
-                label={'$'.repeat(p)}
-                active={draft.priceRanges.includes(p)}
-                onClick={() => togglePrice(p)}
-              />
-            ))}
-          </Section>
+          {texts.priceRange && (
+            <Section title={texts.priceRange}>
+              {texts.free && <Pill label={texts.free} active={!!draft.free} onClick={toggleFree} />}
+              {([1, 2, 3, 4] as const).map((p) => (
+                <Pill
+                  key={p}
+                  label={'$'.repeat(p)}
+                  active={draft.priceRanges.includes(p)}
+                  onClick={() => togglePrice(p)}
+                />
+              ))}
+            </Section>
+          )}
 
           {texts.openNow && (
             <Section title={texts.availability ?? ''}>

@@ -88,6 +88,8 @@
   "map_chip_eat": "Comer",
   "map_chip_stay": "Hospedagem",
   "map_chip_events": "Eventos",
+  "survey_start": "COMEÇAR",
+  "survey_done": "CONCLUÍDO",
   "survey_back": "VOLTAR",
   "survey_next": "PRÓXIMO",
   "survey_send": "ENVIAR",

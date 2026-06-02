@@ -46,6 +46,8 @@
     "map_chip_eat": "Eat",
     "map_chip_stay": "Stay",
     "map_chip_events": "Events",
+    "survey_start": "START",
+    "survey_done": "DONE",
     "survey_back": "BACK",
     "survey_next": "NEXT",
     "survey_send": "SEND",
@@ -403,7 +405,7 @@
           {
             "id": "nps",
             "type": "nps",
-            "prompt": "How likely are you to recommend this kiosk?",
+            "prompt": "How likely are you\nto recommend this kiosk?",
             "subtitle": "Your honest rating helps us improve the experience for every visitor.",
             "labels": {
               "low": "Not at all likely",
@@ -8147,7 +8149,7 @@
               "headline": "Glow Up for Less!",
               "subtitle": "Loyalty Week Exclusive",
               "longDescription": "As a thank-you to our loyalty members, enjoy 15% off all beauty essentials for one week only. Code: BEAUTY15. Valid online and in-store.",
-              "cover": "https://images.unsplash.com/photo-1522335789203-aaa95c1cb28a?w=900&q=80",
+              "cover": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=900&q=80",
               "expiresAt": "2026-06-06",
               "originalPrice": "$74.99",
               "promoCode": "BEAUTY15",
@@ -10212,6 +10214,30 @@
         "viewWebsite": "View Website",
         "activitiesEmpty": "Activities coming soon."
       },
+      "deals": {
+        "title": "Deals",
+        "searchPlaceholder": "Search deals",
+        "expiresPrefix": "EXPIRES",
+        "empty": "No deals available right now.",
+        "redeem": {
+          "useCode": "USE CODE",
+          "viewOffer": "View Offer",
+          "share": "Share"
+        },
+        "sort": {
+          "title": "Sort By",
+          "expiringSoon": "Expiring Soon",
+          "recent": "Recently Added",
+          "alphabetical": "A – Z",
+          "bestDiscount": "Best Discount"
+        },
+        "filters": {
+          "title": "Filters",
+          "features": "Features",
+          "clearAll": "CLEAR ALL",
+          "apply": "APPLY"
+        }
+      },
       "map": {
         "title": "Map",
         "tabs": {
@@ -10241,6 +10267,11 @@
             "key": "events",
             "source": "events",
             "label": "Events"
+          },
+          {
+            "key": "trails",
+            "source": "trails",
+            "label": "Trails"
           }
         ],
         "filters": {
@@ -10277,6 +10308,96 @@
           "venue": "Venue",
           "priceRange": "Price Range",
           "free": "Free",
+          "clearAll": "CLEAR ALL",
+          "apply": "APPLY"
+        }
+      },
+      "tickets": {
+        "title": "Tickets",
+        "searchPlaceholder": "Search in your city",
+        "locationLabel": "Street Address, City, State",
+        "emptyState": "No tickets for this day.",
+        "detail": {
+          "eyebrow": "TICKET",
+          "call": "Call",
+          "website": "Website",
+          "addFavorite": "Add Favorite",
+          "removeFavorite": "Remove Favorite",
+          "seeDirections": "See Directions",
+          "description": "Description",
+          "buyTicket": "BUY TICKET"
+        },
+        "filters": {
+          "title": "Filters",
+          "features": "Features",
+          "category": "Category",
+          "venue": "Venue",
+          "priceRange": "Price Range",
+          "free": "Free",
+          "clearAll": "CLEAR ALL",
+          "apply": "APPLY"
+        }
+      },
+      "trails": {
+        "title": "Trails",
+        "searchPlaceholder": "Search trails in your city",
+        "resultsLabel": "{count} RESULTS",
+        "distanceSuffix": "mi away",
+        "tabs": {
+          "listings": "Trails",
+          "map": "Map"
+        },
+        "categories": [
+          {
+            "key": "mountain",
+            "label": "Mountain",
+            "image": "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "desert",
+            "label": "Desert",
+            "image": "https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "canyon",
+            "label": "Canyon",
+            "image": "https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?w=600&auto=format&fit=crop&q=80"
+          },
+          {
+            "key": "urban",
+            "label": "Urban",
+            "image": "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&auto=format&fit=crop&q=80"
+          }
+        ],
+        "detail": {
+          "eyebrow": "TRAIL",
+          "call": "Call",
+          "website": "Website",
+          "addFavorite": "Add to Favorites",
+          "removeFavorite": "Remove from Favorites",
+          "seeDirections": "GET DIRECTIONS",
+          "description": "Description",
+          "mapTabs": {
+            "default": "Default Map",
+            "trail": "Trail Map"
+          },
+          "considerations": {
+            "title": "Considerations",
+            "distance": "Distance",
+            "difficulty": "Difficulty",
+            "duration": "Duration",
+            "elevation": "Elevation Gain",
+            "type": "Trail Type",
+            "dogFriendly": "Dog Friendly",
+            "dogYes": "Yes",
+            "dogNo": "No"
+          }
+        },
+        "filters": {
+          "title": "Filters",
+          "features": "Features",
+          "difficulty": "Difficulty",
+          "trailType": "Trail Type",
           "clearAll": "CLEAR ALL",
           "apply": "APPLY"
         }
@@ -10327,6 +10448,10 @@
           {
             "key": "my-favorites",
             "label": "My Favorites"
+          },
+          {
+            "key": "survey",
+            "label": "Survey"
           },
           {
             "key": "connect-with-us",

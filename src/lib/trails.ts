@@ -72,3 +72,18 @@ export function trailToListing(trail: Trail): Listing {
     directions: trail.directions,
   };
 }
+
+/**
+ * Variante del adapter para la PWA: igual que `trailToListing` pero pobla
+ * `difficulty` y `trailType` para que el overlay de filtros de la PWA
+ * (`applyFilters`) pueda filtrar por las secciones Difficulty / Trail Type.
+ * `slug` es overrideable para el mapa agregado (uid `source__slug`).
+ */
+export function trailToPwaListing(trail: Trail, slug: string = trail.slug): Listing {
+  return {
+    ...trailToListing(trail),
+    slug,
+    difficulty: trail.considerations.difficulty,
+    trailType: trail.considerations.trailType,
+  };
+}

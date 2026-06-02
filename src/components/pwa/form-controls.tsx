@@ -10,30 +10,43 @@ export function RadioRow({
   selected,
   label,
   onSelect,
+  compact = false,
 }: {
   selected: boolean;
   label: string;
   onSelect: () => void;
+  /** Variante reducida (~20% menor) — usada por el Survey de la PWA. */
+  compact?: boolean;
 }) {
+  const box = compact ? 18 : 22;
+  const dot = compact ? 9 : 11;
   return (
     <button
       type="button"
       role="radio"
       aria-checked={selected}
       onClick={onSelect}
-      className="flex w-full items-center gap-4 py-3 text-left"
+      className={`flex w-full items-center text-left ${compact ? 'gap-3 py-2.5' : 'gap-4 py-3'}`}
     >
       <span
-        className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border-2"
+        className="flex shrink-0 items-center justify-center rounded-full border-2"
         style={{
+          width: box,
+          height: box,
           borderColor: selected ? 'hsl(var(--brand-primary))' : 'hsl(var(--foreground) / 0.35)',
         }}
       >
         {selected ? (
-          <span className="h-[11px] w-[11px] rounded-full bg-[hsl(var(--brand-primary))]" />
+          <span
+            className="rounded-full bg-[hsl(var(--brand-primary))]"
+            style={{ width: dot, height: dot }}
+          />
         ) : null}
       </span>
-      <span className="text-[hsl(var(--brand-primary))]" style={{ fontSize: 14, ...OPEN_SANS }}>
+      <span
+        className="text-[hsl(var(--brand-primary))]"
+        style={{ fontSize: compact ? 11 : 14, ...OPEN_SANS }}
+      >
         {label}
       </span>
     </button>
@@ -48,30 +61,36 @@ export function CheckboxRow({
   checked,
   label,
   onToggle,
+  compact = false,
 }: {
   checked: boolean;
   label: string;
   onToggle: () => void;
+  /** Variante reducida (~20% menor) — usada por el Survey de la PWA. */
+  compact?: boolean;
 }) {
+  const box = compact ? 18 : 22;
   return (
     <button
       type="button"
       role="checkbox"
       aria-checked={checked}
       onClick={onToggle}
-      className="flex w-full items-center gap-3 py-2 text-left"
+      className={`flex w-full items-center text-left ${compact ? 'gap-2.5 py-2' : 'gap-3 py-2'}`}
     >
       <span
-        className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[4px] border-2"
+        className="flex shrink-0 items-center justify-center rounded-[4px] border-2"
         style={{
+          width: box,
+          height: box,
           borderColor: 'hsl(var(--brand-primary))',
           backgroundColor: checked ? 'hsl(var(--brand-primary))' : 'transparent',
         }}
       >
         {checked ? (
           <svg
-            width={13}
-            height={13}
+            width={compact ? 11 : 13}
+            height={compact ? 11 : 13}
             viewBox="0 0 24 24"
             fill="none"
             stroke="#fff"
@@ -84,7 +103,10 @@ export function CheckboxRow({
           </svg>
         ) : null}
       </span>
-      <span className="text-[hsl(var(--brand-primary))]" style={{ fontSize: 14, ...OPEN_SANS }}>
+      <span
+        className="text-[hsl(var(--brand-primary))]"
+        style={{ fontSize: compact ? 11 : 14, ...OPEN_SANS }}
+      >
         {label}
       </span>
     </button>

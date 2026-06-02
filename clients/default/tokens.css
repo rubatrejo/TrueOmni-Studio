@@ -29,6 +29,7 @@
   --pwa-sheet-bg: 0 0% 100%; /* fondo de bottom sheets claros de la PWA (neutro) */
   --pwa-sheet-fg: 213 23% 12%; /* texto oscuro de títulos en sheets claros (neutro) */
   --pwa-events-pin: 36 91% 55%; /* #f5a623 — pin de ubicación (ámbar) del header de Events */
+  --pwa-deals-expiry: 66 41% 36%; /* ≈ #7a8236 — fecha de expiración (olive) de las cards de Deals, igual que el kiosk */
   --pwa-reader-bg: 240 5% 13%; /* ≈ #1f1f22 — fondo del visor de PDF (neutro, chrome del reader) */
   --pwa-reader-stage: 228 6% 17%; /* ≈ #28292d — stage oscuro tras la página del PDF (neutro) */
 

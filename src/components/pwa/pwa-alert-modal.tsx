@@ -15,6 +15,11 @@ interface PwaAlertModalProps {
   /** Link secundario opcional (ej. "Create Account"). */
   secondaryCta?: string;
   onSecondary?: () => void;
+  /**
+   * Escala del contenido del modal (1 = default, intacto para login/create-account).
+   * El survey lo invoca con 0.85 para un popup ~15% más compacto.
+   */
+  scale?: number;
 }
 
 /**
@@ -31,9 +36,30 @@ export function PwaAlertModal({
   onPrimary,
   secondaryCta,
   onSecondary,
+  scale = 1,
 }: PwaAlertModalProps) {
   useEscapeToClose(open, onClose);
   if (!open) return null;
+
+  // Dimensiones base (scale 1 = exactamente el modal original de login/create-account);
+  // el survey pasa scale 0.85 → contenido ~15% más pequeño. Inline para poder escalar.
+  const s = (n: number) => Math.round(n * scale);
+  const d = {
+    maxW: s(300),
+    pad: s(24),
+    badge: s(48),
+    badgeMb: s(16),
+    icon: s(26),
+    title: s(18),
+    titleMb: s(8),
+    body: s(14),
+    bodyLh: s(20),
+    bodyMb: s(20),
+    btnH: s(44),
+    btnFs: s(14),
+    secMt: s(12),
+    secFs: s(14),
+  };
 
   return (
     <div
@@ -49,18 +75,24 @@ export function PwaAlertModal({
         className="absolute inset-0 cursor-default bg-black/50 focus:outline-none"
         tabIndex={-1}
       />
-      <div className="relative w-full max-w-[300px] rounded-2xl bg-background p-6 text-center shadow-xl">
+      <div
+        className="relative w-full rounded-2xl bg-background text-center shadow-xl"
+        style={{ maxWidth: d.maxW, padding: d.pad }}
+      >
         {/* Badge de alerta, tokenizado a pwa-primary */}
         <div
-          className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full"
+          className="mx-auto flex items-center justify-center rounded-full"
           style={{
+            width: d.badge,
+            height: d.badge,
+            marginBottom: d.badgeMb,
             backgroundColor: 'hsl(var(--pwa-primary) / 0.12)',
             color: 'hsl(var(--pwa-primary))',
           }}
         >
           <svg
-            width={26}
-            height={26}
+            width={d.icon}
+            height={d.icon}
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -77,14 +109,19 @@ export function PwaAlertModal({
 
         <h2
           id="pwa-alert-title"
-          className="mb-2 font-bold text-foreground"
-          style={{ fontSize: 18, ...OPEN_SANS }}
+          className="font-bold text-foreground"
+          style={{ fontSize: d.title, marginBottom: d.titleMb, ...OPEN_SANS }}
         >
           {title}
         </h2>
         <p
-          className="mb-5 text-foreground/70"
-          style={{ fontSize: 14, lineHeight: '20px', ...OPEN_SANS }}
+          className="text-foreground/70"
+          style={{
+            fontSize: d.body,
+            lineHeight: `${d.bodyLh}px`,
+            marginBottom: d.bodyMb,
+            ...OPEN_SANS,
+          }}
         >
           {body}
         </p>
@@ -92,8 +129,8 @@ export function PwaAlertModal({
         <button
           type="button"
           onClick={onPrimary ?? onClose}
-          className="flex h-11 w-full items-center justify-center rounded-lg bg-[hsl(var(--pwa-primary))] font-bold uppercase text-white"
-          style={{ fontSize: 14, letterSpacing: 0.5 }}
+          className="flex w-full items-center justify-center rounded-lg bg-[hsl(var(--pwa-primary))] font-bold uppercase text-white"
+          style={{ height: d.btnH, fontSize: d.btnFs, letterSpacing: 0.5 }}
         >
           {primaryCta}
         </button>
@@ -101,8 +138,8 @@ export function PwaAlertModal({
           <button
             type="button"
             onClick={onSecondary}
-            className="mt-3 font-semibold text-[hsl(var(--pwa-primary))] underline"
-            style={{ fontSize: 14, ...OPEN_SANS }}
+            className="font-semibold text-[hsl(var(--pwa-primary))] underline"
+            style={{ fontSize: d.secFs, marginTop: d.secMt, ...OPEN_SANS }}
           >
             {secondaryCta}
           </button>

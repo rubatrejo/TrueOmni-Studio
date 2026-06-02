@@ -89,6 +89,8 @@
   "map_chip_eat": "Eat",
   "map_chip_stay": "Stay",
   "map_chip_events": "Events",
+  "survey_start": "START",
+  "survey_done": "DONE",
   "survey_back": "BACK",
   "survey_next": "NEXT",
   "survey_send": "SEND",

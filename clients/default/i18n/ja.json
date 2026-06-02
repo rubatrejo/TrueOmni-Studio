@@ -88,6 +88,8 @@
   "map_chip_eat": "食べる",
   "map_chip_stay": "泊まる",
   "map_chip_events": "イベント",
+  "survey_start": "開始",
+  "survey_done": "完了",
   "survey_back": "戻る",
   "survey_next": "次へ",
   "survey_send": "送信",

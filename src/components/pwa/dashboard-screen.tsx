@@ -202,6 +202,9 @@ export function DashboardScreen({
                 else if (t.key === 'map') router.push('/pwa/map');
                 else if (t.key === 'digital-brochure') router.push('/pwa/digital-brochure');
                 else if (t.key === 'social-wall') router.push('/pwa/social-wall');
+                else if (t.key === 'trails') router.push('/pwa/trails');
+                else if (t.key === 'deals') router.push('/pwa/deals');
+                else if (t.key === 'tickets') router.push('/pwa/tickets');
               }}
               className={`relative h-[125px] overflow-hidden rounded-[6px] bg-cover bg-center ${
                 t.wide ? 'col-span-2' : ''

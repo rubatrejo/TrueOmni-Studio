@@ -1,5 +1,6 @@
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { MoreScreen } from '@/components/pwa/more-screen';
+import { getClientSlug } from '@/lib/client-env';
 import { getConfig } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
@@ -14,6 +15,9 @@ const FALLBACK = {
 export default async function PwaMorePage() {
   const config = await getConfig();
   const more = config.features?.pwa?.more ?? FALLBACK;
+  // El Survey reusa el contenido del kiosk (`features.home.survey`) y se abre como
+  // popup desde el item "survey" del More (no navega a una ruta).
+  const survey = config.features?.home?.survey;
 
   return (
     <MobileCanvas>
@@ -21,6 +25,8 @@ export default async function PwaMorePage() {
         searchPlaceholder={more.searchPlaceholder}
         weatherText={more.weatherText}
         items={more.items}
+        survey={survey}
+        clientSlug={getClientSlug()}
       />
     </MobileCanvas>
   );

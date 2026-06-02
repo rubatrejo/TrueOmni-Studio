@@ -1,12 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
-import type { PwaMoreItem } from '@/lib/config';
+import type { PwaMoreItem, SurveyConfig } from '@/lib/config';
 
 import { PwaBottomNav } from './bottom-nav';
 import { InboxIcon, SearchIcon } from './dashboard-icons';
 import { Layer } from './mobile-layer';
+import { PwaSurveyOverlay } from './pwa-survey-overlay';
 
 const BRAND = 'hsl(var(--brand-primary))';
 const OLIVE = 'hsl(var(--brand-tertiary))';
@@ -21,12 +23,19 @@ const ITEM_HREF: Record<string, string> = {
   'my-profile': '/pwa/profile',
   help: '/pwa/help',
   'digital-brochure': '/pwa/digital-brochure',
+  'interactive-trails': '/pwa/trails',
+  deals: '/pwa/deals',
+  tickets: '/pwa/tickets',
 };
 
 interface MoreScreenProps {
   searchPlaceholder: string;
   weatherText: string;
   items: PwaMoreItem[];
+  /** Config del Survey (reusa `features.home.survey`); si falta/disabled, el item no abre. */
+  survey?: SurveyConfig;
+  /** Slug del cliente activo (para el payload del resultado del survey). */
+  clientSlug?: string;
 }
 
 /**
@@ -37,8 +46,26 @@ interface MoreScreenProps {
  * centrados (16px) + bottom nav con "more" activo. White-label: textos e items
  * desde `config.features.pwa.more`; colores por token.
  */
-export function MoreScreen({ searchPlaceholder, weatherText, items }: MoreScreenProps) {
+export function MoreScreen({
+  searchPlaceholder,
+  weatherText,
+  items,
+  survey,
+  clientSlug,
+}: MoreScreenProps) {
   const router = useRouter();
+  const [surveyOpen, setSurveyOpen] = useState(false);
+
+  /** Survey abre como popup (no navega); el resto usa `ITEM_HREF`. */
+  const handleItem = (key: string) => {
+    if (key === 'survey') {
+      if (survey?.enabled) setSurveyOpen(true);
+      return;
+    }
+    const href = ITEM_HREF[key];
+    if (href) router.push(href);
+  };
+
   return (
     <div className="flex h-full w-full flex-col bg-background">
       {/* Header: search bar + inbox */}
@@ -75,24 +102,30 @@ export function MoreScreen({ searchPlaceholder, weatherText, items }: MoreScreen
 
       {/* Lista de accesos (centrados, spacing 52 del XD) */}
       <div className="scrollbar-hide flex-1 overflow-y-auto bg-background">
-        {items.map((it) => {
-          const href = ITEM_HREF[it.key];
-          return (
-            <button
-              key={it.key}
-              type="button"
-              onClick={() => href && router.push(href)}
-              className="flex h-[54px] w-full items-center justify-center text-foreground"
-              style={{ fontSize: 16, ...OPEN_SANS }}
-            >
-              {it.label}
-            </button>
-          );
-        })}
+        {items.map((it) => (
+          <button
+            key={it.key}
+            type="button"
+            onClick={() => handleItem(it.key)}
+            className="flex h-[54px] w-full items-center justify-center text-foreground"
+            style={{ fontSize: 16, ...OPEN_SANS }}
+          >
+            {it.label}
+          </button>
+        ))}
       </div>
 
       {/* Bottom nav fijo, "more" activo */}
       <PwaBottomNav active="more" />
+
+      {/* Survey popup (reusa `features.home.survey`) */}
+      {surveyOpen && survey ? (
+        <PwaSurveyOverlay
+          config={survey}
+          clientSlug={clientSlug ?? 'default'}
+          onClose={() => setSurveyOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }

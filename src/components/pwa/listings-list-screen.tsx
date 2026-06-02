@@ -31,6 +31,10 @@ interface Props {
   /** Pools del filtro. */
   features: string[];
   subcategories: string[];
+  /** Pool de dificultades (solo Trails; default vacío → sección oculta). */
+  difficulties?: string[];
+  /** Pool de tipos de trail (solo Trails; default vacío → sección oculta). */
+  trailTypes?: string[];
   filterTexts: FilterTexts;
   origin?: { lat: number; lng: number };
   mapboxToken?: string;
@@ -58,6 +62,8 @@ export function ListingsListScreen({
   listings,
   features,
   subcategories,
+  difficulties = [],
+  trailTypes = [],
   filterTexts,
   origin,
   mapboxToken,
@@ -222,6 +228,8 @@ export function ListingsListScreen({
         open={filterOpen}
         features={features}
         subcategories={subcategories}
+        difficulties={difficulties}
+        trailTypes={trailTypes}
         initial={filter}
         texts={filterTexts}
         onCancel={() => setFilterOpen(false)}

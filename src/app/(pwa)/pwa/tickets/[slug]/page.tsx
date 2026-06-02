@@ -8,18 +8,19 @@ import { buildPwaListingDetail } from '@/lib/pwa-listing-detail';
 export const dynamic = 'force-dynamic';
 
 /**
- * Map — detalle de un listing agregado (`/pwa/map/[module]/[slug]`). Reutiliza la
- * pantalla de detalle de listings con `basePath`/`backHref` = "/pwa/map" para que el
- * back vuelva al mapa. El armado por módulo vive en `buildPwaListingDetail`.
+ * Tickets — detalle de un ticket (`/pwa/tickets/[slug]`). Reutiliza la pantalla de
+ * detalle de Events (fila de fecha/hora) con el CTA "BUY TICKET · {precio}" que abre
+ * `ticket.purchaseUrl`; el armado vive en `buildPwaListingDetail` (rama tickets). El
+ * back vuelve a la timeline (`/pwa/tickets`). Bottom nav sin celda activa.
  */
-export default async function PwaMapDetailPage({
+export default async function PwaTicketDetailPage({
   params,
 }: {
-  params: Promise<{ module: string; slug: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { module: moduleSlug, slug } = await params;
+  const { slug } = await params;
   const config = await getConfig();
-  const data = buildPwaListingDetail(config, moduleSlug, slug);
+  const data = buildPwaListingDetail(config, 'tickets', slug);
   if (!data) notFound();
 
   return (
@@ -28,11 +29,8 @@ export default async function PwaMapDetailPage({
         detail={data.detail}
         texts={data.texts}
         heroPrimaryAction={data.heroPrimaryAction}
-        considerations={data.considerations}
-        trailMap={data.trailMap}
-        basePath="/pwa/map"
-        backHref="/pwa/map"
-        navActive="map"
+        basePath="/pwa/tickets"
+        backHref="/pwa/tickets"
         mapboxToken={config.integraciones?.mapbox_token}
       />
     </MobileCanvas>

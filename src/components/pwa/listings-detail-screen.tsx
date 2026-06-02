@@ -6,11 +6,13 @@ import { useRef, useState } from 'react';
 import { MapboxMap } from '@/components/listings/mapbox-map';
 import { useEscapeToClose } from '@/components/listings/use-escape-to-close';
 import { resolveAssetUrl } from '@/lib/asset-url';
-import type { DayOpen } from '@/lib/config';
+import type { DayOpen, TrailConsiderations } from '@/lib/config';
 
 import { PwaBottomNav, type PwaNavKey } from './bottom-nav';
 import { S } from './mobile-layer';
+import { PwaConsiderations, type ConsiderationsLabels } from './pwa-considerations';
 import { PwaHeart } from './pwa-heart';
+import { PwaTrailMap, type PwaTrailMapData } from './pwa-trail-map';
 
 const BRAND = 'hsl(var(--brand-primary))';
 const PWA = 'hsl(var(--pwa-primary))';
@@ -129,6 +131,8 @@ export function ListingsDetailScreen({
   navActive,
   mapboxToken,
   backHref,
+  considerations,
+  trailMap,
 }: {
   detail: ListingDetail;
   texts: ListingDetailTexts;
@@ -140,6 +144,16 @@ export function ListingsDetailScreen({
   mapboxToken?: string;
   /** Fallback del back cuando no hay historial (default `${basePath}/list`). */
   backHref?: string;
+  /**
+   * Panel "Considerations" — solo módulo Trails. Si está, se renderiza tras la
+   * fila de dirección. Ausente en el resto de módulos.
+   */
+  considerations?: { data: TrailConsiderations; labels: ConsiderationsLabels };
+  /**
+   * Mapa de 2 tabs (mapa normal / ruta GeoJSON) — solo módulo Trails. Si está,
+   * sustituye el `MapboxMap` simple del detalle. Ausente = mapa simple (default).
+   */
+  trailMap?: { data: PwaTrailMapData; defaultLabel: string; trailLabel: string };
 }) {
   const router = useRouter();
   const [fav, setFav] = useState(false);
@@ -410,15 +424,25 @@ export function ListingsDetailScreen({
           </button>
         )}
 
-        {/* Mapa */}
-        <MapboxMap
-          token={mapboxToken}
-          coords={detail.coords}
-          interactive
-          pinScale={0.6}
-          className="w-full"
-          style={{ height: 150 }}
-        />
+        {/* Mapa — Trails: 2 tabs (mapa / ruta GeoJSON); resto: pin simple */}
+        {trailMap ? (
+          <PwaTrailMap
+            data={trailMap.data}
+            token={mapboxToken}
+            defaultLabel={trailMap.defaultLabel}
+            trailLabel={trailMap.trailLabel}
+            title={detail.title}
+          />
+        ) : (
+          <MapboxMap
+            token={mapboxToken}
+            coords={detail.coords}
+            interactive
+            pinScale={0.6}
+            className="w-full"
+            style={{ height: 150 }}
+          />
+        )}
 
         {/* Dirección + Directions */}
         <div
@@ -435,6 +459,11 @@ export function ListingsDetailScreen({
             {texts.seeDirections}
           </button>
         </div>
+
+        {/* Considerations (solo Trails) */}
+        {considerations && (
+          <PwaConsiderations considerations={considerations.data} labels={considerations.labels} />
+        )}
 
         {/* Descripción */}
         <div className="px-[18px] py-4">

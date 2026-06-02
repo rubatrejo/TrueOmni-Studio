@@ -367,6 +367,14 @@ export interface Listing {
   diningGuideUrl?: string;
   /** Fotos extra para el slideshow del hero (PWA). Opcional. */
   gallery?: string[];
+  /**
+   * Dificultad del trail — solo presente cuando el listing proviene del adapter
+   * de Trails (`trailToPwaListing`). Habilita la sección "Difficulty" del filtro
+   * de la PWA; los listings normales lo dejan `undefined` y no se ven afectados.
+   */
+  difficulty?: string;
+  /** Tipo de trail (Loop / Out & Back / Point to Point) — ver `difficulty`. */
+  trailType?: string;
 }
 
 /** Módulo de listings parametrizado por cliente (Restaurants, Things to Do, Stay). */
@@ -1164,6 +1172,69 @@ export interface PwaConfig {
   digitalBrochure?: PwaDigitalBrochureModuleConfig;
   /** Módulo Social Wall (muro masonry; data en home.modules['social-wall']). */
   socialWall?: PwaSocialWallModuleConfig;
+  /** Módulo Trails (grid + lista + mapa + detalle; data en home.modules.trails). */
+  trails?: PwaTrailsModuleConfig;
+  /** Módulo Deals (grid de cupones + sheet de canje; data en home.modules.deals). */
+  deals?: PwaDealsModuleConfig;
+  /** Módulo Tickets (timeline + WeekPicker; data en home.modules.events con `ticket`). */
+  tickets?: PwaTicketsModuleConfig;
+}
+
+/**
+ * Textos UI del módulo Trails en la PWA (white-label). La data de los trails
+ * (coords, considerations, trailMap GeoJSON…) se reutiliza del kiosk en
+ * `home.modules.trails`; aquí solo viven las cadenas de interfaz por cliente.
+ *
+ * Mismo flujo de 3 niveles que los listings (grid de subcategorías → lista +
+ * mapa con filtros → detalle), pero el detalle añade el panel "Considerations"
+ * y un mapa de 2 tabs (mapa normal / ruta GeoJSON), igual que el kiosk.
+ */
+export interface PwaTrailsModuleConfig {
+  /** Título del header. */
+  title: string;
+  /** Placeholder del buscador del grid. */
+  searchPlaceholder: string;
+  /** Plantilla del contador de resultados (soporta `{count}`). */
+  resultsLabel: string;
+  /** Sufijo de distancia en las filas ("mi away"). */
+  distanceSuffix: string;
+  /** Labels de los tabs Listings / Map. */
+  tabs: { listings: string; map: string };
+  /** Tiles del grid de subcategorías (#1). */
+  categories: PwaListingCategory[];
+  /** Labels de la pantalla de detalle. */
+  detail: {
+    eyebrow: string; // "TRAIL"
+    call: string;
+    website: string;
+    addFavorite: string;
+    removeFavorite: string;
+    seeDirections: string;
+    description: string; // título "Description"
+    /** Labels de los tabs del mapa del detalle. */
+    mapTabs: { default: string; trail: string };
+    /** Panel "Considerations". */
+    considerations: {
+      title: string;
+      distance: string;
+      difficulty: string;
+      duration: string;
+      elevation: string;
+      type: string;
+      dogFriendly: string;
+      dogYes: string;
+      dogNo: string;
+    };
+  };
+  /** Pantalla de filtros (Features AND + Difficulty OR + Trail Type OR). */
+  filters: {
+    title: string;
+    features: string;
+    difficulty: string;
+    trailType: string;
+    clearAll: string;
+    apply: string;
+  };
 }
 
 /** Una categoría agregada por el módulo Maps (chip + fuente de listings). */
@@ -1252,6 +1323,41 @@ export interface PwaEventsModuleConfig {
 }
 
 /**
+ * Textos UI del módulo Tickets en la PWA. Tickets ⊂ Events: reutiliza la data de
+ * `home.modules.events` (los `EventItem` con campo `ticket`). Igual que
+ * `PwaEventsModuleConfig` pero el detalle usa `buyTicket` (abre `ticket.purchaseUrl`
+ * con el precio) en vez de `getTickets`. La pantalla añade el WeekPicker (selector
+ * de día). Los labels del WeekPicker se derivan de la fecha (no van en config).
+ */
+export interface PwaTicketsModuleConfig {
+  title: string;
+  searchPlaceholder: string;
+  locationLabel: string;
+  /** Texto cuando el día seleccionado no tiene tickets. */
+  emptyState: string;
+  detail: {
+    eyebrow: string; // "TICKET"
+    call: string;
+    website: string;
+    addFavorite: string;
+    removeFavorite: string;
+    seeDirections: string;
+    description: string;
+    buyTicket: string; // botón "BUY TICKET" (se concatena con el precio)
+  };
+  filters: {
+    title: string;
+    features: string;
+    category: string;
+    venue: string;
+    priceRange: string;
+    free: string;
+    clearAll: string;
+    apply: string;
+  };
+}
+
+/**
  * Textos UI del módulo Social Wall en la PWA (white-label). La data del muro
  * (hero, hashtag, handles, highlights, posts) se reutiliza del kiosk en
  * `home.modules['social-wall']`; aquí solo viven las cadenas de interfaz.
@@ -1309,6 +1415,47 @@ export interface PwaPassesModuleConfig {
   viewWebsite: string;
   /** Texto cuando el pass no tiene actividades (ej. "Activities coming soon."). */
   activitiesEmpty: string;
+}
+
+/**
+ * Módulo Deals de la PWA — grid de cupones + overlay de canje. Textos UI; la data
+ * (cupones) se reutiliza del kiosk en `home.modules.deals`. Réplica mobile del
+ * módulo Deals del kiosk adaptada: 2 columnas, canje como sheet, Share nativo y
+ * botón "View Offer" en vez de QR.
+ */
+export interface PwaDealsModuleConfig {
+  /** Título del grid y header (ej. "Deals"). */
+  title: string;
+  /** Placeholder de la barra de búsqueda inline. */
+  searchPlaceholder: string;
+  /** Prefijo de la fecha de expiración en las cards y el hero (ej. "EXPIRES"). */
+  expiresPrefix: string;
+  /** Texto cuando no hay deals visibles. */
+  empty: string;
+  /** Textos del overlay de canje. */
+  redeem: {
+    /** Etiqueta del pill de código promocional (ej. "USE CODE"). */
+    useCode: string;
+    /** CTA primario que abre `qrUrl` (ej. "View Offer"). */
+    viewOffer: string;
+    /** Etiqueta del botón de compartir (ej. "Share"). */
+    share: string;
+  };
+  /** Labels de las 4 opciones de orden (mismo set que el kiosk). */
+  sort: {
+    title: string;
+    expiringSoon: string;
+    recent: string;
+    alphabetical: string;
+    bestDiscount: string;
+  };
+  /** Labels del overlay de filtros (solo sección Features). */
+  filters: {
+    title: string;
+    features: string;
+    clearAll: string;
+    apply: string;
+  };
 }
 
 /** Notificación seed (mock). El estado read/deleted vive client-side. */

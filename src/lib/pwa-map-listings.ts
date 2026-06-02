@@ -4,6 +4,7 @@ import { isListingsModule } from '@/lib/itinerary-tabs';
 import { haversineMi } from '@/lib/listings-sort';
 import type { MapItem } from '@/lib/map-item';
 import { eventDateLabel } from '@/lib/map-open-today';
+import { trailToPwaListing } from '@/lib/trails';
 
 /** "City, ST" derivado de la dirección (igual que los list pages de listings). */
 function cityStateOf(address: string): string {
@@ -97,6 +98,44 @@ export function getPwaMapData(config: KioskConfig): {
           dateLabel: eventDateLabel(e),
           priceMode: e.priceMode,
           priceRange: e.priceBand,
+        });
+      }
+      continue;
+    }
+
+    // Trails: módulo `kind: 'trails'` (no listings). Adapta cada Trail a Listing
+    // crudo (con difficulty/trailType para `applyFilters`) + ListingItem + MapItem
+    // (pin/color/ícono canónico de la source 'trails').
+    if (mod.kind === 'trails') {
+      for (const tr of mod.trails) {
+        const id = uid(cat.source, tr.slug);
+        listings.push(trailToPwaListing(tr, id));
+        for (const f of tr.features) featureSet.add(f);
+        items.push({
+          slug: id,
+          title: tr.title,
+          subcategory: tr.subcategory,
+          image: tr.image,
+          coords: tr.coords,
+          distanceMi: origin ? haversineMi(origin, tr.coords) : 0,
+          cityState: cityStateOf(tr.address),
+          openUntil: '',
+          moduleSlug: cat.source,
+          detailSlug: tr.slug,
+        });
+        mapItems.push({
+          source: 'trails',
+          moduleSlug: cat.source,
+          slug: id,
+          title: tr.title,
+          subcategory: tr.subcategory,
+          image: tr.image,
+          coords: tr.coords,
+          address: tr.address,
+          phone: tr.phone,
+          features: tr.features,
+          popularity: tr.popularity,
+          hours: tr.hours,
         });
       }
       continue;

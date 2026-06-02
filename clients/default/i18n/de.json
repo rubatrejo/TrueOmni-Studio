@@ -88,6 +88,8 @@
   "map_chip_eat": "Essen",
   "map_chip_stay": "Hotels",
   "map_chip_events": "Events",
+  "survey_start": "STARTEN",
+  "survey_done": "FERTIG",
   "survey_back": "ZURÜCK",
   "survey_next": "WEITER",
   "survey_send": "SENDEN",

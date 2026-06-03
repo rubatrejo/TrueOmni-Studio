@@ -65,6 +65,7 @@ interface TaskCheckinProps {
   config: PwaScavengerHuntConfig;
   totalTasks: number;
   mapboxToken?: string;
+  clientName: string;
 }
 
 /**
@@ -78,6 +79,7 @@ export function TaskCheckin({
   config,
   totalTasks,
   mapboxToken,
+  clientName,
 }: TaskCheckinProps) {
   const [mapMode, setMapMode] = useState(false);
   const [completed, setCompleted] = useState(false);
@@ -122,12 +124,27 @@ export function TaskCheckin({
         task={task}
         config={config}
         variant="checkin"
+        clientName={clientName}
       />
     );
   }
 
   // Map GPS mode
   if (mapMode) {
+    const mapItems: MapItem[] = [
+      {
+        slug: task.slug,
+        source: 'things-to-do' as MapItem['source'],
+        moduleSlug: 'scavenger-hunt',
+        title: task.name,
+        subcategory: task.type,
+        image: task.image,
+        coords: { lat: task.coords.lat, lng: task.coords.lng },
+        address: task.address ?? '',
+        features: [],
+        popularity: 0,
+      },
+    ];
     return (
       <div className="relative flex h-full w-full flex-col bg-gray-100">
         {/* Header */}
@@ -148,55 +165,70 @@ export function TaskCheckin({
           </div>
         </div>
 
-        {/* Map placeholder with geofence indicator */}
-        <div className="flex flex-1 flex-col items-center justify-center px-6">
-          {/* Geofence circle */}
-          <div
-            className="mb-6 flex h-[120px] w-[120px] items-center justify-center rounded-full border-[3px]"
-            style={{
-              borderColor: isNear ? '#43a047' : 'hsl(var(--brand-primary))',
-              backgroundColor: isNear
-                ? 'hsl(120 40% 50% / 0.15)'
-                : 'hsl(var(--brand-primary) / 0.1)',
-            }}
-          >
+        {/* Mapa real full-bleed + geofence + banner inferior (verbatim #10) */}
+        <div className="relative flex-1 overflow-hidden">
+          {mapboxToken ? (
+            <MapCanvas
+              token={mapboxToken}
+              items={mapItems}
+              center={task.coords}
+              zoom={14}
+              selectedSlug={null}
+              onSelect={() => {}}
+              cluster={false}
+              pinScale={0.5}
+              className="h-full w-full"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-[13px] text-gray-400">
+              Map unavailable
+            </div>
+          )}
+
+          {/* Geofence circle (centrado sobre el destino) */}
+          <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <div
-              className="h-[14px] w-[14px] rounded-full"
-              style={{ backgroundColor: 'hsl(var(--brand-primary))' }}
+              className="h-[150px] w-[150px] rounded-full border-[3px]"
+              style={{
+                borderColor: isNear ? '#43a047' : 'hsl(var(--brand-primary))',
+                backgroundColor: isNear
+                  ? 'hsl(120 40% 50% / 0.18)'
+                  : 'hsl(var(--brand-primary) / 0.18)',
+              }}
             />
           </div>
 
-          {/* Distance badge (mejora E) */}
+          {/* Distance badge */}
           {distanceM !== null && (
-            <p className="mb-2 text-[14px] font-bold text-gray-700" style={OPEN_SANS}>
-              {distanceM < 1000 ? `${distanceM}m away` : `${(distanceM / 1000).toFixed(1)}km away`}
-            </p>
-          )}
-
-          <p className="text-[13px] text-gray-500" style={OPEN_SANS}>
-            {distanceM === null ? 'Getting your location...' : ''}
-          </p>
-        </div>
-
-        {/* Bottom banner */}
-        <div className="shrink-0 px-4 pb-4">
-          {isNear ? (
-            <button
-              type="button"
-              onClick={handleCheckin}
-              className="w-full rounded-full py-[12px] text-center text-[14px] font-bold uppercase text-white"
-              style={{ ...OPEN_SANS, backgroundColor: 'hsl(var(--brand-primary))' }}
-            >
-              {config.taskDetail.checkIn}
-            </button>
-          ) : (
             <div
-              className="w-full rounded-[6px] py-[12px] text-center text-[14px] font-semibold text-white"
-              style={{ ...OPEN_SANS, backgroundColor: 'hsl(var(--brand-primary))' }}
+              className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-white/90 px-3 py-1 text-[12px] font-bold text-gray-700 shadow"
+              style={OPEN_SANS}
             >
-              Go to the designated point
+              {distanceM < 1000 ? `${distanceM}m away` : `${(distanceM / 1000).toFixed(1)}km away`}
             </div>
           )}
+
+          {/* Banner inferior sobre el mapa */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0">
+            {isNear ? (
+              <div className="pointer-events-auto px-4 pb-4">
+                <button
+                  type="button"
+                  onClick={handleCheckin}
+                  className="w-full rounded-full py-[13px] text-center text-[14px] font-bold uppercase text-white"
+                  style={{ ...OPEN_SANS, backgroundColor: 'hsl(var(--brand-primary))' }}
+                >
+                  {config.taskDetail.checkIn}
+                </button>
+              </div>
+            ) : (
+              <div className="bg-gradient-to-t from-black/75 via-black/40 to-transparent px-4 pb-5 pt-12 text-center">
+                <p className="text-[15px] font-bold text-white" style={OPEN_SANS}>
+                  {config.taskDetail.goToPoint}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         <PwaBottomNav />

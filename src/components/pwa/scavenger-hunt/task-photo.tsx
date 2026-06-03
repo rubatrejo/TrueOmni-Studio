@@ -17,6 +17,7 @@ interface TaskPhotoProps {
   config: PwaScavengerHuntConfig;
   totalTasks: number;
   mapboxToken?: string;
+  clientName: string;
 }
 
 /**
@@ -30,6 +31,7 @@ export function TaskPhoto({
   config,
   totalTasks,
   mapboxToken,
+  clientName,
 }: TaskPhotoProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
@@ -45,6 +47,7 @@ export function TaskPhoto({
         task={task}
         config={config}
         variant="photo"
+        clientName={clientName}
       />
     );
   }

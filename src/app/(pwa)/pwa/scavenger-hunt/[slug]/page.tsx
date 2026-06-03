@@ -21,7 +21,12 @@ export default async function PwaHuntDetailPage({ params }: { params: Promise<{ 
 
   return (
     <MobileCanvas>
-      <HuntDetail hunt={hunt} config={sh} mapboxToken={mapboxToken} />
+      <HuntDetail
+        hunt={hunt}
+        config={sh}
+        mapboxToken={mapboxToken}
+        clientName={config.client.nombre}
+      />
     </MobileCanvas>
   );
 }

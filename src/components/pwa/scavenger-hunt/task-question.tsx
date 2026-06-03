@@ -20,13 +20,21 @@ interface TaskQuestionProps {
   task: ScavengerTask;
   config: PwaScavengerHuntConfig;
   totalTasks: number;
+  clientName: string;
 }
 
 /**
  * Question/Trivia Task: icono ? + pregunta + 4 opciones radio + CANCEL/CONTINUE.
  * Respuesta incorrecta → PwaAlertModal. Correcta → completed.
  */
-export function TaskQuestion({ huntSlug, huntName, task, config, totalTasks }: TaskQuestionProps) {
+export function TaskQuestion({
+  huntSlug,
+  huntName,
+  task,
+  config,
+  totalTasks,
+  clientName,
+}: TaskQuestionProps) {
   const [selected, setSelected] = useState<number | null>(null);
   const [completed, setCompleted] = useState(false);
   const [wrongOpen, setWrongOpen] = useState(false);
@@ -40,6 +48,7 @@ export function TaskQuestion({ huntSlug, huntName, task, config, totalTasks }: T
         task={task}
         config={config}
         variant="question"
+        clientName={clientName}
       />
     );
   }
@@ -71,7 +80,7 @@ export function TaskQuestion({ huntSlug, huntName, task, config, totalTasks }: T
         <div className="flex flex-col items-center px-6 pb-4 pt-6">
           <div
             className="mb-3 flex h-[48px] w-[48px] items-center justify-center rounded-full text-[24px]"
-            style={{ backgroundColor: '#c4a335' }}
+            style={{ backgroundColor: 'hsl(var(--brand-tertiary))' }}
           >
             <span className="font-bold text-white">?</span>
           </div>
@@ -138,7 +147,7 @@ export function TaskQuestion({ huntSlug, huntName, task, config, totalTasks }: T
           onClick={handleContinue}
           disabled={selected === null}
           className="w-full rounded-full py-[10px] text-center text-[12px] font-bold uppercase tracking-wider text-white disabled:opacity-40"
-          style={{ ...OPEN_SANS, backgroundColor: '#c4a335' }}
+          style={{ ...OPEN_SANS, backgroundColor: 'hsl(var(--brand-secondary))' }}
         >
           {config.taskDetail.continue}
         </button>

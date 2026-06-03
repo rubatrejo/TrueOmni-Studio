@@ -1182,6 +1182,61 @@ export interface PwaConfig {
   wayfinding?: PwaWayfindingModuleConfig;
   /** Módulo Scavenger Hunt (gamificación: photo/checkin/trivia tasks). */
   scavengerHunt?: PwaScavengerHuntConfig;
+  /**
+   * Módulo Trip Planner (port mobile del Itinerary Builder del kiosk).
+   * El CONTENIDO (listings/events/preguntas AI/local listings) viene de
+   * `config.features.home.itinerary` + el catálogo; los textos comunes de
+   * `config.textos.itinerary_*`. Aquí solo viven los labels mobile-only.
+   */
+  tripPlanner?: PwaTripPlannerModuleConfig;
+}
+
+/**
+ * Strings mobile-only del Trip Planner PWA. Cero duplicación de contenido: solo
+ * los labels nuevos que introduce el diseño mobile (toggle, menú de categorías,
+ * My Plan, welcome). Los textos comunes se reusan de `config.textos.itinerary_*`.
+ */
+export interface PwaTripPlannerModuleConfig {
+  /** Título del header (LIST + subpantallas). */
+  title: string;
+  /** Prefijo de horario en las cards (ej. "Open until" → "Open until 11:00 pm"). */
+  openUntilPrefix: string;
+  /** Toggle inferior LIST / AI / MAP. */
+  toggle: { list: string; ai: string; map: string };
+  /** Labels del menú desplegable de categorías. */
+  menu: {
+    thingsToDo: string;
+    restaurants: string;
+    events: string;
+    localListings: string;
+  };
+  /** Welcome popup mobile (copy propio del diseño mobile). */
+  welcome: {
+    title: string;
+    subtitle: string;
+    body: string;
+    cta: string;
+  };
+  /** Vista My Plan (lista de stops). */
+  myPlan: {
+    title: string;
+    intro: string;
+    myPlanLabel: string;
+    startTimeLabel: string;
+    endTimeLabel: string;
+    smartRoute: string;
+    startPlan: string;
+  };
+  /** Títulos de header del flujo AI (los demás textos vienen de itinerary_ai_*). */
+  ai: {
+    itineraryTitle: string;
+    resultTitle: string;
+  };
+  /** Labels de los botones de las cards del Top Suggestions result. */
+  top: {
+    itinerary: string;
+    remove: string;
+  };
 }
 
 /**
@@ -1582,6 +1637,7 @@ export interface PwaScavengerHuntConfig {
     taskTypes: ScavengerTaskTypeInfo[];
   };
   hunts: ScavengerHunt[];
+  /** Textos de la pantalla de task completada. `title`/`correctTitle`/`hashtag` admiten `{client_name}`. */
   completed: {
     title: string;
     correctTitle: string;
@@ -1589,6 +1645,7 @@ export interface PwaScavengerHuntConfig {
     done: string;
     hashtag: string;
   };
+  /** Textos de la pantalla 100% completado. `title`/`body` admiten `{client_name}`. */
   hundredPercent: {
     title: string;
     body: string;
@@ -1607,6 +1664,15 @@ export interface PwaScavengerHuntConfig {
     descriptionLabel: string;
     cancel: string;
     continue: string;
+    /** Banner inferior del mapa de check-in cuando estás fuera del radio. */
+    goToPoint: string;
+  };
+  /** Textos de las cards del dashboard (white-label, cero hardcoded en JSX). */
+  dashboard: {
+    /** Sufijo de la pill de conteo, ej. "TASKS" → renderiza "{n} TASKS". */
+    tasksLabel: string;
+    /** Banner de hunt completado, ej. "Fantastic, Impressive work!". */
+    completedBanner: string;
   };
 }
 

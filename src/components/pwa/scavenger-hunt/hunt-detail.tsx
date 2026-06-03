@@ -21,13 +21,15 @@ interface HuntDetailProps {
   hunt: ScavengerHunt;
   config: PwaScavengerHuntConfig;
   mapboxToken: string;
+  /** Nombre del cliente activo para interpolar `{client_name}` en pantallas de completado. */
+  clientName: string;
 }
 
 /**
  * Detail de un hunt: barra de progreso + hero image + tabs Tasks/Map +
  * contenido. Si 100% → pantalla de celebración.
  */
-export function HuntDetail({ hunt, config, mapboxToken }: HuntDetailProps) {
+export function HuntDetail({ hunt, config, mapboxToken, clientName }: HuntDetailProps) {
   const [tab, setTab] = useState<'tasks' | 'map'>('tasks');
   const { completionPercent, completedCount, isCompleted, isTaskCompleted } = useHuntProgress(
     hunt.slug,
@@ -35,7 +37,7 @@ export function HuntDetail({ hunt, config, mapboxToken }: HuntDetailProps) {
   );
 
   if (isCompleted) {
-    return <HuntCompleted hunt={hunt} config={config} />;
+    return <HuntCompleted hunt={hunt} config={config} clientName={clientName} />;
   }
 
   const heroSrc = resolveAssetUrl(hunt.image);
@@ -59,17 +61,17 @@ export function HuntDetail({ hunt, config, mapboxToken }: HuntDetailProps) {
         totalTasks={hunt.tasks.length}
       />
 
-      {/* Hero image */}
+      {/* Hero image (fijo en ambos tabs; el contenido de abajo es lo que cambia) */}
       <div
         className="relative mx-4 h-[130px] overflow-hidden rounded-[10px] bg-cover bg-center"
         style={{ backgroundImage: `url(${heroSrc})` }}
       >
         <span className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <span
-          className="absolute bottom-10 left-3 rounded-full px-2 py-[2px] text-[9px] font-bold text-white"
-          style={{ backgroundColor: 'hsl(var(--brand-primary))', ...OPEN_SANS }}
+          className="absolute bottom-10 left-3 rounded-[4px] px-2 py-[2px] text-[9px] font-bold uppercase tracking-wide text-white"
+          style={{ backgroundColor: 'hsl(var(--brand-tertiary))', ...OPEN_SANS }}
         >
-          {hunt.tasks.length} TASKS
+          {hunt.tasks.length} {config.dashboard.tasksLabel}
         </span>
         <span
           className="absolute bottom-3 left-3 text-[14px] font-bold text-white"

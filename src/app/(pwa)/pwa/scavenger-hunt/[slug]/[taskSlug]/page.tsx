@@ -33,6 +33,7 @@ export default async function PwaTaskPage({
     config: sh,
     totalTasks: hunt.tasks.length,
     mapboxToken,
+    clientName: config.client.nombre,
   };
 
   return (

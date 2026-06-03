@@ -9,6 +9,10 @@ import { TaskTypeIcon } from './task-type-icon';
 const STORAGE_KEY = 'pwa-scavenger-hunt-welcomed';
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
 
+// Show-once: el welcome sale solo la primera vez (persistido en localStorage).
+// Aprobado por Rubén 2026-06-03. Poner en `true` solo si hay que volver a revisar el diseño.
+const ALWAYS_SHOW_FOR_REVIEW = false;
+
 interface HuntWelcomeSheetProps {
   title: string;
   description: string;
@@ -25,7 +29,8 @@ export function HuntWelcomeSheet({ title, description, taskTypes, button }: Hunt
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && !localStorage.getItem(STORAGE_KEY)) {
+    if (typeof window === 'undefined') return;
+    if (ALWAYS_SHOW_FOR_REVIEW || !localStorage.getItem(STORAGE_KEY)) {
       setShow(true);
       // Trigger slide-up animation after mount
       requestAnimationFrame(() => {
@@ -37,7 +42,7 @@ export function HuntWelcomeSheet({ title, description, taskTypes, button }: Hunt
   const dismiss = () => {
     setVisible(false);
     setTimeout(() => {
-      localStorage.setItem(STORAGE_KEY, '1');
+      if (!ALWAYS_SHOW_FOR_REVIEW) localStorage.setItem(STORAGE_KEY, '1');
       setShow(false);
     }, 300);
   };
@@ -45,13 +50,13 @@ export function HuntWelcomeSheet({ title, description, taskTypes, button }: Hunt
   if (!show) return null;
 
   return (
-    <div className="absolute inset-0 z-50 flex flex-col justify-end bg-black/40">
+    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 px-5">
       <div
-        className="flex flex-col items-center rounded-t-[20px] bg-white px-6 pb-6 pt-5 transition-transform duration-300 ease-out"
+        className="flex w-full flex-col items-center rounded-[12px] bg-white px-6 pb-6 pt-5 transition-all duration-300 ease-out"
         style={{
           ...OPEN_SANS,
-          height: '90%',
-          transform: visible ? 'translateY(0)' : 'translateY(100%)',
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'scale(1)' : 'scale(0.95)',
         }}
       >
         {/* Close X */}
@@ -71,41 +76,44 @@ export function HuntWelcomeSheet({ title, description, taskTypes, button }: Hunt
           </svg>
         </button>
 
-        {/* Icono estrella (SVG, no emoji) */}
+        {/* Icono estrella: cuadrado navy + círculo interior + sparkle 4 puntas (verbatim XD) */}
         <div
-          className="mb-4 flex h-[60px] w-[60px] items-center justify-center rounded-[16px] text-white"
+          className="mb-3 flex h-[70px] w-[70px] items-center justify-center rounded-[18px]"
           style={{ backgroundColor: 'hsl(var(--brand-primary))' }}
         >
-          <svg width={28} height={28} viewBox="0 0 24 24" fill="white">
-            <path d="M12 2l2.09 6.26L20.18 9l-5.09 3.74L16.18 19 12 15.27 7.82 19l1.09-6.26L3.82 9l6.09-.74z" />
+          <svg width={70} height={70} viewBox="0 0 60 60" fill="none">
+            <circle cx="30" cy="30" r="18" fill="white" opacity="0.16" />
+            <path
+              d="M30 17c1.2 8.5 4.3 11.6 12.8 12.8C34.3 31 31.2 34.1 30 42.6 28.8 34.1 25.7 31 17.2 29.8 25.7 28.6 28.8 25.5 30 17z"
+              fill="white"
+            />
           </svg>
         </div>
 
-        <h2 className="mb-2 text-[22px] font-bold text-gray-900">{title}</h2>
-        <p className="mb-6 text-center text-[13px] leading-relaxed text-gray-500">{description}</p>
+        <h2 className="mb-1.5 text-[25px] font-bold text-gray-900">{title}</h2>
+        <p className="mb-4 text-center text-[15px] leading-relaxed text-gray-500">{description}</p>
 
         {/* Task types con SVG icons */}
-        <div className="mb-6 flex w-full flex-col gap-3">
+        <div className="mb-3 flex w-full flex-col gap-3">
           {taskTypes.map((t) => (
             <div
               key={t.icon}
-              className="flex items-center gap-3 rounded-[12px] bg-gray-50 px-4 py-3"
+              className="flex items-center gap-3.5 rounded-[14px] bg-gray-50 px-4 py-3"
             >
-              <TaskTypeIcon type={t.icon} size={40} />
+              <TaskTypeIcon type={t.icon} size={48} />
               <div>
-                <p className="text-[14px] font-bold text-gray-800">{t.title}</p>
-                <p className="text-[11px] text-gray-500">{t.description}</p>
+                <p className="text-[16px] font-bold text-gray-800">{t.title}</p>
+                <p className="text-[13px] text-gray-500">{t.description}</p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* CTA — spacer para empujar al fondo */}
-        <div className="flex-1" />
+        {/* CTA */}
         <button
           type="button"
           onClick={dismiss}
-          className="flex w-full items-center justify-center gap-2 rounded-full py-[14px] text-[14px] font-bold text-white"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full py-[15px] text-[16px] font-bold text-white"
           style={{ backgroundColor: 'hsl(var(--brand-secondary, 195 100% 42%))' }}
         >
           {button}

@@ -18,11 +18,15 @@ function HuntCardWithProgress({
   name,
   image,
   tasks,
+  tasksLabel,
+  completedBanner,
 }: {
   slug: string;
   name: string;
   image: string;
   tasks: { slug: string }[];
+  tasksLabel: string;
+  completedBanner: string;
 }) {
   const { completionPercent, completedCount } = useHuntProgress(slug, tasks.length);
   return (
@@ -33,6 +37,8 @@ function HuntCardWithProgress({
       completionPercent={completionPercent}
       completedCount={completedCount}
       totalTasks={tasks.length}
+      tasksLabel={tasksLabel}
+      completedBanner={completedBanner}
     />
   );
 }
@@ -80,6 +86,8 @@ export function HuntDashboard({ config }: HuntDashboardProps) {
               name={h.name}
               image={h.image}
               tasks={h.tasks}
+              tasksLabel={config.dashboard.tasksLabel}
+              completedBanner={config.dashboard.completedBanner}
             />
           ))}
         </div>

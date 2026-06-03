@@ -10430,10 +10430,6 @@
             "label": "Interactive Trails"
           },
           {
-            "key": "hiking-trails",
-            "label": "Hiking Trails"
-          },
-          {
             "key": "trolley-tracker",
             "label": "Trolley Tracker"
           },
@@ -11767,6 +11763,10 @@
           ],
           "button": "Start Your Adventure"
         },
+        "dashboard": {
+          "tasksLabel": "TASKS",
+          "completedBanner": "Fantastic, Impressive work!"
+        },
         "howItWorks": {
           "title": "How it works",
           "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin et ipsum pharetra, tempor est id, viverra ex. Aliquam facilisis interdum elit at egestas. Nullam condimentum dictum lectus, at auctor massa posuere vel. Quisque porttitor lacus vitae mi scelerisque, a consectetur eros rutrum.",
@@ -12185,10 +12185,10 @@
           "correctTitle": "Correct answer,\nYou just completed this task!",
           "remainingTasks": "REMAINING TASKS",
           "done": "DONE",
-          "hashtag": "#VisitParkCity"
+          "hashtag": "#Visit{client_name}"
         },
         "hundredPercent": {
-          "title": "Congratulations, Explorer! You've completed the Park City Scavenger Hunt!",
+          "title": "Congratulations, Explorer! You've completed the Scavenger Hunt!",
           "body": "Thank you for discovering the hidden gems of our beautiful town. We hope you enjoyed the adventure and made some unforgettable memories. Keep exploring, and don't forget to share your favorite finds! Happy adventuring!",
           "done": "DONE"
         },
@@ -12204,7 +12204,42 @@
           "seeDirections": "SEE DIRECTIONS",
           "descriptionLabel": "Description",
           "cancel": "CANCEL",
-          "continue": "CONTINUE"
+          "continue": "CONTINUE",
+          "goToPoint": "Go to the designated point"
+        }
+      },
+      "tripPlanner": {
+        "title": "Trip Planner",
+        "openUntilPrefix": "Open until",
+        "toggle": { "list": "LIST", "ai": "AI", "map": "MAP" },
+        "menu": {
+          "thingsToDo": "Things to Do",
+          "restaurants": "Restaurants",
+          "events": "Events",
+          "localListings": "Local Listings"
+        },
+        "welcome": {
+          "title": "WELCOME TO THE TRIP PLANNER",
+          "subtitle": "LET'S PLAN YOUR PERFECT TRIP",
+          "body": "Heart what you love, interact with our local events, map out your visit, and email the plan to yourself. Easy, quick, and fun.",
+          "cta": "CONTINUE"
+        },
+        "myPlan": {
+          "title": "Trip Planner",
+          "intro": "This is your itinerary Plan. You can remove listings, see time estimates, move the order, share it, and start your trip with a map view.",
+          "myPlanLabel": "MY PLAN",
+          "startTimeLabel": "START TIME",
+          "endTimeLabel": "END TIME",
+          "smartRoute": "SMART ROUTE",
+          "startPlan": "START PLAN"
+        },
+        "ai": {
+          "itineraryTitle": "AI Itinerary",
+          "resultTitle": "AI Itinerary Result"
+        },
+        "top": {
+          "itinerary": "Itinerary",
+          "remove": "Remove"
         }
       }
     }

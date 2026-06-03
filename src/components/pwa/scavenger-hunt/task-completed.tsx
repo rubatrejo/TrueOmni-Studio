@@ -10,6 +10,7 @@ import { S } from '../mobile-layer';
 import { PwaSubHeader } from '../pwa-sub-header';
 
 import { HuntConfetti } from './hunt-confetti';
+import { HuntSocialLinks } from './hunt-social-links';
 
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
 
@@ -19,16 +20,29 @@ interface TaskCompletedProps {
   task: ScavengerTask;
   config: PwaScavengerHuntConfig;
   variant: 'photo' | 'checkin' | 'question';
+  /** Nombre del cliente activo (config.client.nombre) para interpolar `{client_name}`. */
+  clientName: string;
 }
 
 /**
  * Pantalla de éxito al completar una task. Fullbleed con imagen + overlay +
- * check + mensaje + social links + REMAINING TASKS / DONE.
+ * check + mensaje + social links + REMAINING TASKS / DONE. Textos white-label:
+ * soportan `{client_name}`.
  */
-export function TaskCompleted({ huntSlug, huntName, task, config, variant }: TaskCompletedProps) {
+export function TaskCompleted({
+  huntSlug,
+  huntName,
+  task,
+  config,
+  variant,
+  clientName,
+}: TaskCompletedProps) {
   const router = useRouter();
   const bgSrc = resolveAssetUrl(task.image);
-  const title = variant === 'question' ? config.completed.correctTitle : config.completed.title;
+  const fill = (s: string) => s.replaceAll('{client_name}', clientName);
+  const title = fill(
+    variant === 'question' ? config.completed.correctTitle : config.completed.title,
+  );
 
   return (
     <div className="relative flex h-full w-full flex-col">
@@ -75,53 +89,11 @@ export function TaskCompleted({ huntSlug, huntName, task, config, variant }: Tas
           {title}
         </p>
 
-        {/* Social links */}
-        {config.socialLinks && (
-          <div className="mb-2 flex items-center gap-3">
-            {config.socialLinks.x && (
-              <a
-                href={config.socialLinks.x}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-white/20 text-[12px] text-white"
-              >
-                𝕏
-              </a>
-            )}
-            {config.socialLinks.facebook && (
-              <a
-                href={config.socialLinks.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-white/20 text-[12px] text-white"
-              >
-                f
-              </a>
-            )}
-            {config.socialLinks.instagram && (
-              <a
-                href={config.socialLinks.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-white/20 text-[12px] text-white"
-              >
-                📷
-              </a>
-            )}
-            {config.socialLinks.youtube && (
-              <a
-                href={config.socialLinks.youtube}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-white/20 text-[12px] text-white"
-              >
-                ▶
-              </a>
-            )}
-          </div>
-        )}
+        {/* Social links (logos oficiales, fuente única) */}
+        <HuntSocialLinks socialLinks={config.socialLinks} />
+
         <p className="text-[11px] text-white/70" style={OPEN_SANS}>
-          {config.completed.hashtag}
+          {fill(config.completed.hashtag)}
         </p>
       </div>
 

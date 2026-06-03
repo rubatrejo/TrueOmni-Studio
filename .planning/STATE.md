@@ -3713,6 +3713,63 @@ digital-brochure,ads,social-wall}-pwa/`. Zoom del brochure medido (276→423px);
 
 ---
 
+### Sesión 2026-06-02 — PWA Wayfinding + Scavenger Hunt (WIP)
+
+**Hecho:**
+
+- **Módulo Wayfinding (PWA)** — completo y funcional (`/pwa/wayfinding` + `/pwa/wayfinding/[slug]`):
+  floor plans 3D por piso (Lobby/2nd/3rd), tabs, cards de amenidades, pantalla de Directions con
+  ruta SVG dinámica (polyline + markers HTML), welcome modal (localStorage), bottom nav. 7
+  componentes (`wayfinding-screen`, `wayfinding-directions`, `wayfinding-route-overlay`,
+  `wayfinding-floor-tabs`, `wayfinding-amenity-card`, `wayfinding-welcome-modal`,
+  `wayfinding-step-list`). Assets extraídos de SVGs (3 floor plans + 9 amenity images).
+- **Módulo Scavenger Hunt (PWA)** — estructura creada pero con bugs pendientes de pulir.
+  Dashboard con grid 2-col de 8 hunts, welcome bottom-sheet slide-up, hunt detail con tabs
+  Tasks/Map, 3 tipos de task (Photo con cámara nativa, Check-in con Geolocation API, Question
+  con radio), task completed con confetti (framer-motion), 100% completed, how-it-works.
+  ~15 componentes en `src/components/pwa/scavenger-hunt/`. Hook `useHuntProgress` con
+  localStorage reactivo. Seed data con 8 hunts y tasks variadas.
+- **Cableado**: ambos módulos wired en dashboard-screen + more-screen.
+- **Types**: `PwaWayfindingModuleConfig`, `PwaScavengerHuntConfig` + auxiliares en config.ts.
+
+**Verificado:**
+
+- `pnpm typecheck` + `pnpm lint` + `validate:configs` 3/3 limpios.
+- Wayfinding funciona correctamente (floor plan, tabs, directions con ruta, welcome modal).
+- Scavenger Hunt compila y carga, pero tiene problemas de UI que el usuario señaló reiteradamente:
+  iconos/colores no idénticos al diseño XD, mapas que no cargan consistentemente (token Mapbox
+  se pasa desde `config.integraciones.mapbox_token` pero la integración con MapCanvas en el
+  contexto del scavenger hunt no se verificó visualmente de forma definitiva).
+
+**Pendiente / siguiente:**
+
+- **Scavenger Hunt — pulido pixel-perfect urgente**: los iconos de task type, colores, cards del
+  dashboard, mapas embebidos y la correspondencia con las 17 pantallas del diseño XD necesitan
+  revisión exhaustiva. El usuario quedó insatisfecho con la calidad visual — las iteraciones
+  incrementales no convergieron. **Próxima sesión: abrir cada pantalla del diseño lado a lado
+  con el render y hacer diff visual riguroso antes de declarar cualquier cosa lista.**
+- Mapas del Scavenger Hunt: verificar que `MapCanvas` recibe el token y renderiza pins correctamente
+  en los 3 contextos (hunt detail Map tab, photo task mini map, checkin task mini map).
+- Resto de módulos PWA: Ask AI, Itinerary.
+- Pz: integración de la PWA al Studio.
+- Limpiar carpetas locales `.next.trash-*`.
+
+**Decisiones:**
+
+- Wayfinding: ruta dinámica SVG (polyline estirada + markers HTML sin estiramiento), welcome modal
+  con localStorage show-once, floor plan con `object-cover` y altura fija 200px.
+- Scavenger Hunt: cámara nativa (`<input capture>`), geolocalización real (`navigator.geolocation`),
+  progreso en localStorage reactivo, confetti con framer-motion, PwaAlertModal para diálogos de
+  error, social links a redes del cliente.
+- Colores de task types del diseño XD: Photo=#brand-primary (azul oscuro), Checkin=#2d8faa (teal),
+  Question=#c4a335 (olive/amarillo). Botones DONE/CONTINUE usan brand-primary, no cyan hardcoded.
+- Token Mapbox: viene de `config.integraciones?.mapbox_token`, NO de `process.env` en client
+  components.
+
+**Fase:** Milestone PWA Mobile — P2/Px (módulos reutilizados + PWA-only).
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

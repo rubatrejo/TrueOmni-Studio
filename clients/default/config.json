@@ -11248,7 +11248,10 @@
             "body": "Enjoy 20% off all entrées this weekend only. Show this notification at the host stand to redeem.",
             "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&auto=format&fit=crop&q=80",
             "timestamp": "2026-05-29T12:00:00Z",
-            "action": { "label": "VIEW RESTAURANT", "href": "/pwa/restaurants/el-farolito" }
+            "action": {
+              "label": "VIEW RESTAURANT",
+              "href": "/pwa/restaurants/el-farolito"
+            }
           },
           {
             "id": "notif-2",
@@ -11267,7 +11270,10 @@
             "title": "Welcome to {client_name}!",
             "body": "Explore restaurants, things to do and places to stay. Tap the heart on any place to save it to your favorites.",
             "timestamp": "2026-05-28T18:00:00Z",
-            "action": { "label": "GET HELP", "href": "/pwa/help" }
+            "action": {
+              "label": "GET HELP",
+              "href": "/pwa/help"
+            }
           },
           {
             "id": "notif-4",
@@ -11283,9 +11289,923 @@
             "body": "Selected attractions are offering limited-time discounts. Browse the latest deals before they're gone.",
             "image": "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?w=400&auto=format&fit=crop&q=80",
             "timestamp": "2026-05-27T15:00:00Z",
-            "action": { "label": "BROWSE", "href": "/pwa/things-to-do" }
+            "action": {
+              "label": "BROWSE",
+              "href": "/pwa/things-to-do"
+            }
           }
         ]
+      },
+      "wayfinding": {
+        "title": "Wayfinding",
+        "subtitle": "Welcome to our Wayfinding",
+        "youAreHereLabel": "YOU ARE HERE",
+        "welcome": {
+          "title": "Welcome to our Wayfinding Navigation",
+          "description": "Select your floor and choose from the list of amenities to find simple walking directions.",
+          "tagline": "Enjoy the Experience",
+          "button": "OK"
+        },
+        "floors": [
+          {
+            "key": "lobby",
+            "label": "LOBBY",
+            "floorPlanImage": "assets/pwa/wayfinding/floor-lobby.png",
+            "origin": {
+              "x": 85,
+              "y": 42
+            },
+            "amenities": [
+              {
+                "slug": "library",
+                "name": "LIBRARY",
+                "image": "assets/pwa/wayfinding/amenities/library.jpg",
+                "destination": {
+                  "x": 12,
+                  "y": 48
+                },
+                "routePoints": [
+                  {
+                    "x": 85,
+                    "y": 42
+                  },
+                  {
+                    "x": 60,
+                    "y": 42
+                  },
+                  {
+                    "x": 40,
+                    "y": 45
+                  },
+                  {
+                    "x": 12,
+                    "y": 48
+                  }
+                ],
+                "steps": [
+                  {
+                    "icon": "location",
+                    "text": "Current Location"
+                  },
+                  {
+                    "icon": "left",
+                    "text": "Turn to your left"
+                  },
+                  {
+                    "icon": "straight",
+                    "text": "Move straight forward until you see an entrance"
+                  },
+                  {
+                    "icon": "destination",
+                    "text": "You will see the Library. Welcome!"
+                  }
+                ]
+              },
+              {
+                "slug": "resort-shops",
+                "name": "RESORT SHOPS",
+                "image": "assets/pwa/wayfinding/amenities/resort-shops.jpg",
+                "destination": {
+                  "x": 50,
+                  "y": 62
+                },
+                "routePoints": [
+                  {
+                    "x": 85,
+                    "y": 42
+                  },
+                  {
+                    "x": 60,
+                    "y": 42
+                  },
+                  {
+                    "x": 50,
+                    "y": 55
+                  },
+                  {
+                    "x": 50,
+                    "y": 62
+                  }
+                ],
+                "steps": [
+                  {
+                    "icon": "location",
+                    "text": "Current Location"
+                  },
+                  {
+                    "icon": "left",
+                    "text": "Turn to your left"
+                  },
+                  {
+                    "icon": "straight",
+                    "text": "Walk straight ahead past the lobby"
+                  },
+                  {
+                    "icon": "left",
+                    "text": "Turn left at the corridor"
+                  },
+                  {
+                    "icon": "destination",
+                    "text": "Resort Shops will be on your right. Enjoy!"
+                  }
+                ]
+              },
+              {
+                "slug": "katsumidori-sushi-tokyo",
+                "name": "KATSUMIDORI SUSHI TOKYO",
+                "image": "assets/pwa/wayfinding/amenities/katsumidori.jpg",
+                "destination": {
+                  "x": 25,
+                  "y": 52
+                },
+                "routePoints": [
+                  {
+                    "x": 85,
+                    "y": 42
+                  },
+                  {
+                    "x": 60,
+                    "y": 42
+                  },
+                  {
+                    "x": 40,
+                    "y": 48
+                  },
+                  {
+                    "x": 25,
+                    "y": 52
+                  }
+                ],
+                "steps": [
+                  {
+                    "icon": "location",
+                    "text": "Current Location"
+                  },
+                  {
+                    "icon": "left",
+                    "text": "Turn to your left"
+                  },
+                  {
+                    "icon": "straight",
+                    "text": "Walk straight through the lobby"
+                  },
+                  {
+                    "icon": "right",
+                    "text": "Turn right at the end of the hall"
+                  },
+                  {
+                    "icon": "destination",
+                    "text": "Katsumidori Sushi Tokyo is on your left. Itadakimasu!"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "key": "2nd-floor",
+            "label": "2nd Floor",
+            "floorPlanImage": "assets/pwa/wayfinding/floor-2nd.png",
+            "origin": {
+              "x": 80,
+              "y": 55
+            },
+            "amenities": [
+              {
+                "slug": "100-sails-restaurant-bar",
+                "name": "100 SAILS RESTAURANT & BAR",
+                "image": "assets/pwa/wayfinding/amenities/100-sails.jpg",
+                "destination": {
+                  "x": 65,
+                  "y": 30
+                },
+                "routePoints": [
+                  {
+                    "x": 80,
+                    "y": 55
+                  },
+                  {
+                    "x": 70,
+                    "y": 45
+                  },
+                  {
+                    "x": 65,
+                    "y": 30
+                  }
+                ],
+                "steps": [
+                  {
+                    "icon": "location",
+                    "text": "Current Location"
+                  },
+                  {
+                    "icon": "straight",
+                    "text": "Take the elevator to the 2nd floor"
+                  },
+                  {
+                    "icon": "right",
+                    "text": "Turn right out of the elevator"
+                  },
+                  {
+                    "icon": "destination",
+                    "text": "100 Sails Restaurant & Bar is ahead. Bon appetit!"
+                  }
+                ]
+              },
+              {
+                "slug": "piinaio-ballroom",
+                "name": "PI'INAIO BALLROOM",
+                "image": "assets/pwa/wayfinding/amenities/piinaio-ballroom.jpg",
+                "destination": {
+                  "x": 35,
+                  "y": 50
+                },
+                "routePoints": [
+                  {
+                    "x": 80,
+                    "y": 55
+                  },
+                  {
+                    "x": 60,
+                    "y": 50
+                  },
+                  {
+                    "x": 35,
+                    "y": 50
+                  }
+                ],
+                "steps": [
+                  {
+                    "icon": "location",
+                    "text": "Current Location"
+                  },
+                  {
+                    "icon": "straight",
+                    "text": "Take the elevator to the 2nd floor"
+                  },
+                  {
+                    "icon": "left",
+                    "text": "Turn left and walk down the hallway"
+                  },
+                  {
+                    "icon": "destination",
+                    "text": "Pi'inaio Ballroom is at the end of the hall."
+                  }
+                ]
+              },
+              {
+                "slug": "makiki-room",
+                "name": "MAKIKI ROOM",
+                "image": "assets/pwa/wayfinding/amenities/makiki-room.jpg",
+                "destination": {
+                  "x": 20,
+                  "y": 45
+                },
+                "routePoints": [
+                  {
+                    "x": 80,
+                    "y": 55
+                  },
+                  {
+                    "x": 50,
+                    "y": 50
+                  },
+                  {
+                    "x": 20,
+                    "y": 45
+                  }
+                ],
+                "steps": [
+                  {
+                    "icon": "location",
+                    "text": "Current Location"
+                  },
+                  {
+                    "icon": "straight",
+                    "text": "Take the elevator to the 2nd floor"
+                  },
+                  {
+                    "icon": "left",
+                    "text": "Turn left and continue past the ballroom"
+                  },
+                  {
+                    "icon": "destination",
+                    "text": "Makiki Room will be on your left."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "key": "3rd-floor",
+            "label": "3rd Floor",
+            "floorPlanImage": "assets/pwa/wayfinding/floor-3rd.png",
+            "origin": {
+              "x": 78,
+              "y": 48
+            },
+            "amenities": [
+              {
+                "slug": "fitness-center",
+                "name": "FITNESS CENTER",
+                "image": "assets/pwa/wayfinding/amenities/fitness-center.jpg",
+                "destination": {
+                  "x": 15,
+                  "y": 42
+                },
+                "routePoints": [
+                  {
+                    "x": 78,
+                    "y": 48
+                  },
+                  {
+                    "x": 50,
+                    "y": 45
+                  },
+                  {
+                    "x": 30,
+                    "y": 42
+                  },
+                  {
+                    "x": 15,
+                    "y": 42
+                  }
+                ],
+                "steps": [
+                  {
+                    "icon": "location",
+                    "text": "Current Location"
+                  },
+                  {
+                    "icon": "straight",
+                    "text": "Take the elevator to the 3rd floor"
+                  },
+                  {
+                    "icon": "left",
+                    "text": "Turn left out of the elevator"
+                  },
+                  {
+                    "icon": "straight",
+                    "text": "Walk straight to the end of the corridor"
+                  },
+                  {
+                    "icon": "destination",
+                    "text": "Fitness Center is on your left. Enjoy your workout!"
+                  }
+                ]
+              },
+              {
+                "slug": "naio-bliss-spa",
+                "name": "NAIO BLISS SPA",
+                "image": "assets/pwa/wayfinding/amenities/naio-bliss-spa.jpg",
+                "destination": {
+                  "x": 30,
+                  "y": 50
+                },
+                "routePoints": [
+                  {
+                    "x": 78,
+                    "y": 48
+                  },
+                  {
+                    "x": 55,
+                    "y": 48
+                  },
+                  {
+                    "x": 30,
+                    "y": 50
+                  }
+                ],
+                "steps": [
+                  {
+                    "icon": "location",
+                    "text": "Current Location"
+                  },
+                  {
+                    "icon": "straight",
+                    "text": "Take the elevator to the 3rd floor"
+                  },
+                  {
+                    "icon": "left",
+                    "text": "Turn left and follow the signs"
+                  },
+                  {
+                    "icon": "destination",
+                    "text": "Naio Bliss Spa is ahead. Time to relax!"
+                  }
+                ]
+              },
+              {
+                "slug": "poolside-cabanas",
+                "name": "POOLSIDE CABANAS",
+                "image": "assets/pwa/wayfinding/amenities/poolside-cabanas.jpg",
+                "destination": {
+                  "x": 50,
+                  "y": 65
+                },
+                "routePoints": [
+                  {
+                    "x": 78,
+                    "y": 48
+                  },
+                  {
+                    "x": 60,
+                    "y": 50
+                  },
+                  {
+                    "x": 50,
+                    "y": 65
+                  }
+                ],
+                "steps": [
+                  {
+                    "icon": "location",
+                    "text": "Current Location"
+                  },
+                  {
+                    "icon": "straight",
+                    "text": "Take the elevator to the 3rd floor"
+                  },
+                  {
+                    "icon": "right",
+                    "text": "Turn right towards the pool area"
+                  },
+                  {
+                    "icon": "destination",
+                    "text": "Poolside Cabanas are by the pool. Enjoy the sun!"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "directions": {
+          "goBack": "GO BACK",
+          "thanks": "THANKS"
+        }
+      },
+      "scavengerHunt": {
+        "title": "Scavenger Hunt",
+        "welcome": {
+          "title": "Start Exploring!",
+          "description": "Complete tasks to earn points and discover hidden gems around the city.",
+          "taskTypes": [
+            {
+              "icon": "checkin",
+              "title": "Check-in",
+              "description": "Visit locations to confirm arrival"
+            },
+            {
+              "icon": "photo",
+              "title": "Photo Challenge",
+              "description": "Snap landmarks and hidden objects"
+            },
+            {
+              "icon": "question",
+              "title": "Trivia",
+              "description": "Solve riddles about your surroundings"
+            }
+          ],
+          "button": "Start Your Adventure"
+        },
+        "howItWorks": {
+          "title": "How it works",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin et ipsum pharetra, tempor est id, viverra ex. Aliquam facilisis interdum elit at egestas. Nullam condimentum dictum lectus, at auctor massa posuere vel. Quisque porttitor lacus vitae mi scelerisque, a consectetur eros rutrum.",
+          "taskTypes": [
+            {
+              "icon": "checkin",
+              "title": "CHECK-IN",
+              "description": "Et harum quidem rerum facilis est et expedita distinctio"
+            },
+            {
+              "icon": "photo",
+              "title": "PHOTO",
+              "description": "Nam libero tempore, cum soluta nobis est eligendi optio cumque"
+            },
+            {
+              "icon": "question",
+              "title": "QUESTIONS",
+              "description": "Nam libero tempore, cum soluta nobis est eligendi optio cumque"
+            }
+          ]
+        },
+        "hunts": [
+          {
+            "slug": "explore-the-mountains",
+            "name": "Explore the mountains",
+            "image": "assets/pwa/scavenger-hunt/hunts/explore-mountains.jpg",
+            "avatar": "assets/pwa/scavenger-hunt/hunts/explore-mountains.jpg",
+            "taskCount": 10,
+            "tasks": [
+              {
+                "slug": "balloons-event-photo",
+                "type": "photo",
+                "name": "Ballons Event Photo",
+                "image": "assets/pwa/scavenger-hunt/tasks/balloons-event.jpg",
+                "address": "1800 Park Ave, Park City, UT 84060, United States",
+                "coords": {
+                  "lat": 40.6461,
+                  "lng": -111.498
+                },
+                "description": "Park City's Balloon Festival, typically held in the summer, is a vibrant and colorful celebration featuring hot air balloons of all shapes and sizes. The event usually includes",
+                "directionsUrl": "https://maps.google.com/?q=40.6461,-111.498"
+              },
+              {
+                "slug": "mirror-lake-checkin",
+                "type": "checkin",
+                "name": "Mirror Lake",
+                "image": "assets/pwa/scavenger-hunt/tasks/mirror-lake.jpg",
+                "address": "1800 Park Ave, Park City, UT 84060, United States",
+                "coords": {
+                  "lat": 40.7031,
+                  "lng": -110.8869
+                },
+                "checkinRadius": 100,
+                "description": "Mirror Lake, nestled in the stunning Uinta Mountains near Park City, is a serene alpine gem that captures the essence of Utah's natural beauty. Surrounded by towering peaks",
+                "directionsUrl": "https://maps.google.com/?q=40.7031,-110.8869"
+              },
+              {
+                "slug": "sundance-trivia",
+                "type": "question",
+                "name": "Question Task",
+                "image": "assets/pwa/scavenger-hunt/tasks/sundance-festival.png",
+                "coords": {
+                  "lat": 40.6461,
+                  "lng": -111.498
+                },
+                "question": "What annual event in Park City is known for showcasing independent films from around the world?",
+                "options": [
+                  "Park City Music Festival",
+                  "Sundance Film Festival",
+                  "Park City Food and Wine Classic",
+                  "Park City Art Festival"
+                ],
+                "correctIndex": 1,
+                "description": "Test your knowledge about Park City!"
+              },
+              {
+                "slug": "main-street-photo",
+                "type": "photo",
+                "name": "Main Street Photo",
+                "image": "assets/pwa/scavenger-hunt/tasks/park-city-snow.jpg",
+                "address": "Main Street, Park City, UT 84060",
+                "coords": {
+                  "lat": 40.643,
+                  "lng": -111.497
+                },
+                "description": "Capture the historic charm of Park City's Main Street with its colorful buildings and mountain backdrop.",
+                "directionsUrl": "https://maps.google.com/?q=40.6430,-111.4970"
+              }
+            ]
+          },
+          {
+            "slug": "park-city-solo",
+            "name": "Park City solo",
+            "image": "assets/pwa/scavenger-hunt/hunts/park-city-solo.jpg",
+            "avatar": "assets/pwa/scavenger-hunt/hunts/park-city-solo.jpg",
+            "taskCount": 8,
+            "tasks": [
+              {
+                "slug": "solo-main-st",
+                "type": "photo",
+                "name": "Main Street Selfie",
+                "image": "assets/pwa/scavenger-hunt/tasks/park-city-snow.jpg",
+                "address": "Main Street, Park City, UT",
+                "coords": {
+                  "lat": 40.643,
+                  "lng": -111.497
+                },
+                "description": "Take a selfie on Main Street!",
+                "directionsUrl": "https://maps.google.com/?q=40.643,-111.497"
+              },
+              {
+                "slug": "solo-trivia",
+                "type": "question",
+                "name": "History Quiz",
+                "image": "assets/pwa/scavenger-hunt/tasks/sundance-festival.png",
+                "coords": {
+                  "lat": 40.646,
+                  "lng": -111.498
+                },
+                "question": "What was Park City originally known for?",
+                "options": ["Silver mining", "Gold mining", "Ski resort", "Film festival"],
+                "correctIndex": 0,
+                "description": "Test your history knowledge!"
+              },
+              {
+                "slug": "solo-checkin",
+                "type": "checkin",
+                "name": "Town Lift Plaza",
+                "image": "assets/pwa/scavenger-hunt/tasks/balloons-event.jpg",
+                "address": "Town Lift, Park City, UT",
+                "coords": {
+                  "lat": 40.645,
+                  "lng": -111.496
+                },
+                "checkinRadius": 80,
+                "description": "Check in at the Town Lift Plaza!",
+                "directionsUrl": "https://maps.google.com/?q=40.645,-111.496"
+              }
+            ]
+          },
+          {
+            "slug": "pro-scavenger-hunt",
+            "name": "Pro scavenger hunt",
+            "image": "assets/pwa/scavenger-hunt/hunts/pro-scavenger.jpg",
+            "avatar": "assets/pwa/scavenger-hunt/hunts/pro-scavenger.jpg",
+            "taskCount": 12,
+            "tasks": [
+              {
+                "slug": "pro-photo-1",
+                "type": "photo",
+                "name": "Summit Photo",
+                "image": "assets/pwa/scavenger-hunt/tasks/park-city-snow.jpg",
+                "address": "Park City Mountain Resort",
+                "coords": {
+                  "lat": 40.651,
+                  "lng": -111.508
+                },
+                "description": "Capture the summit view!",
+                "directionsUrl": "https://maps.google.com/?q=40.651,-111.508"
+              },
+              {
+                "slug": "pro-checkin-1",
+                "type": "checkin",
+                "name": "Base Lodge",
+                "image": "assets/pwa/scavenger-hunt/tasks/mirror-lake.jpg",
+                "address": "Base Lodge, PCMR",
+                "coords": {
+                  "lat": 40.648,
+                  "lng": -111.507
+                },
+                "checkinRadius": 50,
+                "description": "Check in at the Base Lodge.",
+                "directionsUrl": "https://maps.google.com/?q=40.648,-111.507"
+              },
+              {
+                "slug": "pro-trivia-1",
+                "type": "question",
+                "name": "Ski Trivia",
+                "image": "assets/pwa/scavenger-hunt/tasks/sundance-festival.png",
+                "coords": {
+                  "lat": 40.649,
+                  "lng": -111.506
+                },
+                "question": "How many ski runs does Park City Mountain have?",
+                "options": ["Over 100", "Over 200", "Over 300", "Over 400"],
+                "correctIndex": 2,
+                "description": "Think you know the mountain?"
+              }
+            ]
+          },
+          {
+            "slug": "explore-the-snow",
+            "name": "Explore the snow",
+            "image": "assets/pwa/scavenger-hunt/hunts/explore-snow.jpg",
+            "avatar": "assets/pwa/scavenger-hunt/hunts/explore-snow.jpg",
+            "taskCount": 6,
+            "tasks": [
+              {
+                "slug": "snow-photo",
+                "type": "photo",
+                "name": "Snowy Landscape",
+                "image": "assets/pwa/scavenger-hunt/tasks/park-city-snow.jpg",
+                "address": "Deer Valley, Park City",
+                "coords": {
+                  "lat": 40.637,
+                  "lng": -111.478
+                },
+                "description": "Photograph the pristine snow!",
+                "directionsUrl": "https://maps.google.com/?q=40.637,-111.478"
+              },
+              {
+                "slug": "snow-checkin",
+                "type": "checkin",
+                "name": "Ski Lodge",
+                "image": "assets/pwa/scavenger-hunt/tasks/mirror-lake.jpg",
+                "address": "Deer Valley Resort",
+                "coords": {
+                  "lat": 40.636,
+                  "lng": -111.479
+                },
+                "checkinRadius": 100,
+                "description": "Check in at the ski lodge.",
+                "directionsUrl": "https://maps.google.com/?q=40.636,-111.479"
+              }
+            ]
+          },
+          {
+            "slug": "urban-and-downtown",
+            "name": "Urban and downtown hunt",
+            "image": "assets/pwa/scavenger-hunt/hunts/urban-downtown.jpg",
+            "avatar": "assets/pwa/scavenger-hunt/hunts/urban-downtown.jpg",
+            "taskCount": 7,
+            "tasks": [
+              {
+                "slug": "urban-photo",
+                "type": "photo",
+                "name": "Street Art Photo",
+                "image": "assets/pwa/scavenger-hunt/tasks/balloons-event.jpg",
+                "address": "Lower Main Street, Park City",
+                "coords": {
+                  "lat": 40.641,
+                  "lng": -111.496
+                },
+                "description": "Find and photograph the street art!",
+                "directionsUrl": "https://maps.google.com/?q=40.641,-111.496"
+              },
+              {
+                "slug": "urban-trivia",
+                "type": "question",
+                "name": "Downtown Quiz",
+                "image": "assets/pwa/scavenger-hunt/tasks/sundance-festival.png",
+                "coords": {
+                  "lat": 40.643,
+                  "lng": -111.497
+                },
+                "question": "What year was Park City incorporated?",
+                "options": ["1884", "1898", "1912", "1926"],
+                "correctIndex": 0,
+                "description": "How well do you know downtown?"
+              },
+              {
+                "slug": "urban-checkin",
+                "type": "checkin",
+                "name": "Egyptian Theatre",
+                "image": "assets/pwa/scavenger-hunt/tasks/sundance-festival.png",
+                "address": "328 Main St, Park City, UT",
+                "coords": {
+                  "lat": 40.644,
+                  "lng": -111.497
+                },
+                "checkinRadius": 60,
+                "description": "Check in at the historic Egyptian Theatre.",
+                "directionsUrl": "https://maps.google.com/?q=40.644,-111.497"
+              }
+            ]
+          },
+          {
+            "slug": "friendship-park-city",
+            "name": "Friendship Park City hunt",
+            "image": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop",
+            "avatar": "assets/pwa/scavenger-hunt/hunts/park-city-solo.jpg",
+            "taskCount": 5,
+            "tasks": [
+              {
+                "slug": "fp-photo",
+                "type": "photo",
+                "name": "Group Photo",
+                "image": "assets/pwa/scavenger-hunt/tasks/balloons-event.jpg",
+                "address": "Park City Town Center",
+                "coords": {
+                  "lat": 40.644,
+                  "lng": -111.497
+                },
+                "description": "Take a group photo!",
+                "directionsUrl": "https://maps.google.com/?q=40.644,-111.497"
+              },
+              {
+                "slug": "fp-checkin",
+                "type": "checkin",
+                "name": "Town Center",
+                "image": "assets/pwa/scavenger-hunt/tasks/mirror-lake.jpg",
+                "address": "Town Center Plaza",
+                "coords": {
+                  "lat": 40.645,
+                  "lng": -111.496
+                },
+                "checkinRadius": 80,
+                "description": "Check in at the plaza.",
+                "directionsUrl": "https://maps.google.com/?q=40.645,-111.496"
+              },
+              {
+                "slug": "fp-trivia",
+                "type": "question",
+                "name": "History Quiz",
+                "image": "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=400&h=300&fit=crop",
+                "coords": {
+                  "lat": 40.643,
+                  "lng": -111.498
+                },
+                "question": "Which year did Sundance Film Festival start?",
+                "options": ["1978", "1985", "1992", "2001"],
+                "correctIndex": 0,
+                "description": "Film festival trivia!"
+              }
+            ]
+          },
+          {
+            "slug": "winter-wonderland",
+            "name": "Winter wonderland",
+            "image": "https://images.unsplash.com/photo-1491002052546-bf38f186af56?w=600&h=400&fit=crop",
+            "avatar": "assets/pwa/scavenger-hunt/hunts/explore-snow.jpg",
+            "taskCount": 4,
+            "tasks": [
+              {
+                "slug": "ww-photo",
+                "type": "photo",
+                "name": "Snow Angel",
+                "image": "assets/pwa/scavenger-hunt/tasks/park-city-snow.jpg",
+                "address": "Deer Valley Resort",
+                "coords": {
+                  "lat": 40.637,
+                  "lng": -111.478
+                },
+                "description": "Make a snow angel and snap it!",
+                "directionsUrl": "https://maps.google.com/?q=40.637,-111.478"
+              },
+              {
+                "slug": "ww-trivia",
+                "type": "question",
+                "name": "Ski Quiz",
+                "image": "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=400&h=300&fit=crop",
+                "coords": {
+                  "lat": 40.638,
+                  "lng": -111.479
+                },
+                "question": "What is the average annual snowfall in Park City?",
+                "options": ["200 inches", "350 inches", "500 inches", "150 inches"],
+                "correctIndex": 1,
+                "description": "Snow trivia!"
+              }
+            ]
+          },
+          {
+            "slug": "foodie-adventure",
+            "name": "Foodie adventure",
+            "image": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop",
+            "avatar": "assets/pwa/scavenger-hunt/hunts/urban-downtown.jpg",
+            "taskCount": 6,
+            "tasks": [
+              {
+                "slug": "food-photo",
+                "type": "photo",
+                "name": "Best Dish Photo",
+                "image": "assets/pwa/scavenger-hunt/tasks/balloons-event.jpg",
+                "address": "350 Main St, Park City",
+                "coords": {
+                  "lat": 40.644,
+                  "lng": -111.497
+                },
+                "description": "Photograph the best dish you find!",
+                "directionsUrl": "https://maps.google.com/?q=40.644,-111.497"
+              },
+              {
+                "slug": "food-checkin",
+                "type": "checkin",
+                "name": "High West Distillery",
+                "image": "assets/pwa/scavenger-hunt/tasks/mirror-lake.jpg",
+                "address": "703 Park Ave, Park City",
+                "coords": {
+                  "lat": 40.647,
+                  "lng": -111.498
+                },
+                "checkinRadius": 60,
+                "description": "Check in at High West!",
+                "directionsUrl": "https://maps.google.com/?q=40.647,-111.498"
+              },
+              {
+                "slug": "food-trivia",
+                "type": "question",
+                "name": "Food Quiz",
+                "image": "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=400&h=300&fit=crop",
+                "coords": {
+                  "lat": 40.643,
+                  "lng": -111.497
+                },
+                "question": "What is High West known for?",
+                "options": ["Pizza", "Whiskey", "Sushi", "Tacos"],
+                "correctIndex": 1,
+                "description": "Food & drink trivia!"
+              }
+            ]
+          }
+        ],
+        "completed": {
+          "title": "Amazing,\nYou just completed this task!",
+          "correctTitle": "Correct answer,\nYou just completed this task!",
+          "remainingTasks": "REMAINING TASKS",
+          "done": "DONE",
+          "hashtag": "#VisitParkCity"
+        },
+        "hundredPercent": {
+          "title": "Congratulations, Explorer! You've completed the Park City Scavenger Hunt!",
+          "body": "Thank you for discovering the hidden gems of our beautiful town. We hope you enjoyed the adventure and made some unforgettable memories. Keep exploring, and don't forget to share your favorite finds! Happy adventuring!",
+          "done": "DONE"
+        },
+        "socialLinks": {
+          "x": "https://x.com/visitparkcity",
+          "facebook": "https://facebook.com/visitparkcity",
+          "instagram": "https://instagram.com/visitparkcity",
+          "youtube": "https://youtube.com/visitparkcity"
+        },
+        "taskDetail": {
+          "takePhoto": "TAKE PHOTO",
+          "checkIn": "CHECK-IN",
+          "seeDirections": "SEE DIRECTIONS",
+          "descriptionLabel": "Description",
+          "cancel": "CANCEL",
+          "continue": "CONTINUE"
+        }
       }
     }
   },

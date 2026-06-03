@@ -205,6 +205,8 @@ export function DashboardScreen({
                 else if (t.key === 'trails') router.push('/pwa/trails');
                 else if (t.key === 'deals') router.push('/pwa/deals');
                 else if (t.key === 'tickets') router.push('/pwa/tickets');
+                else if (t.key === 'wayfinding') router.push('/pwa/wayfinding');
+                else if (t.key === 'scavenger-hunt') router.push('/pwa/scavenger-hunt');
               }}
               className={`relative h-[125px] overflow-hidden rounded-[6px] bg-cover bg-center ${
                 t.wide ? 'col-span-2' : ''

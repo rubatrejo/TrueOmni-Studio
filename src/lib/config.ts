@@ -1178,6 +1178,10 @@ export interface PwaConfig {
   deals?: PwaDealsModuleConfig;
   /** Módulo Tickets (timeline + WeekPicker; data en home.modules.events con `ticket`). */
   tickets?: PwaTicketsModuleConfig;
+  /** Módulo Wayfinding (floor plans + amenidades + direcciones; data propia). */
+  wayfinding?: PwaWayfindingModuleConfig;
+  /** Módulo Scavenger Hunt (gamificación: photo/checkin/trivia tasks). */
+  scavengerHunt?: PwaScavengerHuntConfig;
 }
 
 /**
@@ -1455,6 +1459,154 @@ export interface PwaDealsModuleConfig {
     features: string;
     clearAll: string;
     apply: string;
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Wayfinding (PWA)
+// ---------------------------------------------------------------------------
+
+/** Icono de un paso de dirección en Wayfinding. */
+export type WayfindingStepIcon = 'location' | 'left' | 'right' | 'straight' | 'destination';
+
+/** Punto 2D en porcentaje (0-100) relativo al floor plan. */
+export interface WayfindingPoint {
+  x: number;
+  y: number;
+}
+
+/** Paso de la ruta textual hacia una amenidad. */
+export interface WayfindingStep {
+  icon: WayfindingStepIcon;
+  text: string;
+}
+
+/** Amenidad dentro de un piso (Wayfinding). */
+export interface WayfindingAmenity {
+  slug: string;
+  name: string;
+  /** Imagen de la card en el listado (path relativo a assets). */
+  image: string;
+  /** Punto destino en el floor plan (%). */
+  destination: WayfindingPoint;
+  /** Waypoints de la ruta desde el origin del piso hasta el destino (%). */
+  routePoints: WayfindingPoint[];
+  /** Instrucciones paso-a-paso para llegar. */
+  steps: WayfindingStep[];
+}
+
+/** Piso del módulo Wayfinding. */
+export interface WayfindingFloor {
+  key: string;
+  label: string;
+  /** Imagen del floor plan 3D (path relativo a assets). */
+  floorPlanImage: string;
+  /** Posición del "YOU ARE HERE" en este piso (%). */
+  origin: WayfindingPoint;
+  amenities: WayfindingAmenity[];
+}
+
+/** Configuración del módulo Wayfinding en la PWA. */
+export interface PwaWayfindingModuleConfig {
+  title: string;
+  subtitle: string;
+  /** Etiqueta del marcador de posición actual. */
+  youAreHereLabel: string;
+  /** Modal de bienvenida (se muestra solo la primera vez vía localStorage). */
+  welcome: {
+    title: string;
+    description: string;
+    tagline: string;
+    button: string;
+  };
+  /** Pisos del edificio con sus amenidades. */
+  floors: WayfindingFloor[];
+  /** Textos de la pantalla de Directions. */
+  directions: {
+    goBack: string;
+    thanks: string;
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Scavenger Hunt (PWA)
+// ---------------------------------------------------------------------------
+
+export type ScavengerTaskType = 'photo' | 'checkin' | 'question';
+
+export interface ScavengerTask {
+  slug: string;
+  type: ScavengerTaskType;
+  name: string;
+  image: string;
+  address?: string;
+  coords: { lat: number; lng: number };
+  description: string;
+  directionsUrl?: string;
+  /** Solo para checkin: radio en metros para geofence. */
+  checkinRadius?: number;
+  /** Solo para question: la pregunta. */
+  question?: string;
+  /** Solo para question: opciones de respuesta. */
+  options?: string[];
+  /** Solo para question: índice de la respuesta correcta (0-based). */
+  correctIndex?: number;
+}
+
+export interface ScavengerHunt {
+  slug: string;
+  name: string;
+  image: string;
+  avatar: string;
+  taskCount: number;
+  tasks: ScavengerTask[];
+}
+
+export interface ScavengerTaskTypeInfo {
+  icon: 'checkin' | 'photo' | 'question';
+  title: string;
+  description: string;
+}
+
+export interface PwaScavengerHuntConfig {
+  title: string;
+  welcome: {
+    title: string;
+    description: string;
+    taskTypes: ScavengerTaskTypeInfo[];
+    button: string;
+  };
+  howItWorks: {
+    title: string;
+    description: string;
+    taskTypes: ScavengerTaskTypeInfo[];
+  };
+  hunts: ScavengerHunt[];
+  completed: {
+    title: string;
+    correctTitle: string;
+    remainingTasks: string;
+    done: string;
+    hashtag: string;
+  };
+  hundredPercent: {
+    title: string;
+    body: string;
+    done: string;
+  };
+  socialLinks?: {
+    x?: string;
+    facebook?: string;
+    instagram?: string;
+    youtube?: string;
+  };
+  taskDetail: {
+    takePhoto: string;
+    checkIn: string;
+    seeDirections: string;
+    descriptionLabel: string;
+    cancel: string;
+    continue: string;
   };
 }
 

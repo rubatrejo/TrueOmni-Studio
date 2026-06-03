@@ -26,6 +26,8 @@ const ITEM_HREF: Record<string, string> = {
   'interactive-trails': '/pwa/trails',
   deals: '/pwa/deals',
   tickets: '/pwa/tickets',
+  wayfinding: '/pwa/wayfinding',
+  'scavenger-hunt': '/pwa/scavenger-hunt',
 };
 
 interface MoreScreenProps {

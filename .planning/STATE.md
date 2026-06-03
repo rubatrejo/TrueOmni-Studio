@@ -3770,6 +3770,61 @@ digital-brochure,ads,social-wall}-pwa/`. Zoom del brochure medido (276→423px);
 
 ---
 
+### Sesión 2026-06-03 — Scavenger Hunt aprobado + Trip Planner (Fase 1+2)
+
+**Hecho:**
+
+- **Scavenger Hunt — pulido pixel-perfect + white-label (APROBADO por Rubén):**
+  iconos de task type a cuadrados redondeados con colores de brand (Photo=primary,
+  Check-in=secondary + pin, Question=tertiary olive); welcome convertido a popup
+  centrado con contenido más grande; dashboard cards (ring con fracción, pill olive
+  "N TASKS", card completada con banner); Map tab full-bleed + cards flotantes (#3);
+  check-in con mapa real + geofence + "Go to the designated point" (#10); 100%
+  completed con bottom nav arreglado (z-10), logos sociales oficiales (componente
+  único `hunt-social-links.tsx`), `{client_name}` interpolado en textos+hashtag
+  (#VisitArizona); welcome vuelto a show-once. Barra COMPLETION → olive.
+- **More:** quitado el item "Hiking Trails" del config.
+- **Módulo Trip Planner PWA (NUEVO) — Fase 1 + Fase 2 completas** en
+  `src/components/pwa/trip-planner/` + ruta `/pwa/trip-planner`:
+  - Fase 1: Welcome (con mapa real Mapbox client-dependent), LIST con menú de
+    categorías (Things to Do/Restaurants/Events+week-strip/Local Listings), cards
+    con "Open until X", pill MY PLAN, My Plan (stops + Smart Route + Start Plan),
+    Map con ruta + carrusel + Share (QR), toggle LIST/AI/MAP.
+  - Fase 2: AI popup (2 caminos), wizard config-driven (`{client_name}`), loading,
+    AI Itinerary Result (tabs LODGING/DAY + timeline + carrusel), Top Suggestions
+    Result (tabs por categoría + More info/Itinerary/Remove).
+  - Reutiliza lógica del kiosk: `useItineraryRail`, `generateItinerary`, catálogo,
+    `textos.itinerary_*`; `smartRouteOrder` extraído a `src/lib/itinerary-smart-route.ts`.
+    Config nueva: `features.pwa.tripPlanner` (solo strings mobile). Cableado el
+    quick-access `trip-planner` del dashboard.
+
+**Verificado:**
+
+- typecheck + lint + validate:configs (3/3) limpios.
+- Self-review pixel-perfect con puppeteer (viewport 390×844) de todas las pantallas
+  vs PNGs de `~/Desktop/PWA/Trip Planner` y `~/Desktop/PWA/Scavenger Hunt`.
+- Sin regresión del kiosk (solo se extendió/leía lógica compartida; nuevos archivos).
+
+**Pendiente / siguiente:**
+
+- **Feedback de Rubén sobre Trip Planner** (lo da la próxima sesión).
+- Gaps Trip Planner: pines numerados del mapa (requiere extender `MapCanvas`, misma
+  limitación que el kiosk), popup "leave AI warning" del wizard (saltado en v1).
+- Welcome del Trip Planner sigue con flag `ALWAYS_SHOW_FOR_REVIEW=true` (sale cada vez)
+  hasta aprobación.
+- Limpiar carpetas `.next.trash-*` de la raíz.
+
+**Decisiones:**
+
+- Trip Planner reutiliza CONTENIDO del kiosk (`features.home.itinerary`), cero
+  duplicación; solo strings mobile en `features.pwa.tripPlanner`.
+- My Plan sin drag manual: solo quitar + Smart Route (TSP greedy).
+- Mapa/ilustración client-dependent vía `buildMapboxStaticUrl` + `client.coords`.
+
+**Fase:** Milestone PWA Mobile — P2/Px (Scavenger Hunt cerrado; Trip Planner en review).
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

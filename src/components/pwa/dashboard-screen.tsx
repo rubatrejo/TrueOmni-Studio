@@ -164,6 +164,7 @@ export function DashboardScreen({
                 onClick={() => {
                   if (q.key === 'places-to-stay') router.push('/pwa/stay');
                   else if (q.key === 'events') router.push('/pwa/events');
+                  else if (q.key === 'trip-planner') router.push('/pwa/trip-planner');
                 }}
                 className="absolute bg-cover bg-center"
                 style={{

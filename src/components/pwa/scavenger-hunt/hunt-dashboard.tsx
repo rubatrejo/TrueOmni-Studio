@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
-
 import { useHuntProgress } from '@/hooks/use-hunt-progress';
 import type { PwaScavengerHuntConfig } from '@/lib/config';
 
@@ -48,22 +46,6 @@ interface HuntDashboardProps {
 }
 
 export function HuntDashboard({ config }: HuntDashboardProps) {
-  // Pre-seed one hunt as completed for demo
-  useEffect(() => {
-    const key = 'pwa-hunt-progress-friendship-park-city';
-    if (typeof window !== 'undefined' && !localStorage.getItem(key)) {
-      const fp = config.hunts.find((h) => h.slug === 'friendship-park-city');
-      if (fp) {
-        const progress: Record<string, { status: string; completedAt: string }> = {};
-        fp.tasks.forEach((t) => {
-          progress[t.slug] = { status: 'completed', completedAt: new Date().toISOString() };
-        });
-        localStorage.setItem(key, JSON.stringify(progress));
-        window.dispatchEvent(new Event('hunt-progress'));
-      }
-    }
-  }, [config.hunts]);
-
   return (
     <div className="relative flex h-full w-full flex-col bg-white">
       {/* Header */}

@@ -181,7 +181,7 @@ export function TaskCheckin({
             />
           ) : (
             <div className="flex h-full items-center justify-center text-[13px] text-gray-400">
-              Map unavailable
+              {config.geoError?.mapUnavailable ?? 'Map unavailable'}
             </div>
           )}
 
@@ -190,9 +190,9 @@ export function TaskCheckin({
             <div
               className="h-[150px] w-[150px] rounded-full border-[3px]"
               style={{
-                borderColor: isNear ? '#43a047' : 'hsl(var(--brand-primary))',
+                borderColor: isNear ? 'hsl(var(--pwa-success))' : 'hsl(var(--brand-primary))',
                 backgroundColor: isNear
-                  ? 'hsl(120 40% 50% / 0.18)'
+                  ? 'hsl(var(--pwa-success) / 0.18)'
                   : 'hsl(var(--brand-primary) / 0.18)',
               }}
             />
@@ -204,7 +204,12 @@ export function TaskCheckin({
               className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-white/90 px-3 py-1 text-[12px] font-bold text-gray-700 shadow"
               style={OPEN_SANS}
             >
-              {distanceM < 1000 ? `${distanceM}m away` : `${(distanceM / 1000).toFixed(1)}km away`}
+              {(() => {
+                const tpl = config.taskList?.distanceAway ?? '{n} {unit} away';
+                return distanceM < 1000
+                  ? tpl.replace('{n}', String(distanceM)).replace('{unit}', 'm')
+                  : tpl.replace('{n}', (distanceM / 1000).toFixed(1)).replace('{unit}', 'km');
+              })()}
             </div>
           )}
 
@@ -240,9 +245,11 @@ export function TaskCheckin({
             setGeoError(false);
             setMapMode(false);
           }}
-          title="Location Required"
-          body="Please enable location services to use the check-in feature."
-          primaryCta="OK"
+          title={config.geoError?.title ?? 'Location Required'}
+          body={
+            config.geoError?.body ?? 'Please enable location services to use the check-in feature.'
+          }
+          primaryCta={config.geoError?.ok ?? 'OK'}
         />
       </div>
     );

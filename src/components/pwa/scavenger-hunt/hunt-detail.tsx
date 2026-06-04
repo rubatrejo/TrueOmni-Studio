@@ -23,13 +23,21 @@ interface HuntDetailProps {
   mapboxToken: string;
   /** Nombre del cliente activo para interpolar `{client_name}` en pantallas de completado. */
   clientName: string;
+  /** Origen del cliente para calcular la distancia real a cada tarea. */
+  clientCoords: { lat: number; lng: number };
 }
 
 /**
  * Detail de un hunt: barra de progreso + hero image + tabs Tasks/Map +
  * contenido. Si 100% → pantalla de celebración.
  */
-export function HuntDetail({ hunt, config, mapboxToken, clientName }: HuntDetailProps) {
+export function HuntDetail({
+  hunt,
+  config,
+  mapboxToken,
+  clientName,
+  clientCoords,
+}: HuntDetailProps) {
   const [tab, setTab] = useState<'tasks' | 'map'>('tasks');
   const { completionPercent, completedCount, isCompleted, isTaskCompleted } = useHuntProgress(
     hunt.slug,
@@ -95,7 +103,9 @@ export function HuntDetail({ hunt, config, mapboxToken, clientName }: HuntDetail
               backgroundColor: tab === t ? 'hsl(var(--brand-primary))' : 'transparent',
             }}
           >
-            {t === 'tasks' ? 'Tasks' : 'Map'}
+            {t === 'tasks'
+              ? (config.taskList?.tasksTab ?? 'Tasks')
+              : (config.taskList?.mapTab ?? 'Map')}
           </button>
         ))}
       </div>
@@ -108,6 +118,8 @@ export function HuntDetail({ hunt, config, mapboxToken, clientName }: HuntDetail
               huntSlug={hunt.slug}
               tasks={hunt.tasks}
               isTaskCompleted={isTaskCompleted}
+              config={config}
+              clientCoords={clientCoords}
             />
           </div>
         ) : (

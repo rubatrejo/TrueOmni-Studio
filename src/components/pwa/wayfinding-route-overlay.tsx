@@ -21,14 +21,14 @@ function OriginMarker({ point, label }: { point: WayfindingPoint; label: string 
     >
       <span
         className="mb-[2px] whitespace-nowrap text-[8px] font-bold"
-        style={{ ...OPEN_SANS, color: '#e53935' }}
+        style={{ ...OPEN_SANS, color: 'hsl(var(--pwa-route-pin))' }}
       >
         {label}
       </span>
       <svg width="18" height="24" viewBox="0 0 18 24" fill="none">
         <path
           d="M9 0C4.03 0 0 4.03 0 9c0 6.75 9 15 9 15s9-8.25 9-15c0-4.97-4.03-9-9-9z"
-          fill="#e53935"
+          fill="hsl(var(--pwa-route-pin))"
         />
         <circle cx="9" cy="8.5" r="3.5" fill="white" />
       </svg>

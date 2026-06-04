@@ -91,14 +91,14 @@ export function TaskPhoto({
       <PwaAlertModal
         open={error}
         onClose={() => setError(false)}
-        title="Whoops!"
-        body="Something went wrong, please try again."
-        primaryCta="Retry"
+        title={config.errors?.title ?? 'Whoops!'}
+        body={config.errors?.photoFailed ?? 'Something went wrong, please try again.'}
+        primaryCta={config.errors?.retry ?? 'Retry'}
         onPrimary={() => {
           setError(false);
           fileRef.current?.click();
         }}
-        secondaryCta="Cancel"
+        secondaryCta={config.errors?.cancel ?? 'Cancel'}
         onSecondary={() => setError(false)}
       />
     </>

@@ -20,6 +20,12 @@
   --brand-secondary: 25 95% 55%; /* #F58A1F — Naranja cálido: CTAs, links, pins, ring */
   --brand-tertiary: 160 72% 45%; /* #1FC58F — Verde menta: highlights, CTA destacado */
 
+  /* Tokens PWA de cards/wayfinding/check-in (neutros + funcionales). */
+  --pwa-card-footer: 0 0% 33%;
+  --pwa-route-pin: 1 78% 55%;
+  --pwa-floorplan-bg: 60 9% 94%;
+  --pwa-success: 122 41% 45%;
+
   /* ---------------------------------------------------------------------- */
   /*  NEUTRALES (no son brand del cliente — fondo y texto base del kiosk)   */
   /* ---------------------------------------------------------------------- */

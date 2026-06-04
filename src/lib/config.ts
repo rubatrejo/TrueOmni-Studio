@@ -1674,6 +1674,39 @@ export interface PwaScavengerHuntConfig {
     /** Banner de hunt completado, ej. "Fantastic, Impressive work!". */
     completedBanner: string;
   };
+  /** Lista de tareas del detalle del hunt (labels por tipo, tabs, distancia). */
+  taskList?: {
+    remainingTasks: string;
+    photoTask: string;
+    checkinTask: string;
+    questionTask: string;
+    allCompleted: string;
+    tasksTab: string;
+    mapTab: string;
+    /** Plantilla de distancia, ej. "{n} {unit} away". */
+    distanceAway: string;
+    /** Unidad de distancia, ej. "mi". */
+    unit: string;
+  };
+  /** Texto de la pantalla de pregunta. */
+  question?: {
+    instruction: string;
+  };
+  /** Modales de error/reintento (white-label + i18n). */
+  errors?: {
+    title: string;
+    retry: string;
+    cancel: string;
+    wrongAnswer: string;
+    photoFailed: string;
+  };
+  /** Modal de permiso de ubicación + mapa no disponible del check-in. */
+  geoError?: {
+    title: string;
+    body: string;
+    ok: string;
+    mapUnavailable: string;
+  };
 }
 
 /** Notificación seed (mock). El estado read/deleted vive client-side. */

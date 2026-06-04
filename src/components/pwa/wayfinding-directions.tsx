@@ -38,7 +38,7 @@ export function WayfindingDirections({ config, floor, amenity }: WayfindingDirec
       {/* Contenido scrolleable */}
       <div className="scrollbar-hide flex-1 overflow-y-auto">
         {/* Floor plan con ruta overlay */}
-        <div className="relative w-full bg-[#f0f0ee]">
+        <div className="relative w-full bg-[hsl(var(--pwa-floorplan-bg))]">
           <img
             src={floorPlanSrc}
             alt={`${floor.label} floor plan`}

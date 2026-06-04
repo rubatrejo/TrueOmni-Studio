@@ -3,7 +3,16 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
-const COLORS = ['#1a6fa0', '#d4a83e', '#c62828', '#2e7d32', '#5c35a0', '#e65100'];
+// Paleta tokenizada: colores de marca + acentos funcionales ya existentes
+// (cero hex inventados — cada cliente recolorea el confeti vía sus tokens).
+const COLORS = [
+  'hsl(var(--brand-primary))',
+  'hsl(var(--brand-tertiary))',
+  'hsl(var(--brand-secondary))',
+  'hsl(var(--pwa-success))',
+  'hsl(var(--pwa-favorite))',
+  'hsl(var(--pwa-events-pin))',
+];
 const PARTICLE_COUNT = 30;
 
 function randomBetween(a: number, b: number) {

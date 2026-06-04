@@ -31,6 +31,10 @@
   --pwa-events-pin: 36 91% 55%; /* pin de ubicación (ámbar) del header de Events */
   --pwa-reader-bg: 240 5% 13%; /* fondo del visor de PDF (neutro, chrome del reader) */
   --pwa-reader-stage: 228 6% 17%; /* stage oscuro tras la página del PDF (neutro) */
+  --pwa-card-footer: 0 0% 33%; /* footer gris de las cards de mapa (Map + Trip Planner) */
+  --pwa-route-pin: 1 78% 55%; /* pin "YOU ARE HERE" de la ruta de Wayfinding */
+  --pwa-floorplan-bg: 60 9% 94%; /* fondo del lienzo de floor plan (Wayfinding) */
+  --pwa-success: 122 41% 45%; /* verde semántico de proximidad/éxito (check-in geofence) */
 
   /* ---------------------------------------------------------------------- */
   /*  TOKENS SEMÁNTICOS (consumidos por Tailwind y componentes)             */

@@ -26,6 +26,7 @@ export default async function PwaHuntDetailPage({ params }: { params: Promise<{ 
         config={sh}
         mapboxToken={mapboxToken}
         clientName={config.client.nombre}
+        clientCoords={config.client.coords ?? { lat: 0, lng: 0 }}
       />
     </MobileCanvas>
   );

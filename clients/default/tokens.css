@@ -32,6 +32,10 @@
   --pwa-deals-expiry: 66 41% 36%; /* ≈ #7a8236 — fecha de expiración (olive) de las cards de Deals, igual que el kiosk */
   --pwa-reader-bg: 240 5% 13%; /* ≈ #1f1f22 — fondo del visor de PDF (neutro, chrome del reader) */
   --pwa-reader-stage: 228 6% 17%; /* ≈ #28292d — stage oscuro tras la página del PDF (neutro) */
+  --pwa-card-footer: 0 0% 33%; /* ≈ #555 — footer gris de las cards de mapa (Map + Trip Planner) */
+  --pwa-route-pin: 1 78% 55%; /* ≈ #e53935 — pin "YOU ARE HERE" de la ruta de Wayfinding */
+  --pwa-floorplan-bg: 60 9% 94%; /* ≈ #f0f0ee — fondo del lienzo de floor plan (Wayfinding) */
+  --pwa-success: 122 41% 45%; /* ≈ #43a047 — verde semántico de proximidad/éxito (check-in geofence) */
 
   /* ---------------------------------------------------------------------- */
   /*  TOKENS SEMÁNTICOS (consumidos por Tailwind y componentes)             */

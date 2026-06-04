@@ -71,7 +71,10 @@ export function TaskQuestion({
           className="absolute left-0 top-0"
           style={{ width: 375, height: 90, transform: `scale(${S})`, transformOrigin: 'top left' }}
         >
-          <PwaSubHeader title="Question Task" backHref={`/pwa/scavenger-hunt/${huntSlug}`} />
+          <PwaSubHeader
+            title={config.taskList?.questionTask ?? 'Question Task'}
+            backHref={`/pwa/scavenger-hunt/${huntSlug}`}
+          />
         </div>
       </div>
 
@@ -85,7 +88,8 @@ export function TaskQuestion({
             <span className="font-bold text-white">?</span>
           </div>
           <p className="text-center text-[15px] font-bold text-gray-800" style={OPEN_SANS}>
-            Answer this question correctly and complete this task
+            {config.question?.instruction ??
+              'Answer this question correctly and complete this task'}
           </p>
         </div>
 
@@ -159,14 +163,14 @@ export function TaskQuestion({
       <PwaAlertModal
         open={wrongOpen}
         onClose={() => setWrongOpen(false)}
-        title="Whoops!"
-        body="Wrong answer, please try again"
-        primaryCta="Retry"
+        title={config.errors?.title ?? 'Whoops!'}
+        body={config.errors?.wrongAnswer ?? 'Wrong answer, please try again'}
+        primaryCta={config.errors?.retry ?? 'Retry'}
         onPrimary={() => {
           setWrongOpen(false);
           setSelected(null);
         }}
-        secondaryCta="Cancel"
+        secondaryCta={config.errors?.cancel ?? 'Cancel'}
         onSecondary={() => setWrongOpen(false)}
       />
     </div>

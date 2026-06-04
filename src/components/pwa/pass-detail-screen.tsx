@@ -6,6 +6,7 @@ import type { PassActivity, PassItem, PwaPassesModuleConfig } from '@/lib/config
 import { PwaBottomNav } from './bottom-nav';
 import { S } from './mobile-layer';
 import { PwaSubHeader } from './pwa-sub-header';
+import { ShareIconButton } from './share-icon-button';
 
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
 const FG = 'hsl(var(--foreground))';
@@ -24,19 +25,6 @@ function sharePass(pass: PassItem) {
   } else {
     openExternal(url);
   }
-}
-
-/** Botón de compartir del header (mismo glyph que el detalle de listings). */
-function ShareButton({ onShare }: { onShare: () => void }) {
-  return (
-    <button type="button" aria-label="Share" onClick={onShare}>
-      <svg width={18} height={20} viewBox="0 0 72.914 81.25" fill="currentColor" aria-hidden>
-        <g transform="translate(-13.543 -9.375)">
-          <path d="M70.832,9.375a15.625,15.625,0,1,1-11.52,26.18L43.9,44.8a15.61,15.61,0,0,1,0,10.395l15.41,9.246A15.607,15.607,0,1,1,56.094,69.8l-15.41-9.25a15.623,15.623,0,1,1,0-21.113l15.41-9.25A15.627,15.627,0,0,1,70.832,9.375Z" />
-        </g>
-      </svg>
-    </button>
-  );
 }
 
 /** Fila de actividad — thumbnail + título + descripción + enlace externo. */
@@ -109,7 +97,7 @@ export function PassDetailScreen({
           <PwaSubHeader
             title={pass.title}
             backHref="/pwa/passes"
-            right={<ShareButton onShare={() => sharePass(pass)} />}
+            right={<ShareIconButton onShare={() => sharePass(pass)} size={18} />}
           />
         </div>
       </div>

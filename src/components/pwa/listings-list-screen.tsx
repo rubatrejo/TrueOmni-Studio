@@ -23,6 +23,8 @@ interface Props {
   title: string;
   tabs: { listings: string; map: string };
   resultsLabel: string;
+  /** Texto cuando los filtros no dejan resultados (white-label). */
+  emptyLabel?: string;
   distanceSuffix: string;
   items: ListingItem[];
   mapItems: MapItem[];
@@ -56,6 +58,7 @@ export function ListingsListScreen({
   title,
   tabs,
   resultsLabel,
+  emptyLabel,
   distanceSuffix,
   items,
   mapItems,
@@ -199,18 +202,30 @@ export function ListingsListScreen({
           >
             {resultsLabel.replace('{count}', String(vItems.length))}
           </div>
-          <ul className="mt-2">
-            {vItems.map((it) => (
-              <ListingRow
-                key={it.slug}
-                item={it}
-                href={`${basePath}/${it.slug}`}
-                fav={favs.has(it.slug)}
-                onToggleFav={() => toggleFav(it.slug)}
-                distanceSuffix={distanceSuffix}
-              />
-            ))}
-          </ul>
+          {vItems.length > 0 ? (
+            <ul className="mt-2 pb-6">
+              {vItems.map((it) => (
+                <ListingRow
+                  key={it.slug}
+                  item={it}
+                  href={`${basePath}/${it.slug}`}
+                  fav={favs.has(it.slug)}
+                  onToggleFav={() => toggleFav(it.slug)}
+                  distanceSuffix={distanceSuffix}
+                />
+              ))}
+            </ul>
+          ) : (
+            <div
+              className="flex flex-col items-center px-10 pt-20 text-center text-foreground/45"
+              style={{ fontFamily: OPEN_SANS }}
+            >
+              <svg width={40} height={40} viewBox="0 0 512 512" fill="currentColor" aria-hidden>
+                <path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
+              </svg>
+              <p className="mt-4 text-[15px]">{emptyLabel ?? 'No results match your filters.'}</p>
+            </div>
+          )}
         </div>
       ) : (
         <ListingsMap

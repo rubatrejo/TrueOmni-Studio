@@ -16,8 +16,12 @@ const PWA = 'hsl(var(--pwa-primary))';
 
 export type PwaNavKey = 'home' | 'events' | 'dining' | 'map' | 'more';
 
-/** 5 celdas del nav (75px c/u). `href` undefined → aún sin pantalla destino. */
-const NAV: { key: PwaNavKey; Icon: typeof HomeNavIcon; href?: string }[] = [
+/**
+ * 5 celdas del nav (75px c/u) — FUENTE ÚNICA de los destinos del bottom nav.
+ * Consumido por `PwaBottomNav` y por `InLayerNav` (pantallas en layer escalado)
+ * para evitar el drift de hrefs entre ambos. `href` undefined → sin destino aún.
+ */
+export const PWA_NAV: { key: PwaNavKey; Icon: typeof HomeNavIcon; href?: string }[] = [
   { key: 'home', Icon: HomeNavIcon, href: '/pwa/dashboard' },
   { key: 'events', Icon: CalendarNavIcon, href: '/pwa/events' },
   { key: 'dining', Icon: DiningNavIcon, href: '/pwa/restaurants' },
@@ -35,7 +39,7 @@ export function PwaBottomNav({ active }: { active?: PwaNavKey }) {
   return (
     <Layer h={56} className="shrink-0" style={{ backgroundColor: BRAND }}>
       <div className="flex h-full w-full">
-        {NAV.map(({ key, Icon, href }) => (
+        {PWA_NAV.map(({ key, Icon, href }) => (
           <button
             key={key}
             type="button"

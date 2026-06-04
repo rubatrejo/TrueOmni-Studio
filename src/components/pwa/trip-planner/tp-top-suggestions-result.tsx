@@ -8,6 +8,7 @@ import type { UseItineraryRailResult } from '@/lib/itinerary-favorites';
 
 import { Layer } from '../mobile-layer';
 
+import { TpConfirmPopup } from './tp-confirm-popup';
 import type { TpCard, TpCategory } from './types';
 
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
@@ -33,6 +34,7 @@ export function TpTopSuggestionsResult({
     (x): x is TpCategory => Boolean(x),
   );
   const [tab, setTab] = useState(0);
+  const [confirmStartOver, setConfirmStartOver] = useState(false);
   const tabLabelFor = (key: string) =>
     key === 'things-to-do'
       ? (textos.itinerary_top_tab_things ?? 'Things to do')
@@ -54,7 +56,7 @@ export function TpTopSuggestionsResult({
         <button
           type="button"
           aria-label="Back"
-          onClick={onStartOver}
+          onClick={() => setConfirmStartOver(true)}
           className="absolute text-white"
           style={{ left: 18, top: 50, height: 28 }}
         >
@@ -69,13 +71,6 @@ export function TpTopSuggestionsResult({
           {textos.itinerary_top_title ?? 'Top Suggestions'}
         </div>
       </Layer>
-
-      <p
-        className="px-6 py-3 text-center text-[13px] font-semibold text-foreground/80"
-        style={OPEN_SANS}
-      >
-        {textos.itinerary_top_subtitle ?? 'Top curated ideas. Just choose, save, or start over!'}
-      </p>
 
       {/* Tabs (underline) */}
       <div
@@ -159,7 +154,7 @@ export function TpTopSuggestionsResult({
       <div className="flex shrink-0 gap-3 px-4 py-3" style={OPEN_SANS}>
         <button
           type="button"
-          onClick={onStartOver}
+          onClick={() => setConfirmStartOver(true)}
           className="flex-1 rounded-full py-2.5 text-[13px] font-bold uppercase text-white"
           style={{ backgroundColor: 'hsl(var(--brand-tertiary))' }}
         >
@@ -174,6 +169,24 @@ export function TpTopSuggestionsResult({
           {textos.itinerary_ai_finish_cta ?? 'Finish'}
         </button>
       </div>
+
+      {/* Warning al hacer Start Over (vuelve a empezar el cuestionario) */}
+      {confirmStartOver && (
+        <TpConfirmPopup
+          title={textos.itinerary_ai_leave_warning_title ?? 'Are you sure\nyou want to leave?'}
+          body={
+            textos.itinerary_ai_leave_warning_body ??
+            "You'll lose the AI itinerary you've generated and have to answer the questions again."
+          }
+          cancelLabel={textos.itinerary_ai_leave_warning_cancel ?? 'Cancel'}
+          confirmLabel={textos.itinerary_ai_leave_warning_confirm ?? 'Leave'}
+          onCancel={() => setConfirmStartOver(false)}
+          onConfirm={() => {
+            setConfirmStartOver(false);
+            onStartOver();
+          }}
+        />
+      )}
     </div>
   );
 }

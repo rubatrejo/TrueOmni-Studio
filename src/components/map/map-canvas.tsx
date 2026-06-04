@@ -103,6 +103,12 @@ export function MapCanvas({
   const itemsRef = useRef<readonly MapItem[]>(items);
   const routeStopsRef = useRef<readonly { lng: number; lat: number }[] | undefined>(routeStops);
   routeStopsRef.current = routeStops;
+  // Refs para poder aplicar el fitBounds inicial dentro del handler `load`
+  // (el effect de routeStops puede correr antes de que el mapa cargue → race).
+  const fitRouteBoundsRef = useRef(fitRouteBounds);
+  fitRouteBoundsRef.current = fitRouteBounds;
+  const flyToPaddingRef = useRef(flyToPadding);
+  flyToPaddingRef.current = flyToPadding;
 
   // Init del mapa una sola vez.
   useEffect(() => {
@@ -260,6 +266,23 @@ export function MapCanvas({
             },
           ],
         });
+        // El effect de fitBounds pudo correr antes del load (readyRef=false) y
+        // salir sin encuadrar. Aplicarlo ahora que el mapa está listo.
+        if (fitRouteBoundsRef.current) {
+          const bounds = new mapboxgl.LngLatBounds();
+          initialStops.forEach((s) => bounds.extend([s.lng, s.lat]));
+          const pad = flyToPaddingRef.current ?? {};
+          map.fitBounds(bounds, {
+            padding: {
+              top: (pad.top ?? 0) + 80,
+              bottom: (pad.bottom ?? 0) + 80,
+              left: (pad.left ?? 0) + 80,
+              right: (pad.right ?? 0) + 80,
+            },
+            duration: 0,
+            maxZoom: 14,
+          });
+        }
       }
     });
 

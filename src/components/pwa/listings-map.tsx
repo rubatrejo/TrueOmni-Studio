@@ -11,7 +11,7 @@ import type { ListingItem } from './listing-row';
 import { PwaHeart } from './pwa-heart';
 
 const OLIVE = 'hsl(var(--brand-tertiary))';
-const FOOTER = 'hsl(0 0% 33%)'; // gris neutro del footer (≈ #555 del card del kiosk)
+const FOOTER = 'hsl(var(--pwa-card-footer))'; // gris neutro del footer (≈ #555 del card del kiosk)
 const OPEN_SANS = 'var(--font-open-sans)';
 
 /* Card estilo kiosk (imagen 16:9 + footer): ~2.5 visibles en el canvas 390. */

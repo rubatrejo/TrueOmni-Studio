@@ -5,6 +5,26 @@ import type { TpCategory } from './types';
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
 const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
 
+/** "2026-07-18" → "JULY 18" (UTC determinista para no romper hidratación). */
+function fmtDay(iso: string): string {
+  const d = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(d.getTime())) return '';
+  const month = d.toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' }).toUpperCase();
+  return `${month} ${d.getUTCDate()}`;
+}
+
+/** Rango "JULY 18 - JULY 25" derivado del min/max de fechas de los eventos. */
+function eventDateRange(items: { date?: string }[]): string {
+  const dates = items
+    .map((i) => i.date)
+    .filter((d): d is string => Boolean(d))
+    .sort();
+  if (dates.length === 0) return '';
+  const start = fmtDay(dates[0]!);
+  const end = fmtDay(dates[dates.length - 1]!);
+  return start && end ? (start === end ? start : `${start} - ${end}`) : '';
+}
+
 /** Glifo por categoría dentro del badge circular. */
 function CatGlyph({ catKey }: { catKey: string }) {
   switch (catKey) {
@@ -114,14 +134,19 @@ export function TpCategoryMenu({
           {/* Week-strip cuando Events está activo */}
           {c.key === 'events' && active === 'events' && (
             <div className="px-4 pb-2">
-              <div
-                className="mb-2 flex items-center justify-center gap-3 text-[13px] font-bold"
-                style={{ color: 'hsl(var(--brand-secondary))' }}
-              >
-                <span>‹</span>
-                <span>JULY 18 - JULY 25</span>
-                <span>›</span>
-              </div>
+              {(() => {
+                const range = eventDateRange(c.items ?? []);
+                return range ? (
+                  <div
+                    className="mb-2 flex items-center justify-center gap-3 text-[13px] font-bold"
+                    style={{ color: 'hsl(var(--brand-secondary))' }}
+                  >
+                    <span>‹</span>
+                    <span>{range}</span>
+                    <span>›</span>
+                  </div>
+                ) : null;
+              })()}
               <div className="flex flex-col gap-1.5">
                 {DAYS.map((d, i) => {
                   const on = i === selectedDay;

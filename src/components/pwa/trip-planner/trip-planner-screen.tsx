@@ -124,6 +124,13 @@ export function TripPlannerScreen({
     setAiResult(null);
   };
 
+  // Finish del flujo AI → al planning (My Plan) con todos los listings que el
+  // usuario agregó al rail durante el resultado.
+  const onAiFinish = () => {
+    exitAi();
+    setMode('myplan');
+  };
+
   const inAi = aiView !== null;
 
   return (
@@ -185,7 +192,7 @@ export function TripPlannerScreen({
             resolveCard={resolveCard}
             rail={rail}
             onStartOver={() => setAiView('wizard')}
-            onFinish={exitAi}
+            onFinish={onAiFinish}
             onShare={() => setShareOpen(true)}
           />
         ) : aiPath === 'top' ? (
@@ -195,7 +202,7 @@ export function TripPlannerScreen({
             textos={textos}
             rail={rail}
             onStartOver={() => setAiView('wizard')}
-            onFinish={exitAi}
+            onFinish={onAiFinish}
           />
         ) : null)}
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import type { PwaTripPlannerModuleConfig } from '@/lib/config';
@@ -31,6 +32,7 @@ export function TpListView({
   rail: UseItineraryRailResult;
   onOpenMyPlan: () => void;
 }) {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeCat, setActiveCat] = useState('things-to-do');
   const [selectedDay, setSelectedDay] = useState(1);
@@ -50,7 +52,7 @@ export function TpListView({
   };
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col" style={{ backgroundColor: BRAND }}>
+    <div className="relative flex min-h-0 flex-1 flex-col bg-background">
       {/* Header: hamburguesa + título + search */}
       <Layer h={90} className="relative z-10 shrink-0" style={{ backgroundColor: BRAND }}>
         <button
@@ -81,9 +83,15 @@ export function TpListView({
         >
           {headerTitle}
         </div>
-        <div className="absolute text-white" style={{ right: 18, top: 48 }}>
+        <button
+          type="button"
+          aria-label="Search"
+          onClick={() => router.push('/pwa/search')}
+          className="absolute text-white"
+          style={{ right: 18, top: 48 }}
+        >
           <SearchIcon size={20} />
-        </div>
+        </button>
       </Layer>
 
       {/* Lista scrollable (bg navy → separa cards) */}
@@ -115,31 +123,22 @@ export function TpListView({
             })}
       </div>
 
-      {/* Floating heart (abre My Plan) */}
-      <button
-        type="button"
-        aria-label="My plan"
-        onClick={onOpenMyPlan}
-        className="absolute right-3 flex h-[36px] w-[36px] items-center justify-center rounded-full bg-white shadow"
-        style={{ top: headerH + 8 }}
-      >
-        <svg width={18} height={18} viewBox="0 0 24 24" fill="hsl(var(--pwa-favorite))" aria-hidden>
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-        </svg>
-      </button>
-
       {/* MY PLAN (n) pill */}
       {rail.count > 0 && (
         <button
           type="button"
           onClick={onOpenMyPlan}
           className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full py-2 pl-4 pr-2 text-white shadow-lg"
-          style={{ backgroundColor: 'hsl(var(--brand-tertiary))', ...OPEN_SANS }}
+          style={{
+            backgroundImage:
+              'linear-gradient(to right, hsl(var(--brand-primary)), hsl(var(--brand-secondary)))',
+            ...OPEN_SANS,
+          }}
         >
           <span className="text-[13px] font-bold">{tp.myPlan.myPlanLabel}</span>
           <span
-            className="flex h-[24px] min-w-[24px] items-center justify-center rounded-full px-1 text-[12px] font-bold"
-            style={{ backgroundColor: 'hsl(var(--brand-secondary))' }}
+            className="flex h-[24px] min-w-[24px] items-center justify-center rounded-full bg-white px-1 text-[12px] font-bold"
+            style={{ color: 'hsl(var(--brand-primary))' }}
           >
             {rail.count}
           </span>

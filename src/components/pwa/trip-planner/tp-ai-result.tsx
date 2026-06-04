@@ -3,13 +3,14 @@
 import { useState } from 'react';
 
 import type { GeneratedEntry, GeneratedItinerary } from '@/lib/ai-itinerary';
-import { resolveAssetUrl } from '@/lib/asset-url';
 import type { PwaTripPlannerModuleConfig } from '@/lib/config';
 import type { UseItineraryRailResult } from '@/lib/itinerary-favorites';
 
 import { Layer } from '../mobile-layer';
-import { PwaHeart } from '../pwa-heart';
+import { ShareIconButton } from '../share-icon-button';
 
+import { TpConfirmPopup } from './tp-confirm-popup';
+import { TpStopCard } from './tp-stop-card';
 import type { TpCard } from './types';
 
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
@@ -71,6 +72,7 @@ export function TpAiResult({
   const lodgingLabel = 'LODGING';
   const tabs = [lodgingLabel, ...result.days.map((d) => d.label.toUpperCase())];
   const [tab, setTab] = useState(result.days.length > 0 ? 1 : 0);
+  const [confirmStartOver, setConfirmStartOver] = useState(false);
 
   const kindLabel = (k: GeneratedEntry['kind']) =>
     k === 'breakfast'
@@ -103,7 +105,7 @@ export function TpAiResult({
         <button
           type="button"
           aria-label="Back"
-          onClick={onStartOver}
+          onClick={() => setConfirmStartOver(true)}
           className="absolute text-white"
           style={{ left: 18, top: 50, height: 28 }}
         >
@@ -117,22 +119,11 @@ export function TpAiResult({
         >
           {tp.ai.resultTitle}
         </div>
-        <button
-          type="button"
-          aria-label="Share"
-          onClick={onShare}
-          className="absolute text-white"
-          style={{ right: 18, top: 50 }}
-        >
-          <svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path
-              d="M18 8a3 3 0 10-2.83-4M6 15a3 3 0 100-6 3 3 0 000 6zm12 7a3 3 0 10-2.83-4M8.6 13.5l6.8 3.9M15.4 6.6l-6.8 3.9"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
+        <ShareIconButton
+          onShare={onShare}
+          size={20}
+          className="absolute right-[18px] top-[50px] text-white"
+        />
       </Layer>
 
       {/* Tabs */}
@@ -180,33 +171,21 @@ export function TpAiResult({
           </div>
         )}
 
-        {/* Carrusel de cards */}
-        <div className="scrollbar-hide flex gap-3 overflow-x-auto px-4 pb-4 pt-1">
+        {/* Carrusel de cards (estilo módulo Map para consistencia) */}
+        <div className="scrollbar-hide flex gap-2.5 overflow-x-auto px-4 pb-4 pt-1">
           {carouselCards.map((c) => {
             const fav = rail.has(c.slug, c.kind);
             return (
-              <div
+              <TpStopCard
                 key={`${c.kind}:${c.slug}`}
-                className="relative h-[150px] w-[230px] shrink-0 overflow-hidden rounded-[12px] bg-cover bg-center shadow"
-                style={{ backgroundImage: `url("${resolveAssetUrl(c.image)}")` }}
-              >
-                <span className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
-                <button
-                  type="button"
-                  aria-label="Toggle"
-                  onClick={() => (fav ? rail.remove(c.slug, c.kind) : rail.add(c.slug, c.kind))}
-                  className="absolute right-2 top-2 flex h-[30px] w-[30px] items-center justify-center rounded-full bg-white/90"
-                >
-                  <PwaHeart filled={fav} size={17} />
-                </button>
-                <div className="absolute bottom-2 left-3 right-3">
-                  <p className="text-[8px] font-bold uppercase text-white/80">{c.subcategory}</p>
-                  <p className="truncate text-[14px] font-bold text-white">{c.title}</p>
-                  <p className="text-[11px] text-white/90">
-                    {distanceTemplate.replace('{n}', c.distanceMi.toFixed(1))}
-                  </p>
-                </div>
-              </div>
+                image={c.image}
+                eyebrow={c.subcategory}
+                title={c.title}
+                meta={distanceTemplate.replace('{n}', c.distanceMi.toFixed(1))}
+                openUntil={c.openUntil}
+                fav={fav}
+                onToggleFav={() => (fav ? rail.remove(c.slug, c.kind) : rail.add(c.slug, c.kind))}
+              />
             );
           })}
         </div>
@@ -216,7 +195,7 @@ export function TpAiResult({
       <div className="flex shrink-0 gap-3 px-4 py-3" style={OPEN_SANS}>
         <button
           type="button"
-          onClick={onStartOver}
+          onClick={() => setConfirmStartOver(true)}
           className="flex-1 rounded-full py-2.5 text-[13px] font-bold uppercase text-white"
           style={{ backgroundColor: 'hsl(var(--brand-tertiary))' }}
         >
@@ -231,6 +210,24 @@ export function TpAiResult({
           {textos.itinerary_ai_finish_cta ?? 'Finish'}
         </button>
       </div>
+
+      {/* Warning al hacer Start Over (descarta el itinerario AI generado) */}
+      {confirmStartOver && (
+        <TpConfirmPopup
+          title={textos.itinerary_ai_leave_warning_title ?? 'Are you sure\nyou want to leave?'}
+          body={
+            textos.itinerary_ai_leave_warning_body ??
+            "You'll lose the AI itinerary you've generated and have to answer the questions again."
+          }
+          cancelLabel={textos.itinerary_ai_leave_warning_cancel ?? 'Cancel'}
+          confirmLabel={textos.itinerary_ai_leave_warning_confirm ?? 'Leave'}
+          onCancel={() => setConfirmStartOver(false)}
+          onConfirm={() => {
+            setConfirmStartOver(false);
+            onStartOver();
+          }}
+        />
+      )}
     </div>
   );
 }

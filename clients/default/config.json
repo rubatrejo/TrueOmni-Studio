@@ -248,6 +248,14 @@
     "itinerary_ai_leave_warning_body": "You'll lose the AI itinerary you've generated and have to answer the questions again.",
     "itinerary_ai_leave_warning_cancel": "Cancel",
     "itinerary_ai_leave_warning_confirm": "Leave",
+    "itinerary_remove_confirm_title": "Remove from plan?",
+    "itinerary_remove_confirm_body": "This listing will be removed from your itinerary plan.",
+    "itinerary_remove_confirm_cancel": "Cancel",
+    "itinerary_remove_confirm_confirm": "Remove",
+    "itinerary_clear_confirm_title": "Clear your plan?",
+    "itinerary_clear_confirm_body": "All listings will be removed from your itinerary plan.",
+    "itinerary_clear_confirm_cancel": "Cancel",
+    "itinerary_clear_confirm_confirm": "Clear all",
     "itinerary_finished_title": "Itinerary saved!",
     "itinerary_finished_body": "We've added the {count} stops to your day. You can keep editing them on the map.",
     "itinerary_stop_label": "Stop {n}",
@@ -9931,6 +9939,108 @@
                 "moduleSlug": "restaurants"
               }
             ]
+          },
+          {
+            "slug": "family-fun-day",
+            "title": "Family Fun Day",
+            "description": "A kid-approved lineup of gardens, animals and hands-on wonder — easy to do in a single day with the whole family.",
+            "image": "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=1080&h=720&fit=crop&q=80",
+            "stops": [
+              {
+                "slug": "desert-botanical-garden",
+                "kind": "listing",
+                "moduleSlug": "things-to-do"
+              },
+              {
+                "slug": "phoenix-zoo",
+                "kind": "listing",
+                "moduleSlug": "things-to-do"
+              },
+              {
+                "slug": "odysea-aquarium",
+                "kind": "listing",
+                "moduleSlug": "things-to-do"
+              },
+              {
+                "slug": "butterfly-wonderland",
+                "kind": "listing",
+                "moduleSlug": "things-to-do"
+              }
+            ]
+          },
+          {
+            "slug": "art-and-culture-tour",
+            "title": "Art & Culture Tour",
+            "description": "Spend the day among world-class museums and galleries — a curated route for lovers of art, history and design.",
+            "image": "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=1080&h=720&fit=crop&q=80",
+            "stops": [
+              {
+                "slug": "heard-museum",
+                "kind": "listing",
+                "moduleSlug": "things-to-do"
+              },
+              {
+                "slug": "phoenix-art-museum",
+                "kind": "listing",
+                "moduleSlug": "things-to-do"
+              },
+              {
+                "slug": "musical-instrument-museum",
+                "kind": "listing",
+                "moduleSlug": "things-to-do"
+              }
+            ]
+          },
+          {
+            "slug": "outdoor-adventures",
+            "title": "Outdoor Adventures",
+            "description": "Trails, lakes and wide-open parks for a day of fresh air and great views — built for hikers and outdoor lovers.",
+            "image": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=1080&h=720&fit=crop&q=80",
+            "stops": [
+              {
+                "slug": "camelback-mountain",
+                "kind": "listing",
+                "moduleSlug": "things-to-do"
+              },
+              {
+                "slug": "papago-park",
+                "kind": "listing",
+                "moduleSlug": "things-to-do"
+              },
+              {
+                "slug": "south-mountain-park",
+                "kind": "listing",
+                "moduleSlug": "things-to-do"
+              },
+              {
+                "slug": "tempe-town-lake",
+                "kind": "listing",
+                "moduleSlug": "things-to-do"
+              }
+            ]
+          },
+          {
+            "slug": "live-music-weekend",
+            "title": "Live Music Weekend",
+            "description": "From jazz under the stars to festival headliners — a weekend itinerary for music lovers chasing the best live shows.",
+            "image": "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1080&h=720&fit=crop&q=80",
+            "stops": [
+              {
+                "slug": "jazz-under-the-stars",
+                "kind": "event",
+                "moduleSlug": "events"
+              },
+              {
+                "slug": "indie-fest-2026",
+                "kind": "event",
+                "moduleSlug": "events"
+              },
+              {
+                "slug": "waterfront-concert",
+                "kind": "event",
+                "moduleSlug": "events"
+              }
+            ]
           }
         ],
         "ai": {
@@ -12206,6 +12316,33 @@
           "cancel": "CANCEL",
           "continue": "CONTINUE",
           "goToPoint": "Go to the designated point"
+        },
+        "taskList": {
+          "remainingTasks": "Remaining Tasks",
+          "photoTask": "Photo Task",
+          "checkinTask": "Check-In Task",
+          "questionTask": "Question Task",
+          "allCompleted": "All tasks completed!",
+          "tasksTab": "Tasks",
+          "mapTab": "Map",
+          "distanceAway": "{n} {unit} away",
+          "unit": "mi"
+        },
+        "question": {
+          "instruction": "Answer this question correctly and complete this task"
+        },
+        "errors": {
+          "title": "Whoops!",
+          "retry": "Retry",
+          "cancel": "Cancel",
+          "wrongAnswer": "Wrong answer, please try again",
+          "photoFailed": "Something went wrong, please try again."
+        },
+        "geoError": {
+          "title": "Location Required",
+          "body": "Please enable location services to use the check-in feature.",
+          "ok": "OK",
+          "mapUnavailable": "Map unavailable"
         }
       },
       "tripPlanner": {
@@ -12226,7 +12363,7 @@
         },
         "myPlan": {
           "title": "Trip Planner",
-          "intro": "This is your itinerary Plan. You can remove listings, see time estimates, move the order, share it, and start your trip with a map view.",
+          "intro": "You can remove listings, see time estimates, move the order, share it, and start your trip with a map view.",
           "myPlanLabel": "MY PLAN",
           "startTimeLabel": "START TIME",
           "endTimeLabel": "END TIME",

@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
 import { resolveAssetUrl } from '@/lib/asset-url';
@@ -10,6 +11,7 @@ import { smartRouteOrder } from '@/lib/itinerary-smart-route';
 import { SearchIcon } from '../dashboard-icons';
 import { Layer } from '../mobile-layer';
 
+import { TpConfirmPopup } from './tp-confirm-popup';
 import type { TpCard } from './types';
 
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
@@ -46,7 +48,10 @@ export function TpMyPlan({
   onBack: () => void;
   onStartPlan: () => void;
 }) {
+  const router = useRouter();
   const [optimalNote, setOptimalNote] = useState(false);
+  const [pendingRemove, setPendingRemove] = useState<TpCard | null>(null);
+  const [confirmClear, setConfirmClear] = useState(false);
   const coordByKey = useMemo(() => {
     const m = new Map<string, { lat: number; lng: number }>();
     stops.forEach((s) => m.set(`${s.kind}:${s.slug}`, s.coords));
@@ -101,9 +106,15 @@ export function TpMyPlan({
         >
           {tp.myPlan.title}
         </div>
-        <div className="absolute text-white" style={{ right: 18, top: 48 }}>
+        <button
+          type="button"
+          aria-label="Search"
+          onClick={() => router.push('/pwa/search')}
+          className="absolute text-white"
+          style={{ right: 18, top: 48 }}
+        >
           <SearchIcon size={20} />
-        </div>
+        </button>
       </Layer>
 
       {/* Barra MY PLAN + reset + duración */}
@@ -123,7 +134,7 @@ export function TpMyPlan({
         <button
           type="button"
           aria-label="Clear"
-          onClick={() => rail.clear()}
+          onClick={() => rail.count > 0 && setConfirmClear(true)}
           className="flex h-[30px] w-[30px] items-center justify-center rounded-full border"
           style={{ borderColor: 'hsl(var(--foreground)/0.25)' }}
         >
@@ -157,7 +168,7 @@ export function TpMyPlan({
         {stops.map((s, i) => (
           <div
             key={`${s.kind}:${s.slug}`}
-            className="overflow-hidden rounded-[10px] border"
+            className="shrink-0 overflow-hidden rounded-[10px] border"
             style={{ borderColor: 'hsl(var(--brand-secondary)/0.4)', ...OPEN_SANS }}
           >
             <div
@@ -173,7 +184,7 @@ export function TpMyPlan({
               <span className="flex-1 truncate text-[14px] font-bold text-foreground">
                 {s.title}
               </span>
-              <button type="button" aria-label="Remove" onClick={() => rail.remove(s.slug, s.kind)}>
+              <button type="button" aria-label="Remove" onClick={() => setPendingRemove(s)}>
                 <svg width={16} height={16} viewBox="0 0 24 24" fill="none">
                   <path
                     d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"
@@ -217,8 +228,11 @@ export function TpMyPlan({
         ))}
       </div>
 
-      {/* Botones */}
-      <div className="flex shrink-0 gap-3 px-4 py-3" style={OPEN_SANS}>
+      {/* Botones (fondo sólido + sombra para no transparentarse sobre el scroll) */}
+      <div
+        className="flex shrink-0 gap-3 border-t border-foreground/10 bg-background px-4 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)]"
+        style={OPEN_SANS}
+      >
         <button
           type="button"
           onClick={onSmartRoute}
@@ -248,6 +262,42 @@ export function TpMyPlan({
           {textos.itinerary_smart_route_optimal_body ??
             'Your stops are already in the most efficient order.'}
         </div>
+      )}
+
+      {/* Confirmar borrado de un stop */}
+      {pendingRemove && (
+        <TpConfirmPopup
+          title={textos.itinerary_remove_confirm_title ?? 'Remove from plan?'}
+          body={
+            textos.itinerary_remove_confirm_body ??
+            'This listing will be removed from your itinerary plan.'
+          }
+          cancelLabel={textos.itinerary_remove_confirm_cancel ?? 'Cancel'}
+          confirmLabel={textos.itinerary_remove_confirm_confirm ?? 'Remove'}
+          onCancel={() => setPendingRemove(null)}
+          onConfirm={() => {
+            rail.remove(pendingRemove.slug, pendingRemove.kind);
+            setPendingRemove(null);
+          }}
+        />
+      )}
+
+      {/* Confirmar Clear all */}
+      {confirmClear && (
+        <TpConfirmPopup
+          title={textos.itinerary_clear_confirm_title ?? 'Clear your plan?'}
+          body={
+            textos.itinerary_clear_confirm_body ??
+            'All listings will be removed from your itinerary plan.'
+          }
+          cancelLabel={textos.itinerary_clear_confirm_cancel ?? 'Cancel'}
+          confirmLabel={textos.itinerary_clear_confirm_confirm ?? 'Clear all'}
+          onCancel={() => setConfirmClear(false)}
+          onConfirm={() => {
+            rail.clear();
+            setConfirmClear(false);
+          }}
+        />
       )}
     </div>
   );

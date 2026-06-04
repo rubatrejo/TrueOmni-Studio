@@ -3825,6 +3825,81 @@ digital-brochure,ads,social-wall}-pwa/`. Zoom del brochure medido (276→423px);
 
 ---
 
+### Sesión 2026-06-04 — Trip Planner pulido + Auditoría profunda PWA + Fase A/B remediación
+
+**Hecho:**
+
+- **Trip Planner (feedback de Rubén, múltiples rondas, aprobado):** quitado el corazón
+  flotante redundante del LIST; lupa cableada al search global `/pwa/search`; intro sin
+  "This is your itinerary Plan."; warning popup al borrar stop/Clear all
+  (`tp-confirm-popup.tsx` nuevo); My Plan con scroll (`shrink-0`) + botones con fondo;
+  componente único `tp-stop-card.tsx` (imagen 16:9 + footer gris) usado por Map view, AI
+  Result y consistente con el módulo Map; share unificado a `ShareIconButton`; +4 local
+  listings (6 total, con scroll) + fondo blanco del LIST; pill MY PLAN con gradiente
+  primary→secondary; toolbar del Map view estilo kiosk (Remove All · Show Driving toggle ·
+  Hide Markers toggle · Smart Route, sin Share); mapa encuadra TODOS los pins por default y
+  vuela al pin al seleccionar card (sync bidireccional carrusel↔pin); AI Result y Top
+  Suggestions con warning en Start Over + Finish → My Plan; quitado título de Top Suggestions.
+- **Fix compartido `map-canvas.tsx`:** `fitRouteBounds` ahora se aplica también en el evento
+  `load` (race: el effect corría antes de que el mapa cargara y no encuadraba). Aditivo,
+  beneficia kiosk + PWA.
+- **Auditoría profunda de la PWA** (6 agentes en paralelo sobre 51 rutas / 112 componentes):
+  reporte + plan en `.planning/PWA-AUDIT-2026-06-04.{html,pdf}`. 49 hallazgos
+  (7 críticos / 13 altos / 17 medios / 12 bajos). Dos brechas estructurales: la PWA no está
+  integrada al Studio (editor stub, sin bridge/flags) y drift de UI duplicada.
+- **Fase A — cero-hardcoded & tokens (completa):** tokens nuevos `--pwa-card-footer`,
+  `--pwa-route-pin`, `--pwa-floorplan-bg`, `--pwa-success` en los 3 tokens.css; hex
+  eliminados en wayfinding (route pin, floorplan bg), listings-map/tp-stop-card (footer),
+  task-checkin (verde proximidad), hunt-confetti (paleta→tokens). Strings del Scavenger Hunt
+  → `config.pwa.scavengerHunt` (taskList, question, errors, geoError) + tipos en config.ts +
+  distancia real (haversine) en vez del fake `0.14km`. `JULY 18-25` derivado del data de
+  eventos (UTC determinista). Slug demo `friendship-park-city` presembrado → eliminado.
+- **Fase B — consistencia (parcial):** B1 `InLayerNav` deriva de `PWA_NAV` de `bottom-nav`
+  (arregla Events/Map muertos en Profile/Settings/Delete — verificado); B2 share inline →
+  `ShareIconButton` (pass-detail, listings-detail); B4 empty states en listings-list y
+  pwa-map-screen (+ `pb-6` anti-nav).
+
+**Verificado:**
+
+- `pnpm typecheck` exit 0 · `validate-configs` 3/3 · lint sin errores (solo 2 warnings
+  preexistentes de `<img>` en wayfinding).
+- Revisión visual con puppeteer (Chrome del sistema, viewport 390×844) de todo el flujo del
+  Trip Planner (LIST, My Plan, warning, Map default+selección, AI Result, Top Suggestions,
+  Finish→My Plan), Scavenger Hunt task list (labels+distancia real), wayfinding floor-plan,
+  y B1 (celda Events del nav en Profile navega a `/pwa/events`).
+- PDF del audit verificado (portada + badges de severidad renderizan).
+
+**Pendiente / siguiente:**
+
+- **Fase B restantes:** B3 headers inline → `PwaSubHeader` (NO batch ciego: conviven coords
+  375-space escaladas vs 390-space del trip-planner, back router vs callback, y headers sobre
+  imagen hero que no deben llevar barra navy; requiere pantalla-por-pantalla + extender
+  PwaSubHeader con `onBack`), y B5 `:active`/pressed en botones primarios.
+- Resto del plan del audit: Fase C (search navegable, tile→ruta config-driven, favoritos
+  persistentes, hydration `todayIndex`, leak `createObjectURL`), Fase D (i18n selector, Ask
+  AI, map aggregator, survey), Fase E (safe-areas iOS, aria bottom nav, touch targets ≥40px),
+  Fase F (integración Studio — editor PWA, `features.pwa`, bridge/preview, clonado).
+- **Deuda de seed:** la distancia real del Scavenger Hunt muestra ~498 mi porque el seed
+  mezcla cliente Arizona con hunts en Park City, UT. Unificar geografía del seed (BAJO).
+- Cableo a config del `emptyLabel` (hoy con fallback en inglés, patrón aceptado).
+- Limpiar carpetas `.next.trash-*` de la raíz (no commiteadas).
+
+**Decisiones:**
+
+- Search del Trip Planner = reutilizar `/pwa/search` global (decisión de Rubén), cero
+  duplicación.
+- `tp-stop-card.tsx` como fuente única de la card estilo Map (DRY + consistencia).
+- `PWA_NAV` exportado de `bottom-nav` = fuente única de destinos del nav (lo consume también
+  `InLayerNav`), evita el drift de hrefs.
+- Configurado `.claude/settings.local.json` con allowlist (Edit/Write + verificación +
+  exploración) y deny (push/commit/build/rm) para trabajar sin pedir aprobación constante.
+- B3 deliberadamente diferido por riesgo de romper layouts (calidad > velocidad).
+
+**Fase:** Milestone PWA Mobile — remediación post-auditoría (Fase A ✅, Fase B parcial; Trip
+Planner aprobado).
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

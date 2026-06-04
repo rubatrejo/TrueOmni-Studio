@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Auditoría de Diseño · PWA TrueOmni · 2026-06-04</title>
+<style>
+  :root{
+    --navy:#0b2d4d; --blue:#1796d6; --olive:#b8a03e;
+    --crit:#c0392b; --alto:#e67e22; --medio:#2e86c1; --bajo:#7f8c8d;
+    --ink:#1d2733; --muted:#5b6b7a; --line:#e2e8f0; --bg:#f7f9fc;
+  }
+  *{box-sizing:border-box}
+  html,body{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
+  @media print{*,*::before,*::after{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}}
+  body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);margin:0;font-size:12.5px;line-height:1.5}
+  .page{padding:48px 54px}
+  h1{font-size:30px;margin:0 0 4px;color:var(--navy);letter-spacing:-.4px}
+  h2{font-size:19px;margin:34px 0 10px;color:var(--navy);border-bottom:2px solid var(--line);padding-bottom:6px}
+  h3{font-size:14.5px;margin:20px 0 6px;color:var(--navy)}
+  h4{font-size:12.5px;margin:14px 0 4px;color:var(--navy)}
+  p{margin:6px 0}
+  a{color:var(--blue);text-decoration:none}
+  code{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:11px;background:#eef2f7;padding:1px 5px;border-radius:4px;color:#33415a}
+  .lead{color:var(--muted);font-size:14px;margin-top:2px}
+  .meta{color:var(--muted);font-size:11.5px;margin-top:14px}
+  .cover{background:linear-gradient(135deg,var(--navy),#13456f);color:#fff;padding:70px 54px 56px;border-radius:0}
+  .cover h1{color:#fff;font-size:38px}
+  .cover .lead{color:#cfe2f1}
+  .pill{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);padding:4px 12px;border-radius:999px;font-size:11px;margin-right:6px}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
+  .stat{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px;text-align:center}
+  .stat .n{font-size:30px;font-weight:800;line-height:1}
+  .stat .l{font-size:11px;color:var(--muted);margin-top:6px;text-transform:uppercase;letter-spacing:.5px}
+  .n.crit{color:var(--crit)} .n.alto{color:var(--alto)} .n.medio{color:var(--medio)} .n.bajo{color:var(--bajo)}
+  .sev{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.6px;color:#fff;padding:2px 8px;border-radius:5px;vertical-align:middle;margin-right:6px}
+  .sev.crit{background:var(--crit)} .sev.alto{background:var(--alto)} .sev.medio{background:var(--medio)} .sev.bajo{background:var(--bajo)}
+  .find{border:1px solid var(--line);border-left:4px solid var(--line);border-radius:8px;padding:12px 16px;margin:10px 0;background:#fff;break-inside:avoid}
+  .find.crit{border-left-color:var(--crit)} .find.alto{border-left-color:var(--alto)} .find.medio{border-left-color:var(--medio)} .find.bajo{border-left-color:var(--bajo)}
+  .find .t{font-weight:700;font-size:13px}
+  .find .row{margin:5px 0;font-size:11.8px}
+  .find .k{font-weight:700;color:var(--navy)}
+  .where{color:var(--muted);font-size:11px}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:11.3px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:var(--navy);color:#fff;font-weight:600;font-size:11px}
+  tr:nth-child(even) td{background:var(--bg)}
+  .ok{color:#1e8449;font-weight:700}
+  .no{color:var(--crit);font-weight:700}
+  .partial{color:var(--alto);font-weight:700}
+  .phase{border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:12px 0;background:#fff;break-inside:avoid}
+  .phase h3{margin-top:0;display:flex;align-items:center;gap:8px}
+  .tag{font-size:10px;background:var(--navy);color:#fff;padding:2px 8px;border-radius:5px}
+  .tag.eff{background:var(--olive)}
+  ul{margin:6px 0;padding-left:20px} li{margin:3px 0}
+  .pagebreak{page-break-before:always}
+  .callout{background:#fff7e6;border:1px solid #f0d9a8;border-radius:8px;padding:12px 16px;margin:12px 0}
+  .good{background:#eafaf1;border:1px solid #b7e4c7;border-radius:8px;padding:12px 16px;margin:12px 0}
+  footer{margin-top:30px;border-top:1px solid var(--line);padding-top:10px;color:var(--muted);font-size:10.5px}
+  @page{size:A4;margin:0}
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="pill">Auditoría de diseño</div>
+  <div class="pill">Producto: PWA Mobile</div>
+  <div class="pill">2026-06-04</div>
+  <h1>Auditoría profunda de la PWA</h1>
+  <p class="lead">Diseño, consistencia, bugs, paridad con el kiosk y editabilidad desde TrueOmni Studio.<br/>Reporte + plan de remediación priorizado.</p>
+  <p class="lead" style="margin-top:26px;font-size:12px">Kiosk Portrait (white-label) · 51 rutas · 112 componentes · 6 ejes de auditoría en paralelo</p>
+</div>
+
+<div class="page">
+
+  <h2>1 · Resumen ejecutivo</h2>
+  <p>La PWA tiene una <strong>base sólida</strong>: reutiliza correctamente la capa de datos del kiosk (config, listings, events, itinerary, deals, tickets, trails, ads), adopta los tokens <code>--brand-*</code> en casi todos los componentes (119 usos de <code>brand-primary</code>) y respeta patrones clave del proyecto (back = solo chevron, <code>pointer-events-none</code> en títulos, bottom nav en la mayoría de pantallas, altura de header uniforme 90px).</p>
+  <p>Sin embargo, hay <strong>dos brechas estructurales</strong> que condicionan el resto:</p>
+  <ul>
+    <li><strong>La PWA no está integrada a TrueOmni Studio.</strong> El editor es un stub <em>"Coming Soon"</em>; no hay bridge ni preview reactivo, ni flags de módulo, ni clonado al crear cliente. Hoy <strong>todo se edita a mano en <code>config.json</code></strong> — justo lo que el producto busca eliminar.</li>
+    <li><strong>Drift de implementación.</strong> El header brand y el botón Share están <em>duplicados inline</em> en lugar de consumir los componentes únicos que ya existen (<code>PwaSubHeader</code>, <code>ShareIconButton</code>), y el mapeo tile→ruta está hardcodeado, lo que rompe el principio "cliente nuevo = solo JSON".</li>
+  </ul>
+
+  <div class="grid">
+    <div class="stat"><div class="n crit">7</div><div class="l">Críticos</div></div>
+    <div class="stat"><div class="n alto">13</div><div class="l">Altos</div></div>
+    <div class="stat"><div class="n medio">17</div><div class="l">Medios</div></div>
+    <div class="stat"><div class="n bajo">12</div><div class="l">Bajos</div></div>
+  </div>
+
+  <div class="callout">
+    <strong>Recomendación de prioridad.</strong> Antes de seguir agregando módulos a la PWA, conviene cerrar (1) el <em>cero-hardcoded</em> pendiente, (2) la consolidación de componentes únicos y (3) sentar las bases de configurabilidad (<code>features.pwa</code> + tile→ruta por config). Esos tres pasos <strong>desbloquean</strong> la integración al Studio (fase Pz), que es el objetivo de producto.
+  </div>
+
+  <h2>2 · Metodología</h2>
+  <p>Se auditó el 100% de la superficie de la PWA (<code>src/components/pwa/**</code> y <code>src/app/(pwa)/**</code>, más <code>clients/default/config.json</code> y el editor <code>src/app/studio/**</code>) con <strong>6 agentes especializados en paralelo</strong>, cada uno sobre un eje:</p>
+  <table>
+    <tr><th style="width:32%">Eje</th><th>Foco</th></tr>
+    <tr><td>White-label & tokens</td><td>Colores/strings/paths hardcoded, tokens faltantes, nombres geográficos</td></tr>
+    <tr><td>Consistencia UI & patrones</td><td>Headers, bottom nav, share, cards, componentes duplicados, estados vacíos</td></tr>
+    <tr><td>Bugs & navegación</td><td>Rutas rotas, dead-ends, estado, hydration/SSR, leaks, taps</td></tr>
+    <tr><td>Paridad Kiosk ↔ PWA</td><td>Módulos presentes/ausentes/divergentes, reutilización de lógica</td></tr>
+    <tr><td>Editabilidad desde Studio</td><td>Config-driven vs hardcoded, flags, bridge/preview, clonado</td></tr>
+    <tr><td>UX mobile & accesibilidad</td><td>Touch targets, safe areas, aria, estados, legibilidad, feedback</td></tr>
+  </table>
+
+</div>
+
+<div class="page pagebreak">
+  <h2>3 · Hallazgos críticos</h2>
+
+  <div class="find crit">
+    <div class="t"><span class="sev crit">CRÍTICO</span>La PWA no está integrada al Studio (editor stub + sin bridge ni preview)</div>
+    <div class="row where"><span class="k">Dónde:</span> <code>src/app/studio/[slug]/mobile-pwa/page.tsx</code> (ComingSoon), <code>(pwa)/layout.tsx</code> (sin StudioBridge), <code>_lib/products.ts</code> (status <code>soon</code>)</div>
+    <div class="row"><span class="k">Problema:</span> El editor de la PWA es un placeholder. El layout PWA <em>deliberadamente</em> no monta <code>StudioBridge</code> y lee config solo server-side, así que ninguna edición del Studio se ve en vivo. <code>PreviewPanel</code> ya soporta <code>orientation: 'mobile-pwa'</code> (390×844) pero nadie lo invoca. La fase Pz del roadmap está 0/6.</div>
+    <div class="row"><span class="k">Recomendación:</span> Construir el editor PWA reutilizando el <code>Shell</code>/tabs del editor kiosk sobre la sección <code>config.pwa</code>; montar bridge en <code>(pwa)/layout.tsx</code>; cablear <code>PreviewPanel</code> con <code>previewSrc='/pwa'</code>.</div>
+  </div>
+
+  <div class="find crit">
+    <div class="t"><span class="sev crit">CRÍTICO</span>Multi-idioma no funcional en la PWA (sin selector ni <code>setLocale</code>)</div>
+    <div class="row where"><span class="k">Dónde:</span> <code>(pwa)/layout.tsx</code> monta <code>I18nProvider</code> pero <code>grep setLocale|useLocaleStore</code> → 0 resultados en la PWA</div>
+    <div class="row"><span class="k">Problema:</span> La PWA queda clavada al <code>defaultLocale</code> del cliente. El kiosk cambia idioma con <code>language-dropdown</code> + <code>locale-store</code>, que la PWA no importa. No hay entrada "Language" en More/Settings. Rompe la paridad de los 6 idiomas.</div>
+    <div class="row"><span class="k">Recomendación:</span> Añadir selector de idioma (More/Settings) que escriba en el <code>locale-store</code> existente (no duplicar el store).</div>
+  </div>
+
+  <div class="find crit">
+    <div class="t"><span class="sev crit">CRÍTICO</span>Strings de UI hardcoded en el módulo Scavenger Hunt (white-label + i18n)</div>
+    <div class="row where"><span class="k">Dónde:</span> <code>hunt-task-list.tsx:46-59</code> ("Photo/Check-In/Question Task", "All tasks completed!", "0.14km" fake), <code>task-question.tsx:74,162-169</code>, <code>task-photo.tsx:94-101</code>, <code>task-checkin.tsx:207,243-245</code> ("Location Required", "Whoops!", "Retry", "OK")</div>
+    <div class="row"><span class="k">Problema:</span> Estos componentes ya reciben <code>config</code> pero estos strings se escaparon hardcoded en inglés (y dentro de props <code>title=</code>/<code>body=</code> que el auditor no caza por grep). Intraducibles e ineditables desde el Studio. El <code>'0.14km'</code> es un valor fake repetido.</div>
+    <div class="row"><span class="k">Recomendación:</span> Añadir keys a <code>config.pwa.scavengerHunt</code>: <code>taskTypeLabels</code>, <code>taskList.allCompleted</code>, <code>errors.{title,retry,cancel,ok}</code>, <code>geoError.{title,body}</code>, <code>distance.{awaySuffix,unitM,unitKm}</code>. Calcular la distancia real.</div>
+  </div>
+
+  <div class="find crit">
+    <div class="t"><span class="sev crit">CRÍTICO</span>Ask AI ausente en la PWA</div>
+    <div class="row where"><span class="k">Dónde:</span> kiosk en <code>src/components/ai/</code> + <code>lib/ask-ai.ts</code>; en la PWA: cero referencias</div>
+    <div class="row"><span class="k">Problema:</span> PWA-PROJECT.md lista Ask AI como "reutilizado", pero no existe punto de entrada conversacional en la PWA (el <code>ai-itinerary</code> del Trip Planner es otra cosa). El visitante mobile no tiene el asistente.</div>
+    <div class="row"><span class="k">Recomendación:</span> Decidir alcance. Si entra: <code>src/components/pwa/ai/</code> reutilizando <code>lib/ask-ai</code> + trigger en Dashboard. Si no: moverlo a "excluidos" en PROJECT.md.</div>
+  </div>
+
+  <div class="find crit">
+    <div class="t"><span class="sev crit">CRÍTICO</span>Safe areas de iOS (notch / home indicator) no aplicadas en ninguna pantalla</div>
+    <div class="row where"><span class="k">Dónde:</span> <code>(pwa)/layout.tsx</code> declara <code>viewportFit:'cover'</code> pero <code>env(safe-area-inset-*)</code> tiene 0 usos reales</div>
+    <div class="row"><span class="k">Problema:</span> Instalada como PWA standalone en un iPhone con notch, el contenido superior de los headers queda bajo el reloj/Dynamic Island y el bottom nav bajo el home indicator. Los formularios full-screen empujan los CTA al borde inferior.</div>
+    <div class="row"><span class="k">Recomendación:</span> Aplicar <code>env(safe-area-inset-top/bottom)</code> al header brand y al bottom nav (o al <code>MobileCanvas</code> en standalone). Mínimo ~44px arriba / ~34px abajo.</div>
+  </div>
+
+  <div class="find crit">
+    <div class="t"><span class="sev crit">CRÍTICO</span>Bottom nav sin <code>aria-label</code> en ninguna de sus 5 celdas</div>
+    <div class="row where"><span class="k">Dónde:</span> <code>bottom-nav.tsx:39-48</code></div>
+    <div class="row"><span class="k">Problema:</span> Las 5 celdas son <code>&lt;button&gt;</code> con solo un icono SVG. VoiceOver las anuncia como "botón" sin nombre. Es la navegación principal de toda la PWA.</div>
+    <div class="row"><span class="k">Recomendación:</span> <code>aria-label</code> por celda (desde config/i18n) + <code>aria-current="page"</code> en la activa.</div>
+  </div>
+
+  <div class="find crit">
+    <div class="t"><span class="sev crit">CRÍTICO</span>Sin bridge/preview reactivo ni provisión de PWA al crear cliente</div>
+    <div class="row where"><span class="k">Dónde:</span> <code>POST /api/studio/clients/route.ts</code> (sin rama <code>mobilePwa</code>), <code>purge-client.ts</code> (sin prefijos PWA), <code>NewClientModal</code> (checkbox sin efecto)</div>
+    <div class="row"><span class="k">Problema:</span> El checkbox "Mobile PWA" del modal de cliente nuevo no aprovisiona ni purga nada → estado inconsistente. No hay <code>bootstrap-from-fs</code> para <code>config.pwa</code>.</div>
+    <div class="row"><span class="k">Recomendación:</span> Implementar Pz 2/3/4: rama de clonado PWA, prefijos KV de purga, bootstrap-from-fs.</div>
+  </div>
+
+  <h2>4 · Hallazgos altos</h2>
+
+  <div class="find alto">
+    <div class="t"><span class="sev alto">ALTO</span>Mapeo tile→ruta hardcoded en el Dashboard (rompe white-label)</div>
+    <div class="row where"><span class="k">Dónde:</span> <code>dashboard-screen.tsx:165-210</code>, <code>more-screen.tsx:22-30</code></div>
+    <div class="row"><span class="k">Problema:</span> El destino de cada tile es una cadena <code>if/else if</code> sobre <code>key</code> literales, sin fallback. Un módulo nuevo configurado desde el Studio (Wellness, Shopping…) <strong>no obtiene tile navegable</strong> sin tocar código; cambiar el <code>key</code> rompe el routing. El kiosk lo resuelve dinámicamente desde <code>home.modules</code>.</div>
+    <div class="row"><span class="k">Recomendación:</span> Llevar el <code>route</code>/<code>module</code> en el propio config del tile (o tabla centralizada <code>key→route</code> validada por schema) y navegar genéricamente. Considerar ruta dinámica <code>(pwa)/pwa/[module]</code>.</div>
+  </div>
+
+  <div class="find alto">
+    <div class="t"><span class="sev alto">ALTO</span>Sin feature flags para activar/desactivar módulos de la PWA</div>
+    <div class="row where"><span class="k">Dónde:</span> <code>config.pwa.dashboard.tiles</code> (sin <code>enabled</code>), no existe <code>features.pwa</code></div>
+    <div class="row"><span class="k">Problema:</span> El kiosk tiene <code>features.home.tiles[].enabled</code>; la PWA muestra siempre los 11 tiles + 4 quick-access. El operador no puede apagar Scavenger Hunt/Wayfinding/Trails para un cliente que no los use.</div>
+    <div class="row"><span class="k">Recomendación:</span> Crear <code>config.features.pwa</code> (o <code>enabled</code> por tile, espejo del kiosk) y exponerlo como toggles en el editor PWA.</div>
+  </div>
+
+  <div class="find alto">
+    <div class="t"><span class="sev alto">ALTO</span>Header brand duplicado en 4 implementaciones divergentes en vez de <code>PwaSubHeader</code></div>
+    <div class="row where"><span class="k">Dónde:</span> canon en <code>pwa-sub-header.tsx</code>; copias inline en <code>trip-planner/tp-my-plan|tp-ai-result|tp-map-view</code>, <code>listings-detail|listings-list|brochures-list|deals-grid</code> (back en <code>left:12</code> vs canon <code>left:18</code>), y <code>connect-with-us-screen</code> (header como SVG)</div>
+    <div class="row"><span class="k">Problema:</span> Mismo header navy en ≥4 estilos, con la posición del back variando entre 3 valores. Es el "drift" que el proyecto busca evitar (lección Breadcrumb 2026-05-25).</div>
+    <div class="row"><span class="k">Recomendación:</span> Migrar todos a <code>PwaSubHeader</code> (ya tiene slot <code>right</code> para acciones como Share).</div>
+  </div>
+
+  <div class="find alto">
+    <div class="t"><span class="sev alto">ALTO</span>Botón Share reimplementado inline en vez de <code>ShareIconButton</code></div>
+    <div class="row where"><span class="k">Dónde:</span> <code>pass-detail-screen.tsx:30-44</code>, <code>listings-detail-screen.tsx:226-244</code> (copian byte-por-byte el path/viewBox)</div>
+    <div class="row"><span class="k">Problema:</span> <code>ShareIconButton</code> existe exactamente para esto; si cambia el glyph, estos dos quedan desincronizados.</div>
+    <div class="row"><span class="k">Recomendación:</span> Sustituir por <code>&lt;ShareIconButton /&gt;</code> (igual que ya hicimos en Trip Planner).</div>
+  </div>
+
+  <div class="find alto">
+    <div class="t"><span class="sev alto">ALTO</span>Tabs "Events" y "Map" muertos en Profile / Settings / Delete Account</div>
+    <div class="row where"><span class="k">Dónde:</span> <code>in-layer-nav.tsx:18-23</code> (<code>HREF.events/map = undefined</code>)</div>
+    <div class="row"><span class="k">Problema:</span> <code>InLayerNav</code> deja sin navegar Events/Map mientras el <code>PwaBottomNav</code> compartido sí los cablea. El usuario toca y no pasa nada. Drift por tener dos fuentes de verdad del nav.</div>
+    <div class="row"><span class="k">Recomendación:</span> Derivar <code>InLayerNav</code> del mismo <code>NAV</code> de <code>bottom-nav.tsx</code> (fuente única).</div>
+  </div>
+
+  <div class="find alto">
+    <div class="t"><span class="sev alto">ALTO</span>Resultados de búsqueda no navegan — dead-end</div>
+    <div class="row where"><span class="k">Dónde:</span> <code>search-screen.tsx:204</code>, <code>lib/pwa-search.ts</code></div>
+    <div class="row"><span class="k">Problema:</span> Tocar un resultado solo guarda el término en "recents"; no hay <code>router.push</code>. <code>PwaSearchItem</code> ni siquiera expone <code>href</code>. La búsqueda es un callejón sin salida.</div>
+    <div class="row"><span class="k">Recomendación:</span> Añadir <code>href</code> al construir el índice (<code>place→/pwa/&lt;module&gt;/&lt;slug&gt;</code>, <code>event→…</code>) y navegar en el onClick.</div>
+  </div>
+
+  <div class="find alto">
+    <div class="t"><span class="sev alto">ALTO</span>Favoritos de listings efímeros (no persisten)</div>
+    <div class="row where"><span class="k">Dónde:</span> <code>listings-list-screen.tsx:76</code> (<code>useState</code> local); la PWA no importa <code>lib/favorites</code></div>
+    <div class="row"><span class="k">Problema:</span> Los corazones de listings viven en estado local → se pierden al navegar/recargar. El kiosk persiste en sessionStorage. Conviven dos mecanismos de "favorito" en la PWA (Trip Planner sí usa <code>itinerary-favorites</code>).</div>
+    <div class="row"><span class="k">Recomendación:</span> Wirear a un store persistido único (reutilizar <code>lib/favorites</code> o el bucket de <code>itinerary-favorites</code>).</div>
+  </div>
+
+  <div class="find alto">
+    <div class="t"><span class="sev alto">ALTO</span>Color de marca <code>#e53935</code> (pin de ruta wayfinding) hardcoded y repetido</div>
+    <div class="row where"><span class="k">Dónde:</span> <code>wayfinding-route-overlay.tsx:24,31</code></div>
+    <div class="row"><span class="k">Problema:</span> Color con peso de branding repetido sin tokenizar; no editable por cliente.</div>
+    <div class="row"><span class="k">Recomendación:</span> Token <code>--pwa-route-pin</code> (o reusar un token de acento) en <code>tokens.css</code>.</div>
+  </div>
+
+  <div class="find alto">
+    <div class="t"><span class="sev alto">ALTO</span>Touch targets de iconos de header por debajo de 44×44px</div>
+    <div class="row where"><span class="k">Dónde:</span> Filter en <code>pwa-map-screen.tsx:128</code> / <code>listings-list-screen.tsx:134</code> (28px), Share/Photos <code>listings-detail-screen.tsx:226,309</code> (26px), <code>deals-grid-screen.tsx:127,139</code></div>
+    <div class="row"><span class="k">Problema:</span> Hit-area real ~27-29px, por debajo del mínimo iOS/WCAG 2.5.5, y pegados a otros controles. El Back sí está bien (40×40).</div>
+    <div class="row"><span class="k">Recomendación:</span> Estandarizar hit-areas de iconos de header a ≥40×40 centrando el SVG en un botón con padding.</div>
+  </div>
+
+  <div class="find alto">
+    <div class="t"><span class="sev alto">ALTO</span>Iconos sociales de Login son <code>&lt;div&gt;</code> (affordance falsa) y sin loading en submit</div>
+    <div class="row where"><span class="k">Dónde:</span> <code>login-screen.tsx:166-175,220-227</code></div>
+    <div class="row"><span class="k">Problema:</span> Apple/Facebook/Google parecen tocables pero no hacen nada ni son alcanzables por teclado. El botón LOGIN no tiene disabled/loading → doble-tap = doble navegación.</div>
+    <div class="row"><span class="k">Recomendación:</span> Si son decorativos, <code>aria-hidden</code>; si deben funcionar, <code>&lt;button aria-label&gt;</code>. Añadir feedback pressed + bloqueo de doble submit.</div>
+  </div>
+
+  <div class="find alto">
+    <div class="t"><span class="sev alto">ALTO</span>Estado "obteniendo ubicación" ausente en el check-in GPS</div>
+    <div class="row where"><span class="k">Dónde:</span> <code>scavenger-hunt/task-checkin.tsx:94-209</code></div>
+    <div class="row"><span class="k">Problema:</span> Hasta el primer fix de GPS no hay badge de distancia ni spinner ni mensaje. Si el GPS tarda (interiores), parece colgado.</div>
+    <div class="row"><span class="k">Recomendación:</span> Mostrar "Locating you…" mientras <code>distanceM===null && !geoError</code>.</div>
+  </div>
+
+  <div class="find alto">
+    <div class="t"><span class="sev alto">ALTO</span>Bottom nav ausente en el cluster de cuenta (inconsistente)</div>
+    <div class="row where"><span class="k">Dónde:</span> sin <code>PwaBottomNav</code>: <code>profile</code>, <code>settings</code>, <code>edit-profile</code>, <code>change-password</code>, <code>search</code></div>
+    <div class="row"><span class="k">Problema:</span> La regla del proyecto pide bottom nav en TODAS las pantallas (drill-downs incluidos). Estos quedan sin nav, excepción no documentada. (Los flujos pre-auth login/create-account/forgot sí es correcto que no lo tengan.)</div>
+    <div class="row"><span class="k">Recomendación:</span> Añadir nav a profile/settings/edit/change-password/search, o documentar el "account zone" como excepción explícita.</div>
+  </div>
+
+  <div class="find alto">
+    <div class="t"><span class="sev alto">ALTO</span>Literal <code>JULY 18 - JULY 25</code> hardcoded en Trip Planner</div>
+    <div class="row where"><span class="k">Dónde:</span> <code>trip-planner/tp-category-menu.tsx:122</code></div>
+    <div class="row"><span class="k">Problema:</span> Rango de fechas de eventos quemado en JSX; todo cliente vería siempre el mismo rango.</div>
+    <div class="row"><span class="k">Recomendación:</span> Derivar del min/max real del data de eventos, o key <code>tripPlanner.events.dateRangeLabel</code>.</div>
+  </div>
+
+</div>
+
+<div class="page pagebreak">
+  <h2>5 · Hallazgos medios (resumen)</h2>
+  <table>
+    <tr><th style="width:30%">Hallazgo</th><th style="width:34%">Dónde</th><th>Recomendación</th></tr>
+    <tr><td>Footer gris <code>hsl(0 0% 33%)</code> duplicado sin token</td><td><code>listings-map.tsx:14</code>, <code>tp-stop-card.tsx:11</code></td><td>Token <code>--pwa-card-footer</code></td></tr>
+    <tr><td>Fondo de floor-plan <code>bg-[#f0f0ee]</code> hardcoded</td><td><code>wayfinding-directions.tsx:41</code>, <code>wayfinding-screen.tsx:44</code></td><td>Token <code>--pwa-floorplan-bg</code></td></tr>
+    <tr><td>Paleta de confeti hex inventada</td><td><code>scavenger-hunt/hunt-confetti.tsx:6</code></td><td>Derivar de <code>--brand-*</code> + acentos tokenizados</td></tr>
+    <tr><td>Verde de proximidad "isNear" hardcoded</td><td><code>task-checkin.tsx:193-197</code> (<code>#43a047</code>)</td><td>Token semántico <code>--pwa-success</code></td></tr>
+    <tr><td>Empty states faltantes con filtros activos</td><td><code>listings-list</code>, <code>passes-grid</code>, <code>listings-grid</code>, <code>pwa-map-screen</code></td><td>Añadir empty state (prioritario listings-list y map)</td></tr>
+    <tr><td>Sin estados de carga/skeleton en listas dinámicas</td><td>general (hidratación desde bridge)</td><td>Estado de carga compartido</td></tr>
+    <tr><td><code>todayIndex()</code> con <code>new Date()</code> en render → hydration mismatch</td><td><code>listings-detail-screen.tsx:38,185</code></td><td>Calcular <code>today</code> tras montaje (useEffect)</td></tr>
+    <tr><td>Memory leak: <code>createObjectURL</code> sin <code>revokeObjectURL</code></td><td><code>photo-source-sheet.tsx:45</code> + create-account-photo</td><td>Revocar URL anterior + en cleanup (o usar <code>use-photo-session</code>)</td></tr>
+    <tr><td>Map de PWA usa aggregator propio, no el del kiosk</td><td><code>pwa-map-listings.ts</code> vs <code>map-aggregator</code></td><td>Verificar paridad de pins; envolver el aggregator del kiosk</td></tr>
+    <tr><td>Survey con menos tipos de pregunta que el kiosk</td><td><code>pwa-survey-question.tsx</code> (2 archivos vs 6 tipos)</td><td>Auditar/completar NPS, rating, contact</td></tr>
+    <tr><td>Listas sin padding inferior → última fila pegada al nav</td><td><code>pwa-map-screen.tsx:222</code>, <code>notifications-screen.tsx:228</code></td><td><code>pb-4/pb-6</code> al final de listas scrolleables</td></tr>
+    <tr><td>Fuentes diminutas tras render (5–8.5px)</td><td><code>profile-screen.tsx:80</code> (5px), survey, cards</td><td>Piso ~10px para texto informativo</td></tr>
+    <tr><td>Estados <code>:active</code>/pressed casi inexistentes</td><td>toda la PWA (solo 5 archivos)</td><td><code>active:opacity-80 / scale-[.98]</code> en botones primarios</td></tr>
+    <tr><td>Botones glifo "×" / dots de galería sin hit-area mínima</td><td><code>search-screen.tsx:112,168</code>, <code>listings-detail-screen.tsx:578</code></td><td>Envolver en hit-area ≥40×40</td></tr>
+    <tr><td>Modal de validación de Create Account genérico</td><td><code>create-account-screen.tsx:117-131</code></td><td>Mensaje específico (passwords) + scroll con teclado abierto</td></tr>
+    <tr><td>Header del Dashboard: iconos Search/Profile/Notif muy juntos</td><td><code>dashboard-screen.tsx:64-108</code></td><td>Hit-area ≥40×40 y separar centros ≥48px</td></tr>
+    <tr><td>Doc de alcance (PROJECT.md) desincronizada</td><td><code>.planning/PWA-PROJECT.md:46-51</code></td><td>Social Wall/Survey → reutilizados; Ask AI/idioma → pendientes reales</td></tr>
+  </table>
+
+  <h2>6 · Hallazgos bajos (resumen)</h2>
+  <table>
+    <tr><th style="width:30%">Hallazgo</th><th style="width:34%">Dónde</th><th>Acción</th></tr>
+    <tr><td>Slug demo <code>'friendship-park-city'</code> presembrado en código</td><td><code>scavenger-hunt/hunt-dashboard.tsx:52-64</code></td><td>Quitar o mover a <code>config.demo</code></td></tr>
+    <tr><td><code>setTimeout</code> con <code>setState</code> sin cleanup</td><td><code>trip-planner-screen.tsx:118</code>, <code>task-photo.tsx:56</code></td><td><code>clearTimeout</code> en cleanup</td></tr>
+    <tr><td>Seed data mezcla Arizona + Park City</td><td><code>config.json</code> (scavengerHunt usa Park City, UT)</td><td>Unificar geografía / interpolar <code>{client_name}</code></td></tr>
+    <tr><td>Boilerplate <code>scale(${S})</code> repetido en 34 archivos</td><td>en vez de usar <code>&lt;Layer&gt;</code></td><td>Migrar a <code>Layer</code> (menos superficie de bug)</td></tr>
+    <tr><td><code>router.back()</code> sin fallback (deep-link/reload)</td><td><code>search-screen.tsx:92</code>, brochures</td><td>Patrón <code>history.length&gt;1 ? back : push(fallback)</code></td></tr>
+    <tr><td>Glyph de back ~6% más chico en search</td><td><code>search-screen.tsx:95</code> (11×19 vs 11.87×20.36)</td><td>Unificar tamaño</td></tr>
+    <tr><td><code>fill="transparent"</code> en hit-area</td><td><code>connect-with-us-screen.tsx:171</code></td><td>Se resuelve al migrar a <code>PwaSubHeader</code></td></tr>
+    <tr><td>Survey countdown frágil si <code>onClose</code> no memoizado</td><td><code>pwa-survey-overlay.tsx:342</code></td><td>Memoizar / ref</td></tr>
+    <tr><td><code>#fff</code> en glifos SVG y <code>rgba(0,0,0)</code> neutros</td><td>~40 sitios (decorativos)</td><td>Tolerable; opcional <code>--pwa-on-brand</code> / unificar a <code>hsl(0 0% 0% / α)</code></td></tr>
+    <tr><td>Imágenes de fondo sin alt (cards informativas)</td><td>tiles/cards con <code>backgroundImage</code></td><td>Confirmar label accesible en cada tocable (en general OK)</td></tr>
+    <tr><td>Logos FB/Google con color oficial</td><td><code>social-icons.tsx</code></td><td>Excepción permitida (marcas de terceros) — sin acción</td></tr>
+    <tr><td>Wayfinding/Scavenger son stubs en el kiosk</td><td>asimetría inversa (PWA &gt; kiosk)</td><td>Planificar port al kiosk si se exige paridad bidireccional</td></tr>
+  </table>
+
+  <div class="good">
+    <strong>Lo que ya está bien resuelto (no tocar):</strong> back = solo chevron (cero "Back" textual), <code>pointer-events-none</code> en títulos/overlays (16 usos correctos), <code>PwaHeart</code> reutilizado, header navy 90px uniforme, cleanup correcto de mapas/geolocation/listeners, hydration guardada en notifications/hunt-progress/canvas, Mapbox token siempre por prop, <code>PwaFilterOverlay</code> y <code>form-controls</code> accesibles (roles + aria), empty/error states en Notifications/Search/Deals/Events/Tickets, y reutilización amplia de la data layer del kiosk.
+  </div>
+</div>
+
+<div class="page pagebreak">
+  <h2>7 · Tabla de paridad Kiosk ↔ PWA</h2>
+  <table>
+    <tr><th>Módulo</th><th style="width:10%">Kiosk</th><th style="width:10%">PWA</th><th style="width:18%">Nivel</th><th>Notas</th></tr>
+    <tr><td>Home / Dashboard</td><td class="ok">✓</td><td class="ok">✓</td><td>Completo (diseño propio)</td><td>Tile→ruta hardcoded en PWA</td></tr>
+    <tr><td>Listings (Restaurants/Things/Stay)</td><td class="ok">✓</td><td class="ok">✓</td><td>Completo</td><td>Reusa filter/sort/map-item</td></tr>
+    <tr><td>Listing detail</td><td class="ok">✓</td><td class="ok">✓</td><td>Completo</td><td>Reusa <code>pwa-listing-detail</code></td></tr>
+    <tr><td>Events</td><td class="ok">✓</td><td class="ok">✓</td><td>Completo</td><td>week-picker + reuse</td></tr>
+    <tr><td>Map</td><td class="ok">✓</td><td class="partial">✓</td><td>Parcial</td><td>Aggregator propio (divergencia)</td></tr>
+    <tr><td>Deals / Passes / Tickets / Trails</td><td class="ok">✓</td><td class="ok">✓</td><td>Completo</td><td>Reusan libs del kiosk</td></tr>
+    <tr><td>Digital Brochure</td><td class="ok">✓</td><td class="ok">✓</td><td>Completo</td><td>Reusa pdfjs</td></tr>
+    <tr><td>Social Wall</td><td class="ok">✓</td><td class="ok">✓</td><td>Completo</td><td>⚠ doc lo marcaba excluido</td></tr>
+    <tr><td>Ads (transversal)</td><td class="ok">✓</td><td class="ok">✓</td><td>Completo</td><td>Provider + slots propios</td></tr>
+    <tr><td>Survey</td><td class="ok">✓</td><td class="partial">✓</td><td>Parcial</td><td>Menos tipos de pregunta</td></tr>
+    <tr><td>Itinerary / Trip Planner</td><td class="ok">✓</td><td class="ok">✓</td><td>Completo (rediseñado)</td><td>Buena reutilización de libs</td></tr>
+    <tr><td>Wayfinding</td><td class="partial">stub</td><td class="ok">✓</td><td>PWA &gt; Kiosk</td><td>Solo en PWA</td></tr>
+    <tr><td>Scavenger Hunt</td><td class="partial">stub</td><td class="ok">✓</td><td>PWA &gt; Kiosk</td><td>Solo en PWA</td></tr>
+    <tr><td>Favoritos</td><td class="ok">✓ persist</td><td class="partial">efímero</td><td>Divergente</td><td>Listings no persisten</td></tr>
+    <tr><td>Ask AI (conversacional)</td><td class="ok">✓</td><td class="no">✗</td><td>Ausente</td><td>No portado</td></tr>
+    <tr><td>Multi-idioma (6 + teclado)</td><td class="ok">✓</td><td class="partial">parcial</td><td>Sin selector</td><td>Clavado al default</td></tr>
+    <tr><td>Photo Booth / Guestbook / Billboards</td><td class="ok">✓</td><td class="no">✗</td><td>Excluido (por diseño)</td><td>Correcto</td></tr>
+    <tr><td>Login / Profile / Notifications / More</td><td class="no">—</td><td class="ok">✓</td><td>PWA-only</td><td>Nuevos</td></tr>
+  </table>
+
+  <h2>8 · Plan de remediación priorizado</h2>
+  <p>Seis fases atómicas, en orden de dependencia. Cada una ejecutable en una ventana de contexto fresca, con <code>typecheck + lint + verificación visual</code>. Esfuerzo orientativo: <span class="tag eff">S</span> ½ día · <span class="tag eff">M</span> 1–2 días · <span class="tag eff">L</span> 3+ días.</p>
+
+  <div class="phase">
+    <h3>Fase A · Cero-hardcoded & tokens <span class="tag eff">M</span> <span class="tag">desbloquea Studio</span></h3>
+    <ul>
+      <li>Strings del Scavenger Hunt → <code>config.pwa.scavengerHunt.*</code> (task types, errores, geoError, distancia real).</li>
+      <li>Tokens nuevos en <code>tokens.css</code>: <code>--pwa-card-footer</code>, <code>--pwa-route-pin</code>, <code>--pwa-floorplan-bg</code>, <code>--pwa-success</code>; aplicar en wayfinding, listings-map, tp-stop-card, task-checkin, confetti.</li>
+      <li><code>JULY 18 - JULY 25</code> → derivar de data o config. Quitar slug demo presembrado.</li>
+    </ul>
+  </div>
+
+  <div class="phase">
+    <h3>Fase B · Consistencia (fuente única) <span class="tag eff">M</span></h3>
+    <ul>
+      <li>Migrar todos los headers inline → <code>PwaSubHeader</code> (slot <code>right</code> para Share).</li>
+      <li>Sustituir Share inline → <code>ShareIconButton</code> en pass-detail y listings-detail.</li>
+      <li><code>InLayerNav</code> → derivar del <code>NAV</code> de <code>bottom-nav</code> (arregla Events/Map muertos). Decidir bottom nav en cluster de cuenta.</li>
+      <li>Empty states en listings-list y map; <code>:active</code> en botones primarios.</li>
+    </ul>
+  </div>
+
+  <div class="phase">
+    <h3>Fase C · Navegación & bugs <span class="tag eff">M</span></h3>
+    <ul>
+      <li>Search navegable (<code>href</code> en el índice + <code>router.push</code>).</li>
+      <li>Tile→ruta config-driven (campo <code>route</code>/<code>module</code> o tabla central) — prerequisito de white-label.</li>
+      <li>Favoritos de listings → store persistido único.</li>
+      <li>Fix hydration <code>todayIndex</code>, memory leak <code>createObjectURL</code>, <code>setTimeout</code> sin cleanup, wayfinding slug inválido.</li>
+    </ul>
+  </div>
+
+  <div class="phase">
+    <h3>Fase D · Paridad con el kiosk <span class="tag eff">L</span></h3>
+    <ul>
+      <li>Selector de idioma funcional (reutilizar <code>locale-store</code>).</li>
+      <li>Decidir e implementar (o excluir formalmente) Ask AI mobile.</li>
+      <li>Unificar aggregator de mapa; completar tipos de Survey. Actualizar PWA-PROJECT.md/ROADMAP.</li>
+    </ul>
+  </div>
+
+  <div class="phase">
+    <h3>Fase E · UX mobile & accesibilidad <span class="tag eff">M</span></h3>
+    <ul>
+      <li><code>env(safe-area-inset-*)</code> en header y bottom nav (standalone).</li>
+      <li><code>aria-label</code> + <code>aria-current</code> en bottom nav; hit-areas de iconos de header ≥40×40.</li>
+      <li>Estado "obteniendo ubicación" en check-in; loading en submit (login/signup); padding inferior en listas; piso de fuente ~10px.</li>
+    </ul>
+  </div>
+
+  <div class="phase">
+    <h3>Fase F · Integración a TrueOmni Studio (Pz) <span class="tag eff">L</span> <span class="tag">objetivo de producto</span></h3>
+    <ul>
+      <li>Editor PWA real (reemplaza el stub) sobre <code>config.pwa</code>, reusando <code>Shell</code>/tabs del kiosk.</li>
+      <li><code>features.pwa</code> con flags por módulo + UI de toggles.</li>
+      <li>Montar bridge en <code>(pwa)/layout.tsx</code> + <code>PreviewPanel</code> 390×844 con <code>previewSrc='/pwa'</code>.</li>
+      <li>Clonado/purga/bootstrap-from-fs de PWA al crear cliente; <code>client-branding-sync</code> al runtime PWA.</li>
+    </ul>
+  </div>
+
+  <div class="callout">
+    <strong>Ruta crítica sugerida:</strong> A → B → C sientan las bases (cero-hardcoded + fuente única + config-driven). Son prerequisito natural de la Fase F (Studio), que es el objetivo de producto. D y E pueden intercalarse según prioridad de negocio.
+  </div>
+
+  <footer>
+    Auditoría generada el 2026-06-04 · Kiosk Portrait (white-label) · 6 ejes en paralelo sobre 51 rutas y 112 componentes de la PWA.<br/>
+    Documento de trabajo para verificación. No se modificó ningún archivo de código durante la auditoría.
+  </footer>
+</div>
+
+</body>
+</html>

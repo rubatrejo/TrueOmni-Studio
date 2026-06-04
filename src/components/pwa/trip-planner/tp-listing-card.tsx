@@ -44,7 +44,7 @@ export function TpListingCard({
 
       {/* Texto overlay */}
       <div className="absolute bottom-2.5 left-3.5 right-12">
-        <p className="text-[9px] font-bold uppercase tracking-wide text-white/80">
+        <p className="text-[10px] font-bold uppercase tracking-wide text-white/80">
           {item.subcategory}
         </p>
         <p className="truncate text-[17px] font-bold leading-tight text-white drop-shadow">

@@ -77,7 +77,7 @@ function FavCard({ left, item }: { left: number; item: PwaProfileFavorite }) {
       />
       <span
         className="absolute text-white/90"
-        style={{ left: 10, top: 38, fontSize: 5, letterSpacing: 0.3, ...OPEN_SANS }}
+        style={{ left: 10, top: 38, fontSize: 10, letterSpacing: 0.3, ...OPEN_SANS }}
       >
         {item.subcategory}
       </span>
@@ -99,13 +99,13 @@ function FavCard({ left, item }: { left: number; item: PwaProfileFavorite }) {
       >
         <span
           className="absolute text-white"
-          style={{ left: 10, top: 5, fontSize: 7.5, fontWeight: 300, ...OPEN_SANS }}
+          style={{ left: 10, top: 5, fontSize: 10, fontWeight: 300, ...OPEN_SANS }}
         >
           {item.distance}
         </span>
         <span
           className="absolute font-semibold"
-          style={{ left: 10, top: 16, fontSize: 7.5, color: PWA, ...OPEN_SANS }}
+          style={{ left: 10, top: 16, fontSize: 10, color: PWA, ...OPEN_SANS }}
         >
           {item.hours}
         </span>

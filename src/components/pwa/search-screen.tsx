@@ -114,7 +114,7 @@ export function SearchScreen({ texts, index, browse }: SearchScreenProps) {
               type="button"
               aria-label="Clear"
               onClick={() => setQuery('')}
-              className="text-xl leading-none text-foreground/40"
+              className="relative text-xl leading-none text-foreground/40 before:absolute before:-inset-[12px] before:content-['']"
             >
               ×
             </button>
@@ -169,7 +169,7 @@ export function SearchScreen({ texts, index, browse }: SearchScreenProps) {
                       type="button"
                       aria-label="Remove"
                       onClick={() => removeRecent(r)}
-                      className="text-lg leading-none text-foreground/30"
+                      className="relative text-lg leading-none text-foreground/30 before:absolute before:-inset-[13px] before:content-['']"
                     >
                       ×
                     </button>
@@ -202,7 +202,10 @@ export function SearchScreen({ texts, index, browse }: SearchScreenProps) {
               <li key={it.id}>
                 <button
                   type="button"
-                  onClick={() => addRecent(it.title)}
+                  onClick={() => {
+                    addRecent(it.title);
+                    if (it.href) router.push(it.href);
+                  }}
                   className="border-foreground/8 flex w-full items-center gap-3 border-b px-5 py-3 text-left"
                 >
                   <span

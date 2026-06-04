@@ -857,6 +857,11 @@ export interface PwaQuickAccess {
   label: string;
   /** Imagen del thumbnail (path relativo a `assets/` o URL). */
   image: string;
+  /**
+   * Ruta destino (white-label). Si se omite, el default es `/pwa/{key}`.
+   * Usar `""` para un tile no navegable (sin pantalla propia). Ver `resolvePwaTileRoute`.
+   */
+  route?: string;
 }
 
 /** Tile del grid del Dashboard PWA. */
@@ -868,6 +873,11 @@ export interface PwaTile {
   image: string;
   /** Si true, ocupa el ancho completo del grid (1 columna span 2). */
   wide?: boolean;
+  /**
+   * Ruta destino (white-label). Si se omite, el default es `/pwa/{key}`.
+   * Usar `""` para un tile no navegable (sin pantalla propia). Ver `resolvePwaTileRoute`.
+   */
+  route?: string;
 }
 
 /** Pantalla Home/Dashboard de la PWA. */

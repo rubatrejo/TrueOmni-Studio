@@ -11,6 +11,7 @@ import {
   isEventsFilterEmpty,
   type EventsFilterState,
 } from '@/lib/events-filter';
+import { useEventFavorites } from '@/lib/favorites';
 import { EMPTY_FILTER, type FilterState } from '@/lib/listings-filter';
 import { pwaShare } from '@/lib/pwa-share';
 
@@ -75,17 +76,10 @@ export function EventsTimelineScreen({
 }) {
   const router = useRouter();
   const [query, setQuery] = useState('');
-  const [favs, setFavs] = useState<Set<string>>(new Set());
+  // Favoritos de eventos persistentes (sessionStorage, compartido con el kiosk) — C3.
+  const { isFavorited, toggle: toggleFav } = useEventFavorites();
   const [filter, setFilter] = useState<FilterState>(EMPTY_FILTER);
   const [filterOpen, setFilterOpen] = useState(false);
-
-  const toggleFav = (slug: string) =>
-    setFavs((s) => {
-      const next = new Set(s);
-      if (next.has(slug)) next.delete(slug);
-      else next.add(slug);
-      return next;
-    });
 
   // Pools del overlay (derivados de los eventos reales).
   const featurePool = useMemo(() => {
@@ -334,7 +328,7 @@ export function EventsTimelineScreen({
                         aria-label="Favorite"
                         onClick={() => toggleFav(event.slug)}
                       >
-                        <PwaHeart filled={favs.has(event.slug)} size={20} />
+                        <PwaHeart filled={isFavorited(event.slug)} size={20} />
                       </button>
                     </div>
                   </div>

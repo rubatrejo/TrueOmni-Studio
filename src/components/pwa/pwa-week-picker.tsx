@@ -93,7 +93,7 @@ export function PwaWeekPicker({
             >
               <span
                 className="uppercase"
-                style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.04em', ...OPEN_SANS }}
+                style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.04em', ...OPEN_SANS }}
               >
                 {weekdayShort(iso)}
               </span>

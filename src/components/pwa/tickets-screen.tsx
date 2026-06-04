@@ -12,6 +12,7 @@ import {
   type EventsFilterState,
 } from '@/lib/events-filter';
 import { sortEvents } from '@/lib/events-sort';
+import { useTicketFavorites } from '@/lib/favorites';
 import { EMPTY_FILTER, type FilterState } from '@/lib/listings-filter';
 import { pwaShare } from '@/lib/pwa-share';
 import type { TicketableEvent } from '@/lib/tickets';
@@ -79,17 +80,10 @@ export function TicketsScreen({
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState(() => initialDate(tickets));
-  const [favs, setFavs] = useState<Set<string>>(new Set());
+  // Favoritos de tickets persistentes (sessionStorage) — C3.
+  const { isFavorited, toggle: toggleFav } = useTicketFavorites();
   const [filter, setFilter] = useState<FilterState>(EMPTY_FILTER);
   const [filterOpen, setFilterOpen] = useState(false);
-
-  const toggleFav = (slug: string) =>
-    setFavs((s) => {
-      const next = new Set(s);
-      if (next.has(slug)) next.delete(slug);
-      else next.add(slug);
-      return next;
-    });
 
   // Pools del overlay (derivados de todos los tickets).
   const featurePool = useMemo(() => {
@@ -350,7 +344,7 @@ export function TicketsScreen({
                         aria-label="Favorite"
                         onClick={() => toggleFav(event.slug)}
                       >
-                        <PwaHeart filled={favs.has(event.slug)} size={20} />
+                        <PwaHeart filled={isFavorited(event.slug)} size={20} />
                       </button>
                     </div>
                   </div>

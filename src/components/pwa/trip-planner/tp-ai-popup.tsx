@@ -73,7 +73,7 @@ export function TpAiPopup({
           <button
             type="button"
             onClick={() => onChoose('ai')}
-            className="mt-4 w-full rounded-full py-3 text-[14px] font-bold text-white"
+            className="mt-4 w-full rounded-full py-3 text-[14px] font-bold text-white transition-transform active:scale-[0.97]"
             style={{ backgroundColor: 'hsl(var(--brand-secondary))' }}
           >
             {textos.itinerary_ai_card_ai_cta ?? 'Start'}
@@ -105,7 +105,7 @@ export function TpAiPopup({
           <button
             type="button"
             onClick={() => onChoose('top')}
-            className="mt-4 w-full rounded-full py-3 text-[14px] font-bold text-white"
+            className="mt-4 w-full rounded-full py-3 text-[14px] font-bold text-white transition-transform active:scale-[0.97]"
             style={{ backgroundColor: 'hsl(var(--brand-tertiary))' }}
           >
             {textos.itinerary_ai_card_top_cta ?? "Let's Go"}

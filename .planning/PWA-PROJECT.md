@@ -44,11 +44,13 @@ data seed). Se clona el diseño, se navega, se valida visualmente. La integraci�
 ## Inventario de módulos
 
 - **🔁 Reutilizados (diseño mobile propio):** Home/Dashboard · Listings (Restaurants / Things to Do /
-  Stay) + detalle · Events · Map · Deals · Passes · Tickets · Trails · Digital Brochure · Ask AI ·
-  Itinerary/Favoritos · Multi-idioma (transversal) · Ads (transversal).
+  Stay) + detalle · Events · Map · Deals · Passes · Tickets · Trails · Digital Brochure ·
+  Ask AI (mobile, sin avatar Tavus — Fase D) · Survey (5 tipos: nps/rating/single/multi/text +
+  contact, paridad con el kiosk) · Itinerary/Favoritos · Multi-idioma + selector de idioma
+  funcional (Fase D) · Ads (transversal).
 - **🆕 PWA-only (nuevos):** Login Flow (mock passwordless) · Profile/Account · Notifications ·
   More Module · Scavenger Hunt · Bottom Nav Menu (transversal). _(Se añadirán más sobre la marcha.)_
-- **🚫 Excluidos:** Photo Booth · Guestbook · Social Wall · Billboards · Survey.
+- **🚫 Excluidos:** Photo Booth · Guestbook · Social Wall · Billboards.
 
 ## Fuera de alcance (milestone posterior)
 

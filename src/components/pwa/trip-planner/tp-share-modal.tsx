@@ -62,14 +62,14 @@ export function TpShareModal({
         <div className="flex flex-col gap-2.5">
           <button
             type="button"
-            className="w-full rounded-full py-3 text-[13px] font-bold uppercase tracking-wide text-white"
+            className="w-full rounded-full py-3 text-[13px] font-bold uppercase tracking-wide text-white transition-transform active:scale-[0.97]"
             style={{ backgroundColor: 'hsl(var(--brand-tertiary))' }}
           >
             {textos.itinerary_share_send_phone ?? 'SEND TO PHONE'}
           </button>
           <button
             type="button"
-            className="w-full rounded-full py-3 text-[13px] font-bold uppercase tracking-wide text-white"
+            className="w-full rounded-full py-3 text-[13px] font-bold uppercase tracking-wide text-white transition-transform active:scale-[0.97]"
             style={{ backgroundColor: 'hsl(var(--brand-secondary))' }}
           >
             {textos.itinerary_share_send_email ?? 'SEND TO EMAIL'}

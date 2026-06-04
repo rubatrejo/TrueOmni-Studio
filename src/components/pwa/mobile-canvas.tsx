@@ -28,6 +28,17 @@ function detectEmbedded(): boolean {
   }
 }
 
+/** PWA instalada (añadida a inicio): el SO la lanza full-screen sin chrome del navegador. */
+function detectStandalone(): boolean {
+  if (typeof window === 'undefined') return false;
+  // iOS Safari expone `navigator.standalone`; el resto, el media query estándar.
+  const iosStandalone = (window.navigator as { standalone?: boolean }).standalone === true;
+  return iosStandalone || window.matchMedia('(display-mode: standalone)').matches;
+}
+
+/** Color del header/bottom-nav: rellena el notch y el home-indicator de forma continua. */
+const BRAND = 'hsl(var(--brand-primary))';
+
 /**
  * Canvas fijo 390×844 (mobile retrato) para la PWA.
  *
@@ -41,13 +52,15 @@ function detectEmbedded(): boolean {
 export function MobileCanvas({ children }: { children: ReactNode }) {
   const [scale, setScale] = useState(1);
   const [embedded, setEmbedded] = useState(false);
+  const [standalone, setStandalone] = useState(false);
 
   useEffect(() => {
     setEmbedded(detectEmbedded());
+    setStandalone(detectStandalone());
   }, []);
 
   useEffect(() => {
-    if (embedded) return; // sin scaling interno cuando es preview
+    if (embedded || standalone) return; // sin scaling interno en preview ni standalone
 
     const updateScale = () => {
       const availW = window.innerWidth - VIEWPORT_PADDING_X_PX * 2;
@@ -58,7 +71,35 @@ export function MobileCanvas({ children }: { children: ReactNode }) {
     updateScale();
     window.addEventListener('resize', updateScale);
     return () => window.removeEventListener('resize', updateScale);
-  }, [embedded]);
+  }, [embedded, standalone]);
+
+  // Modo standalone (PWA instalada en el SO): llena el viewport real y respeta las
+  // safe-areas de iOS (notch / Dynamic Island arriba, home indicator abajo). El padding
+  // navy continúa el color del header y del bottom nav. Ancho tope 390 (centrado) para
+  // no deformar el layout 375-space en pantallas anchas (E1).
+  if (standalone) {
+    return (
+      <div
+        className="flex justify-center overflow-hidden"
+        style={{
+          width: '100%',
+          height: '100dvh',
+          paddingTop: 'env(safe-area-inset-top)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          backgroundColor: BRAND,
+        }}
+      >
+        <div
+          data-pwa-canvas
+          className="relative h-full w-full overflow-hidden bg-background text-foreground"
+          style={{ maxWidth: `${PWA_WIDTH_PX}px` }}
+        >
+          <PwaKeyboardProvider>{children}</PwaKeyboardProvider>
+          <PwaAdsSlot />
+        </div>
+      </div>
+    );
+  }
 
   // Modo embedded (iframe): canvas a 390×844 reales, ocupando el iframe.
   if (embedded) {

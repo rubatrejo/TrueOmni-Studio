@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { resolveAssetUrl } from '@/lib/asset-url';
 
 import { S } from './mobile-layer';
+import { PwaPrimaryButton } from './pwa-button';
 
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
 
@@ -127,14 +128,13 @@ export function ForgotPasswordScreen({
         </div>
 
         {/* RESET PASSWORD */}
-        <button
-          type="button"
+        <PwaPrimaryButton
           onClick={() => router.push(checkEmailHref)}
-          className="absolute flex items-center justify-center rounded-[2px] bg-[hsl(var(--pwa-primary))] font-bold uppercase text-white"
+          className="absolute rounded-[2px] uppercase"
           style={{ left: 24, top: 452, width: 328, height: 46, fontSize: 14, letterSpacing: 0.5 }}
         >
           {texts.resetCta}
-        </button>
+        </PwaPrimaryButton>
 
         {/* Create New Account → signup */}
         <button

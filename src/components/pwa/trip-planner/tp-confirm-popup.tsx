@@ -50,7 +50,7 @@ export function TpConfirmPopup({
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 rounded-full border-2 py-2.5 text-[13px] font-bold uppercase"
+            className="flex-1 rounded-full border-2 py-2.5 text-[13px] font-bold uppercase transition-transform active:scale-[0.97]"
             style={{
               borderColor: 'hsl(var(--brand-primary))',
               color: 'hsl(var(--brand-primary))',
@@ -61,7 +61,7 @@ export function TpConfirmPopup({
           <button
             type="button"
             onClick={onConfirm}
-            className="flex-1 rounded-full py-2.5 text-[13px] font-bold uppercase text-white"
+            className="flex-1 rounded-full py-2.5 text-[13px] font-bold uppercase text-white transition-transform active:scale-[0.97]"
             style={{ backgroundColor: 'hsl(var(--brand-primary))' }}
           >
             {confirmLabel}

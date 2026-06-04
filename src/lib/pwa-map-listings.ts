@@ -1,7 +1,9 @@
 import type { ListingItem } from '@/components/pwa/listing-row';
 import type { KioskConfig, Listing } from '@/lib/config';
+import { todayISO } from '@/lib/events-date';
 import { isListingsModule } from '@/lib/itinerary-tabs';
 import { haversineMi } from '@/lib/listings-sort';
+import { jitterCoords } from '@/lib/map-aggregator';
 import type { MapItem } from '@/lib/map-item';
 import { eventDateLabel } from '@/lib/map-open-today';
 import { trailToPwaListing } from '@/lib/trails';
@@ -39,6 +41,8 @@ export function getPwaMapData(config: KioskConfig): {
   const categories = config.features?.pwa?.map?.categories ?? [];
   const modules = config.features?.home?.modules ?? {};
   const origin = config.client?.coords;
+  // Paridad con el kiosk (D3): excluir eventos pasados del mapa.
+  const today = todayISO(config.client?.timezone);
 
   const items: ListingItem[] = [];
   const mapItems: MapItem[] = [];
@@ -53,6 +57,7 @@ export function getPwaMapData(config: KioskConfig): {
     // Listing crudo (para `applyFilters`) + ListingItem + MapItem (pin 'events').
     if (mod.kind === 'events') {
       for (const e of mod.events) {
+        if (e.date < today) continue; // no mostrar eventos pasados (paridad kiosk)
         const id = uid(cat.source, e.slug);
         listings.push({
           slug: id,
@@ -90,7 +95,7 @@ export function getPwaMapData(config: KioskConfig): {
           title: e.title,
           subcategory: e.category,
           image: e.image,
-          coords: e.coords,
+          coords: jitterCoords(id, 'events', e.coords),
           address: e.address,
           phone: e.phone,
           features: e.features,
@@ -130,7 +135,7 @@ export function getPwaMapData(config: KioskConfig): {
           title: tr.title,
           subcategory: tr.subcategory,
           image: tr.image,
-          coords: tr.coords,
+          coords: jitterCoords(id, 'trails', tr.coords),
           address: tr.address,
           phone: tr.phone,
           features: tr.features,
@@ -167,7 +172,7 @@ export function getPwaMapData(config: KioskConfig): {
         title: l.title,
         subcategory: l.subcategory,
         image: l.image,
-        coords: l.coords,
+        coords: jitterCoords(id, cat.source, l.coords),
         address: l.address,
         phone: l.phone,
         features: l.features,

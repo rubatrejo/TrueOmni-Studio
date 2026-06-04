@@ -76,7 +76,7 @@ export function HuntDetail({
       >
         <span className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <span
-          className="absolute bottom-10 left-3 rounded-[4px] px-2 py-[2px] text-[9px] font-bold uppercase tracking-wide text-white"
+          className="absolute bottom-10 left-3 rounded-[4px] px-2 py-[2px] text-[10px] font-bold uppercase tracking-wide text-white"
           style={{ backgroundColor: 'hsl(var(--brand-tertiary))', ...OPEN_SANS }}
         >
           {hunt.tasks.length} {config.dashboard.tasksLabel}

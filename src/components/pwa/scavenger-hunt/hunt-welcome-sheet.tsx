@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { useSafeTimeout } from '@/hooks/use-safe-timeout';
 import type { ScavengerTaskTypeInfo } from '@/lib/config';
 
 import { TaskTypeIcon } from './task-type-icon';
@@ -27,6 +28,7 @@ interface HuntWelcomeSheetProps {
 export function HuntWelcomeSheet({ title, description, taskTypes, button }: HuntWelcomeSheetProps) {
   const [show, setShow] = useState(false);
   const [visible, setVisible] = useState(false);
+  const schedule = useSafeTimeout();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -41,10 +43,9 @@ export function HuntWelcomeSheet({ title, description, taskTypes, button }: Hunt
 
   const dismiss = () => {
     setVisible(false);
-    setTimeout(() => {
-      if (!ALWAYS_SHOW_FOR_REVIEW) localStorage.setItem(STORAGE_KEY, '1');
-      setShow(false);
-    }, 300);
+    // Persistir inmediato (no perderlo si se desmonta durante el fade) — C6.
+    if (!ALWAYS_SHOW_FOR_REVIEW) localStorage.setItem(STORAGE_KEY, '1');
+    schedule(() => setShow(false), 300);
   };
 
   if (!show) return null;

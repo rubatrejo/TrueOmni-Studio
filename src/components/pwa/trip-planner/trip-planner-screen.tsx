@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 
+import { useSafeTimeout } from '@/hooks/use-safe-timeout';
 import { generateItinerary, type AiPreferences, type GeneratedItinerary } from '@/lib/ai-itinerary';
 import type { ItineraryAiConfig, PwaTripPlannerModuleConfig } from '@/lib/config';
 import { distanceMi, type ItineraryCatalogItem } from '@/lib/itinerary-catalog';
@@ -58,6 +59,7 @@ export function TripPlannerScreen({
   const [aiView, setAiView] = useState<AiView>(null);
   const [aiResult, setAiResult] = useState<GeneratedItinerary | null>(null);
   const rail = useItineraryRail();
+  const schedule = useSafeTimeout();
 
   // Resolver `${kind}:${slug}` → TpCard desde el catálogo completo.
   const cardByKey = useMemo(() => {
@@ -115,7 +117,7 @@ export function TripPlannerScreen({
       });
     } else {
       // Top Suggestions: no genera; muestra cards curadas tras un breve delay.
-      window.setTimeout(() => setAiView('result'), 1600);
+      schedule(() => setAiView('result'), 1600);
     }
   };
 

@@ -193,7 +193,7 @@ export function PwaSurveyOverlay({ config, clientSlug, onClose }: Props) {
                 <p
                   key={`sub-${step}`}
                   className="survey-step-anim mt-2 text-center"
-                  style={{ fontSize: 9.5, lineHeight: 1.45, color: MUTED, fontFamily: OPEN_SANS }}
+                  style={{ fontSize: 11, lineHeight: 1.45, color: MUTED, fontFamily: OPEN_SANS }}
                 >
                   {currentQuestion.subtitle}
                 </p>

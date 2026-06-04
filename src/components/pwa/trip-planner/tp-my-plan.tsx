@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
+import { useSafeTimeout } from '@/hooks/use-safe-timeout';
 import { resolveAssetUrl } from '@/lib/asset-url';
 import type { PwaTripPlannerModuleConfig } from '@/lib/config';
 import type { UseItineraryRailResult } from '@/lib/itinerary-favorites';
@@ -10,6 +11,7 @@ import { smartRouteOrder } from '@/lib/itinerary-smart-route';
 
 import { SearchIcon } from '../dashboard-icons';
 import { Layer } from '../mobile-layer';
+import { PwaSubHeader } from '../pwa-sub-header';
 
 import { TpConfirmPopup } from './tp-confirm-popup';
 import type { TpCard } from './types';
@@ -52,6 +54,7 @@ export function TpMyPlan({
   const [optimalNote, setOptimalNote] = useState(false);
   const [pendingRemove, setPendingRemove] = useState<TpCard | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
+  const schedule = useSafeTimeout();
   const coordByKey = useMemo(() => {
     const m = new Map<string, { lat: number; lng: number }>();
     stops.forEach((s) => m.set(`${s.kind}:${s.slug}`, s.coords));
@@ -65,7 +68,7 @@ export function TpMyPlan({
     const target = smartRouteOrder(rail.stops, (e) => coordByKey.get(`${e.kind}:${e.slug}`));
     if (!target) {
       setOptimalNote(true);
-      setTimeout(() => setOptimalNote(false), 2200);
+      schedule(() => setOptimalNote(false), 2200);
       return;
     }
     const current = [...rail.stops];
@@ -83,38 +86,17 @@ export function TpMyPlan({
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-background">
-      {/* Header (back propio → vuelve a LIST) */}
-      <Layer
-        h={90}
-        className="relative z-10 shrink-0"
-        style={{ backgroundColor: 'hsl(var(--brand-primary))' }}
-      >
-        <button
-          type="button"
-          aria-label="Back"
-          onClick={onBack}
-          className="absolute text-white"
-          style={{ left: 18, top: 50, height: 28 }}
-        >
-          <svg width={11.87} height={20.36} viewBox="0 0 11.87 20.36" fill="#fff" aria-hidden>
-            <path d="M.292,10.946a.975.975,0,0,1,0-1.392L9.537.417a1.456,1.456,0,0,1,2.041,0,1.415,1.415,0,0,1,0,2.016L3.669,10.25l7.909,7.815a1.417,1.417,0,0,1,0,2.017,1.456,1.456,0,0,1-2.041,0Z" />
-          </svg>
-        </button>
-        <div
-          className="pointer-events-none absolute text-center font-bold text-white"
-          style={{ left: 60, top: 53, width: 255, fontSize: 17, ...OPEN_SANS }}
-        >
-          {tp.myPlan.title}
-        </div>
-        <button
-          type="button"
-          aria-label="Search"
-          onClick={() => router.push('/pwa/search')}
-          className="absolute text-white"
-          style={{ right: 18, top: 48 }}
-        >
-          <SearchIcon size={20} />
-        </button>
+      {/* Header (sub-header compartido; back propio → vuelve a LIST) */}
+      <Layer h={90} className="relative z-10 shrink-0">
+        <PwaSubHeader
+          title={tp.myPlan.title}
+          onBack={onBack}
+          right={
+            <button type="button" aria-label="Search" onClick={() => router.push('/pwa/search')}>
+              <SearchIcon size={20} />
+            </button>
+          }
+        />
       </Layer>
 
       {/* Barra MY PLAN + reset + duración */}
@@ -215,7 +197,7 @@ export function TpMyPlan({
                 ) : null}
               </div>
               <div
-                className="w-[120px] shrink-0 border-l px-3 py-2 text-[9px]"
+                className="w-[120px] shrink-0 border-l px-3 py-2 text-[10px]"
                 style={{ borderColor: 'hsl(var(--foreground)/0.1)' }}
               >
                 <p className="font-bold text-foreground/50">{tp.myPlan.startTimeLabel}</p>
@@ -236,7 +218,7 @@ export function TpMyPlan({
         <button
           type="button"
           onClick={onSmartRoute}
-          className="flex-1 rounded-full border-2 py-2.5 text-[13px] font-bold uppercase"
+          className="flex-1 rounded-full border-2 py-2.5 text-[13px] font-bold uppercase transition-transform active:scale-[0.97]"
           style={{
             borderColor: 'hsl(var(--brand-secondary))',
             color: 'hsl(var(--brand-secondary))',
@@ -247,7 +229,7 @@ export function TpMyPlan({
         <button
           type="button"
           onClick={onStartPlan}
-          className="flex-1 rounded-full py-2.5 text-[13px] font-bold uppercase text-white"
+          className="flex-1 rounded-full py-2.5 text-[13px] font-bold uppercase text-white transition-transform active:scale-[0.97]"
           style={{ backgroundColor: 'hsl(var(--brand-secondary))' }}
         >
           {tp.myPlan.startPlan}

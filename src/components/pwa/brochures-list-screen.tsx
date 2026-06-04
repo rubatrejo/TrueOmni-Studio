@@ -9,6 +9,7 @@ import type { BrochureItem, PwaDigitalBrochureModuleConfig } from '@/lib/config'
 import { PwaBottomNav } from './bottom-nav';
 import { SearchIcon } from './dashboard-icons';
 import { S } from './mobile-layer';
+import { PwaSubHeader } from './pwa-sub-header';
 
 const BRAND = 'hsl(var(--brand-primary))';
 const PWA = 'hsl(var(--pwa-primary))';
@@ -97,30 +98,7 @@ export function BrochuresListScreen({
             transformOrigin: 'top left',
           }}
         >
-          <button
-            type="button"
-            aria-label="Back"
-            onClick={() => router.back()}
-            className="absolute"
-            style={{ left: 12, top: 44, width: 40, height: 40 }}
-          >
-            <svg
-              className="mx-auto"
-              width={11.87}
-              height={20.36}
-              viewBox="0 0 11.87 20.36"
-              fill="#fff"
-              aria-hidden
-            >
-              <path d="M.292,10.946a.975.975,0,0,1,0-1.392L9.537.417a1.456,1.456,0,0,1,2.041,0,1.415,1.415,0,0,1,0,2.016L3.669,10.25l7.909,7.815a1.417,1.417,0,0,1,0,2.017,1.456,1.456,0,0,1-2.041,0Z" />
-            </svg>
-          </button>
-          <div
-            className="pointer-events-none absolute text-center font-bold text-white"
-            style={{ left: 0, top: 50, width: 375, fontSize: 17, fontFamily: OPEN_SANS }}
-          >
-            {texts.title}
-          </div>
+          <PwaSubHeader title={texts.title} />
           {/* Search bar (sustituye al segmented Listings/Map del listings screen) */}
           <div
             className="absolute flex items-center gap-2 rounded-full px-[14px] text-white"

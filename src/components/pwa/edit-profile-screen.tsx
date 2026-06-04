@@ -3,10 +3,12 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { usePhotoSession } from '@/hooks/use-photo-session';
 import { resolveAssetUrl } from '@/lib/asset-url';
 
 import { S } from './mobile-layer';
 import { PhotoSourceSheet } from './photo-source-sheet';
+import { PwaPrimaryButton } from './pwa-button';
 import { PwaSubHeader } from './pwa-sub-header';
 import { ChevronDownIcon, FlagIcon, MailIcon, MapPinIcon, UserIcon } from './signup-icons';
 
@@ -76,7 +78,9 @@ function Field({
  */
 export function EditProfileScreen({ texts, photo, photoSheetTexts }: EditProfileScreenProps) {
   const router = useRouter();
-  const [photoUrl, setPhotoUrl] = useState<string | null>(photo ?? null);
+  // Foto: blob nuevo con revoke automático (C5); si no hay, el prefill `photo`.
+  const { blobUrl, setBlob } = usePhotoSession();
+  const photoUrl = blobUrl ?? photo ?? null;
   const [sheetOpen, setSheetOpen] = useState(false);
   const [name, setName] = useState(texts.prefill.name);
   const [email, setEmail] = useState(texts.prefill.email);
@@ -194,30 +198,29 @@ export function EditProfileScreen({ texts, photo, photoSheetTexts }: EditProfile
         />
 
         {/* CHANGE PASSWORD (outline) */}
-        <button
-          type="button"
+        <PwaPrimaryButton
+          variant="outline"
           onClick={() => router.push('/pwa/profile/password')}
-          className="absolute flex items-center justify-center rounded-[2px] border border-white font-bold uppercase text-white"
+          className="absolute rounded-[2px] uppercase"
           style={{ left: 22, top: 565, width: 328, height: 46, fontSize: 14, letterSpacing: 0.5 }}
         >
           {texts.changePasswordCta}
-        </button>
+        </PwaPrimaryButton>
         {/* SAVE */}
-        <button
-          type="button"
+        <PwaPrimaryButton
           onClick={() => router.push('/pwa/profile')}
-          className="absolute flex items-center justify-center rounded-[2px] bg-[hsl(var(--pwa-primary))] font-bold uppercase text-white"
+          className="absolute rounded-[2px] uppercase"
           style={{ left: 23, top: 633, width: 328, height: 46, fontSize: 14, letterSpacing: 0.5 }}
         >
           {texts.saveCta}
-        </button>
+        </PwaPrimaryButton>
       </div>
 
       <PhotoSourceSheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
         texts={photoSheetTexts}
-        onPicked={setPhotoUrl}
+        onPicked={setBlob}
       />
     </div>
   );

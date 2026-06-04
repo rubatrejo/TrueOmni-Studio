@@ -2,6 +2,8 @@
 
 import { useEscapeToClose } from '@/components/listings/use-escape-to-close';
 
+import { PwaPrimaryButton } from './pwa-button';
+
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
 
 interface PwaAlertModalProps {
@@ -126,14 +128,13 @@ export function PwaAlertModal({
           {body}
         </p>
 
-        <button
-          type="button"
+        <PwaPrimaryButton
           onClick={onPrimary ?? onClose}
-          className="flex w-full items-center justify-center rounded-lg bg-[hsl(var(--pwa-primary))] font-bold uppercase text-white"
+          className="w-full rounded-lg uppercase"
           style={{ height: d.btnH, fontSize: d.btnFs, letterSpacing: 0.5 }}
         >
           {primaryCta}
-        </button>
+        </PwaPrimaryButton>
         {secondaryCta ? (
           <button
             type="button"

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { resolveAssetUrl } from '@/lib/asset-url';
 
 import { S } from './mobile-layer';
+import { PwaPrimaryButton } from './pwa-button';
 
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
 
@@ -76,24 +77,23 @@ export function CheckEmailScreen({ background, texts, forgotHref }: CheckEmailSc
         </div>
 
         {/* CREATE ACCOUNT → signup */}
-        <button
-          type="button"
+        <PwaPrimaryButton
           onClick={() => router.push('/pwa/create-account')}
-          className="absolute flex items-center justify-center rounded-[2px] bg-[hsl(var(--pwa-primary))] font-bold uppercase text-white"
+          className="absolute rounded-[2px] uppercase"
           style={{ left: 23, top: 451, width: 328, height: 46, fontSize: 14, letterSpacing: 0.5 }}
         >
           {texts.createAccountCta}
-        </button>
+        </PwaPrimaryButton>
 
         {/* TRY AGAIN (vuelve al paso 1) */}
-        <button
-          type="button"
+        <PwaPrimaryButton
+          variant="outline"
           onClick={() => router.push(forgotHref)}
-          className="absolute flex items-center justify-center rounded-[3px] border border-white font-bold uppercase text-white"
+          className="absolute rounded-[3px] uppercase"
           style={{ left: 23, top: 516, width: 328, height: 46, fontSize: 14, letterSpacing: 0.5 }}
         >
           {texts.tryAgainCta}
-        </button>
+        </PwaPrimaryButton>
       </div>
     </div>
   );

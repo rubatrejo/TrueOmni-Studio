@@ -74,7 +74,7 @@ function NpsField({
               style={{
                 width: 20,
                 height: 20,
-                fontSize: 9.5,
+                fontSize: 11,
                 fontFamily: OPEN_SANS,
                 border: `1.5px solid ${active ? PRIMARY : 'hsl(var(--foreground) / 0.25)'}`,
                 backgroundColor: active ? PRIMARY : 'transparent',
@@ -88,10 +88,10 @@ function NpsField({
       </div>
       {question.labels ? (
         <div className="flex w-full items-center justify-between px-1">
-          <span style={{ fontSize: 7.5, color: MUTED, fontFamily: OPEN_SANS }}>
+          <span style={{ fontSize: 10, color: MUTED, fontFamily: OPEN_SANS }}>
             {question.labels.low}
           </span>
-          <span style={{ fontSize: 7.5, color: MUTED, fontFamily: OPEN_SANS }}>
+          <span style={{ fontSize: 10, color: MUTED, fontFamily: OPEN_SANS }}>
             {question.labels.high}
           </span>
         </div>
@@ -220,7 +220,7 @@ function TextField({
       />
       <div
         className="mt-1 text-right"
-        style={{ fontSize: 8.5, color: MUTED, fontFamily: OPEN_SANS }}
+        style={{ fontSize: 10, color: MUTED, fontFamily: OPEN_SANS }}
       >
         {counter}
       </div>
@@ -285,7 +285,7 @@ export function PwaSurveyContact({
           }}
         />
       ) : null}
-      <p style={{ fontSize: 8.5, lineHeight: 1.4, color: MUTED, fontFamily: OPEN_SANS }}>
+      <p style={{ fontSize: 12, lineHeight: 1.4, color: MUTED, fontFamily: OPEN_SANS }}>
         {disclaimer}
       </p>
     </div>

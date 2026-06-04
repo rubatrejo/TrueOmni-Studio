@@ -3,11 +3,14 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { useAvailableLocales, useCurrentLocale } from '@/components/i18n-provider';
 import type { PwaMoreItem, SurveyConfig } from '@/lib/config';
+import { LOCALE_LABELS } from '@/lib/i18n';
 
 import { PwaBottomNav } from './bottom-nav';
 import { InboxIcon, SearchIcon } from './dashboard-icons';
 import { Layer } from './mobile-layer';
+import { GlobeIcon, PwaLanguageSheet } from './pwa-language-sheet';
 import { PwaSurveyOverlay } from './pwa-survey-overlay';
 
 const BRAND = 'hsl(var(--brand-primary))';
@@ -57,6 +60,11 @@ export function MoreScreen({
 }: MoreScreenProps) {
   const router = useRouter();
   const [surveyOpen, setSurveyOpen] = useState(false);
+  const [languageOpen, setLanguageOpen] = useState(false);
+  // Selector de idioma: solo tiene sentido con >1 idioma disponible (D1).
+  const availableLocales = useAvailableLocales();
+  const currentLocale = useCurrentLocale();
+  const showLanguage = availableLocales.length > 1;
 
   /** Survey abre como popup (no navega); el resto usa `ITEM_HREF`. */
   const handleItem = (key: string) => {
@@ -115,6 +123,19 @@ export function MoreScreen({
             {it.label}
           </button>
         ))}
+        {/* Selector de idioma (chrome de la app; muestra el idioma activo) — D1 */}
+        {showLanguage ? (
+          <button
+            type="button"
+            aria-label="Language"
+            onClick={() => setLanguageOpen(true)}
+            className="flex h-[54px] w-full items-center justify-center gap-2 text-foreground"
+            style={{ fontSize: 16, ...OPEN_SANS }}
+          >
+            <GlobeIcon size={18} />
+            {LOCALE_LABELS[currentLocale] ?? currentLocale}
+          </button>
+        ) : null}
       </div>
 
       {/* Bottom nav fijo, "more" activo */}
@@ -128,6 +149,9 @@ export function MoreScreen({
           onClose={() => setSurveyOpen(false)}
         />
       ) : null}
+
+      {/* Selector de idioma (bottom-sheet) */}
+      <PwaLanguageSheet open={languageOpen} onClose={() => setLanguageOpen(false)} />
     </div>
   );
 }

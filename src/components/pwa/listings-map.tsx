@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { MapCanvas } from '@/components/map/map-canvas';
 import { resolveAssetUrl } from '@/lib/asset-url';
+import { useFavorites } from '@/lib/favorites';
 import type { MapItem } from '@/lib/map-item';
 
 import type { ListingItem } from './listing-row';
@@ -45,17 +46,10 @@ export function ListingsMap({
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(items[0]?.slug ?? null);
-  const [favs, setFavs] = useState<Set<string>>(new Set());
+  // Favoritos persistentes (sessionStorage, compartido con kiosk + Trip Planner) — C3.
+  const { isFavorited, toggle: toggleFav } = useFavorites();
   const railRef = useRef<HTMLDivElement | null>(null);
   const syncing = useRef(false);
-
-  const toggleFav = (slug: string) =>
-    setFavs((s) => {
-      const next = new Set(s);
-      if (next.has(slug)) next.delete(slug);
-      else next.add(slug);
-      return next;
-    });
 
   // Pin seleccionado en el mapa → centrar la card en el carrusel.
   useEffect(() => {
@@ -123,7 +117,7 @@ export function ListingsMap({
                 <div className="px-2.5 py-1.5" style={{ backgroundColor: FOOTER }}>
                   <p
                     className="truncate uppercase text-white"
-                    style={{ fontSize: 8, letterSpacing: 0.4, fontFamily: OPEN_SANS }}
+                    style={{ fontSize: 10, letterSpacing: 0.4, fontFamily: OPEN_SANS }}
                   >
                     {it.subcategory}
                   </p>
@@ -135,13 +129,13 @@ export function ListingsMap({
                   </p>
                   <p
                     className="truncate text-white"
-                    style={{ fontSize: 8.5, fontWeight: 300, marginTop: 2, fontFamily: OPEN_SANS }}
+                    style={{ fontSize: 10, fontWeight: 300, marginTop: 2, fontFamily: OPEN_SANS }}
                   >
                     {it.distanceMi.toFixed(1)} mi · {it.cityState}
                   </p>
                   <p
                     className="truncate font-semibold"
-                    style={{ fontSize: 8.5, color: OLIVE, marginTop: 1, fontFamily: OPEN_SANS }}
+                    style={{ fontSize: 10, color: OLIVE, marginTop: 1, fontFamily: OPEN_SANS }}
                   >
                     {it.openUntil}
                   </p>
@@ -161,7 +155,7 @@ export function ListingsMap({
                   backgroundColor: 'hsl(0 0% 100% / 0.7)',
                 }}
               >
-                <PwaHeart filled={favs.has(it.slug)} size={16} />
+                <PwaHeart filled={isFavorited(it.slug)} size={16} />
               </button>
             </div>
           );

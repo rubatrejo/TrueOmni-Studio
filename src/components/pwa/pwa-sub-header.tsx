@@ -13,21 +13,28 @@ const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
  *   resto del kiosk/PWA. No añadir un label de texto al botón de back.
  * - `right` es un slot opcional (ej. gear de Edit Profile, link "Edit Profile").
  * - Back robusto: `router.back()` con fallback a `backHref` (o `/pwa/dashboard`).
+ * - `onBack` opcional: si se pasa, el botón lo invoca en vez de la lógica de router
+ *   (para pantallas con navegación propia: trip-planner, create-account, etc.).
+ *   Default = comportamiento actual, sin cambios para los consumidores existentes.
  */
 export function PwaSubHeader({
   title,
   right,
   backHref = '/pwa/dashboard',
+  onBack,
 }: {
   title?: string;
   right?: ReactNode;
   backHref?: string;
+  onBack?: () => void;
 }) {
   const router = useRouter();
-  const onBack = () => {
-    if (typeof window !== 'undefined' && window.history.length > 1) router.back();
-    else router.push(backHref);
-  };
+  const handleBack =
+    onBack ??
+    (() => {
+      if (typeof window !== 'undefined' && window.history.length > 1) router.back();
+      else router.push(backHref);
+    });
 
   return (
     <>
@@ -39,7 +46,7 @@ export function PwaSubHeader({
       <button
         type="button"
         aria-label="Back"
-        onClick={onBack}
+        onClick={handleBack}
         className="absolute flex items-center text-white"
         style={{ left: 18, top: 50, height: 28, ...OPEN_SANS }}
       >

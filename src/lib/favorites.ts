@@ -151,6 +151,11 @@ const trailFavorites = createFavoritesStore({
   kind: 'trail',
 });
 
+const ticketFavorites = createFavoritesStore({
+  storageKey: 'kiosk_ticket_favorites',
+  kind: 'ticket',
+});
+
 /** Hook del bucket de listings (retrocompatible con Fase 3.3). */
 export const useFavorites = listingFavorites.useStore;
 
@@ -159,3 +164,6 @@ export const useEventFavorites = eventFavorites.useStore;
 
 /** Hook del bucket de trails (Fase 3.13). */
 export const useTrailFavorites = trailFavorites.useStore;
+
+/** Hook del bucket de tickets (PWA — Fase C). */
+export const useTicketFavorites = ticketFavorites.useStore;

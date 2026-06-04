@@ -1,17 +1,18 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { MapboxMap } from '@/components/listings/mapbox-map';
 import { useEscapeToClose } from '@/components/listings/use-escape-to-close';
 import { resolveAssetUrl } from '@/lib/asset-url';
 import type { DayOpen, TrailConsiderations } from '@/lib/config';
+import { useFavorites } from '@/lib/favorites';
 
 import { PwaBottomNav, type PwaNavKey } from './bottom-nav';
 import { S } from './mobile-layer';
 import { PwaConsiderations, type ConsiderationsLabels } from './pwa-considerations';
 import { PwaHeart } from './pwa-heart';
+import { PwaSubHeader } from './pwa-sub-header';
 import { PwaTrailMap, type PwaTrailMapData } from './pwa-trail-map';
 import { ShareIconButton } from './share-icon-button';
 
@@ -156,8 +157,9 @@ export function ListingsDetailScreen({
    */
   trailMap?: { data: PwaTrailMapData; defaultLabel: string; trailLabel: string };
 }) {
-  const router = useRouter();
-  const [fav, setFav] = useState(false);
+  // Favorito persistente (sessionStorage, compartido con kiosk + Trip Planner) — C3.
+  const { isFavorited, toggle: toggleFav } = useFavorites();
+  const fav = isFavorited(detail.slug);
   const [menuOpen, setMenuOpen] = useState(false);
   const hasHeroAction = heroPrimaryAction.kind !== 'none';
   const [hoursOpen, setHoursOpen] = useState(false);
@@ -183,51 +185,27 @@ export function ListingsDetailScreen({
     setPhotoIdx(Math.round(rail.scrollLeft / rail.clientWidth));
   };
 
-  const today = todayIndex();
-  const todayRange = detail.openHours ? rangeOf(detail.openHours[DAY_KEYS[today]]) : '';
+  // `todayIndex()` depende de `new Date()`: diferido a post-montaje para evitar
+  // hydration mismatch (server vs cliente). Antes de montar, sin highlight de hoy — C4.
+  const [today, setToday] = useState<number | null>(null);
+  useEffect(() => setToday(todayIndex()), []);
+  const todayRange =
+    detail.openHours && today != null ? rangeOf(detail.openHours[DAY_KEYS[today]]) : '';
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${detail.coords.lat},${detail.coords.lng}`;
   const open = (url?: string) => url && window.open(url, '_blank', 'noopener,noreferrer');
 
   return (
     <div className="relative flex h-full w-full flex-col bg-background">
-      {/* Header fijo */}
-      <div className="relative z-10 shrink-0" style={{ height: 90 * S, backgroundColor: BRAND }}>
+      {/* Header fijo (sub-header compartido) */}
+      <div className="relative z-10 shrink-0" style={{ height: 90 * S }}>
         <div
           className="absolute left-0 top-0"
           style={{ width: 375, height: 90, transform: `scale(${S})`, transformOrigin: 'top left' }}
         >
-          <button
-            type="button"
-            aria-label="Back"
-            onClick={() =>
-              window.history.length > 1
-                ? router.back()
-                : router.push(backHref ?? `${basePath}/list`)
-            }
-            className="absolute"
-            style={{ left: 12, top: 44, width: 40, height: 40 }}
-          >
-            <svg
-              className="mx-auto"
-              width={11.87}
-              height={20.36}
-              viewBox="0 0 11.87 20.36"
-              fill="#fff"
-              aria-hidden
-            >
-              <path d="M.292,10.946a.975.975,0,0,1,0-1.392L9.537.417a1.456,1.456,0,0,1,2.041,0,1.415,1.415,0,0,1,0,2.016L3.669,10.25l7.909,7.815a1.417,1.417,0,0,1,0,2.017,1.456,1.456,0,0,1-2.041,0Z" />
-            </svg>
-          </button>
-          <div
-            className="pointer-events-none absolute text-center font-bold text-white"
-            style={{ left: 0, top: 50, width: 375, fontSize: 17, fontFamily: OPEN_SANS }}
-          >
-            {texts.headerTitle}
-          </div>
-          <ShareIconButton
-            onShare={() => open(detail.website)}
-            size={20}
-            className="absolute left-[335px] top-[48px] text-white"
+          <PwaSubHeader
+            title={texts.headerTitle}
+            backHref={backHref ?? `${basePath}/list`}
+            right={<ShareIconButton onShare={() => open(detail.website)} size={20} />}
           />
         </div>
       </div>
@@ -297,7 +275,7 @@ export function ListingsDetailScreen({
             type="button"
             aria-label="Photos"
             onClick={() => setGalleryOpen(true)}
-            className="absolute text-white/90"
+            className="absolute text-white/90 before:absolute before:-inset-[7px] before:content-['']"
             style={{ right: 16, bottom: 16, width: 28, height: 26 }}
           >
             <svg width={22} height={20} viewBox="0 0 24 24" fill="none">
@@ -317,7 +295,7 @@ export function ListingsDetailScreen({
             {
               k: 'fav' as const,
               label: fav ? texts.removeFavorite : texts.addFavorite,
-              onClick: () => setFav((f) => !f),
+              onClick: () => toggleFav(detail.slug),
             },
           ].map((a, i) => (
             <button
@@ -499,7 +477,7 @@ export function ListingsDetailScreen({
             type="button"
             aria-label="Close"
             onClick={() => setGalleryOpen(false)}
-            className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full"
+            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full"
             style={{ backgroundColor: 'hsl(0 0% 100% / 0.2)' }}
           >
             <svg width={18} height={18} viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -569,7 +547,7 @@ export function ListingsDetailScreen({
                     type="button"
                     aria-label={`Photo ${i + 1}`}
                     onClick={() => goToPhoto(i)}
-                    className="rounded-full"
+                    className="relative rounded-full before:absolute before:-inset-x-2 before:-inset-y-4 before:content-['']"
                     style={{
                       width: 7,
                       height: 7,

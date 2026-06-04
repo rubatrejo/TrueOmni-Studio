@@ -10241,7 +10241,8 @@
           {
             "key": "regions",
             "label": "REGIONS",
-            "image": "assets/pwa/dashboard/quick-regions.jpg"
+            "image": "assets/pwa/dashboard/quick-regions.jpg",
+            "route": ""
           },
           {
             "key": "trip-planner",
@@ -10251,7 +10252,8 @@
           {
             "key": "places-to-stay",
             "label": "PLACES TO STAY",
-            "image": "assets/pwa/dashboard/quick-places-to-stay.jpg"
+            "image": "assets/pwa/dashboard/quick-places-to-stay.jpg",
+            "route": "/pwa/stay"
           },
           {
             "key": "events",

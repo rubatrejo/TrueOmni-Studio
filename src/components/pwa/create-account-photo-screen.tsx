@@ -3,10 +3,12 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { usePhotoSession } from '@/hooks/use-photo-session';
 import { resolveAssetUrl } from '@/lib/asset-url';
 
 import { S } from './mobile-layer';
 import { PhotoSourceSheet } from './photo-source-sheet';
+import { PwaPrimaryButton } from './pwa-button';
 import { PlusIcon } from './signup-icons';
 
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
@@ -48,7 +50,8 @@ export function CreateAccountPhotoScreen({
   dashboardHref,
 }: CreateAccountPhotoScreenProps) {
   const router = useRouter();
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  // Blob-URL con revoke automático (evita memory leak) — C5.
+  const { blobUrl: photoUrl, setBlob: setPhotoUrl } = usePhotoSession();
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const finish = () => router.push(dashboardHref);
@@ -117,10 +120,9 @@ export function CreateAccountPhotoScreen({
         {/* Botones según estado */}
         {photoUrl ? (
           <>
-            <button
-              type="button"
+            <PwaPrimaryButton
               onClick={finish}
-              className="absolute flex items-center justify-center rounded-[2px] bg-[hsl(var(--pwa-primary))] font-bold uppercase text-white"
+              className="absolute rounded-[2px] uppercase"
               style={{
                 left: 23,
                 top: 451,
@@ -131,11 +133,11 @@ export function CreateAccountPhotoScreen({
               }}
             >
               {texts.saveCta}
-            </button>
-            <button
-              type="button"
+            </PwaPrimaryButton>
+            <PwaPrimaryButton
+              variant="outline"
               onClick={() => setPhotoUrl(null)}
-              className="absolute flex items-center justify-center rounded-[3px] border border-white font-bold uppercase text-white"
+              className="absolute rounded-[3px] uppercase"
               style={{
                 left: 23,
                 top: 516,
@@ -146,17 +148,16 @@ export function CreateAccountPhotoScreen({
               }}
             >
               {texts.cancelCta}
-            </button>
+            </PwaPrimaryButton>
           </>
         ) : (
-          <button
-            type="button"
+          <PwaPrimaryButton
             onClick={finish}
-            className="absolute flex items-center justify-center rounded-[2px] bg-[hsl(var(--pwa-primary))] font-bold uppercase text-white"
+            className="absolute rounded-[2px] uppercase"
             style={{ left: 24, top: 520, width: 328, height: 46, fontSize: 14, letterSpacing: 0.5 }}
           >
             {texts.skipCta}
-          </button>
+          </PwaPrimaryButton>
         )}
       </div>
 
@@ -165,7 +166,7 @@ export function CreateAccountPhotoScreen({
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
         texts={texts}
-        onPicked={(url) => setPhotoUrl(url)}
+        onPicked={(file) => setPhotoUrl(file)}
       />
     </div>
   );

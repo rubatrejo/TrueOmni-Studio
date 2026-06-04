@@ -20,7 +20,7 @@ function OriginMarker({ point, label }: { point: WayfindingPoint; label: string 
       style={{ left: `${point.x}%`, top: `${point.y}%`, transform: 'translate(-50%, -100%)' }}
     >
       <span
-        className="mb-[2px] whitespace-nowrap text-[8px] font-bold"
+        className="mb-[2px] whitespace-nowrap text-[10px] font-bold"
         style={{ ...OPEN_SANS, color: 'hsl(var(--pwa-route-pin))' }}
       >
         {label}
@@ -44,7 +44,7 @@ function DestinationMarker({ point, name }: { point: WayfindingPoint; name: stri
       style={{ left: `${point.x}%`, top: `${point.y}%`, transform: 'translate(-50%, -100%)' }}
     >
       <span
-        className="mb-[2px] whitespace-nowrap text-[8px] font-bold"
+        className="mb-[2px] whitespace-nowrap text-[10px] font-bold"
         style={{ ...OPEN_SANS, color: 'hsl(var(--brand-primary))' }}
       >
         {name}

@@ -122,7 +122,7 @@ export function HuntCard({
           style={OPEN_SANS}
         >
           <span
-            className="rounded-[4px] px-[7px] py-[2px] text-[9px] font-bold uppercase tracking-wide text-white"
+            className="rounded-[4px] px-[7px] py-[2px] text-[10px] font-bold uppercase tracking-wide text-white"
             style={{ backgroundColor: 'hsl(var(--brand-tertiary))' }}
           >
             {totalTasks} {tasksLabel}

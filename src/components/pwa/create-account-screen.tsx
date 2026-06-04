@@ -10,6 +10,8 @@ import type { GuestbookCountry } from '@/lib/config';
 
 import { S } from './mobile-layer';
 import { PwaAlertModal } from './pwa-alert-modal';
+import { PwaPrimaryButton } from './pwa-button';
+import { PwaSubHeader } from './pwa-sub-header';
 import {
   ChevronDownIcon,
   FlagIcon,
@@ -44,15 +46,6 @@ interface CreateAccountScreenProps {
   countries: GuestbookCountry[];
   /** Destino tras SIGN UP válido (paso 2). */
   photoHref: string;
-}
-
-/** Chevron-left del header (verbatim del XD). */
-function BackChevron() {
-  return (
-    <svg width={11.87} height={20.36} viewBox="0 0 11.87 20.36" fill="#fff" aria-hidden>
-      <path d="M.292,10.946a.975.975,0,0,1,0-1.392L9.537.417a1.456,1.456,0,0,1,2.041,0,1.415,1.415,0,0,1,0,2.016L3.669,10.25l7.909,7.815a1.417,1.417,0,0,1,0,2.017,1.456,1.456,0,0,1-2.041,0Z" />
-    </svg>
-  );
 }
 
 /** Campo de texto con icono (patrón del Login: bg-white/30 + icono + input). */
@@ -143,34 +136,8 @@ export function CreateAccountScreen({
         className="absolute left-0 top-0"
         style={{ width: 375, height: 812, transform: `scale(${S})`, transformOrigin: 'top left' }}
       >
-        {/* Header brand: back + título centrado */}
-        <div
-          className="absolute left-0 top-0 bg-[hsl(var(--brand-primary))]"
-          style={{ width: 375, height: 90 }}
-        />
-        {/* Título: pointer-events-none para no tapar el botón de back (mismo z, va después en el DOM). */}
-        <div
-          className="pointer-events-none absolute text-center font-bold text-white"
-          style={{
-            left: 0,
-            top: 50,
-            width: 375,
-            fontSize: 17,
-            letterSpacing: '-0.024em',
-            ...OPEN_SANS,
-          }}
-        >
-          {texts.title}
-        </div>
-        <button
-          type="button"
-          aria-label="Back"
-          onClick={handleBack}
-          className="absolute flex items-center justify-center"
-          style={{ left: 12, top: 46, width: 40, height: 40 }}
-        >
-          <BackChevron />
-        </button>
+        {/* Header brand (sub-header compartido; back propio del flujo de signup) */}
+        <PwaSubHeader title={texts.title} onBack={handleBack} />
 
         {/* Logo del cliente */}
         <div className="absolute" style={{ left: 89, top: 122.5, width: 197.269, height: 36.869 }}>
@@ -274,14 +241,13 @@ export function CreateAccountScreen({
         </div>
 
         {/* SIGN UP */}
-        <button
-          type="button"
+        <PwaPrimaryButton
           onClick={handleSignUp}
-          className="absolute flex items-center justify-center rounded-[2px] bg-[hsl(var(--pwa-primary))] font-bold uppercase text-white"
+          className="absolute rounded-[2px] uppercase"
           style={{ left: 24, top: 650, width: 328, height: 46, fontSize: 14, letterSpacing: 0.5 }}
         >
           {texts.signUpCta}
-        </button>
+        </PwaPrimaryButton>
       </div>
 
       {/* Bottom-sheet de país */}

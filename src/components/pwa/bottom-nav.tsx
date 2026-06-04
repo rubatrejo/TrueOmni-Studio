@@ -30,6 +30,18 @@ export const PWA_NAV: { key: PwaNavKey; Icon: typeof HomeNavIcon; href?: string 
 ];
 
 /**
+ * Etiquetas de accesibilidad por celda (screen readers). En inglés como el resto de
+ * `aria-label` del proyecto (Back/Search/Filter…); no son UI visible.
+ */
+export const NAV_ARIA: Record<PwaNavKey, string> = {
+  home: 'Home',
+  events: 'Events',
+  dining: 'Dining',
+  map: 'Map',
+  more: 'More',
+};
+
+/**
  * Bottom nav compartido de la PWA (Dashboard, More, …). Iconos Font Awesome 6;
  * la celda `active` se resalta con `--pwa-primary`. Fijo (no scrollea).
  * `active` opcional: las sub-pantallas (p.ej. Connect With Us) lo omiten → sin resaltado.
@@ -43,6 +55,8 @@ export function PwaBottomNav({ active }: { active?: PwaNavKey }) {
           <button
             key={key}
             type="button"
+            aria-label={NAV_ARIA[key]}
+            aria-current={key === active ? 'page' : undefined}
             onClick={() => href && router.push(href)}
             className="flex flex-1 items-center justify-center text-white"
             style={key === active ? { backgroundColor: PWA } : undefined}

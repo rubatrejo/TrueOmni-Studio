@@ -155,7 +155,7 @@ export function TpTopSuggestionsResult({
         <button
           type="button"
           onClick={() => setConfirmStartOver(true)}
-          className="flex-1 rounded-full py-2.5 text-[13px] font-bold uppercase text-white"
+          className="flex-1 rounded-full py-2.5 text-[13px] font-bold uppercase text-white transition-transform active:scale-[0.97]"
           style={{ backgroundColor: 'hsl(var(--brand-tertiary))' }}
         >
           {textos.itinerary_ai_start_over ?? 'Start Over'}
@@ -163,7 +163,7 @@ export function TpTopSuggestionsResult({
         <button
           type="button"
           onClick={onFinish}
-          className="flex-1 rounded-full py-2.5 text-[13px] font-bold uppercase text-white"
+          className="flex-1 rounded-full py-2.5 text-[13px] font-bold uppercase text-white transition-transform active:scale-[0.97]"
           style={{ backgroundColor: 'hsl(var(--brand-secondary))' }}
         >
           {textos.itinerary_ai_finish_cta ?? 'Finish'}

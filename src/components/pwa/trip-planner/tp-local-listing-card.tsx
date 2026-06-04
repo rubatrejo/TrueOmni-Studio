@@ -48,7 +48,7 @@ export function TpLocalListingCard({
       </button>
 
       <div className="absolute bottom-2.5 left-3.5 right-12">
-        <p className="text-[9px] font-bold uppercase tracking-wide text-white/80">{eyebrow}</p>
+        <p className="text-[10px] font-bold uppercase tracking-wide text-white/80">{eyebrow}</p>
         <p className="truncate text-[17px] font-bold leading-tight text-white drop-shadow">
           {ll.title}
         </p>

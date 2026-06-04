@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { CheckboxRow, RadioRow } from './form-controls';
 import { InLayerNav } from './in-layer-nav';
 import { S } from './mobile-layer';
+import { PwaPrimaryButton } from './pwa-button';
 import { PwaSubHeader } from './pwa-sub-header';
 import { LockIcon } from './signup-icons';
 
@@ -31,14 +32,13 @@ interface DeleteFlowTexts {
 /** Botón de acción inferior (CONTINUE / DELETE MY ACCOUNT). */
 function ActionButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <button
-      type="button"
+    <PwaPrimaryButton
       onClick={onClick}
-      className="absolute flex items-center justify-center rounded-[2px] bg-[hsl(var(--pwa-primary))] font-bold uppercase text-white"
+      className="absolute rounded-[2px] uppercase"
       style={{ left: 24, top: 650, width: 328, height: 46, fontSize: 14, letterSpacing: 0.5 }}
     >
       {label}
-    </button>
+    </PwaPrimaryButton>
   );
 }
 

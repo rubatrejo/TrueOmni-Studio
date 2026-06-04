@@ -7,6 +7,7 @@ import { resolveAssetUrl } from '@/lib/asset-url';
 
 import { S } from './mobile-layer';
 import { PwaAlertModal } from './pwa-alert-modal';
+import { PwaPrimaryButton } from './pwa-button';
 import { LockIcon } from './signup-icons';
 
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
@@ -114,14 +115,13 @@ export function ChangePasswordScreen({
           >
             {texts.success.title}
           </div>
-          <button
-            type="button"
+          <PwaPrimaryButton
             onClick={() => router.push(doneHref)}
-            className="absolute flex items-center justify-center rounded-[2px] bg-[hsl(var(--pwa-primary))] font-bold uppercase text-white"
+            className="absolute rounded-[2px] uppercase"
             style={{ left: 24, top: 720, width: 328, height: 46, fontSize: 14, letterSpacing: 0.5 }}
           >
             {texts.success.doneCta}
-          </button>
+          </PwaPrimaryButton>
         </div>
       </div>
     );
@@ -211,14 +211,13 @@ export function ChangePasswordScreen({
         </div>
 
         {/* ESTABLISH NEW PASSWORD */}
-        <button
-          type="button"
+        <PwaPrimaryButton
           onClick={establish}
-          className="absolute flex items-center justify-center rounded-[2px] bg-[hsl(var(--pwa-primary))] font-bold uppercase text-white"
+          className="absolute rounded-[2px] uppercase"
           style={{ left: 59, top: 633, width: 258, height: 46, fontSize: 14, letterSpacing: 0.5 }}
         >
           {texts.establishCta}
-        </button>
+        </PwaPrimaryButton>
       </div>
 
       <PwaAlertModal

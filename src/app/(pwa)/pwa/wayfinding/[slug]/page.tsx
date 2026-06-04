@@ -1,3 +1,5 @@
+import { notFound } from 'next/navigation';
+
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { WayfindingDirections } from '@/components/pwa/wayfinding-directions';
 import { getConfig } from '@/lib/config';
@@ -27,32 +29,17 @@ export default async function PwaWayfindingDirectionsPage({
     );
   }
 
-  // Buscar la amenidad por slug en todos los pisos
-  let foundFloor = wf.floors[0];
-  let foundAmenity = wf.floors[0]?.amenities[0];
+  // Buscar la amenidad por slug en todos los pisos. Slug inválido → 404 real (C7):
+  // sin fallback al primer piso/amenidad (que mostraba la pantalla equivocada con HTTP 200).
+  const found = wf.floors
+    .flatMap((floor) => floor.amenities.map((amenity) => ({ floor, amenity })))
+    .find((x) => x.amenity.slug === amenitySlug);
 
-  for (const floor of wf.floors) {
-    const match = floor.amenities.find((a) => a.slug === amenitySlug);
-    if (match) {
-      foundFloor = floor;
-      foundAmenity = match;
-      break;
-    }
-  }
-
-  if (!foundAmenity) {
-    return (
-      <MobileCanvas>
-        <div className="flex h-full items-center justify-center text-gray-400">
-          Amenity not found
-        </div>
-      </MobileCanvas>
-    );
-  }
+  if (!found) notFound();
 
   return (
     <MobileCanvas>
-      <WayfindingDirections config={wf} floor={foundFloor} amenity={foundAmenity} />
+      <WayfindingDirections config={wf} floor={found.floor} amenity={found.amenity} />
     </MobileCanvas>
   );
 }

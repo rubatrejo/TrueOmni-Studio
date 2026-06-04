@@ -6,6 +6,7 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { useNotifications } from '@/hooks/use-notifications';
 import { resolveAssetUrl } from '@/lib/asset-url';
 import type { PwaNotification, PwaQuickAccess, PwaTile } from '@/lib/config';
+import { resolvePwaTileRoute } from '@/lib/pwa-routes';
 
 import { PwaBottomNav } from './bottom-nav';
 import { NotificationIcon, ProfileIcon, SearchIcon } from './dashboard-icons';
@@ -61,11 +62,12 @@ export function DashboardScreen({
         <div className="absolute" style={{ left: 20, top: 48, width: 154 }}>
           <TrueOmniLogo className="h-auto w-full text-white" title={logoAlt} slot="default" />
         </div>
+        {/* before:-inset expande el área de tap a ≥40px sin mover el glifo (E3). */}
         <button
           type="button"
           aria-label="Search"
           onClick={() => router.push('/pwa/search')}
-          className="absolute text-white"
+          className="absolute text-white before:absolute before:-inset-[11px] before:content-['']"
           style={{ left: 266, top: 55 }}
         >
           <SearchIcon size={19} />
@@ -74,7 +76,7 @@ export function DashboardScreen({
           type="button"
           aria-label="Profile"
           onClick={() => router.push('/pwa/profile')}
-          className="absolute text-white"
+          className="absolute text-white before:absolute before:-inset-[10px] before:content-['']"
           style={{ left: 298, top: 54 }}
         >
           <ProfileIcon size={21} />
@@ -83,7 +85,7 @@ export function DashboardScreen({
           type="button"
           aria-label="Notifications"
           onClick={() => router.push('/pwa/notifications')}
-          className="absolute text-white"
+          className="absolute text-white before:absolute before:-inset-2 before:content-['']"
           style={{ left: 334, top: 53 }}
         >
           <NotificationIcon size={24} />
@@ -162,9 +164,8 @@ export function DashboardScreen({
               <button
                 type="button"
                 onClick={() => {
-                  if (q.key === 'places-to-stay') router.push('/pwa/stay');
-                  else if (q.key === 'events') router.push('/pwa/events');
-                  else if (q.key === 'trip-planner') router.push('/pwa/trip-planner');
+                  const dest = resolvePwaTileRoute(q);
+                  if (dest) router.push(dest);
                 }}
                 className="absolute bg-cover bg-center"
                 style={{
@@ -180,7 +181,7 @@ export function DashboardScreen({
               {/* label (1pt más grande, centrado bajo la card) */}
               <span
                 className="absolute text-center font-bold uppercase leading-[1.1] text-white"
-                style={{ left: cx - 29, top: 245, width: 58, fontSize: 9, ...OPEN_SANS }}
+                style={{ left: cx - 29, top: 245, width: 58, fontSize: 10, ...OPEN_SANS }}
               >
                 {q.label}
               </span>
@@ -197,17 +198,8 @@ export function DashboardScreen({
               key={t.key}
               type="button"
               onClick={() => {
-                if (t.key === 'restaurants') router.push('/pwa/restaurants');
-                else if (t.key === 'things-to-do') router.push('/pwa/things-to-do');
-                else if (t.key === 'passes') router.push('/pwa/passes');
-                else if (t.key === 'map') router.push('/pwa/map');
-                else if (t.key === 'digital-brochure') router.push('/pwa/digital-brochure');
-                else if (t.key === 'social-wall') router.push('/pwa/social-wall');
-                else if (t.key === 'trails') router.push('/pwa/trails');
-                else if (t.key === 'deals') router.push('/pwa/deals');
-                else if (t.key === 'tickets') router.push('/pwa/tickets');
-                else if (t.key === 'wayfinding') router.push('/pwa/wayfinding');
-                else if (t.key === 'scavenger-hunt') router.push('/pwa/scavenger-hunt');
+                const dest = resolvePwaTileRoute(t);
+                if (dest) router.push(dest);
               }}
               className={`relative h-[125px] overflow-hidden rounded-[6px] bg-cover bg-center ${
                 t.wide ? 'col-span-2' : ''

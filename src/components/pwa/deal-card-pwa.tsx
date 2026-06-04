@@ -77,7 +77,7 @@ export function DealCardPwa({
           <span
             className="font-bold uppercase"
             style={{
-              fontSize: 9.5,
+              fontSize: 11,
               lineHeight: '12px',
               letterSpacing: '0.04em',
               color: EXPIRY,

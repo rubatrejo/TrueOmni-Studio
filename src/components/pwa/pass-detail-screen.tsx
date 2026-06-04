@@ -118,7 +118,7 @@ export function PassDetailScreen({
           />
           <span
             className="absolute font-semibold uppercase tracking-wide text-white/90"
-            style={{ left: 14, bottom: pass.tagline ? 44 : 18, fontSize: 9, ...OPEN_SANS }}
+            style={{ left: 14, bottom: pass.tagline ? 44 : 18, fontSize: 10, ...OPEN_SANS }}
           >
             {texts.eyebrow}
           </span>

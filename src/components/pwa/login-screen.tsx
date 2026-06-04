@@ -7,6 +7,7 @@ import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { resolveAssetUrl } from '@/lib/asset-url';
 
 import { LoginErrorModal } from './login-error-modal';
+import { PwaPrimaryButton } from './pwa-button';
 import { AppleSocialIcon, FacebookSocialIcon, GoogleSocialIcon } from './social-icons';
 
 /** Validación mock de email (sin backend): formato básico. */
@@ -217,24 +218,23 @@ export function LoginScreen({
         </button>
 
         {/* LOGIN (acción primaria) */}
-        <button
-          type="button"
+        <PwaPrimaryButton
           onClick={handleLogin}
-          className="absolute flex items-center justify-center rounded-[4px] bg-[hsl(var(--pwa-primary))] font-bold uppercase text-white"
+          className="absolute rounded-[4px] uppercase"
           style={{ left: 23.1, top: 569, width: 328, height: 44, fontSize: 14, letterSpacing: 0.5 }}
         >
           {texts.loginCta}
-        </button>
+        </PwaPrimaryButton>
 
         {/* CREATE NEW ACCOUNT (outline) */}
-        <button
-          type="button"
+        <PwaPrimaryButton
+          variant="outline"
           onClick={() => router.push('/pwa/create-account')}
-          className="absolute flex items-center justify-center rounded-[4px] border border-white font-bold uppercase text-white"
+          className="absolute rounded-[4px] uppercase"
           style={{ left: 23, top: 633, width: 328, height: 44, fontSize: 14, letterSpacing: 0.5 }}
         >
           {texts.createAccountCta}
-        </button>
+        </PwaPrimaryButton>
 
         {/* Skip Login */}
         <button

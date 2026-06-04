@@ -57,19 +57,19 @@ export function TpStopCard({
         {badge}
       </div>
       <div className="px-2.5 py-1.5" style={{ backgroundColor: FOOTER }}>
-        <p className="truncate uppercase text-white" style={{ fontSize: 8, letterSpacing: 0.4 }}>
+        <p className="truncate uppercase text-white" style={{ fontSize: 10, letterSpacing: 0.4 }}>
           {eyebrow}
         </p>
         <p className="truncate font-semibold text-white" style={{ fontSize: 13, lineHeight: 1.1 }}>
           {title}
         </p>
-        <p className="truncate text-white" style={{ fontSize: 8.5, fontWeight: 300, marginTop: 2 }}>
+        <p className="truncate text-white" style={{ fontSize: 10, fontWeight: 300, marginTop: 2 }}>
           {meta}
         </p>
         {openUntil ? (
           <p
             className="truncate font-semibold"
-            style={{ fontSize: 8.5, color: OLIVE, marginTop: 1 }}
+            style={{ fontSize: 10, color: OLIVE, marginTop: 1 }}
           >
             {openUntil}
           </p>

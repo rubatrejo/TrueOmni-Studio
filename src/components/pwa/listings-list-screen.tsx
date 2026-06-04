@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import type { Listing } from '@/lib/config';
+import { useFavorites } from '@/lib/favorites';
 import { applyFilters, EMPTY_FILTER, isFilterEmpty, type FilterState } from '@/lib/listings-filter';
 import type { MapItem } from '@/lib/map-item';
 
@@ -12,6 +13,7 @@ import { ListingRow, type ListingItem } from './listing-row';
 import { ListingsMap } from './listings-map';
 import { S } from './mobile-layer';
 import { PwaFilterOverlay, type FilterTexts } from './pwa-filter-overlay';
+import { PwaSubHeader } from './pwa-sub-header';
 
 const BRAND = 'hsl(var(--brand-primary))';
 const OPEN_SANS = 'var(--font-open-sans)';
@@ -76,17 +78,10 @@ export function ListingsListScreen({
 }: Props) {
   const router = useRouter();
   const [tab, setTab] = useState<'listings' | 'map'>(initialTab);
-  const [favs, setFavs] = useState<Set<string>>(new Set());
+  // Favoritos persistentes (sessionStorage, compartido con kiosk + Trip Planner) — C3.
+  const { isFavorited, toggle: toggleFav } = useFavorites();
   const [filter, setFilter] = useState<FilterState>(EMPTY_FILTER);
   const [filterOpen, setFilterOpen] = useState(false);
-
-  const toggleFav = (slug: string) =>
-    setFavs((s) => {
-      const next = new Set(s);
-      if (next.has(slug)) next.delete(slug);
-      else next.add(slug);
-      return next;
-    });
 
   // Filtro (reusa applyFilters del kiosk sobre los listings crudos).
   const visibleSlugs = new Set(applyFilters(listings, filter).map((l) => l.slug));
@@ -110,30 +105,7 @@ export function ListingsListScreen({
             transformOrigin: 'top left',
           }}
         >
-          <button
-            type="button"
-            aria-label="Back"
-            onClick={() => router.push(basePath)}
-            className="absolute"
-            style={{ left: 12, top: 44, width: 40, height: 40 }}
-          >
-            <svg
-              className="mx-auto"
-              width={11.87}
-              height={20.36}
-              viewBox="0 0 11.87 20.36"
-              fill="#fff"
-              aria-hidden
-            >
-              <path d="M.292,10.946a.975.975,0,0,1,0-1.392L9.537.417a1.456,1.456,0,0,1,2.041,0,1.415,1.415,0,0,1,0,2.016L3.669,10.25l7.909,7.815a1.417,1.417,0,0,1,0,2.017,1.456,1.456,0,0,1-2.041,0Z" />
-            </svg>
-          </button>
-          <div
-            className="pointer-events-none absolute text-center font-bold text-white"
-            style={{ left: 0, top: 50, width: 375, fontSize: 17, fontFamily: OPEN_SANS }}
-          >
-            {title}
-          </div>
+          <PwaSubHeader title={title} onBack={() => router.push(basePath)} />
           <button
             type="button"
             aria-label="Filter"
@@ -209,7 +181,7 @@ export function ListingsListScreen({
                   key={it.slug}
                   item={it}
                   href={`${basePath}/${it.slug}`}
-                  fav={favs.has(it.slug)}
+                  fav={isFavorited(it.slug)}
                   onToggleFav={() => toggleFav(it.slug)}
                   distanceSuffix={distanceSuffix}
                 />

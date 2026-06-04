@@ -138,9 +138,18 @@ Decisión y ejecución de la fase puntual **MIG-AB-1** (plan en `.planning/MIG-A
 4. **Test E2E ejecutable** — instalar `@playwright/test` + mover spec documentado a `tests/e2e/`.
 5. **Fase 4 — primer cliente real** — bloqueada por negocio.
 
-**Última sesión (2026-05-31):** Milestone PWA Mobile — 2 módulos nuevos: **Passes** (`/pwa/passes` grid + detalle con actividades, sin GET YOURS, con Share `navigator.share`, contenido −20%) y **Maps** (`/pwa/map` list+map agregado de Restaurants+Stay+Things to Do, abre en Map, chips por categoría + overlay de filtros sin subcategorías, detalle propio en `/pwa/map/[module]/[slug]`). Cableados: celda `map` del bottom nav + tiles `passes`/`map` del Dashboard; quitado `passes` del More. Refactor sin duplicar UI: extraído `ListingRow`; props retrocompat (`initialTab`, `hrefForItem`, `backHref`). Pines del mapa: tamaño de icono por categoría igualado a Restaurants (`ICON_BOX_BY_SOURCE` en `map-pin-icons.ts`: stay 66, things-to-do 100). **SIN COMMITEAR** al iniciar el cierre (se commitea ahora).
+**Última sesión (2026-06-04 tarde):** Milestone PWA Mobile — **remediación de la auditoría
+profunda cerrada para las Fases B-resto, C, D y E** (A ya estaba). B3 headers→`PwaSubHeader` +
+B5 `PwaPrimaryButton`; C search navegable/tile→ruta config-driven/favoritos persistentes +
+4 bugs (hydration, leak, timeouts, wayfinding 404); D selector de idioma + Ask AI mobile +
+map paridad (jitter/filtro eventos) + survey-doc; E safe-areas standalone + aria nav +
+hit-areas ≥40 + fuentes ≥10px. typecheck/lint/configs verde + verificación visual puppeteer +
+no-regresión kiosk. Se commitea ahora.
 
-**Siguiente acción concreta:** Continuar el Milestone PWA con los módulos reutilizados mobile que faltan (Events, Trails, Deals, Tickets, Brochure, Ask AI, Itinerary) — al crear Events/Trails, **sumarlos a `features.pwa.map.categories`** + extender `buildPwaListingDetail` para que aparezcan en el mapa. Pendiente feedback de **Notifications**. Pz = integración al Studio (editores + preview bridge 390×844). **Fase 4 — primer cliente real** sigue bloqueada por negocio.
+**Siguiente acción concreta:** **Fase F del audit — integración al Studio** (la única que
+falta): montar el bridge en `(pwa)/layout.tsx` + `PreviewPanel` 390×844 (`previewSrc='/pwa'`),
+editor PWA real, `features.pwa` con flags por tile, clonado. Es un milestone propio →
+arrancar sesión dedicada. **Fase 4 — primer cliente real** sigue bloqueada por negocio.
 
 **Bloqueos:**
 
@@ -3897,6 +3906,65 @@ digital-brochure,ads,social-wall}-pwa/`. Zoom del brochure medido (276→423px);
 
 **Fase:** Milestone PWA Mobile — remediación post-auditoría (Fase A ✅, Fase B parcial; Trip
 Planner aprobado).
+
+---
+
+### Sesión 2026-06-04 (tarde) — Remediación auditoría PWA: Fases B-resto, C, D y E
+
+**Hecho:**
+
+- **Fase B restante:** B3 — extendido `PwaSubHeader` con `onBack?` (aditivo) y migrados 8
+  headers inline al componente compartido (5 drop-in de 90px: listings-detail, deals-grid,
+  tp-my-plan, tp-ai-wizard, create-account; 3 compuestos de 150px: listings-list, pwa-map,
+  brochures-list, con tabs/filtro/search como hermanos). B5 — nuevo `pwa-button.tsx`
+  (`PwaPrimaryButton` primary/outline con `active:scale`), adoptado en ~14 CTAs sólidos +
+  `active:` inline en los CTAs con gradiente del trip-planner.
+- **Fase C:** C1 tile→ruta config-driven (`route?` en PwaTile/QuickAccess + helper
+  `src/lib/pwa-routes.ts`, default `/pwa/{key}`; `places-to-stay→/pwa/stay`, `regions` no-op).
+  C2 search navegable (`href` en `PwaSearchItem` + `router.push`). C3 favoritos persistentes
+  en 6 superficies (reutiliza `lib/favorites.ts`; nuevo bucket `useTicketFavorites`).
+  C4 hydration `todayIndex` diferido. C5 leak `createObjectURL` → `usePhotoSession`
+  (PhotoSourceSheet.onPicked pasa `File`). C6 nuevo `use-safe-timeout.ts` en 5 sitios.
+  C7 wayfinding slug inválido → `notFound()` (404 real).
+- **Fase D:** D1 selector de idioma (`pwa-language-sheet.tsx` reutiliza locale-store + fila
+  en More). D2 Ask AI mobile (`ask-ai/pwa-ask-ai-{host,trigger,modal}.tsx` reutiliza
+  `useAiStore` + `/api/ai`, sin Tavus; FAB en dashboard). D3 map aggregator paridad
+  (`jitterCoords` exportado + filtro de eventos pasados en `pwa-map-listings`). D4 doc:
+  Survey ya tenía paridad (5 tipos) → corregido PWA-PROJECT.md.
+- **Fase E:** E1 modo `standalone` en MobileCanvas con `env(safe-area-inset-*)` navy.
+  E2 `aria-label`+`aria-current` en bottom nav (PwaBottomNav e InLayerNav). E3 hit-areas
+  ≥40px (patrón `before:-inset`). E4 ~28 fuentes <10px subidas a piso ≥10px (legal a 12px).
+
+**Verificado:**
+
+- `pnpm typecheck` exit 0 · `pnpm lint` sin errores nuevos · `validate:configs` 3/3.
+- Visual (puppeteer, Chrome del sistema, 390×844): favoritos persisten cross-screen
+  (list→detail "Remove from Favorites"), search navega, tiles config-driven
+  (places-to-stay→/pwa/stay), wayfinding 404/200, Ask AI modal end-to-end (chip canned +
+  typewriter), selector de idioma (English→Español reactivo), map con pins dispersos (jitter),
+  profile con fuentes legibles. No-regresión kiosk (home + Ask AI "Ask anything" intactos).
+
+**Pendiente / siguiente:**
+
+- **Fase F — integración al Studio** (la última del plan del audit): editor PWA real,
+  `features.pwa` + flags, bridge/preview 390×844 (`PreviewPanel` orientation `mobile-pwa`),
+  clonado. Es un milestone mayor → sesión dedicada.
+- E1 (safe-areas standalone) no probado en iPhone instalado real (especulativo); dev-view
+  y embedded intactos confirman que es aditivo.
+- Deuda menor: cobertura i18n de los textos server-side de la PWA (el selector cambia los
+  que pasan por `useTextos`; los labels de config no se re-traducen). Limpiar `.next.trash-*`.
+
+**Decisiones:**
+
+- Un solo commit de remediación: los archivos se solapan entre fases B/C/D/E (misma sesión
+  continua sobre la misma auditoría), no son fases del roadmap independientes con archivos
+  disjuntos → separarlos requeriría parchear hunks. Mensaje enumera las fases.
+- Ask AI mobile sin avatar Tavus (solo texto) por simplicidad; endpoints ya funcionales.
+- Map aggregator: paridad de comportamiento (jitter + excluir eventos pasados) en vez de
+  envolver `getMapItems` del kiosk (firmas distintas, más riesgo).
+- Hit-areas se calibran en canvas 390-space, no en el viewport escalado del dev-view (~0.75).
+
+**Fase:** Milestone PWA Mobile — remediación post-auditoría: A✅ B✅ C✅ D✅ E✅; falta F (Studio).
 
 ---
 

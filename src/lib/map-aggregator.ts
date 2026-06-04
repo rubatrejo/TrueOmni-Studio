@@ -64,9 +64,14 @@ const SOURCE_BIAS: Record<string, { dLat: number; dLng: number }> = {
 
 const ZERO_BIAS = { dLat: 0, dLng: 0 };
 
-function jitterCoords(
+/**
+ * Exportado para que la PWA (`pwa-map-listings`) aplique el MISMO jitter que el kiosk
+ * y no apile pins coincidentes (D3 de la auditoría). `source` acepta `string` porque la
+ * PWA deriva la categoría del config; el `SOURCE_BIAS` ya hace lookup con fallback.
+ */
+export function jitterCoords(
   slug: string,
-  source: MapSource,
+  source: string,
   coords: { lat: number; lng: number },
 ): { lat: number; lng: number } {
   const seed = `${source}:${slug}`;

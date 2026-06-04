@@ -112,7 +112,7 @@ export function DealRedeemPopup({
               >
                 <span
                   className="font-bold uppercase"
-                  style={{ fontSize: 9.5, letterSpacing: '0.1em', color: MUTED, ...OPEN_SANS }}
+                  style={{ fontSize: 11, letterSpacing: '0.1em', color: MUTED, ...OPEN_SANS }}
                 >
                   {texts.redeem.useCode}
                 </span>

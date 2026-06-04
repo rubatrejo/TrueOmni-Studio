@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { useSafeTimeout } from '@/hooks/use-safe-timeout';
 import type { PwaTripPlannerModuleConfig } from '@/lib/config';
 import { buildMapboxStaticUrl } from '@/lib/itinerary-asset';
 
@@ -17,7 +18,7 @@ function MapPin({ label, style }: { label: string; style: React.CSSProperties })
   return (
     <div className="absolute flex flex-col items-center" style={style}>
       <div
-        className="rounded-[8px] bg-white px-2 py-1 text-[9px] font-bold shadow"
+        className="rounded-[8px] bg-white px-2 py-1 text-[10px] font-bold shadow"
         style={{ color: 'hsl(var(--brand-primary))', ...OPEN_SANS }}
       >
         {label}
@@ -44,6 +45,7 @@ export function TpWelcomePopup({
 }) {
   const [show, setShow] = useState(false);
   const [visible, setVisible] = useState(false);
+  const schedule = useSafeTimeout();
   const mapUrl = buildMapboxStaticUrl({
     token: mapboxToken,
     lng: clientCoords.lng,
@@ -63,10 +65,9 @@ export function TpWelcomePopup({
 
   const dismiss = () => {
     setVisible(false);
-    setTimeout(() => {
-      if (!ALWAYS_SHOW_FOR_REVIEW) window.sessionStorage.setItem(STORAGE_KEY, '1');
-      setShow(false);
-    }, 250);
+    // Persistir inmediato (no perderlo si se desmonta durante el fade) — C6.
+    if (!ALWAYS_SHOW_FOR_REVIEW) window.sessionStorage.setItem(STORAGE_KEY, '1');
+    schedule(() => setShow(false), 250);
   };
 
   if (!show) return null;

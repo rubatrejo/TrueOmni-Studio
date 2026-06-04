@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 
 import { useHuntProgress } from '@/hooks/use-hunt-progress';
+import { useSafeTimeout } from '@/hooks/use-safe-timeout';
 import type { ScavengerTask, PwaScavengerHuntConfig } from '@/lib/config';
 
 import { PwaAlertModal } from '../pwa-alert-modal';
@@ -38,6 +39,7 @@ export function TaskPhoto({
   const [completed, setCompleted] = useState(false);
   const [error, setError] = useState(false);
   const { completeTask, isTaskCompleted } = useHuntProgress(huntSlug, totalTasks);
+  const schedule = useSafeTimeout();
 
   if (isTaskCompleted(task.slug) || completed) {
     return (
@@ -55,7 +57,7 @@ export function TaskPhoto({
   const handleFile = () => {
     setLoading(true);
     // Simular validación (1.5s)
-    setTimeout(() => {
+    schedule(() => {
       setLoading(false);
       completeTask(task.slug);
       setCompleted(true);

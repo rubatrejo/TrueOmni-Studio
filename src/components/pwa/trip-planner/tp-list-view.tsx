@@ -128,7 +128,7 @@ export function TpListView({
         <button
           type="button"
           onClick={onOpenMyPlan}
-          className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full py-2 pl-4 pr-2 text-white shadow-lg"
+          className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full py-2 pl-4 pr-2 text-white shadow-lg transition-transform active:scale-[0.97]"
           style={{
             backgroundImage:
               'linear-gradient(to right, hsl(var(--brand-primary)), hsl(var(--brand-secondary)))',

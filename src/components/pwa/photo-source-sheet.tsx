@@ -19,7 +19,8 @@ interface PhotoSourceSheetTexts {
 /**
  * Action sheet (estilo iOS) para elegir origen de la foto: Take Photo (cámara) /
  * Choose From Gallery / Cancel. Owns los `<input type=file>` ocultos; al elegir una
- * imagen válida (≤5 MB) llama `onPicked(objectURL)` y cierra. Reusado por el signup
+ * imagen válida (≤5 MB) llama `onPicked(file)` y cierra. El consumidor crea/revoca el
+ * objectURL (vía `usePhotoSession`) para no leakear blobs. Reusado por el signup
  * (Upload Picture) y Edit Profile (EDIT PHOTO).
  */
 export function PhotoSourceSheet({
@@ -31,7 +32,7 @@ export function PhotoSourceSheet({
   open: boolean;
   onClose: () => void;
   texts: PhotoSourceSheetTexts;
-  onPicked: (url: string) => void;
+  onPicked: (file: File) => void;
 }) {
   const galleryRef = useRef<HTMLInputElement | null>(null);
   const cameraRef = useRef<HTMLInputElement | null>(null);
@@ -42,7 +43,7 @@ export function PhotoSourceSheet({
     e.target.value = '';
     if (!file) return;
     if (file.size > MAX_BYTES) return; // el hint ya explica el límite
-    onPicked(URL.createObjectURL(file));
+    onPicked(file);
     onClose();
   };
 

@@ -6,6 +6,7 @@ import type { AiPreferences } from '@/lib/ai-itinerary';
 import type { AiQuestion, PwaTripPlannerModuleConfig } from '@/lib/config';
 
 import { Layer } from '../mobile-layer';
+import { PwaSubHeader } from '../pwa-sub-header';
 
 import { TpAiQuestion } from './tp-ai-question';
 
@@ -49,29 +50,9 @@ export function TpAiWizard({
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-background">
-      {/* Header */}
-      <Layer
-        h={90}
-        className="relative z-10 shrink-0"
-        style={{ backgroundColor: 'hsl(var(--brand-primary))' }}
-      >
-        <button
-          type="button"
-          aria-label="Back"
-          onClick={back}
-          className="absolute text-white"
-          style={{ left: 18, top: 50, height: 28 }}
-        >
-          <svg width={11.87} height={20.36} viewBox="0 0 11.87 20.36" fill="#fff" aria-hidden>
-            <path d="M.292,10.946a.975.975,0,0,1,0-1.392L9.537.417a1.456,1.456,0,0,1,2.041,0,1.415,1.415,0,0,1,0,2.016L3.669,10.25l7.909,7.815a1.417,1.417,0,0,1,0,2.017,1.456,1.456,0,0,1-2.041,0Z" />
-          </svg>
-        </button>
-        <div
-          className="pointer-events-none absolute text-center font-bold text-white"
-          style={{ left: 60, top: 53, width: 255, fontSize: 17, ...OPEN_SANS }}
-        >
-          {title}
-        </div>
+      {/* Header (sub-header compartido; back propio del wizard) */}
+      <Layer h={90} className="relative z-10 shrink-0">
+        <PwaSubHeader title={title} onBack={back} />
       </Layer>
 
       {/* Pregunta */}
@@ -91,7 +72,7 @@ export function TpAiWizard({
             type="button"
             onClick={next}
             disabled={!answered}
-            className="rounded-full px-8 py-2.5 text-[14px] font-bold text-white disabled:opacity-40"
+            className="rounded-full px-8 py-2.5 text-[14px] font-bold text-white transition-transform active:scale-[0.97] disabled:opacity-40"
             style={{ backgroundColor: 'hsl(var(--brand-secondary))' }}
           >
             {isLast

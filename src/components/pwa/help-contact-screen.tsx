@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { PwaBottomNav } from './bottom-nav';
 import { S } from './mobile-layer';
+import { PwaPrimaryButton } from './pwa-button';
 import { PwaSubHeader } from './pwa-sub-header';
 
 const PWA = 'hsl(var(--pwa-primary))';
@@ -117,21 +118,19 @@ export function HelpContactScreen({
           />
 
           <div className="px-5 pb-6 pt-4">
-            <button
-              type="button"
+            <PwaPrimaryButton
               onClick={() => setSent(true)}
               disabled={message.trim().length === 0}
-              className="w-full rounded-full font-bold text-white disabled:opacity-40"
+              className="w-full rounded-full disabled:opacity-40"
               style={{
                 height: 50,
-                backgroundColor: PWA,
                 fontSize: 15,
                 letterSpacing: '0.04em',
                 fontFamily: OPEN_SANS,
               }}
             >
               {send}
-            </button>
+            </PwaPrimaryButton>
 
             {phone ? (
               <a

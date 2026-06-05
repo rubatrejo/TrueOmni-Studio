@@ -26,6 +26,9 @@ export function TopBar({
   onOpenVersions,
   versionsActive,
   onPublish,
+  productLabel = 'Kiosk',
+  previewHref,
+  showExportImport = true,
 }: {
   slug: string;
   nombre: string;
@@ -43,7 +46,16 @@ export function TopBar({
   onOpenVersions?: () => void;
   versionsActive?: boolean;
   onPublish?: () => void;
+  /** Etiqueta del último crumb + producto. Default `'Kiosk'`; el editor PWA
+   *  pasa `'Mobile PWA'`. */
+  productLabel?: string;
+  /** Href del botón "Open in tab". Default `/k/${slug}` (kiosk runtime); el
+   *  editor PWA pasa `/pwa`. */
+  previewHref?: string;
+  /** Export/Import del config completo (solo kiosk). Default `true`. */
+  showExportImport?: boolean;
 }) {
+  const openHref = previewHref ?? `/k/${slug}`;
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-5 dark:border-zinc-900 dark:bg-zinc-950">
       <div className="flex items-center gap-4">
@@ -55,7 +67,7 @@ export function TopBar({
             { label: 'Clients', href: '/studio' },
             { label: nombre, href: `/studio/${slug}` },
             {
-              label: 'Kiosk',
+              label: productLabel,
               icon: (
                 <FaviconBadge
                   favicon={favicon}
@@ -118,13 +130,13 @@ export function TopBar({
         <ThemeToggle />
 
         {/* Export / Import full config (hallazgo #25 del audit). */}
-        <ExportImportButtons slug={slug} />
+        {showExportImport ? <ExportImportButtons slug={slug} /> : null}
 
         <Link
-          href={`/k/${slug}`}
+          href={openHref}
           target="_blank"
           rel="noopener noreferrer"
-          title={`Open kiosk at /k/${slug}`}
+          title={`Open at ${openHref}`}
           className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1.5 text-[12px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-800"
         >
           <Eye className="h-3.5 w-3.5" />

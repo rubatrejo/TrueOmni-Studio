@@ -329,9 +329,17 @@ export async function POST(_req: Request, { params }: RouteParams) {
       await kv.set(kVideoWallClient(slug), validated.data);
       await kv.sadd(kVideoWallClientList, slug);
     }
+  } else if (productId === 'mobilePwa') {
+    // La PWA vive en `features.pwa` del config.json del cliente y hereda la
+    // data del kiosk (`home.modules.*`). El editor PWA trata esa sección como
+    // un slice aislado en KV (`pwa:<slug>`). Al activar, sembramos ese slice
+    // desde el config.json del propio cliente (si está publicado) o desde el
+    // template `default`. Idempotente — no toca el `cfg:<slug>` del kiosk.
+    const { ensurePwaSlice } = await import('@/lib/studio/pwa-config');
+    await ensurePwaSlice(slug);
   }
-  // Para mobile-pwa/tablets: solo flipea el flag por ahora.
-  // Cuando se implementen, agregar aquí la lógica de clone.
+  // Para tablets: solo flipea el flag por ahora.
+  // Cuando se implemente, agregar aquí la lógica de clone.
 
   await saveClientManifest({
     ...manifest,

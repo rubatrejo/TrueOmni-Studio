@@ -2,10 +2,12 @@
 
 import { motion } from 'framer-motion';
 import {
+  Bell,
   BookOpen,
   Calendar,
   Camera,
   ClipboardList,
+  Compass,
   Database,
   Footprints,
   History,
@@ -15,6 +17,7 @@ import {
   MapPin,
   Megaphone,
   MonitorPlay,
+  MoreHorizontal,
   Palette,
   PenSquare,
   Plug,
@@ -22,11 +25,14 @@ import {
   RotateCcw,
   Route,
   Share2,
+  Smartphone,
   Sparkles,
   Tag,
   Ticket,
   TicketCheck,
   ToggleRight,
+  Trophy,
+  UserCircle,
   UtensilsCrossed,
   type LucideIcon,
 } from 'lucide-react';
@@ -37,10 +43,12 @@ import type { SystemModules } from '@/lib/studio/schema';
 import type { StudioSection, StudioSectionKey } from '../_lib/sections';
 
 const ICONS: Record<string, LucideIcon> = {
+  Bell,
   BookOpen,
   Calendar,
   Camera,
   ClipboardList,
+  Compass,
   Database,
   Footprints,
   History,
@@ -49,21 +57,39 @@ const ICONS: Record<string, LucideIcon> = {
   MapPin,
   Megaphone,
   MonitorPlay,
+  MoreHorizontal,
   Palette,
   PenSquare,
   Plug,
   Rocket,
   Route,
   Share2,
+  Smartphone,
   Sparkles,
   Tag,
   Ticket,
   TicketCheck,
   ToggleRight,
+  Trophy,
+  UserCircle,
   UtensilsCrossed,
 };
 
-export function SidebarTabs({
+/**
+ * Shape mínimo que `SidebarTabs` necesita de cada sección. `StudioSection`
+ * (kiosk) lo satisface, y el editor PWA define sus propias secciones con un
+ * key distinto. Genérico en `K` para preservar el tipado fuerte del kiosk
+ * (`StudioSectionKey`) sin acoplar la sidebar a un único producto.
+ */
+export type SidebarSectionLike<K extends string> = {
+  key: K;
+  label: string;
+  title: string;
+  icon: string;
+  systemModuleKey?: StudioSection['systemModuleKey'];
+};
+
+export function SidebarTabs<K extends string = StudioSectionKey>({
   sections,
   activeKey,
   onSelect,
@@ -71,9 +97,9 @@ export function SidebarTabs({
   bridgeStatus = 'connected',
   onReloadPreview,
 }: {
-  sections: StudioSection[];
-  activeKey: StudioSectionKey;
-  onSelect: (key: StudioSectionKey) => void;
+  sections: ReadonlyArray<SidebarSectionLike<K>>;
+  activeKey: K;
+  onSelect: (key: K) => void;
   /**
    * Si la sección depende de un módulo (`section.systemModuleKey`) y ese
    * módulo está OFF en `systemModules`, la sección se dibuja en gris y
@@ -85,7 +111,7 @@ export function SidebarTabs({
   /** Recarga el iframe del preview (incrementa `reloadKey`). */
   onReloadPreview?: () => void;
 }) {
-  const isDisabled = (section: StudioSection): boolean => {
+  const isDisabled = (section: SidebarSectionLike<K>): boolean => {
     if (!systemModules || !section.systemModuleKey) return false;
     return !systemModules[section.systemModuleKey];
   };

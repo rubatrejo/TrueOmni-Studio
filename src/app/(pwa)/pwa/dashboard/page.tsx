@@ -1,5 +1,5 @@
 import { PwaAskAiHost } from '@/components/pwa/ask-ai/pwa-ask-ai-host';
-import { DashboardScreen } from '@/components/pwa/dashboard-screen';
+import { DashboardLive } from '@/components/pwa/dashboard-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -28,12 +28,9 @@ export default async function PwaDashboardPage() {
 
   return (
     <MobileCanvas>
-      <DashboardScreen
+      <DashboardLive
         logoAlt={config.branding.logo.alt}
-        heroTitle={d.heroTitle}
-        heroImage={d.heroImage}
-        quickAccess={d.quickAccess}
-        tiles={d.tiles}
+        dashboard={d}
         notifications={config.features?.pwa?.notifications?.seed ?? []}
       />
       {askAi ? (

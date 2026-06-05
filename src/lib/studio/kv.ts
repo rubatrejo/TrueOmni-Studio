@@ -134,6 +134,15 @@ export const kvKeys = {
    *  atómicamente con kv.set. */
   cfgSnapList: (slug: string) => `cfg:${slug}:snap-list`,
   i18n: (slug: string) => `i18n:${slug}`,
+  /** Working copy del editor PWA: la sección `features.pwa` del cliente,
+   *  aislada en su propio namespace para no tocar el `cfg:<slug>` del kiosk
+   *  ni su schema. El runtime PWA sigue leyendo `features.pwa` del config.json
+   *  publicado; este KV es solo la copia editable del Studio. */
+  pwa: (slug: string) => `pwa:${slug}`,
+  pwaMeta: (slug: string) => `pwa:${slug}:meta`,
+  /** Snapshot inmutable del slice PWA previo a un PATCH/import (undo). */
+  pwaSnap: (slug: string, ts: string) => `pwa:${slug}:snap:${ts}`,
+  pwaSnapList: (slug: string) => `pwa:${slug}:snap-list`,
   clientsList: 'clients:list',
   pubRequest: (slug: string, reqId: string) => `pub:${slug}:${reqId}`,
   pubQueue: 'pub:queue',

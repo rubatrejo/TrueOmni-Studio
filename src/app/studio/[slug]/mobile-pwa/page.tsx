@@ -1,29 +1,65 @@
-import { loadClientManifest } from '@/lib/studio/client-manifest';
+import { notFound } from 'next/navigation';
 
-import { ComingSoon } from '../_components/ComingSoon';
+import {
+  loadUnifiedBranding,
+  UnifiedClientBrandingSchema,
+  type UnifiedClientBranding,
+} from '@/lib/studio/client-branding-sync';
+import { loadClientManifest } from '@/lib/studio/client-manifest';
+import { ensurePwaSlice, loadPwaMeta, loadPwaSlice } from '@/lib/studio/pwa-config';
+
+import { PwaShell } from './_components/PwaShell';
 
 export const metadata = {
   title: 'Mobile PWA · TrueOmni Studio',
 };
 
-export default async function MobilePwaStub({ params }: { params: Promise<{ slug: string }> }) {
+export const dynamic = 'force-dynamic';
+
+/**
+ * `/studio/[slug]/mobile-pwa` — Editor de la PWA Mobile del cliente.
+ *
+ * Reemplaza el stub "Coming Soon" (fase Pz). La PWA edita `features.pwa` como
+ * un slice aislado (`pwa:<slug>` en KV) y hereda branding + data del kiosk.
+ */
+export default async function MobilePwaEditorPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
   const manifest = await loadClientManifest(slug).catch(() => null);
+  if (!manifest) notFound();
+
+  // Si el producto está activo, asegura el slice en KV (idempotente).
+  if (manifest.products.mobilePwa) {
+    await ensurePwaSlice(slug).catch(() => {});
+  }
+
+  const [pwa, meta, unified] = await Promise.all([
+    loadPwaSlice(slug),
+    loadPwaMeta(slug),
+    loadUnifiedBranding(slug),
+  ]);
+
+  // Fallback defensivo: si el cliente aún no tiene unified branding, lo
+  // materializamos con defaults para que el editor abra (edge case raro —
+  // el auto-migrate normalmente ya lo creó).
+  const branding: UnifiedClientBranding =
+    unified ??
+    UnifiedClientBrandingSchema.parse({
+      name: manifest.name,
+      brand: { primary: '#079EE2', secondary: '#0b4f8a', accent: '#b8a03e' },
+      logos: { default: '' },
+    });
+
   return (
-    <ComingSoon
+    <PwaShell
       slug={slug}
-      clientName={manifest?.name}
-      product="Mobile PWA"
-      timeline="In design · Q3 2026"
-      tone="design"
-      description="Companion app del kiosk: el visitante escanea el QR del kiosk y se lleva el itinerario, los favoritos y los pases en su teléfono. Hereda branding, fonts y módulos del cliente sin reconfiguración."
-      features={[
-        'Login passwordless por código del kiosk — el itinerario salta del kiosk al teléfono en un escaneo.',
-        'Favoritos sincronizados (listings, events, deals) entre kiosk y phone.',
-        'Pases y tickets como wallet card (Apple Wallet / Google Wallet).',
-        'Modo offline para mapas y rutas guardadas — útil en zonas con cobertura intermitente.',
-        'Push notifications opt-in para deals nuevos cerca del visitante.',
-      ]}
+      nombre={manifest.name}
+      initialPwa={pwa}
+      initialMeta={meta}
+      initialBranding={branding}
     />
   );
 }

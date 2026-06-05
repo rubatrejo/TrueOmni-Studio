@@ -52,9 +52,7 @@ export const STUDIO_PRODUCTS: readonly StudioProduct[] = [
     label: 'Mobile PWA',
     segment: 'mobile-pwa',
     icon: Smartphone,
-    status: 'soon',
-    comingSoonCopy:
-      'Editor del Progressive Web App heredando branding del cliente. Disponible en próximas versiones.',
+    status: 'live',
   },
   {
     id: 'video-walls',

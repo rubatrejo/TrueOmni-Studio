@@ -4,6 +4,51 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+## 2026-06-04 (noche) · Fase Pz — Editor de la PWA en el Studio (Fase 1)
+
+Arranque de la **última fase del milestone PWA: integración al Studio**. Brainstorming
+aprobado (plan en `~/.claude/plans/si-recuerda-que-tenemmos-steady-penguin.md`). Decisiones:
+editor PWA **independiente** (card/ruta/tabs/publish propios) pero **embebido sobre el mismo
+`config.json`** del cliente — la PWA vive en `features.pwa` y hereda data del kiosk; branding
+**unificado** editable desde la PWA; deploy = mismo deploy `/pwa` + PR propio; por fases.
+
+**Hallazgo clave:** el `KioskConfigSchema` del Studio NO modela `features.pwa`. Estrategia
+elegida: tratar el slice como **aislado** con su propio namespace KV `pwa:<slug>`
+(`src/lib/studio/pwa-config.ts`), **sin tocar el schema ni el publish del kiosk** → cero
+riesgo de regresión.
+
+**Construido (Fase 1):**
+
+- `products.ts`: `mobile-pwa` `soon`→`live`. Activación cableada en `activate/route.ts`
+  (`ensurePwaSlice`). Endpoint `GET/PATCH /api/studio/pwa/[slug]` + api-client.
+- Ruta `/studio/[slug]/mobile-pwa` (reemplaza stub) → `PwaShell` (paralelo a `Shell.tsx`)
+  reutilizando TopBar/SidebarTabs/EditorPanel/PreviewPanel/SaveBar/MobileTabBar vía **props
+  opcionales** (default=kiosk): `SidebarTabs` genérico en el key, `PreviewPanel product="pwa"`
+  (carga `/pwa` 390×844), `TopBar productLabel/previewHref/showExportImport`.
+- **5 editores reales**: Branding (`BrandingForm` unified — afecta kiosk+signage), Módulos
+  (reorder/rename tiles+quickAccess), Scavenger Hunt, Wayfinding, Trip Planner. (Coords/rutas/
+  imágenes técnicas fuera de v1.)
+- **Bridge**: `StudioBridge` montado en `(pwa)/layout.tsx` (branding+idioma **live**),
+  `PwaBridgeProvider` (`src/components/pwa/pwa-bridge-context.tsx`) + `usePwaSection`, mensaje
+  `studio:pwa-update` + `usePwaPreviewBridge`. **Preview live** en: branding, idioma, Dashboard
+  (`dashboard-live.tsx`) y Trip Planner (`trip-planner-live.tsx`).
+- **Publish**: `POST /api/studio/publish/[slug]/pwa` (mergea solo `features.pwa` en config.json →
+  PR propio → redeploy Vercel). Botón Publish cableado en el TopBar.
+
+**Verificado:** `pnpm typecheck` ✓, `pnpm lint` ✓ (solo warnings preexistentes),
+`validate-configs` 3/3 ✓, dev arranca limpio. **Verificación visual NO hecha** (entorno sin
+Chrome puppeteer / agent-browser global / curl localhost bloqueado) → pendiente que Rubén la
+haga en navegador.
+
+**Pendiente (Fase 2 / follow-ups):** preview live de Scavenger Hunt y Wayfinding (migrar sus
+pantallas a `usePwaSection`); editores de welcome/login/dashboard-content/perfil/notifs/more/
+textos de módulos heredados; i18n PWA + ads mobile. Branding del cliente sin kiosk: el publish
+PWA solo escribe `features.pwa`; el branding se publica desde su propio flujo.
+
+**Sin commit todavía** — Rubén verifica visualmente y aprueba antes de `git add`.
+
+---
+
 ## 2026-05-18 · Studio UX iterativo + Video Walls 4x2 pixel-perfect
 
 Sesión larga con dos bloques principales:

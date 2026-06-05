@@ -40,6 +40,7 @@ export function PreviewPanel({
   iframeRef,
   onIframeLoad,
   onLocaleChange,
+  product = 'kiosk',
 }: {
   slug: string;
   nombre: string;
@@ -51,10 +52,16 @@ export function PreviewPanel({
    *  empuja el locale al kiosk via postMessage; el i18n-provider lo aplica
    *  sin reload. */
   onLocaleChange?: (locale: string) => void;
+  /** Producto del preview. `'pwa'` carga `/pwa` a 390×844 (canvas mobile real)
+   *  y oculta los device tabs de orientación (la PWA solo tiene un viewport).
+   *  Default `'kiosk'` conserva el comportamiento original. */
+  product?: 'kiosk' | 'pwa';
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
-  const [orientation, setOrientation] = useState<PreviewOrientation>(initialOrientation);
+  const [orientation, setOrientation] = useState<PreviewOrientation>(
+    product === 'pwa' ? 'mobile-pwa' : initialOrientation,
+  );
   const [fullScreen, setFullScreen] = useState(false);
   const [locale, setLocale] = useState<string>('en');
 
@@ -131,29 +138,38 @@ export function PreviewPanel({
   // Fase S0 lo cambiará por `/preview/${client.slug}`.
   // Pasa el viewport como query param para que el KioskCanvas client-side
   // pueda detectar mobile-pwa y renderizar a 390×844 en lugar de 1080×1920.
-  const previewSrc = orientation === 'mobile-pwa' ? '/?viewport=mobile-pwa' : '/';
+  const previewSrc =
+    product === 'pwa' ? '/pwa' : orientation === 'mobile-pwa' ? '/?viewport=mobile-pwa' : '/';
 
   return (
     <div className="flex h-full w-full flex-col">
       {/* Toolbar */}
       <div className="flex shrink-0 items-center justify-between px-6 pb-3 pt-4">
         <div className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-900 dark:bg-zinc-950">
-          <DeviceTab
-            active={orientation === 'portrait'}
-            onClick={() => setOrientation('portrait')}
-            icon={<KioskGlyph />}
-            label="Kiosk · 1080×1920"
-          />
-          <DeviceTab
-            active={orientation === 'landscape'}
-            onClick={() => setOrientation('landscape')}
-            icon={<LandscapeGlyph />}
-            label="Landscape · 1920×1080"
-          />
-          {/* PWA tab retirado del editor kiosk (2026-05-18). PWA pasa a
-              ser un producto independiente con su propio editor. La data
-              `orientation === 'mobile-pwa'` queda viva pero ya no tiene
-              entry point desde aquí. */}
+          {product === 'pwa' ? (
+            // La PWA tiene un solo viewport (390×844). Mostramos un tab estático
+            // en vez del selector de orientación del kiosk.
+            <DeviceTab active onClick={() => {}} icon={<MobileGlyph />} label="Mobile · 390×844" />
+          ) : (
+            <>
+              <DeviceTab
+                active={orientation === 'portrait'}
+                onClick={() => setOrientation('portrait')}
+                icon={<KioskGlyph />}
+                label="Kiosk · 1080×1920"
+              />
+              <DeviceTab
+                active={orientation === 'landscape'}
+                onClick={() => setOrientation('landscape')}
+                icon={<LandscapeGlyph />}
+                label="Landscape · 1920×1080"
+              />
+              {/* PWA tab retirado del editor kiosk (2026-05-18). PWA pasa a
+                  ser un producto independiente con su propio editor. La data
+                  `orientation === 'mobile-pwa'` queda viva pero ya no tiene
+                  entry point desde aquí. */}
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-1 text-[11px] text-zinc-500">
@@ -282,6 +298,7 @@ export function PreviewPanel({
           slug={slug}
           nombre={nombre}
           orientation={orientation}
+          product={product}
           onClose={() => setFullScreen(false)}
         />
       )}
@@ -303,11 +320,13 @@ function FullScreenPreview({
   slug,
   nombre,
   orientation,
+  product = 'kiosk',
   onClose,
 }: {
   slug: string;
   nombre: string;
   orientation: PreviewOrientation;
+  product?: 'kiosk' | 'pwa';
   onClose: () => void;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -364,7 +383,20 @@ function FullScreenPreview({
         className="relative overflow-hidden shadow-2xl"
         style={{ width: w * scale, height: h * scale }}
       >
-        {orientation === 'landscape' || orientation === 'mobile-pwa' ? (
+        {product === 'pwa' ? (
+          <iframe
+            src="/pwa"
+            title={`${nombre} full screen`}
+            className="absolute left-0 top-0 block border-0"
+            style={{
+              width: w,
+              height: h,
+              transform: `scale(${scale})`,
+              transformOrigin: '0 0',
+            }}
+            loading="eager"
+          />
+        ) : orientation === 'landscape' || orientation === 'mobile-pwa' ? (
           <OrientationComingSoon
             slug={slug}
             scale={scale}
@@ -574,6 +606,24 @@ function KioskGlyph() {
     >
       <rect x="4" y="1.5" width="8" height="13" rx="1.2" />
       <line x1="6.8" y1="13" x2="9.2" y2="13" />
+    </svg>
+  );
+}
+
+function MobileGlyph() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="4.5" y="1.5" width="7" height="13" rx="1.4" />
+      <line x1="7" y1="12.4" x2="9" y2="12.4" />
     </svg>
   );
 }

@@ -85,6 +85,10 @@ export function StudioBridge() {
         map?: unknown;
         integrations?: unknown;
         locale?: string;
+        /** Slice `features.pwa` completo enviado por el editor PWA del Studio. */
+        pwa?: unknown;
+        /** Ruta destino para `studio:pwa-nav` (navegación del preview PWA). */
+        route?: string;
       } | null;
       if (!data || typeof data !== 'object' || !data.type) return;
 
@@ -262,6 +266,22 @@ export function StudioBridge() {
           break;
         case 'studio:ads-update':
           if (data.ads) applyAdsOverride(data.ads);
+          break;
+        case 'studio:pwa-update':
+          // Editor PWA → runtime PWA. Empuja el slice `features.pwa` completo;
+          // el `PwaBridgeProvider` lo aplica reactivamente a las pantallas.
+          if (data.pwa) applyPwaOverride(data.pwa);
+          break;
+        case 'studio:pwa-nav':
+          // Navega el preview PWA a una ruta (`/pwa/...`) sin reload completo
+          // cuando ya estamos en el mismo origin.
+          if (typeof data.route === 'string' && data.route.startsWith('/pwa')) {
+            try {
+              if (window.location.pathname !== data.route) {
+                window.location.assign(data.route);
+              }
+            } catch {}
+          }
           break;
         default:
           break;
@@ -540,6 +560,28 @@ function applyIntegrationsOverride(integrations: unknown) {
 function applyAdsOverride(ads: unknown) {
   if (typeof window === 'undefined') return;
   window.dispatchEvent(new CustomEvent(KIOSK_ADS_OVERRIDE_EVENT, { detail: ads }));
+}
+
+/** Evento global que el `PwaBridgeProvider` escucha para reemplazar el slice
+ *  `features.pwa` activo cuando el editor PWA del Studio empuja cambios. */
+export const PWA_CONFIG_OVERRIDE_EVENT = 'pwa:config-override';
+
+function applyPwaOverride(pwa: unknown) {
+  if (typeof window === 'undefined') return;
+  // Cachear el último override para que un provider que monte DESPUÉS del
+  // dispatch (navegación SPA dentro del iframe) pueda hidratarse al mount.
+  (window as PwaBridgeWindow).__pwaConfigOverride = pwa;
+  window.dispatchEvent(new CustomEvent(PWA_CONFIG_OVERRIDE_EVENT, { detail: pwa }));
+}
+
+interface PwaBridgeWindow extends Window {
+  __pwaConfigOverride?: unknown;
+}
+
+/** Lee el último slice `features.pwa` que el bridge haya aplicado, o `null`. */
+export function getCachedPwaOverride(): unknown {
+  if (typeof window === 'undefined') return null;
+  return (window as PwaBridgeWindow).__pwaConfigOverride ?? null;
 }
 
 const injectedFontLinks = new Set<string>();

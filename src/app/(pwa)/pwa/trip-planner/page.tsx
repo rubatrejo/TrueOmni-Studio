@@ -1,6 +1,6 @@
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { openUntilLabel } from '@/components/pwa/trip-planner/open-until';
-import { TripPlannerScreen } from '@/components/pwa/trip-planner/trip-planner-screen';
+import { TripPlannerLive } from '@/components/pwa/trip-planner/trip-planner-live';
 import type { TpCard, TpCategory, TpLocalListing } from '@/components/pwa/trip-planner/types';
 import { getConfig } from '@/lib/config';
 import {
@@ -82,7 +82,7 @@ export default async function PwaTripPlannerPage() {
 
   return (
     <MobileCanvas>
-      <TripPlannerScreen
+      <TripPlannerLive
         tp={tp}
         categories={categories}
         localListings={localListings}

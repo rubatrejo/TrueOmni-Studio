@@ -1,5 +1,7 @@
 'use client';
 
+import type { PwaConfig } from '@/lib/config';
+import type { UnifiedClientBranding } from '@/lib/studio/client-branding-sync';
 import type {
   AdsModule,
   AiAvatarConfig,
@@ -280,6 +282,77 @@ export async function suggestContent(input: {
 
 export async function seedDefault(): Promise<void> {
   await http<{ seeded: boolean }>('/api/studio/seed', { method: 'POST' });
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Mobile PWA slice (features.pwa)                                           */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export interface PwaSliceMetaDto {
+  slug: string;
+  createdAt: string;
+  lastEditedAt: string;
+  currentVersion: number;
+}
+
+export async function getPwaSlice(
+  slug: string,
+): Promise<{ pwa: PwaConfig; meta: PwaSliceMetaDto | null }> {
+  const data = await http<{ slug: string; pwa: PwaConfig; meta: PwaSliceMetaDto | null }>(
+    `/api/studio/pwa/${slug}`,
+  );
+  return { pwa: data.pwa, meta: data.meta };
+}
+
+export async function patchPwaSlice(slug: string, pwa: PwaConfig): Promise<PwaSliceMetaDto> {
+  const data = await http<{ slug: string; ok: true; meta: PwaSliceMetaDto }>(
+    `/api/studio/pwa/${slug}`,
+    { method: 'PATCH', body: { pwa } },
+  );
+  return data.meta;
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*  Unified client branding (compartido kiosk / signage / pwa)               */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export async function getClientBranding(slug: string): Promise<UnifiedClientBranding> {
+  const data = await http<{ branding: UnifiedClientBranding }>(
+    `/api/studio/clients/${slug}/branding`,
+  );
+  return data.branding;
+}
+
+/** Persiste el unified branding del cliente y propaga a kiosk + signage. */
+export async function patchClientBranding(
+  slug: string,
+  branding: UnifiedClientBranding,
+): Promise<void> {
+  await http<{ ok: true; sync: unknown }>(`/api/studio/clients/${slug}/branding`, {
+    method: 'PATCH',
+    body: branding,
+  });
+}
+
+export interface PwaPublishResult {
+  slug: string;
+  dryRun: boolean;
+  mode: 'fs' | 'pr';
+  written: number;
+  files: Array<{ path: string; action: 'create' | 'update' | 'unchanged'; sizeAfter: number }>;
+  pr?: { url: string; number: number; branch: string; commit: string } | null;
+}
+
+/** Publica solo `features.pwa` (fs en dev, PR en producción). */
+export async function publishPwaSlice(
+  slug: string,
+  options: { dryRun?: boolean; mode?: 'fs' | 'pr' } = {},
+): Promise<PwaPublishResult> {
+  const params = new URLSearchParams();
+  if (options.dryRun) params.set('dryRun', '1');
+  if (options.mode) params.set('mode', options.mode);
+  const qs = params.toString() ? `?${params.toString()}` : '';
+  return http<PwaPublishResult>(`/api/studio/publish/${slug}/pwa${qs}`, { method: 'POST' });
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */

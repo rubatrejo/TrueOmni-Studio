@@ -251,10 +251,9 @@ export function ClientView({ slug, initialManifest, initialBranding }: ClientVie
               segment="mobile-pwa"
               productSegment="mobile-pwa"
               label="Mobile PWA"
-              description="Progressive Web App that inherits the client's branding. Inicia sesión, guarda favoritos, navega offline."
+              description="Companion mobile app that inherits the client's branding and content."
               icon={Smartphone}
-              status="soon"
-              soonTimeline="In design · Q3 2026"
+              status="live"
               active={initialManifest.products.mobilePwa}
             />
             <ProductCard

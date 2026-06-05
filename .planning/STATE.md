@@ -4,6 +4,55 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-04 (noche-2) — Editor PWA desplegado en Vercel + fixes de feedback
+
+**Hecho:**
+
+- **Desplegado a producción Vercel** el editor PWA (commits `d439066`, `dbee723`,
+  `4e2314a`; `f7e08f8` pendiente de push). `trueomni-studio.vercel.app`.
+- `dbee723`: la card **Mobile PWA** en `ClientView.tsx` estaba hardcoded `status=soon`
+  ("In design · Q3 2026") — una **2ª fuente de verdad** que `products.ts` no controla.
+  Pasada a `live` → clickable (Activate → editor).
+- `4e2314a`: **fix 500 de `/pwa` en producción**. `getConfig()` lee
+  `clients/<slug>/{config.json,tokens.css,i18n}` con `fs.readFile` de ruta dinámica
+  (`process.cwd()`) que el file-tracer de Next NO detecta → no se empaquetaban en la
+  lambda de `/pwa`. Fix: `outputFileTracingIncludes` en `next.config.mjs`.
+- `f7e08f8`: **editor de Branding de la PWA = MISMO `BrandingEditor` del kiosk**
+  (exportado de `EditorPanel.tsx`). PwaShell maneja el branding como `Branding` (hex),
+  reconstruye el unified al guardar (preserva name/location/neutral). Tamaños del
+  editor PWA alineados al kiosk (header px-6 py-5 text-xl, contenido px-6 py-6).
+
+**Verificado:**
+
+- typecheck + lint limpios en cada commit. Deploy Vercel READY (commits hasta `4e2314a`).
+- `web_fetch` de `/pwa` en prod: **200 OK** tras el fix (antes 500). Confirmado por logs
+  de runtime de Vercel (MCP).
+- El usuario confirmó visualmente que el iframe del preview YA carga.
+
+**Pendiente / siguiente:**
+
+- **Push de `f7e08f8`** (branding kiosk-UI) → deploy. Bloqueado hasta ahora porque
+  `git push` estaba en `deny` de `.claude/settings.local.json`; el usuario lo sacó del
+  deny vía sed. **Requiere reiniciar Claude Code** para que el permiso aplique.
+- Feedback abierto: "todo el editor PWA debe verse como el del kiosk en tamaños" — hecho
+  para Branding + headers/padding; falta revisar consistencia fina de los demás editores
+  (Módulos/Scavenger/Wayfinding usan pwa-ui propio, no los Field del kiosk).
+- Semántica del branding "modificable por producto": hoy edita el unified COMPARTIDO; si
+  se quiere override per-producto independiente, es otra decisión.
+- Fase 2: preview live de Scavenger/Wayfinding; editores de welcome/login/dashboard-content/
+  perfil/notifs/more/textos heredados; i18n PWA + ads mobile.
+
+**Decisiones:**
+
+- El deploy a Vercel se dispara con `git push origin main` (integración git del proyecto
+  `trueomni-studio` / `prj_puHjPHpHmjg0U6V9pRQzo8jT6Q2C`). Monitoreo con MCP Vercel.
+- `.vercelignore` nuevo (excluye `.next.trash-*` de 367 MB) solo relevante para deploy CLI;
+  el deploy real es por git. Untracked.
+
+**Fase:** Milestone PWA — Fase Pz (integración al Studio), Fase 1 desplegada en prod.
+
+---
+
 ## 2026-06-04 (noche) · Fase Pz — Editor de la PWA en el Studio (Fase 1)
 
 Arranque de la **última fase del milestone PWA: integración al Studio**. Brainstorming

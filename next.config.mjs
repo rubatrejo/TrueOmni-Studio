@@ -18,6 +18,17 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const nextConfig = {
   reactStrictMode: true,
   outputFileTracingRoot: __dirname,
+  // `getConfig()` lee `clients/<slug>/{config.json,tokens.css,i18n/*.json}` con
+  // `fs.readFile` de una ruta dinámica (`process.cwd()`), que el file-tracer de
+  // Next NO detecta — por eso esos archivos no se empaquetan en algunas lambdas
+  // y la ruta crashea con "[kiosk] no se pudo cargar clients/<slug>/config.json"
+  // (síntoma observado: `/pwa` daba 500 intermitente en producción mientras `/`
+  // funcionaba, según el agrupamiento de lambdas). Forzamos su inclusión en
+  // TODAS las rutas. Son JSON/CSS pequeños (los assets pesados se sirven aparte),
+  // así que el bloat de cada lambda es mínimo.
+  outputFileTracingIncludes: {
+    '/**': ['./clients/*/config.json', './clients/*/tokens.css', './clients/*/i18n/*.json'],
+  },
   // Lint corre via `pnpm check` (CI gate separado). Dejar `next lint` dentro
   // del build production rompía deploys en Vercel por warnings cumulativos
   // de archivos no tocados en la rama actual. Los errores de TypeScript

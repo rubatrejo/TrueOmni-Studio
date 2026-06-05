@@ -53,7 +53,7 @@ export function WayfindingEditor({
         title="Wayfinding"
         description="Indoor navigation texts, floors and amenities. Floor plans, coordinates and route geometry come from the initial setup."
       />
-      <div className="flex-1 space-y-6 overflow-y-auto px-5 py-5">
+      <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
         <PwaGroup title="Header">
           <PwaField label="Title" value={v.title} onChange={(t) => onChange({ ...v, title: t })} />
           <PwaField

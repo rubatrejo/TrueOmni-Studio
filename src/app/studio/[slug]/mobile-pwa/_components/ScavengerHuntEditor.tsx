@@ -67,7 +67,7 @@ export function ScavengerHuntEditor({
         title="Scavenger Hunt"
         description="White-label texts and the hunts / tasks. Coordinates, images and geofence radii come from the initial setup."
       />
-      <div className="flex-1 space-y-6 overflow-y-auto px-5 py-5">
+      <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
         <PwaGroup title="General">
           <PwaField label="Title" value={v.title} onChange={(t) => onChange({ ...v, title: t })} />
         </PwaGroup>

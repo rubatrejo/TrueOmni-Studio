@@ -53,7 +53,7 @@ export function TripPlannerEditor({
         title="Trip Planner"
         description="Mobile labels for the Trip Planner. The itinerary content (listings, events, AI questions) is inherited from the kiosk."
       />
-      <div className="flex-1 space-y-6 overflow-y-auto px-5 py-5">
+      <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
         <PwaGroup title="Header">
           <PwaField label="Title" value={v.title} onChange={(t) => onChange({ ...v, title: t })} />
           <PwaField

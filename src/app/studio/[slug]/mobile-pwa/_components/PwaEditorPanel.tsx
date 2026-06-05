@@ -1,9 +1,10 @@
 'use client';
 
 import type { PwaConfig } from '@/lib/config';
-import type { UnifiedClientBranding } from '@/lib/studio/client-branding-sync';
+import type { Branding } from '@/lib/studio/schema';
 
-import { BrandingForm } from '../../_components/BrandingForm';
+import { BrandingSyncBanner } from '../../../_components/BrandingSyncBanner';
+import { BrandingEditor } from '../../../_components/EditorPanel';
 import { PWA_SECTIONS, type PwaSectionKey } from '../_lib/pwa-sections';
 
 import { ModulesEditor } from './ModulesEditor';
@@ -13,11 +14,13 @@ import { TripPlannerEditor } from './TripPlannerEditor';
 import { WayfindingEditor } from './WayfindingEditor';
 
 /**
- * Panel central del editor PWA. Renderiza el editor de la sección activa.
+ * Panel central del editor PWA. Renderiza el editor de la sección activa con el
+ * mismo chasis (header + scroll) y tamaños que el EditorPanel del kiosk.
  *
- * Implementados: Branding (unified, compartido) y Trip Planner. El resto de
- * secciones muestran un placeholder hasta la siguiente iteración. El branding
- * y el idioma se previsualizan en vivo vía el StudioBridge.
+ * Branding reutiliza el MISMO `BrandingEditor` del kiosk (mismo UI) sobre el
+ * branding compartido del cliente. El resto de secciones edita el slice
+ * `features.pwa`. Trip Planner / Módulos / Scavenger Hunt / Wayfinding tienen
+ * editor real; el branding y el idioma se previsualizan en vivo.
  */
 export function PwaEditorPanel({
   slug,
@@ -31,18 +34,19 @@ export function PwaEditorPanel({
   sectionKey: PwaSectionKey;
   pwa: PwaConfig;
   onPwaChange: (next: PwaConfig) => void;
-  branding: UnifiedClientBranding;
-  onBrandingChange: (next: UnifiedClientBranding) => void;
+  branding: Branding;
+  onBrandingChange: (next: Branding) => void;
 }) {
   if (sectionKey === 'branding') {
     return (
-      <div className="flex h-full flex-col">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white dark:bg-zinc-950">
         <PwaPanelHeader
           title="Branding & Identity"
           description="Brand colors, logo and typography. Shared with the kiosk — editing here updates every product for this client."
         />
-        <div className="flex-1 overflow-y-auto p-4">
-          <BrandingForm slug={slug} value={branding} onChange={onBrandingChange} />
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+          <BrandingSyncBanner slug={slug} product="pwa" />
+          <BrandingEditor branding={branding} onChange={onBrandingChange} />
         </div>
       </div>
     );

@@ -10,13 +10,14 @@ import type { ReactNode } from 'react';
  */
 
 export function PwaPanelHeader({ title, description }: { title: string; description: string }) {
+  // Mismos tamaños que el header del EditorPanel del kiosk (px-6 py-5, text-xl).
   return (
-    <div className="border-b border-zinc-200 px-5 py-4 dark:border-zinc-900">
-      <h2 className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100">{title}</h2>
-      <p className="mt-1 text-[12px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+    <header className="shrink-0 border-b border-zinc-200 px-6 py-5 dark:border-zinc-900">
+      <h2 className="font-display text-xl font-semibold text-zinc-900 dark:text-white">{title}</h2>
+      <p className="mt-1 text-[12.5px] leading-relaxed text-zinc-500 dark:text-zinc-500">
         {description}
       </p>
-    </div>
+    </header>
   );
 }
 

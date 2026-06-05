@@ -47,7 +47,7 @@ export function ModulesEditor({
         title="Modules & Navigation"
         description="Rename and reorder the dashboard tiles and quick-access entries of the mobile app."
       />
-      <div className="flex-1 space-y-6 overflow-y-auto px-5 py-5">
+      <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
         <PwaGroup title="Hero">
           <PwaField
             label="Hero title"

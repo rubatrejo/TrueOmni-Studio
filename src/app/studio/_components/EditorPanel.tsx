@@ -528,7 +528,7 @@ export function EditorPanel({
 /* Branding editor                                                           */
 /* ────────────────────────────────────────────────────────────────────────── */
 
-function BrandingEditor({
+export function BrandingEditor({
   branding,
   onChange,
 }: {

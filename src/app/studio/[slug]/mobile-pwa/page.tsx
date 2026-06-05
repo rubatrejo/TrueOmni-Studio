@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 
 import {
   loadUnifiedBranding,
+  unifiedToKioskBranding,
   UnifiedClientBrandingSchema,
   type UnifiedClientBranding,
 } from '@/lib/studio/client-branding-sync';
@@ -59,7 +60,8 @@ export default async function MobilePwaEditorPage({
       nombre={manifest.name}
       initialPwa={pwa}
       initialMeta={meta}
-      initialBranding={branding}
+      initialBranding={unifiedToKioskBranding(branding)}
+      initialUnified={branding}
     />
   );
 }

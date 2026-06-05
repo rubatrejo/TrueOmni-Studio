@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 
 import type { PwaConfig } from '@/lib/config';
 import type { UnifiedClientBranding } from '@/lib/studio/client-branding-sync';
-import { hslToHex } from '@/lib/studio/hex-to-hsl';
+import { hexToHsl } from '@/lib/studio/hex-to-hsl';
+import type { Branding } from '@/lib/studio/schema';
 
 import { MobileTabBar, type MobileEditorTab } from '../../../_components/MobileTabBar';
 import { PreviewPanel } from '../../../_components/PreviewPanel';
@@ -26,31 +27,57 @@ import { PwaEditorPanel } from './PwaEditorPanel';
 
 /**
  * Chasis del editor PWA. Paralelo a `Shell.tsx` (kiosk) pero con dos slices de
- * estado: el branding unificado del cliente (compartido con kiosk/signage) y
- * el slice `features.pwa`. Reutiliza TopBar / SidebarTabs / SaveBar /
- * PreviewPanel / MobileTabBar / BrandingForm del kiosk vía sus props (cero
- * regresión del editor del kiosk).
+ * estado: el branding del cliente (compartido con kiosk/signage, editado con el
+ * MISMO `BrandingEditor` del kiosk) y el slice `features.pwa`. Reutiliza el
+ * chasis del kiosk (TopBar / SidebarTabs / SaveBar / PreviewPanel / MobileTabBar
+ * / BrandingEditor) sin tocar su comportamiento.
  */
 
-/** HSL canónico ("H S% L%") o hex → hex `#RRGGBB` (client-safe; `toHex` del
- *  módulo server-only `client-branding-sync` no es importable aquí). */
-function toHexClient(value: string): string {
-  const t = value.trim();
-  if (t.startsWith('#')) {
-    return t.length === 4 ? `#${t[1]}${t[1]}${t[2]}${t[2]}${t[3]}${t[3]}` : t;
-  }
-  return hslToHex(t);
+/** Branding (hex, shape del kiosk) → patch para el bridge del preview PWA. */
+function brandingToPatch(b: Branding, clientName: string): PwaBrandingPatch {
+  return {
+    primary: b.primary,
+    secondary: b.secondary,
+    tertiary: b.tertiary,
+    logo: b.logo,
+    favicon: b.favicon,
+    fonts: { display: b.fonts?.display, body: b.fonts?.body },
+    clientName,
+  };
 }
 
-function unifiedToPwaBrandingPatch(u: UnifiedClientBranding): PwaBrandingPatch {
+/**
+ * Reconstruye el unified branding del cliente desde el `Branding` editado (hex)
+ * preservando los campos que el `BrandingEditor` no toca (name, location,
+ * website, neutral). Equivalente client-safe de `kioskToUnifiedBranding`.
+ */
+function rebuildUnified(base: UnifiedClientBranding, b: Branding): UnifiedClientBranding {
   return {
-    primary: toHexClient(u.brand.primary),
-    secondary: toHexClient(u.brand.secondary),
-    tertiary: toHexClient(u.brand.accent),
-    logo: u.logos.default || undefined,
-    favicon: u.favicon || undefined,
-    fonts: { display: u.fonts.display, body: u.fonts.body },
-    clientName: u.name,
+    ...base,
+    brand: {
+      primary: hexToHsl(b.primary),
+      secondary: hexToHsl(b.secondary),
+      accent: hexToHsl(b.tertiary),
+      neutral: base.brand.neutral,
+    },
+    logos: {
+      default: b.logo ?? '',
+      dark: base.logos.dark ?? '',
+      idle: b.idleLogo ?? '',
+      footer: b.footerLogo ?? '',
+    },
+    fonts: {
+      display: b.fonts?.display ?? base.fonts.display,
+      body: b.fonts?.body ?? base.fonts.body,
+      displayCustom: b.fonts?.displayCustom,
+      bodyCustom: b.fonts?.bodyCustom,
+    },
+    favicon: b.favicon ?? '',
+    homeHero: b.homeHero ?? base.homeHero,
+    heroGradient: b.heroGradient ?? base.heroGradient,
+    heroLogoSize: b.heroLogoSize ?? base.heroLogoSize,
+    brandVideo: b.brandVideo ?? base.brandVideo,
+    idleBackground: b.idleBackground ?? base.idleBackground,
   };
 }
 
@@ -60,13 +87,16 @@ export function PwaShell({
   initialPwa,
   initialMeta,
   initialBranding,
+  initialUnified,
 }: {
   slug: string;
   nombre: string;
   initialPwa: PwaConfig;
   initialMeta: PwaSliceMetaDto | null;
-  /** Branding unificado del cliente (compartido). Editable desde esta PWA. */
-  initialBranding: UnifiedClientBranding;
+  /** Branding del cliente en shape `Branding` (hex) para el BrandingEditor. */
+  initialBranding: Branding;
+  /** Unified branding base (para preservar name/location/neutral al guardar). */
+  initialUnified: UnifiedClientBranding;
 }) {
   const [activeTab, setActiveTab] = useState<PwaSectionKey>('branding');
   const [mobileTab, setMobileTab] = useState<MobileEditorTab>('editor');
@@ -78,8 +108,8 @@ export function PwaShell({
   const [savedPwa, setSavedPwa] = useState<PwaConfig>(initialPwa);
   const [pwa, setPwa] = useState<PwaConfig>(initialPwa);
 
-  const [savedBranding, setSavedBranding] = useState<UnifiedClientBranding>(initialBranding);
-  const [branding, setBranding] = useState<UnifiedClientBranding>(initialBranding);
+  const [savedBranding, setSavedBranding] = useState<Branding>(initialBranding);
+  const [branding, setBranding] = useState<Branding>(initialBranding);
 
   const { iframeRef, pushPwa, pushBranding, pushLocale, bridgeStatus, onIframeLoad } =
     usePwaPreviewBridge();
@@ -88,8 +118,8 @@ export function PwaShell({
   // handshake) para que `/pwa` muestre la marca real, no la del cliente
   // `default` que sirve el build del Studio.
   useEffect(() => {
-    pushBranding(unifiedToPwaBrandingPatch(branding));
-  }, [branding, pushBranding]);
+    pushBranding(brandingToPatch(branding, nombre));
+  }, [branding, nombre, pushBranding]);
 
   // Empuja el slice PWA al preview en cada cambio (debounced 120ms en el hook).
   useEffect(() => {
@@ -110,7 +140,8 @@ export function PwaShell({
     try {
       const tasks: Array<Promise<unknown>> = [];
       if (dirtyPwa) tasks.push(patchPwaSlice(slug, pwa));
-      if (dirtyBranding) tasks.push(patchClientBranding(slug, branding));
+      if (dirtyBranding)
+        tasks.push(patchClientBranding(slug, rebuildUnified(initialUnified, branding)));
       await Promise.all(tasks);
       if (dirtyPwa) setSavedPwa(pwa);
       if (dirtyBranding) setSavedBranding(branding);
@@ -124,12 +155,10 @@ export function PwaShell({
       });
       setSaveState('error');
     }
-  }, [pwa, savedPwa, branding, savedBranding, slug, toast]);
+  }, [pwa, savedPwa, branding, savedBranding, slug, initialUnified, toast]);
 
   const handlePublish = useCallback(async () => {
     if (publishing) return;
-    // Si hay cambios sin guardar, primero los persistimos: el publish lee del
-    // KV, así que sin guardar no entrarían en el PR.
     const dirtyNow =
       JSON.stringify(pwa) !== JSON.stringify(savedPwa) ||
       JSON.stringify(branding) !== JSON.stringify(savedBranding);

@@ -1,8 +1,10 @@
 'use client';
 
+import { Mic } from 'lucide-react';
 import { useState } from 'react';
 
 import { useEscapeToClose } from '@/components/listings/use-escape-to-close';
+import { useTavusConversation } from '@/hooks/use-tavus-conversation';
 import { useAiStore } from '@/stores/ai-store';
 
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
@@ -13,15 +15,24 @@ interface PwaAskAiModalTexts {
   inputPlaceholder: string;
   ariaClose: string;
   ariaSend: string;
+  ariaMic: string;
 }
 
 /**
  * Modal mobile del Ask AI (390-space). Consume el `useAiStore` agnóstico (mismo store y
- * endpoint `/api/ai` que el kiosk): greeting + typewriter, chips de sugeridas y entrada
- * libre. Sin avatar Tavus (solo texto). El teclado lo provee el `PwaKeyboardProvider`
- * montado en `MobileCanvas` al enfocar el input. Va bajo los ads (z-40).
+ * endpoint `/api/ai` que el kiosk) para el chat de texto, y el hook compartido
+ * `useTavusConversation` para el video conversacional de Tavus (el mismo del kiosk):
+ * el avatar responde en video con captions y el usuario puede hablarle con el botón de
+ * micrófono (push-to-talk). El teclado lo provee el `PwaKeyboardProvider` montado en
+ * `MobileCanvas` al enfocar el input. Va bajo los ads (z-40).
  */
-export function PwaAskAiModal({ texts }: { texts: PwaAskAiModalTexts }) {
+export function PwaAskAiModal({
+  texts,
+  clientName,
+}: {
+  texts: PwaAskAiModalTexts;
+  clientName?: string;
+}) {
   const isOpen = useAiStore((s) => s.isOpen);
   const close = useAiStore((s) => s.close);
   const messages = useAiStore((s) => s.messages);
@@ -30,6 +41,13 @@ export function PwaAskAiModal({ texts }: { texts: PwaAskAiModalTexts }) {
   const suggestedQuestions = useAiStore((s) => s.suggestedQuestions);
   const askQuestion = useAiStore((s) => s.askQuestion);
   const [input, setInput] = useState('');
+  const [isListening, setIsListening] = useState(false);
+
+  const { avatarVideoRef, caption, isUnavailable } = useTavusConversation({
+    isOpen,
+    isListening,
+    clientName,
+  });
 
   useEscapeToClose(isOpen, close);
 
@@ -72,6 +90,50 @@ export function PwaAskAiModal({ texts }: { texts: PwaAskAiModalTexts }) {
           <svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
             <path d="M6 6l12 12M18 6L6 18" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
           </svg>
+        </button>
+      </div>
+
+      {/* Avatar de video (Tavus) + caption + micrófono */}
+      <div className="relative shrink-0 overflow-hidden bg-black" style={{ height: 300 }}>
+        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+        <video
+          ref={avatarVideoRef}
+          autoPlay
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+
+        {isUnavailable ? (
+          <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-[13px] text-white/70">
+            <p>{texts.subtitle}</p>
+          </div>
+        ) : null}
+
+        {/* Caption en vivo del avatar */}
+        {caption ? (
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 pb-20 pt-8">
+            <p className="text-center text-[14px] font-medium leading-snug text-white">{caption}</p>
+          </div>
+        ) : null}
+
+        {/* Botón de micrófono (push-to-talk) */}
+        <button
+          type="button"
+          aria-label={texts.ariaMic}
+          aria-pressed={isListening}
+          disabled={isUnavailable}
+          onClick={() => setIsListening((v) => !v)}
+          className="absolute bottom-4 left-1/2 grid h-14 w-14 -translate-x-1/2 place-items-center rounded-full text-white shadow-lg transition-transform active:scale-[0.94] disabled:opacity-40"
+          style={{
+            backgroundColor: isListening
+              ? 'hsl(var(--brand-secondary))'
+              : 'hsl(var(--brand-primary))',
+          }}
+        >
+          {isListening ? (
+            <span className="absolute inset-0 animate-ping rounded-full bg-[hsl(var(--brand-secondary)/0.5)]" />
+          ) : null}
+          <Mic className="relative h-6 w-6" />
         </button>
       </div>
 

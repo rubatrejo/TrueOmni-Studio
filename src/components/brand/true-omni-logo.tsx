@@ -21,6 +21,7 @@
 import { memo, useEffect, useState } from 'react';
 
 import { getCachedLogoOverride } from '@/components/studio-bridge';
+import { resolveAssetUrl } from '@/lib/asset-url';
 
 interface TrueOmniLogoProps {
   /** Clase Tailwind para controlar tamaño/color. Ej: `h-16 w-auto text-white`. */
@@ -90,7 +91,11 @@ function TrueOmniLogoBase({
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={override}
+        // El override puede ser una data URL (logo subido en el Studio) o un
+        // path relativo del seed (`assets/logo.svg`). `resolveAssetUrl` deja las
+        // data/http intactas y normaliza el path a `/assets/...` servible — sin
+        // esto el `<img>` con path relativo se rompe y cae al alt.
+        src={resolveAssetUrl(override)}
         alt={title}
         className={`${className ?? ''} block object-contain ${
           align === 'left' ? 'object-left' : 'object-center'

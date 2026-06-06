@@ -254,6 +254,10 @@ export function PreviewPanel({
           style={{
             width: w * scale,
             height: h * scale,
+            // La PWA es un dispositivo mobile: redondeamos las esquinas como un
+            // teléfono real (~44px sobre 390px de ancho, escalado al preview). El
+            // kiosk no se redondea (su pantalla es rectangular a sangre).
+            borderRadius: product === 'pwa' ? 44 * scale : undefined,
           }}
         >
           {orientation === 'landscape' ? (

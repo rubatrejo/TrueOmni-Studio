@@ -1,5 +1,6 @@
 'use client';
 
+import { prewarmAiAvatar } from '@/hooks/use-tavus-conversation';
 import { useAiStore } from '@/stores/ai-store';
 
 /** Glifo "sparkles" (asistente AI). Neutro/tokenizado vía `currentColor`. */
@@ -18,12 +19,23 @@ function SparklesIcon({ size = 26 }: { size?: number }) {
  * (regla del proyecto: los ads van por encima del pill Ask AI) y por encima del bottom nav
  * sin taparlo (`bottom` ≈ alto del nav + margen).
  */
-export function PwaAskAiTrigger({ ariaLabel }: { ariaLabel: string }) {
+export function PwaAskAiTrigger({
+  ariaLabel,
+  clientName,
+}: {
+  ariaLabel: string;
+  clientName?: string;
+}) {
   const open = useAiStore((s) => s.open);
+  // Pre-warm la conversación Tavus al tocar el FAB (antes del open) para que el
+  // conversation_url esté casi listo cuando el modal monta.
+  const prewarm = () => prewarmAiAvatar(clientName);
   return (
     <button
       type="button"
       aria-label={ariaLabel}
+      onPointerDown={prewarm}
+      onTouchStart={prewarm}
       onClick={open}
       className="absolute z-30 flex items-center justify-center rounded-full text-white shadow-lg transition-transform active:scale-[0.94]"
       style={{

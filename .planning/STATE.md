@@ -4,6 +4,62 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-06 — Fase 2 del editor PWA (preview live + editores) + iteración de fixes en Vercel
+
+**Hecho (6 commits, todos en prod):**
+
+- **`4433347`** — Preview live de **Scavenger Hunt** y **Wayfinding** (wrappers `*-live`
+  con `usePwaSection`; las pantallas de detalle re-derivan su sub-ítem por slug).
+- **`9fbe547`** — **Editores PWA Fase 2**: arranque (Welcome fondo+timing, Login
+  form+error, Dashboard hero image), cuenta (Profile 5 pantallas, Notifications, More) y
+  **listings** (editor genérico para Restaurants/Stay/Things to Do — comparten
+  `PwaListingsModuleConfig`; 3 wrappers `*-live` genéricos por `moduleKey`). Solo textos
+  white-label. Nuevos `PwaNumberField`/`PwaOptionList` en `pwa-ui`; reutiliza `ImageField`.
+- **`d6590d4`** — Fixes de revisión: preview de la PWA con **esquinas redondeadas**; **logo
+  del cliente** (TrueOmniLogo pasa el override por `resolveAssetUrl`); **AI Avatar Tavus
+  portado a la PWA** extrayendo la lógica Daily/Tavus a un hook compartido
+  `useTavusConversation` (refactor del `ai-modal` del kiosk sin cambio funcional).
+- **`c75755d`** — El **Welcome splash auto-avanza también en el preview** (antes se
+  congelaba bajo override y bloqueaba el recorrido del flujo).
+- **`4a0837f`** — Ask AI: header consistente con la PWA (90px, sin subtítulo) + cuerpo
+  estilo kiosk; FAB con el avatar del kiosk; **botón de idioma en Login**; **InboxIcon →
+  campana** en Events/Tickets/More.
+- **`47409b2`** — Ask AI FAB respeta el **avatar pill rectangular** (object-contain, sin
+  recorte); caption con **fondo accent + opacidad**; nuevo **`SavedTripButton`** (bookmark
+  - badge con `useItineraryRail().count` → `/pwa/trip-planner`) en grid de listings, Events
+    y Tickets.
+
+**Verificado:**
+
+- `pnpm typecheck` + `pnpm lint` + `pnpm kiosk:dev` limpios en cada commit.
+- Los 6 commits desplegados en Vercel (`trueomni-studio.vercel.app`), todos **READY**.
+- Verificación visual la hace Rubén en el navegador (Vercel) — iteramos varios fixes
+  sobre sus capturas.
+
+**Pendiente / siguiente:**
+
+- **Verificación funcional del AI Avatar con Tavus real** (kiosk no-regresión + PWA) — no
+  se pudo probar sin navegador/credenciales.
+- Afinar UI del modal Ask AI PWA si algún tamaño/posición no calza (afinado a ojo).
+- Módulos heredados que faltan: **Trails** (tipo propio `PwaTrailsModuleConfig`, fuera del
+  editor genérico), help, search, events, tickets, deals, passes, map, digitalBrochure,
+  socialWall, connectWithUs, forgotPassword, createAccount.
+- i18n PWA + ads mobile. Detalle de notificación `[id]` (preview live marginal).
+- ¿Tickets al mismo contador del trip rail? (hoy bucket aparte).
+
+**Decisiones:**
+
+- Editor de listings **genérico** para los 3 módulos que comparten `PwaListingsModuleConfig`
+  (Trails NO lo comparte → su propio editor en follow-up).
+- Solo se editan **textos white-label**; la data de demo (user, favoritos, seed) viene del
+  setup, igual que Scavenger/Wayfinding.
+- Lógica Daily/Tavus extraída a hook compartido `useTavusConversation` (una sola fuente para
+  kiosk y PWA).
+
+**Fase:** Milestone PWA — Fase Pz (editor en el Studio), Fase 2 en prod.
+
+---
+
 ### Sesión 2026-06-04 (noche-2) — Editor PWA desplegado en Vercel + fixes de feedback
 
 **Hecho:**

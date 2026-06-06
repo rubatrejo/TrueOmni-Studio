@@ -1,4 +1,5 @@
-import { ListingsListScreen, type ListingItem } from '@/components/pwa/listings-list-screen';
+import { type ListingItem } from '@/components/pwa/listings-list-screen';
+import { ListingsListScreenLive } from '@/components/pwa/listings-list-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 import { isListingsModule } from '@/lib/itinerary-tabs';
@@ -67,21 +68,17 @@ export default async function PwaThingsToDoListPage({
     priceRange: l.priceRange,
   }));
 
-  const categoryLabel = cat ? t.categories.find((c) => c.key === cat)?.label : undefined;
-
   return (
     <MobileCanvas>
-      <ListingsListScreen
-        title={categoryLabel ?? t.title}
-        tabs={t.tabs}
-        resultsLabel={t.resultsLabel}
-        distanceSuffix={t.distanceSuffix}
+      <ListingsListScreenLive
+        moduleKey="thingsToDo"
+        config={t}
+        categoryKey={cat}
         items={items}
         mapItems={mapItems}
         listings={mod.listings}
         features={mod.features}
         subcategories={mod.subcategories}
-        filterTexts={t.filters}
         origin={origin}
         mapboxToken={config.integraciones?.mapbox_token}
         basePath="/pwa/things-to-do"

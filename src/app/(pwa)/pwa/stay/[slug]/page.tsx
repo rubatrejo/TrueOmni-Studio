@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { ListingsDetailScreen } from '@/components/pwa/listings-detail-screen';
+import { ListingsDetailScreenLive } from '@/components/pwa/listings-detail-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 import { isListingsModule } from '@/lib/itinerary-tabs';
@@ -27,7 +27,9 @@ export default async function PwaStayDetailPage({ params }: { params: Promise<{ 
 
   return (
     <MobileCanvas>
-      <ListingsDetailScreen
+      <ListingsDetailScreenLive
+        moduleKey="stay"
+        config={s}
         detail={{
           slug: l.slug,
           title: l.title,
@@ -45,19 +47,6 @@ export default async function PwaStayDetailPage({ params }: { params: Promise<{ 
             ? { kind: 'external-link', label: s.detail.bookNow, url: bookUrl }
             : { kind: 'none' }
         }
-        texts={{
-          headerTitle: s.title,
-          eyebrow: s.detail.eyebrow,
-          call: s.detail.call,
-          website: s.detail.website,
-          addFavorite: s.detail.addFavorite,
-          removeFavorite: s.detail.removeFavorite,
-          seeDirections: s.detail.seeDirections,
-          description: s.detail.description,
-          openNowUntil: s.detail.openNowUntil,
-          moreHours: s.detail.moreHours,
-          businessHours: s.businessHours,
-        }}
         basePath="/pwa/stay"
         mapboxToken={config.integraciones?.mapbox_token}
       />

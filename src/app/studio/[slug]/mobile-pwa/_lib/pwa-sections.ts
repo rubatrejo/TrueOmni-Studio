@@ -15,10 +15,18 @@ import type { SidebarSectionLike } from '../../../_components/SidebarTabs';
 
 export type PwaSectionKey =
   | 'branding'
+  | 'welcome'
+  | 'login'
   | 'modules'
   | 'scavenger-hunt'
   | 'wayfinding'
   | 'trip-planner'
+  | 'restaurants'
+  | 'stay'
+  | 'things-to-do'
+  | 'profile'
+  | 'notifications'
+  | 'more'
   | 'publish';
 
 export type PwaSection = SidebarSectionLike<PwaSectionKey> & {
@@ -40,8 +48,28 @@ export const PWA_SECTIONS: readonly PwaSection[] = [
     phase: 'P1',
   },
   {
-    key: 'modules',
+    key: 'welcome',
     num: '02',
+    label: 'Welcome',
+    title: 'Welcome Splash',
+    description:
+      'Arrival screen of the mobile app: fullscreen background and how long it shows before moving to Login.',
+    icon: 'Sparkles',
+    phase: 'P2',
+  },
+  {
+    key: 'login',
+    num: '03',
+    label: 'Login',
+    title: 'Login & Sign In',
+    description:
+      'Background, form labels and buttons of the login screen, plus the texts of the login error dialog.',
+    icon: 'LogIn',
+    phase: 'P2',
+  },
+  {
+    key: 'modules',
+    num: '04',
     label: 'Modules',
     title: 'Modules & Navigation',
     description:
@@ -51,7 +79,7 @@ export const PWA_SECTIONS: readonly PwaSection[] = [
   },
   {
     key: 'scavenger-hunt',
-    num: '03',
+    num: '05',
     label: 'Scavenger Hunt',
     title: 'Scavenger Hunt',
     description:
@@ -61,7 +89,7 @@ export const PWA_SECTIONS: readonly PwaSection[] = [
   },
   {
     key: 'wayfinding',
-    num: '04',
+    num: '06',
     label: 'Wayfinding',
     title: 'Wayfinding',
     description:
@@ -71,7 +99,7 @@ export const PWA_SECTIONS: readonly PwaSection[] = [
   },
   {
     key: 'trip-planner',
-    num: '05',
+    num: '07',
     label: 'Trip Planner',
     title: 'Trip Planner',
     description:
@@ -80,8 +108,68 @@ export const PWA_SECTIONS: readonly PwaSection[] = [
     phase: 'P1',
   },
   {
+    key: 'restaurants',
+    num: '08',
+    label: 'Restaurants',
+    title: 'Restaurants',
+    description:
+      'White-label texts of the Restaurants module (grid, list, filters and detail screens).',
+    icon: 'UtensilsCrossed',
+    phase: 'P2',
+  },
+  {
+    key: 'stay',
+    num: '09',
+    label: 'Places to Stay',
+    title: 'Places to Stay',
+    description:
+      'White-label texts of the Places to Stay module (grid, list, filters and detail screens).',
+    icon: 'BookOpen',
+    phase: 'P2',
+  },
+  {
+    key: 'things-to-do',
+    num: '10',
+    label: 'Things to Do',
+    title: 'Things to Do',
+    description:
+      'White-label texts of the Things to Do module (grid, list, filters and detail screens).',
+    icon: 'Compass',
+    phase: 'P2',
+  },
+  {
+    key: 'profile',
+    num: '11',
+    label: 'Profile',
+    title: 'Profile & Account',
+    description:
+      'White-label texts of the profile, edit, settings, change-password and delete-account screens.',
+    icon: 'UserCircle',
+    phase: 'P2',
+  },
+  {
+    key: 'notifications',
+    num: '12',
+    label: 'Notifications',
+    title: 'Notifications',
+    description:
+      'Texts of the notifications list, selection mode, delete confirmation and empty state.',
+    icon: 'Bell',
+    phase: 'P2',
+  },
+  {
+    key: 'more',
+    num: '13',
+    label: 'More',
+    title: 'More Menu',
+    description:
+      'Search placeholder, weather line and the labels / order of the More menu entries.',
+    icon: 'MoreHorizontal',
+    phase: 'P2',
+  },
+  {
     key: 'publish',
-    num: '06',
+    num: '14',
     label: 'Publish',
     title: 'Publish & Approvals',
     description:

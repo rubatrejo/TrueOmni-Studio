@@ -1,4 +1,4 @@
-import { EditProfileScreen } from '@/components/pwa/edit-profile-screen';
+import { EditProfileScreenLive } from '@/components/pwa/edit-profile-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -30,14 +30,8 @@ export default async function PwaEditProfilePage() {
 
   return (
     <MobileCanvas>
-      <EditProfileScreen
-        texts={{
-          title: e.title,
-          editPhoto: e.editPhoto,
-          changePasswordCta: e.changePasswordCta,
-          saveCta: e.saveCta,
-          prefill: e.prefill,
-        }}
+      <EditProfileScreenLive
+        editProfile={e}
         photoSheetTexts={
           ca
             ? {

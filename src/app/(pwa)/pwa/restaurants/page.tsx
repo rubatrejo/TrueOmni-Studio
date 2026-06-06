@@ -1,4 +1,4 @@
-import { ListingsGridScreen } from '@/components/pwa/listings-grid-screen';
+import { ListingsGridScreenLive } from '@/components/pwa/listings-grid-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -24,9 +24,9 @@ export default async function PwaRestaurantsPage() {
 
   return (
     <MobileCanvas>
-      <ListingsGridScreen
-        searchPlaceholder={r.searchPlaceholder}
-        categories={r.categories}
+      <ListingsGridScreenLive
+        moduleKey="restaurants"
+        config={r}
         basePath="/pwa/restaurants"
         navActive="dining"
       />

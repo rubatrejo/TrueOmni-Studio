@@ -7,11 +7,17 @@ import { BrandingSyncBanner } from '../../../_components/BrandingSyncBanner';
 import { BrandingEditor } from '../../../_components/EditorPanel';
 import { PWA_SECTIONS, type PwaSectionKey } from '../_lib/pwa-sections';
 
+import { ListingsModuleEditor } from './ListingsModuleEditor';
+import { LoginEditor } from './LoginEditor';
 import { ModulesEditor } from './ModulesEditor';
+import { MoreEditor } from './MoreEditor';
+import { NotificationsEditor } from './NotificationsEditor';
+import { ProfileEditor } from './ProfileEditor';
 import { PwaPanelHeader, PwaPlaceholderPanel } from './pwa-ui';
 import { ScavengerHuntEditor } from './ScavengerHuntEditor';
 import { TripPlannerEditor } from './TripPlannerEditor';
 import { WayfindingEditor } from './WayfindingEditor';
+import { WelcomeEditor } from './WelcomeEditor';
 
 /**
  * Panel central del editor PWA. Renderiza el editor de la sección activa con el
@@ -52,6 +58,22 @@ export function PwaEditorPanel({
     );
   }
 
+  if (sectionKey === 'welcome') {
+    return (
+      <WelcomeEditor value={pwa.welcome} onChange={(welcome) => onPwaChange({ ...pwa, welcome })} />
+    );
+  }
+
+  if (sectionKey === 'login') {
+    return (
+      <LoginEditor
+        login={pwa.login}
+        loginError={pwa.loginError}
+        onChange={(login, loginError) => onPwaChange({ ...pwa, login, loginError })}
+      />
+    );
+  }
+
   if (sectionKey === 'modules') {
     return (
       <ModulesEditor
@@ -86,6 +108,42 @@ export function PwaEditorPanel({
         onChange={(tripPlanner) => onPwaChange({ ...pwa, tripPlanner })}
       />
     );
+  }
+
+  const LISTINGS_SECTIONS = {
+    restaurants: { slice: 'restaurants', title: 'Restaurants' },
+    stay: { slice: 'stay', title: 'Places to Stay' },
+    'things-to-do': { slice: 'thingsToDo', title: 'Things to Do' },
+  } as const;
+
+  if (sectionKey in LISTINGS_SECTIONS) {
+    const { slice, title } = LISTINGS_SECTIONS[sectionKey as keyof typeof LISTINGS_SECTIONS];
+    return (
+      <ListingsModuleEditor
+        title={title}
+        value={pwa[slice]}
+        onChange={(next) => onPwaChange({ ...pwa, [slice]: next })}
+      />
+    );
+  }
+
+  if (sectionKey === 'profile') {
+    return (
+      <ProfileEditor value={pwa.profile} onChange={(profile) => onPwaChange({ ...pwa, profile })} />
+    );
+  }
+
+  if (sectionKey === 'notifications') {
+    return (
+      <NotificationsEditor
+        value={pwa.notifications}
+        onChange={(notifications) => onPwaChange({ ...pwa, notifications })}
+      />
+    );
+  }
+
+  if (sectionKey === 'more') {
+    return <MoreEditor value={pwa.more} onChange={(more) => onPwaChange({ ...pwa, more })} />;
   }
 
   const section = PWA_SECTIONS.find((s) => s.key === sectionKey);

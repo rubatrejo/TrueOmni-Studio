@@ -1,5 +1,5 @@
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { NotificationsScreen } from '@/components/pwa/notifications-screen';
+import { NotificationsScreenLive } from '@/components/pwa/notifications-screen-live';
 import { getConfig } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 /**
  * Notifications — lista. Abierta desde la campana del Dashboard. Textos + seed desde
  * `config.features.pwa.notifications`; el estado read/deleted vive client-side.
- * Los títulos/cuerpos admiten `{client_name}`, interpolado aquí.
+ * La interpolación de `{client_name}` la hace el wrapper live (preview del Studio).
  */
 export default async function PwaNotificationsPage() {
   const config = await getConfig();
@@ -23,16 +23,9 @@ export default async function PwaNotificationsPage() {
     );
   }
 
-  const clientName = config.client?.nombre ?? '';
-  const seed = n.seed.map((item) => ({
-    ...item,
-    title: item.title.replace(/\{client_name\}/g, clientName),
-    body: item.body.replace(/\{client_name\}/g, clientName),
-  }));
-
   return (
     <MobileCanvas>
-      <NotificationsScreen cfg={n} seed={seed} />
+      <NotificationsScreenLive cfg={n} clientName={config.client?.nombre ?? ''} />
     </MobileCanvas>
   );
 }

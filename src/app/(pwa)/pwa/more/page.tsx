@@ -1,5 +1,5 @@
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { MoreScreen } from '@/components/pwa/more-screen';
+import { MoreScreenLive } from '@/components/pwa/more-screen-live';
 import { getClientSlug } from '@/lib/client-env';
 import { getConfig } from '@/lib/config';
 
@@ -21,13 +21,7 @@ export default async function PwaMorePage() {
 
   return (
     <MobileCanvas>
-      <MoreScreen
-        searchPlaceholder={more.searchPlaceholder}
-        weatherText={more.weatherText}
-        items={more.items}
-        survey={survey}
-        clientSlug={getClientSlug()}
-      />
+      <MoreScreenLive more={more} survey={survey} clientSlug={getClientSlug()} />
     </MobileCanvas>
   );
 }

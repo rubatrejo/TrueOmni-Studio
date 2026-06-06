@@ -66,6 +66,15 @@ export function usePwaConfig(): PwaConfig | null {
 }
 
 /**
+ * True si la PWA corre embebida en el editor del Studio con un override activo.
+ * Útil para suprimir comportamientos de runtime que estorban al editar (p. ej.
+ * el auto-advance del Welcome splash hacia Login).
+ */
+export function usePwaIsOverridden(): boolean {
+  return useContext(PwaBridgeContext).isOverridden;
+}
+
+/**
  * Lee una sección del slice PWA con preview live. `fallback` es el valor que
  * la pantalla ya recibe por props del server — se usa cuando no hay override
  * (runtime normal) o la sección no está presente en el override.

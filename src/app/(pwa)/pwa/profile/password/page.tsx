@@ -1,4 +1,4 @@
-import { ChangePasswordScreen } from '@/components/pwa/change-password-screen';
+import { ChangePasswordScreenLive } from '@/components/pwa/change-password-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -27,7 +27,7 @@ export default async function PwaChangePasswordPage() {
 
   return (
     <MobileCanvas>
-      <ChangePasswordScreen texts={cp} doneHref="/pwa/profile/edit" />
+      <ChangePasswordScreenLive changePassword={cp} doneHref="/pwa/profile/edit" />
     </MobileCanvas>
   );
 }

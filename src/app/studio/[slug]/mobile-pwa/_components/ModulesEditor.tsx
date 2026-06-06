@@ -2,6 +2,8 @@
 
 import type { PwaDashboardConfig, PwaQuickAccess, PwaTile } from '@/lib/config';
 
+import { ImageField } from '../../../_components/ImageField';
+
 import { move, PwaField, PwaGroup, PwaPanelHeader, ReorderButtons } from './pwa-ui';
 
 /**
@@ -54,6 +56,14 @@ export function ModulesEditor({
             multiline
             value={v.heroTitle}
             onChange={(t) => onChange({ ...v, heroTitle: t })}
+          />
+          <ImageField
+            label="Hero image"
+            hint="Background photo of the dashboard hero. JPG or PNG."
+            layout="cover"
+            aspect="390/200"
+            value={v.heroImage}
+            onChange={(next) => onChange({ ...v, heroImage: next ?? '' })}
           />
         </PwaGroup>
 

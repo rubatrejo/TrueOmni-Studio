@@ -1,5 +1,5 @@
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { WelcomeSplash } from '@/components/pwa/welcome-splash';
+import { WelcomeSplashLive } from '@/components/pwa/welcome-splash-live';
 import { getConfig } from '@/lib/config';
 
 // La PWA lee config en runtime (KIOSK_CLIENT). Igual que el kiosk, marcamos la
@@ -16,12 +16,7 @@ export default async function PwaHomePage() {
 
   return (
     <MobileCanvas>
-      <WelcomeSplash
-        background={welcome?.background ?? 'assets/pwa/welcome-bg.jpg'}
-        logoAlt={config.branding.logo.alt}
-        autoAdvanceMs={welcome?.autoAdvanceMs ?? 2500}
-        nextHref="/pwa/login"
-      />
+      <WelcomeSplashLive welcome={welcome} logoAlt={config.branding.logo.alt} />
     </MobileCanvas>
   );
 }

@@ -1,4 +1,4 @@
-import { ListingsGridScreen } from '@/components/pwa/listings-grid-screen';
+import { ListingsGridScreenLive } from '@/components/pwa/listings-grid-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -25,11 +25,7 @@ export default async function PwaThingsToDoPage() {
 
   return (
     <MobileCanvas>
-      <ListingsGridScreen
-        searchPlaceholder={t.searchPlaceholder}
-        categories={t.categories}
-        basePath="/pwa/things-to-do"
-      />
+      <ListingsGridScreenLive moduleKey="thingsToDo" config={t} basePath="/pwa/things-to-do" />
     </MobileCanvas>
   );
 }

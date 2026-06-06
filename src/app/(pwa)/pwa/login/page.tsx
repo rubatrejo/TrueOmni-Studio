@@ -1,4 +1,4 @@
-import { LoginScreen } from '@/components/pwa/login-screen';
+import { LoginScreenLive } from '@/components/pwa/login-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig, type PwaLoginConfig } from '@/lib/config';
 
@@ -35,13 +35,11 @@ export default async function PwaLoginPage() {
 
   return (
     <MobileCanvas>
-      <LoginScreen
-        background={background}
+      <LoginScreenLive
+        login={login}
+        loginError={pwa?.loginError ?? FALLBACK_ERROR}
         logoAlt={config.branding.logo.alt}
-        texts={login}
-        dashboardHref="/pwa/dashboard"
-        forgotHref="/pwa/forgot-password"
-        errorTexts={pwa?.loginError ?? FALLBACK_ERROR}
+        background={background}
       />
     </MobileCanvas>
   );

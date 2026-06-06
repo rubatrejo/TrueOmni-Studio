@@ -1,5 +1,5 @@
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { ProfileScreen } from '@/components/pwa/profile-screen';
+import { ProfileScreenLive } from '@/components/pwa/profile-screen-live';
 import { getConfig } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
@@ -25,13 +25,7 @@ export default async function PwaProfilePage() {
 
   return (
     <MobileCanvas>
-      <ProfileScreen
-        editProfileLink={p.editProfileLink}
-        user={p.user}
-        favorites={p.favorites}
-        upcomingEvents={p.upcomingEvents}
-        editHref="/pwa/profile/edit"
-      />
+      <ProfileScreenLive profile={p} editHref="/pwa/profile/edit" />
     </MobileCanvas>
   );
 }

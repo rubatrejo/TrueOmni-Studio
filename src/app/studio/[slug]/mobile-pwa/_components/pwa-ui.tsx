@@ -73,6 +73,75 @@ export function PwaField({
   );
 }
 
+export function PwaNumberField({
+  label,
+  value,
+  onChange,
+  min,
+  step,
+  suffix,
+}: {
+  label: string;
+  value: number;
+  onChange: (next: number) => void;
+  min?: number;
+  step?: number;
+  suffix?: string;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-[12px] font-medium text-zinc-600 dark:text-zinc-400">
+        {label}
+      </span>
+      <div className="flex items-center gap-2">
+        <input
+          type="number"
+          value={Number.isFinite(value) ? value : ''}
+          min={min}
+          step={step}
+          onChange={(e) => {
+            const n = Number(e.target.value);
+            onChange(Number.isFinite(n) ? n : 0);
+          }}
+          className="block w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-[13px] text-zinc-900 outline-none transition focus:border-sky-500/60 focus:ring-2 focus:ring-sky-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+        />
+        {suffix ? (
+          <span className="shrink-0 text-[12px] text-zinc-400 dark:text-zinc-500">{suffix}</span>
+        ) : null}
+      </div>
+    </label>
+  );
+}
+
+/**
+ * Edita un array de strings (opciones / días) in-place, un `PwaField` por
+ * elemento, sin añadir ni borrar (la longitud la fija el seed). Devuelve `null`
+ * si el array está vacío.
+ */
+export function PwaOptionList({
+  label,
+  options,
+  onChange,
+}: {
+  label: string;
+  options: string[];
+  onChange: (next: string[]) => void;
+}) {
+  if (options.length === 0) return null;
+  return (
+    <>
+      {options.map((opt, i) => (
+        <PwaField
+          key={i}
+          label={`${label} ${i + 1}`}
+          value={opt}
+          onChange={(next) => onChange(options.map((o, idx) => (idx === i ? next : o)))}
+        />
+      ))}
+    </>
+  );
+}
+
 /** Mueve un elemento de `from` a `to` (no muta el array original). */
 export function move<T>(arr: readonly T[], from: number, to: number): T[] {
   if (to < 0 || to >= arr.length) return [...arr];

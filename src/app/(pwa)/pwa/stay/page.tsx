@@ -1,4 +1,4 @@
-import { ListingsGridScreen } from '@/components/pwa/listings-grid-screen';
+import { ListingsGridScreenLive } from '@/components/pwa/listings-grid-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -25,11 +25,7 @@ export default async function PwaStayPage() {
 
   return (
     <MobileCanvas>
-      <ListingsGridScreen
-        searchPlaceholder={s.searchPlaceholder}
-        categories={s.categories}
-        basePath="/pwa/stay"
-      />
+      <ListingsGridScreenLive moduleKey="stay" config={s} basePath="/pwa/stay" />
     </MobileCanvas>
   );
 }

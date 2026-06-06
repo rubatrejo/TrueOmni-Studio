@@ -1,4 +1,4 @@
-import { DeleteAccountFlow } from '@/components/pwa/delete-account-flow';
+import { DeleteAccountFlowLive } from '@/components/pwa/delete-account-flow-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -51,7 +51,7 @@ export default async function PwaDeleteAccountPage() {
   const d = config.features?.pwa?.profile?.delete ?? FALLBACK;
   return (
     <MobileCanvas>
-      <DeleteAccountFlow texts={d} logoutHref="/pwa" />
+      <DeleteAccountFlowLive deleteFlow={d} logoutHref="/pwa" />
     </MobileCanvas>
   );
 }

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { ListingsDetailScreen } from '@/components/pwa/listings-detail-screen';
+import { ListingsDetailScreenLive } from '@/components/pwa/listings-detail-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 import { isListingsModule } from '@/lib/itinerary-tabs';
@@ -28,7 +28,9 @@ export default async function PwaRestaurantDetailPage({
 
   return (
     <MobileCanvas>
-      <ListingsDetailScreen
+      <ListingsDetailScreenLive
+        moduleKey="restaurants"
+        config={r}
         detail={{
           slug: l.slug,
           title: l.title,
@@ -52,20 +54,6 @@ export default async function PwaRestaurantDetailPage({
               }
             : { kind: 'none' }
         }
-        texts={{
-          headerTitle: r.title,
-          eyebrow: r.detail.eyebrow,
-          call: r.detail.call,
-          website: r.detail.website,
-          addFavorite: r.detail.addFavorite,
-          removeFavorite: r.detail.removeFavorite,
-          seeDirections: r.detail.seeDirections,
-          description: r.detail.description,
-          openNowUntil: r.detail.openNowUntil,
-          moreHours: r.detail.moreHours,
-          openDiningGuide: r.detail.openDiningGuide,
-          businessHours: r.businessHours,
-        }}
         basePath="/pwa/restaurants"
         navActive="dining"
         mapboxToken={config.integraciones?.mapbox_token}

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { ListingsDetailScreen } from '@/components/pwa/listings-detail-screen';
+import { ListingsDetailScreenLive } from '@/components/pwa/listings-detail-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 import { isListingsModule } from '@/lib/itinerary-tabs';
@@ -28,7 +28,9 @@ export default async function PwaThingsToDoDetailPage({
 
   return (
     <MobileCanvas>
-      <ListingsDetailScreen
+      <ListingsDetailScreenLive
+        moduleKey="thingsToDo"
+        config={t}
         detail={{
           slug: l.slug,
           title: l.title,
@@ -42,19 +44,6 @@ export default async function PwaThingsToDoDetailPage({
           gallery: l.gallery,
         }}
         heroPrimaryAction={{ kind: 'none' }}
-        texts={{
-          headerTitle: t.title,
-          eyebrow: t.detail.eyebrow,
-          call: t.detail.call,
-          website: t.detail.website,
-          addFavorite: t.detail.addFavorite,
-          removeFavorite: t.detail.removeFavorite,
-          seeDirections: t.detail.seeDirections,
-          description: t.detail.description,
-          openNowUntil: t.detail.openNowUntil,
-          moreHours: t.detail.moreHours,
-          businessHours: t.businessHours,
-        }}
         basePath="/pwa/things-to-do"
         mapboxToken={config.integraciones?.mapbox_token}
       />

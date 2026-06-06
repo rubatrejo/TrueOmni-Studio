@@ -18,10 +18,11 @@ import { pwaShare } from '@/lib/pwa-share';
 import type { TicketableEvent } from '@/lib/tickets';
 
 import { PwaBottomNav } from './bottom-nav';
-import { NotificationIcon, ProfileIcon, SearchIcon } from './dashboard-icons';
+import { ProfileIcon, SearchIcon } from './dashboard-icons';
 import { PwaFilterOverlay, type FilterTexts } from './pwa-filter-overlay';
 import { PwaHeart } from './pwa-heart';
 import { PwaWeekPicker } from './pwa-week-picker';
+import { SavedTripButton } from './saved-trip-button';
 import { ShareIconButton } from './share-icon-button';
 
 const BRAND = 'hsl(var(--brand-primary))';
@@ -154,14 +155,7 @@ export function TicketsScreen({
             </button>
           ) : null}
         </div>
-        <button
-          type="button"
-          aria-label="Inbox"
-          onClick={() => router.push('/pwa/notifications')}
-          className="shrink-0 text-white"
-        >
-          <NotificationIcon size={24} />
-        </button>
+        <SavedTripButton size={24} className="shrink-0" />
       </div>
 
       {/* Sub-fila: título + ubicación + filtro (fondo brand-primary, continúa el header) */}

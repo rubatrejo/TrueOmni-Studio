@@ -118,7 +118,7 @@ export function PwaAskAiModal({
         {caption ? (
           <div
             className="absolute bottom-4 left-4 right-20 rounded-2xl px-4 py-2.5 backdrop-blur-md"
-            style={{ backgroundColor: 'hsl(var(--brand-primary) / 0.65)' }}
+            style={{ backgroundColor: 'hsl(var(--brand-secondary) / 0.7)' }}
           >
             <p className="text-center text-[13px] font-medium leading-snug text-white">{caption}</p>
           </div>

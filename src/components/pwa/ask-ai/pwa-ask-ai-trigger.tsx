@@ -17,9 +17,11 @@ function SparklesIcon({ size = 26 }: { size?: number }) {
 
 /**
  * FAB flotante que abre el Ask AI mobile. Usa el MISMO avatar configurado para
- * el kiosk (`features.home.askAi.avatar`) para consistencia entre productos,
- * a tamaño PWA (56×56). Si el cliente no tiene avatar, cae al glifo sparkles.
- * Va sobre el contenido pero DEBAJO de los ads y por encima del bottom nav.
+ * el kiosk (`features.home.askAi.avatar`) — que suele ser una "pastilla"
+ * rectangular (ej. 428×162) — respetando su aspecto a tamaño PWA (alto fijo,
+ * ancho automático, `object-contain`, sin recorte). Si el cliente no tiene
+ * avatar, cae al glifo sparkles en un FAB circular. Va sobre el contenido pero
+ * DEBAJO de los ads y por encima del bottom nav.
  */
 export function PwaAskAiTrigger({
   ariaLabel,
@@ -34,6 +36,28 @@ export function PwaAskAiTrigger({
   // Pre-warm la conversación Tavus al tocar el FAB (antes del open) para que el
   // conversation_url esté casi listo cuando el modal monta.
   const prewarm = () => prewarmAiAvatar(clientName);
+
+  if (avatarSrc) {
+    return (
+      <button
+        type="button"
+        aria-label={ariaLabel}
+        onPointerDown={prewarm}
+        onTouchStart={prewarm}
+        onClick={open}
+        className="absolute z-30 transition-transform active:scale-[0.96]"
+        style={{ right: 12, bottom: 70 }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={resolveAssetUrl(avatarSrc)}
+          alt={ariaLabel}
+          className="block h-12 w-auto drop-shadow-lg"
+        />
+      </button>
+    );
+  }
+
   return (
     <button
       type="button"
@@ -41,25 +65,16 @@ export function PwaAskAiTrigger({
       onPointerDown={prewarm}
       onTouchStart={prewarm}
       onClick={open}
-      className="absolute z-30 flex items-center justify-center overflow-hidden rounded-full text-white shadow-lg transition-transform active:scale-[0.94]"
+      className="absolute z-30 flex items-center justify-center rounded-full text-white shadow-lg transition-transform active:scale-[0.94]"
       style={{
         right: 16,
         bottom: 72,
         width: 56,
         height: 56,
-        backgroundColor: avatarSrc ? undefined : 'hsl(var(--brand-secondary))',
+        backgroundColor: 'hsl(var(--brand-secondary))',
       }}
     >
-      {avatarSrc ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={resolveAssetUrl(avatarSrc)}
-          alt={ariaLabel}
-          className="block h-full w-full object-cover"
-        />
-      ) : (
-        <SparklesIcon size={26} />
-      )}
+      <SparklesIcon size={26} />
     </button>
   );
 }

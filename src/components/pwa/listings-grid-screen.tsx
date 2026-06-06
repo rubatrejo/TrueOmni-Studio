@@ -8,6 +8,7 @@ import type { PwaListingCategory } from '@/lib/config';
 import { PwaBottomNav, type PwaNavKey } from './bottom-nav';
 import { ProfileIcon, SearchIcon } from './dashboard-icons';
 import { S } from './mobile-layer';
+import { SavedTripButton } from './saved-trip-button';
 
 const BRAND = 'hsl(var(--brand-primary))';
 const MONTSERRAT = { fontFamily: 'var(--font-montserrat)' } as const;
@@ -77,29 +78,7 @@ export function ListingsGridScreen({
               {searchPlaceholder}
             </span>
           </button>
-          <button
-            type="button"
-            aria-label="Saved"
-            className="absolute flex items-center justify-center text-white"
-            style={{ left: 342, top: 52, width: 18, height: 28 }}
-          >
-            <svg
-              width={18}
-              height={21.4}
-              viewBox="0 0 44.192 52.507"
-              fill="currentColor"
-              aria-hidden
-            >
-              <g transform="translate(-32.26 -28.91)">
-                <g transform="translate(32.26 28.91)">
-                  <path
-                    d="M68.423,80.372l.2.162a5,5,0,0,0,7.83-4.1V36.379a7.475,7.475,0,0,0-7.469-7.469H39.729a7.475,7.475,0,0,0-7.469,7.469V76.438a4.979,4.979,0,0,0,7.818,4.083,1.257,1.257,0,0,0,.2-.162L54.343,68.284Z"
-                    transform="translate(-32.26 -28.91)"
-                  />
-                </g>
-              </g>
-            </svg>
-          </button>
+          <SavedTripButton size={22} className="absolute" style={{ left: 342, top: 52 }} />
         </div>
       </div>
 

@@ -1,7 +1,5 @@
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { TaskCheckin } from '@/components/pwa/scavenger-hunt/task-checkin';
-import { TaskPhoto } from '@/components/pwa/scavenger-hunt/task-photo';
-import { TaskQuestion } from '@/components/pwa/scavenger-hunt/task-question';
+import { TaskLive } from '@/components/pwa/scavenger-hunt/task-live';
 import { getConfig } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
@@ -26,21 +24,19 @@ export default async function PwaTaskPage({
   }
 
   const mapboxToken = config.integraciones?.mapbox_token ?? '';
-  const props = {
-    huntSlug: slug,
-    huntName: hunt.name,
-    task,
-    config: sh,
-    totalTasks: hunt.tasks.length,
-    mapboxToken,
-    clientName: config.client.nombre,
-  };
 
   return (
     <MobileCanvas>
-      {task.type === 'photo' && <TaskPhoto {...props} />}
-      {task.type === 'checkin' && <TaskCheckin {...props} />}
-      {task.type === 'question' && <TaskQuestion {...props} />}
+      <TaskLive
+        huntSlug={slug}
+        taskSlug={taskSlug}
+        huntName={hunt.name}
+        task={task}
+        config={sh}
+        totalTasks={hunt.tasks.length}
+        mapboxToken={mapboxToken}
+        clientName={config.client.nombre}
+      />
     </MobileCanvas>
   );
 }

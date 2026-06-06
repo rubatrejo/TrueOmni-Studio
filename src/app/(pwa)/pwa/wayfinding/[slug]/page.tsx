@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { WayfindingDirections } from '@/components/pwa/wayfinding-directions';
+import { WayfindingDirectionsLive } from '@/components/pwa/wayfinding-directions-live';
 import { getConfig } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
@@ -39,7 +39,12 @@ export default async function PwaWayfindingDirectionsPage({
 
   return (
     <MobileCanvas>
-      <WayfindingDirections config={wf} floor={found.floor} amenity={found.amenity} />
+      <WayfindingDirectionsLive
+        amenitySlug={amenitySlug}
+        config={wf}
+        floor={found.floor}
+        amenity={found.amenity}
+      />
     </MobileCanvas>
   );
 }

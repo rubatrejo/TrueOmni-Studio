@@ -1,5 +1,5 @@
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { HuntDashboard } from '@/components/pwa/scavenger-hunt/hunt-dashboard';
+import { HuntDashboardLive } from '@/components/pwa/scavenger-hunt/hunt-dashboard-live';
 import { getConfig } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
@@ -20,7 +20,7 @@ export default async function PwaScavengerHuntPage() {
 
   return (
     <MobileCanvas>
-      <HuntDashboard config={sh} />
+      <HuntDashboardLive config={sh} />
     </MobileCanvas>
   );
 }

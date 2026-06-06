@@ -1,5 +1,5 @@
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { WayfindingScreen } from '@/components/pwa/wayfinding-screen';
+import { WayfindingLive } from '@/components/pwa/wayfinding-live';
 import { getConfig } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
@@ -24,7 +24,7 @@ export default async function PwaWayfindingPage() {
 
   return (
     <MobileCanvas>
-      <WayfindingScreen config={wf} />
+      <WayfindingLive config={wf} />
     </MobileCanvas>
   );
 }

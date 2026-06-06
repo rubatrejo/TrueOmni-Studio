@@ -1,5 +1,5 @@
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { HuntDetail } from '@/components/pwa/scavenger-hunt/hunt-detail';
+import { HuntDetailLive } from '@/components/pwa/scavenger-hunt/hunt-detail-live';
 import { getConfig } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +21,8 @@ export default async function PwaHuntDetailPage({ params }: { params: Promise<{ 
 
   return (
     <MobileCanvas>
-      <HuntDetail
+      <HuntDetailLive
+        slug={slug}
         hunt={hunt}
         config={sh}
         mapboxToken={mapboxToken}

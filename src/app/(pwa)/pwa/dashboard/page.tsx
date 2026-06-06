@@ -37,6 +37,7 @@ export default async function PwaDashboardPage() {
         <PwaAskAiHost
           greeting={askAi.greeting}
           subtitle={askAi.subtitle ?? t.ai_subtitle ?? ''}
+          avatar={askAi.avatar}
           suggestedQuestions={askAi.suggestedQuestions}
           fallbackResponse={t.ai_fallback_response ?? 'I can help with that — let me look into it.'}
           clientName={config.client.nombre}

@@ -18,7 +18,7 @@ import { pwaShare } from '@/lib/pwa-share';
 import type { TicketableEvent } from '@/lib/tickets';
 
 import { PwaBottomNav } from './bottom-nav';
-import { InboxIcon, ProfileIcon, SearchIcon } from './dashboard-icons';
+import { NotificationIcon, ProfileIcon, SearchIcon } from './dashboard-icons';
 import { PwaFilterOverlay, type FilterTexts } from './pwa-filter-overlay';
 import { PwaHeart } from './pwa-heart';
 import { PwaWeekPicker } from './pwa-week-picker';
@@ -160,7 +160,7 @@ export function TicketsScreen({
           onClick={() => router.push('/pwa/notifications')}
           className="shrink-0 text-white"
         >
-          <InboxIcon size={24} />
+          <NotificationIcon size={24} />
         </button>
       </div>
 

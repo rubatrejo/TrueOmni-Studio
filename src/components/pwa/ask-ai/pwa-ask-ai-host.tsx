@@ -16,6 +16,8 @@ interface PwaAskAiHostProps {
   suggestedQuestions: AskAiSuggestedQuestion[];
   fallbackResponse: string;
   clientName: string;
+  /** Avatar del kiosk (`features.home.askAi.avatar`) — mismo icono en el FAB. */
+  avatar?: string;
   texts: {
     title: string;
     inputPlaceholder: string;
@@ -40,6 +42,7 @@ export function PwaAskAiHost({
   suggestedQuestions,
   fallbackResponse,
   clientName,
+  avatar,
   texts,
 }: PwaAskAiHostProps) {
   const locale = useCurrentLocale();
@@ -71,7 +74,7 @@ export function PwaAskAiHost({
 
   return (
     <>
-      <PwaAskAiTrigger ariaLabel={texts.ariaOpen} clientName={clientName} />
+      <PwaAskAiTrigger ariaLabel={texts.ariaOpen} clientName={clientName} avatarSrc={avatar} />
       <PwaAskAiModal
         clientName={clientName}
         texts={{

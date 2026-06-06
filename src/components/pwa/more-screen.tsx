@@ -8,7 +8,7 @@ import type { PwaMoreItem, SurveyConfig } from '@/lib/config';
 import { LOCALE_LABELS } from '@/lib/i18n';
 
 import { PwaBottomNav } from './bottom-nav';
-import { InboxIcon, SearchIcon } from './dashboard-icons';
+import { NotificationIcon, SearchIcon } from './dashboard-icons';
 import { Layer } from './mobile-layer';
 import { GlobeIcon, PwaLanguageSheet } from './pwa-language-sheet';
 import { PwaSurveyOverlay } from './pwa-survey-overlay';
@@ -96,7 +96,7 @@ export function MoreScreen({
           </span>
         </div>
         <div className="absolute text-white" style={{ left: 334, top: 54 }}>
-          <InboxIcon size={24} />
+          <NotificationIcon size={24} />
         </div>
       </Layer>
 

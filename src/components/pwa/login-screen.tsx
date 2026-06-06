@@ -4,10 +4,12 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
+import { useCurrentLocale } from '@/components/i18n-provider';
 import { resolveAssetUrl } from '@/lib/asset-url';
 
 import { LoginErrorModal } from './login-error-modal';
 import { PwaPrimaryButton } from './pwa-button';
+import { GlobeIcon, PwaLanguageSheet } from './pwa-language-sheet';
 import { AppleSocialIcon, FacebookSocialIcon, GoogleSocialIcon } from './social-icons';
 
 /** Validación mock de email (sin backend): formato básico. */
@@ -107,9 +109,11 @@ export function LoginScreen({
   errorTexts,
 }: LoginScreenProps) {
   const router = useRouter();
+  const locale = useCurrentLocale();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorOpen, setErrorOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
 
   const goToDashboard = () => {
     if (dashboardHref) router.push(dashboardHref);
@@ -246,6 +250,21 @@ export function LoginScreen({
           {texts.skipLogin}
         </button>
       </div>
+
+      {/* Botón de idioma (esquina superior derecha) — abre el bottom-sheet de
+          idioma, consistente con el switcher del kiosk (globo + código). Va en
+          el contenedor sin escalar y al final del stack para que reciba el tap. */}
+      <button
+        type="button"
+        aria-label="Language"
+        onClick={() => setLangOpen(true)}
+        className="absolute right-4 top-4 z-30 flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-white backdrop-blur-sm transition active:scale-[0.96]"
+      >
+        <GlobeIcon size={16} />
+        <span className="text-[12px] font-bold uppercase tracking-wide">{locale}</span>
+      </button>
+
+      <PwaLanguageSheet open={langOpen} onClose={() => setLangOpen(false)} />
 
       {/* Modal de error (validación mock fallida). "Create Account" lleva al signup. */}
       <LoginErrorModal

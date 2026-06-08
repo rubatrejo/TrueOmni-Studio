@@ -180,7 +180,7 @@ aprobado por Rubén. Listo para Milestone Signage Studio (DSS0+).
 
 ---
 
-## Milestone PWA Mobile — Companion app white-label ⏳ EN CURSO (desde 2026-05-25)
+## Milestone PWA Mobile — Companion app white-label ✅ CERRADO 2026-06-08
 
 > Detalles completos en `.planning/PWA-PROJECT.md` y `.planning/PWA-ROADMAP.md`.
 > Brainstorming aprobado: `~/.claude/plans/quiero-que-ahora-dise-emos-lazy-harbor.md`.
@@ -191,12 +191,18 @@ PWA-only). **Canvas 390×844**, ruta `/pwa`, cliente por `KIOSK_CLIENT`. Alcance
 **solo frontend pixel-perfect** (auth/data mockeados); backend real (login, sync, push, wallet,
 offline) en milestone posterior. Integración al Studio en la fase final.
 
-- [ ] **P0** — Bootstrap del runtime (route group `(pwa)`, canvas 390×844, bottom nav shell).
-- [ ] **P1** — Flujo de arranque: Welcome → Login → Dashboard.
-- [ ] **P2…Pn** — Módulos reutilizados con diseño mobile (bajo demanda).
-- [ ] **Px** — Módulos PWA-only (Profile, Notifications, More, Scavenger Hunt…).
-- [ ] **Py** — Transversales (i18n + ads mobile).
-- [ ] **Pz** — Integración al Studio (editor, clone, branding-sync, publish, preview bridge).
+- [x] **P0** — Bootstrap del runtime (route group `(pwa)`, canvas 390×844, bottom nav shell).
+- [x] **P1** — Flujo de arranque: Welcome → Login → Dashboard.
+- [x] **P2…Pn** — Módulos reutilizados con diseño mobile (listings, events, map, deals, passes,
+      tickets, trails, brochure, social wall, Ask AI, trip planner).
+- [x] **Px** — Módulos PWA-only (Profile, Notifications, More, Scavenger Hunt, Wayfinding,
+      Connect/Help/Search/Create Account/Forgot Password).
+- [x] **Py** — Transversales (i18n 6 idiomas + ads mobile).
+- [x] **Pz** — Integración al Studio (editor, clone, branding-sync, publish, preview bridge).
+
+**Fuera de alcance (no bloquean el cierre):** render live del avatar Tavus (lado operador) ·
+backend real login/sync/push/wallet/offline (**milestone aparte**) · auto-translate en prod
+para clientes ya existentes en KV (acción manual en Vercel; los nuevos heredan de `default`).
 
 ---
 

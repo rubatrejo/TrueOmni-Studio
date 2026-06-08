@@ -13,8 +13,8 @@ import type { PwaConfig } from './config';
 
 /**
  * Keys cuyo valor NO es texto traducible (paths de assets, slugs, rutas, ids,
- * coords, URLs…) y subárboles que no se traducen (`i18n`, `ads`). Se saltan tanto
- * en la extracción como en la resolución.
+ * coords, URLs, teléfonos, horas, fechas, enums…) y subárboles que no se traducen
+ * (`i18n`, `ads`). Se saltan tanto en la extracción como en la resolución.
  */
 const BLOCKLIST = new Set<string>([
   'i18n',
@@ -35,7 +35,55 @@ const BLOCKLIST = new Set<string>([
   'id',
   'icon',
   'avatar',
+  // No-texto suelto: contacto, horas, fechas, enums y assets que se colaban como leaves.
+  'phone',
+  'website',
+  'address',
+  'directionsUrl',
+  'timestamp',
+  'day',
+  'accent',
+  'type',
+  'code',
+  'open',
+  'close',
+  'todayClose',
+  'route',
+  'hashtag',
+  'weather',
+  'photo',
+  'heroImage',
+  'floorPlanImage',
+  'question',
 ]);
+
+/**
+ * Subárboles de **contenido seed/demo del cliente** que se podan completos. Viven en
+ * los editores de _contenido/setup_ del Studio (no en el editor i18n): hunts, floors,
+ * países, usuario demo, notificaciones seed, horarios… La poda es por **dot-path**
+ * (no por nombre de key suelto) para no colisionar con UI legítima que reutiliza la
+ * misma key (p. ej. `more.items` sí es UI white-label, `profile.favorites.items` no).
+ * Decisión: los editores PWA editan solo textos white-label; el contenido del setup
+ * no se traduce vía i18n PWA.
+ */
+const SKIP_PATH_PREFIXES = [
+  'scavengerHunt.hunts',
+  'scavengerHunt.socialLinks',
+  'wayfinding.floors',
+  'createAccount.countries',
+  'profile.user',
+  'profile.favorites.items',
+  'profile.upcomingEvents.items',
+  'profile.editProfile.prefill',
+  'notifications.seed',
+  'connectWithUs.social',
+  'connectWithUs.hours.schedule',
+];
+
+/** True si el dot-path cae dentro de un subárbol seed/demo de `SKIP_PATH_PREFIXES`. */
+function isSkippedPrefix(path: string): boolean {
+  return SKIP_PATH_PREFIXES.some((pre) => path === pre || path.startsWith(`${pre}.`));
+}
 
 export interface TranslatablePath {
   /** Dot-path dentro del slice, ej. `login.loginCta` o `restaurants.detail.eyebrow`. */
@@ -45,15 +93,17 @@ export interface TranslatablePath {
 }
 
 /**
- * Recorre el slice PWA y devuelve los string-leaves traducibles como dot-paths.
- * Salta el `BLOCKLIST` (assets/ids/rutas) y los subárboles `i18n`/`ads`. Las
- * entradas de arrays usan índice numérico en el path (ej. `more.items.0.label`).
+ * Recorre el slice PWA y devuelve los string-leaves **de UI white-label** como
+ * dot-paths. Salta el `BLOCKLIST` (no-texto: assets/ids/rutas/contacto/horas/enums)
+ * y poda los subárboles de contenido seed/demo de `SKIP_PATH_PREFIXES`. Las entradas
+ * de arrays usan índice numérico en el path (ej. `more.items.0.label`).
  */
 export function extractTranslatablePaths(pwa: PwaConfig | null | undefined): TranslatablePath[] {
   const out: TranslatablePath[] = [];
   if (!pwa) return out;
 
   const walk = (node: unknown, prefix: string, lastKey: string): void => {
+    if (isSkippedPrefix(prefix)) return;
     if (typeof node === 'string') {
       if (node.trim().length > 0 && !BLOCKLIST.has(lastKey))
         out.push({ path: prefix, value: node });

@@ -4,6 +4,73 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-08 — Editor PWA del Studio COMPLETO (todos los módulos + auxiliares + ads + i18n) + backend Pz + Tavus verificado
+
+**Hecho (sin commit previo dentro de la sesión; un único commit al cierre):**
+
+- **Trails**: `TrailsModuleEditor` + 3 wrappers `trails-*-screen-live` + sección + páginas conectadas.
+- **7 módulos de contenido** (Events, Tickets, Deals, Passes, Map, Digital Brochure, Social
+  Wall): editor por módulo + 11 wrappers `*-live` + secciones + páginas conectadas.
+- **5 pantallas auxiliares** (Connect With Us, Help, Search, Create Account, Forgot Password):
+  editor por pantalla + 9 wrappers `*-live` (5 directos + 4 parciales con interpolación server)
+  - secciones + páginas conectadas.
+- **Pulidos UI**: wrapper live del detalle de notificación (`notification-detail-screen-live`)
+  - **CRUD de artículos FAQ** en `HelpEditor` (add/edit/remove/reorder).
+- **Ads PWA**: nuevo slot `features.pwa.ads` (tipo en config.ts); runtime
+  (`(pwa)/layout` lee el slot + `pwa-ads-slot` con override del bridge para preview live);
+  `AdsEditor` del kiosk **extendido** con props opcionales `commonRoutes`/`kindDimensions`
+  (default kiosk); `PwaAdsEditor` con rutas `/pwa/*` y dims mobile; **migrados** los 3 ads
+  `pwa-*` de `features.advertisements` a `features.pwa.ads` en `clients/default`.
+- **i18n PWA**: tipo `PwaConfig.i18n` (locale→dot-path→texto); `src/lib/pwa-i18n.ts`
+  (`extractTranslatablePaths` + `resolvePwaForLocale`, que entrega el slice sin `i18n`);
+  runtime server+recarga (`(pwa)/layout` resuelve por cookie `pwa_locale` y lo pasa como
+  `initial` del bridge → todas las pantallas traducen vía `usePwaSection`, sin tocar páginas);
+  selector de idioma escribe cookie + `router.refresh()`; `PwaI18nEditor` (tabla por locale +
+  AI translate reutilizando `translateI18nBulk`).
+- **Backend Pz**: rama `if (products.mobilePwa)` en `POST /api/studio/clients` (`ensurePwaSlice`)
+  - prefijos `pwa:${slug}` en `purge-client.ts`. (El resto del backend Pz ya existía.)
+- **Tavus**: verificado a nivel backend (start → conversación Daily real → end), kiosk y PWA
+  comparten el hook/endpoint.
+
+**Verificado:**
+
+- `pnpm typecheck` + `pnpm lint` (0 errores) + `validate:configs` 3/3 + `prettier --check`
+  limpios en cada frente · `pnpm kiosk:dev` arranca limpio.
+- Smoke HTTP (node fetch; `curl` denegado) de TODAS las rutas PWA nuevas → 200, slugs inválidos
+  → 404, sin errores de runtime en el log.
+- Ads: la imagen del ad aparece en el HTML SSR de `/pwa/restaurants` (runtime lee el slot nuevo).
+- i18n: prueba SSR — con una traducción de prueba, `/pwa/login` con cookie `pwa_locale=es`
+  renderiza el texto traducido y sin cookie no (prueba revertida; config validado).
+- Tavus: `/api/ai-avatar/start` → 200 (conversationId + URL `tavus.daily.co`), `/end` → 200.
+
+**Pendiente / siguiente:**
+
+- **Traducciones reales**: el AI translate NO corre en local (faltan `DEEPL_API_KEY`/
+  `ANTHROPIC_API_KEY`; status `available:false`). Se hará **en Vercel** tras deploy: editor PWA
+  → Languages → "Auto-translate empty" por idioma (las claves existen en prod). Decisión de Rubén.
+- **El extractor i18n capta 890 paths** incluyendo mucho seed/demo (countries ~60, scavenger 202,
+  profile 93, wayfinding 63). Considerar acotar el extractor a textos de UI antes de traducir todo.
+- Render en vivo del avatar Tavus (navegador con cámara/mic) — lado de Rubén.
+- Backend real (login/sync/push/wallet/offline) — otro milestone, fuera de alcance.
+- Limpiar carpetas `.next.trash-*` de la raíz (untracked).
+
+**Decisiones:**
+
+- **Ads PWA = slot propio** `features.pwa.ads` (aislado del catálogo del kiosk), no compartido.
+- **i18n PWA = resolución server + recarga**: cookie `pwa_locale` → `resolvePwaForLocale` →
+  `initial` del bridge (sin `i18n` para no serializar el diccionario al cliente). Aprovecha que
+  TODAS las pantallas ya pasan por wrappers `*-live` con `usePwaSection` → cero cambios en páginas.
+- Editores PWA editan **solo textos white-label**; el contenido del setup (listings, eventos,
+  posts, brochures, países, schedule, artículos FAQ salvo Help) no se edita ahí.
+- `AdsEditor` extendido con props opcionales (default = kiosk) para no regresionar el kiosk (§8).
+- Un único commit grande: PwaEditorPanel/pwa-sections/config.ts se tocan por todos los frentes
+  (archivos solapados), separar requeriría parchear hunks (mismo criterio que la remediación previa).
+
+**Fase:** Milestone PWA — Fase Pz (editor en el Studio). **Editor PWA completo**; falta correr
+traducciones en prod + backend real (milestone aparte).
+
+---
+
 ### Sesión 2026-06-06 — Fase 2 del editor PWA (preview live + editores) + iteración de fixes en Vercel
 
 **Hecho (6 commits, todos en prod):**

@@ -21,7 +21,7 @@ import {
 } from '../../../_lib/api-client';
 import { StudioSlugProvider } from '../../../_lib/slug-context';
 import { usePwaPreviewBridge, type PwaBrandingPatch } from '../../../_lib/use-pwa-preview-bridge';
-import { PWA_SECTIONS, type PwaSectionKey } from '../_lib/pwa-sections';
+import { PWA_SECTIONS, pwaSectionPreviewRoute, type PwaSectionKey } from '../_lib/pwa-sections';
 
 import { PwaEditorPanel } from './PwaEditorPanel';
 
@@ -40,6 +40,8 @@ function brandingToPatch(b: Branding, clientName: string): PwaBrandingPatch {
     secondary: b.secondary,
     tertiary: b.tertiary,
     logo: b.logo,
+    idleLogo: b.idleLogo,
+    footerLogo: b.footerLogo,
     favicon: b.favicon,
     fonts: { display: b.fonts?.display, body: b.fonts?.body },
     clientName,
@@ -111,7 +113,7 @@ export function PwaShell({
   const [savedBranding, setSavedBranding] = useState<Branding>(initialBranding);
   const [branding, setBranding] = useState<Branding>(initialBranding);
 
-  const { iframeRef, pushPwa, pushBranding, pushLocale, bridgeStatus, onIframeLoad } =
+  const { iframeRef, pushPwa, pushBranding, pushLocale, navTo, bridgeStatus, onIframeLoad } =
     usePwaPreviewBridge();
 
   // Empuja el branding al preview en cada cambio (y se re-envía en cada
@@ -259,6 +261,24 @@ export function PwaShell({
             <div
               className={`${mobileTab === 'editor' ? 'flex' : 'hidden'} w-full shrink-0 flex-col overflow-hidden border-r border-zinc-200 dark:border-zinc-900 lg:flex lg:w-[400px] xl:w-[480px]`}
             >
+              {(() => {
+                // Botón "ver esta pantalla en el preview" (paridad con el editor del
+                // kiosk): navega el iframe a la ruta `/pwa/...` de la sección activa.
+                // Solo en secciones con pantalla propia (branding/ads/languages/publish no).
+                const previewRoute = pwaSectionPreviewRoute(activeTab);
+                return previewRoute ? (
+                  <div className="flex shrink-0 items-center justify-end border-b border-zinc-200 px-4 py-1.5 dark:border-zinc-900">
+                    <button
+                      type="button"
+                      onClick={() => navTo(previewRoute)}
+                      title={`Open ${previewRoute} in the preview`}
+                      className="inline-flex items-center gap-1 rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-medium text-zinc-600 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-300 dark:hover:border-sky-800 dark:hover:bg-sky-950/40 dark:hover:text-sky-300"
+                    >
+                      View in preview ↗
+                    </button>
+                  </div>
+                ) : null;
+              })()}
               <div
                 key={activeTab}
                 className="studio-tab-fade flex min-h-0 flex-1 flex-col overflow-hidden"

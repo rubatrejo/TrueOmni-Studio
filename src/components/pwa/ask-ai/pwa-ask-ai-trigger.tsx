@@ -52,7 +52,7 @@ export function PwaAskAiTrigger({
         <img
           src={resolveAssetUrl(avatarSrc)}
           alt={ariaLabel}
-          className="block h-12 w-auto drop-shadow-lg"
+          className="block h-[58px] w-auto drop-shadow-lg"
         />
       </button>
     );
@@ -69,12 +69,12 @@ export function PwaAskAiTrigger({
       style={{
         right: 16,
         bottom: 72,
-        width: 56,
-        height: 56,
+        width: 67,
+        height: 67,
         backgroundColor: 'hsl(var(--brand-secondary))',
       }}
     >
-      <SparklesIcon size={26} />
+      <SparklesIcon size={31} />
     </button>
   );
 }

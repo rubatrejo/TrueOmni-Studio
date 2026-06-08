@@ -85,10 +85,10 @@ export const PWA_SECTIONS: readonly PwaSection[] = [
   {
     key: 'modules',
     num: '04',
-    label: 'Modules',
-    title: 'Modules & Navigation',
+    label: 'Dashboard',
+    title: 'Dashboard',
     description:
-      'Show, hide, reorder and rename the dashboard tiles and bottom-nav entries of the mobile app.',
+      'Logo, hero, and the dashboard tiles / quick-access entries of the mobile app — rename and reorder.',
     icon: 'LayoutGrid',
     phase: 'P1',
   },
@@ -338,3 +338,40 @@ export const PWA_SECTIONS: readonly PwaSection[] = [
     phase: 'P1',
   },
 ];
+
+/**
+ * Ruta del runtime PWA (`/pwa/...`) que previsualiza cada sección, para el botón
+ * "Ver en preview" del header (espejo del patrón del editor del kiosk). Devuelve
+ * `null` para secciones globales sin pantalla propia (branding/ads/languages/publish).
+ */
+const PWA_PREVIEW_ROUTES: Partial<Record<PwaSectionKey, string>> = {
+  welcome: '/pwa',
+  login: '/pwa/login',
+  modules: '/pwa/dashboard',
+  'scavenger-hunt': '/pwa/scavenger-hunt',
+  wayfinding: '/pwa/wayfinding',
+  'trip-planner': '/pwa/trip-planner',
+  restaurants: '/pwa/restaurants',
+  stay: '/pwa/stay',
+  'things-to-do': '/pwa/things-to-do',
+  trails: '/pwa/trails',
+  events: '/pwa/events',
+  tickets: '/pwa/tickets',
+  deals: '/pwa/deals',
+  passes: '/pwa/passes',
+  map: '/pwa/map',
+  'digital-brochure': '/pwa/digital-brochure',
+  'social-wall': '/pwa/social-wall',
+  profile: '/pwa/profile',
+  notifications: '/pwa/notifications',
+  more: '/pwa/more',
+  'connect-with-us': '/pwa/connect-with-us',
+  help: '/pwa/help',
+  search: '/pwa/search',
+  'create-account': '/pwa/create-account',
+  'forgot-password': '/pwa/forgot-password',
+};
+
+export function pwaSectionPreviewRoute(key: PwaSectionKey): string | null {
+  return PWA_PREVIEW_ROUTES[key] ?? null;
+}

@@ -43,18 +43,29 @@ export async function GET(
     return new NextResponse('forbidden', { status: 403 });
   }
 
-  const fullPath = path.join(process.cwd(), 'clients', slug, relPath);
-  try {
-    const data = await readFile(fullPath);
-    const ext = relPath.split('.').pop()?.toLowerCase() ?? '';
-    const contentType = MIME_TYPES[ext] ?? 'application/octet-stream';
-    return new NextResponse(new Uint8Array(data), {
-      headers: {
-        'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=3600',
-      },
-    });
-  } catch {
+  // Lee el asset del cliente; si no existe (típico en clientes creados en el
+  // Studio que viven en KV sin carpeta fs propia) cae al asset seed del template
+  // `default`, donde viven los assets compartidos (p. ej. `assets/pwa/welcome-bg.jpg`).
+  // Sin esto el preview muestra la imagen rota.
+  const readAsset = async (clientSlug: string): Promise<Buffer | null> => {
+    try {
+      return await readFile(path.join(process.cwd(), 'clients', clientSlug, relPath));
+    } catch {
+      return null;
+    }
+  };
+
+  const data = (await readAsset(slug)) ?? (slug !== 'default' ? await readAsset('default') : null);
+  if (!data) {
     return new NextResponse('not found', { status: 404 });
   }
+
+  const ext = relPath.split('.').pop()?.toLowerCase() ?? '';
+  const contentType = MIME_TYPES[ext] ?? 'application/octet-stream';
+  return new NextResponse(new Uint8Array(data), {
+    headers: {
+      'Content-Type': contentType,
+      'Cache-Control': 'public, max-age=3600',
+    },
+  });
 }

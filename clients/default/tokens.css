@@ -24,12 +24,16 @@
   /*  NEUTRALES (no son brand del cliente — fondo y texto base del kiosk)   */
   /* ---------------------------------------------------------------------- */
   --brand-neutral: 0 0% 7%; /* #131313 Black Tetramine */
-  --pwa-primary: 201 95% 46%; /* #079EE2 — PWA: botón de acción (Login/CTA), azul brillante */
+  --pwa-primary: var(
+    --brand-secondary
+  ); /* PWA: botón de acción (Login/CTA) → sigue el "action color" del branding (secondary) */
   --pwa-favorite: 0 76% 50%; /* ≈ #e02020 — corazón de favoritos (rojo, consistente con el kiosk) */
   --pwa-sheet-bg: 0 0% 100%; /* fondo de bottom sheets claros de la PWA (neutro) */
   --pwa-sheet-fg: 213 23% 12%; /* texto oscuro de títulos en sheets claros (neutro) */
   --pwa-events-pin: 36 91% 55%; /* #f5a623 — pin de ubicación (ámbar) del header de Events */
-  --pwa-deals-expiry: 66 41% 36%; /* ≈ #7a8236 — fecha de expiración (olive) de las cards de Deals, igual que el kiosk */
+  --pwa-deals-expiry: var(
+    --brand-tertiary
+  ); /* fecha de expiración (acento) de las cards de Deals → sigue tertiary del branding */
   --pwa-reader-bg: 240 5% 13%; /* ≈ #1f1f22 — fondo del visor de PDF (neutro, chrome del reader) */
   --pwa-reader-stage: 228 6% 17%; /* ≈ #28292d — stage oscuro tras la página del PDF (neutro) */
   --pwa-card-footer: 0 0% 33%; /* ≈ #555 — footer gris de las cards de mapa (Map + Trip Planner) */

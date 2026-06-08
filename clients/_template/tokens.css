@@ -24,7 +24,9 @@
   /*  NEUTRALES (no son brand del cliente — fondo y texto base del kiosk)   */
   /* ---------------------------------------------------------------------- */
   --brand-neutral: 0 0% 7%; /* #131313 Black Tetramine */
-  --pwa-primary: 201 95% 46%; /* #079EE2 — PWA: botón de acción (Login/CTA), azul brillante */
+  --pwa-primary: var(
+    --brand-secondary
+  ); /* PWA: botón de acción (Login/CTA) → sigue el "action color" del branding (secondary) */
   --pwa-favorite: 0 76% 50%; /* corazón de favoritos (rojo) */
   --pwa-sheet-bg: 0 0% 100%; /* fondo de bottom sheets claros de la PWA (neutro) */
   --pwa-sheet-fg: 213 23% 12%; /* texto oscuro de títulos en sheets claros (neutro) */

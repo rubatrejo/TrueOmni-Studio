@@ -24,6 +24,8 @@ export type PwaBrandingPatch = {
   secondary: string;
   tertiary: string;
   logo?: string;
+  idleLogo?: string;
+  footerLogo?: string;
   favicon?: string;
   fonts?: { display?: string; body?: string };
   clientName?: string;
@@ -72,6 +74,11 @@ export function usePwaPreviewBridge() {
           secondary: hexToHsl(branding.secondary),
           tertiary: hexToHsl(branding.tertiary),
           logo: branding.logo,
+          // El Login y el Welcome de la PWA usan el slot `idle` del logo (igual que
+          // el Billboard del kiosk); el Dashboard usa el `default`. Enviamos los tres
+          // para que el override del logo del cliente aplique en todas las pantallas.
+          idleLogo: branding.idleLogo,
+          footerLogo: branding.footerLogo,
           favicon: branding.favicon,
           fonts: branding.fonts,
           clientName: branding.clientName,

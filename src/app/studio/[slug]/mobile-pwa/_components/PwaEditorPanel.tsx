@@ -94,6 +94,8 @@ export function PwaEditorPanel({
       <ModulesEditor
         value={pwa.dashboard}
         onChange={(dashboard) => onPwaChange({ ...pwa, dashboard })}
+        logo={branding.logo}
+        onLogoChange={(logo) => onBrandingChange({ ...branding, logo: logo ?? '' })}
       />
     );
   }

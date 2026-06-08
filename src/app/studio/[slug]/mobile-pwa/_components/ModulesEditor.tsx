@@ -23,9 +23,14 @@ const EMPTY_DASHBOARD: PwaDashboardConfig = {
 export function ModulesEditor({
   value,
   onChange,
+  logo,
+  onLogoChange,
 }: {
   value: PwaDashboardConfig | undefined;
   onChange: (next: PwaDashboardConfig) => void;
+  /** Logo del cliente (`branding.logo`) — editable aquí igual que en el kiosk. */
+  logo?: string;
+  onLogoChange?: (next: string | undefined) => void;
 }) {
   const v: PwaDashboardConfig = {
     ...EMPTY_DASHBOARD,
@@ -46,10 +51,21 @@ export function ModulesEditor({
   return (
     <div className="flex h-full flex-col">
       <PwaPanelHeader
-        title="Modules & Navigation"
-        description="Rename and reorder the dashboard tiles and quick-access entries of the mobile app."
+        title="Dashboard"
+        description="Logo, hero, and the dashboard tiles / quick-access entries of the mobile app."
       />
       <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
+        {onLogoChange ? (
+          <PwaGroup title="Logo">
+            <ImageField
+              layout="compact"
+              label="Client logo"
+              hint="Header & login of the mobile app · SVG · PNG. Shared with the kiosk branding."
+              value={logo}
+              onChange={onLogoChange}
+            />
+          </PwaGroup>
+        ) : null}
         <PwaGroup title="Hero">
           <PwaField
             label="Hero title"

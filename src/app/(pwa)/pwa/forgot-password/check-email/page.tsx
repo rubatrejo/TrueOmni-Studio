@@ -1,4 +1,4 @@
-import { CheckEmailScreen } from '@/components/pwa/check-email-screen';
+import { CheckEmailScreenLive } from '@/components/pwa/check-email-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -24,7 +24,8 @@ export default async function PwaCheckEmailPage() {
 
   return (
     <MobileCanvas>
-      <CheckEmailScreen
+      <CheckEmailScreenLive
+        config={pwa?.forgotPassword}
         background={background}
         texts={{
           title: sent.title,

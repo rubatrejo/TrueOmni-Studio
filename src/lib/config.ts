@@ -1199,7 +1199,23 @@ export interface PwaConfig {
    * `config.textos.itinerary_*`. Aquí solo viven los labels mobile-only.
    */
   tripPlanner?: PwaTripPlannerModuleConfig;
+  /**
+   * Catálogo de ads propio de la PWA (hero / bottom / popup) con rutas `/pwa/*` y
+   * assets a dimensiones mobile. Aislado del catálogo del kiosk
+   * (`features.advertisements`); el runtime PWA lo lee desde aquí.
+   */
+  ads?: AdvertisementsConfig;
+  /**
+   * Traducciones del slice por locale. `{ <locale>: { <dot-path>: <texto> } }`,
+   * ej. `{ es: { "login.loginCta": "INICIAR SESIÓN" } }`. El locale base (default)
+   * NO se guarda aquí (es el propio slice). El runtime resuelve el slice para el
+   * locale activo con `resolvePwaForLocale` (`src/lib/pwa-i18n.ts`).
+   */
+  i18n?: PwaI18nOverlay;
 }
+
+/** Overlay de traducciones del slice PWA: locale → dot-path → texto traducido. */
+export type PwaI18nOverlay = Record<string, Record<string, string>>;
 
 /**
  * Strings mobile-only del Trip Planner PWA. Cero duplicación de contenido: solo

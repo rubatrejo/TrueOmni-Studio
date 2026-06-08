@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 
 import { useAds } from '@/components/ads/use-ads';
 
+import { usePwaSection } from '../pwa-bridge-context';
+
 import { PwaAdBottom } from './pwa-ad-bottom';
 import { PwaAdHero } from './pwa-ad-hero';
 import { PwaAdPopup } from './pwa-ad-popup';
@@ -19,7 +21,11 @@ type SystemModulesDetail = { ads: boolean; languages: boolean; aiAvatar: boolean
  * sesión. Misma lógica que el `AdsSlot` del kiosk, con componentes a medida móvil.
  */
 export function PwaAdsSlot() {
-  const ads = usePwaAds();
+  // Catálogo del server (layout) + override live del editor PWA (`features.pwa.ads`
+  // vía el bridge). Fuera del Studio el override es el mismo slice del server.
+  const ctxAds = usePwaAds();
+  const adsCfg = usePwaSection('ads', undefined);
+  const ads = adsCfg?.ads ?? ctxAds;
   const { popupAd, heroAd, bottomAd, dismiss } = useAds(ads);
   const [hidden, setHidden] = useState(false);
 

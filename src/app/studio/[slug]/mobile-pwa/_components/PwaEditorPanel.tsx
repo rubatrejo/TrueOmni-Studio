@@ -7,14 +7,29 @@ import { BrandingSyncBanner } from '../../../_components/BrandingSyncBanner';
 import { BrandingEditor } from '../../../_components/EditorPanel';
 import { PWA_SECTIONS, type PwaSectionKey } from '../_lib/pwa-sections';
 
+import { ConnectWithUsEditor } from './ConnectWithUsEditor';
+import { CreateAccountEditor } from './CreateAccountEditor';
+import { DealsModuleEditor } from './DealsModuleEditor';
+import { DigitalBrochureModuleEditor } from './DigitalBrochureModuleEditor';
+import { EventsModuleEditor } from './EventsModuleEditor';
+import { ForgotPasswordEditor } from './ForgotPasswordEditor';
+import { HelpEditor } from './HelpEditor';
 import { ListingsModuleEditor } from './ListingsModuleEditor';
 import { LoginEditor } from './LoginEditor';
+import { MapModuleEditor } from './MapModuleEditor';
 import { ModulesEditor } from './ModulesEditor';
 import { MoreEditor } from './MoreEditor';
 import { NotificationsEditor } from './NotificationsEditor';
+import { PassesModuleEditor } from './PassesModuleEditor';
 import { ProfileEditor } from './ProfileEditor';
 import { PwaPanelHeader, PwaPlaceholderPanel } from './pwa-ui';
+import { PwaAdsEditor } from './PwaAdsEditor';
+import { PwaI18nEditor } from './PwaI18nEditor';
 import { ScavengerHuntEditor } from './ScavengerHuntEditor';
+import { SearchEditor } from './SearchEditor';
+import { SocialWallModuleEditor } from './SocialWallModuleEditor';
+import { TicketsModuleEditor } from './TicketsModuleEditor';
+import { TrailsModuleEditor } from './TrailsModuleEditor';
 import { TripPlannerEditor } from './TripPlannerEditor';
 import { WayfindingEditor } from './WayfindingEditor';
 import { WelcomeEditor } from './WelcomeEditor';
@@ -125,6 +140,115 @@ export function PwaEditorPanel({
         onChange={(next) => onPwaChange({ ...pwa, [slice]: next })}
       />
     );
+  }
+
+  if (sectionKey === 'trails') {
+    return (
+      <TrailsModuleEditor
+        value={pwa.trails}
+        onChange={(trails) => onPwaChange({ ...pwa, trails })}
+      />
+    );
+  }
+
+  if (sectionKey === 'events') {
+    return (
+      <EventsModuleEditor
+        value={pwa.events}
+        onChange={(events) => onPwaChange({ ...pwa, events })}
+      />
+    );
+  }
+
+  if (sectionKey === 'tickets') {
+    return (
+      <TicketsModuleEditor
+        value={pwa.tickets}
+        onChange={(tickets) => onPwaChange({ ...pwa, tickets })}
+      />
+    );
+  }
+
+  if (sectionKey === 'deals') {
+    return (
+      <DealsModuleEditor value={pwa.deals} onChange={(deals) => onPwaChange({ ...pwa, deals })} />
+    );
+  }
+
+  if (sectionKey === 'passes') {
+    return (
+      <PassesModuleEditor
+        value={pwa.passes}
+        onChange={(passes) => onPwaChange({ ...pwa, passes })}
+      />
+    );
+  }
+
+  if (sectionKey === 'map') {
+    return <MapModuleEditor value={pwa.map} onChange={(map) => onPwaChange({ ...pwa, map })} />;
+  }
+
+  if (sectionKey === 'digital-brochure') {
+    return (
+      <DigitalBrochureModuleEditor
+        value={pwa.digitalBrochure}
+        onChange={(digitalBrochure) => onPwaChange({ ...pwa, digitalBrochure })}
+      />
+    );
+  }
+
+  if (sectionKey === 'social-wall') {
+    return (
+      <SocialWallModuleEditor
+        value={pwa.socialWall}
+        onChange={(socialWall) => onPwaChange({ ...pwa, socialWall })}
+      />
+    );
+  }
+
+  if (sectionKey === 'connect-with-us') {
+    return (
+      <ConnectWithUsEditor
+        value={pwa.connectWithUs}
+        onChange={(connectWithUs) => onPwaChange({ ...pwa, connectWithUs })}
+      />
+    );
+  }
+
+  if (sectionKey === 'help') {
+    return <HelpEditor value={pwa.help} onChange={(help) => onPwaChange({ ...pwa, help })} />;
+  }
+
+  if (sectionKey === 'search') {
+    return (
+      <SearchEditor value={pwa.search} onChange={(search) => onPwaChange({ ...pwa, search })} />
+    );
+  }
+
+  if (sectionKey === 'create-account') {
+    return (
+      <CreateAccountEditor
+        value={pwa.createAccount}
+        onChange={(createAccount) => onPwaChange({ ...pwa, createAccount })}
+      />
+    );
+  }
+
+  if (sectionKey === 'forgot-password') {
+    return (
+      <ForgotPasswordEditor
+        value={pwa.forgotPassword}
+        onChange={(forgotPassword) => onPwaChange({ ...pwa, forgotPassword })}
+      />
+    );
+  }
+
+  if (sectionKey === 'ads') {
+    return <PwaAdsEditor value={pwa.ads} onChange={(ads) => onPwaChange({ ...pwa, ads })} />;
+  }
+
+  if (sectionKey === 'languages') {
+    return <PwaI18nEditor value={pwa} onChange={onPwaChange} />;
   }
 
   if (sectionKey === 'profile') {

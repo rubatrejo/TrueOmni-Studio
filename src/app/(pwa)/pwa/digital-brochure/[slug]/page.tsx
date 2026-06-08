@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { BrochureReaderScreen } from '@/components/pwa/brochure-reader-screen';
+import { BrochureReaderScreenLive } from '@/components/pwa/brochure-reader-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -28,7 +28,7 @@ export default async function PwaBrochureReaderPage({
 
   return (
     <MobileCanvas>
-      <BrochureReaderScreen brochure={brochure} texts={texts} />
+      <BrochureReaderScreenLive brochure={brochure} config={texts} />
     </MobileCanvas>
   );
 }

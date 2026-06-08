@@ -1,5 +1,5 @@
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { PassesGridScreen } from '@/components/pwa/passes-grid-screen';
+import { PassesGridScreenLive } from '@/components/pwa/passes-grid-screen-live';
 import { getConfig } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
@@ -26,7 +26,7 @@ export default async function PwaPassesPage() {
 
   return (
     <MobileCanvas>
-      <PassesGridScreen title={texts.title} passes={mod.passes} />
+      <PassesGridScreenLive config={texts} passes={mod.passes} />
     </MobileCanvas>
   );
 }

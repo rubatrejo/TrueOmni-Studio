@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 
-import { ListingsDetailScreen } from '@/components/pwa/listings-detail-screen';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
+import { TrailsDetailScreenLive } from '@/components/pwa/trails-detail-screen-live';
 import { getConfig } from '@/lib/config';
 import { buildPwaListingDetail } from '@/lib/pwa-listing-detail';
 
@@ -19,12 +19,14 @@ export default async function PwaTrailDetailPage({
 }) {
   const { slug } = await params;
   const config = await getConfig();
+  const t = config.features?.pwa?.trails;
   const data = buildPwaListingDetail(config, 'trails', slug);
-  if (!data) notFound();
+  if (!t || !data) notFound();
 
   return (
     <MobileCanvas>
-      <ListingsDetailScreen
+      <TrailsDetailScreenLive
+        config={t}
         detail={data.detail}
         texts={data.texts}
         heroPrimaryAction={data.heroPrimaryAction}

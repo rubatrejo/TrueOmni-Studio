@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { HelpArticleScreen } from '@/components/pwa/help-article-screen';
+import { HelpArticleScreenLive } from '@/components/pwa/help-article-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -27,7 +27,8 @@ export default async function PwaHelpArticlePage({
 
   return (
     <MobileCanvas>
-      <HelpArticleScreen
+      <HelpArticleScreenLive
+        config={h}
         headerTitle={h.title}
         question={article.question}
         answer={article.answer.replace(/\{client_name\}/g, clientName)}

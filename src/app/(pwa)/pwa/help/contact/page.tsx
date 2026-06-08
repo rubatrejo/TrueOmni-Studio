@@ -1,4 +1,4 @@
-import { HelpContactScreen } from '@/components/pwa/help-contact-screen';
+import { HelpContactScreenLive } from '@/components/pwa/help-contact-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -28,7 +28,8 @@ export default async function PwaHelpContactPage() {
 
   return (
     <MobileCanvas>
-      <HelpContactScreen
+      <HelpContactScreenLive
+        config={h}
         title={c.title}
         fromLabel={c.fromLabel}
         fromDefault={profileName || c.fromDefault}

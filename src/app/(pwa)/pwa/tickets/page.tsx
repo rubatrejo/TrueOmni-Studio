@@ -1,5 +1,5 @@
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { TicketsScreen } from '@/components/pwa/tickets-screen';
+import { TicketsScreenLive } from '@/components/pwa/tickets-screen-live';
 import { getConfig } from '@/lib/config';
 import { filterTicketableEvents } from '@/lib/tickets';
 
@@ -30,7 +30,7 @@ export default async function PwaTicketsPage() {
 
   return (
     <MobileCanvas>
-      <TicketsScreen texts={texts} tickets={tickets} />
+      <TicketsScreenLive config={texts} tickets={tickets} />
     </MobileCanvas>
   );
 }

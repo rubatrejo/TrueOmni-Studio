@@ -1,4 +1,5 @@
 import type { Viewport } from 'next';
+import { cookies } from 'next/headers';
 import type { ReactNode } from 'react';
 
 import { I18nProvider } from '@/components/i18n-provider';
@@ -9,6 +10,10 @@ import { getAdsFromConfig } from '@/lib/ads';
 import { getClientSlug } from '@/lib/client-env';
 import { getConfig } from '@/lib/config';
 import { loadAllLocales } from '@/lib/i18n-server';
+import { resolvePwaForLocale } from '@/lib/pwa-i18n';
+
+/** Cookie que fija el locale del slice PWA resuelto en server (la escribe el selector). */
+const PWA_LOCALE_COOKIE = 'pwa_locale';
 
 /**
  * Viewport mobile de la PWA. Solo aplica al subárbol `(pwa)`; el kiosk hereda
@@ -37,11 +42,21 @@ export default async function PwaLayout({ children }: { children: ReactNode }) {
   const available = lang?.available ?? ['en'];
   const defaultLocale = lang?.default ?? 'en';
   const localesMap = await loadAllLocales(slug, available);
-  const ads = getAdsFromConfig(config);
+  // Ads de la PWA: catálogo propio (`features.pwa.ads`) con fallback al catálogo
+  // del kiosk para clientes que aún no migraron al slot PWA.
+  const ads = config.features?.pwa?.ads?.ads ?? getAdsFromConfig(config);
+
+  // Locale activo del slice PWA: cookie escrita por el selector de idioma (con
+  // recarga). Resolvemos el slice una vez y lo pasamos como `initial` del bridge;
+  // las pantallas (todas vía `usePwaSection`) muestran los textos traducidos.
+  const cookieLocale = (await cookies()).get(PWA_LOCALE_COOKIE)?.value;
+  const activeLocale =
+    cookieLocale && available.includes(cookieLocale) ? cookieLocale : defaultLocale;
+  const resolvedPwa = resolvePwaForLocale(config.features?.pwa ?? null, activeLocale);
 
   return (
     <I18nProvider localesMap={localesMap} defaultLocale={defaultLocale} available={available}>
-      <PwaBridgeProvider initial={config.features?.pwa ?? null}>
+      <PwaBridgeProvider initial={resolvedPwa}>
         <PwaAdsProvider ads={ads}>{children}</PwaAdsProvider>
         <StudioBridge />
       </PwaBridgeProvider>

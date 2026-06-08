@@ -24,9 +24,24 @@ export type PwaSectionKey =
   | 'restaurants'
   | 'stay'
   | 'things-to-do'
+  | 'trails'
+  | 'events'
+  | 'tickets'
+  | 'deals'
+  | 'passes'
+  | 'map'
+  | 'digital-brochure'
+  | 'social-wall'
   | 'profile'
   | 'notifications'
   | 'more'
+  | 'connect-with-us'
+  | 'help'
+  | 'search'
+  | 'create-account'
+  | 'forgot-password'
+  | 'ads'
+  | 'languages'
   | 'publish';
 
 export type PwaSection = SidebarSectionLike<PwaSectionKey> & {
@@ -138,8 +153,85 @@ export const PWA_SECTIONS: readonly PwaSection[] = [
     phase: 'P2',
   },
   {
-    key: 'profile',
+    key: 'trails',
     num: '11',
+    label: 'Trails',
+    title: 'Trails',
+    description:
+      'White-label texts of the Trails module (grid, list, filters, the detail screen and its Considerations panel).',
+    icon: 'Footprints',
+    phase: 'P2',
+  },
+  {
+    key: 'events',
+    num: '12',
+    label: 'Events',
+    title: 'Events',
+    description:
+      'White-label texts of the events timeline, filters and detail screen of the mobile app.',
+    icon: 'Calendar',
+    phase: 'P2',
+  },
+  {
+    key: 'tickets',
+    num: '13',
+    label: 'Tickets',
+    title: 'Tickets',
+    description:
+      'White-label texts of the tickets timeline, filters and detail screen (buy-ticket CTA).',
+    icon: 'Ticket',
+    phase: 'P2',
+  },
+  {
+    key: 'deals',
+    num: '14',
+    label: 'Deals',
+    title: 'Deals',
+    description:
+      'White-label texts of the deals grid, sort / filter overlays and the redeem sheet.',
+    icon: 'Tag',
+    phase: 'P2',
+  },
+  {
+    key: 'passes',
+    num: '15',
+    label: 'Passes',
+    title: 'Passes',
+    description: 'White-label texts of the passes grid and detail screen of the mobile app.',
+    icon: 'TicketCheck',
+    phase: 'P2',
+  },
+  {
+    key: 'map',
+    num: '16',
+    label: 'Map',
+    title: 'Map',
+    description:
+      'White-label texts of the aggregated map (tabs, results, filters) and category chip labels.',
+    icon: 'MapPin',
+    phase: 'P2',
+  },
+  {
+    key: 'digital-brochure',
+    num: '17',
+    label: 'Digital Brochure',
+    title: 'Digital Brochure',
+    description: 'White-label texts of the brochures list and the PDF reader of the mobile app.',
+    icon: 'BookOpen',
+    phase: 'P2',
+  },
+  {
+    key: 'social-wall',
+    num: '18',
+    label: 'Social Wall',
+    title: 'Social Wall',
+    description: 'White-label texts of the social wall (title, tabs and highlights row).',
+    icon: 'Share2',
+    phase: 'P2',
+  },
+  {
+    key: 'profile',
+    num: '19',
     label: 'Profile',
     title: 'Profile & Account',
     description:
@@ -149,7 +241,7 @@ export const PWA_SECTIONS: readonly PwaSection[] = [
   },
   {
     key: 'notifications',
-    num: '12',
+    num: '20',
     label: 'Notifications',
     title: 'Notifications',
     description:
@@ -159,7 +251,7 @@ export const PWA_SECTIONS: readonly PwaSection[] = [
   },
   {
     key: 'more',
-    num: '13',
+    num: '21',
     label: 'More',
     title: 'More Menu',
     description:
@@ -168,8 +260,76 @@ export const PWA_SECTIONS: readonly PwaSection[] = [
     phase: 'P2',
   },
   {
+    key: 'connect-with-us',
+    num: '22',
+    label: 'Connect With Us',
+    title: 'Connect With Us',
+    description:
+      'Contact details and texts of the Connect With Us screen (socials, phone, website, address, hours).',
+    icon: 'Smartphone',
+    phase: 'P2',
+  },
+  {
+    key: 'help',
+    num: '23',
+    label: 'Help',
+    title: 'Help',
+    description:
+      'White-label texts of the help center: landing, article feedback and the contact screen.',
+    icon: 'ClipboardList',
+    phase: 'P2',
+  },
+  {
+    key: 'search',
+    num: '24',
+    label: 'Search',
+    title: 'Search',
+    description: 'Placeholder, headings and result-type labels of the search screen.',
+    icon: 'Compass',
+    phase: 'P2',
+  },
+  {
+    key: 'create-account',
+    num: '25',
+    label: 'Create Account',
+    title: 'Create Account',
+    description:
+      'Texts of the sign-up flow: the form, the validation dialog and the upload-photo step.',
+    icon: 'PenSquare',
+    phase: 'P2',
+  },
+  {
+    key: 'forgot-password',
+    num: '26',
+    label: 'Forgot Password',
+    title: 'Forgot Password',
+    description: 'Texts of the forgot-password flow: the email step and the confirmation screen.',
+    icon: 'Lock',
+    phase: 'P2',
+  },
+  {
+    key: 'ads',
+    num: '27',
+    label: 'Ads',
+    title: 'Ads',
+    description:
+      'Hero, bottom-banner and popup ads of the mobile app, placed by /pwa route with mobile-sized assets.',
+    icon: 'Megaphone',
+    phase: 'P2',
+  },
+  {
+    key: 'languages',
+    num: '28',
+    label: 'Languages',
+    title: 'Languages',
+    description:
+      'Translate the mobile app texts to each language (AI-assisted). Applied at runtime when the user switches language.',
+    icon: 'Languages',
+    phase: 'P2',
+  },
+  {
     key: 'publish',
-    num: '14',
+    num: '29',
     label: 'Publish',
     title: 'Publish & Approvals',
     description:

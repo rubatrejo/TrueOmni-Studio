@@ -1,4 +1,4 @@
-import { HelpScreen } from '@/components/pwa/help-screen';
+import { HelpScreenLive } from '@/components/pwa/help-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -31,7 +31,8 @@ export default async function PwaHelpPage() {
 
   return (
     <MobileCanvas>
-      <HelpScreen
+      <HelpScreenLive
+        config={h}
         title={h.title}
         searchPlaceholder={h.searchPlaceholder}
         noResults={h.noResults}

@@ -1,4 +1,4 @@
-import { ForgotPasswordScreen } from '@/components/pwa/forgot-password-screen';
+import { ForgotPasswordScreenLive } from '@/components/pwa/forgot-password-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -25,7 +25,8 @@ export default async function PwaForgotPasswordPage() {
 
   return (
     <MobileCanvas>
-      <ForgotPasswordScreen
+      <ForgotPasswordScreenLive
+        config={pwa?.forgotPassword}
         background={background}
         texts={{
           title: fp.title,

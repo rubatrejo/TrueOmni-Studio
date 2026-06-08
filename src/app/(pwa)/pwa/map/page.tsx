@@ -1,5 +1,5 @@
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { PwaMapScreen } from '@/components/pwa/pwa-map-screen';
+import { PwaMapScreenLive } from '@/components/pwa/pwa-map-screen-live';
 import { getConfig } from '@/lib/config';
 import { getPwaMapData } from '@/lib/pwa-map-listings';
 
@@ -28,18 +28,12 @@ export default async function PwaMapPage() {
 
   return (
     <MobileCanvas>
-      <PwaMapScreen
-        title={m.title}
-        tabs={m.tabs}
-        resultsLabel={m.resultsLabel}
-        distanceSuffix={m.distanceSuffix}
-        allLabel={m.allLabel}
-        categories={m.categories}
+      <PwaMapScreenLive
+        config={m}
         items={items}
         mapItems={mapItems}
         listings={listings}
         features={features}
-        filterTexts={m.filters}
         origin={config.client?.coords}
         mapboxToken={config.integraciones?.mapbox_token}
       />

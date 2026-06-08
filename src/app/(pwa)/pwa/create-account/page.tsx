@@ -1,4 +1,4 @@
-import { CreateAccountScreen } from '@/components/pwa/create-account-screen';
+import { CreateAccountScreenLive } from '@/components/pwa/create-account-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -37,7 +37,8 @@ export default async function PwaCreateAccountPage() {
 
   return (
     <MobileCanvas>
-      <CreateAccountScreen
+      <CreateAccountScreenLive
+        config={ca}
         background={background}
         logoAlt={config.branding.logo.alt}
         texts={{

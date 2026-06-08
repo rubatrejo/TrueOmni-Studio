@@ -4,14 +4,15 @@ import { kv } from './kv';
 
 /**
  * Prefijos KV bajo los que viven todos los datos de un cliente unified
- * (kiosk + signage + video walls + manifest). Cada uno puede ser una key
- * directa (`<prefix>`) o tener sub-keys (`<prefix>:...`). El purge borra
+ * (kiosk + signage + video walls + mobile PWA + manifest). Cada uno puede ser
+ * una key directa (`<prefix>`) o tener sub-keys (`<prefix>:...`). El purge borra
  * ambos casos.
  *
  * Mantener sincronizado con:
- *  - `@/lib/studio/kv` (kvKeys.cfg / cfgMeta / cfgVersion / cfgSnap / ...).
+ *  - `@/lib/studio/kv` (kvKeys.cfg / cfgMeta / cfgVersion / cfgSnap / pwa / ...).
  *  - `@/lib/signage/kv-keys` (kSignageClient / kSignageDisplay / ...).
  *  - `@/lib/video-walls/kv-keys` (kVideoWallClient / kVideoWall / ...).
+ *  - `@/lib/studio/pwa-config` (kvKeys.pwa / pwaMeta / pwaSnap / pwaSnapList).
  *  - `@/lib/studio/client-manifest` (clientKeys.manifest / branding / ...).
  */
 export function buildPrefixesToPurge(slug: string): string[] {
@@ -45,6 +46,9 @@ export function buildPrefixesToPurge(slug: string): string[] {
     `videowall:social:${slug}`,
     `videowall:news:${slug}`,
     `videowall:i18n:${slug}`,
+    // Mobile PWA — `pwa:${slug}` cubre la working copy; sus sub-keys
+    // (`:meta`, `:snap:<ts>`, `:snap-list`) las borra `purgePrefix` por patrón.
+    `pwa:${slug}`,
     // Unified manifest + unified branding + sync-errors + migrating lock
     `client:${slug}`,
   ];

@@ -1,4 +1,4 @@
-import { EventsTimelineScreen } from '@/components/pwa/events-timeline-screen';
+import { EventsTimelineScreenLive } from '@/components/pwa/events-timeline-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 import { sortEvents } from '@/lib/events-sort';
@@ -30,7 +30,7 @@ export default async function PwaEventsPage() {
 
   return (
     <MobileCanvas>
-      <EventsTimelineScreen texts={texts} events={events} />
+      <EventsTimelineScreenLive config={texts} events={events} />
     </MobileCanvas>
   );
 }

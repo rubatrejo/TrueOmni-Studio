@@ -35,9 +35,18 @@ import { Select, TextInput, Textarea } from './ui';
 interface AdsEditorProps {
   value: AdsModule;
   onChange: (next: AdsModule) => void;
+  /** Rutas pre-seleccionables del picker. Default = rutas del kiosk (`/home/*`). */
+  commonRoutes?: readonly string[];
+  /** Dimensiones por tipo mostradas como ayuda. Default = dims del kiosk. */
+  kindDimensions?: Record<AdKind, string>;
 }
 
-export function AdsEditor({ value, onChange }: AdsEditorProps) {
+export function AdsEditor({
+  value,
+  onChange,
+  commonRoutes = COMMON_ROUTES,
+  kindDimensions = AD_KIND_DIMENSIONS,
+}: AdsEditorProps) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'' | AdKind>('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -113,6 +122,8 @@ export function AdsEditor({ value, onChange }: AdsEditorProps) {
         onChange={(patch) => handleItemChange(editingAd.id, patch)}
         onBack={() => setEditingId(null)}
         onDelete={() => handleDelete(editingAd.id)}
+        commonRoutes={commonRoutes}
+        kindDimensions={kindDimensions}
       />
     );
   }
@@ -206,6 +217,7 @@ export function AdsEditor({ value, onChange }: AdsEditorProps) {
             <AdRow
               key={ad.id}
               ad={ad}
+              dims={kindDimensions}
               onSelect={() => setEditingId(ad.id)}
               onToggle={() => handleItemChange(ad.id, { enabled: !ad.enabled })}
               onDuplicate={() => handleDuplicate(ad.id)}
@@ -220,12 +232,14 @@ export function AdsEditor({ value, onChange }: AdsEditorProps) {
 
 function AdRow({
   ad,
+  dims,
   onSelect,
   onToggle,
   onDuplicate,
   onDelete,
 }: {
   ad: Ad;
+  dims: Record<AdKind, string>;
   onSelect: () => void;
   onToggle: () => void;
   onDuplicate: () => void;
@@ -251,7 +265,7 @@ function AdRow({
             <span className="truncate font-mono text-[11.5px] font-medium text-zinc-800 dark:text-zinc-200">
               {ad.id}
             </span>
-            <KindBadge kind={ad.kind} />
+            <KindBadge kind={ad.kind} dims={dims} />
             {!ad.enabled ? (
               <span className="rounded bg-zinc-200 px-1.5 py-0.5 font-mono text-[9.5px] uppercase tracking-wide text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
                 disabled
@@ -315,7 +329,7 @@ const COMMON_ROUTES = [
   '/home/map',
 ] as const;
 
-function KindBadge({ kind }: { kind: AdKind }) {
+function KindBadge({ kind, dims }: { kind: AdKind; dims: Record<AdKind, string> }) {
   const colorClass = {
     popup: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
     hero: 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300',
@@ -324,7 +338,7 @@ function KindBadge({ kind }: { kind: AdKind }) {
   return (
     <span
       className={`rounded px-1.5 py-0.5 font-mono text-[9.5px] uppercase tracking-wide ${colorClass}`}
-      title={`${kind.toUpperCase()} ad · ${AD_KIND_DIMENSIONS[kind]}`}
+      title={`${kind.toUpperCase()} ad · ${dims[kind]}`}
     >
       {kind}
     </span>
@@ -357,11 +371,15 @@ function AdEditPanel({
   onChange,
   onBack,
   onDelete,
+  commonRoutes,
+  kindDimensions,
 }: {
   ad: Ad;
   onChange: (patch: Partial<Ad>) => void;
   onBack: () => void;
   onDelete: () => void;
+  commonRoutes: readonly string[];
+  kindDimensions: Record<AdKind, string>;
 }) {
   const setField = <K extends keyof Ad>(key: K, value: Ad[K]) =>
     onChange({ [key]: value } as Partial<Ad>);
@@ -411,12 +429,12 @@ function AdEditPanel({
 
         <Field
           label="Kind"
-          hint={`Hero ${AD_KIND_DIMENSIONS.hero} · Bottom ${AD_KIND_DIMENSIONS.bottom} · Popup ${AD_KIND_DIMENSIONS.popup} (canvas 1080×1920)`}
+          hint={`Hero ${kindDimensions.hero} · Bottom ${kindDimensions.bottom} · Popup ${kindDimensions.popup}`}
         >
           <Select value={ad.kind} onChange={(e) => setField('kind', e.target.value as AdKind)}>
             {AD_KINDS.map((k) => (
               <option key={k} value={k}>
-                {k} — {AD_KIND_DIMENSIONS[k]}
+                {k} — {kindDimensions[k]}
               </option>
             ))}
           </Select>
@@ -426,7 +444,7 @@ function AdEditPanel({
           label="Image"
           value={ad.image}
           onChange={(v) => setField('image', v ?? '')}
-          helpText={`Path or URL. Recommended size: ${AD_KIND_DIMENSIONS[ad.kind]}. The QR (if any) must already be embedded in the asset.`}
+          helpText={`Path or URL. Recommended size: ${kindDimensions[ad.kind]}. The QR (if any) must already be embedded in the asset.`}
         />
 
         <Field label="Alt text" hint="Description for accessibility. Shown to screen readers.">
@@ -439,7 +457,7 @@ function AdEditPanel({
         >
           <div className="space-y-2">
             <div className="flex flex-wrap gap-1.5">
-              {COMMON_ROUTES.map((route) => {
+              {commonRoutes.map((route) => {
                 const active = ad.routes.includes(route);
                 return (
                   <button

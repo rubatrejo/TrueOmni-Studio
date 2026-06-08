@@ -1,5 +1,7 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 import { useAvailableLocales, useCurrentLocale } from '@/components/i18n-provider';
 import { useEscapeToClose } from '@/components/listings/use-escape-to-close';
 import { LOCALE_LABELS } from '@/lib/i18n';
@@ -32,6 +34,7 @@ export function PwaLanguageSheet({ open, onClose }: { open: boolean; onClose: ()
   const available = useAvailableLocales();
   const current = useCurrentLocale();
   const setLocale = useLocaleStore((s) => s.setLocale);
+  const router = useRouter();
   useEscapeToClose(open, onClose);
 
   if (!open) return null;
@@ -60,7 +63,13 @@ export function PwaLanguageSheet({ open, onClose }: { open: boolean; onClose: ()
               type="button"
               aria-current={isCurrent ? 'true' : undefined}
               onClick={() => {
-                if (!isCurrent) setLocale(locale);
+                if (!isCurrent) {
+                  // Textos del kiosk (useTextos) reactivos + cookie para que el
+                  // server resuelva el slice PWA traducido; refresh re-renderiza.
+                  setLocale(locale);
+                  document.cookie = `pwa_locale=${locale};path=/;max-age=31536000;samesite=lax`;
+                  router.refresh();
+                }
                 onClose();
               }}
               className="flex w-full items-center gap-3 border-t border-foreground/10 px-7 py-4 text-left text-foreground"

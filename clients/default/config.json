@@ -10193,30 +10193,6 @@
           "alt": "Uber Eats — $5 off your first order",
           "routes": ["/home/events"],
           "enabled": true
-        },
-        {
-          "id": "pwa-mastercard",
-          "kind": "hero",
-          "image": "/assets/ads/pwa-hero-mastercard.png",
-          "alt": "Fearless Strivers Grant Contest — presented by Mastercard",
-          "routes": ["/pwa/restaurants"],
-          "enabled": true
-        },
-        {
-          "id": "pwa-ubereats",
-          "kind": "bottom",
-          "image": "/assets/ads/pwa-bottom-ubereats.png",
-          "alt": "Uber Eats — Tonight, I'll be eating",
-          "routes": ["/pwa/events"],
-          "enabled": true
-        },
-        {
-          "id": "pwa-expedia",
-          "kind": "popup",
-          "image": "/assets/ads/pwa-popup-expedia.png",
-          "alt": "Expedia — Out there starts by bundling for better rates",
-          "routes": ["/pwa/dashboard"],
-          "enabled": true
         }
       ]
     },
@@ -12350,7 +12326,11 @@
       "tripPlanner": {
         "title": "Trip Planner",
         "openUntilPrefix": "Open until",
-        "toggle": { "list": "LIST", "ai": "AI", "map": "MAP" },
+        "toggle": {
+          "list": "LIST",
+          "ai": "AI",
+          "map": "MAP"
+        },
         "menu": {
           "thingsToDo": "Things to Do",
           "restaurants": "Restaurants",
@@ -12380,6 +12360,34 @@
           "itinerary": "Itinerary",
           "remove": "Remove"
         }
+      },
+      "ads": {
+        "ads": [
+          {
+            "id": "pwa-mastercard",
+            "kind": "hero",
+            "image": "/assets/ads/pwa-hero-mastercard.png",
+            "alt": "Fearless Strivers Grant Contest — presented by Mastercard",
+            "routes": ["/pwa/restaurants"],
+            "enabled": true
+          },
+          {
+            "id": "pwa-ubereats",
+            "kind": "bottom",
+            "image": "/assets/ads/pwa-bottom-ubereats.png",
+            "alt": "Uber Eats — Tonight, I'll be eating",
+            "routes": ["/pwa/events"],
+            "enabled": true
+          },
+          {
+            "id": "pwa-expedia",
+            "kind": "popup",
+            "image": "/assets/ads/pwa-popup-expedia.png",
+            "alt": "Expedia — Out there starts by bundling for better rates",
+            "routes": ["/pwa/dashboard"],
+            "enabled": true
+          }
+        ]
       }
     }
   },

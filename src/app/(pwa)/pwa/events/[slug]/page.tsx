@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { ListingsDetailScreen } from '@/components/pwa/listings-detail-screen';
+import { EventsDetailScreenLive } from '@/components/pwa/events-detail-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 import { buildPwaListingDetail } from '@/lib/pwa-listing-detail';
@@ -20,12 +20,14 @@ export default async function PwaEventDetailPage({
 }) {
   const { slug } = await params;
   const config = await getConfig();
+  const texts = config.features?.pwa?.events;
   const data = buildPwaListingDetail(config, 'events', slug);
-  if (!data) notFound();
+  if (!texts || !data) notFound();
 
   return (
     <MobileCanvas>
-      <ListingsDetailScreen
+      <EventsDetailScreenLive
+        config={texts}
         detail={data.detail}
         texts={data.texts}
         heroPrimaryAction={data.heroPrimaryAction}

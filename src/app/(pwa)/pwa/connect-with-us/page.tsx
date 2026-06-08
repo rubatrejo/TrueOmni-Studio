@@ -1,4 +1,4 @@
-import { ConnectWithUsScreen } from '@/components/pwa/connect-with-us-screen';
+import { ConnectWithUsScreenLive } from '@/components/pwa/connect-with-us-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -33,7 +33,8 @@ export default async function PwaConnectWithUsPage() {
 
   return (
     <MobileCanvas>
-      <ConnectWithUsScreen
+      <ConnectWithUsScreenLive
+        config={c}
         title={c?.title ?? 'Connect With Us'}
         orgName={c?.orgName || clientName}
         social={c?.social}

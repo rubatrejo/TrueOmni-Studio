@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { PassDetailScreen } from '@/components/pwa/pass-detail-screen';
+import { PassDetailScreenLive } from '@/components/pwa/pass-detail-screen-live';
 import { getConfig } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
@@ -23,7 +23,7 @@ export default async function PwaPassDetailPage({ params }: { params: Promise<{ 
 
   return (
     <MobileCanvas>
-      <PassDetailScreen pass={pass} texts={texts} />
+      <PassDetailScreenLive pass={pass} config={texts} />
     </MobileCanvas>
   );
 }

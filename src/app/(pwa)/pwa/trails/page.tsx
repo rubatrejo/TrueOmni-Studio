@@ -1,5 +1,5 @@
-import { ListingsGridScreen } from '@/components/pwa/listings-grid-screen';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
+import { TrailsGridScreenLive } from '@/components/pwa/trails-grid-screen-live';
 import { getConfig } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
@@ -25,11 +25,7 @@ export default async function PwaTrailsPage() {
 
   return (
     <MobileCanvas>
-      <ListingsGridScreen
-        searchPlaceholder={t.searchPlaceholder}
-        categories={t.categories}
-        basePath="/pwa/trails"
-      />
+      <TrailsGridScreenLive config={t} basePath="/pwa/trails" />
     </MobileCanvas>
   );
 }

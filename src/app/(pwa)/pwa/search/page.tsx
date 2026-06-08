@@ -1,5 +1,5 @@
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { SearchScreen } from '@/components/pwa/search-screen';
+import { SearchScreenLive } from '@/components/pwa/search-screen-live';
 import { getConfig } from '@/lib/config';
 import { buildSearchIndex } from '@/lib/pwa-search';
 
@@ -31,7 +31,8 @@ export default async function PwaSearchPage() {
 
   return (
     <MobileCanvas>
-      <SearchScreen
+      <SearchScreenLive
+        config={config.features?.pwa?.search}
         texts={{
           placeholder: s.placeholder,
           recentTitle: s.recentTitle,

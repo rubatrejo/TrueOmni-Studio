@@ -1,4 +1,4 @@
-import { DealsGridScreen } from '@/components/pwa/deals-grid-screen';
+import { DealsGridScreenLive } from '@/components/pwa/deals-grid-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -26,7 +26,7 @@ export default async function PwaDealsPage() {
 
   return (
     <MobileCanvas>
-      <DealsGridScreen texts={texts} deals={mod.deals} featureCatalog={mod.featureCatalog} />
+      <DealsGridScreenLive config={texts} deals={mod.deals} featureCatalog={mod.featureCatalog} />
     </MobileCanvas>
   );
 }

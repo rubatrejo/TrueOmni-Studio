@@ -421,6 +421,22 @@ export async function POST(request: Request) {
     }
   }
 
+  // 2c. Sembrar el slice Mobile PWA si toca. A diferencia de signage/video-walls,
+  // la PWA NO clona un cliente aparte: reutiliza la data del kiosk y solo siembra
+  // el slice editable `features.pwa` en KV (desde el config.json del propio cliente
+  // si está publicado, o el template default). Mismo helper que usa `activate`.
+  if (products.mobilePwa) {
+    try {
+      const { ensurePwaSlice } = await import('@/lib/studio/pwa-config');
+      await ensurePwaSlice(slug);
+    } catch (e) {
+      return NextResponse.json(
+        { error: 'failed to create pwa slice', message: (e as Error).message },
+        { status: 500 },
+      );
+    }
+  }
+
   // 3. Unified branding como source of truth.
   let unified: UnifiedClientBranding;
   if (kioskConfig) {

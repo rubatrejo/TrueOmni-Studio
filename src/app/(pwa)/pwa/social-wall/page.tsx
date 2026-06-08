@@ -1,5 +1,5 @@
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { SocialWallScreen } from '@/components/pwa/social-wall/social-wall-screen';
+import { SocialWallScreenLive } from '@/components/pwa/social-wall-screen-live';
 import { getConfig } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
@@ -26,7 +26,7 @@ export default async function PwaSocialWallPage() {
 
   return (
     <MobileCanvas>
-      <SocialWallScreen texts={texts} mod={mod} />
+      <SocialWallScreenLive config={texts} mod={mod} />
     </MobileCanvas>
   );
 }

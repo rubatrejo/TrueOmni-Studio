@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
-import { NotificationDetailScreen } from '@/components/pwa/notification-detail-screen';
+import { NotificationDetailScreenLive } from '@/components/pwa/notification-detail-screen-live';
 import { getConfig } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
@@ -32,7 +32,7 @@ export default async function PwaNotificationDetailPage({
 
   return (
     <MobileCanvas>
-      <NotificationDetailScreen headerTitle={n.title} notification={notification} />
+      <NotificationDetailScreenLive cfg={n} headerTitle={n.title} notification={notification} />
     </MobileCanvas>
   );
 }

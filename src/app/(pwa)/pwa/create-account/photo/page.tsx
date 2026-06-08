@@ -1,4 +1,4 @@
-import { CreateAccountPhotoScreen } from '@/components/pwa/create-account-photo-screen';
+import { CreateAccountPhotoScreenLive } from '@/components/pwa/create-account-photo-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -39,7 +39,8 @@ export default async function PwaCreateAccountPhotoPage({
 
   return (
     <MobileCanvas>
-      <CreateAccountPhotoScreen
+      <CreateAccountPhotoScreenLive
+        config={pwa?.createAccount}
         background={background}
         fullName={fullName}
         texts={photo}

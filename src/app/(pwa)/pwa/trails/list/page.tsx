@@ -1,5 +1,6 @@
-import { ListingsListScreen, type ListingItem } from '@/components/pwa/listings-list-screen';
+import { type ListingItem } from '@/components/pwa/listings-list-screen';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
+import { TrailsListScreenLive } from '@/components/pwa/trails-list-screen-live';
 import { getConfig } from '@/lib/config';
 import { isTrailsModule } from '@/lib/itinerary-tabs';
 import { haversineMi } from '@/lib/listings-sort';
@@ -72,15 +73,11 @@ export default async function PwaTrailsListPage({
     hours: tr.hours,
   }));
 
-  const categoryLabel = cat ? t.categories.find((c) => c.key === cat)?.label : undefined;
-
   return (
     <MobileCanvas>
-      <ListingsListScreen
-        title={categoryLabel ?? t.title}
-        tabs={t.tabs}
-        resultsLabel={t.resultsLabel}
-        distanceSuffix={t.distanceSuffix}
+      <TrailsListScreenLive
+        config={t}
+        categoryKey={cat}
         items={items}
         mapItems={mapItems}
         listings={listings}
@@ -88,7 +85,6 @@ export default async function PwaTrailsListPage({
         subcategories={[]}
         difficulties={mod.difficulties}
         trailTypes={mod.trailTypes}
-        filterTexts={t.filters}
         origin={origin}
         mapboxToken={config.integraciones?.mapbox_token}
         basePath="/pwa/trails"

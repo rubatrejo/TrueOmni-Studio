@@ -1,4 +1,4 @@
-import { BrochuresListScreen } from '@/components/pwa/brochures-list-screen';
+import { BrochuresListScreenLive } from '@/components/pwa/brochures-list-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
 
@@ -27,7 +27,11 @@ export default async function PwaDigitalBrochurePage() {
 
   return (
     <MobileCanvas>
-      <BrochuresListScreen texts={texts} categories={mod.categories} brochures={mod.brochures} />
+      <BrochuresListScreenLive
+        config={texts}
+        categories={mod.categories}
+        brochures={mod.brochures}
+      />
     </MobileCanvas>
   );
 }

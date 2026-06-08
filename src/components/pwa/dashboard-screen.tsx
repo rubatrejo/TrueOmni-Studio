@@ -19,7 +19,19 @@ interface DashboardScreenProps {
   quickAccess: PwaQuickAccess[];
   tiles: PwaTile[];
   notifications: PwaNotification[];
+  /** Tamaño del logo del header (default 'M' = 154px de ancho). */
+  logoSize?: 'S' | 'M' | 'L' | 'XL';
+  /** Offset del logo en px, sumado a la posición base (left:20, top:48). */
+  logoOffset?: { x: number; y: number };
 }
+
+/** Ancho del logo del header por tamaño (px). 'M' = 154 (verbatim del XD). */
+const LOGO_SIZE_PX: Record<'S' | 'M' | 'L' | 'XL', number> = {
+  S: 124,
+  M: 154,
+  L: 190,
+  XL: 230,
+};
 
 const BRAND = 'hsl(var(--brand-primary))';
 const PWA = 'hsl(var(--pwa-primary))';
@@ -49,9 +61,14 @@ export function DashboardScreen({
   quickAccess,
   tiles,
   notifications,
+  logoSize,
+  logoOffset,
 }: DashboardScreenProps) {
   const router = useRouter();
   const { unreadCount } = useNotifications(notifications);
+  const logoW = LOGO_SIZE_PX[logoSize ?? 'M'];
+  const logoX = 20 + (logoOffset?.x ?? 0);
+  const logoY = 48 + (logoOffset?.y ?? 0);
   return (
     <div className="flex h-full w-full flex-col bg-background">
       {/* Header fijo — tamaños/posiciones verbatim del XD (110 alto; logo 154×29 a
@@ -59,7 +76,7 @@ export function DashboardScreen({
           (9:41) lo dibuja el SO → su zona superior queda como safe-area azul.
           z-10 para tapar el solape de la foto del hero. */}
       <Layer h={90} className="relative z-10 shrink-0" style={{ backgroundColor: BRAND }}>
-        <div className="absolute" style={{ left: 20, top: 48, width: 154 }}>
+        <div className="absolute" style={{ left: logoX, top: logoY, width: logoW }}>
           <TrueOmniLogo className="h-auto w-full text-white" title={logoAlt} slot="default" />
         </div>
         {/* before:-inset expande el área de tap a ≥40px sin mover el glifo (E3). */}
@@ -207,7 +224,7 @@ export function DashboardScreen({
               style={bg(t.image)}
             >
               <span className="absolute inset-0 bg-black/40" />
-              <span className="absolute inset-0 flex items-center justify-center px-3 text-center text-[15px] font-bold uppercase leading-tight text-white">
+              <span className="absolute inset-0 flex items-center justify-center whitespace-pre-line px-3 text-center text-[15px] font-bold leading-tight text-white">
                 {t.label}
               </span>
             </button>

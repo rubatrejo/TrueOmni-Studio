@@ -10,7 +10,7 @@ import { SearchBar } from './search-bar';
 import { SearchOverlay } from './search-overlay';
 
 type ModulesOverridePayload = {
-  tiles: Array<{ key: string; label: string; enabled: boolean }>;
+  tiles: Array<{ key: string; label: string; enabled: boolean; wide?: boolean }>;
   /** Tamaño global de la tipografía de los títulos de los tiles (px). */
   tileTitleFontSize?: number;
 };
@@ -106,11 +106,17 @@ export function HomeShell({
       if (!isCoreEnabled(entry.key)) continue;
       const base = tilesByKey.get(entry.key);
       if (base) {
-        out.push({ ...base, label: entry.label });
+        out.push({ ...base, label: entry.label, wide: entry.wide });
       } else {
         // Tile dinámico que el server no conoce (ej. listing module nuevo
         // duplicado en el Studio). Renderizamos con placeholder de imagen.
-        out.push({ key: entry.key, label: entry.label, enabled: true, image: '' });
+        out.push({
+          key: entry.key,
+          label: entry.label,
+          enabled: true,
+          image: '',
+          wide: entry.wide,
+        });
       }
     }
     return out;

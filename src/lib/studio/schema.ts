@@ -159,6 +159,8 @@ export const ModuleEntrySchema = z.object({
   label: z.string().min(1).max(64),
   /** Si false, el tile se oculta del grid del Home. */
   enabled: z.boolean(),
+  /** Si true, el tile ocupa el ancho completo del grid (las 2 columnas). */
+  wide: z.boolean().optional(),
 });
 
 /**

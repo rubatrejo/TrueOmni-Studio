@@ -57,9 +57,15 @@ export function CategoryTile({
     </>
   );
 
-  const sharedClassName =
-    'relative block overflow-hidden focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-white';
-  const sharedStyle = { width: '460px', height: '460px', borderRadius: '9px' };
+  // Tile ancho: ocupa las 2 columnas del grid (460+30+460 = 950px), misma altura.
+  const sharedClassName = `relative block overflow-hidden focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-white${
+    tile.wide ? ' col-span-2' : ''
+  }`;
+  const sharedStyle = {
+    width: tile.wide ? '950px' : '460px',
+    height: '460px',
+    borderRadius: '9px',
+  };
 
   if (onClick) {
     return (

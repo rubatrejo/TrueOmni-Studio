@@ -331,6 +331,7 @@ function applyModulesAndTiles(
     label: t.label,
     enabled: t.enabled,
     image: imageByKey.get(t.key) ?? '',
+    ...(t.wide ? { wide: true } : {}),
   }));
 
   // Tamaño global de la tipografía de los títulos de los tiles (px).

@@ -400,6 +400,12 @@ export function HomeDashboardEditor({
       tiles: modules.tiles.map((t) => (t.key === key ? { ...t, label } : t)),
     });
 
+  const handleWide = (key: string, wide: boolean) =>
+    onChange({
+      ...modules,
+      tiles: modules.tiles.map((t) => (t.key === key ? { ...t, wide } : t)),
+    });
+
   const handleReset = () => onChange({ ...defaultModules(), systemModules: modules.systemModules });
 
   return (
@@ -490,6 +496,7 @@ export function HomeDashboardEditor({
                   customIcon={tileIcon.customIcon}
                   onToggle={() => handleToggle(entry.key)}
                   onLabel={(label) => handleLabel(entry.key, label)}
+                  onWide={(wide) => handleWide(entry.key, wide)}
                 />
               );
             })}
@@ -1152,6 +1159,7 @@ function ModuleRow({
   customIcon,
   onToggle,
   onLabel,
+  onWide,
 }: {
   entry: ModuleEntry;
   /** Pareja resuelta por el caller: prioridad customIcon > iconKey Lucide. */
@@ -1159,6 +1167,7 @@ function ModuleRow({
   customIcon?: string;
   onToggle: () => void;
   onLabel: (label: string) => void;
+  onWide: (wide: boolean) => void;
 }) {
   const dragControls = useDragControls();
   const [editing, setEditing] = useState(false);
@@ -1247,6 +1256,24 @@ function ModuleRow({
           /home/{entry.key}
         </span>
       </div>
+
+      {/* Full-width: el tile ocupa las 2 columnas del grid. */}
+      <button
+        type="button"
+        onClick={() => onWide(!entry.wide)}
+        aria-pressed={entry.wide ?? false}
+        title={
+          entry.wide ? 'Full width tile (spans 2 columns)' : 'Make this tile full width (2 columns)'
+        }
+        className={
+          'shrink-0 rounded-md border px-1.5 py-1 text-[10px] font-semibold transition ' +
+          ((entry.wide ?? false)
+            ? 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:border-sky-400/40 dark:text-sky-300'
+            : 'border-zinc-200 bg-white text-zinc-400 hover:text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-500')
+        }
+      >
+        Wide
+      </button>
 
       <ToggleSwitch enabled={entry.enabled} onChange={onToggle} label={entry.label} />
     </Reorder.Item>

@@ -1,5 +1,6 @@
 'use client';
 
+import { Play } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 import type { PwaConfig } from '@/lib/config';
@@ -272,9 +273,10 @@ export function PwaShell({
                       type="button"
                       onClick={() => navTo(previewRoute)}
                       title={`Open ${previewRoute} in the preview`}
-                      className="inline-flex items-center gap-1 rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-medium text-zinc-600 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-300 dark:hover:border-sky-800 dark:hover:bg-sky-950/40 dark:hover:text-sky-300"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-sky-500/30 bg-sky-500/10 px-2.5 py-1.5 text-[11.5px] font-medium text-sky-700 transition hover:bg-sky-500/20 dark:border-sky-400/30 dark:text-sky-300"
                     >
-                      View in preview ↗
+                      <Play className="h-3 w-3" />
+                      View in preview
                     </button>
                   </div>
                 ) : null;

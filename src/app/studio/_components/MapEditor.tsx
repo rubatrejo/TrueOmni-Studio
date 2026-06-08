@@ -322,7 +322,7 @@ function PinStylingSection({
   return (
     <Section
       title="Pin styling"
-      description="Tamaño global de los pins del mapa y override del icono por categoría. El color permanece ligado al brand del kiosk para mantener coherencia con los chips."
+      description="Global size of the map pins and per-category icon override. The color stays tied to the kiosk brand to keep it consistent with the chips."
     >
       <Field label="Pin size">
         <div className="flex gap-2">

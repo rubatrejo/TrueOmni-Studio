@@ -10240,58 +10240,58 @@
         "tiles": [
           {
             "key": "restaurants",
-            "label": "RESTAURANTS",
-            "image": "assets/pwa/dashboard/tile-restaurants.jpg"
+            "label": "Restaurants",
+            "image": "assets/home/tiles/restaurants.jpg"
           },
           {
             "key": "map",
-            "label": "MAP",
-            "image": "assets/pwa/dashboard/tile-map.jpg"
+            "label": "Map",
+            "image": "assets/home/tiles/map.jpg"
           },
           {
             "key": "wayfinding",
-            "label": "WAYFINDING",
-            "image": "assets/pwa/dashboard/tile-wayfinding.jpg"
+            "label": "Wayfinding",
+            "image": "assets/home/tiles/wayfinding.jpg"
           },
           {
             "key": "social-wall",
-            "label": "SOCIAL WALL",
-            "image": "assets/pwa/dashboard/tile-social-wall.jpg"
+            "label": "Social Wall",
+            "image": "assets/home/tiles/social-wall.jpg"
           },
           {
             "key": "things-to-do",
-            "label": "THINGS TO DO",
-            "image": "assets/pwa/dashboard/tile-things-to-do.jpg",
+            "label": "Things\nto Do",
+            "image": "assets/home/tiles/things-to-do.jpg",
             "wide": true
           },
           {
             "key": "digital-brochure",
-            "label": "DIGITAL BROCHURE",
-            "image": "assets/pwa/dashboard/tile-digital-brochure.jpg"
+            "label": "Digital Brochure",
+            "image": "assets/home/tiles/digital-brochure.jpg"
           },
           {
             "key": "trails",
-            "label": "TRAILS",
-            "image": "assets/pwa/dashboard/tile-trails.jpg"
+            "label": "Trails",
+            "image": "assets/home/tiles/trails.jpg"
           },
           {
             "key": "passes",
-            "label": "PASSES",
-            "image": "assets/pwa/dashboard/tile-passes.jpg"
+            "label": "Passes",
+            "image": "assets/home/tiles/passes.jpg"
           },
           {
             "key": "tickets",
-            "label": "TICKETS",
-            "image": "assets/pwa/dashboard/tile-tickets.jpg"
+            "label": "Tickets",
+            "image": "assets/home/tiles/tickets.jpg"
           },
           {
             "key": "deals",
-            "label": "DEALS",
-            "image": "assets/pwa/dashboard/tile-deals.jpg"
+            "label": "Deals",
+            "image": "assets/home/tiles/deals.jpg"
           },
           {
             "key": "scavenger-hunt",
-            "label": "SCAVENGER HUNT",
+            "label": "Scavenger Hunt",
             "image": "assets/pwa/dashboard/tile-scavenger-hunt.jpg"
           }
         ]
@@ -12406,17 +12406,17 @@
           "dashboard.quickAccess.1.label": "CONSTRUCTOR DE ITINERARIO",
           "dashboard.quickAccess.2.label": "DÓNDE HOSPEDARSE",
           "dashboard.quickAccess.3.label": "EVENTOS",
-          "dashboard.tiles.0.label": "RESTAURANTES",
-          "dashboard.tiles.1.label": "MAPA",
+          "dashboard.tiles.0.label": "Restaurantes",
+          "dashboard.tiles.1.label": "Mapa",
           "tripPlanner.toggle.map": "MAPA",
-          "dashboard.tiles.2.label": "CÓMO LLEGAR",
-          "dashboard.tiles.3.label": "MURO SOCIAL",
-          "dashboard.tiles.4.label": "QUÉ HACER",
-          "dashboard.tiles.5.label": "FOLLETO DIGITAL",
-          "dashboard.tiles.6.label": "SENDEROS",
-          "dashboard.tiles.7.label": "PASES",
-          "dashboard.tiles.8.label": "BOLETOS",
-          "dashboard.tiles.9.label": "OFERTAS",
+          "dashboard.tiles.2.label": "Cómo llegar",
+          "dashboard.tiles.3.label": "Muro Social",
+          "dashboard.tiles.4.label": "Qué hacer",
+          "dashboard.tiles.5.label": "Folleto Digital",
+          "dashboard.tiles.6.label": "Senderos",
+          "dashboard.tiles.7.label": "Pases",
+          "dashboard.tiles.8.label": "Boletos",
+          "dashboard.tiles.9.label": "Ofertas",
           "dashboard.tiles.10.label": "BÚSQUEDA DEL TESORO",
           "passes.title": "Pases",
           "passes.eyebrow": "PASE",
@@ -12926,17 +12926,17 @@
           "dashboard.quickAccess.1.label": "CRÉATEUR D'ITINÉRAIRE",
           "dashboard.quickAccess.2.label": "HÉBERGEMENT",
           "dashboard.quickAccess.3.label": "ÉVÉNEMENTS",
-          "dashboard.tiles.0.label": "RESTAURANTS",
-          "dashboard.tiles.1.label": "CARTE",
+          "dashboard.tiles.0.label": "Restaurants",
+          "dashboard.tiles.1.label": "Carte",
           "tripPlanner.toggle.map": "CARTE",
-          "dashboard.tiles.2.label": "ORIENTATION",
-          "dashboard.tiles.3.label": "MUR SOCIAL",
-          "dashboard.tiles.4.label": "À FAIRE",
-          "dashboard.tiles.5.label": "BROCHURE NUMÉRIQUE",
-          "dashboard.tiles.6.label": "SENTIERS",
-          "dashboard.tiles.7.label": "PASSES",
-          "dashboard.tiles.8.label": "BILLETS",
-          "dashboard.tiles.9.label": "OFFRES",
+          "dashboard.tiles.2.label": "Orientation",
+          "dashboard.tiles.3.label": "Mur social",
+          "dashboard.tiles.4.label": "À faire",
+          "dashboard.tiles.5.label": "Brochure Numérique",
+          "dashboard.tiles.6.label": "Sentiers",
+          "dashboard.tiles.7.label": "Passes",
+          "dashboard.tiles.8.label": "Billets",
+          "dashboard.tiles.9.label": "Offres",
           "dashboard.tiles.10.label": "CHASSE AU TRÉSOR",
           "passes.title": "Passes",
           "passes.eyebrow": "PASS",
@@ -13446,17 +13446,17 @@
           "dashboard.quickAccess.1.label": "REISEPLANER",
           "dashboard.quickAccess.2.label": "ÜBERNACHTEN",
           "dashboard.quickAccess.3.label": "EVENTS",
-          "dashboard.tiles.0.label": "RESTAURANTS",
-          "dashboard.tiles.1.label": "KARTE",
+          "dashboard.tiles.0.label": "Restaurants",
+          "dashboard.tiles.1.label": "Karte",
           "tripPlanner.toggle.map": "KARTE",
-          "dashboard.tiles.2.label": "WEGWEISER",
-          "dashboard.tiles.3.label": "SOCIAL WALL",
-          "dashboard.tiles.4.label": "AKTIVITÄTEN",
-          "dashboard.tiles.5.label": "DIGITALE BROSCHÜRE",
-          "dashboard.tiles.6.label": "WANDERWEGE",
-          "dashboard.tiles.7.label": "PÄSSE",
-          "dashboard.tiles.8.label": "TICKETS",
-          "dashboard.tiles.9.label": "ANGEBOTE",
+          "dashboard.tiles.2.label": "Wegweiser",
+          "dashboard.tiles.3.label": "Social Wall",
+          "dashboard.tiles.4.label": "Aktivitäten",
+          "dashboard.tiles.5.label": "Digitale Broschüre",
+          "dashboard.tiles.6.label": "Wanderwege",
+          "dashboard.tiles.7.label": "Pässe",
+          "dashboard.tiles.8.label": "Tickets",
+          "dashboard.tiles.9.label": "Angebote",
           "dashboard.tiles.10.label": "SCHNITZELJAGD",
           "passes.title": "Pässe",
           "passes.eyebrow": "PASS",
@@ -13966,17 +13966,17 @@
           "dashboard.quickAccess.1.label": "CRIADOR DE ITINERÁRIO",
           "dashboard.quickAccess.2.label": "HOSPEDAGEM",
           "dashboard.quickAccess.3.label": "EVENTOS",
-          "dashboard.tiles.0.label": "RESTAURANTES",
-          "dashboard.tiles.1.label": "MAPA",
+          "dashboard.tiles.0.label": "Restaurantes",
+          "dashboard.tiles.1.label": "Mapa",
           "tripPlanner.toggle.map": "MAPA",
-          "dashboard.tiles.2.label": "COMO CHEGAR",
-          "dashboard.tiles.3.label": "MURAL SOCIAL",
-          "dashboard.tiles.4.label": "O QUE FAZER",
-          "dashboard.tiles.5.label": "FOLHETO DIGITAL",
-          "dashboard.tiles.6.label": "TRILHAS",
-          "dashboard.tiles.7.label": "PASSES",
-          "dashboard.tiles.8.label": "INGRESSOS",
-          "dashboard.tiles.9.label": "OFERTAS",
+          "dashboard.tiles.2.label": "Como chegar",
+          "dashboard.tiles.3.label": "Mural Social",
+          "dashboard.tiles.4.label": "O que fazer",
+          "dashboard.tiles.5.label": "Folheto Digital",
+          "dashboard.tiles.6.label": "Trilhas",
+          "dashboard.tiles.7.label": "Passes",
+          "dashboard.tiles.8.label": "Ingressos",
+          "dashboard.tiles.9.label": "Ofertas",
           "dashboard.tiles.10.label": "CAÇA AO TESOURO",
           "passes.title": "Passes",
           "passes.eyebrow": "PASSE",
@@ -14492,7 +14492,7 @@
           "dashboard.tiles.2.label": "案内",
           "dashboard.tiles.3.label": "ソーシャル",
           "dashboard.tiles.4.label": "アクティビティ",
-          "dashboard.tiles.5.label": "デジタルパンフレット",
+          "dashboard.tiles.5.label": "デジタル パンフレット",
           "dashboard.tiles.6.label": "トレイル",
           "dashboard.tiles.7.label": "パス",
           "dashboard.tiles.8.label": "チケット",

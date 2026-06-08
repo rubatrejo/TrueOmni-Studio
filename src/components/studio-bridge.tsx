@@ -364,7 +364,7 @@ export type HeroOverrideDetail = {
 };
 
 type ModulesPatch = {
-  tiles: Array<{ key: string; label: string; enabled: boolean }>;
+  tiles: Array<{ key: string; label: string; enabled: boolean; wide?: boolean }>;
   systemModules?: { ads: boolean; languages: boolean; aiAvatar: boolean };
   /** Tamaño global de la tipografía de los títulos de los tiles (px). */
   tileTitleFontSize?: number;

@@ -29,6 +29,8 @@ export function DashboardLive({
       quickAccess={d.quickAccess}
       tiles={d.tiles}
       notifications={notifications}
+      logoSize={d.logoSize}
+      logoOffset={d.logoOffset}
     />
   );
 }

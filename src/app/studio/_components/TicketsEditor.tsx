@@ -67,7 +67,7 @@ export function TicketsEditor({ value, eventsValue, onChange }: TicketsEditorPro
       />
 
       <ImageUrlField
-        label="Fallback hero (events sin imagen propia)"
+        label="Fallback hero (events without their own image)"
         value={value.fallbackHero}
         onChange={(next) => update({ fallbackHero: next ?? '' })}
         helpText="Used in detail pages of paid events that don't define their own image."

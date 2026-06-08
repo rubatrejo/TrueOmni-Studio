@@ -7,7 +7,6 @@ import { useRef } from 'react';
 import { downloadConfigExport, importConfig } from '../_lib/api-client';
 
 import { Breadcrumb } from './Breadcrumb';
-import { FaviconBadge } from './FaviconBadge';
 import { SaveStatusPill } from './SaveStatusPill';
 import { StudioBrand } from './StudioBrand';
 import { ThemeToggle } from './ThemeToggle';
@@ -16,7 +15,6 @@ import { useToast } from './Toast';
 export function TopBar({
   slug,
   nombre,
-  favicon,
   currentVersion,
   saveState,
   isDirty,
@@ -32,9 +30,8 @@ export function TopBar({
 }: {
   slug: string;
   nombre: string;
-  /** Favicon del kiosk activo (data URL o path). Se muestra como icono
-   *  pequeño junto al nombre en el breadcrumb para confirmar visualmente
-   *  qué kiosk se está editando. */
+  /** @deprecated Ya no se muestra el favicon en el breadcrumb (lo pidió Rubén).
+   *  Se mantiene en el tipo por compatibilidad con los callers existentes. */
   favicon?: string;
   currentVersion: number;
   saveState: 'idle' | 'saving' | 'saved' | 'error';
@@ -68,13 +65,6 @@ export function TopBar({
             { label: nombre, href: `/studio/${slug}` },
             {
               label: productLabel,
-              icon: (
-                <FaviconBadge
-                  favicon={favicon}
-                  slug={slug}
-                  className="block h-4 w-4 rounded-sm object-cover ring-1 ring-zinc-200 dark:ring-zinc-800"
-                />
-              ),
               slug,
             },
           ]}

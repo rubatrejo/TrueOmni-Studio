@@ -17,6 +17,8 @@ export interface HomeTile {
   enabled: boolean;
   /** Path absoluto al asset de imagen (servido desde clients/{slug}/assets/). */
   image: string;
+  /** Si true, el tile ocupa el ancho completo del grid (las 2 columnas). */
+  wide?: boolean;
 }
 
 /** Intro del Survey mostrado en el primer paso. */
@@ -890,6 +892,12 @@ export interface PwaDashboardConfig {
   quickAccess: PwaQuickAccess[];
   /** Tiles del grid principal. */
   tiles: PwaTile[];
+  /** Tamaño del logo del header del dashboard (default 'M'). Análogo al
+   *  `heroLogoSize` del kiosk. */
+  logoSize?: 'S' | 'M' | 'L' | 'XL';
+  /** Desplazamiento del logo del header en px (default {x:0,y:0}). Se suma a
+   *  la posición base (left:20, top:48). Permite mover el logo. */
+  logoOffset?: { x: number; y: number };
 }
 
 /** Ítem de la lista del More Menu. */

@@ -35,6 +35,8 @@ export function LoginScreenLive({
       dashboardHref="/pwa/dashboard"
       forgotHref="/pwa/forgot-password"
       errorTexts={liveError}
+      logoSize={liveLogin.logoSize}
+      logoOffset={liveLogin.logoOffset}
     />
   );
 }

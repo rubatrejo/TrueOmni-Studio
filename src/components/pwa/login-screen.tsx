@@ -50,7 +50,19 @@ interface LoginScreenProps {
   forgotHref?: string;
   /** Textos del modal de error (validación mock fallida). */
   errorTexts: LoginErrorTexts;
+  /** Tamaño del logo (slot idle). Default 'M' = width 251.4. */
+  logoSize?: 'S' | 'M' | 'L' | 'XL';
+  /** Offset del logo en px, sumado a su posición base (62, 122). */
+  logoOffset?: { x: number; y: number };
 }
+
+/** Factor de escala del logo por tamaño (ratios del kiosk: 280/360, 1, 480/360, 600/360). */
+const LOGO_SCALE: Record<'S' | 'M' | 'L' | 'XL', number> = {
+  S: 0.78,
+  M: 1,
+  L: 1.33,
+  XL: 1.67,
+};
 
 function MailIcon({ style }: { style?: React.CSSProperties }) {
   return (
@@ -107,9 +119,17 @@ export function LoginScreen({
   dashboardHref,
   forgotHref = '/pwa/forgot-password',
   errorTexts,
+  logoSize,
+  logoOffset,
 }: LoginScreenProps) {
   const router = useRouter();
   const locale = useCurrentLocale();
+  // Logo: tamaño (escala width/height base 251.4×46.2) + posición (offset px).
+  const logoScale = LOGO_SCALE[logoSize ?? 'M'];
+  const logoW = 251.4 * logoScale;
+  const logoH = 46.2 * logoScale;
+  const logoLeft = 62 + (logoOffset?.x ?? 0);
+  const logoTop = 122 + (logoOffset?.y ?? 0);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorOpen, setErrorOpen] = useState(false);
@@ -148,7 +168,10 @@ export function LoginScreen({
         }}
       >
         {/* Logo */}
-        <div className="absolute" style={{ left: 62, top: 122, width: 251.4, height: 46.2 }}>
+        <div
+          className="absolute"
+          style={{ left: logoLeft, top: logoTop, width: logoW, height: logoH }}
+        >
           <TrueOmniLogo className="h-full w-full text-white" title={logoAlt} slot="idle" />
         </div>
 

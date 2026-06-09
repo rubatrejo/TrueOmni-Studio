@@ -268,7 +268,7 @@ export function ColorPicker({
         placeholder={placeholder}
         spellCheck={false}
         disabled={disabled}
-        className={`flex-1 rounded-md border bg-white px-2 py-1 font-mono text-[11px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:ring-2 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600 ${
+        className={`w-full min-w-0 flex-1 rounded-md border bg-white px-2 py-1 font-mono text-[11px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:ring-2 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600 ${
           isInvalid
             ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20'
             : 'border-zinc-200 focus:border-sky-500/60 focus:ring-sky-500/20 dark:border-zinc-700'

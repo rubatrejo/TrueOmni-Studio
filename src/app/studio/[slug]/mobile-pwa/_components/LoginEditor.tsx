@@ -4,7 +4,7 @@ import type { PwaLoginConfig, PwaLoginErrorConfig } from '@/lib/config';
 
 import { ImageField } from '../../../_components/ImageField';
 
-import { PwaField, PwaGroup, PwaPanelHeader } from './pwa-ui';
+import { PwaField, PwaGroup, PwaLogoControls, PwaPanelHeader } from './pwa-ui';
 
 /**
  * Editor de la pantalla de Login de la PWA. Edita dos slices: `login` (fondo +
@@ -59,6 +59,15 @@ export function LoginEditor({
             aspect="390/844"
             value={l.background}
             onChange={(next) => setLogin({ background: next })}
+          />
+        </PwaGroup>
+
+        <PwaGroup title="Logo">
+          <PwaLogoControls
+            size={l.logoSize}
+            offset={l.logoOffset}
+            onSizeChange={(logoSize) => setLogin({ logoSize })}
+            onOffsetChange={(logoOffset) => setLogin({ logoOffset })}
           />
         </PwaGroup>
 

@@ -20,6 +20,8 @@ export function WelcomeSplashLive({
   logoAlt: string;
 }) {
   const w = usePwaSection('welcome', welcome);
+  // El Welcome muestra el mismo logo idle que el Login → reutiliza su tamaño/posición.
+  const login = usePwaSection('login', undefined);
 
   return (
     <WelcomeSplash
@@ -27,6 +29,8 @@ export function WelcomeSplashLive({
       logoAlt={logoAlt}
       autoAdvanceMs={w?.autoAdvanceMs ?? 2500}
       nextHref="/pwa/login"
+      logoSize={login?.logoSize}
+      logoOffset={login?.logoOffset}
     />
   );
 }

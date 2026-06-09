@@ -205,10 +205,82 @@ export function PwaPlaceholderPanel({
           En construcción
         </span>
         <p className="max-w-xs text-[13px] leading-relaxed text-zinc-500 dark:text-zinc-400">
-          Este editor llega en la siguiente iteración de la Fase 1. Por ahora el branding y el
-          idioma ya se previsualizan en vivo a la derecha.
+          This editor ships in the next iteration of Phase 1. For now the branding and the language
+          already preview live on the right.
         </p>
       </div>
     </div>
+  );
+}
+
+export type PwaLogoSize = 'S' | 'M' | 'L' | 'XL';
+
+/**
+ * Controles del logo de una pantalla de la PWA: tamaño (S/M/L/XL, mismo look que
+ * el selector del kiosk) + posición (move X/Y en px). Reutilizable en cualquier
+ * editor PWA (Dashboard, Login…) para que el UI sea consistente.
+ */
+export function PwaLogoControls({
+  size,
+  offset,
+  onSizeChange,
+  onOffsetChange,
+}: {
+  size?: PwaLogoSize;
+  offset?: { x: number; y: number };
+  onSizeChange: (size: PwaLogoSize) => void;
+  onOffsetChange: (offset: { x: number; y: number }) => void;
+}) {
+  const off = offset ?? { x: 0, y: 0 };
+  return (
+    <>
+      <div>
+        <span className="mb-1 block text-[12px] font-medium text-zinc-600 dark:text-zinc-400">
+          Logo size
+        </span>
+        <div
+          role="radiogroup"
+          aria-label="Logo size"
+          className="inline-flex rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-800 dark:bg-zinc-900/40"
+        >
+          {(['S', 'M', 'L', 'XL'] as const).map((s) => {
+            const active = (size ?? 'M') === s;
+            return (
+              <button
+                key={s}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                onClick={() => onSizeChange(s)}
+                className={
+                  'rounded-md px-3.5 py-1 text-[11.5px] font-semibold transition ' +
+                  (active
+                    ? 'bg-sky-500 text-white shadow-sm'
+                    : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40')
+                }
+              >
+                {s}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <PwaNumberField
+          label="Move X"
+          value={off.x}
+          onChange={(x) => onOffsetChange({ x, y: off.y })}
+          step={1}
+          suffix="px"
+        />
+        <PwaNumberField
+          label="Move Y"
+          value={off.y}
+          onChange={(y) => onOffsetChange({ x: off.x, y })}
+          step={1}
+          suffix="px"
+        />
+      </div>
+    </>
   );
 }

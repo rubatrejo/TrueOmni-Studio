@@ -850,6 +850,10 @@ export interface PwaLoginConfig {
   loginCta: string;
   createAccountCta: string;
   skipLogin: string;
+  /** Tamaño del logo del Login/Welcome (slot idle). Default 'M' (width 251.4). */
+  logoSize?: 'S' | 'M' | 'L' | 'XL';
+  /** Offset del logo en px, sumado a su posición base. Permite moverlo. */
+  logoOffset?: { x: number; y: number };
 }
 
 /** Acceso rápido (squircle) de la fila superior del Dashboard PWA. */

@@ -21,7 +21,19 @@ interface WelcomeSplashProps {
   nextHref?: string;
   /** Ancho del logo como fracción del canvas. Default 0.6704 (251.4/375 del XD). */
   logoWidthPct?: number;
+  /** Tamaño del logo (escala el ancho); compartido con el Login. Default 'M'. */
+  logoSize?: 'S' | 'M' | 'L' | 'XL';
+  /** Offset del logo en px desde el centro; compartido con el Login. */
+  logoOffset?: { x: number; y: number };
 }
+
+/** Factor de escala del logo por tamaño (ratios del kiosk). Igual que el Login. */
+const LOGO_SCALE: Record<'S' | 'M' | 'L' | 'XL', number> = {
+  S: 0.78,
+  M: 1,
+  L: 1.33,
+  XL: 1.67,
+};
 
 /**
  * Welcome (splash de arranque) de la PWA — pantalla 01.
@@ -43,9 +55,14 @@ export function WelcomeSplash({
   autoAdvanceMs,
   nextHref,
   logoWidthPct = 0.6704,
+  logoSize,
+  logoOffset,
 }: WelcomeSplashProps) {
   const router = useRouter();
   const [logoIn, setLogoIn] = useState(false);
+  const logoW = logoWidthPct * LOGO_SCALE[logoSize ?? 'M'];
+  const ox = logoOffset?.x ?? 0;
+  const oy = logoOffset?.y ?? 0;
 
   // Fade-in del logo justo tras montar.
   useEffect(() => {
@@ -74,9 +91,9 @@ export function WelcomeSplash({
         <div
           className="transition-all duration-700 ease-out"
           style={{
-            width: `${logoWidthPct * 100}%`,
+            width: `${logoW * 100}%`,
             opacity: logoIn ? 1 : 0,
-            transform: logoIn ? 'scale(1)' : 'scale(0.96)',
+            transform: `translate(${ox}px, ${oy}px) ${logoIn ? 'scale(1)' : 'scale(0.96)'}`,
           }}
         >
           <TrueOmniLogo className="h-auto w-full text-white" title={logoAlt} slot="idle" />

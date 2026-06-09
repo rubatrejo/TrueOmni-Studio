@@ -767,7 +767,7 @@ function ColorRow({
         <span className="text-[12.5px] font-medium text-zinc-800 dark:text-zinc-200">{label}</span>
         <span className="text-[10.5px] leading-tight text-zinc-500">{description}</span>
       </span>
-      <div className="w-32">
+      <div className="w-40 shrink-0">
         <ColorPicker value={value} onChange={onChange} />
       </div>
     </div>

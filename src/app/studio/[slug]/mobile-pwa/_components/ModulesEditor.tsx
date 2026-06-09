@@ -4,7 +4,14 @@ import type { PwaDashboardConfig, PwaQuickAccess, PwaTile } from '@/lib/config';
 
 import { ImageField } from '../../../_components/ImageField';
 
-import { move, PwaField, PwaGroup, PwaNumberField, PwaPanelHeader, ReorderButtons } from './pwa-ui';
+import {
+  move,
+  PwaField,
+  PwaGroup,
+  PwaLogoControls,
+  PwaPanelHeader,
+  ReorderButtons,
+} from './pwa-ui';
 
 /**
  * Editor de los módulos / navegación de la PWA: hero, accesos rápidos y tiles
@@ -64,55 +71,12 @@ export function ModulesEditor({
               value={logo}
               onChange={onLogoChange}
             />
-            {/* Tamaño del logo del header (S/M/L/XL), igual que el kiosk. */}
-            <div>
-              <span className="mb-1 block text-[12px] font-medium text-zinc-600 dark:text-zinc-400">
-                Logo size
-              </span>
-              <div
-                role="radiogroup"
-                aria-label="Dashboard logo size"
-                className="inline-flex rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-800 dark:bg-zinc-900/40"
-              >
-                {(['S', 'M', 'L', 'XL'] as const).map((size) => {
-                  const active = (v.logoSize ?? 'M') === size;
-                  return (
-                    <button
-                      key={size}
-                      type="button"
-                      role="radio"
-                      aria-checked={active}
-                      onClick={() => onChange({ ...v, logoSize: size })}
-                      className={
-                        'rounded-md px-3.5 py-1 text-[11.5px] font-semibold transition ' +
-                        (active
-                          ? 'bg-sky-500 text-white shadow-sm'
-                          : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40')
-                      }
-                    >
-                      {size}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            {/* Posición del logo (offset en px sobre la posición base). */}
-            <div className="grid grid-cols-2 gap-2">
-              <PwaNumberField
-                label="Move X"
-                value={v.logoOffset?.x ?? 0}
-                onChange={(x) => onChange({ ...v, logoOffset: { x, y: v.logoOffset?.y ?? 0 } })}
-                step={1}
-                suffix="px"
-              />
-              <PwaNumberField
-                label="Move Y"
-                value={v.logoOffset?.y ?? 0}
-                onChange={(y) => onChange({ ...v, logoOffset: { x: v.logoOffset?.x ?? 0, y } })}
-                step={1}
-                suffix="px"
-              />
-            </div>
+            <PwaLogoControls
+              size={v.logoSize}
+              offset={v.logoOffset}
+              onSizeChange={(logoSize) => onChange({ ...v, logoSize })}
+              onOffsetChange={(logoOffset) => onChange({ ...v, logoOffset })}
+            />
           </PwaGroup>
         ) : null}
         <PwaGroup title="Hero">
@@ -176,10 +140,9 @@ export function ModulesEditor({
                     onChange={(label) => updateTile(i, { label })}
                   />
                   <ImageField
-                    layout="cover"
-                    aspect="2/1"
+                    layout="compact"
                     label="Tile image"
-                    hint="Background photo of the tile. JPG or PNG."
+                    hint="Background photo · JPG · PNG"
                     value={t.image}
                     onChange={(image) => updateTile(i, { image: image ?? '' })}
                   />

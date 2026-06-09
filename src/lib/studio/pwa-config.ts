@@ -4,6 +4,7 @@ import path from 'node:path';
 import 'server-only';
 
 import type { PwaConfig } from '@/lib/config';
+import { normalizePwaSliceDashboard } from '@/lib/pwa-dashboard';
 
 import { kv, kvKeys } from './kv';
 
@@ -77,13 +78,16 @@ export async function makeDefaultPwaSlice(): Promise<PwaConfig> {
  * Análogo al drift-recovery del editor del kiosk (`kiosk/page.tsx`).
  */
 export async function loadPwaSlice(slug: string): Promise<PwaConfig> {
+  // Self-heal: cualquier slice (KV, FS o template) se devuelve con el dashboard
+  // ya normalizado (QA ∩ tiles = ∅). Limpia datos guardados con duplicados sin
+  // requerir una acción del operador. El publish lee por esta vía → sale limpio.
   const fromKv = await kv.get<PwaConfig>(kvKeys.pwa(slug));
-  if (fromKv) return fromKv;
+  if (fromKv) return normalizePwaSliceDashboard(fromKv);
 
   const fromClientFs = await readPwaSliceFromFs(slug);
-  if (fromClientFs) return fromClientFs;
+  if (fromClientFs) return normalizePwaSliceDashboard(fromClientFs);
 
-  return makeDefaultPwaSlice();
+  return normalizePwaSliceDashboard(await makeDefaultPwaSlice());
 }
 
 /** Carga la metadata del slice PWA, o `null` si nunca se guardó. */
@@ -100,7 +104,9 @@ export async function ensurePwaSlice(slug: string): Promise<PwaSliceMeta> {
   const existingMeta = await loadPwaMeta(slug);
   if (existingMeta) return existingMeta;
 
-  const seed = (await readPwaSliceFromFs(slug)) ?? (await makeDefaultPwaSlice());
+  const seed = normalizePwaSliceDashboard(
+    (await readPwaSliceFromFs(slug)) ?? (await makeDefaultPwaSlice()),
+  );
   const now = new Date().toISOString();
   const meta: PwaSliceMeta = {
     slug,
@@ -123,7 +129,8 @@ export async function savePwaSlice(slug: string, slice: PwaConfig): Promise<PwaS
     lastEditedAt: now,
     currentVersion: (prev?.currentVersion ?? 0) + 1,
   };
-  await kv.set(kvKeys.pwa(slug), slice);
+  // Defensa: lo persistido siempre cumple el invariante QA ∩ tiles = ∅.
+  await kv.set(kvKeys.pwa(slug), normalizePwaSliceDashboard(slice));
   await kv.set(kvKeys.pwaMeta(slug), meta);
   return meta;
 }

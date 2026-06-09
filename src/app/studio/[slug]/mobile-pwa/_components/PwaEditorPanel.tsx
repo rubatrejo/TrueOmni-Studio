@@ -1,6 +1,7 @@
 'use client';
 
 import type { PwaConfig } from '@/lib/config';
+import { normalizePwaDashboard } from '@/lib/pwa-dashboard';
 import type { Branding } from '@/lib/studio/schema';
 
 import { BrandingSyncBanner } from '../../../_components/BrandingSyncBanner';
@@ -93,7 +94,9 @@ export function PwaEditorPanel({
     return (
       <ModulesEditor
         value={pwa.dashboard}
-        onChange={(dashboard) => onPwaChange({ ...pwa, dashboard })}
+        onChange={(dashboard) =>
+          onPwaChange({ ...pwa, dashboard: normalizePwaDashboard(dashboard) })
+        }
         logo={branding.logo}
         onLogoChange={(logo) => onBrandingChange({ ...branding, logo: logo ?? '' })}
       />

@@ -4,6 +4,59 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-08 (tarde) — i18n PWA real + cierre milestone PWA + 3 rondas de fixes del editor (todo en prod)
+
+**Hecho (5 commits, todos pusheados a `origin/main` → 5 deploys Vercel READY):**
+
+- **`23e2d56`** — Acotado el extractor i18n PWA (`extractTranslatablePaths`): poda seed/demo +
+  no-texto → **890→518 paths**. Pobladas las **traducciones reales** de los 518 textos UI a
+  es/fr/de/pt/ja en `clients/default/features.pwa.i18n`, reusando la terminología del kiosk
+  (heredado por todo cliente clonado).
+- **`fe1d3f6`** — Cerrado el **Milestone PWA Mobile** (P0–Pz): reconciliados `PWA-ROADMAP.md` y
+  `ROADMAP.md`.
+- **`d0c1dc9` (R1, 7 fixes)** — Logo del cliente en preview Login/Welcome (bridge envía
+  idleLogo/footerLogo) · botón "View in preview" por sección · fallback del endpoint de assets a
+  `clients/default` · sección "Dashboard" (renombra Modules) + control de Logo · tokens `--pwa-*`
+  de marca derivan de `--brand-*` vía `var()` · FAB Ask AI +20% · ancho del color field.
+- **`f4e9849` (R2, 6 fixes)** — Logo dashboard PWA size+pos · tiles PWA con imágenes/labels del
+  kiosk (Title Case, sin uppercase) + ImageField por tile · botón preview estilo kiosk (Play+sky) ·
+  **Full-width tile en el kiosk** (ModuleEntry.wide end-to-end) · breadcrumb sin icono · strings
+  del editor a inglés.
+- **`c58bb4e` (R3, 3 fixes)** — Overflow del input hex (`min-w-0` en ColorPicker) · control de
+  tamaño+posición del logo Login/Welcome con UI compartida `PwaLogoControls` · editor de imagen de
+  tiles en `layout="compact"`.
+
+**Verificado:**
+
+- En cada commit: `pnpm typecheck` + `pnpm lint` (0 errores) + `validate:configs` 3/3 + prettier.
+  (`pnpm build` local denegado por el sandbox → validado en Vercel.)
+- Los **5 deploys a producción quedaron READY** (verificado con el MCP de Vercel). Prod pasó de
+  `47409b2` (estancado) a `c58bb4e`.
+
+**Pendiente / siguiente:**
+
+- **QA visual de Rubén en prod** de los 16 fixes; en especial el **Full-width tile del kiosk**
+  (toca el render pixel-perfect del Home: tile wide = 950×460 col-span-2).
+- Traducciones i18n PWA para clientes ya existentes en KV (correr "Auto-translate empty" en Vercel).
+- Borrar `.tmp-shots/` (screenshots locales untracked).
+- Aplicar a `CLAUDE.md §9` la regla de **auto-push a Vercel** (revoca "no git push sin aprobación").
+
+**Decisiones:**
+
+- **Auto-push a Vercel:** tras implementar lo que Rubén pide → verificar → commit → **push a
+  `origin/main`** sin pedir permiso; vigilar deploy hasta READY. Guardado en memoria
+  (`feedback_auto_push_vercel.md`). Revoca la regla previa de §9.
+- **`PwaLogoControls`** = componente único (size S/M/L/XL + move X/Y) reutilizado por Dashboard y
+  Login para UI consistente con el kiosk.
+- Tokens `--pwa-*` de marca derivan de `--brand-*` con `var()` (cambio del bridge se propaga solo).
+- Tiles PWA heredan por default imágenes+labels del kiosk; el `min-w-0` (no el ancho del wrapper)
+  era la causa real del overflow del input hex.
+
+**Fase:** Milestone PWA Mobile **CERRADO**; trabajo post-cierre = iteración de fixes del editor
+Studio en producción.
+
+---
+
 ### Sesión 2026-06-08 — Editor PWA del Studio COMPLETO (todos los módulos + auxiliares + ads + i18n) + backend Pz + Tavus verificado
 
 **Hecho (sin commit previo dentro de la sesión; un único commit al cierre):**

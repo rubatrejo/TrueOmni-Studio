@@ -191,7 +191,7 @@ El subagent `auditor-white-label` fuerza estas reglas antes de cada commit.
 - ❌ Declarar una pantalla lista sin comparar contra el SVG original.
 - ❌ Saltarse plan mode en tareas no triviales.
 - ❌ Cargar los 10 skills a la vez (seguir SKILLS.md por tiers).
-- ❌ Ejecutar `pnpm build` o `git push` sin mi aprobación explícita.
+- ⚙️ `git push` a `origin/main`: por defecto, tras implementar un cambio que Rubén pidió → verificar (`typecheck`/`lint`/`validate`) → commit → **push** sin pedir aprobación (decisión 2026-06-08; Vercel auto-deploya, vigilar el deploy hasta READY; si entra en ERROR, leer build logs y arreglar). NO pushear trabajo exploratorio ni cambios no pedidos. `pnpm build` sigue requiriendo aprobación (o se valida en Vercel). Ver memoria `feedback_auto_push_vercel.md`.
 - ❌ Borrar archivos de `.planning/` sin permiso.
 - ❌ Mezclar trabajo de varias fases en un commit.
 - ❌ Usar `git add -A` ciego; siempre archivos específicos.

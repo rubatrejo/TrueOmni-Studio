@@ -9,14 +9,7 @@ import { resolvePwaTileRoute } from '@/lib/pwa-routes';
 
 import { ImageField } from '../../../_components/ImageField';
 
-import {
-  move,
-  PwaField,
-  PwaGroup,
-  PwaLogoControls,
-  PwaPanelHeader,
-  ReorderButtons,
-} from './pwa-ui';
+import { PwaField, PwaGroup, PwaLogoControls, PwaPanelHeader } from './pwa-ui';
 
 /**
  * Editor de los módulos / navegación de la PWA: hero, accesos rápidos y tiles
@@ -105,24 +98,40 @@ export function ModulesEditor({
         </PwaGroup>
 
         {v.quickAccess.length > 0 ? (
-          <PwaGroup title="Quick access">
-            {v.quickAccess.map((q, i) => (
-              <div key={q.key} className="flex items-start gap-2">
-                <ReorderButtons
-                  index={i}
-                  count={v.quickAccess.length}
-                  onMove={(to) => onChange({ ...v, quickAccess: move(v.quickAccess, i, to) })}
+          <section className="space-y-3">
+            <header className="min-w-0">
+              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                Quick access
+              </h3>
+              <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
+                Drag to reorder · pick a module · click to rename · set its image.
+              </p>
+            </header>
+            <Reorder.Group
+              axis="y"
+              values={v.quickAccess}
+              onReorder={(quickAccess) => onChange({ ...v, quickAccess })}
+              className="flex flex-col gap-1.5"
+            >
+              {v.quickAccess.map((q, i) => (
+                <PwaQuickAccessRow
+                  key={`${q.key}-${i}`}
+                  item={q}
+                  tiles={v.tiles}
+                  onSelectModule={(tile) =>
+                    updateQuick(i, {
+                      key: tile.key,
+                      label: tile.label,
+                      image: tile.image,
+                      route: tile.route,
+                    })
+                  }
+                  onLabel={(label) => updateQuick(i, { label })}
+                  onImage={(image) => updateQuick(i, { image: image ?? '' })}
                 />
-                <div className="flex-1">
-                  <PwaField
-                    label={q.key}
-                    value={q.label}
-                    onChange={(label) => updateQuick(i, { label })}
-                  />
-                </div>
-              </div>
-            ))}
-          </PwaGroup>
+              ))}
+            </Reorder.Group>
+          </section>
         ) : null}
 
         {/* Dashboard tiles — misma UI que el editor del kiosk (drag · rename ·
@@ -351,5 +360,137 @@ function ToggleSwitch({
         )}
       </span>
     </button>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* PwaQuickAccessRow — misma fila que los Dashboard tiles (grip · rename ·     */
+/* imagen) + un selector para cambiar este acceso rápido por otro módulo del  */
+/* Dashboard. Se mantienen 4 (el hero del XD tiene 4 posiciones fijas).       */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function PwaQuickAccessRow({
+  item,
+  tiles,
+  onSelectModule,
+  onLabel,
+  onImage,
+}: {
+  item: PwaQuickAccess;
+  /** Módulos elegibles = los tiles del Dashboard. */
+  tiles: PwaTile[];
+  onSelectModule: (tile: PwaTile) => void;
+  onLabel: (label: string) => void;
+  onImage: (image: string | undefined) => void;
+}) {
+  const dragControls = useDragControls();
+  const [editing, setEditing] = useState(false);
+  const displayLabel = item.label.replace(/\n/g, ' ');
+  const [draft, setDraft] = useState(displayLabel);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const isKnownModule = tiles.some((t) => t.key === item.key);
+
+  useEffect(() => {
+    if (!editing) setDraft(displayLabel);
+  }, [displayLabel, editing]);
+
+  useEffect(() => {
+    if (editing) inputRef.current?.select();
+  }, [editing]);
+
+  const commit = () => {
+    const next = draft.replace(/\s+/g, ' ').trim();
+    if (next.length > 0 && next !== displayLabel) onLabel(next);
+    else setDraft(displayLabel);
+    setEditing(false);
+  };
+
+  const cancel = () => {
+    setDraft(displayLabel);
+    setEditing(false);
+  };
+
+  return (
+    <Reorder.Item
+      value={item}
+      dragListener={false}
+      dragControls={dragControls}
+      className="group relative block rounded-lg border border-zinc-200 bg-white p-2 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-900 dark:bg-zinc-900/40 dark:hover:border-zinc-800 dark:hover:bg-zinc-900/70"
+    >
+      <div className="flex items-center gap-2.5">
+        <button
+          type="button"
+          onPointerDown={(e) => dragControls.start(e)}
+          className="grid h-7 w-5 shrink-0 cursor-grab place-items-center text-zinc-400 transition hover:text-zinc-600 active:cursor-grabbing dark:text-zinc-600 dark:hover:text-zinc-300"
+          aria-label={`Drag ${displayLabel}`}
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+
+        <div className="flex flex-1 flex-col">
+          {editing ? (
+            <input
+              ref={inputRef}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={commit}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  commit();
+                } else if (e.key === 'Escape') {
+                  e.preventDefault();
+                  cancel();
+                }
+              }}
+              className="h-7 w-full rounded-md border border-sky-500/50 bg-white px-2 font-display text-[12.5px] font-medium leading-none text-zinc-900 outline-none ring-2 ring-sky-500/20 dark:bg-zinc-950 dark:text-white"
+              spellCheck={false}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="block cursor-text truncate rounded-md px-2 py-0.5 text-left font-display text-[12.5px] font-medium leading-snug text-zinc-800 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800/70"
+              title="Click to rename"
+            >
+              {displayLabel}
+            </button>
+          )}
+          <span className="px-2 font-mono text-[10px] text-zinc-400 dark:text-zinc-600">
+            {resolvePwaTileRoute(item) || '— (not navigable)'}
+          </span>
+        </div>
+
+        {/* Cambiar este acceso rápido por otro módulo del Dashboard. */}
+        <select
+          value={isKnownModule ? item.key : ''}
+          onChange={(e) => {
+            const tile = tiles.find((t) => t.key === e.target.value);
+            if (tile) onSelectModule(tile);
+          }}
+          aria-label="Module"
+          title="Change this quick access to another module"
+          className="max-w-[120px] shrink-0 rounded-md border border-zinc-200 bg-white px-1.5 py-1 text-[11px] font-medium text-zinc-700 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-200"
+        >
+          {!isKnownModule ? <option value="">{displayLabel} (custom)</option> : null}
+          {tiles.map((t) => (
+            <option key={t.key} value={t.key}>
+              {t.label.replace(/\n/g, ' ')}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Imagen del squircle del hero. */}
+      <div className="mt-2 pl-[30px]">
+        <ImageField
+          layout="compact"
+          label="Tile image"
+          hint="Background photo · JPG · PNG"
+          value={item.image}
+          onChange={onImage}
+        />
+      </div>
+    </Reorder.Item>
   );
 }

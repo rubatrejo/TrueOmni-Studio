@@ -210,11 +210,26 @@ export function StudioBridge() {
           break;
         case 'studio:locale-update':
           // Multi-idioma preview (#10 audit). El i18n-provider escucha este
-          // evento y cambia el locale activo del store sin reload.
+          // evento y cambia el locale activo del store sin reload (textos del
+          // kiosk reutilizados vía `useTextos`).
           if (typeof data.locale === 'string') {
+            const nextLocale = data.locale;
             window.dispatchEvent(
-              new CustomEvent('kiosk:locale-update', { detail: { locale: data.locale } }),
+              new CustomEvent('kiosk:locale-update', { detail: { locale: nextLocale } }),
             );
+            // La PWA resuelve su slice (`features.pwa`) server-side por la cookie
+            // `pwa_locale` (ver `(pwa)/layout`). El cambio reactivo no basta:
+            // hay que escribir la cookie y recargar para re-resolver. Guard por
+            // valor actual para no entrar en loop con el re-envío del handshake.
+            try {
+              if (window.location.pathname.startsWith('/pwa')) {
+                const current = document.cookie.match(/(?:^|;\s*)pwa_locale=([^;]+)/)?.[1];
+                if (current !== nextLocale) {
+                  document.cookie = `pwa_locale=${nextLocale};path=/;max-age=31536000;samesite=lax`;
+                  window.location.reload();
+                }
+              }
+            } catch {}
           }
           break;
         case 'studio:map-open-preview':
@@ -364,7 +379,7 @@ export type HeroOverrideDetail = {
 };
 
 type ModulesPatch = {
-  tiles: Array<{ key: string; label: string; enabled: boolean; wide?: boolean }>;
+  tiles: Array<{ key: string; label: string; enabled: boolean; wide?: boolean; image?: string }>;
   systemModules?: { ads: boolean; languages: boolean; aiAvatar: boolean };
   /** Tamaño global de la tipografía de los títulos de los tiles (px). */
   tileTitleFontSize?: number;

@@ -161,6 +161,12 @@ export const ModuleEntrySchema = z.object({
   enabled: z.boolean(),
   /** Si true, el tile ocupa el ancho completo del grid (las 2 columnas). */
   wide: z.boolean().optional(),
+  /**
+   * Imagen de fondo del tile (path `/assets/home/tiles/{key}.jpg` o data URL).
+   * Opcional: si `undefined`, el publish preserva la imagen del filesystem por
+   * `key`. Editable desde el Home Dashboard del Studio (igual que la PWA).
+   */
+  image: z.string().optional(),
 });
 
 /**

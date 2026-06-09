@@ -95,6 +95,8 @@ import {
   type SystemModules,
 } from '@/lib/studio/schema';
 
+import { ImageField } from './ImageField';
+
 /* ────────────────────────────────────────────────────────────────────────── */
 /* Icon helpers (Lucide + custom image)                                       */
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -406,6 +408,12 @@ export function HomeDashboardEditor({
       tiles: modules.tiles.map((t) => (t.key === key ? { ...t, wide } : t)),
     });
 
+  const handleImage = (key: string, image: string | undefined) =>
+    onChange({
+      ...modules,
+      tiles: modules.tiles.map((t) => (t.key === key ? { ...t, image: image ?? '' } : t)),
+    });
+
   const handleReset = () => onChange({ ...defaultModules(), systemModules: modules.systemModules });
 
   return (
@@ -497,6 +505,7 @@ export function HomeDashboardEditor({
                   onToggle={() => handleToggle(entry.key)}
                   onLabel={(label) => handleLabel(entry.key, label)}
                   onWide={(wide) => handleWide(entry.key, wide)}
+                  onImage={(image) => handleImage(entry.key, image)}
                 />
               );
             })}
@@ -1160,6 +1169,7 @@ function ModuleRow({
   onToggle,
   onLabel,
   onWide,
+  onImage,
 }: {
   entry: ModuleEntry;
   /** Pareja resuelta por el caller: prioridad customIcon > iconKey Lucide. */
@@ -1168,6 +1178,7 @@ function ModuleRow({
   onToggle: () => void;
   onLabel: (label: string) => void;
   onWide: (wide: boolean) => void;
+  onImage: (image: string | undefined) => void;
 }) {
   const dragControls = useDragControls();
   const [editing, setEditing] = useState(false);
@@ -1201,81 +1212,96 @@ function ModuleRow({
       dragListener={false}
       dragControls={dragControls}
       className={
-        'group relative flex items-center gap-2.5 overflow-hidden rounded-lg border bg-white p-2 transition dark:bg-zinc-900/40 ' +
+        'group relative block rounded-lg border bg-white p-2 transition dark:bg-zinc-900/40 ' +
         (entry.enabled
           ? 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-900 dark:hover:border-zinc-800 dark:hover:bg-zinc-900/70'
           : 'border-dashed border-zinc-200 opacity-60 hover:opacity-100 dark:border-zinc-900')
       }
     >
-      <button
-        type="button"
-        onPointerDown={(e) => dragControls.start(e)}
-        className="grid h-7 w-5 shrink-0 cursor-grab place-items-center text-zinc-400 transition hover:text-zinc-600 active:cursor-grabbing dark:text-zinc-600 dark:hover:text-zinc-300"
-        aria-label={`Drag ${entry.label}`}
-      >
-        <GripVertical className="h-4 w-4" />
-      </button>
+      <div className="flex items-center gap-2.5">
+        <button
+          type="button"
+          onPointerDown={(e) => dragControls.start(e)}
+          className="grid h-7 w-5 shrink-0 cursor-grab place-items-center text-zinc-400 transition hover:text-zinc-600 active:cursor-grabbing dark:text-zinc-600 dark:hover:text-zinc-300"
+          aria-label={`Drag ${entry.label}`}
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
 
-      <span
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-zinc-100 text-zinc-600 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800"
-        aria-hidden
-      >
-        <IconNode iconKey={iconKey} customIcon={customIcon} className="h-4 w-4" />
-      </span>
-
-      <div className="flex flex-1 flex-col">
-        {editing ? (
-          <input
-            ref={inputRef}
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onBlur={commit}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                commit();
-              } else if (e.key === 'Escape') {
-                e.preventDefault();
-                cancel();
-              }
-            }}
-            className="h-7 w-full rounded-md border border-sky-500/50 bg-white px-2 font-display text-[12.5px] font-medium leading-none text-zinc-900 outline-none ring-2 ring-sky-500/20 dark:bg-zinc-950 dark:text-white"
-            spellCheck={false}
-          />
-        ) : (
-          <button
-            type="button"
-            onClick={() => setEditing(true)}
-            className="block cursor-text truncate rounded-md px-2 py-0.5 text-left font-display text-[12.5px] font-medium leading-snug text-zinc-800 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800/70"
-            title="Click to rename"
-          >
-            {displayLabel}
-          </button>
-        )}
-        <span className="px-2 font-mono text-[10px] text-zinc-400 dark:text-zinc-600">
-          /home/{entry.key}
+        <span
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-zinc-100 text-zinc-600 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-800"
+          aria-hidden
+        >
+          <IconNode iconKey={iconKey} customIcon={customIcon} className="h-4 w-4" />
         </span>
+
+        <div className="flex flex-1 flex-col">
+          {editing ? (
+            <input
+              ref={inputRef}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={commit}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  commit();
+                } else if (e.key === 'Escape') {
+                  e.preventDefault();
+                  cancel();
+                }
+              }}
+              className="h-7 w-full rounded-md border border-sky-500/50 bg-white px-2 font-display text-[12.5px] font-medium leading-none text-zinc-900 outline-none ring-2 ring-sky-500/20 dark:bg-zinc-950 dark:text-white"
+              spellCheck={false}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="block cursor-text truncate rounded-md px-2 py-0.5 text-left font-display text-[12.5px] font-medium leading-snug text-zinc-800 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800/70"
+              title="Click to rename"
+            >
+              {displayLabel}
+            </button>
+          )}
+          <span className="px-2 font-mono text-[10px] text-zinc-400 dark:text-zinc-600">
+            /home/{entry.key}
+          </span>
+        </div>
+
+        {/* Full-width: el tile ocupa las 2 columnas del grid. */}
+        <button
+          type="button"
+          onClick={() => onWide(!entry.wide)}
+          aria-pressed={entry.wide ?? false}
+          title={
+            entry.wide
+              ? 'Full width tile (spans 2 columns)'
+              : 'Make this tile full width (2 columns)'
+          }
+          className={
+            'shrink-0 rounded-md border px-1.5 py-1 text-[10px] font-semibold transition ' +
+            ((entry.wide ?? false)
+              ? 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:border-sky-400/40 dark:text-sky-300'
+              : 'border-zinc-200 bg-white text-zinc-400 hover:text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-500')
+          }
+        >
+          Wide
+        </button>
+
+        <ToggleSwitch enabled={entry.enabled} onChange={onToggle} label={entry.label} />
       </div>
 
-      {/* Full-width: el tile ocupa las 2 columnas del grid. */}
-      <button
-        type="button"
-        onClick={() => onWide(!entry.wide)}
-        aria-pressed={entry.wide ?? false}
-        title={
-          entry.wide ? 'Full width tile (spans 2 columns)' : 'Make this tile full width (2 columns)'
-        }
-        className={
-          'shrink-0 rounded-md border px-1.5 py-1 text-[10px] font-semibold transition ' +
-          ((entry.wide ?? false)
-            ? 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:border-sky-400/40 dark:text-sky-300'
-            : 'border-zinc-200 bg-white text-zinc-400 hover:text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-500')
-        }
-      >
-        Wide
-      </button>
-
-      <ToggleSwitch enabled={entry.enabled} onChange={onToggle} label={entry.label} />
+      {/* Imagen de fondo del tile — editable como en el editor PWA. */}
+      <div className="mt-2 pl-[30px]">
+        <ImageField
+          layout="compact"
+          label="Tile image"
+          hint="Background photo · JPG · PNG"
+          value={entry.image}
+          onChange={onImage}
+        />
+      </div>
     </Reorder.Item>
   );
 }

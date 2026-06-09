@@ -316,7 +316,8 @@ function applyModulesAndTiles(
   const wayfindingTile = modules.tiles.find((t) => t.key === 'wayfinding');
   const homeTiles = modules.tiles.filter((t) => t.key !== 'wayfinding');
 
-  // Preservar `image` por key de los tiles existentes en filesystem.
+  // Imagen del tile: gana la editada en el Studio (`t.image`); si el operador
+  // no la tocó, se preserva la del filesystem por `key`.
   const currentTiles = Array.isArray(home.tiles)
     ? (home.tiles as Array<Record<string, unknown>>)
     : [];
@@ -330,7 +331,7 @@ function applyModulesAndTiles(
     key: t.key,
     label: t.label,
     enabled: t.enabled,
-    image: imageByKey.get(t.key) ?? '',
+    image: t.image ?? imageByKey.get(t.key) ?? '',
     ...(t.wide ? { wide: true } : {}),
   }));
 

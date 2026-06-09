@@ -135,8 +135,8 @@ export const PWA_SECTIONS: readonly PwaSection[] = [
   {
     key: 'stay',
     num: '09',
-    label: 'Places to Stay',
-    title: 'Places to Stay',
+    label: 'Stay',
+    title: 'Stay',
     description:
       'White-label texts of the Places to Stay module (grid, list, filters and detail screens).',
     icon: 'BookOpen',

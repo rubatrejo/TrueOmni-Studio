@@ -35,6 +35,7 @@ export function usePwaPreviewBridge() {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const lastPwaRef = useRef<PwaConfig | null>(null);
   const lastBrandingRef = useRef<PwaBrandingPatch | null>(null);
+  const lastLocaleRef = useRef<string | null>(null);
   const pwaDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const brandingDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -97,10 +98,15 @@ export function usePwaPreviewBridge() {
       setLastAckAt(Date.now());
       if (lastBrandingRef.current) sendBrandingNow(lastBrandingRef.current);
       if (lastPwaRef.current) sendPwaNow(lastPwaRef.current);
+      // Re-sincroniza el locale tras un reload del iframe (el cambio de idioma
+      // recarga la PWA para re-resolver el slice server-side). El guard de la
+      // cookie en `StudioBridge` evita un segundo reload en cadena.
+      if (lastLocaleRef.current)
+        post({ type: 'studio:locale-update', locale: lastLocaleRef.current });
     };
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
-  }, [sendBrandingNow, sendPwaNow]);
+  }, [sendBrandingNow, sendPwaNow, post]);
 
   const pushPwa = useCallback(
     (pwa: PwaConfig) => {
@@ -121,7 +127,10 @@ export function usePwaPreviewBridge() {
   );
 
   const pushLocale = useCallback(
-    (locale: string) => post({ type: 'studio:locale-update', locale }),
+    (locale: string) => {
+      lastLocaleRef.current = locale;
+      post({ type: 'studio:locale-update', locale });
+    },
     [post],
   );
 

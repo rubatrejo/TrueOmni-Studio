@@ -89,6 +89,7 @@ export function usePreviewBridge() {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const lastBrandingRef = useRef<BrandingPatch | null>(null);
   const lastModulesRef = useRef<ModulesConfig | null>(null);
+  const lastLocaleRef = useRef<string | null>(null);
   const lastBillboardRef = useRef<BillboardConfig | null>(null);
   const lastAiRef = useRef<AiAvatarConfig | null>(null);
   const lastSurveyRef = useRef<SurveyConfig | null>(null);
@@ -595,6 +596,21 @@ export function usePreviewBridge() {
       setLastAckAt(Date.now());
       if (lastBrandingRef.current) sendBrandingNow(lastBrandingRef.current);
       if (lastModulesRef.current) sendModulesNow(lastModulesRef.current);
+      // Re-sincroniza el locale del preview tras un reload del iframe (el
+      // dropdown EN/ES/… persiste aunque se recargue o se navegue de pantalla).
+      if (lastLocaleRef.current) {
+        const win = iframeRef.current?.contentWindow;
+        if (win) {
+          try {
+            win.postMessage(
+              { type: 'studio:locale-update', locale: lastLocaleRef.current },
+              IFRAME_TARGET_ORIGIN,
+            );
+          } catch {
+            /* ignore — iframe puede no estar listo aún */
+          }
+        }
+      }
       if (lastBillboardRef.current) sendBillboardNow(lastBillboardRef.current);
       if (lastAiRef.current) sendAiNow(lastAiRef.current);
       if (lastSurveyRef.current) sendSurveyNow(lastSurveyRef.current);
@@ -812,6 +828,7 @@ export function usePreviewBridge() {
    *  i18n-provider escucha `kiosk:locale-update` y actualiza el store de
    *  zustand. No hay debounce — el cambio es discreto (dropdown). */
   const pushLocale = useCallback((locale: string) => {
+    lastLocaleRef.current = locale;
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
@@ -820,6 +837,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Cuando el iframe re-monta, resetea ready para forzar un nuevo handshake.

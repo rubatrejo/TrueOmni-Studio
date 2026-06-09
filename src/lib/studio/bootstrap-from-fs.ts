@@ -298,29 +298,38 @@ export function bootstrapStudioFromFs(
     }
   }
 
-  // ── modules (tiles enabled + labels) ──
-  // El Studio.modules.tiles ya tiene shape correcto; sólo importa hidratar
-  // los `enabled` desde fs si el operador no los tocó. Heurística: si
-  // todos los enabled del Studio están en true (default factory), copiar
-  // los enabled del fs.
+  // ── modules (tiles enabled + labels + image) ──
+  // El Studio.modules.tiles ya tiene shape correcto; hidratamos desde fs:
+  //  - `image`: SIEMPRE (la imagen de fondo del tile vive en el fs config; el
+  //    editor del Home Dashboard la necesita para mostrarla/editarla).
+  //  - `enabled`: solo si el operador no lo tocó (heurística: todos en true =
+  //    default factory).
   if (next.modules) {
     const fsTiles = fsConfig.features?.home?.tiles;
-    if (Array.isArray(fsTiles) && allTilesEnabled(next.modules.tiles)) {
+    if (Array.isArray(fsTiles)) {
+      const fsImageByKey = new Map<string, string>();
       const fsEnabledByKey = new Map<string, boolean>();
       for (const t of fsTiles) {
-        if (typeof t?.key === 'string' && typeof t?.enabled === 'boolean') {
-          fsEnabledByKey.set(t.key, t.enabled);
-        }
+        if (typeof t?.key !== 'string') continue;
+        if (typeof t?.image === 'string') fsImageByKey.set(t.key, t.image);
+        if (typeof t?.enabled === 'boolean') fsEnabledByKey.set(t.key, t.enabled);
       }
       const wayfindingTile = fsConfig.features?.home?.wayfinding;
-      if (wayfindingTile && typeof wayfindingTile.enabled === 'boolean') {
-        fsEnabledByKey.set('wayfinding', wayfindingTile.enabled);
+      if (wayfindingTile) {
+        if (typeof wayfindingTile.image === 'string') {
+          fsImageByKey.set('wayfinding', wayfindingTile.image);
+        }
+        if (typeof wayfindingTile.enabled === 'boolean') {
+          fsEnabledByKey.set('wayfinding', wayfindingTile.enabled);
+        }
       }
+      const hydrateEnabled = allTilesEnabled(next.modules.tiles);
       next.modules = {
         ...next.modules,
         tiles: next.modules.tiles.map((t) => ({
           ...t,
-          enabled: fsEnabledByKey.get(t.key) ?? t.enabled,
+          image: t.image ?? fsImageByKey.get(t.key),
+          enabled: hydrateEnabled ? (fsEnabledByKey.get(t.key) ?? t.enabled) : t.enabled,
         })),
       };
     }

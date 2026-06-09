@@ -164,7 +164,8 @@ export function DashboardScreen({
         {quickAccess.slice(0, 4).map((q, i) => {
           const cx = CARD_X[i] + 33; // centro de la card
           return (
-            <div key={q.key}>
+            // key con índice: dos accesos rápidos pueden apuntar al mismo módulo.
+            <div key={`${q.key}-${i}`}>
               {/* halo */}
               <div
                 className="absolute"

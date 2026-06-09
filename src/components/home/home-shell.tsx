@@ -10,7 +10,7 @@ import { SearchBar } from './search-bar';
 import { SearchOverlay } from './search-overlay';
 
 type ModulesOverridePayload = {
-  tiles: Array<{ key: string; label: string; enabled: boolean; wide?: boolean }>;
+  tiles: Array<{ key: string; label: string; enabled: boolean; wide?: boolean; image?: string }>;
   /** Tamaño global de la tipografía de los títulos de los tiles (px). */
   tileTitleFontSize?: number;
 };
@@ -106,7 +106,14 @@ export function HomeShell({
       if (!isCoreEnabled(entry.key)) continue;
       const base = tilesByKey.get(entry.key);
       if (base) {
-        out.push({ ...base, label: entry.label, wide: entry.wide });
+        // `image` del override gana (el operador la editó en vivo); si no llega,
+        // conserva la del config publicado.
+        out.push({
+          ...base,
+          label: entry.label,
+          wide: entry.wide,
+          image: entry.image ?? base.image,
+        });
       } else {
         // Tile dinámico que el server no conoce (ej. listing module nuevo
         // duplicado en el Studio). Renderizamos con placeholder de imagen.

@@ -880,6 +880,12 @@ export interface PwaTile {
   /** Si true, ocupa el ancho completo del grid (1 columna span 2). */
   wide?: boolean;
   /**
+   * Si `false`, el tile se oculta del grid del Dashboard PWA. `undefined`/`true`
+   * = visible (default; preserva los clientes existentes sin el campo).
+   * Análogo a `ModuleEntry.enabled` del kiosk.
+   */
+  enabled?: boolean;
+  /**
    * Ruta destino (white-label). Si se omite, el default es `/pwa/{key}`.
    * Usar `""` para un tile no navegable (sin pantalla propia). Ver `resolvePwaTileRoute`.
    */

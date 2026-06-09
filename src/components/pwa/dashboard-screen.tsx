@@ -210,25 +210,27 @@ export function DashboardScreen({
       {/* Grid de tiles (único que scrollea) */}
       <div className="scrollbar-hide flex-1 overflow-y-auto bg-background">
         <div className="grid grid-cols-2 gap-4 px-5 pb-5 pt-5">
-          {tiles.map((t) => (
-            <button
-              key={t.key}
-              type="button"
-              onClick={() => {
-                const dest = resolvePwaTileRoute(t);
-                if (dest) router.push(dest);
-              }}
-              className={`relative h-[125px] overflow-hidden rounded-[6px] bg-cover bg-center ${
-                t.wide ? 'col-span-2' : ''
-              }`}
-              style={bg(t.image)}
-            >
-              <span className="absolute inset-0 bg-black/40" />
-              <span className="absolute inset-0 flex items-center justify-center whitespace-pre-line px-3 text-center text-[15px] font-bold leading-tight text-white">
-                {t.label}
-              </span>
-            </button>
-          ))}
+          {tiles
+            .filter((t) => t.enabled !== false)
+            .map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                onClick={() => {
+                  const dest = resolvePwaTileRoute(t);
+                  if (dest) router.push(dest);
+                }}
+                className={`relative h-[125px] overflow-hidden rounded-[6px] bg-cover bg-center ${
+                  t.wide ? 'col-span-2' : ''
+                }`}
+                style={bg(t.image)}
+              >
+                <span className="absolute inset-0 bg-black/40" />
+                <span className="absolute inset-0 flex items-center justify-center whitespace-pre-line px-3 text-center text-[15px] font-bold leading-tight text-white">
+                  {t.label}
+                </span>
+              </button>
+            ))}
         </div>
       </div>
 

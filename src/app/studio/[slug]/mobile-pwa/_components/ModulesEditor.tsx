@@ -1,6 +1,11 @@
 'use client';
 
+import { Reorder, useDragControls } from 'framer-motion';
+import { Eye, EyeOff, GripVertical } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+
 import type { PwaDashboardConfig, PwaQuickAccess, PwaTile } from '@/lib/config';
+import { resolvePwaTileRoute } from '@/lib/pwa-routes';
 
 import { ImageField } from '../../../_components/ImageField';
 
@@ -15,9 +20,10 @@ import {
 
 /**
  * Editor de los módulos / navegación de la PWA: hero, accesos rápidos y tiles
- * del dashboard. v1 cubre las operaciones seguras (renombrar, reordenar,
- * ancho completo) que no rompen rutas. Añadir/eliminar tiles llega después
- * porque cambia la navegación config-driven (`resolvePwaTileRoute`).
+ * del dashboard. La sección "Dashboard tiles" replica la UI del editor del
+ * kiosk (drag&drop con grip, renombrar inline, botón Wide, toggle de
+ * visibilidad) para que ambos editores sean consistentes — solo cambia el
+ * contenido (los tiles de la PWA llevan imagen de fondo propia).
  */
 
 const EMPTY_DASHBOARD: PwaDashboardConfig = {
@@ -46,14 +52,16 @@ export function ModulesEditor({
     tiles: value?.tiles ?? [],
   };
 
-  const updateTile = (i: number, patch: Partial<PwaTile>) =>
-    onChange({ ...v, tiles: v.tiles.map((t, idx) => (idx === i ? { ...t, ...patch } : t)) });
+  const updateTile = (key: string, patch: Partial<PwaTile>) =>
+    onChange({ ...v, tiles: v.tiles.map((t) => (t.key === key ? { ...t, ...patch } : t)) });
 
   const updateQuick = (i: number, patch: Partial<PwaQuickAccess>) =>
     onChange({
       ...v,
       quickAccess: v.quickAccess.map((q, idx) => (idx === i ? { ...q, ...patch } : q)),
     });
+
+  const enabledCount = v.tiles.filter((t) => t.enabled !== false).length;
 
   return (
     <div className="flex h-full flex-col">
@@ -117,50 +125,231 @@ export function ModulesEditor({
           </PwaGroup>
         ) : null}
 
-        <PwaGroup title="Dashboard tiles">
+        {/* Dashboard tiles — misma UI que el editor del kiosk (drag · rename ·
+            Wide · visibilidad), con el ImageField del tile justo debajo. */}
+        <section className="space-y-3">
+          <header className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                Dashboard tiles
+              </h3>
+              <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
+                Drag to reorder · click to rename · toggle to hide from the grid.
+              </p>
+            </div>
+            {v.tiles.length > 0 ? (
+              <span className="shrink-0 whitespace-nowrap rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-0.5 font-mono text-[10.5px] leading-tight text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
+                {enabledCount}/{v.tiles.length} on
+              </span>
+            ) : null}
+          </header>
+
           {v.tiles.length === 0 ? (
             <p className="text-[12px] text-zinc-400 dark:text-zinc-500">
               No tiles configured for this client.
             </p>
           ) : (
-            v.tiles.map((t, i) => (
-              <div
-                key={t.key}
-                className="flex items-start gap-2 rounded-lg border border-zinc-200 p-2.5 dark:border-zinc-800"
-              >
-                <ReorderButtons
-                  index={i}
-                  count={v.tiles.length}
-                  onMove={(to) => onChange({ ...v, tiles: move(v.tiles, i, to) })}
+            <Reorder.Group
+              axis="y"
+              values={v.tiles}
+              onReorder={(tiles) => onChange({ ...v, tiles })}
+              className="flex flex-col gap-1.5"
+            >
+              {v.tiles.map((t) => (
+                <PwaTileRow
+                  key={t.key}
+                  tile={t}
+                  onToggle={() => updateTile(t.key, { enabled: !(t.enabled !== false) })}
+                  onLabel={(label) => updateTile(t.key, { label })}
+                  onWide={(wide) => updateTile(t.key, { wide })}
+                  onImage={(image) => updateTile(t.key, { image: image ?? '' })}
                 />
-                <div className="flex-1 space-y-2">
-                  <PwaField
-                    label={t.key}
-                    value={t.label}
-                    onChange={(label) => updateTile(i, { label })}
-                  />
-                  <ImageField
-                    layout="compact"
-                    label="Tile image"
-                    hint="Background photo · JPG · PNG"
-                    value={t.image}
-                    onChange={(image) => updateTile(i, { image: image ?? '' })}
-                  />
-                  <label className="flex items-center gap-2 text-[12px] text-zinc-600 dark:text-zinc-400">
-                    <input
-                      type="checkbox"
-                      checked={t.wide ?? false}
-                      onChange={(e) => updateTile(i, { wide: e.target.checked })}
-                      className="h-3.5 w-3.5 rounded border-zinc-300 text-sky-600 focus:ring-sky-500 dark:border-zinc-700"
-                    />
-                    Full width tile
-                  </label>
-                </div>
-              </div>
-            ))
+              ))}
+            </Reorder.Group>
           )}
-        </PwaGroup>
+        </section>
       </div>
     </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* PwaTileRow — réplica del ModuleRow del kiosk: grip + label inline + Wide +  */
+/* toggle de visibilidad, con el ImageField del tile justo debajo.            */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function PwaTileRow({
+  tile,
+  onToggle,
+  onLabel,
+  onWide,
+  onImage,
+}: {
+  tile: PwaTile;
+  onToggle: () => void;
+  onLabel: (label: string) => void;
+  onWide: (wide: boolean) => void;
+  onImage: (image: string | undefined) => void;
+}) {
+  const dragControls = useDragControls();
+  const [editing, setEditing] = useState(false);
+  const displayLabel = tile.label.replace(/\n/g, ' ');
+  const [draft, setDraft] = useState(displayLabel);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const enabled = tile.enabled !== false;
+
+  useEffect(() => {
+    if (!editing) setDraft(displayLabel);
+  }, [displayLabel, editing]);
+
+  useEffect(() => {
+    if (editing) inputRef.current?.select();
+  }, [editing]);
+
+  const commit = () => {
+    const next = draft.replace(/\s+/g, ' ').trim();
+    if (next.length > 0 && next !== displayLabel) onLabel(next);
+    else setDraft(displayLabel);
+    setEditing(false);
+  };
+
+  const cancel = () => {
+    setDraft(displayLabel);
+    setEditing(false);
+  };
+
+  return (
+    <Reorder.Item
+      value={tile}
+      dragListener={false}
+      dragControls={dragControls}
+      className={
+        'group relative rounded-lg border bg-white p-2 transition dark:bg-zinc-900/40 ' +
+        (enabled
+          ? 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-900 dark:hover:border-zinc-800 dark:hover:bg-zinc-900/70'
+          : 'border-dashed border-zinc-200 opacity-60 hover:opacity-100 dark:border-zinc-900')
+      }
+    >
+      <div className="flex items-center gap-2.5">
+        <button
+          type="button"
+          onPointerDown={(e) => dragControls.start(e)}
+          className="grid h-7 w-5 shrink-0 cursor-grab place-items-center text-zinc-400 transition hover:text-zinc-600 active:cursor-grabbing dark:text-zinc-600 dark:hover:text-zinc-300"
+          aria-label={`Drag ${displayLabel}`}
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+
+        <div className="flex flex-1 flex-col">
+          {editing ? (
+            <input
+              ref={inputRef}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={commit}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  commit();
+                } else if (e.key === 'Escape') {
+                  e.preventDefault();
+                  cancel();
+                }
+              }}
+              className="h-7 w-full rounded-md border border-sky-500/50 bg-white px-2 font-display text-[12.5px] font-medium leading-none text-zinc-900 outline-none ring-2 ring-sky-500/20 dark:bg-zinc-950 dark:text-white"
+              spellCheck={false}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="block cursor-text truncate rounded-md px-2 py-0.5 text-left font-display text-[12.5px] font-medium leading-snug text-zinc-800 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800/70"
+              title="Click to rename"
+            >
+              {displayLabel}
+            </button>
+          )}
+          <span className="px-2 font-mono text-[10px] text-zinc-400 dark:text-zinc-600">
+            {resolvePwaTileRoute(tile) || '— (not navigable)'}
+          </span>
+        </div>
+
+        {/* Full-width: el tile ocupa las 2 columnas del grid. */}
+        <button
+          type="button"
+          onClick={() => onWide(!tile.wide)}
+          aria-pressed={tile.wide ?? false}
+          title={
+            tile.wide
+              ? 'Full width tile (spans 2 columns)'
+              : 'Make this tile full width (2 columns)'
+          }
+          className={
+            'shrink-0 rounded-md border px-1.5 py-1 text-[10px] font-semibold transition ' +
+            ((tile.wide ?? false)
+              ? 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:border-sky-400/40 dark:text-sky-300'
+              : 'border-zinc-200 bg-white text-zinc-400 hover:text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-500')
+          }
+        >
+          Wide
+        </button>
+
+        <ToggleSwitch enabled={enabled} onChange={onToggle} label={displayLabel} />
+      </div>
+
+      {/* Imagen de fondo del tile (su contenido propio, ausente en el kiosk). */}
+      <div className="mt-2 pl-[30px]">
+        <ImageField
+          layout="compact"
+          label="Tile image"
+          hint="Background photo · JPG · PNG"
+          value={tile.image}
+          onChange={onImage}
+        />
+      </div>
+    </Reorder.Item>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* Toggle de visibilidad — mismo look que el ToggleSwitch del editor kiosk.    */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function ToggleSwitch({
+  enabled,
+  onChange,
+  label,
+}: {
+  enabled: boolean;
+  onChange: () => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={enabled}
+      aria-label={`${enabled ? 'Hide' : 'Show'} ${label}`}
+      onClick={onChange}
+      className={
+        'relative flex h-6 w-10 shrink-0 items-center rounded-full transition ' +
+        (enabled
+          ? 'bg-sky-500/90 hover:bg-sky-500 dark:bg-sky-400/80 dark:hover:bg-sky-400'
+          : 'bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700')
+      }
+    >
+      <span
+        className={
+          'flex h-5 w-5 transform items-center justify-center rounded-full bg-white shadow-sm transition ' +
+          (enabled ? 'translate-x-[18px]' : 'translate-x-0.5')
+        }
+      >
+        {enabled ? (
+          <Eye className="h-2.5 w-2.5 text-sky-600" />
+        ) : (
+          <EyeOff className="h-2.5 w-2.5 text-zinc-400" />
+        )}
+      </span>
+    </button>
   );
 }

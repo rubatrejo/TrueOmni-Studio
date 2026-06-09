@@ -54,6 +54,37 @@ export function ModulesEditor({
       quickAccess: v.quickAccess.map((q, idx) => (idx === i ? { ...q, ...patch } : q)),
     });
 
+  /**
+   * Intercambia un acceso rápido con un tile del Dashboard: el módulo elegido
+   * sube al slot de Quick Access y el que estaba ahí baja a Dashboard tiles, en
+   * la misma posición que ocupaba el elegido (swap). Quick Access y Dashboard
+   * tiles son un pool único y mutuamente excluyente.
+   */
+  const swapQuickAccess = (qaIndex: number, tileKey: string) => {
+    const tileIndex = v.tiles.findIndex((t) => t.key === tileKey);
+    if (tileIndex < 0) return;
+    const tile = v.tiles[tileIndex];
+    const old = v.quickAccess[qaIndex];
+    const promoted: PwaQuickAccess = {
+      key: tile.key,
+      label: tile.label,
+      image: tile.image,
+      route: tile.route,
+    };
+    const demoted: PwaTile = {
+      key: old.key,
+      label: old.label,
+      image: old.image,
+      route: old.route,
+      enabled: true,
+    };
+    onChange({
+      ...v,
+      quickAccess: v.quickAccess.map((q, idx) => (idx === qaIndex ? promoted : q)),
+      tiles: v.tiles.map((t, idx) => (idx === tileIndex ? demoted : t)),
+    });
+  };
+
   const enabledCount = v.tiles.filter((t) => t.enabled !== false).length;
 
   return (
@@ -113,23 +144,24 @@ export function ModulesEditor({
               onReorder={(quickAccess) => onChange({ ...v, quickAccess })}
               className="flex flex-col gap-1.5"
             >
-              {v.quickAccess.map((q, i) => (
-                <PwaQuickAccessRow
-                  key={`${q.key}-${i}`}
-                  item={q}
-                  tiles={v.tiles}
-                  onSelectModule={(tile) =>
-                    updateQuick(i, {
-                      key: tile.key,
-                      label: tile.label,
-                      image: tile.image,
-                      route: tile.route,
-                    })
-                  }
-                  onLabel={(label) => updateQuick(i, { label })}
-                  onImage={(image) => updateQuick(i, { image: image ?? '' })}
-                />
-              ))}
+              {v.quickAccess.map((q, i) => {
+                // Módulos elegibles = los tiles del Dashboard que no estén ya en
+                // OTRO acceso rápido (los slots son mutuamente excluyentes).
+                const usedByOthers = new Set(
+                  v.quickAccess.filter((_, idx) => idx !== i).map((x) => x.key),
+                );
+                const options = v.tiles.filter((t) => !usedByOthers.has(t.key));
+                return (
+                  <PwaQuickAccessRow
+                    key={`${q.key}-${i}`}
+                    item={q}
+                    options={options}
+                    onSwap={(tileKey) => swapQuickAccess(i, tileKey)}
+                    onLabel={(label) => updateQuick(i, { label })}
+                    onImage={(image) => updateQuick(i, { image: image ?? '' })}
+                  />
+                );
+              })}
             </Reorder.Group>
           </section>
         ) : null}
@@ -371,15 +403,16 @@ function ToggleSwitch({
 
 function PwaQuickAccessRow({
   item,
-  tiles,
-  onSelectModule,
+  options,
+  onSwap,
   onLabel,
   onImage,
 }: {
   item: PwaQuickAccess;
-  /** Módulos elegibles = los tiles del Dashboard. */
-  tiles: PwaTile[];
-  onSelectModule: (tile: PwaTile) => void;
+  /** Tiles del Dashboard elegibles para intercambiar con este slot. */
+  options: PwaTile[];
+  /** Intercambia este acceso rápido con el tile `tileKey` (swap con Dashboard). */
+  onSwap: (tileKey: string) => void;
   onLabel: (label: string) => void;
   onImage: (image: string | undefined) => void;
 }) {
@@ -388,7 +421,6 @@ function PwaQuickAccessRow({
   const displayLabel = item.label.replace(/\n/g, ' ');
   const [draft, setDraft] = useState(displayLabel);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const isKnownModule = tiles.some((t) => t.key === item.key);
 
   useEffect(() => {
     if (!editing) setDraft(displayLabel);
@@ -461,19 +493,20 @@ function PwaQuickAccessRow({
           </span>
         </div>
 
-        {/* Cambiar este acceso rápido por otro módulo del Dashboard. */}
+        {/* Intercambiar este acceso rápido con un módulo del Dashboard: el
+            elegido sube y el actual baja a Dashboard tiles (swap). */}
         <select
-          value={isKnownModule ? item.key : ''}
+          value={item.key}
           onChange={(e) => {
-            const tile = tiles.find((t) => t.key === e.target.value);
-            if (tile) onSelectModule(tile);
+            if (e.target.value !== item.key) onSwap(e.target.value);
           }}
           aria-label="Module"
-          title="Change this quick access to another module"
+          title="Swap this quick access with a Dashboard module"
           className="max-w-[120px] shrink-0 rounded-md border border-zinc-200 bg-white px-1.5 py-1 text-[11px] font-medium text-zinc-700 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-200"
         >
-          {!isKnownModule ? <option value="">{displayLabel} (custom)</option> : null}
-          {tiles.map((t) => (
+          {/* El módulo actual del slot (no está en `options` porque vive en QA). */}
+          <option value={item.key}>{displayLabel}</option>
+          {options.map((t) => (
             <option key={t.key} value={t.key}>
               {t.label.replace(/\n/g, ' ')}
             </option>

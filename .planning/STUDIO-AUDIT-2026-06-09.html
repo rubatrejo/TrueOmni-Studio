@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TrueOmni Studio — Auditoría extensiva · 2026-06-09</title>
+<style>
+  :root{
+    --ink:#16181d; --muted:#5b6472; --faint:#8a93a3; --line:#e4e7ec; --bg:#ffffff;
+    --crit:#b42318; --critbg:#fef3f2; --alto:#c4320a; --altobg:#fff4ed;
+    --medio:#b54708; --mediobg:#fffaeb; --bajo:#475467; --bajobg:#f2f4f7;
+    --ok:#067647; --okbg:#ecfdf3; --sky:#026aa2; --skybg:#f0f9ff;
+    --brand:#0b5cad;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink); line-height:1.5; margin:0; font-size:13px; background:var(--bg);}
+  .page{max-width:880px; margin:0 auto; padding:32px 40px;}
+  h1{font-size:30px; line-height:1.15; margin:0 0 6px; letter-spacing:-.02em;}
+  h2{font-size:20px; margin:34px 0 12px; padding-bottom:6px; border-bottom:2px solid var(--ink); letter-spacing:-.01em;}
+  h3{font-size:15px; margin:22px 0 8px; color:var(--brand);}
+  h4{font-size:13.5px; margin:16px 0 6px;}
+  p{margin:0 0 9px;} ul{margin:0 0 10px; padding-left:20px;} li{margin:3px 0;}
+  code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; background:#f4f5f7; padding:1px 4px; border-radius:4px; color:#344054;}
+  a{color:var(--brand); text-decoration:none;}
+  .cover{padding:80px 40px 40px;}
+  .cover .kicker{font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--brand); font-weight:700;}
+  .cover .sub{font-size:15px; color:var(--muted); margin-top:10px; max-width:560px;}
+  .meta-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px 28px; margin-top:30px; max-width:560px; font-size:12.5px;}
+  .meta-grid dt{color:var(--faint); text-transform:uppercase; letter-spacing:.06em; font-size:10.5px; margin-top:8px;}
+  .meta-grid dd{margin:1px 0 0; font-weight:600;}
+  .sevbadge{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
+    padding:2px 7px; border-radius:5px; vertical-align:middle;}
+  .s-crit{color:var(--crit); background:var(--critbg);} .s-alto{color:var(--alto); background:var(--altobg);}
+  .s-medio{color:var(--medio); background:var(--mediobg);} .s-bajo{color:var(--bajo); background:var(--bajobg);}
+  .tag{display:inline-block; font-size:10px; font-weight:600; padding:1px 6px; border-radius:5px; background:#f2f4f7; color:#475467; margin-left:4px;}
+  .tag.qw{background:var(--okbg); color:var(--ok);}
+  .tag.dim{background:#eef2ff; color:#3538cd;}
+  .finding{border:1px solid var(--line); border-left:4px solid var(--line); border-radius:8px; padding:11px 14px; margin:10px 0; break-inside:avoid;}
+  .finding.crit{border-left-color:var(--crit);} .finding.alto{border-left-color:var(--alto);}
+  .finding.medio{border-left-color:var(--medio);} .finding.bajo{border-left-color:var(--bajo);}
+  .finding .fhead{display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin-bottom:5px;}
+  .finding .fid{font-weight:800; font-size:12.5px; font-family:"SF Mono",ui-monospace,monospace;}
+  .finding .ftitle{font-weight:700; font-size:13px;}
+  .finding dl{margin:4px 0 0; display:grid; grid-template-columns:84px 1fr; gap:2px 10px; font-size:12px;}
+  .finding dt{color:var(--faint); font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; padding-top:2px;}
+  .finding dd{margin:0;}
+  table{border-collapse:collapse; width:100%; font-size:11.5px; margin:8px 0 14px;}
+  th,td{border:1px solid var(--line); padding:5px 8px; text-align:left; vertical-align:top;}
+  th{background:#f8fafc; font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted);}
+  .count-row td{font-weight:700;}
+  .matrix{display:grid; grid-template-columns:90px 1fr 1fr; grid-auto-rows:auto; gap:6px; margin:10px 0 6px;}
+  .matrix .axis{font-size:10px; color:var(--faint); text-transform:uppercase; letter-spacing:.05em; align-self:center;}
+  .quad{border:1px solid var(--line); border-radius:8px; padding:9px 11px; min-height:84px;}
+  .quad h5{margin:0 0 5px; font-size:12px;} .quad .ids{font-family:"SF Mono",ui-monospace,monospace; font-size:10.5px; color:#475467; line-height:1.7;}
+  .quad.win{background:var(--okbg); border-color:#aae0c2;} .quad.bet{background:var(--skybg); border-color:#a5d8f0;}
+  .quad.fill{background:#fcfcfd;} .quad.later{background:#fafafa;}
+  .callout{background:#f8fafc; border:1px solid var(--line); border-radius:8px; padding:12px 15px; margin:12px 0;}
+  .callout.warn{background:var(--critbg); border-color:#f5c4bf;}
+  .theme{margin:10px 0;}
+  .theme b{color:var(--ink);}
+  .roadmap-phase{border:1px solid var(--line); border-radius:8px; padding:12px 15px; margin:10px 0; break-inside:avoid;}
+  .roadmap-phase h4{margin:0 0 6px; display:flex; align-items:center; gap:8px;}
+  .pill{font-size:10px; font-weight:800; padding:2px 8px; border-radius:20px; background:var(--brand); color:#fff;}
+  .small{font-size:11px; color:var(--muted);}
+  .legend{font-size:11px; color:var(--muted); margin:4px 0 14px;}
+  hr{border:0; border-top:1px solid var(--line); margin:24px 0;}
+  @media print{
+    .page{padding:0 14mm; max-width:none;}
+    .cover{padding:40mm 14mm 0;}
+    h2{break-after:avoid;} h3{break-after:avoid;}
+    .pagebreak{break-before:page;}
+  }
+</style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<section class="cover">
+  <div class="kicker">Auditoría de producto · Confidencial</div>
+  <h1>TrueOmni Studio<br/>Auditoría extensiva</h1>
+  <p class="sub">Revisión estratégica y técnica de los 4 productos del Studio (Kiosk, Digital Displays, Video Walls, Mobile PWA) y sus sistemas transversales. Hallazgos priorizados por severidad × esfuerzo, con fix recomendado y hoja de ruta.</p>
+  <dl class="meta-grid">
+    <div><dt>Fecha</dt><dd>2026-06-09</dd></div>
+    <div><dt>Commit base</dt><dd>fc0a088 (main)</dd></div>
+    <div><dt>Alcance</dt><dd>Todo el Studio + transversales</dd></div>
+    <div><dt>Dimensiones</dt><dd>Bugs · UX · Casos de uso · Deuda/Perf/Seg</dd></div>
+    <div><dt>Hallazgos</dt><dd>68 nuevos (1 crítico · 13 altos)</dd></div>
+    <div><dt>Metodología</dt><dd>6 auditores en paralelo + verificación manual</dd></div>
+    <div><dt>Reconcilia</dt><dd>Audit v2 (S-01..S-47) + PWA + Video Walls</dd></div>
+    <div><dt>Quick-wins</dt><dd>~30 (impacto alto / esfuerzo ≤2h)</dd></div>
+  </dl>
+</section>
+
+<div class="page">
+
+<!-- RESUMEN EJECUTIVO -->
+<h2 class="pagebreak">1 · Resumen ejecutivo</h2>
+<p>El TrueOmni Studio está <b>notablemente más sano de lo que sugería el audit previo</b>: de los 47 hallazgos de mayo (S-01..S-47), la gran mayoría están cerrados — search en el dashboard, tabs accesibles con roving tabindex, consolidación de los ~25 <code>useEffect</code> del Shell en un único diff por referencia, modal a11y base, pinning, duplicar cliente, validación lat/lon, drift de <code>client:list</code>, auto-migrate con concurrencia y cache. El producto funciona end-to-end y no hay nada que bloquee operar hoy.</p>
+<p>Dicho eso, la auditoría identificó <b>68 hallazgos nuevos</b>. El patrón de mayor riesgo no es un bug aislado sino un <b>tema recurrente: "lo que el operador edita no es lo que se ve"</b> — sobre todo en Video Walls y en la previsualización del idioma/Welcome de la PWA. Junto a ello, la capa de seguridad del bridge/auth tiene huecos de defensa-en-profundidad, y faltan redes de seguridad (tests, undo, snapshots de PWA).</p>
+
+<h3>Conteo por severidad</h3>
+<table>
+  <tr><th>Severidad</th><th>Kiosk</th><th>PWA</th><th>Signage/VW</th><th>Core</th><th>Hub</th><th>Calidad</th><th>Total</th></tr>
+  <tr><td><span class="sevbadge s-crit">Crítico</span></td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td><b>1</b></td></tr>
+  <tr><td><span class="sevbadge s-alto">Alto</span></td><td>2</td><td>2</td><td>3</td><td>2</td><td>1</td><td>3</td><td><b>13</b></td></tr>
+  <tr><td><span class="sevbadge s-medio">Medio</span></td><td>4</td><td>6</td><td>3</td><td>5</td><td>4</td><td>4</td><td><b>26</b></td></tr>
+  <tr><td><span class="sevbadge s-bajo">Bajo</span></td><td>5</td><td>3</td><td>3</td><td>5</td><td>7</td><td>5</td><td><b>28</b></td></tr>
+  <tr class="count-row"><td>Total por área</td><td>11</td><td>11</td><td>10</td><td>12</td><td>12</td><td>12</td><td><b>68</b></td></tr>
+</table>
+
+<h3>Cinco temas transversales</h3>
+<div class="theme"><b>A · "Lo que editas no es lo que se ve" (preview ↔ runtime).</b> El más serio. Los Video Walls <b>no rotan</b> la playlist en runtime (F-SIGNAGE-1, <span class="sevbadge s-crit">Crítico</span>) ni respetan el dayparting por slide (F-SIGNAGE-3); el preview de signage congela la rotación tras un click manual y nunca la recupera (F-SIGNAGE-4); el preview del idioma en la PWA vuelve al idioma base (F-PWA-1) y el Welcome splash no se puede previsualizar (F-PWA-2). El operador configura cosas que el producto ignora.</div>
+<div class="theme"><b>B · Seguridad de bridge y auth (defensa en profundidad).</b> La auth de todo <code>/api/studio/*</code> falla <i>abierta</i> si faltan dos env vars y ningún handler revalida sesión (F-CORE-1); los receptores de <code>postMessage</code> no validan <code>event.origin</code> (F-CORE-2, F-SIGNAGE-6); el approval gate del publish se salta si la allowlist está vacía (F-CORE-3).</div>
+<div class="theme"><b>C · Sin red de seguridad (pérdida de datos).</b> El botón "Discard" revierte TODAS las secciones sin confirmar (F-KIOSK-1); los deletes de catálogo no tienen undo (F-KIOSK-9); la PWA no toma snapshots — su save es irreversible (F-CORE-7); las escrituras KV son read-modify-write sin atomicidad (F-CORE-4); y no existe ni un test unitario (F-QA-6).</div>
+<div class="theme"><b>D · Capacidades a medio cablear / código muerto.</b> El catálogo de starters por vertical (hotel/DMO/resort) existe pero nunca se importa (F-HUB-1); el extractor de paleta-desde-logo no está en el BrandingForm unificado (F-HUB-2); el primitivo <code>TabStrip</code> se construyó y quedó huérfano (F-KIOSK-3); varios editores PWA no permiten añadir/borrar items reales (F-PWA-5).</div>
+<div class="theme"><b>E · Deuda que frena el desarrollo.</b> Editores monolíticos (<code>schema.ts</code> 2355 líneas, <code>ModulesEditor</code> 1572, <code>EditorPanel</code> 1393) (F-QA-1); imágenes inlinadas como data-URI base64 dentro de <code>config.json</code> (F-PWA-3); 62 warnings de lint concentrados en un patrón (F-QA-8).</div>
+
+<h3>Recomendaciones clave</h3>
+<ul>
+  <li><b>Cerrar el tema A primero.</b> Portar la rotación + dayparting de signage al runtime de Video Walls (índice determinista por reloj para sincronizar paneles) y arreglar la previsualización de idioma/Welcome de la PWA. Es donde el producto rompe su promesa.</li>
+  <li><b>Endurecer auth/bridge en una pasada.</b> Un guard <code>requireStudioSession()</code> en los handlers mutantes + validación de <code>event.origin</code> cierra F-CORE-1/2/3/10 de raíz. Mayor ROI de seguridad, esfuerzo bajo.</li>
+  <li><b>Añadir redes de seguridad.</b> Confirmación en el discard global + toasts "Undo" en deletes + snapshots de la PWA + arrancar Vitest sobre <code>schema.ts</code> y el bootstrap del cliente nuevo.</li>
+  <li><b>Cobrar deuda barata.</b> Cablear los starters muertos y la paleta-desde-logo (onboarding ya diseñado), y limpiar los 62 warnings de lint en medio día.</li>
+  <li><b>Refactor oportunista.</b> Partir los monolitos solo cuando se vaya a tocar esa área; no como refactor aislado.</li>
+</ul>
+
+<!-- METODOLOGÍA -->
+<h2 class="pagebreak">2 · Metodología y alcance</h2>
+<p>Auditoría estática de código (sin levantar el runtime en navegador salvo verificación puntual). Seis auditores especializados recorrieron en paralelo: (1) editor Kiosk, (2) editor PWA, (3) Signage + Video Walls, (4) persistencia KV + Publish + Auth + Bridge, (5) Hub/ClientView/Branding/i18n/Ads/Integraciones, (6) calidad transversal (deuda, a11y, perf, tests). Insumos automáticos: <code>wc -l</code> (hotspots), <code>pnpm lint</code> (62 warnings, 0 errores), <code>pnpm typecheck</code> (limpio), grep de TODO/FIXME y barrido white-label. Se reconciliaron los audits previos (<code>2026-05-08-studio-audit-v2</code>, <code>PWA-AUDIT-2026-06-04</code>, <code>2026-05-12-video-walls-real-client-audit</code>).</p>
+<p><b>Verificación de críticos:</b> el único hallazgo crítico (F-SIGNAGE-1) y la base de seguridad (F-CORE-1) se confirmaron leyendo el código directamente, no solo por reporte del agente.</p>
+<p class="legend"><b>Severidad</b> — <span class="sevbadge s-crit">Crítico</span> pérdida de datos / bloqueo de flujo / seguridad · <span class="sevbadge s-alto">Alto</span> funcionalidad rota o fricción severa frecuente · <span class="sevbadge s-medio">Medio</span> degradación o inconsistencia · <span class="sevbadge s-bajo">Bajo</span> pulido. &nbsp; <b>Esfuerzo</b> — S ≤ ~2h · M ≤ ~1 día · L = varios días. &nbsp; <span class="tag qw">quick-win</span> = impacto ≥ alto y esfuerzo S.</p>
+
+<!-- MATRIZ -->
+<h2 class="pagebreak">3 · Matriz de priorización (severidad × esfuerzo)</h2>
+<div class="matrix">
+  <div></div>
+  <div class="axis" style="text-align:center;">Esfuerzo bajo (S)</div>
+  <div class="axis" style="text-align:center;">Esfuerzo alto (M · L)</div>
+
+  <div class="axis">Impacto alto<br/>(Crítico·Alto)</div>
+  <div class="quad win">
+    <h5>★ Quick wins — hacer ya</h5>
+    <div class="ids">F-KIOSK-1 · F-PWA-1 · F-PWA-2 · F-SIGNAGE-3 · F-SIGNAGE-4 · F-CORE-1 · F-CORE-2 · F-CORE-3 · F-KIOSK-4</div>
+  </div>
+  <div class="quad bet">
+    <h5>◆ Apuestas grandes — planificar</h5>
+    <div class="ids">F-SIGNAGE-1 · F-SIGNAGE-2 · F-HUB-2 · F-QA-1 · F-QA-3 · F-QA-6 · F-QA-7</div>
+  </div>
+
+  <div class="axis">Impacto bajo<br/>(Medio·Bajo)</div>
+  <div class="quad fill">
+    <h5>· Rellenos — oportunista</h5>
+    <div class="ids">F-PWA-4 · F-PWA-7 · F-SIGNAGE-5 · F-CORE-5 · F-CORE-6 · F-CORE-8 · F-CORE-9 · F-HUB-4 · F-HUB-5 · F-QA-2 · F-QA-8 · F-QA-9 · F-QA-10 · F-KIOSK-2 · F-KIOSK-7</div>
+  </div>
+  <div class="quad later">
+    <h5>· Diferir — backlog</h5>
+    <div class="ids">F-PWA-3 · F-PWA-5 · F-PWA-6 · F-PWA-9 · F-CORE-4 · F-CORE-7 · F-HUB-3 · F-HUB-7 · F-HUB-9 · F-QA-4 · F-QA-5 · F-QA-12 · F-KIOSK-9</div>
+  </div>
+</div>
+<p class="small">La esquina superior-izquierda (quick wins) es donde más valor se desbloquea por hora invertida: arreglos de alto impacto que caben en una sesión. F-SIGNAGE-1 (crítico) cae en "apuestas" por su esfuerzo M, pero debe encabezar el roadmap pese a ello.</p>
+
+<h3>Tabla de quick-wins (alto impacto · ≤2h)</h3>
+<table>
+  <tr><th>ID</th><th>Área</th><th>Qué arregla</th></tr>
+  <tr><td>F-CORE-1</td><td>Auth</td><td>Cerrar el fail-open: APIs mutantes → 503 si no hay auth configurada.</td></tr>
+  <tr><td>F-CORE-2</td><td>Bridge</td><td>Validar <code>event.origin</code> en los receptores postMessage (kiosk + PWA).</td></tr>
+  <tr><td>F-CORE-3</td><td>Publish</td><td>Approval gate falla cerrado: fallback al super-admin si allowlist vacía.</td></tr>
+  <tr><td>F-KIOSK-1</td><td>Kiosk</td><td>Confirmar antes de descartar TODAS las secciones (footgun de pérdida de datos).</td></tr>
+  <tr><td>F-PWA-1</td><td>PWA</td><td>Preview del idioma: enviar el slice ya resuelto para el locale activo.</td></tr>
+  <tr><td>F-PWA-2</td><td>PWA</td><td>Welcome splash: congelar auto-advance solo cuando la sección activa es Welcome.</td></tr>
+  <tr><td>F-SIGNAGE-3</td><td>Video Walls</td><td>Evaluar el schedule por slide en runtime (reusar <code>isSlideActive</code> de signage).</td></tr>
+  <tr><td>F-SIGNAGE-4</td><td>Signage</td><td>Resetear <code>manualOverrideRef</code> para devolver el control al ciclo automático.</td></tr>
+  <tr><td>F-KIOSK-4</td><td>Kiosk</td><td>Merge del bundle i18n al cargar, para no perder renames tempranos.</td></tr>
+</table>
+
+</div>
+
+<!-- HALLAZGOS POR ÁREA -->
+<div class="page">
+<h2 class="pagebreak">4 · Hallazgos por área</h2>
+
+<h3>4.1 · Editor Kiosk Portrait</h3>
+
+<div class="finding alto"><div class="fhead"><span class="fid">F-KIOSK-1</span><span class="sevbadge s-alto">Alto</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">bug/ux</span><span class="ftitle">"Discard" revierte TODAS las secciones sin confirmar</span></div>
+<dl><dt>Síntoma</dt><dd>El botón de la SaveBar (icono <code>Undo2</code>, "Discard changes") está cableado a <code>handleDiscard</code>, que revierte de golpe los slots dirty de las 20 secciones, sin diálogo.</dd>
+<dt>Evidencia</dt><dd><code>SaveBar.tsx:21-30</code>; <code>Shell.tsx:902-908</code> (<code>onUndo={handleDiscard}</code>); <code>Shell.tsx:705-749</code>.</dd>
+<dt>Impacto</dt><dd>Footgun: 1h de edición en varias secciones se pierde con un click en un icono que sugiere "undo granular".</dd>
+<dt>Fix</dt><dd>Confirmación inline antes de descartar (reusar <code>UnsavedChangesModal</code>) o limitar al tab activo; cambiar icono a <code>Trash</code>/<code>RotateCcw</code> y tooltip a "Discard ALL unsaved changes".</dd></dl></div>
+
+<div class="finding alto"><div class="fhead"><span class="fid">F-KIOSK-4</span><span class="sevbadge s-alto">Alto</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">bug</span><span class="ftitle">Race: rename de tile temprano se pierde al cargar i18n</span></div>
+<dl><dt>Síntoma</dt><dd>El bundle i18n carga async; si se renombra un tile antes de que resuelva, el <code>.then</code> sobrescribe <code>setI18nBundle</code> con el del servidor, perdiendo el rename cascadeado al EN local.</dd>
+<dt>Evidencia</dt><dd><code>Shell.tsx:239-255</code> (load pisa el state) + <code>Shell.tsx:224-233</code> (cascade en <code>setModules</code>).</dd>
+<dt>Impacto</dt><dd>Rename perdido silenciosamente en conexiones lentas; el header del módulo en runtime no refleja el nuevo nombre.</dd>
+<dt>Fix</dt><dd>Mergear el bundle del servidor con overrides locales ya aplicados, o bloquear ediciones de modules hasta <code>i18nLoaded</code>.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-KIOSK-2</span><span class="sevbadge s-medio">Medio</span><span class="tag">S</span><span class="tag dim">bug/ux</span><span class="ftitle">Botón "Redo" miente: solo recarga el preview</span></div>
+<dl><dt>Evidencia</dt><dd><code>SaveBar.tsx:31-39</code> (icono <code>Redo2</code>, <code>title="⌘⇧Z"</code>) vs <code>Shell.tsx:907</code> (<code>onRedo={() =&gt; setPreviewKey(k=&gt;k+1)}</code>); el atajo ni se registra.</dd>
+<dt>Fix</dt><dd>Renombrar a "Reload preview" con icono <code>RotateCcw</code>, o implementar undo/redo real con stack de snapshots.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-KIOSK-5</span><span class="sevbadge s-medio">Medio</span><span class="tag">S</span><span class="tag dim">bug</span><span class="ftitle">Edición durante save en vuelo → estado saved/dirty inconsistente</span></div>
+<dl><dt>Evidencia</dt><dd><code>Shell.tsx:512-651</code>: los <code>setSavedX(X)</code> usan el valor del closure al iniciar el save, no un snapshot del payload enviado; los inputs no se congelan durante <code>saving</code>.</dd>
+<dt>Fix</dt><dd>Snapshotear el payload enviado y comparar contra él al resolver; marcar dirty si <code>X</code> cambió respecto al snapshot.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-KIOSK-3</span><span class="sevbadge s-medio">Medio</span><span class="tag">M</span><span class="tag dim">debt/a11y</span><span class="ftitle"><code>TabStrip</code> se construyó para S-15 y quedó huérfano</span></div>
+<dl><dt>Evidencia</dt><dd><code>grep TabStrip</code> → solo se encuentra a sí mismo; PhotoBoothEditor y GuestbookEditor siguen usando <code>&lt;button&gt;</code> sin <code>role=tab</code>.</dd>
+<dt>Fix</dt><dd>Migrar los editores con tabs internas a <code>&lt;TabStrip&gt;</code>, o eliminarlo (no dejar código muerto).</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-KIOSK-9</span><span class="sevbadge s-medio">Medio</span><span class="tag">M</span><span class="tag dim">ux</span><span class="ftitle">Deletes de catálogo sin confirmación ni undo</span></div>
+<dl><dt>Evidencia</dt><dd><code>ListingsEditor.tsx:201-224</code> (filtros directos, bulk delete sin confirm); PhotoBooth remove directo.</dd>
+<dt>Fix</dt><dd>Toast con acción "Undo" tras delete; confirm para bulk ≥3 items.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-KIOSK-7</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag dim">bug</span><span class="ftitle">Photo Booth: <code>stream</code> en ref no reactivo (latente)</span></div>
+<dl><dt>Evidencia</dt><dd><code>use-camera.ts:69,90</code>: <code>streamRef.current = stream</code> sin setState; funciona "por casualidad" porque <code>setPermission</code> fuerza el render. Relacionado con S-05.</dd>
+<dt>Fix</dt><dd>Promover <code>stream</code> a <code>useState</code>; el ref solo para cleanup.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-KIOSK-6</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">M</span><span class="tag dim">debt/perf</span><span class="ftitle">15× <code>JSON.stringify</code> + serialización completa por render</span></div>
+<dl><dt>Evidencia</dt><dd><code>Shell.tsx:376-433</code> (15 dirty con stringify) + <code>:464-508</code> (payload size serializa todo el config por render).</dd>
+<dt>Fix</dt><dd>Diff por referencia (<code>Object.is</code>, los setters ya preservan referencia) + throttle del size meter.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-KIOSK-8</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">white-label</span><span class="ftitle">Preset de paleta hardcoded "Arizona"</span></div>
+<dl><dt>Evidencia</dt><dd><code>EditorPanel.tsx:786-791</code> (<code>name:'Arizona'</code>). §9 prohíbe topónimos hardcoded en UI.</dd>
+<dt>Fix</dt><dd>Renombrar a neutro ("Desert"/"Terracotta") o mover presets a data.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-KIOSK-10</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">bug</span><span class="ftitle">Timer de Photo Booth acepta 0 segundos</span></div>
+<dl><dt>Evidencia</dt><dd><code>PhotoBoothEditor.tsx:289-298</code> (<code>n &lt; 0</code> deja pasar el 0).</dd>
+<dt>Fix</dt><dd><code>n &lt; 1</code> y <code>min={1}</code>.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-KIOSK-11</span><span class="sevbadge s-medio">Medio</span><span class="tag">S</span><span class="tag dim">ux</span><span class="ftitle">Auto-jump a Modules sin avisar al apagar un módulo</span></div>
+<dl><dt>Evidencia</dt><dd><code>Shell.tsx:355-361</code>: salta a Modules si la sección activa queda locked, sin feedback.</dd>
+<dt>Fix</dt><dd>Toast informativo ("AI Avatar disabled — switched to Modules").</dd></dl></div>
+
+<h3 class="pagebreak">4.2 · Editor Mobile PWA</h3>
+
+<div class="finding alto"><div class="fhead"><span class="fid">F-PWA-1</span><span class="sevbadge s-alto">Alto</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">bug</span><span class="ftitle">El preview del idioma vuelve al idioma base</span></div>
+<dl><dt>Síntoma</dt><dd>Al previsualizar otro idioma, el handshake re-empuja <code>lastPwaRef</code> (slice base, sin resolver), y <code>override ?? initial</code> hace que el override base gane sobre el <code>initial</code> traducido del server.</dd>
+<dt>Evidencia</dt><dd><code>use-pwa-preview-bridge.ts:100</code> + <code>pwa-bridge-context.tsx:55,87-88</code> vs <code>(pwa)/layout.tsx:55</code>.</dd>
+<dt>Impacto</dt><dd>La sección Languages (la #28) es inverificable en vivo: el operador traduce y no ve el resultado. Justo el caso de uso del editor i18n.</dd>
+<dt>Fix</dt><dd>El bridge debe enviar el slice ya resuelto para el locale activo (<code>resolvePwaForLocale</code> con <code>lastLocaleRef</code> antes de <code>sendPwaNow</code>).</dd></dl></div>
+
+<div class="finding alto"><div class="fhead"><span class="fid">F-PWA-2</span><span class="sevbadge s-alto">Alto</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">ux/bug</span><span class="ftitle">El Welcome splash no se puede previsualizar</span></div>
+<dl><dt>Síntoma</dt><dd>Editando Welcome, el preview auto-avanza a <code>/pwa/login</code> a los ~2.5s SIEMPRE, también en el Studio. Aplica al revés la lección 2026-06-06 (el freeze debe depender de la sección activa, no eliminarse).</dd>
+<dt>Evidencia</dt><dd><code>welcome-splash-live.tsx:11-13,30-31</code>.</dd>
+<dt>Fix</dt><dd>Flag por el bridge (<code>studio:pwa-freeze</code> con la sección activa); congelar el auto-advance solo cuando la sección editada es <code>welcome</code>.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-PWA-7</span><span class="sevbadge s-medio">Medio</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">bug/white-label</span><span class="ftitle">El editor i18n traduce 5 locales hardcodeados</span></div>
+<dl><dt>Evidencia</dt><dd><code>PwaI18nEditor.tsx:24</code> (<code>TARGET_LOCALES = ['es','fr','de','pt','ja']</code>) ignora <code>features.languages.available</code> que sí usa el runtime (<code>(pwa)/layout.tsx:42</code>).</dd>
+<dt>Fix</dt><dd>Derivar <code>TARGET_LOCALES</code> de <code>languages.available</code> (sin el base), pasado como prop del server.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-PWA-4</span><span class="sevbadge s-medio">Medio</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">bug</span><span class="ftitle">El badge de versión del TopBar se queda clavado</span></div>
+<dl><dt>Evidencia</dt><dd><code>PwaShell.tsx:145</code> ignora la <code>meta</code> que devuelve <code>patchPwaSlice</code>; <code>:234</code> usa siempre <code>initialMeta</code>.</dd>
+<dt>Fix</dt><dd><code>const [meta,setMeta]=useState(initialMeta)</code>; capturar el resultado del patch.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-PWA-6</span><span class="sevbadge s-medio">Medio</span><span class="tag">M</span><span class="tag dim">ux/debt</span><span class="ftitle">Cero validación en todo el editor PWA</span></div>
+<dl><dt>Evidencia</dt><dd>0 <code>required/maxLength/safeParse</code> en los <code>_components/*.tsx</code>; el PATCH solo chequea <code>typeof body.pwa === 'object'</code> (<code>route.ts:35</code>). El slice PWA no tiene schema Zod propio.</dd>
+<dt>Fix</dt><dd>Schema Zod para <code>PwaConfig</code> validado en el PATCH + validación inline mínima (label requerido, <code>min={0}</code> en number fields).</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-PWA-5</span><span class="sevbadge s-medio">Medio</span><span class="tag">M</span><span class="tag dim">feature/ux</span><span class="ftitle">Editores PWA-only sin add/remove real</span></div>
+<dl><dt>Evidencia</dt><dd>ScavengerHunt/Wayfinding/Connect/Notifications/Profile solo renombran/reordenan el seed; no crean hunts/tasks/floors ni editan coords/geofence (<code>ScavengerHuntEditor.tsx:8-11,51-62</code>).</dd>
+<dt>Impacto</dt><dd>Montar un Scavenger Hunt o Wayfinding real exige editar <code>config.json</code> a mano — lo que el white-label busca eliminar.</dd>
+<dt>Fix</dt><dd>Add/remove + coords/imagen/geofence (mini-mapa Mapbox por prop) al menos para Scavenger Hunt y Wayfinding.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-PWA-8</span><span class="sevbadge s-medio">Medio</span><span class="tag">S</span><span class="tag dim">bug</span><span class="ftitle">FOUC de branding: el preview parte de cliente <code>default</code></span></div>
+<dl><dt>Evidencia</dt><dd>El iframe carga <code>/pwa</code> con <code>KIOSK_CLIENT=default</code>; la identidad real depende del bridge tras el handshake (<code>PwaShell.tsx:123-130</code>).</dd>
+<dt>Fix</dt><dd>Cargar <code>/pwa</code> ya con el slug correcto (query/cookie) para resolver server-side desde el primer paint; skeleton mientras <code>connecting</code>.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-PWA-9</span><span class="sevbadge s-medio">Medio</span><span class="tag">M</span><span class="tag dim">bug/debt</span><span class="ftitle">El preview live solo funciona en pantallas migradas a <code>usePwaSection</code></span></div>
+<dl><dt>Evidencia</dt><dd><code>pwa-bridge-context.tsx:19-21</code> (migración incremental); el panel expone todas las secciones igual, sin indicar cuáles no previsualizan.</dd>
+<dt>Fix</dt><dd>Marcar en <code>pwa-sections.ts</code> las secciones con preview live y avisar en las que no, o completar la migración.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-PWA-3</span><span class="sevbadge s-medio">Medio</span><span class="tag">M</span><span class="tag dim">debt/perf</span><span class="ftitle">Imágenes inlinadas como data-URI base64 en <code>config.json</code></span></div>
+<dl><dt>Evidencia</dt><dd><code>ImageField.tsx:62-63</code> emite data-URI; el publish mergea el slice verbatim (<code>publish/[slug]/pwa/route.ts:135-139</code>); el bridge re-postea el slice completo en cada keystroke y el dirty-check hace <code>JSON.stringify</code> del slice multi-MB.</dd>
+<dt>Impacto</dt><dd>Lag al teclear con muchas imágenes + <code>config.json</code> pesado en el repo. Deuda transversal (kiosk también), amplificada en PWA.</dd>
+<dt>Fix</dt><dd>Materializar data-URIs a <code>clients/{slug}/assets/pwa/</code> en el publish; excluir imágenes del payload del bridge; memoizar dirty por referencia.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-PWA-10</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">ux/debt</span><span class="ftitle">Placeholder "En construcción" (español) en UI en inglés</span></div>
+<dl><dt>Evidencia</dt><dd><code>pwa-ui.tsx:206</code> mezcla español con texto en inglés; mensaje potencialmente obsoleto.</dd>
+<dt>Fix</dt><dd>Unificar idioma; revisar si sigue alcanzable.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-PWA-11</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">bug/ux</span><span class="ftitle">Quick Access asume exactamente 4 sin validar</span></div>
+<dl><dt>Evidencia</dt><dd><code>dashboard-screen.tsx:167</code> (<code>slice(0,4)</code> con <code>CARD_X</code> fijos); el editor no valida <code>length===4</code>.</dd>
+<dt>Fix</dt><dd>Normalizar/avisar en <code>normalizePwaDashboard</code> si <code>quickAccess.length !== 4</code>.</dd></dl></div>
+
+<h3 class="pagebreak">4.3 · Signage (Digital Displays) + Video Walls</h3>
+
+<div class="finding crit"><div class="fhead"><span class="fid">F-SIGNAGE-1</span><span class="sevbadge s-crit">Crítico</span><span class="tag">M</span><span class="tag dim">bug</span><span class="ftitle">Los Video Walls NO rotan la playlist en runtime</span></div>
+<dl><dt>Síntoma</dt><dd>El operador crea playlists multi-slide y configura "Default slide duration", pero el wall en producción muestra solo un slide fijo (índice 0). <b>Verificado a mano.</b></dd>
+<dt>Evidencia</dt><dd><code>VideoWallRuntime.tsx:90-94</code> resuelve el slide con <code>slideIndex</code> (prop, default 0) y nunca lo cambia — sin <code>setInterval/useState</code>; <code>(video-walls)/.../page.tsx</code> pasa <code>slideIndex</code> estático. La duración existe en <code>SettingsPanel.tsx:83</code> y el multi-slide en <code>PlaylistPanel.tsx</code>.</dd>
+<dt>Impacto</dt><dd>Lo que el operador edita no es lo que se ve. Walls multi-slide congelados; la duración configurada es decorativa. Contradice el modelo del producto (signage sí rota en <code>SignagePlayer</code>).</dd>
+<dt>Fix</dt><dd>Portar el rotador de <code>SignagePlayer</code> (avance por <code>durationMs</code> + transición) al runtime VW. Usar índice <b>determinista por reloj</b> (<code>floor(epoch/durationMs) % n</code>) para sincronizar paneles (resuelve también F-SIGNAGE-2).</dd></dl></div>
+
+<div class="finding alto"><div class="fhead"><span class="fid">F-SIGNAGE-2</span><span class="sevbadge s-alto">Alto</span><span class="tag">L</span><span class="tag dim">bug/feature</span><span class="ftitle">Paneles de un mismo wall se desincronizarían</span></div>
+<dl><dt>Evidencia</dt><dd>Cada TV abre su URL <code>?cell=r,c</code> con su propio reloj (<code>VideoWallStage.tsx:19-27</code>); sin reloj compartido. El bug está oculto hoy porque no rota (F-1), emerge al arreglarlo.</dd>
+<dt>Fix</dt><dd>Índice de slide derivado del reloj (no timer incremental) para que todas las celdas calculen el mismo slide sin coordinación.</dd></dl></div>
+
+<div class="finding alto"><div class="fhead"><span class="fid">F-SIGNAGE-3</span><span class="sevbadge s-alto">Alto</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">bug</span><span class="ftitle">El dayparting por slide de los Video Walls es no-op</span></div>
+<dl><dt>Evidencia</dt><dd><code>SchedulePopover.tsx:49-54</code> guarda <code>{kind:'hours',...}</code> pero <code>isSlideActive</code> no aparece en el runtime VW (grep vacío). Signage sí lo evalúa (<code>SignagePlayer.tsx:276</code>).</dd>
+<dt>Fix</dt><dd>Reusar <code>isSlideActive</code>/<code>getWallClockParts</code> de signage al construir la playlist efectiva del VW.</dd></dl></div>
+
+<div class="finding alto"><div class="fhead"><span class="fid">F-SIGNAGE-4</span><span class="sevbadge s-alto">Alto</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">bug</span><span class="ftitle">El preview de signage se congela tras un click manual</span></div>
+<dl><dt>Evidencia</dt><dd><code>SignagePlayer.tsx:152</code> pone <code>manualOverrideRef=true</code> en cada jump y nunca lo resetea (el comentario dice que sí, pero no existe la línea). Tras un click, el auto-advance y el dayparting quedan desactivados hasta recargar.</dd>
+<dt>Fix</dt><dd>Resetear <code>manualOverrideRef.current=false</code> tras N segundos o al cambiar de playlist.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-SIGNAGE-5</span><span class="sevbadge s-medio">Medio</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">bug</span><span class="ftitle">Brand video de YouTube ignora el toggle de audio</span></div>
+<dl><dt>Evidencia</dt><dd><code>brand-video-overlay.tsx:39-45</code> monta el iframe YouTube sin <code>mute</code>; solo la rama <code>&lt;video&gt;</code> respeta <code>audioEnabled</code>.</dd>
+<dt>Fix</dt><dd>Resolver <code>embedUrl</code> con <code>mute=${audioEnabled?0:1}</code>.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-SIGNAGE-6</span><span class="sevbadge s-medio">Medio</span><span class="tag">S</span><span class="tag dim">debt/seg</span><span class="ftitle">Bridges de DD/VW sin validar origin (postMessage '*')</span></div>
+<dl><dt>Evidencia</dt><dd>Sin <code>event.origin</code> en handlers; <code>'*'</code> en <code>use-signage-bridge.ts:78..231</code> y <code>SignagePlayer.tsx:231</code>.</dd>
+<dt>Fix</dt><dd>Validar <code>event.origin === window.location.origin</code> y usar targetOrigin explícito (mismo fix que F-CORE-2).</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-SIGNAGE-7</span><span class="sevbadge s-medio">Medio</span><span class="tag">S</span><span class="tag dim">bug</span><span class="ftitle">Autosave de display con posible closure stale</span></div>
+<dl><dt>Evidencia</dt><dd><code>save-display.ts:48-69</code>: debounce con deps <code>[trigger,dirty]</code> + disable-exhaustive-deps; si <code>onSave</code> captura <code>draft</code> por render, guarda versión vieja.</dd>
+<dt>Fix</dt><dd>Que <code>onSave</code> lea <code>useDisplayEditStore.getState().draft</code> en el disparo, no por closure.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-SIGNAGE-8</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">debt</span><span class="ftitle">Código muerto de grids 2x1/1x2 en VideoWallHeader</span></div>
+<dl><dt>Evidencia</dt><dd>Schema promueve <code>2x1/1x2 → 2x2</code> (<code>schema.ts:90</code>), pero <code>VideoWallHeader.tsx</code> aún calibra para anchos 1920 que nunca llegan.</dd>
+<dt>Fix</dt><dd>Eliminar ramas/comentarios de 1x2/2x1; simplificar a anchos vivos.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-SIGNAGE-9</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag dim">ux/feature</span><span class="ftitle">Sin snapshot manual (solo restore) en DD/VW</span></div>
+<dl><dt>Evidencia</dt><dd><code>snapshots-api.ts</code> solo expone <code>list/restore</code>; sin <code>createSnapshot</code> cliente.</dd>
+<dt>Fix</dt><dd>Confirmar si el publish crea snapshot; si se quiere checkpoint manual, añadir <code>createSnapshot(note)</code> + botón.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-SIGNAGE-10</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">bug</span><span class="ftitle">Asset endpoint VW puede 302→404 (placeholder roto)</span></div>
+<dl><dt>Evidencia</dt><dd>G7 del audit de video walls (<code>video-wall-assets/[client]/[...path]/route.ts:57-63</code>): redirige a un path que también puede 404.</dd>
+<dt>Fix</dt><dd>Servir placeholder neutro tokenizado o validar existencia antes del 302.</dd></dl></div>
+
+<h3 class="pagebreak">4.4 · Core — Persistencia · Publish · Auth · Bridge</h3>
+
+<div class="finding alto"><div class="fhead"><span class="fid">F-CORE-1</span><span class="sevbadge s-alto">Alto</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">seguridad</span><span class="ftitle">La auth de <code>/api/studio/*</code> falla ABIERTA</span></div>
+<dl><dt>Síntoma</dt><dd>Si faltan <code>AUTH_GITHUB_ID/SECRET</code>, el middleware deja pasar todo; ningún handler revalida sesión. <b>Verificado a mano</b> (grep de <code>auth()</code> en handlers = vacío).</dd>
+<dt>Evidencia</dt><dd><code>middleware.ts:29-31</code> (<code>return NextResponse.next()</code>); 0 <code>getServerSession</code> en <code>api/studio/**</code>.</dd>
+<dt>Impacto</dt><dd>Un deploy sin esas env vars deja TODO el Studio público, incluido <code>DELETE /api/studio/clients/[slug]</code> (borra cliente entero).</dd>
+<dt>Fix</dt><dd>En el branch fail-open, dejar pasar solo GET de páginas; APIs mutantes → 503. Guard <code>requireStudioSession()</code> en handlers de mayor impacto (DELETE clients, publish).</dd></dl></div>
+
+<div class="finding alto"><div class="fhead"><span class="fid">F-CORE-2</span><span class="sevbadge s-alto">Alto</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">seguridad</span><span class="ftitle">Los receptores postMessage no validan <code>event.origin</code></span></div>
+<dl><dt>Evidencia</dt><dd><code>studio-bridge.tsx:64-93</code> (handler sin chequear origin; aplica branding, navega, sobrescribe módulos); <code>studio:ready</code> emitido con <code>'*'</code> (<code>:311</code>). Igual en los listeners host.</dd>
+<dt>Impacto</dt><dd>El runtime (<code>/</code>, <code>/pwa</code>) es público; embebido en iframe hostil, el parent puede inyectar <code>studio:pwa-nav</code>/<code>branding-update</code> (defacement / redirección). S-02 cerró el emisor pero dejó el receptor abierto.</dd>
+<dt>Fix</dt><dd>Primer guard en cada handler: <code>if (event.origin !== window.location.origin) return;</code>.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-CORE-3</span><span class="sevbadge s-medio">Medio</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">seguridad</span><span class="ftitle">El approval gate del publish se salta si la allowlist está vacía</span></div>
+<dl><dt>Evidencia</dt><dd><code>publish/[slug]/route.ts:112</code> y <code>pwa/route.ts:94</code>: <code>if (mode==='pr' &amp;&amp; adminEmails.length &gt; 0)</code> → sin <code>STUDIO_ADMIN_EMAILS</code>, cualquier sesión abre PRs a prod.</dd>
+<dt>Fix</dt><dd>Si <code>adminEmails.length===0</code> y <code>mode==='pr'</code>, fallback al <code>SUPER_ADMIN_EMAIL</code> (falla cerrado).</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-CORE-4</span><span class="sevbadge s-medio">Medio</span><span class="tag">M</span><span class="tag dim">bug</span><span class="ftitle">Escrituras KV read-modify-write sin atomicidad (lost update)</span></div>
+<dl><dt>Evidencia</dt><dd><code>configs/[slug]/route.ts:156→509</code> (<code>kv.set</code> sin CAS/version-check); <code>snapshots.ts:18-23</code> lo documenta; <code>savePwaSlice</code> igual.</dd>
+<dt>Fix</dt><dd><code>If-Match</code>/versión desde el cliente; rechazar 409 si <code>currentVersion</code> no coincide.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-CORE-6</span><span class="sevbadge s-medio">Medio</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">ux</span><span class="ftitle">El sync hook de branding falla en silencio (drift de marca)</span></div>
+<dl><dt>Evidencia</dt><dd><code>configs/[slug]/route.ts:532-544</code>: <code>catch → console.warn</code> y responde 200. Branding del kiosk no propaga a signage/PWA sin señal.</dd>
+<dt>Fix</dt><dd><code>{syncWarning:true}</code> en el response + toast no bloqueante en el Save status.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-CORE-7</span><span class="sevbadge s-medio">Medio</span><span class="tag">S</span><span class="tag dim">bug</span><span class="ftitle">La PWA no toma snapshots — su save es irreversible</span></div>
+<dl><dt>Evidencia</dt><dd><code>savePwaSlice</code> (<code>pwa-config.ts:123-136</code>) solo hace 2 <code>kv.set</code>; las keys <code>pwaSnap/pwaSnapList</code> existen pero nadie las escribe.</dd>
+<dt>Fix</dt><dd>Replicar <code>takeSnapshot</code> para el slice PWA (paridad con el revert del kiosk).</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-CORE-5</span><span class="sevbadge s-medio">Medio</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">perf</span><span class="ftitle">Round-trips KV secuenciales en hot paths</span></div>
+<dl><dt>Evidencia</dt><dd><code>configs/route.ts:20-27</code> (cfg+meta en serie por slug); PATCH ~6 <code>kv.get/set</code> en serie (<code>configs/[slug]/route.ts:507-518</code>).</dd>
+<dt>Fix</dt><dd>Paralelizar lecturas independientes con <code>Promise.all</code>; <code>mget</code> si el wrapper lo expone.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-CORE-9</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">perf/ux</span><span class="ftitle">El heartbeat re-emite los 18 slots cada 5s</span></div>
+<dl><dt>Evidencia</dt><dd><code>studio-bridge.tsx:321</code> (<code>setInterval(announceReady,5000)</code>) reusa <code>studio:ready</code>, que el host trata como reconexión y reenvía 18 <code>sendXNow</code>.</dd>
+<dt>Fix</dt><dd>Separar <code>studio:ready</code> (handshake) de <code>studio:heartbeat</code> (solo actualiza <code>lastAckAt</code>).</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-CORE-8</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">perf</span><span class="ftitle">Purge de cliente: 25× <code>kv.keys</code> + <code>del</code> secuenciales</span></div>
+<dl><dt>Evidencia</dt><dd><code>purge-client.ts:18-68</code>: <code>buildPrefixesToPurge</code> retorna 25+ prefijos, cada uno con <code>kv.keys(prefix:*)</code> + loop de <code>del</code>.</dd>
+<dt>Fix</dt><dd>Paralelizar los <code>del</code>; usar <code>SCAN</code> con cursor si Upstash lo permite.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-CORE-10</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag dim">seguridad</span><span class="ftitle">Header <code>x-studio-admin-email</code> spoofable en fail-open</span></div>
+<dl><dt>Evidencia</dt><dd><code>publish/[slug]/route.ts:111</code> confía en el header; <code>middleware.ts:29-31</code> no lo borra en el branch fail-open.</dd>
+<dt>Fix</dt><dd>En fail-open, <code>headers.delete('x-studio-admin-email')</code>; derivar el actor de <code>auth()</code> en el handler.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-CORE-11</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag dim">bug</span><span class="ftitle">Regex de slug inconsistente entre endpoints</span></div>
+<dl><dt>Evidencia</dt><dd>Publish acepta trailing hyphen (<code>route.ts:67</code>), create no (<code>clients/[slug]/route.ts:11</code>), upload otro distinto (<code>upload/route.ts:29</code>).</dd>
+<dt>Fix</dt><dd>Centralizar un <code>STUDIO_SLUG_REGEX</code> único.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-CORE-12</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag dim">ux</span><span class="ftitle">El cap de tamaño KV no aplica a la PWA/signage</span></div>
+<dl><dt>Evidencia</dt><dd>El kiosk valida 950KB con hint accionable (<code>configs/[slug]/route.ts:472-501</code>); <code>savePwaSlice</code> no.</dd>
+<dt>Fix</dt><dd>Extraer el guard de tamaño a un helper compartido y aplicarlo en PWA/signage.</dd></dl></div>
+
+<h3 class="pagebreak">4.5 · Hub · ClientView · Branding · i18n · Ads · Integraciones</h3>
+
+<div class="finding alto"><div class="fhead"><span class="fid">F-HUB-2</span><span class="sevbadge s-alto">Alto</span><span class="tag">M</span><span class="tag dim">feature</span><span class="ftitle">Paleta-desde-logo no está en el BrandingForm unificado</span></div>
+<dl><dt>Evidencia</dt><dd><code>palette-from-image.ts</code> solo se importa en el editor kiosk legacy (<code>EditorPanel.tsx:45</code>); el BrandingForm (fuente de verdad del branding compartido) pide los 4 tokens a mano.</dd>
+<dt>Impacto</dt><dd>El operador sube el logo y teclea HSL/hex a mano cuando la auto-derivación ya existe. Fricción de onboarding evitable.</dd>
+<dt>Fix</dt><dd>Botón "Suggest palette from logo" que llame a <code>extractPaletteFromImage(logo)</code> y precargue primary/secondary/accent.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-HUB-1</span><span class="sevbadge s-medio">Medio</span><span class="tag">M</span><span class="tag dim">debt/feature</span><span class="ftitle">Catálogo de starters por vertical = código muerto</span></div>
+<dl><dt>Evidencia</dt><dd><code>starters.ts:36-179</code> (Boutique Hotel, DMO, Resort, Urban) nunca se importa; <code>NewClientModal</code> solo ofrece "Start empty". Todo cliente clona <code>default</code>.</dd>
+<dt>Fix</dt><dd>Cablear un selector de starter en <code>NewClientModal</code> (escribe paleta/fonts/módulos/aiTone), o borrar el módulo. Decidir explícitamente.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-HUB-3</span><span class="sevbadge s-medio">Medio</span><span class="tag">M</span><span class="tag dim">feature</span><span class="ftitle">Sin rollback histórico del branding en la Vista de Cliente</span></div>
+<dl><dt>Evidencia</dt><dd><code>ClientView.tsx:53-84</code>: "Discard" revierte al snapshot de sesión, no a versiones persistidas; <code>branding/route.ts</code> solo GET+PATCH. S-08 quedó parcial.</dd>
+<dt>Fix</dt><dd>Snapshots de branding (patrón ya existente en kiosk) + panel "Branding history" con restore.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-HUB-7</span><span class="sevbadge s-medio">Medio</span><span class="tag">M</span><span class="tag dim">feature</span><span class="ftitle">Integraciones: tests on-demand pero sin monitor de salud</span></div>
+<dl><dt>Evidencia</dt><dd><code>IntegrationsEditor.tsx</code>: cada test es <code>useState</code> efímero con auto-dismiss; no hay "Test all" ni badge persistido. <code>integrations/smoke/route.ts</code> existe pero no se consume aquí. S-45 parcial.</dd>
+<dt>Fix</dt><dd>"Test all" + último resultado/timestamp en KV + badge de salud en la ProductCard.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-HUB-4</span><span class="sevbadge s-medio">Medio</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">bug</span><span class="ftitle">Website del BrandingForm no valida protocolo</span></div>
+<dl><dt>Evidencia</dt><dd><code>BrandingForm.tsx:114-120</code> acepta texto libre; <code>NewClientModal.tsx:142-144</code> sí exige <code>https?://</code>. Inconsistencia entre create y edit.</dd>
+<dt>Fix</dt><dd>Reusar el regex del modal (warning inline).</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-HUB-5</span><span class="sevbadge s-medio">Medio</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">bug</span><span class="ftitle">ID de ad sin validar unicidad</span></div>
+<dl><dt>Evidencia</dt><dd><code>AdsEditor.tsx:422-427</code> edita el ID sin chequear contra <code>value.ads</code>; el dismissal/frequency-cap se trackea por ID → IDs colisionados comparten estado.</dd>
+<dt>Fix</dt><dd>Validar unicidad inline (como <code>I18nEditor.tsx:137</code> hace con keys).</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-HUB-6</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">ux</span><span class="ftitle">"Pending publish" solo cubre Kiosk + Displays</span></div>
+<dl><dt>Evidencia</dt><dd><code>ClientView.tsx:344-453</code> tipa/itera solo <code>kiosks/digitalDisplays</code>; PWA y Video Walls (ya <code>live</code>) no aparecen.</dd>
+<dt>Fix</dt><dd>Extender a PWA + VW o renombrar la sección para acotar.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-HUB-8</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">ux/white-label</span><span class="ftitle">Validación de Location US-only bloquea clientes internacionales</span></div>
+<dl><dt>Evidencia</dt><dd><code>NewClientModal.tsx:12</code> (<code>City, ST</code> con estado de 2 letras). "Paris, France"/"Tokyo" se rechazan.</dd>
+<dt>Fix</dt><dd>Relajar a "City, Region/Country" y confiar en Nominatim para coords.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-HUB-9</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">M</span><span class="tag dim">feature</span><span class="ftitle">Sin bulk ops en el dashboard</span></div>
+<dl><dt>Evidencia</dt><dd><code>page.tsx:431-641</code>: pin/clone/delete por-cliente; sin selección múltiple. El endpoint <code>resync</code> existe.</dd>
+<dt>Fix</dt><dd>Selección múltiple + barra de acciones (bulk pin/resync/export).</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-HUB-10</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">M</span><span class="tag dim">ux</span><span class="ftitle">Waitlist "Notify me" solo escribe localStorage</span></div>
+<dl><dt>Evidencia</dt><dd><code>ComingSoon.tsx:68-81</code>: <code>localStorage.setItem</code> y nada más. Solo afecta a Tablets (PWA/VW ya live).</dd>
+<dt>Fix</dt><dd>POST a un endpoint (KV <code>waitlist:&lt;product&gt;</code>) o degradar el CTA a texto honesto.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-HUB-11</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">bug</span><span class="ftitle">Token "Neutral" se edita pero el copy dice "3 tokens"</span></div>
+<dl><dt>Evidencia</dt><dd><code>BrandingForm.tsx:179,199-204</code>: 4 ColorRow pero el hint dice "3 tokens recolor every product"; el hub solo consume 3.</dd>
+<dt>Fix</dt><dd>Alinear el copy o agrupar Neutral aparte.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-HUB-12</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">M</span><span class="tag dim">ux</span><span class="ftitle">i18n kiosk y PWA en tablas separadas (riesgo de divergencia)</span></div>
+<dl><dt>Evidencia</dt><dd>Coexisten <code>I18nEditor.tsx</code> (kiosk) y <code>PwaI18nEditor.tsx</code>, sin vista que reconcilie claves.</dd>
+<dt>Fix</dt><dd>Editor i18n unificado por cliente, o indicador "X keys solo en kiosk / Y solo en PWA".</dd></dl></div>
+
+<h3 class="pagebreak">4.6 · Calidad transversal — Deuda · a11y · Perf · Tests</h3>
+
+<div class="finding alto"><div class="fhead"><span class="fid">F-QA-6</span><span class="sevbadge s-alto">Alto</span><span class="tag">L</span><span class="tag dim">test</span><span class="ftitle">Cero tests unitarios en todo el repo</span></div>
+<dl><dt>Evidencia</dt><dd>Sin <code>*.test.*</code>/<code>*.spec.*</code>; <code>package.json</code> no tiene script <code>test</code>. <code>schema.ts</code> (135 schemas Zod), <code>bootstrap-from-fs.ts</code>, <code>rewriteAddresses/Content</code> sin red.</dd>
+<dt>Fix</dt><dd>Vitest + script <code>test</code>; empezar por <code>schema.ts</code> (parse de <code>_template</code>/<code>default</code>), <code>import-helpers.ts</code> y los diffs del bridge.</dd></dl></div>
+
+<div class="finding alto"><div class="fhead"><span class="fid">F-QA-1</span><span class="sevbadge s-alto">Alto</span><span class="tag">L</span><span class="tag dim">debt</span><span class="ftitle">Editores monolíticos (1000–2355 líneas)</span></div>
+<dl><dt>Evidencia</dt><dd><code>schema.ts</code> 2355, <code>ModulesEditor.tsx</code> 1572 (9 componentes), <code>EditorPanel.tsx</code> 1393, <code>PhotoBoothEditor.tsx</code> 1186, <code>Shell.tsx</code> 1037, <code>BillboardEditor.tsx</code> 1027.</dd>
+<dt>Fix</dt><dd>Split por responsabilidad (carpetas <code>_components/modules/</code>, etc.), oportunista al tocar cada área. Barrel para no romper imports.</dd></dl></div>
+
+<div class="finding alto"><div class="fhead"><span class="fid">F-QA-3</span><span class="sevbadge s-alto">Alto</span><span class="tag">M</span><span class="tag dim">debt/a11y</span><span class="ftitle">Tres implementaciones casi idénticas de roving-tabindex</span></div>
+<dl><dt>Evidencia</dt><dd><code>SidebarTabs.tsx:153-159</code>, <code>TabStrip.tsx:69-74</code>, <code>SignageSidebarTabs.tsx:141-147</code>: mismo <code>handleKeyDown</code> copiado.</dd>
+<dt>Fix</dt><dd>Hook <code>useRovingTabList(refs, count, {orientation})</code> consumido por los tres.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-QA-7</span><span class="sevbadge s-medio">Medio</span><span class="tag">M</span><span class="tag dim">test</span><span class="ftitle">Sin E2E del flujo "cliente nuevo" completo (S-39)</span></div>
+<dl><dt>Evidencia</dt><dd><code>tests/e2e/studio-create-client.json</code> mínimo; no valida clone + rewrite + geocoding + ausencia de strings del template en el preview.</dd>
+<dt>Fix</dt><dd>Spec agent-browser que cree cliente, navegue al preview y asserte nombre del cliente + ausencia de Arizona/Phoenix.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-QA-4</span><span class="sevbadge s-medio">Medio</span><span class="tag">M</span><span class="tag dim">a11y</span><span class="ftitle">12 modales sin <code>useFocusTrap</code>/<code>useEscapeClose</code></span></div>
+<dl><dt>Evidencia</dt><dd>10 modales usan el hook; faltan ImportModal, AddSlideModal (×2), SchedulePopover (×2), SignageThemeModals, CommandPalette, OnboardingTour, etc.</dd>
+<dt>Fix</dt><dd>Enchufar <code>use-modal-a11y</code> en los modales reales.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-QA-5</span><span class="sevbadge s-medio">Medio</span><span class="tag">M</span><span class="tag dim">perf</span><span class="ftitle">Cero code-splitting; <code>&lt;img&gt;</code> sin lazy en galerías</span></div>
+<dl><dt>Evidencia</dt><dd>0 <code>dynamic()/lazy</code> en studio; 24 <code>&lt;img&gt;</code>, 1 <code>next/image</code>; <code>loading="lazy"</code> solo ×2.</dd>
+<dt>Fix</dt><dd><code>dynamic()</code> para los 16 editores tras el switch de <code>EditorPanel</code>; <code>loading="lazy"</code> en galerías.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-QA-12</span><span class="sevbadge s-medio">Medio</span><span class="tag">M</span><span class="tag dim">debt</span><span class="ftitle"><code>schema.ts</code> — 2355 líneas, 135 schemas en un archivo</span></div>
+<dl><dt>Evidencia</dt><dd><code>wc -l</code> = 2355; el archivo más sensible (white-label depende de él).</dd>
+<dt>Fix</dt><dd>(No urgente) split por dominio re-exportado desde un barrel, solo al tocarlo sustancialmente.</dd></dl></div>
+
+<div class="finding medio"><div class="fhead"><span class="fid">F-QA-2</span><span class="sevbadge s-medio">Medio</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">debt</span><span class="ftitle"><code>ToggleSwitch</code>/<code>DeleteConfirm</code> inline en ModulesEditor</span></div>
+<dl><dt>Evidencia</dt><dd><code>ModulesEditor.tsx:1313,1524</code>: primitivas privadas que deberían vivir en <code>_components/</code> (riesgo de drift, como Breadcrumb/SaveStatusPill).</dd>
+<dt>Fix</dt><dd>Promover a <code>_components/ConfirmDialog.tsx</code> y reusar el <code>ToggleField</code> existente.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-QA-8</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">debt</span><span class="ftitle">34 de 62 warnings de lint vienen de un patrón</span></div>
+<dl><dt>Evidencia</dt><dd><code>use-preview-bridge.ts</code>: ~22 <code>useCallback</code> omiten <code>recordPostSuccess/Failure</code> (estables) de sus deps.</dd>
+<dt>Fix</dt><dd>Añadir las deps o factorizar <code>makePusher(channel)</code> → elimina ~34 warnings de golpe.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-QA-9</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">perf</span><span class="ftitle">9 <code>&lt;img&gt;</code> sin optimizar</span></div>
+<dl><dt>Evidencia</dt><dd><code>slot-renderers.tsx</code> (×5), wayfinding (×2). Excepción legítima: renderers pixel-perfect con <code>pxToCss</code> → documentar con <code>eslint-disable</code> en vez de dejar el warning.</dd>
+<dt>Fix</dt><dd><code>next/image</code> donde el tamaño es conocido; comentar las excepciones.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-QA-10</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">debt</span><span class="ftitle">11 <code>console.*</code> sin pasar por el logger</span></div>
+<dl><dt>Evidencia</dt><dd>10 en <code>use-tavus-conversation.ts</code> + 1 en <code>logger.ts</code> (legítimo).</dd>
+<dt>Fix</dt><dd>Rutar por <code>lib/studio/logger.ts</code>; <code>eslint-disable</code> con comentario en el sink.</dd></dl></div>
+
+<div class="finding bajo"><div class="fhead"><span class="fid">F-QA-11</span><span class="sevbadge s-bajo">Bajo</span><span class="tag">S</span><span class="tag qw">quick-win</span><span class="tag dim">a11y</span><span class="ftitle"><code>SaveStatusPill</code> sin <code>role="status"</code> propio</span></div>
+<dl><dt>Evidencia</dt><dd>Confía en el <code>sr-only aria-live</code> de <code>Shell.tsx:927</code> (dos fuentes del mismo estado).</dd>
+<dt>Fix</dt><dd>Consolidar: el pill lleva <code>role="status"</code> y se quita el duplicado, o documentar Shell como única fuente.</dd></dl></div>
+
+</div>
+
+<!-- NUEVOS CASOS DE USO -->
+<div class="page">
+<h2 class="pagebreak">5 · Nuevos casos de uso y oportunidades de producto</h2>
+<p>Más allá de los fixes, el código revela capacidades a medio construir y oportunidades de alto valor para hacer del Studio una herramienta multi-tenant más potente.</p>
+
+<h3>Onboarding y creación de clientes</h3>
+<ul>
+  <li><b>Starters por vertical (ya diseñados).</b> Cablear <code>STARTERS</code> (hotel/DMO/resort/urban) al modal de creación: el operador elige un punto de partida con paleta, fonts, módulos y tono de Ask AI por industria. Mayor ROI desbloqueable del audit (F-HUB-1).</li>
+  <li><b>Paleta automática desde el logo</b> en el BrandingForm (el helper ya existe) — elimina teclear HSL a mano (F-HUB-2).</li>
+  <li><b>Soporte internacional</b> en Location (hoy US-only) confiando en Nominatim (F-HUB-8).</li>
+</ul>
+
+<h3>Escala multi-tenant</h3>
+<ul>
+  <li><b>Bulk ops</b> en el dashboard (selección múltiple + bulk resync/pin/export). El endpoint <code>resync</code> ya existe (F-HUB-9).</li>
+  <li><b>Monitor de integraciones</b> ("Test all" + badge de salud por cliente) consumiendo <code>integrations/smoke</code> (F-HUB-7).</li>
+  <li><b>Historial de versiones cross-device</b>: migrar <code>local-version-history</code> (hoy localStorage) a KV (<code>changelog:&lt;slug&gt;</code>, ya reservado) — prerequisito del changelog auto-source ya en backlog.</li>
+</ul>
+
+<h3>Confianza en la edición</h3>
+<ul>
+  <li><b>Undo/redo real</b> con stack de snapshots (cierra el "Redo" falso y el discard peligroso del kiosk).</li>
+  <li><b>Snapshots unificados</b> (namespace, slug): generalizar <code>snapshots.ts</code> da undo gratis a PWA, signage y video walls (F-CORE-7).</li>
+  <li><b>Versionado optimista</b> (<code>If-Match</code>) para edición segura multi-pestaña / multi-operador (F-CORE-4).</li>
+  <li><b>Dry-run de publish como UX</b>: el endpoint ya soporta <code>dryRun</code>; exponerlo como "Preview changes" que liste campos vacíos/sospechosos antes del PR.</li>
+</ul>
+
+<h3>Potencia de signage / video walls</h3>
+<ul>
+  <li><b>Rotación + dayparting real en Video Walls</b> (resuelve F-1/2/3 de un tiro con índice determinista por reloj). La mayor brecha de producto.</li>
+  <li><b>Playlist por daypart</b> (mañana/tarde/noche) reusando la infra multi-playlist existente.</li>
+  <li><b>Editor de setup geográfico para módulos PWA-only</b> (Scavenger Hunt/Wayfinding) con mini-mapa (F-PWA-5).</li>
+</ul>
+
+<h3>Consistencia white-label</h3>
+<ul>
+  <li><b>i18n unificado kiosk ↔ PWA</b> por cliente, evitando dos tablas de traducción divergentes (F-HUB-12).</li>
+  <li><b>Vista de cobertura i18n</b> (contador de strings traducidos por locale + "publish gate" si faltan traducciones).</li>
+  <li><b>Materialización de assets</b> en el publish (data-URI → archivos versionables/CDN) — aligera <code>config.json</code> y acelera el editor (F-PWA-3).</li>
+</ul>
+
+<!-- ROADMAP -->
+<h2 class="pagebreak">6 · Roadmap propuesto</h2>
+<p>Cuatro fases, ordenadas por impacto/esfuerzo. Las fases 1–2 son una sesión de fixes cada una; 3–4 son trabajo planificado.</p>
+
+<div class="roadmap-phase"><h4><span class="pill">Fase 1</span> Seguridad + previews rotas · <span class="small">quick-wins de alto impacto · ~1 sesión</span></h4>
+<ul>
+  <li><b>Auth/bridge en una pasada:</b> F-CORE-1 (fail-open), F-CORE-2 + F-SIGNAGE-6 (origin), F-CORE-3 (gate), F-CORE-10 (header).</li>
+  <li><b>Previews que mienten:</b> F-PWA-1 (idioma), F-PWA-2 (Welcome), F-SIGNAGE-4 (override congelado), F-SIGNAGE-3 (dayparting VW).</li>
+  <li><b>Footgun de datos:</b> F-KIOSK-1 (confirm discard), F-KIOSK-4 (race i18n).</li>
+</ul></div>
+
+<div class="roadmap-phase"><h4><span class="pill">Fase 2</span> Crítico de producto + redes de seguridad · <span class="small">~1–2 sesiones</span></h4>
+<ul>
+  <li><b>F-SIGNAGE-1 + F-SIGNAGE-2 (Crítico/Alto):</b> rotación + sincronización determinista de Video Walls. La pieza que rompe la promesa del producto.</li>
+  <li><b>Undo/snapshots:</b> F-CORE-7 (snapshots PWA), F-KIOSK-9 (toast undo en deletes).</li>
+  <li><b>Validación:</b> F-HUB-4 (website), F-HUB-5 (ad id), F-PWA-7 (locales i18n), F-PWA-4 (versión).</li>
+</ul></div>
+
+<div class="roadmap-phase"><h4><span class="pill">Fase 3</span> Capacidades a medio cablear + onboarding · <span class="small">trabajo planificado</span></h4>
+<ul>
+  <li><b>Desbloquear lo diseñado:</b> F-HUB-1 (starters), F-HUB-2 (paleta-desde-logo), F-HUB-8 (location internacional).</li>
+  <li><b>PWA-only editable:</b> F-PWA-5 (add/remove + setup geográfico), F-PWA-6 (schema Zod + validación).</li>
+  <li><b>Observabilidad:</b> F-CORE-6 (sync warning), F-HUB-7 (monitor integraciones), F-PWA-9 (marcar preview live).</li>
+</ul></div>
+
+<div class="roadmap-phase"><h4><span class="pill">Fase 4</span> Salud estructural · <span class="small">continuo / oportunista</span></h4>
+<ul>
+  <li><b>Tests:</b> F-QA-6 (Vitest + schema/bootstrap), F-QA-7 (E2E cliente nuevo).</li>
+  <li><b>Refactor:</b> F-QA-1/F-QA-12 (monolitos, al tocarlos), F-QA-3 (hook roving), F-QA-2 (extraer primitivas), F-PWA-3 (materializar assets).</li>
+  <li><b>Limpieza barata:</b> F-QA-8/9/10/11 (62 → ~10 warnings), F-CORE-5/8/9 (perf KV/bridge), F-SIGNAGE-8 (código muerto).</li>
+</ul></div>
+
+<!-- ANEXOS -->
+<h2 class="pagebreak">7 · Anexos</h2>
+
+<h3>7.1 · Reconciliación del audit previo (S-01..S-47)</h3>
+<p>De los 47 hallazgos de mayo, la mayoría están <b>cerrados</b>. Resumen del estado verificado en el código actual:</p>
+<table>
+  <tr><th>Estado</th><th>Hallazgos previos</th></tr>
+  <tr><td><span class="sevbadge s-bajo" style="color:var(--ok);background:var(--okbg);">Cerrado</span></td><td>S-01 (hydration), S-03/S-06 (client:list drift), S-07 (search), S-09 (activate fallback), S-10 (modal DD), S-12 (duplicar), S-13 (pinning), S-16 (footer env), S-17 (color picker), S-18 (lat/lon), S-21 (sticky header), S-22 (status pill), S-24..S-27/S-30 (a11y tabs/aria-live), S-32/S-33 (Shell useEffects), S-34/S-37 (auto-migrate), S-40 (prettier), S-44 (add display)</td></tr>
+  <tr><td><span class="sevbadge s-medio">Parcial</span></td><td>S-02 (emisor sí, receptor no → F-CORE-2), S-05 (cleanup sí, latente F-KIOSK-7), S-08 (sesión sí, histórico no → F-HUB-3), S-11 (solo kiosk+DD → F-HUB-6), S-15 (UX sí, duplicación → F-QA-3/F-KIOSK-3), S-28/S-29 (10 modales sí, 12 no → F-QA-4), S-38 (POST murió, PATCH persiste → F-CORE-6), S-45 (tests sí, monitor no → F-HUB-7)</td></tr>
+  <tr><td><span class="sevbadge s-alto">Abierto</span></td><td>S-39 (sin E2E cliente nuevo → F-QA-7); algunos G5/G6/G7/G8 del audit de video walls (endpoint client-level VW, asset fallback)</td></tr>
+</table>
+<p class="small">PWA-AUDIT-2026-06-04: los hallazgos críticos de integración (editor stub, mapeo tile→ruta, feature flags) están <b>cerrados</b> por la integración al Studio + el trabajo de esta sesión. El multi-idioma quedó <b>parcial</b> (preview roto, F-PWA-1; locales hardcoded, F-PWA-7).</p>
+
+<h3>7.2 · Inventario de deuda (archivos &gt; 750 líneas)</h3>
+<table>
+  <tr><th>Archivo</th><th>Líneas</th><th>Nota</th></tr>
+  <tr><td><code>src/lib/studio/schema.ts</code></td><td>2355</td><td>135 schemas; el más sensible (white-label)</td></tr>
+  <tr><td><code>_components/ModulesEditor.tsx</code></td><td>1572</td><td>9 componentes en un archivo</td></tr>
+  <tr><td><code>_components/EditorPanel.tsx</code></td><td>1393</td><td>switch de 16 editores</td></tr>
+  <tr><td><code>_components/PhotoBoothEditor.tsx</code></td><td>1186</td><td>5 tabs internas sin TabStrip</td></tr>
+  <tr><td><code>_components/Shell.tsx</code></td><td>1037</td><td>owner de 20 pares de state</td></tr>
+  <tr><td><code>_components/BillboardEditor.tsx</code></td><td>1027</td><td>—</td></tr>
+  <tr><td><code>_lib/use-preview-bridge.ts</code></td><td>912</td><td>34 warnings exhaustive-deps</td></tr>
+  <tr><td><code>[slug]/_components/BrandingForm.tsx</code></td><td>897</td><td>fuente de verdad del branding</td></tr>
+  <tr><td><code>components/studio-bridge.tsx</code></td><td>844</td><td>receptor sin validar origin</td></tr>
+  <tr><td><code>_components/SocialWallEditor.tsx</code></td><td>782</td><td>—</td></tr>
+  <tr><td><code>_components/IntegrationsEditor.tsx</code></td><td>763</td><td>tests efímeros</td></tr>
+  <tr><td><code>studio/page.tsx</code></td><td>759</td><td>dashboard</td></tr>
+</table>
+
+<h3>7.3 · Cobertura de tests y calidad</h3>
+<ul>
+  <li><b>Tests unitarios:</b> 0 (sin script <code>test</code>, sin Vitest/Jest).</li>
+  <li><b>E2E:</b> 3 specs agent-browser (<code>studio-create-client</code>, <code>video-walls-create-wall</code>, <code>video-walls-full-flow</code>); el flujo crítico de cliente nuevo está cubierto solo de forma mínima.</li>
+  <li><b>Lint:</b> 62 warnings, 0 errores (34 de un patrón en <code>use-preview-bridge</code>, 9 <code>no-img-element</code>, 11 <code>no-console</code>).</li>
+  <li><b>Typecheck:</b> limpio. <b>Prettier:</b> limpio en código fuente.</li>
+</ul>
+
+<h3>7.4 · White-label</h3>
+<p>El barrido encontró el código <b>mayormente limpio</b>: cero colores hex hardcoded en JSX de componentes; los "Phoenix/Arizona" detectados son placeholders, comentarios o lógica de rewrite del template (no datos de cliente). Excepciones menores: el preset de paleta "Arizona" (F-KIOSK-8) y el <code>LOCATION_REGEX</code> US-only (F-HUB-8), ambos rozan la regla §9 de topónimos.</p>
+
+<hr/>
+<p class="small">Documento generado el 2026-06-09 · 6 auditores en paralelo + verificación manual de críticos · Reconciliación de 3 audits previos · Esta auditoría es un backlog priorizado; no se aplicó ningún cambio de código de producto al generarla.</p>
+
+</div>
+</body>
+</html>

@@ -69,6 +69,9 @@ export function DashboardScreen({
   const logoW = LOGO_SIZE_PX[logoSize ?? 'M'];
   const logoX = 20 + (logoOffset?.x ?? 0);
   const logoY = 48 + (logoOffset?.y ?? 0);
+  // Quick Access y los tiles del grid son mutuamente excluyentes: un módulo que
+  // ya aparece como acceso rápido del hero no se repite en el grid de abajo.
+  const quickAccessKeys = new Set(quickAccess.slice(0, 4).map((q) => q.key));
   return (
     <div className="flex h-full w-full flex-col bg-background">
       {/* Header fijo — tamaños/posiciones verbatim del XD (110 alto; logo 154×29 a
@@ -212,7 +215,7 @@ export function DashboardScreen({
       <div className="scrollbar-hide flex-1 overflow-y-auto bg-background">
         <div className="grid grid-cols-2 gap-4 px-5 pb-5 pt-5">
           {tiles
-            .filter((t) => t.enabled !== false)
+            .filter((t) => t.enabled !== false && !quickAccessKeys.has(t.key))
             .map((t) => (
               <button
                 key={t.key}

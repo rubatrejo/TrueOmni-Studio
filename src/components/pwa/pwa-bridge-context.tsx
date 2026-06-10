@@ -2,7 +2,12 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
-import { PWA_CONFIG_OVERRIDE_EVENT, getCachedPwaOverride } from '@/components/studio-bridge';
+import {
+  PWA_ACTIVE_SECTION_EVENT,
+  PWA_CONFIG_OVERRIDE_EVENT,
+  getCachedPwaActiveSection,
+  getCachedPwaOverride,
+} from '@/components/studio-bridge';
 import type { PwaConfig } from '@/lib/config';
 
 /**
@@ -25,9 +30,15 @@ type PwaBridgeContextValue = {
   pwa: PwaConfig | null;
   /** True si hay un override activo (estamos dentro del editor). */
   isOverridden: boolean;
+  /** Sección del editor PWA activa ahora mismo, o `null` fuera del Studio. */
+  activeSection: string | null;
 };
 
-const PwaBridgeContext = createContext<PwaBridgeContextValue>({ pwa: null, isOverridden: false });
+const PwaBridgeContext = createContext<PwaBridgeContextValue>({
+  pwa: null,
+  isOverridden: false,
+  activeSection: null,
+});
 
 export function PwaBridgeProvider({
   initial,
@@ -37,24 +48,35 @@ export function PwaBridgeProvider({
   children: ReactNode;
 }) {
   const [override, setOverride] = useState<PwaConfig | null>(null);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
 
   useEffect(() => {
     // Hidrata con el último override cacheado (cubre el caso de navegación SPA
     // dentro del iframe donde el provider monta después del último dispatch).
     const cached = getCachedPwaOverride();
     if (cached) setOverride(cached as PwaConfig);
+    const cachedSection = getCachedPwaActiveSection();
+    if (cachedSection) setActiveSection(cachedSection);
 
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail && typeof detail === 'object') setOverride(detail as PwaConfig);
     };
+    const sectionHandler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (typeof detail === 'string') setActiveSection(detail);
+    };
     window.addEventListener(PWA_CONFIG_OVERRIDE_EVENT, handler);
-    return () => window.removeEventListener(PWA_CONFIG_OVERRIDE_EVENT, handler);
+    window.addEventListener(PWA_ACTIVE_SECTION_EVENT, sectionHandler);
+    return () => {
+      window.removeEventListener(PWA_CONFIG_OVERRIDE_EVENT, handler);
+      window.removeEventListener(PWA_ACTIVE_SECTION_EVENT, sectionHandler);
+    };
   }, []);
 
   const pwa = override ?? initial;
   return (
-    <PwaBridgeContext.Provider value={{ pwa, isOverridden: override !== null }}>
+    <PwaBridgeContext.Provider value={{ pwa, isOverridden: override !== null, activeSection }}>
       {children}
     </PwaBridgeContext.Provider>
   );
@@ -72,6 +94,15 @@ export function usePwaConfig(): PwaConfig | null {
  */
 export function usePwaIsOverridden(): boolean {
   return useContext(PwaBridgeContext).isOverridden;
+}
+
+/**
+ * Sección del editor PWA activa ahora mismo (`null` fuera del Studio). Permite
+ * que una pantalla congele un comportamiento de runtime SOLO cuando se la está
+ * editando, sin romper el flujo del preview en el resto de secciones (F-PWA-2).
+ */
+export function usePwaActiveSection(): string | null {
+  return useContext(PwaBridgeContext).activeSection;
 }
 
 /**

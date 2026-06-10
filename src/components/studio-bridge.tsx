@@ -89,6 +89,8 @@ export function StudioBridge() {
         pwa?: unknown;
         /** Ruta destino para `studio:pwa-nav` (navegación del preview PWA). */
         route?: string;
+        /** Sección activa del editor PWA (`studio:pwa-active-section`). */
+        section?: string;
       } | null;
       if (!data || typeof data !== 'object' || !data.type) return;
 
@@ -286,6 +288,12 @@ export function StudioBridge() {
           // Editor PWA → runtime PWA. Empuja el slice `features.pwa` completo;
           // el `PwaBridgeProvider` lo aplica reactivamente a las pantallas.
           if (data.pwa) applyPwaOverride(data.pwa);
+          break;
+        case 'studio:pwa-active-section':
+          // Editor PWA → runtime PWA: qué sección se está editando ahora. Lo usan
+          // las pantallas para congelar comportamientos de runtime SOLO en su
+          // sección (F-PWA-2: Welcome no auto-avanza mientras se edita Welcome).
+          if (typeof data.section === 'string') applyPwaActiveSection(data.section);
           break;
         case 'studio:pwa-nav':
           // Navega el preview PWA a una ruta (`/pwa/...`) sin reload completo
@@ -591,12 +599,29 @@ function applyPwaOverride(pwa: unknown) {
 
 interface PwaBridgeWindow extends Window {
   __pwaConfigOverride?: unknown;
+  __pwaActiveSection?: string;
 }
 
 /** Lee el último slice `features.pwa` que el bridge haya aplicado, o `null`. */
 export function getCachedPwaOverride(): unknown {
   if (typeof window === 'undefined') return null;
   return (window as PwaBridgeWindow).__pwaConfigOverride ?? null;
+}
+
+/** Evento global que el `PwaBridgeProvider` escucha para saber qué sección del
+ *  editor PWA está activa (F-PWA-2). */
+export const PWA_ACTIVE_SECTION_EVENT = 'pwa:active-section';
+
+function applyPwaActiveSection(section: string) {
+  if (typeof window === 'undefined') return;
+  (window as PwaBridgeWindow).__pwaActiveSection = section;
+  window.dispatchEvent(new CustomEvent(PWA_ACTIVE_SECTION_EVENT, { detail: section }));
+}
+
+/** Lee la última sección activa del editor PWA que el bridge haya anunciado. */
+export function getCachedPwaActiveSection(): string | null {
+  if (typeof window === 'undefined') return null;
+  return (window as PwaBridgeWindow).__pwaActiveSection ?? null;
 }
 
 const injectedFontLinks = new Set<string>();

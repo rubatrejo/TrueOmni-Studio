@@ -62,6 +62,10 @@ const EXIT_CLASS: Record<TransitionKind, string> = {
   'slide-up': 'signage-anim-slide-up-out',
 };
 
+/** F-SIGNAGE-4: tras una navegación manual desde el editor, segundos antes de
+ *  devolver el control al ciclo automático (auto-advance + dayparting). */
+const MANUAL_OVERRIDE_RESUME_MS = 30_000;
+
 function readSearchParams(): URLSearchParams | null {
   if (typeof window === 'undefined') return null;
   return new URLSearchParams(window.location.search);
@@ -145,11 +149,19 @@ export function SignagePlayer({
   const [currentIdx, setCurrentIdx] = useState(0);
   const [outgoingIdx, setOutgoingIdx] = useState<number | null>(null);
   const [transitionKind, setTransitionKind] = useState<TransitionKind>('cut');
-  /** Cuando es true, los effects de dayparting/filter no resetean el
-   *  currentIdx automáticamente — el operator está navegando manualmente
-   *  desde el editor y queremos respetarlo aunque el slide esté fuera de
-   *  schedule. Se desactiva al primer auto-advance natural. */
-  const manualOverrideRef = useRef(false);
+  /** QA freeze PERMANENTE (`?slide=N`): congela el slide para diffs
+   *  pixel-perfect del revisor-visual / agent-browser. No se reanuda nunca
+   *  (solo recargando la URL sin el query param). */
+  const qaFreezeRef = useRef(false);
+  /** Override TEMPORAL por navegación manual del operator desde el editor
+   *  (jump/nav-slide). Mientras está activo, los effects de dayparting/filter y
+   *  el auto-advance respetan el slide elegido aunque esté fuera de schedule.
+   *  F-SIGNAGE-4: se reanuda solo pasados `MANUAL_OVERRIDE_RESUME_MS` para
+   *  devolver el control al ciclo automático (antes no se reseteaba nunca y el
+   *  preview quedaba congelado hasta recargar). El nonce (>0 = activo) permite
+   *  reiniciar el temporizador en cada nueva navegación. */
+  const [manualOverrideNonce, setManualOverrideNonce] = useState(0);
+  const manualOverride = manualOverrideNonce > 0;
 
   // QA freeze hook (`?slide=N` o `?slide=<templateId>`): pinta el slide
   // pedido y desactiva auto-advance. Se usa por el revisor-visual /
@@ -164,7 +176,7 @@ export function SignagePlayer({
     if (Number.isFinite(asNum) && asNum >= 0) target = asNum;
     if (target < 0) target = playlist.findIndex((s) => s.templateId === raw);
     if (target < 0 || target >= playlist.length) return;
-    manualOverrideRef.current = true;
+    qaFreezeRef.current = true;
     setOutgoingIdx(null);
     setTransitionKind('cut');
     setCurrentIdx(target);
@@ -191,7 +203,7 @@ export function SignagePlayer({
             window.clearTimeout(cleanupTimerRef.current);
             cleanupTimerRef.current = null;
           }
-          manualOverrideRef.current = true;
+          setManualOverrideNonce((n) => n + 1);
           setOutgoingIdx(null);
           setTransitionKind('cut');
           setCurrentIdx(idx);
@@ -201,7 +213,7 @@ export function SignagePlayer({
           window.clearTimeout(cleanupTimerRef.current);
           cleanupTimerRef.current = null;
         }
-        manualOverrideRef.current = true;
+        setManualOverrideNonce((n) => n + 1);
         setOutgoingIdx(null);
         setTransitionKind('cut');
         setCurrentIdx((idx) => {
@@ -283,9 +295,9 @@ export function SignagePlayer({
   // su índice haya cambiado por filtrado.
   const currentSlideId = playlist[currentIdx]?.id;
   useEffect(() => {
-    // Operator manual override (jump/nav desde editor): respetar siempre,
-    // aunque el slide esté fuera de schedule.
-    if (manualOverrideRef.current) return;
+    // Operator manual override (jump/nav desde editor) o QA freeze: respetar
+    // siempre, aunque el slide esté fuera de schedule.
+    if (qaFreezeRef.current || manualOverride) return;
     if (effectivePlaylist.length === 0) {
       if (currentIdx !== 0) setCurrentIdx(0);
       return;
@@ -304,7 +316,7 @@ export function SignagePlayer({
         setCurrentIdx(firstActiveOriginalIdx);
       }
     }
-  }, [effectivePlaylist, playlist, currentIdx, currentSlideId]);
+  }, [effectivePlaylist, playlist, currentIdx, currentSlideId, manualOverride]);
 
   const slide = playlist[currentIdx];
   const duration = slide?.durationMs ?? settings.defaultDurationMs;
@@ -315,7 +327,7 @@ export function SignagePlayer({
   // slide concreto sin que se vaya solo.
   useEffect(() => {
     if (effectivePlaylist.length <= 1) return;
-    if (manualOverrideRef.current) return;
+    if (qaFreezeRef.current || manualOverride) return;
     const tickId = window.setTimeout(() => {
       // Buscar el siguiente slide ACTIVO en la playlist original, partiendo
       // del current. Esto preserva el orden original entre slides activos.
@@ -357,7 +369,25 @@ export function SignagePlayer({
     return () => {
       window.clearTimeout(tickId);
     };
-  }, [currentIdx, duration, playlist, effectivePlaylist, settings.defaultTransition]);
+  }, [
+    currentIdx,
+    duration,
+    playlist,
+    effectivePlaylist,
+    settings.defaultTransition,
+    manualOverride,
+  ]);
+
+  // F-SIGNAGE-4: reanudación del ciclo automático tras una navegación manual.
+  // Cada nuevo jump incrementa el nonce → reinicia el temporizador (limpia el
+  // anterior). Pasados MANUAL_OVERRIDE_RESUME_MS sin tocar nada, el override se
+  // levanta y el auto-advance/dayparting vuelven a actuar (antes el preview
+  // quedaba congelado para siempre tras el primer click).
+  useEffect(() => {
+    if (manualOverrideNonce === 0) return;
+    const t = window.setTimeout(() => setManualOverrideNonce(0), MANUAL_OVERRIDE_RESUME_MS);
+    return () => window.clearTimeout(t);
+  }, [manualOverrideNonce]);
 
   // Cleanup global en unmount.
   useEffect(() => {

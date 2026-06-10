@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { PwaConfig } from '@/lib/config';
+import { resolvePwaForLocale } from '@/lib/pwa-i18n';
 import { hexToHsl } from '@/lib/studio/hex-to-hsl';
 
 /**
@@ -36,6 +37,7 @@ export function usePwaPreviewBridge() {
   const lastPwaRef = useRef<PwaConfig | null>(null);
   const lastBrandingRef = useRef<PwaBrandingPatch | null>(null);
   const lastLocaleRef = useRef<string | null>(null);
+  const lastSectionRef = useRef<string | null>(null);
   const pwaDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const brandingDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -62,7 +64,14 @@ export function usePwaPreviewBridge() {
   }, []);
 
   const sendPwaNow = useCallback(
-    (pwa: PwaConfig) => post({ type: 'studio:pwa-update', pwa }),
+    (pwa: PwaConfig) => {
+      // F-PWA-1: resolver el slice para el locale activo del preview antes de
+      // enviarlo. Si no se resuelve, el handshake re-empuja el slice base y pisa
+      // la traducción que el layout resolvió server-side (la sección Languages
+      // quedaba inverificable en vivo). resolvePwaForLocale es no-op en el base.
+      const resolved = resolvePwaForLocale(pwa, lastLocaleRef.current ?? undefined) ?? pwa;
+      post({ type: 'studio:pwa-update', pwa: resolved });
+    },
     [post],
   );
 
@@ -98,6 +107,11 @@ export function usePwaPreviewBridge() {
       setLastAckAt(Date.now());
       if (lastBrandingRef.current) sendBrandingNow(lastBrandingRef.current);
       if (lastPwaRef.current) sendPwaNow(lastPwaRef.current);
+      // F-PWA-2: re-sincroniza la sección activa del editor para que el preview
+      // sepa cuándo congelar comportamientos de runtime que estorban al editar
+      // (p. ej. el auto-advance del Welcome splash).
+      if (lastSectionRef.current)
+        post({ type: 'studio:pwa-active-section', section: lastSectionRef.current });
       // Re-sincroniza el locale tras un reload del iframe (el cambio de idioma
       // recarga la PWA para re-resolver el slice server-side). El guard de la
       // cookie en `StudioBridge` evita un segundo reload en cadena.
@@ -134,6 +148,20 @@ export function usePwaPreviewBridge() {
     [post],
   );
 
+  /**
+   * Informa al preview qué sección del editor está activa (F-PWA-2). Lo usa el
+   * runtime PWA para congelar comportamientos que estorban al editar SOLO en su
+   * sección (no por "estar en el Studio"): el preview sigue comportándose como
+   * el runtime en el resto de pantallas.
+   */
+  const pushActiveSection = useCallback(
+    (section: string) => {
+      lastSectionRef.current = section;
+      post({ type: 'studio:pwa-active-section', section });
+    },
+    [post],
+  );
+
   /** Navega el preview a una ruta `/pwa/...` para previsualizar una sección. */
   const navTo = useCallback((route: string) => post({ type: 'studio:pwa-nav', route }), [post]);
 
@@ -157,6 +185,7 @@ export function usePwaPreviewBridge() {
     pushPwa,
     pushBranding,
     pushLocale,
+    pushActiveSection,
     navTo,
     isReady,
     bridgeStatus,

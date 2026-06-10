@@ -114,8 +114,23 @@ export function PwaShell({
   const [savedBranding, setSavedBranding] = useState<Branding>(initialBranding);
   const [branding, setBranding] = useState<Branding>(initialBranding);
 
-  const { iframeRef, pushPwa, pushBranding, pushLocale, navTo, bridgeStatus, onIframeLoad } =
-    usePwaPreviewBridge();
+  const {
+    iframeRef,
+    pushPwa,
+    pushBranding,
+    pushLocale,
+    pushActiveSection,
+    navTo,
+    bridgeStatus,
+    onIframeLoad,
+  } = usePwaPreviewBridge();
+
+  // F-PWA-2: informa al preview qué sección se edita (re-enviado en cada
+  // handshake por el hook) para que el runtime PWA congele comportamientos solo
+  // donde corresponde (p. ej. el auto-advance del Welcome splash).
+  useEffect(() => {
+    pushActiveSection(activeTab);
+  }, [activeTab, pushActiveSection]);
 
   // Empuja el branding al preview en cada cambio (y se re-envía en cada
   // handshake) para que `/pwa` muestre la marca real, no la del cliente

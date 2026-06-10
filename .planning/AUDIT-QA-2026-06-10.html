@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>QA del audit del Studio — 2026-06-10</title>
+<style>
+  @page { size: A4; margin: 16mm 14mm; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; color: #18181b; font-size: 11px; line-height: 1.45; margin: 0; }
+  h1 { font-size: 21px; margin: 0 0 2px; letter-spacing: -0.02em; }
+  h2 { font-size: 13px; margin: 22px 0 8px; padding-bottom: 4px; border-bottom: 2px solid #18181b; letter-spacing: 0.02em; text-transform: uppercase; }
+  .sub { color: #71717a; font-size: 11px; margin: 0 0 14px; }
+  .intro { background: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 8px; padding: 10px 12px; margin: 0 0 8px; }
+  .legend { font-size: 10px; color: #52525b; margin: 6px 0 0; }
+  .item { border: 1px solid #e4e4e7; border-radius: 8px; padding: 9px 11px 10px; margin: 0 0 7px; page-break-inside: avoid; }
+  .item .top { display: flex; align-items: baseline; gap: 8px; }
+  .chk { font-size: 14px; }
+  .id { font-weight: 700; font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; }
+  .sev { font-size: 8.5px; font-weight: 700; text-transform: uppercase; padding: 1px 6px; border-radius: 999px; letter-spacing: 0.04em; }
+  .sev.med { background: #fef3c7; color: #92400e; }
+  .sev.low { background: #e0f2fe; color: #075985; }
+  .sev.na  { background: #f4f4f5; color: #52525b; }
+  .commit { margin-left: auto; font-family: ui-monospace, Menlo, monospace; font-size: 9px; color: #a1a1aa; }
+  .title { font-weight: 600; font-size: 11.5px; margin: 1px 0 5px 22px; }
+  .rows { margin-left: 22px; }
+  .row { display: flex; gap: 6px; margin: 2px 0; }
+  .k { flex: 0 0 92px; color: #71717a; font-weight: 600; }
+  .v { flex: 1; }
+  .login { display: inline-block; font-size: 8px; font-weight: 700; color: #9f1239; background: #ffe4e6; border-radius: 4px; padding: 1px 5px; margin-left: 6px; vertical-align: middle; }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: 10px; background: #f4f4f5; padding: 0 3px; border-radius: 3px; }
+  .note { color: #71717a; font-style: italic; }
+</style>
+</head>
+<body>
+
+<h1>QA del audit del Studio</h1>
+<p class="sub">STUDIO-AUDIT-2026-06-09 · sesión 2026-06-10 · producción: <code>trueomni-studio.vercel.app</code></p>
+
+<div class="intro">
+  <strong>Cómo usar este documento.</strong> Casi todos los cambios son internos o sutiles
+  (a11y, concurrencia, performance, validación) — por eso al entrar a Vercel se ve "muy parecido".
+  Cada tarjeta dice <strong>qué cambió</strong>, <strong>dónde verlo</strong> y <strong>cómo probarlo</strong>.
+  Tacha el ☐ conforme revises. Los marcados <span class="login">login</span> necesitan tu sesión
+  GitHub en el Studio (el editor exige login; el hub no).
+  <p class="legend">Severidad: <span class="sev med">Medio</span> <span class="sev low">Bajo</span> — ninguno Crítico/Alto (esos ya estaban cerrados antes de esta sesión).</p>
+</div>
+
+<h2>Kiosk</h2>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-KIOSK-2</span><span class="sev med">Medio</span><span class="commit">5aad338</span></div>
+  <div class="title">Botones Undo/Redo muertos del TopBar eliminados</div>
+  <div class="rows">
+    <div class="row"><span class="k">Cambio</span><span class="v">Los iconos Undo/Redo de la barra superior no tenían acción (mentían). Se quitaron.</span></div>
+    <div class="row"><span class="k">Dónde</span><span class="v">Editor de un kiosk → barra superior, junto al toggle de tema. <span class="login">login</span></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">Confirmar que ya NO están esos 2 iconos. Las acciones reales (Discard / Reload preview) viven en la barra inferior (SaveBar).</span></div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-KIOSK-8</span><span class="sev low">Bajo</span><span class="commit">5aad338</span></div>
+  <div class="title">Paleta preset "Arizona" → "Desert" (sin topónimo, regla white-label)</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Editor kiosk → Branding → picker de paletas preset; y al crear cliente con starter. <span class="login">login</span></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">La paleta cálida marrón ahora se llama <strong>Desert · Terracotta</strong>.</span></div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-KIOSK-10</span><span class="sev low">Bajo</span><span class="commit">5aad338</span></div>
+  <div class="title">El timer del Photo Booth ya no acepta 0 segundos</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Editor kiosk → Photo Booth → Timer → "Available options (seconds)". <span class="login">login</span></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">Escribir <code>0</code> y pulsar + → no lo añade (mínimo 1s).</span></div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-KIOSK-11</span><span class="sev med">Medio</span><span class="commit">8336544</span></div>
+  <div class="title">Aviso (toast) al auto-saltar a Modules</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Editor kiosk. <span class="login">login</span></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">Estando en la tab de un módulo (ej. AI Avatar), ir a Modules y apagar ese módulo → aparece un toast «<em>AI Avatar is now off — switched to Modules</em>» en vez de saltar en silencio.</span></div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-KIOSK-5</span><span class="sev na">Sin cambio</span><span class="commit">—</span></div>
+  <div class="title">Edición durante save en vuelo — resuelto por diseño (falso positivo)</div>
+  <div class="rows">
+    <div class="row"><span class="k">Nota</span><span class="v note">Tras leer el código, el comportamiento ya era correcto (los indicadores derivan de <code>isDirty</code> y el baseline guardado = lo enviado a KV). No hubo cambios. Nada que probar.</span></div>
+  </div>
+</div>
+
+<h2>PWA</h2>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-PWA-8</span><span class="sev med">Medio</span><span class="commit">42692d5</span></div>
+  <div class="title">Fin del flash de la marca "default" en el preview</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Preview (iframe) del editor PWA y del kiosk. <span class="login">login</span></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">Recargar el preview (botón Reload o cambiar de cliente). Antes parpadeaba la marca/contenido del cliente <code>default</code>; ahora el iframe hace fade-in mostrando ya la marca del cliente editado.</span></div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-PWA-11</span><span class="sev low">Bajo</span><span class="commit">b66523f</span></div>
+  <div class="title">Aviso cuando Quick Access ≠ 4</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Editor PWA → Modules → sección "Quick access". <span class="login">login</span></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">Dejar 3 o 5 accesos rápidos → aparece un aviso ámbar: «The dashboard shows exactly 4 quick-access tiles — you have N…».</span></div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-PWA-10</span><span class="sev low">Bajo</span><span class="commit">b66523f</span></div>
+  <div class="title">Placeholder "En construcción" → "Coming soon" (UI en inglés)</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Editor PWA, en una sección aún sin editor propio. <span class="login">login</span></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">El chip de estado dice «Coming soon» (antes mezclaba español).</span></div>
+  </div>
+</div>
+
+<h2>Digital Displays / Video Walls (signage)</h2>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-SIGNAGE-5</span><span class="sev med">Medio</span><span class="commit">8336544</span></div>
+  <div class="title">El brand video de YouTube respeta el toggle de audio</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Display con un brand video de YouTube + el toggle de audio del display. <span class="login">login</span></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">Activar el audio del display → el video de YouTube ya no queda forzado a silencio (antes siempre muteado).</span></div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-SIGNAGE-7</span><span class="sev med">Medio</span><span class="commit">8336544</span></div>
+  <div class="title">El autosave del display ya no persiste un borrador viejo</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Editor de un Digital Display (autosave). <span class="login">login</span></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">Editar varios campos en ráfaga rápida → al autosalvar persiste el ÚLTIMO estado, no uno intermedio. (Bug de closure; difícil de ver salvo edición muy rápida.)</span></div>
+  </div>
+</div>
+
+<h2>Hub / Vista de cliente</h2>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-HUB-11</span><span class="sev low">Bajo</span><span class="commit">b66523f</span></div>
+  <div class="title">Copy de la paleta de marca alineado (no decía "3 tokens" con 4 colores)</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Vista de Cliente → Branding → "Brand palette". <span class="login">login</span></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">El hint ahora dice «These colors recolor every product.» (antes «3 tokens…», pero hay 4 ColorRow).</span></div>
+  </div>
+</div>
+
+<h2>Transversales (a11y · concurrencia · performance · validación)</h2>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-QA-4</span><span class="sev med">Medio</span><span class="commit">4977033</span></div>
+  <div class="title">Focus-trap + cerrar con Escape en los modales restantes</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Modales de Digital Displays / Video Walls (New/Duplicate/Delete tema y display, Add slide) y el modal Import del catálogo. <span class="login">login</span></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">Abrir un modal y: (1) pulsar Tab repetidamente → el foco cicla DENTRO del modal sin saltar al fondo; (2) Escape lo cierra; (3) al cerrar, el foco vuelve al botón que lo abrió.</span></div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-CORE-4</span><span class="sev med">Medio</span><span class="commit">2faa4af</span></div>
+  <div class="title">Concurrencia optimista en el guardado de config (evita lost-update)</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Editor kiosk, en 2 pestañas del MISMO cliente. <span class="login">login</span></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">Abrir el mismo kiosk en pestaña A y B. Guardar en A. Luego editar y guardar en B → B muestra toast «This kiosk changed in another session» y NO pisa lo de A. Recargar B y guardar de nuevo → funciona. (Un solo operador con una pestaña: guardar varias veces seguidas debe seguir funcionando sin bloqueos.)</span></div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-QA-5</span><span class="sev med">Medio</span><span class="commit">cba9064</span></div>
+  <div class="title">Code-splitting de editores + carga diferida de imágenes</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Editor kiosk (todas las tabs). <span class="login">login</span></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">Cambiar de tab por primera vez muestra un breve «Loading…» mientras descarga el chunk de ese editor (sólo la 1ª vez). Las imágenes de galerías (listings, events, ads…) cargan diferidas. Es mejora de performance — funcionalmente igual.</span></div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-CORE-11</span><span class="sev low">Bajo</span><span class="commit">ac9e50d</span></div>
+  <div class="title">Validación de slug de cliente unificada en todos los endpoints</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Backend (no visible). Afecta crear/clonar/publicar clientes de kiosk, signage y video walls.</span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">Opcional: intentar crear un cliente con slug inválido (mayúsculas, guion al inicio/fin) → se rechaza igual en todos los flujos.</span></div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-CORE-12</span><span class="sev low">Bajo</span><span class="commit">28ab7ac</span></div>
+  <div class="title">Cap de tamaño de KV aplicado también a PWA y signage</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Backend (no visible salvo config gigante).</span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">No requiere acción. Antes un config PWA/display demasiado grande fallaba opaco; ahora devuelve un error claro (413) en vez de romper el guardado.</span></div>
+  </div>
+</div>
+
+<h2>Pendiente de QA de tandas previas (esta semana, ya en prod)</h2>
+<p class="sub" style="margin-top:-2px">Cerrados antes de esta sesión pero que aún no habías revisado con login.</p>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-HUB-7</span><span class="sev med">Medio</span><span class="commit">bd58b96 · 424e704</span></div>
+  <div class="title">"Test all configured" de integraciones + badge de salud en el hub</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Editor kiosk → Integrations (barra superior "Test all configured"); y la tarjeta de Kiosks en <code>/studio/&lt;slug&gt;</code>. <span class="login">login</span></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">Pulsar «Test all configured» → testea los 9 providers y muestra estado; el badge de salud aparece en la ProductCard de Kiosks.</span></div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-PWA-3</span><span class="sev med">Medio</span><span class="commit">502101b · ac54529 · 05ef245</span></div>
+  <div class="title">Los uploads de imagen/PDF van a Vercel Blob (no base64 en el config)</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Cualquier campo de imagen/PDF del Studio (kiosk y PWA). <span class="login">login</span></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">Subir una imagen nueva → la URL guardada empieza por <code>https://…blob…</code> (no <code>data:base64</code>). Mejora el lag al teclear y el peso del config.</span></div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-QA-3</span><span class="sev med">Medio</span><span class="commit">a566150</span></div>
+  <div class="title">Navegación por teclado unificada en los sidebars (roving tabindex)</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Sidebar de secciones del editor kiosk y de signage. <span class="login">login</span></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">Con el foco en el sidebar, navegar con las flechas ↑/↓ (y Home/End) entre secciones.</span></div>
+  </div>
+</div>
+
+<div class="item">
+  <div class="top"><span class="chk">☐</span><span class="id">F-QA-7</span><span class="sev med">Medio</span><span class="commit">8f62da1</span></div>
+  <div class="title">E2E del flujo "cliente nuevo" (automatizado)</div>
+  <div class="rows">
+    <div class="row"><span class="k">Dónde</span><span class="v">Spec automatizado (no UI). <code>tests/e2e/studio-create-client.json</code></span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">Opcional, en local: <code>agent-browser batch --bail &lt; tests/e2e/studio-create-client.json</code> → crea un cliente y verifica que el preview NO contiene strings del template (Arizona/Phoenix…).</span></div>
+  </div>
+</div>
+
+</body>
+</html>

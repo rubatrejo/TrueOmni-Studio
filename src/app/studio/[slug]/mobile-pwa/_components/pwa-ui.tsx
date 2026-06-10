@@ -202,7 +202,7 @@ export function PwaPlaceholderPanel({
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-8 text-center">
         <span className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-sky-500" />
-          En construcción
+          Coming soon
         </span>
         <p className="max-w-xs text-[13px] leading-relaxed text-zinc-500 dark:text-zinc-400">
           This editor ships in the next iteration of Phase 1. For now the branding and the language

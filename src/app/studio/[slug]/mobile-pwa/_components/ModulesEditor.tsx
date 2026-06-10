@@ -137,6 +137,17 @@ export function ModulesEditor({
               <p className="mt-0.5 text-[11.5px] text-zinc-400 dark:text-zinc-600">
                 Drag to reorder · pick a module · click to rename · set its image.
               </p>
+              {/* F-PWA-11: el dashboard pinta exactamente 4 slots en posiciones
+                  fijas (slice(0,4)). Con ≠4 sobran o faltan tiles en el grid. */}
+              {v.quickAccess.length !== 4 ? (
+                <p className="mt-1 text-[11.5px] font-medium text-amber-600 dark:text-amber-400">
+                  The dashboard shows exactly 4 quick-access tiles — you have {v.quickAccess.length}
+                  .{' '}
+                  {v.quickAccess.length > 4
+                    ? 'The extras past the fourth are ignored.'
+                    : 'The empty slots stay blank.'}
+                </p>
+              ) : null}
             </header>
             <Reorder.Group
               axis="y"

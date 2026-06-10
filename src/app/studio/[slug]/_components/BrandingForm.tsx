@@ -220,7 +220,7 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
           // Cada ColorRow lleva descripción de su rol para que el operador
           // sepa qué cambia visualmente (antes era sólo "Primary/Secondary/
           // Accent/Neutral" sin contexto). 2x2 grid en desktop.
-          <Section title="Brand palette" hint="3 tokens recolor every product.">
+          <Section title="Brand palette" hint="These colors recolor every product.">
             <div className="grid grid-cols-2 gap-3">
               <ColorRow
                 label="Primary"

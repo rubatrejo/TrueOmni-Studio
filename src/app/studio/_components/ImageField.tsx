@@ -3,9 +3,12 @@
 import { Loader2, Upload, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 
+import { UPLOAD_MAX_BYTES } from '@/lib/studio/upload-validation';
+
 import { resolveStudioAsset } from '../_lib/asset-resolve';
 import { compressImage } from '../_lib/image-utils';
 import { useStudioSlug } from '../_lib/slug-context';
+import { uploadToBlob, useBlobAvailable } from '../_lib/upload-to-blob';
 
 interface ImageFieldProps {
   label: string;
@@ -53,14 +56,23 @@ export function ImageField({
   const [hover, setHover] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const slug = useStudioSlug();
+  const blobAvailable = useBlobAvailable();
   const previewSrc = slug ? resolveStudioAsset(slug, value) : value;
 
   const pickFile = async (file: File) => {
     setError(null);
     setBusy(true);
     try {
-      const dataUrl = await compressImage(file, { maxBytes });
-      onChange(dataUrl);
+      // F-PWA-3: con Blob disponible (y archivo dentro del cap) subimos el file
+      // y guardamos la URL — fuera del config va el base64. Sin token o archivo
+      // muy grande, fallback al data-URI comprimido (ruta histórica).
+      if (blobAvailable === true && slug && file.size <= UPLOAD_MAX_BYTES) {
+        const url = await uploadToBlob(file, { slug, kind: 'image', product: 'kiosk' });
+        onChange(url);
+      } else {
+        const dataUrl = await compressImage(file, { maxBytes });
+        onChange(dataUrl);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to read file');
     } finally {

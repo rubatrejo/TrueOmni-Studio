@@ -3,7 +3,12 @@
 import { FileText, Loader2, Upload, X } from 'lucide-react';
 import { useId, useRef, useState } from 'react';
 
-const MAX_BYTES = 8 * 1024 * 1024; // 8MB cap (KV practical limit)
+import { UPLOAD_MAX_BYTES } from '@/lib/studio/upload-validation';
+
+import { useStudioSlug } from '../_lib/slug-context';
+import { uploadToBlob, useBlobAvailable } from '../_lib/upload-to-blob';
+
+const MAX_BYTES = 8 * 1024 * 1024; // 8MB cap (fallback data-URI sin Blob)
 
 /**
  * Compact PDF upload field. Lee el archivo como data URL y emite también
@@ -31,6 +36,8 @@ export function PdfField({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hover, setHover] = useState(false);
+  const slug = useStudioSlug();
+  const blobAvailable = useBlobAvailable();
 
   const handleFile = async (file: File) => {
     setError(null);
@@ -53,7 +60,16 @@ export function PdfField({
       const matches = decoded.match(/\/Type\s*\/Page[^s]/g);
       const pages = matches ? matches.length : 1;
 
-      // Encode to base64.
+      // F-PWA-3: con Blob disponible (y dentro del cap) subimos el PDF y
+      // guardamos la URL — el config deja de cargar el base64 del brochure.
+      if (blobAvailable === true && slug && file.size <= UPLOAD_MAX_BYTES) {
+        const url = await uploadToBlob(file, { slug, kind: 'doc', product: 'kiosk' });
+        onChange(url);
+        onPageCountChange?.(Math.max(1, pages));
+        return;
+      }
+
+      // Fallback (sin token o PDF > cap del Blob): data-URI base64 inline.
       let binary = '';
       const CHUNK = 8 * 1024;
       for (let i = 0; i < bytes.length; i += CHUNK) {

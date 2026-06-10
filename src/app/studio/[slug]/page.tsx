@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { autoMigrateClients } from '@/lib/studio/auto-migrate-clients';
 import { loadUnifiedBranding } from '@/lib/studio/client-branding-sync';
 import { loadClientManifest } from '@/lib/studio/client-manifest';
+import type { IntegrationHealthSnapshot } from '@/lib/studio/integrations-health';
+import { kv, kvKeys } from '@/lib/studio/kv';
 
 import { ClientView } from './_components/ClientView';
 
@@ -26,14 +28,22 @@ export default async function ClientViewPage({ params }: PageProps) {
   // manifest. Idempotente.
   await autoMigrateClients();
 
-  const [manifest, branding] = await Promise.all([
+  const [manifest, branding, integrationsHealth] = await Promise.all([
     loadClientManifest(slug),
     loadUnifiedBranding(slug),
+    kv.get<IntegrationHealthSnapshot>(kvKeys.integHealth(slug)),
   ]);
 
   if (!manifest || !branding) {
     notFound();
   }
 
-  return <ClientView slug={slug} initialManifest={manifest} initialBranding={branding} />;
+  return (
+    <ClientView
+      slug={slug}
+      initialManifest={manifest}
+      initialBranding={branding}
+      initialIntegrationsHealth={integrationsHealth}
+    />
+  );
 }

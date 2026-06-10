@@ -1,10 +1,19 @@
 'use client';
 
 import type { LucideIcon } from 'lucide-react';
-import { ArrowRight, Loader2, Sparkles } from 'lucide-react';
+import {
+  ArrowRight,
+  CheckCircle2,
+  CircleAlert,
+  CircleDashed,
+  Loader2,
+  Sparkles,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+
+import type { IntegrationHealthSnapshot } from '@/lib/studio/integrations-health';
 
 /**
  * Card de un producto bajo el cliente. Si está activo, click → editor.
@@ -29,6 +38,10 @@ export interface ProductCardProps {
    *  "Exploring", etc. Reemplaza el badge genérico "Coming soon". Hallazgo
    *  S-19 del audit panorámico v2. */
   soonTimeline?: string;
+  /** Último snapshot de salud de integraciones (F-HUB-7). Solo se pasa a la
+   *  card de Kiosks (ahí viven las integraciones); `null` = nunca testeado.
+   *  `undefined` = la card no muestra salud de integraciones. */
+  integrationsHealth?: IntegrationHealthSnapshot | null;
 }
 
 export function ProductCard({
@@ -41,6 +54,7 @@ export function ProductCard({
   status,
   active,
   soonTimeline,
+  integrationsHealth,
 }: ProductCardProps) {
   const isComingSoon = status === 'soon';
   const href = `/studio/${slug}/${segment}`;
@@ -88,6 +102,9 @@ export function ProductCard({
         </div>
       </div>
       <p className="text-[12.5px] leading-relaxed text-zinc-500">{description}</p>
+      {integrationsHealth !== undefined && active && (
+        <IntegrationsHealthLine health={integrationsHealth} />
+      )}
       {!isComingSoon && (
         <div
           className={`mt-4 flex items-center gap-1.5 text-[12px] font-medium ${
@@ -149,6 +166,48 @@ export function ProductCard({
     >
       {card}
     </button>
+  );
+}
+
+/**
+ * Línea de salud de integraciones en la card de Kiosks (F-HUB-7). Refleja el
+ * último "Test all" persistido en KV. `null` = nunca testeado.
+ */
+function IntegrationsHealthLine({ health }: { health: IntegrationHealthSnapshot | null }) {
+  const overall = health?.overall ?? 'untested';
+  const failing = health?.totals.failed ?? 0;
+
+  const config =
+    overall === 'healthy'
+      ? {
+          icon: <CheckCircle2 className="h-3.5 w-3.5" />,
+          text: 'Integrations healthy',
+          cls: 'text-emerald-600 dark:text-emerald-400',
+        }
+      : overall === 'degraded'
+        ? {
+            icon: <CircleAlert className="h-3.5 w-3.5" />,
+            text: `${failing} integration${failing === 1 ? '' : 's'} failing`,
+            cls: 'text-red-600 dark:text-red-400',
+          }
+        : {
+            icon: <CircleDashed className="h-3.5 w-3.5" />,
+            text: 'Integrations not tested',
+            cls: 'text-zinc-400 dark:text-zinc-600',
+          };
+
+  return (
+    <span
+      className={`mt-2 inline-flex items-center gap-1.5 text-[11px] font-medium ${config.cls}`}
+      title={
+        health
+          ? `${health.totals.ok} ok · ${health.totals.failed} failing · ${health.totals.skipped} not configured`
+          : 'Run "Test all configured" in the kiosk Integrations tab'
+      }
+    >
+      {config.icon}
+      {config.text}
+    </span>
   );
 }
 

@@ -119,10 +119,12 @@ export async function runIntegrationsHealth(
 - **Cabecera nueva** encima de las cards: botón **"Test all configured"** + línea de estado
   (`Last tested 5m ago · 6 ok · 1 failing · unsaved edits` / `saved config`). En mount hace
   `getIntegrationsHealth(slug)` para poblar la línea.
-- **"Test all"** → `runIntegrationsHealth(slug, value)` (working copy) → distribuye los resultados a
-  cada card y refresca la cabecera. Implementación: se sube un mapa `resultsByKind` al
-  `IntegrationsEditor`; cada Card recibe un prop opcional `externalResult` que pinta en su `TestRow`
-  ya existente (sin duplicar UI).
+- **"Test all"** → `runIntegrationsHealth(slug, value)` (working copy) → refresca la cabecera.
+  **Realización (desvío menor del diseño, decidido en ejecución):** en vez de inyectar `externalResult`
+  en cada una de las 9 cards (27+ ediciones, riesgo de regresión sobre los Test por-card), los
+  resultados se muestran en una **barra de salud consolidada** (`IntegrationsHealthBar`) en la
+  cabecera del tab — los 9 providers de un vistazo (dot + label + message). Menor churn, misma
+  funcionalidad; los botones "Test" por card quedan intactos.
 - Los botones **"Test" por card se mantienen** (efímeros; solo "Test all" persiste el snapshot).
 - Estados: botón con `Loader2` mientras corre; error inline si el POST falla.
 

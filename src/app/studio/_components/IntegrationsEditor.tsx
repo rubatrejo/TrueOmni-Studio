@@ -11,13 +11,20 @@ import {
   Globe,
   Loader2,
   Map,
+  MinusCircle,
   Plane,
+  PlayCircle,
   Share2,
   Ticket,
   Video,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+import type {
+  IntegrationCheckResult,
+  IntegrationHealthSnapshot,
+  IntegrationKind,
+} from '@/lib/studio/integrations-health';
 import {
   WEATHER_PROVIDERS,
   WEATHER_UNITS,
@@ -26,7 +33,8 @@ import {
   type WeatherUnits,
 } from '@/lib/studio/schema';
 
-import { checkIntegration } from '../_lib/api-client';
+import { checkIntegration, getIntegrationsHealth, runIntegrationsHealth } from '../_lib/api-client';
+import { useStudioSlug } from '../_lib/slug-context';
 
 import { TextInput } from './ui';
 
@@ -40,6 +48,7 @@ export function IntegrationsEditor({ value, onChange }: IntegrationsEditorProps)
 
   return (
     <div className="space-y-3">
+      <IntegrationsHealthBar value={value} />
       <WeatherCard config={value.weather} onChange={(next) => update({ weather: next })} />
       <ApiCard
         baseUrl={value.api.baseUrl}
@@ -60,6 +69,173 @@ export function IntegrationsEditor({ value, onChange }: IntegrationsEditorProps)
       <ViatorCard config={value.viator} onChange={(next) => update({ viator: next })} />
     </div>
   );
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/*  Health bar — "Test all" + último resultado persistido (F-HUB-7)         */
+/* ──────────────────────────────────────────────────────────────────────── */
+
+/** Etiqueta legible por provider para la lista de resultados. */
+const KIND_LABEL: Record<IntegrationKind, string> = {
+  mapbox: 'Mapbox',
+  api: 'External API',
+  analytics: 'Google Analytics',
+  openweather: 'OpenWeather',
+  satisfi: 'Satisfi Labs',
+  tavus: 'Tavus',
+  bandwango: 'Bandwango',
+  crowdriff: 'CrowdRiff',
+  viator: 'Viator',
+};
+
+/**
+ * Cabecera del tab Integrations: botón "Test all configured" + línea de estado
+ * con el último barrido persistido (F-HUB-7). Testea la working copy (`value`),
+ * persiste el snapshot en KV y muestra el resultado por provider. El badge del
+ * hub (ProductCard de Kiosks) lee el mismo snapshot.
+ */
+function IntegrationsHealthBar({ value }: { value: IntegrationsConfig }) {
+  const slug = useStudioSlug();
+  const [health, setHealth] = useState<IntegrationHealthSnapshot | null>(null);
+  const [testing, setTesting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Poblar la línea con el último snapshot persistido al montar.
+  useEffect(() => {
+    if (!slug) return;
+    let alive = true;
+    getIntegrationsHealth(slug)
+      .then((snap) => {
+        if (alive) setHealth(snap);
+      })
+      .catch(() => {
+        /* sin snapshot previo no es un error accionable */
+      });
+    return () => {
+      alive = false;
+    };
+  }, [slug]);
+
+  const handleTestAll = async () => {
+    if (!slug || testing) return;
+    setTesting(true);
+    setError(null);
+    try {
+      const snap = await runIntegrationsHealth(slug, value);
+      setHealth(snap);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Test all failed');
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  const totals = health?.totals;
+
+  return (
+    <section className="space-y-2.5 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/30">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="font-display text-[13px] font-semibold text-zinc-900 dark:text-white">
+            Integration health
+          </h3>
+          <p className="text-[11px] leading-snug text-zinc-500 dark:text-zinc-500">
+            {health ? (
+              <>
+                Last tested {formatRelative(health.computedAt)} ·{' '}
+                <span className="text-emerald-600 dark:text-emerald-400">{totals?.ok ?? 0} ok</span>
+                {' · '}
+                <span
+                  className={
+                    (totals?.failed ?? 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-zinc-500'
+                  }
+                >
+                  {totals?.failed ?? 0} failing
+                </span>
+                {' · '}
+                {totals?.skipped ?? 0} not configured ·{' '}
+                {health.source === 'working-copy' ? 'unsaved edits' : 'saved config'}
+              </>
+            ) : (
+              'Test every configured integration at once. The result is saved and shown as a badge on the client hub.'
+            )}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => void handleTestAll()}
+          disabled={!slug || testing}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-sky-300 bg-sky-50 px-3 py-1.5 text-[11.5px] font-medium text-sky-800 transition hover:border-sky-400 hover:bg-sky-100 disabled:opacity-40 dark:border-sky-500/40 dark:bg-sky-500/10 dark:text-sky-200 dark:hover:border-sky-500/60 dark:hover:bg-sky-500/20"
+        >
+          {testing ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <PlayCircle className="h-3.5 w-3.5" />
+          )}
+          {testing ? 'Testing…' : 'Test all configured'}
+        </button>
+      </div>
+
+      {error ? (
+        <p className="rounded-md border border-red-200 bg-red-50/70 px-2.5 py-1.5 text-[11px] text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200">
+          {error}
+        </p>
+      ) : null}
+
+      {health && health.results.length > 0 ? (
+        <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+          {health.results.map((r) => (
+            <HealthResultRow key={r.kind} result={r} />
+          ))}
+        </ul>
+      ) : null}
+    </section>
+  );
+}
+
+function HealthResultRow({ result }: { result: IntegrationCheckResult }) {
+  const tone =
+    result.status === 'ok'
+      ? 'text-emerald-600 dark:text-emerald-400'
+      : result.status === 'failed'
+        ? 'text-red-600 dark:text-red-400'
+        : 'text-zinc-400 dark:text-zinc-600';
+  return (
+    <li className="flex items-start gap-1.5 rounded-md border border-zinc-100 bg-zinc-50/60 px-2 py-1.5 dark:border-zinc-800/60 dark:bg-zinc-900/40">
+      <span className={`mt-px shrink-0 ${tone}`}>
+        {result.status === 'ok' ? (
+          <CheckCircle2 className="h-3.5 w-3.5" />
+        ) : result.status === 'failed' ? (
+          <AlertCircle className="h-3.5 w-3.5" />
+        ) : (
+          <MinusCircle className="h-3.5 w-3.5" />
+        )}
+      </span>
+      <span className="min-w-0 flex-1 text-[11px] leading-snug">
+        <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+          {KIND_LABEL[result.kind]}
+        </span>
+        {result.message ? (
+          <span className="text-zinc-500 dark:text-zinc-500"> — {result.message}</span>
+        ) : null}
+      </span>
+    </li>
+  );
+}
+
+/** Tiempo relativo compacto ("just now", "5m ago", "3h ago", "2d ago"). */
+function formatRelative(iso: string): string {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return 'recently';
+  const diffMs = Date.now() - then;
+  const sec = Math.round(diffMs / 1000);
+  if (sec < 45) return 'just now';
+  const min = Math.round(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.round(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.round(hr / 24);
+  return `${day}d ago`;
 }
 
 /* ──────────────────────────────────────────────────────────────────────── */

@@ -17,6 +17,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { UnifiedClientBranding } from '@/lib/studio/client-branding-sync';
 import type { ClientManifest } from '@/lib/studio/client-manifest';
+import type { IntegrationHealthSnapshot } from '@/lib/studio/integrations-health';
 
 import { Breadcrumb } from '../../_components/Breadcrumb';
 import { StudioBrand } from '../../_components/StudioBrand';
@@ -42,11 +43,19 @@ export interface ClientViewProps {
   slug: string;
   initialManifest: ClientManifest;
   initialBranding: UnifiedClientBranding;
+  /** Último snapshot de salud de integraciones (F-HUB-7) — badge en la card de
+   *  Kiosks. `null` = nunca testeado. */
+  initialIntegrationsHealth?: IntegrationHealthSnapshot | null;
 }
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
-export function ClientView({ slug, initialManifest, initialBranding }: ClientViewProps) {
+export function ClientView({
+  slug,
+  initialManifest,
+  initialBranding,
+  initialIntegrationsHealth = null,
+}: ClientViewProps) {
   const [branding, setBranding] = useState<UnifiedClientBranding>(initialBranding);
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -235,6 +244,7 @@ export function ClientView({ slug, initialManifest, initialBranding }: ClientVie
               icon={Monitor}
               status="live"
               active={initialManifest.products.kiosks}
+              integrationsHealth={initialIntegrationsHealth}
             />
             <ProductCard
               slug={slug}

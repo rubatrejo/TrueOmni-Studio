@@ -4,6 +4,59 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-10 (noche) — cierre del audit (67/68) + Full Screen del preview
+
+**Hecho (18 commits de código + 4 de docs, todos pusheados → deploys Vercel READY):**
+
+- **Quick-wins (3 tandas):** `ac9e50d` F-CORE-11 (regex de slug centralizado en
+  `STUDIO_SLUG_REGEX`, 11 endpoints) · `5aad338` F-KIOSK-2/8/10 (botones Undo/Redo
+  muertos del TopBar, paleta Arizona→Desert, timer ≥1s) · `b66523f` F-PWA-10/11 +
+  F-HUB-11 (placeholder inglés, aviso Quick Access≠4, copy de paleta) · `8336544`
+  F-SIGNAGE-5/7 + F-KIOSK-11 (YouTube respeta audio, autosave latest-ref, toast
+  al auto-jump).
+- **Plan mode:** `4977033` F-QA-4 (focus-trap+escape vía BaseModal → 6 modales
+  signage + ImportModal + 2 AddSlide + ConfirmDialog) · `2faa4af` F-CORE-4
+  (optimistic concurrency con `ConfigMeta.currentVersion` + ifVersion + 409) ·
+  `cba9064` F-QA-5 (code-splitting de ~20 editores con next/dynamic + lazy `<img>`)
+  · `28ab7ac` F-CORE-12 (cap KV en PWA/signage, helper `kv-size-guard`).
+- **Tanda final (agentes en paralelo):** `e31f058` F-KIOSK-6 (size-meter
+  debounced) · `41a5397` F-PWA-9 (flag `livePreview` + banner) · `e274c29`
+  F-SIGNAGE-9 (botón snapshot manual en DD) · `bd2cae7` F-HUB-6/10/12 (copy
+  honesto pending-publish, CTA waitlist honesto, nota i18n separado).
+- **Petición nueva (no-audit):** `1c7d347` Full Screen del preview abre la
+  PANTALLA ACTUAL (no la raíz) en kiosk/PWA (lee `iframe.contentWindow.location`)
+  y Digital Displays (`?slide=N`); Video Walls ya lo hacía.
+- **PDF de QA:** `.planning/AUDIT-QA-2026-06-10.{html,pdf}` — 68 tarjetas (una por
+  hallazgo, con qué/dónde/cómo probar + ☐), generado con Chrome headless.
+
+**Verificado:** cada commit con typecheck + lint (0 warnings) + 51 tests +
+validate:configs 3/3. Todos los deploys de producción quedaron READY (verificado
+con el MCP de Vercel). QA visual/funcional con login pendiente de Rubén (guía = el PDF).
+
+**Pendiente / siguiente:**
+
+- **F-HUB-9 (bulk ops en el dashboard)** — ÚNICO hallazgo abierto del audit. Es un
+  feature de producto (multi-select + barra de acciones batch) que requiere
+  brainstorming de UX. Candidato a la próxima sesión.
+- **QA manual de Rubén** con login (el PDF de QA es la guía exhaustiva).
+- Verificar el Full Screen tras login (navegar a una pantalla interna → Full screen
+  debe abrir esa, no la inicial).
+- F-KIOSK-3 y F-KIOSK-5: **falsos positivos del audit** (TabStrip sí se usa en
+  BrandingForm; el save-en-vuelo ya era correcto). Sin cambios. F-QA-12 (schema.ts)
+  sigue diferido.
+
+**Decisiones:**
+
+- Para cerrar muchos hallazgos rápido sin quemar contexto → despachar agentes en
+  paralelo por área (archivos disjuntos), yo commiteo por hallazgo. Funcionó.
+- Features de producto sin decisión del operador → implementar la opción mínima/
+  honesta que el audit permite (degradar copy, marcar, informar), nunca forzar un
+  feature grande a ciegas (F-HUB-9 se dejó SIN tocar a propósito).
+
+**Fase:** audit `STUDIO-AUDIT-2026-06-09` — **67/68 cerrados** (solo F-HUB-9 abierto).
+
+---
+
 ### Sesión 2026-06-10 (tarde) — Fase 4 del audit casi completa (quick-wins + F-QA-3 + F-QA-7 + F-PWA-3)
 
 > Continuación de la misma sesión abierta. **Sin `/terminar`** todavía. Entrada commiteada para

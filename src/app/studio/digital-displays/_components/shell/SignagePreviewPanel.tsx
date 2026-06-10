@@ -292,6 +292,7 @@ export function SignagePreviewPanel({
           displaySlug={displaySlug}
           displayName={displayName}
           orientation={orientation}
+          activeSlideIndex={activeSlide?.index ?? null}
           onClose={() => setFullScreen(false)}
         />
       ) : null}
@@ -324,12 +325,17 @@ function FullScreenPreview({
   displaySlug,
   displayName,
   orientation,
+  activeSlideIndex,
   onClose,
 }: {
   clientSlug: string;
   displaySlug: string;
   displayName: string | null;
   orientation: SignageOrientation;
+  /** Índice del slide activo en el preview pequeño (state-based via bridge,
+   *  no en la URL). Lo pasamos como `?slide=N` para que el fullscreen arranque
+   *  en el MISMO slide. `null` → el runtime arranca su ciclo normal. */
+  activeSlideIndex: number | null;
   onClose: () => void;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -356,7 +362,12 @@ function FullScreenPreview({
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  const url = `/signage/${clientSlug}/${displaySlug}`;
+  // Restaura el slide actual del preview pequeño (state-based) via el query
+  // param `?slide=N` que el runtime signage ya soporta (QA freeze).
+  const url =
+    activeSlideIndex !== null && activeSlideIndex > 0
+      ? `/signage/${clientSlug}/${displaySlug}?slide=${activeSlideIndex}`
+      : `/signage/${clientSlug}/${displaySlug}`;
   const label = displayName ?? displaySlug;
 
   return (

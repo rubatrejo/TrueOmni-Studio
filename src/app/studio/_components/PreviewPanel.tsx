@@ -63,6 +63,11 @@ export function PreviewPanel({
     product === 'pwa' ? 'mobile-pwa' : initialOrientation,
   );
   const [fullScreen, setFullScreen] = useState(false);
+  // Ruta actual del iframe del preview cuando se abre el Full Screen. El
+  // iframe es same-origin, así que podemos leer `pathname + search` para que
+  // el fullscreen arranque en la MISMA pantalla que el preview pequeño está
+  // mostrando (p. ej. `/home/events`, `/pwa/map`) en lugar de la raíz.
+  const [fullScreenSrc, setFullScreenSrc] = useState<string | null>(null);
   const [locale, setLocale] = useState<string>('en');
   // F-PWA-8: el iframe arranca con KIOSK_CLIENT=default (lo que sirve el build
   // del Studio) y el bridge empuja la marca real ~120-250ms tras el handshake.
@@ -157,6 +162,22 @@ export function PreviewPanel({
     // El handshake del bridge + el push debounced (120ms) aplican la marca real
     // en este margen; tras él hacemos fade-in para que no se vea el `default`.
     window.setTimeout(() => setPreviewReady(true), 320);
+  };
+
+  // Captura la ruta actual del iframe (same-origin) para que el Full Screen
+  // abra exactamente la pantalla que se está viendo. Fallback a la ruta base
+  // del producto si el acceso cross-origin falla o el iframe no está listo.
+  const openFullScreen = () => {
+    const base = previewSrc;
+    let current: string | null = null;
+    try {
+      const loc = iframeRef.current?.contentWindow?.location;
+      if (loc) current = `${loc.pathname}${loc.search}`;
+    } catch {
+      /* cross-origin / detached — usamos el fallback base */
+    }
+    setFullScreenSrc(current && current !== '/' && current !== 'about:blank' ? current : base);
+    setFullScreen(true);
   };
 
   return (
@@ -254,7 +275,7 @@ export function PreviewPanel({
             type="button"
             className="ml-1 inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-900"
             aria-label="Open kiosk in full screen"
-            onClick={() => setFullScreen(true)}
+            onClick={openFullScreen}
           >
             <Maximize className="h-3.5 w-3.5" />
             Full screen
@@ -332,6 +353,7 @@ export function PreviewPanel({
           nombre={nombre}
           orientation={orientation}
           product={product}
+          initialSrc={fullScreenSrc}
           onClose={() => setFullScreen(false)}
         />
       )}
@@ -354,17 +376,25 @@ function FullScreenPreview({
   nombre,
   orientation,
   product = 'kiosk',
+  initialSrc,
   onClose,
 }: {
   slug: string;
   nombre: string;
   orientation: PreviewOrientation;
   product?: 'kiosk' | 'pwa';
+  /** Ruta de la pantalla actual del preview pequeño (same-origin). Si es
+   *  `null` se usa la raíz del producto como fallback. */
+  initialSrc?: string | null;
   onClose: () => void;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const { w, h } = ORIENTATION_DIMS[orientation];
+  // Ruta del iframe fullscreen: la pantalla actual capturada, o el fallback
+  // a la raíz del producto.
+  const kioskSrc = initialSrc ?? '/';
+  const pwaSrc = initialSrc ?? '/pwa';
 
   useEffect(() => {
     function fit() {
@@ -418,7 +448,7 @@ function FullScreenPreview({
       >
         {product === 'pwa' ? (
           <iframe
-            src="/pwa"
+            src={pwaSrc}
             title={`${nombre} full screen`}
             className="absolute left-0 top-0 block border-0"
             style={{
@@ -439,7 +469,7 @@ function FullScreenPreview({
           />
         ) : (
           <iframe
-            src="/"
+            src={kioskSrc}
             title={`${nombre} full screen`}
             className="absolute left-0 top-0 block border-0"
             style={{

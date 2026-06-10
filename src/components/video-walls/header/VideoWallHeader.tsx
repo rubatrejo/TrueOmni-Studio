@@ -39,29 +39,18 @@ const PADDING_Y = 38;
 const SCALE = 335 / 155;
 /** Canvas baseline del header — 3x2 (5760×335). Otros grids escalan el
  *  spacing horizontal proporcionalmente para que las 3 zonas
- *  (logo/weather/clock) no se solapen en grids angostos (1x2: 1920, 2x2/2x1:
- *  3840) ni queden muy separadas en grids anchos (4x2: 7680). */
+ *  (logo/weather/clock) no se solapen en el grid más angosto (2x2: 3840) ni
+ *  queden muy separadas en el más ancho (4x2: 7680). */
 const BASE_CANVAS_W = 5760;
 
 /**
  * Factor de escala horizontal aplicado a padding lateral y gaps internos.
- * Clamp [0.5, 1.0] — abajo 50% para no pegar contenido al borde en 1x2;
- * arriba 100% porque el baseline ya es generoso y aumentar más no aporta
- * legibilidad.
+ * Cap a 1.0 — el baseline ya es generoso y aumentar más no aporta legibilidad.
+ * Los grids vivos (2x2/3x2/4x2) dan ratios 0.667–1.0; el grid 1x2 (que habría
+ * necesitado un floor) fue retirado del catálogo.
  */
 function horizontalScaleFor(canvasW: number): number {
-  return Math.min(1, Math.max(0.5, canvasW / BASE_CANVAS_W));
-}
-
-/**
- * Forecast days passa-tal-cual. Anteriormente había un clamp 5→3 en
- * canvases angostos (1x2/2x1: 1920/3840), pero esos grids fueron
- * retirados del catálogo (2026-05-18) y el clamp además contradecía
- * la intención del operador. El `forecastBlockScale = 0.75` (línea
- * ~251) se encarga de ajustar el tamaño de las cards cuando son 5.
- */
-function clampForecastDays(forecastDays: 1 | 3 | 5, _canvasW: number): 1 | 3 | 5 {
-  return forecastDays;
+  return Math.min(1, canvasW / BASE_CANVAS_W);
 }
 
 /** Weather placeholder usado por el runtime cuando no se pasa weather real. */
@@ -108,11 +97,10 @@ export function VideoWallHeader({ client, weather, grid }: VideoWallHeaderProps)
   const verticalAnchor: CSSProperties = headerPosition === 'bottom' ? { bottom: 0 } : { top: 0 };
 
   // forecastDays — el schema permite 0/1/3/5; mapeo 0 → 1 para que siempre haya al menos 1.
+  // Se pasa tal cual: el `forecastBlockScale = 0.75` (WeatherZone) ajusta el tamaño de las
+  // cards cuando son 5, sin necesidad de recortar días por ancho de canvas.
   const rawForecastDays = header.forecastDays as 0 | 1 | 3 | 5;
-  const requestedForecastDays: 1 | 3 | 5 = rawForecastDays === 0 ? 1 : rawForecastDays;
-  // Clamp por ancho de canvas — en 1x2 (1920) un forecast de 5 días se
-  // solapa con logo y clock; clamp a 1. En 2x2/2x1 (3840) clamp 5 → 3.
-  const forecastDays: 1 | 3 | 5 = clampForecastDays(requestedForecastDays, canvasW);
+  const forecastDays: 1 | 3 | 5 = rawForecastDays === 0 ? 1 : rawForecastDays;
 
   return (
     <div
@@ -196,12 +184,12 @@ function LogoZone({
 }) {
   const simple: 'left' | 'center' | 'right' =
     placement === 'logo-center' ? 'center' : placement === 'logo-right' ? 'right' : 'left';
-  // Logo height escala con widthScale para que en grids estrechos (1x2,
-  // widthScale=0.5) no domine el header. Antes era fijo 0.45 * HEADER_H =
-  // 151px, y con el isotipo TrueOmni (aspect 5.46:1) el logo ocupaba
-  // ~824px de los 1920px del canvas 1x2 → overlap con weather/clock.
+  // Logo height escala con widthScale para que en el grid más angosto (2x2)
+  // no domine el header. Antes era fijo 0.45 * HEADER_H = 151px, y con el
+  // isotipo TrueOmni (aspect 5.46:1) el logo ocupaba demasiado del canvas →
+  // overlap con weather/clock.
   const baseLogoHeight = HEADER_H * 0.45;
-  const logoHeight = Math.round(baseLogoHeight * Math.max(0.55, widthScale));
+  const logoHeight = Math.round(baseLogoHeight * widthScale);
   // Cap del ancho del logo al 30% del canvas para que nunca invada las
   // otras zonas, sin importar el aspect del logo custom.
   const maxLogoWidth = Math.floor(canvasW * 0.3);
@@ -249,11 +237,11 @@ function WeatherZone({
   widthScale: number;
 }) {
   const forecastBlockScale = forecastDays === 5 ? 0.75 : 1;
-  // Escalar TODO el weather (no solo gaps/dividers) por widthScale para
-  // que en 1x2 (widthScale=0.5) el "73°" no se monte con el logo. Antes
-  // los font sizes eran independientes del canvas width → en grids
-  // angostos el texto era demasiado grande relativo al espacio.
-  const totalScale = SCALE * forecastBlockScale * Math.max(0.55, widthScale);
+  // Escalar TODO el weather (no solo gaps/dividers) por widthScale para que en
+  // el grid más angosto (2x2) el "73°" no se monte con el logo. Antes los font
+  // sizes eran independientes del canvas width → en grids angostos el texto era
+  // demasiado grande relativo al espacio.
+  const totalScale = SCALE * forecastBlockScale * widthScale;
   const tempFontSize = Math.round(64 * totalScale);
   // Gap horizontal entre forecast cards — escalado por widthScale para
   // que no queden separadas excesivamente en grids angostos. Mantiene el
@@ -360,8 +348,8 @@ function ClockZone({
   widthScale: number;
 }) {
   // Mismo razonamiento que WeatherZone — escalar fonts por widthScale para
-  // canvas estrechos. Clamp inferior 0.55 para no perder legibilidad.
-  const clockScale = SCALE * Math.max(0.55, widthScale);
+  // canvas estrechos (mínimo vivo 2x2 → widthScale 0.667).
+  const clockScale = SCALE * widthScale;
   const clockFs = Math.round(42 * clockScale);
   const dateFs = Math.round(28 * clockScale);
   const textAlign: CSSProperties['textAlign'] =

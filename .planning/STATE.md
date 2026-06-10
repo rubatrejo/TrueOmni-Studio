@@ -38,11 +38,19 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 **Pendiente / siguiente:**
 
-- **EN CURSO: F-QA-1 / F-QA-12** — split de monolitos (`schema.ts` 2355 líneas / 135 schemas,
-  `ModulesEditor` 1572, `EditorPanel` 1393, `PhotoBoothEditor` 1186, `Shell` 1037,
-  `BillboardEditor` 1027). Esfuerzo L, "oportunista al tocar cada área". Estrategia: split por dominio
-  detrás de un **barrel** que preserve los imports (`@/lib/studio/schema`). `schema.ts` es el archivo
-  más sensible del white-label → máxima cautela, verificar import-by-import.
+- **F-QA-1 — split de monolitos de editor: 4 HECHOS** (`6d507b1`, `00d1f97`, `65ee208`, `f4e6304`,
+  `d660f49`). Patrón: mover sub-componentes hoja a una carpeta + barrel, preservando los exports
+  públicos (cero blast-radius). Verificados (typecheck/lint/51 tests):
+  - **ModulesEditor** 1485 → 776 (`modules/icons` 298 + `modules/rows` 427).
+  - **EditorPanel** 1352 → 890 (`editor-panel/VersionsEditor` 466).
+  - **BillboardEditor** 1027 → 698 (`billboard/controls` 346).
+  - **PhotoBoothEditor** 1186 → 89 (`photo-booth/shared` 448 + `photo-booth/tabs` 682).
+- **F-QA-1/F-QA-12 — pendientes (los 2 más riesgosos, deuda oportunística):**
+  - **`Shell.tsx`** (1084): es UN componente de ~951 líneas; partirlo exige extraer hooks/secciones
+    con estado → riesgo de comportamiento, no un move de hojas. Dejar para cuando se toque.
+  - **`schema.ts`** (2355, F-QA-12): el audit lo marca **"(No urgente), solo al tocarlo
+    sustancialmente"**; 212 exports / 56 importadores, alto riesgo de deps circulares. NO en frío.
+    Estrategia futura: `schema/` por dominio detrás de barrel `export *`.
 - **QA de Rubén** (login + Blob): F-HUB-7 (Test all + badge), F-PWA-3 (upload → URL https no base64),
   F-QA-3 (nav por teclado en sidebars), F-QA-7 (correr el spec con agent-browser).
 - GC de blobs huérfanos (deuda futura anotada en el DESIGN de F-PWA-3).

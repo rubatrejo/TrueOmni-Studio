@@ -26,6 +26,7 @@ import { ImportModal } from './catalog/ImportModal';
 import { ImportToast } from './catalog/ImportToast';
 import { TaxonomyEditor } from './catalog/TaxonomyEditor';
 import { EditorEmptyState } from './EditorEmptyState';
+import { useToast } from './Toast';
 
 interface ListingsEditorProps {
   value: ListingsModule;
@@ -120,6 +121,7 @@ function ListingsCatalogEditor({
   onCatalogChange: (patch: Partial<ListingsCatalog>) => void;
   kioskLocation: string;
 }) {
+  const { show } = useToast();
   const catalog = entry.catalog;
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
@@ -199,8 +201,16 @@ function ListingsCatalogEditor({
     });
 
   const handleItemDelete = (slug: string) => {
-    onCatalogChange({ listings: catalog.listings.filter((l) => l.slug !== slug) });
+    // F-KIOSK-9: delete reversible — guardamos el array previo y ofrecemos Undo.
+    const prevListings = catalog.listings;
+    const removed = prevListings.find((l) => l.slug === slug);
+    onCatalogChange({ listings: prevListings.filter((l) => l.slug !== slug) });
     if (editingSlug === slug) setEditingSlug(null);
+    show(`Deleted "${removed?.title ?? slug}"`, {
+      variant: 'info',
+      durationMs: 6000,
+      action: { label: 'Undo', onClick: () => onCatalogChange({ listings: prevListings }) },
+    });
   };
 
   const handleItemDuplicate = (slug: string) => {
@@ -218,9 +228,23 @@ function ListingsCatalogEditor({
   };
 
   const handleBulkDelete = (slugs: string[]) => {
+    if (slugs.length === 0) return;
+    // F-KIOSK-9: confirm para bulk grande (≥3) + Undo siempre (delete reversible).
+    if (
+      slugs.length >= 3 &&
+      !window.confirm(`Delete ${slugs.length} listings? You can undo right after.`)
+    ) {
+      return;
+    }
+    const prevListings = catalog.listings;
     const set = new Set(slugs);
-    onCatalogChange({ listings: catalog.listings.filter((l) => !set.has(l.slug)) });
+    onCatalogChange({ listings: prevListings.filter((l) => !set.has(l.slug)) });
     if (editingSlug && set.has(editingSlug)) setEditingSlug(null);
+    show(`Deleted ${slugs.length} listing${slugs.length === 1 ? '' : 's'}`, {
+      variant: 'info',
+      durationMs: 6000,
+      action: { label: 'Undo', onClick: () => onCatalogChange({ listings: prevListings }) },
+    });
   };
 
   const handleBulkDuplicate = (slugs: string[]) => {

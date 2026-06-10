@@ -31,12 +31,21 @@ import {
 
 export type ToastVariant = 'info' | 'success' | 'warning' | 'error';
 
+/** Acción opcional del toast (p. ej. "Undo"). Al pulsarla se ejecuta `onClick`
+ *  y el toast se descarta. */
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
 export interface ToastOptions {
   variant?: ToastVariant;
   /** Auto-dismiss en ms. 0 o negativo = sticky (default error sticky, resto 4000). */
   durationMs?: number;
   /** Subtítulo opcional bajo el mensaje principal. */
   description?: string;
+  /** Botón de acción opcional (p. ej. "Undo" tras un delete). */
+  action?: ToastAction;
 }
 
 interface ToastEntry {
@@ -45,6 +54,7 @@ interface ToastEntry {
   description?: string;
   variant: ToastVariant;
   durationMs: number;
+  action?: ToastAction;
 }
 
 interface ToastContextValue {
@@ -88,6 +98,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         description: options?.description,
         variant,
         durationMs,
+        action: options?.action,
       };
       setToasts((prev) => {
         const next = [...prev, entry];
@@ -215,6 +226,18 @@ function ToastCard({ entry, onClose }: { entry: ToastEntry; onClose: () => void 
           <p className="text-[11.5px] leading-relaxed text-zinc-500 dark:text-zinc-500">
             {entry.description}
           </p>
+        ) : null}
+        {entry.action ? (
+          <button
+            type="button"
+            onClick={() => {
+              entry.action?.onClick();
+              onClose();
+            }}
+            className="mt-1 rounded-md text-[11.5px] font-semibold text-sky-700 underline-offset-2 transition hover:underline dark:text-sky-300"
+          >
+            {entry.action.label}
+          </button>
         ) : null}
       </div>
       <button

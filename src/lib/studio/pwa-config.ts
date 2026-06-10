@@ -7,6 +7,7 @@ import type { PwaConfig } from '@/lib/config';
 import { normalizePwaSliceDashboard } from '@/lib/pwa-dashboard';
 
 import { kv, kvKeys } from './kv';
+import { takeSnapshotPwa } from './snapshots';
 
 /**
  * Modelo de datos del editor PWA del Studio.
@@ -122,6 +123,11 @@ export async function ensurePwaSlice(slug: string): Promise<PwaSliceMeta> {
 /** Persiste la working copy del slice PWA y actualiza la metadata. */
 export async function savePwaSlice(slug: string, slice: PwaConfig): Promise<PwaSliceMeta> {
   const prev = await loadPwaMeta(slug);
+  // F-CORE-7: snapshot del slice anterior ANTES de sobrescribir (save reversible,
+  // paridad con el revert del kiosk). `kv.get` directo para capturar solo lo
+  // persistido (no el seed default que devolvería `loadPwaSlice`).
+  const prevSlice = await kv.get<PwaConfig>(kvKeys.pwa(slug));
+  await takeSnapshotPwa(slug, prevSlice, 'patch');
   const now = new Date().toISOString();
   const meta: PwaSliceMeta = {
     slug,

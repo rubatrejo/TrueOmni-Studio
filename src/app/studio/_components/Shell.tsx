@@ -88,6 +88,10 @@ export function Shell({
   const [mobileTab, setMobileTab] = useState<MobileEditorTab>('editor');
   const [previewKey, setPreviewKey] = useState(0);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  // F-CORE-4: versión de la config que esta sesión cree estar editando. Se manda
+  // como `ifVersion` en cada save y se actualiza con la respuesta para que los
+  // saves consecutivos de esta misma sesión no se auto-bloqueen.
+  const [currentVersion, setCurrentVersion] = useState(initialMeta?.currentVersion ?? 0);
   const toast = useToast();
   const [publishOpen, setPublishOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -585,19 +589,32 @@ export function Shell({
       if (itineraryDirty) payload.itineraryBuilder = itinerary;
       if (adsDirty) payload.ads = ads;
       if (integrationsDirty) payload.integrations = integrations;
-      const tasks: Array<Promise<unknown>> = [];
       let syncWarning: string | null = null;
       if (Object.keys(payload).length > 0) {
-        tasks.push(
-          patchConfig(initialConfig.slug, payload).then((r) => {
-            syncWarning = r.syncWarning;
-          }),
-        );
+        // F-CORE-4: mandamos la versión que creemos editar. Si otra sesión
+        // guardó antes, el server responde 409 (conflict) y NO pisamos sus
+        // cambios — avisamos y dejamos el estado dirty para que el operador
+        // recargue. El i18n (sin versionado) NO se guarda en ese caso.
+        const result = await patchConfig(initialConfig.slug, {
+          ...payload,
+          ifVersion: currentVersion,
+        });
+        if (!result.ok) {
+          clearTimeout(stuckTimer);
+          setCurrentVersion(result.currentVersion);
+          toast.show('This kiosk changed in another session', {
+            variant: 'error',
+            description: 'Reload the page to pull the latest changes before saving again.',
+          });
+          setSaveState('error');
+          return;
+        }
+        syncWarning = result.syncWarning;
+        if (result.meta) setCurrentVersion(result.meta.currentVersion);
       }
       if (i18nDirty) {
-        tasks.push(patchI18n(initialConfig.slug, i18nBundle));
+        await patchI18n(initialConfig.slug, i18nBundle);
       }
-      await Promise.all(tasks);
       if (brandingDirty) setSavedBranding(branding);
       if (modulesDirty) setSavedModules(modules);
       if (billboardDirty) setSavedBillboard(billboard);
@@ -684,6 +701,7 @@ export function Shell({
     i18nDirty,
     isDirty,
     initialConfig.slug,
+    currentVersion,
   ]);
 
   // beforeunload guard (audit F-26): si hay cambios sin guardar, el navegador

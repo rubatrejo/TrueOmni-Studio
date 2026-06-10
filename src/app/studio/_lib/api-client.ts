@@ -165,16 +165,45 @@ export async function patchConfig(
     itineraryBuilder?: ItineraryBuilderConfig;
     ads?: AdsModule;
     integrations?: IntegrationsConfig;
+    /** F-CORE-4: versión que el cliente cree estar editando (optimistic lock). */
+    ifVersion?: number;
   },
-): Promise<{ config: KioskConfig; syncWarning: string | null }> {
-  const data = await http<{ config: KioskConfig; syncWarning?: string | null }>(
-    `/api/studio/configs/${slug}`,
-    {
-      method: 'PATCH',
-      body: payload,
-    },
-  );
-  return { config: data.config, syncWarning: data.syncWarning ?? null };
+): Promise<
+  | { ok: true; config: KioskConfig; meta: ConfigMeta | null; syncWarning: string | null }
+  | { ok: false; conflict: true; currentVersion: number }
+> {
+  // No usamos `http()` porque éste lanza en cualquier no-ok; aquí el 409 (otra
+  // sesión guardó antes — F-CORE-4) es un resultado esperado, no una excepción.
+  const res = await fetch(`/api/studio/configs/${slug}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (res.status === 409) {
+    const conflict = (await res.json().catch(() => ({}))) as { currentVersion?: number };
+    return { ok: false, conflict: true, currentVersion: conflict.currentVersion ?? 0 };
+  }
+  if (!res.ok) {
+    let detail = '';
+    try {
+      const err = (await res.json()) as { error?: string };
+      detail = err?.error ?? JSON.stringify(err);
+    } catch (e) {
+      console.warn('[api-client] failed to parse error response', e);
+    }
+    throw new Error(`${res.status} ${res.statusText}${detail ? ` — ${detail}` : ''}`);
+  }
+  const data = (await res.json()) as {
+    config: KioskConfig;
+    syncWarning?: string | null;
+    meta?: ConfigMeta | null;
+  };
+  return {
+    ok: true,
+    config: data.config,
+    meta: data.meta ?? null,
+    syncWarning: data.syncWarning ?? null,
+  };
 }
 
 export async function cloneConfig(

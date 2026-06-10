@@ -183,6 +183,8 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       trails?: unknown;
       ads?: unknown;
       integrations?: unknown;
+      /** F-CORE-4: versión que el cliente creía estar editando (optimistic lock). */
+      ifVersion?: unknown;
     };
 
     let next: KioskConfig = cfg;
@@ -500,28 +502,44 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       );
     }
 
+    // F-CORE-4: control de versión optimista. Leemos el meta ANTES de escribir
+    // para comparar la versión que el cliente creía editar (`ifVersion`) con la
+    // de KV. Si otro save (otra pestaña/operador) llegó antes, las versiones no
+    // coinciden → 409 y NO pisamos sus cambios (el cliente recarga con un GET).
+    // El KV no expone CAS/Lua, así que queda una ventana de carrera get→set de
+    // microsegundos, despreciable para la concurrencia real del Studio.
+    const meta = await kv.get<ConfigMeta>(kvKeys.cfgMeta(slug));
+    const ifVersion = (body as { ifVersion?: unknown }).ifVersion;
+    if (typeof ifVersion === 'number' && meta && ifVersion !== meta.currentVersion) {
+      return NextResponse.json(
+        {
+          error: 'Config changed in another session. Reload before saving.',
+          currentVersion: meta.currentVersion,
+        },
+        { status: 409 },
+      );
+    }
+
     // Snapshot del estado anterior ANTES de sobreescribirlo (#9 audit). Si el
     // operador hace un "Revert" después, restauramos a esto. cfgRaw es el
     // valor literal del KV (no el bootstrap re-aplicado) — eso es lo que el
     // operador espera ver al revertir, sin re-templating del FS.
     if (cfgRaw) await takeSnapshot(slug, cfgRaw, 'patch');
 
-    // F-CORE-5: el write del cfg y la lectura de meta son independientes (el
-    // snapshot ya corrió arriba, que es el único orden que importa) → en
-    // paralelo. El set de meta sí depende de su lectura, va después.
-    const [, meta] = await Promise.all([
+    // Bump de versión + lastEditedAt. El set del cfg y del meta son
+    // independientes (el snapshot ya corrió, único orden que importa — F-CORE-5)
+    // → en paralelo.
+    const updatedMeta: ConfigMeta | null = meta
+      ? {
+          ...meta,
+          lastEditedAt: new Date().toISOString(),
+          currentVersion: meta.currentVersion + 1,
+        }
+      : null;
+    await Promise.all([
       kv.set(kvKeys.cfg(slug), validated.data),
-      kv.get<ConfigMeta>(kvKeys.cfgMeta(slug)),
+      updatedMeta ? kv.set(kvKeys.cfgMeta(slug), updatedMeta) : Promise.resolve(),
     ]);
-
-    // Actualizar meta.lastEditedAt
-    if (meta) {
-      const updatedMeta: ConfigMeta = {
-        ...meta,
-        lastEditedAt: new Date().toISOString(),
-      };
-      await kv.set(kvKeys.cfgMeta(slug), updatedMeta);
-    }
 
     // Sync hook (Fase 4 del refactor cliente-primero): si el PATCH tocó
     // `branding`, `nombre` o `clientInfo`, propaga al unified branding +
@@ -556,7 +574,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       }
     }
 
-    return NextResponse.json({ config: validated.data, syncWarning });
+    return NextResponse.json({ config: validated.data, syncWarning, meta: updatedMeta });
   } catch (error) {
     console.error('[api/studio/configs/[slug] PATCH]', error);
     return NextResponse.json({ error: 'Failed to update config' }, { status: 500 });

@@ -4,6 +4,58 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-09 — fixes del editor PWA (Quick Access/tiles/idioma) en prod + AUDITORÍA EXTENSIVA del Studio (PDF)
+
+**Hecho (6 commits, los 5 de fixes pusheados a prod → deploys Vercel READY; el audit solo commiteado):**
+
+- **`5349cb1`** — Editor de Dashboard tiles del PWA = igual al del kiosk (drag con grip,
+  rename inline, botón Wide, toggle visibilidad `PwaTile.enabled`); preview PWA menos redondeado
+  (44→22px).
+- **`6ae8570`** — 5 puntos: Quick Access con UI de tiles + selector de módulo · ImageField por tile
+  en el editor del Home del kiosk (`ModuleEntry.image` + bridge + publish + bootstrap) · fix del
+  selector de idioma del preview (PWA escribe cookie `pwa_locale` + reload; ambos bridges re-envían
+  el locale en el handshake) · label `Places to Stay`→`Stay` en el side panel PWA.
+- **`b906962`** — Quick Access ↔ Dashboard tiles como **swap** (pool mutuamente excluyente).
+- **`d50c7fe`** — guard de render: el grid del Dashboard excluye módulos ya en Quick Access.
+- **`fc0a088`** — exclusividad QA↔tiles **en el dato**: util `normalizePwaDashboard`
+  (`src/lib/pwa-dashboard.ts`) aplicada en el editor (onChange) + `loadPwaSlice` (self-heal) +
+  `savePwaSlice`/`ensurePwaSlice`. (Plan brainstormeado + aprobado.)
+- **`86b3347`** — **Auditoría extensiva del Studio** → `.planning/STUDIO-AUDIT-2026-06-09.{html,pdf}`
+  (1.3 MB). 6 auditores en paralelo + verificación manual; 68 hallazgos (1 crítico, 13 altos);
+  matriz severidad×esfuerzo, roadmap en 4 fases, reconciliación de S-01..S-47 (mayoría cerrados).
+
+**Verificado:**
+
+- Cada commit de fixes: `typecheck` + `lint` (0 errores) + `validate:configs` 3/3 + prettier.
+  Los 5 deploys a producción quedaron **READY** (verificado con el MCP de Vercel).
+- Audit: críticos confirmados a mano — Video Walls no rotan playlist en runtime
+  (`VideoWallRuntime` usa `slideIndex` fijo); auth `/api/studio/*` falla abierta (middleware
+  fail-open, sin `auth()` en handlers). PDF renderizado con Chrome headless y revisado visualmente.
+
+**Pendiente / siguiente:**
+
+- **Arrancar la sesión de fixes del audit.** Empezar por la **Fase 1** del roadmap del PDF
+  (seguridad auth/bridge + previews que mienten + footgun del discard) — todos quick-wins de alto
+  impacto. Luego **Fase 2**: el crítico de Video Walls (rotación + sincronización) + redes de
+  seguridad (undo/snapshots/tests).
+- QA visual de Rubén en prod de los fixes del editor PWA (swap, idioma, imagen de tiles del kiosk).
+- El PDF del audit **no se pusheó** (docs-only → evita rebuild de Vercel innecesario); pushear solo
+  si se quiere sincronizar a origin.
+
+**Decisiones:**
+
+- **Audit antes de cambios.** Entregar el PDF priorizado antes de tocar código; los fixes van en
+  sesiones siguientes con aprobación, fase por fase.
+- **Regla del invariante PWA:** Quick Access ∩ tiles = ∅ (QA gana). Impuesto en editor + carga +
+  guardado + render (defensa en capas).
+- Fix de idioma: la PWA resuelve su slice server-side por cookie → requiere cookie + reload, no solo
+  el reactivo del kiosk.
+
+**Fase:** Sin milestone abierto. Trabajo post-cierre PWA = fixes del editor en prod + **auditoría
+panorámica del Studio entregada** (insumo para el próximo milestone de mejoras).
+
+---
+
 ### Sesión 2026-06-08 (tarde) — i18n PWA real + cierre milestone PWA + 3 rondas de fixes del editor (todo en prod)
 
 **Hecho (5 commits, todos pusheados a `origin/main` → 5 deploys Vercel READY):**

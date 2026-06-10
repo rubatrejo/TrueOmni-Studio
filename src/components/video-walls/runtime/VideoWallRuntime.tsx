@@ -1,9 +1,11 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
+import { getNowFromSearch, isSlideActive, msUntilNextMinute } from '@/lib/signage/schedule';
 import type { SignageHeaderWeather } from '@/lib/signage/weather-adapter';
 import { HEADER_H } from '@/lib/video-walls/dimensions';
+import { msUntilNextSlide, slideIndexAtTime } from '@/lib/video-walls/rotation';
 import type { VideoWallClientResolved, VideoWallConfig } from '@/lib/video-walls/schema';
 
 import { PLACEHOLDER_WEATHER, VideoWallHeader } from '../header/VideoWallHeader';
@@ -29,12 +31,22 @@ import { useVideoWallBridgeStore } from './video-wall-bridge-store';
  *    sobre los tokens CSS; aquí mergeamos el resto del client (header
  *    config, events, social, news) sobre la prop server.
  */
+function readSearchParams(): URLSearchParams | null {
+  if (typeof window === 'undefined') return null;
+  return new URLSearchParams(window.location.search);
+}
+
 export interface VideoWallRuntimeProps {
   client: VideoWallClientResolved;
   wall: VideoWallConfig;
   weather?: SignageHeaderWeather;
   showBezels?: boolean;
-  /** Índice del slide a renderizar (clamp a playlist length). Default 0. */
+  /**
+   * Índice de slide para el QA freeze (`?slide=N`): el runtime lo pinta fijo,
+   * sin rotar ni filtrar por dayparting (diffs pixel-perfect del revisor-visual).
+   * Sin `?slide`, el wall ROTA su playlist por reloj (default 0 solo para el
+   * primer paint antes de que el cliente tome el control).
+   */
   slideIndex?: number;
 }
 
@@ -87,11 +99,95 @@ export function VideoWallRuntime({
     };
   }, [wall, wallPatch]);
 
+  // Reloj reactivo para el dayparting. Dev override `?clock=HH:MM&day=...` (QA).
+  const [now, setNow] = useState<Date>(() => new Date());
+  const [clockOverride, setClockOverride] = useState(false);
+  // QA freeze (`?slide=N`): el wall se queda en ese slide sin rotar.
+  const [qaFreeze, setQaFreeze] = useState(false);
+  // Índice DENTRO de `effectivePlaylist` (arranca en el prop para un primer
+  // paint estable; el cliente lo recalcula por reloj tras montar).
+  const [currentIdx, setCurrentIdx] = useState(slideIndex);
+
+  // Mount client-only: leer los overrides de la URL.
+  useEffect(() => {
+    const sp = readSearchParams();
+    if (sp?.get('slide')) {
+      setQaFreeze(true);
+      return;
+    }
+    if (sp && (sp.get('clock') || sp.get('day'))) {
+      setNow(getNowFromSearch(sp, client.timezone));
+      setClockOverride(true);
+    }
+  }, [client.timezone]);
+
+  // Re-evaluación del wall-clock cada minuto (dayparting). Congelada si hay dev
+  // override de reloj (QA del gate).
+  useEffect(() => {
+    if (clockOverride) return;
+    let cancelled = false;
+    let timer = 0;
+    const tick = () => {
+      timer = window.setTimeout(() => {
+        if (cancelled) return;
+        setNow(new Date());
+        tick();
+      }, msUntilNextMinute(new Date()));
+    };
+    tick();
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [clockOverride]);
+
+  // Playlist efectiva tras el dayparting por slide (F-SIGNAGE-3).
+  const effectivePlaylist = useMemo(
+    () => effectiveWall.playlist.filter((s) => isSlideActive(s.schedule, now, client.timezone)),
+    [effectiveWall.playlist, now, client.timezone],
+  );
+
+  // Rotación determinista por reloj (F-SIGNAGE-1/2). El índice sale de
+  // `slideIndexAtTime(epoch)` → todas las celdas del wall convergen al mismo
+  // slide sin coordinación. `setTimeout` al borde exacto del slide actual.
+  useEffect(() => {
+    if (qaFreeze) return;
+    if (effectivePlaylist.length === 0) {
+      setCurrentIdx(0);
+      return;
+    }
+    let cancelled = false;
+    let timer = 0;
+    const schedule = () => {
+      const epoch = Date.now();
+      setCurrentIdx(slideIndexAtTime(effectivePlaylist, epoch));
+      const wait = msUntilNextSlide(effectivePlaylist, epoch);
+      if (!Number.isFinite(wait)) return;
+      timer = window.setTimeout(
+        () => {
+          if (!cancelled) schedule();
+        },
+        Math.max(250, wait),
+      );
+    };
+    schedule();
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [qaFreeze, effectivePlaylist]);
+
   const slide = useMemo(() => {
-    if (effectiveWall.playlist.length === 0) return null;
-    const i = Math.max(0, Math.min(slideIndex, effectiveWall.playlist.length - 1));
-    return effectiveWall.playlist[i] ?? null;
-  }, [effectiveWall.playlist, slideIndex]);
+    // QA freeze: render exacto del slide pedido, sin filtrar por dayparting.
+    if (qaFreeze) {
+      if (effectiveWall.playlist.length === 0) return null;
+      const i = Math.max(0, Math.min(slideIndex, effectiveWall.playlist.length - 1));
+      return effectiveWall.playlist[i] ?? null;
+    }
+    if (effectivePlaylist.length === 0) return null;
+    const i = Math.max(0, Math.min(currentIdx, effectivePlaylist.length - 1));
+    return effectivePlaylist[i] ?? null;
+  }, [qaFreeze, effectiveWall.playlist, effectivePlaylist, currentIdx, slideIndex]);
   const template = slide ? getTemplate(slide.templateId, effectiveWall.grid) : null;
 
   return (

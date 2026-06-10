@@ -529,6 +529,10 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     };
     const touchedSyncableField =
       bodyShape.branding != null || bodyShape.nombre != null || bodyShape.clientInfo != null;
+    // F-CORE-6: el sync de branding ya no falla en silencio. Si propagar a
+    // signage/PWA falla, devolvemos `syncWarning` para que el editor avise con un
+    // toast no bloqueante (el save del kiosk sí persistió).
+    let syncWarning: string | null = null;
     if (touchedSyncableField) {
       try {
         const { syncFromKioskSave } = await import('@/lib/studio/client-branding-sync');
@@ -538,12 +542,16 @@ export async function PATCH(req: Request, { params }: RouteParams) {
           await syncFromKioskSave(slug, validated.data);
         }
       } catch (e) {
+        syncWarning =
+          e instanceof Error
+            ? `Branding didn't sync to the other products: ${e.message}`
+            : "Branding didn't sync to the other products.";
         // eslint-disable-next-line no-console
         console.warn('[api/studio/configs/[slug] PATCH] sync hook failed', e);
       }
     }
 
-    return NextResponse.json({ config: validated.data });
+    return NextResponse.json({ config: validated.data, syncWarning });
   } catch (error) {
     console.error('[api/studio/configs/[slug] PATCH]', error);
     return NextResponse.json({ error: 'Failed to update config' }, { status: 500 });

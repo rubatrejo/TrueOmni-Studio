@@ -165,12 +165,15 @@ export async function patchConfig(
     ads?: AdsModule;
     integrations?: IntegrationsConfig;
   },
-): Promise<KioskConfig> {
-  const data = await http<{ config: KioskConfig }>(`/api/studio/configs/${slug}`, {
-    method: 'PATCH',
-    body: payload,
-  });
-  return data.config;
+): Promise<{ config: KioskConfig; syncWarning: string | null }> {
+  const data = await http<{ config: KioskConfig; syncWarning?: string | null }>(
+    `/api/studio/configs/${slug}`,
+    {
+      method: 'PATCH',
+      body: payload,
+    },
+  );
+  return { config: data.config, syncWarning: data.syncWarning ?? null };
 }
 
 export async function cloneConfig(

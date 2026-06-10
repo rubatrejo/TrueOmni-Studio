@@ -21,15 +21,25 @@ import { PwaPanelHeader } from './pwa-ui';
  */
 
 const BASE_LOCALE = 'en';
-const TARGET_LOCALES = ['es', 'fr', 'de', 'pt', 'ja'] as const;
+// Fallback cuando el cliente no declara `features.languages.available`.
+const FALLBACK_TARGET_LOCALES = ['es', 'fr', 'de', 'pt', 'ja'];
 
 export function PwaI18nEditor({
   value,
   onChange,
+  availableLocales,
 }: {
   value: PwaConfig;
   onChange: (next: PwaConfig) => void;
+  /** Idiomas que ofrece el cliente (F-PWA-7); `null` → fallback. */
+  availableLocales: string[] | null;
 }) {
+  // F-PWA-7: traducir a los idiomas reales del cliente (sin el base `en`), no a
+  // una lista hardcodeada que ignoraba `features.languages.available`.
+  const TARGET_LOCALES = useMemo(() => {
+    const list = (availableLocales ?? FALLBACK_TARGET_LOCALES).filter((l) => l !== BASE_LOCALE);
+    return list.length > 0 ? list : FALLBACK_TARGET_LOCALES;
+  }, [availableLocales]);
   const [target, setTarget] = useState<string>(TARGET_LOCALES[0]);
   const [search, setSearch] = useState('');
   const [busy, setBusy] = useState(false);

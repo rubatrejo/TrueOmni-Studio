@@ -91,6 +91,7 @@ export function PwaShell({
   initialMeta,
   initialBranding,
   initialUnified,
+  availableLocales,
 }: {
   slug: string;
   nombre: string;
@@ -100,6 +101,9 @@ export function PwaShell({
   initialBranding: Branding;
   /** Unified branding base (para preservar name/location/neutral al guardar). */
   initialUnified: UnifiedClientBranding;
+  /** Idiomas que ofrece el cliente (`features.languages.available`) para el
+   *  editor i18n (F-PWA-7). `null` → el editor usa su lista por defecto. */
+  availableLocales: string[] | null;
 }) {
   const [activeTab, setActiveTab] = useState<PwaSectionKey>('branding');
   const [mobileTab, setMobileTab] = useState<MobileEditorTab>('editor');
@@ -319,6 +323,7 @@ export function PwaShell({
                   onPwaChange={setPwa}
                   branding={branding}
                   onBrandingChange={setBranding}
+                  availableLocales={availableLocales}
                 />
               </div>
               <SaveBar

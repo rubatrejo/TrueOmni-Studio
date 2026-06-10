@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 
+import { readClientFs } from '@/lib/studio/bootstrap-from-fs';
 import {
   loadUnifiedBranding,
   unifiedToKioskBranding,
@@ -37,11 +38,16 @@ export default async function MobilePwaEditorPage({
     await ensurePwaSlice(slug).catch(() => {});
   }
 
-  const [pwa, meta, unified] = await Promise.all([
+  const [pwa, meta, unified, fsClient] = await Promise.all([
     loadPwaSlice(slug),
     loadPwaMeta(slug),
     loadUnifiedBranding(slug),
+    // F-PWA-7: idiomas que el cliente ofrece (config kiosk), para que el editor
+    // i18n traduzca a esos y no a una lista hardcodeada. Best-effort: si el fs no
+    // tiene el cliente, el editor cae a su default.
+    readClientFs(slug).catch(() => ({ config: null, tokensCss: null })),
   ]);
+  const availableLocales = fsClient.config?.features?.languages?.available ?? null;
 
   // Fallback defensivo: si el cliente aún no tiene unified branding, lo
   // materializamos con defaults para que el editor abra (edge case raro —
@@ -62,6 +68,7 @@ export default async function MobilePwaEditorPage({
       initialMeta={meta}
       initialBranding={unifiedToKioskBranding(branding)}
       initialUnified={branding}
+      availableLocales={availableLocales}
     />
   );
 }

@@ -51,6 +51,7 @@ export function PwaEditorPanel({
   onPwaChange,
   branding,
   onBrandingChange,
+  availableLocales,
 }: {
   slug: string;
   sectionKey: PwaSectionKey;
@@ -58,6 +59,8 @@ export function PwaEditorPanel({
   onPwaChange: (next: PwaConfig) => void;
   branding: Branding;
   onBrandingChange: (next: Branding) => void;
+  /** Idiomas del cliente para el editor i18n (F-PWA-7). */
+  availableLocales: string[] | null;
 }) {
   if (sectionKey === 'branding') {
     return (
@@ -253,7 +256,7 @@ export function PwaEditorPanel({
   }
 
   if (sectionKey === 'languages') {
-    return <PwaI18nEditor value={pwa} onChange={onPwaChange} />;
+    return <PwaI18nEditor value={pwa} onChange={onPwaChange} availableLocales={availableLocales} />;
   }
 
   if (sectionKey === 'profile') {

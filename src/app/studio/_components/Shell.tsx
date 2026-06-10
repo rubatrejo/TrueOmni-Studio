@@ -583,8 +583,13 @@ export function Shell({
       if (adsDirty) payload.ads = ads;
       if (integrationsDirty) payload.integrations = integrations;
       const tasks: Array<Promise<unknown>> = [];
+      let syncWarning: string | null = null;
       if (Object.keys(payload).length > 0) {
-        tasks.push(patchConfig(initialConfig.slug, payload));
+        tasks.push(
+          patchConfig(initialConfig.slug, payload).then((r) => {
+            syncWarning = r.syncWarning;
+          }),
+        );
       }
       if (i18nDirty) {
         tasks.push(patchI18n(initialConfig.slug, i18nBundle));
@@ -614,6 +619,14 @@ export function Shell({
       recordSaveLocal(initialConfig.slug, initialMeta?.lastEditor ?? 'ruben@trueomni.com');
       clearTimeout(stuckTimer);
       setSaveState('saved');
+      // F-CORE-6: el save persistió, pero avisamos si el branding no propagó a
+      // los otros productos (signage/PWA) — antes fallaba en silencio.
+      if (syncWarning) {
+        toast.show('Saved, but branding sync failed', {
+          variant: 'warning',
+          description: syncWarning,
+        });
+      }
       setTimeout(() => setSaveState('idle'), 1500);
     } catch (err) {
       console.error('[Studio Save]', err);

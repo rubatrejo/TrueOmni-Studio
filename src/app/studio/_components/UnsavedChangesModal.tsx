@@ -13,8 +13,18 @@ interface UnsavedChangesModalProps {
   onCancel: () => void;
   /** Descartar cambios y proceder con la navegación. */
   onDiscard: () => void;
-  /** Guardar y luego navegar. */
-  onSave: () => void;
+  /**
+   * Guardar y luego navegar. Opcional: si se omite, el modal funciona como
+   * confirmación de descarte (sin botón "Save & continue") — p. ej. el discard
+   * global de la SaveBar, donde no tiene sentido guardar lo que se va a tirar.
+   */
+  onSave?: () => void;
+  /** Override del título (default "Unsaved changes"). */
+  title?: string;
+  /** Override del cuerpo (default: aviso de navegación). */
+  description?: string;
+  /** Override del label del botón destructivo (default "Discard changes"). */
+  discardLabel?: string;
 }
 
 /**
@@ -28,6 +38,9 @@ export function UnsavedChangesModal({
   onCancel,
   onDiscard,
   onSave,
+  title = 'Unsaved changes',
+  description = "You have changes that haven't been saved yet. If you leave now they will be lost. Save them first or discard to continue.",
+  discardLabel = 'Discard changes',
 }: UnsavedChangesModalProps) {
   // Hallazgos S-28 / S-29: Escape + focus trap unificados.
   useEscapeClose(open, onCancel);
@@ -70,14 +83,13 @@ export function UnsavedChangesModal({
                     id="unsaved-title"
                     className="font-display text-[15px] font-semibold text-zinc-900 dark:text-white"
                   >
-                    Unsaved changes
+                    {title}
                   </h2>
                   <p
                     id="unsaved-desc"
                     className="mt-1 text-[12.5px] leading-relaxed text-zinc-600 dark:text-zinc-400"
                   >
-                    You have changes that haven&apos;t been saved yet. If you leave now they will be
-                    lost. Save them first or discard to continue.
+                    {description}
                   </p>
                 </div>
               </div>
@@ -89,7 +101,7 @@ export function UnsavedChangesModal({
                   disabled={saving}
                   className="rounded-md border border-red-200 bg-white px-3 py-1.5 text-[12.5px] font-medium text-red-700 transition hover:border-red-300 hover:bg-red-50 disabled:opacity-50 dark:border-red-900/40 dark:bg-zinc-900 dark:text-red-300 dark:hover:border-red-800 dark:hover:bg-red-950/30"
                 >
-                  Discard changes
+                  {discardLabel}
                 </button>
                 <button
                   type="button"
@@ -99,14 +111,16 @@ export function UnsavedChangesModal({
                 >
                   Cancel
                 </button>
-                <button
-                  type="button"
-                  onClick={onSave}
-                  disabled={saving}
-                  className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
-                >
-                  {saving ? 'Saving…' : 'Save & continue'}
-                </button>
+                {onSave && (
+                  <button
+                    type="button"
+                    onClick={onSave}
+                    disabled={saving}
+                    className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3.5 py-1.5 text-[12.5px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+                  >
+                    {saving ? 'Saving…' : 'Save & continue'}
+                  </button>
+                )}
               </div>
             </motion.div>
           </div>

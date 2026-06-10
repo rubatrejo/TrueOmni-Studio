@@ -5,7 +5,7 @@
 // bundle del Shell. Otros componentes (modales, sidebar active indicator
 // con layoutId) siguen usando framer-motion.
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type {
   AdsModule,
@@ -172,6 +172,13 @@ export function Shell({
   const [savedI18nBundle, setSavedI18nBundle] = useState<I18nBundle>(defaultI18nBundle());
   const [i18nBundle, setI18nBundle] = useState<I18nBundle>(savedI18nBundle);
   const [i18nLoaded, setI18nLoaded] = useState(false);
+  // F-KIOSK-4: renames de tile aplicados ANTES de que resuelva el bundle i18n
+  // async. Se acumulan aquí para reaplicarlos sobre el bundle del servidor en el
+  // `.then`, en vez de que el load los pise silenciosamente (race en conexiones
+  // lentas). Keys del EN bundle (`tile_label_*` / `module_label_*`).
+  const pendingI18nEnOverridesRef = useRef<Record<string, string>>({});
+  // F-KIOSK-1: confirmación antes del discard global (revierte las 20 secciones).
+  const [discardConfirmOpen, setDiscardConfirmOpen] = useState(false);
 
   /**
    * Wrapper de `setModules` que cascadea cualquier rename de tile.label a:
@@ -228,6 +235,10 @@ export function Shell({
             const slug = key.replace(/-/g, '_');
             en[`tile_label_${slug}`] = label;
             en[`module_label_${slug}`] = label;
+            // F-KIOSK-4: recordar el override para reaplicarlo si el bundle del
+            // servidor aún no había cargado cuando se hizo el rename.
+            pendingI18nEnOverridesRef.current[`tile_label_${slug}`] = label;
+            pendingI18nEnOverridesRef.current[`module_label_${slug}`] = label;
           }
           return { ...bundle, en };
         });
@@ -241,8 +252,16 @@ export function Shell({
     getI18n(initialConfig.slug)
       .then((bundle) => {
         if (cancelled) return;
+        // El bundle del servidor es el baseline "guardado". Pero si el operador
+        // renombró tiles ANTES de que cargara (race F-KIOSK-4), reaplicamos esos
+        // overrides locales sobre el EN del servidor para no perderlos: quedan
+        // como cambios pendientes (current ≠ saved → dirty), no pisados.
+        const overrides = pendingI18nEnOverridesRef.current;
+        const hasOverrides = Object.keys(overrides).length > 0;
         setSavedI18nBundle(bundle);
-        setI18nBundle(bundle);
+        setI18nBundle(
+          hasOverrides ? { ...bundle, en: { ...(bundle.en ?? {}), ...overrides } } : bundle,
+        );
         setI18nLoaded(true);
       })
       .catch((err) => {
@@ -903,7 +922,7 @@ export function Shell({
                 saveState={effectiveSaveState}
                 isDirty={isDirty}
                 onSave={handleSave}
-                onUndo={handleDiscard}
+                onUndo={() => setDiscardConfirmOpen(true)}
                 onRedo={() => setPreviewKey((k) => k + 1)}
               />
             </div>
@@ -972,6 +991,19 @@ export function Shell({
             await handleSave();
             setPendingNavHref(null);
             if (target) router.push(target);
+          }}
+        />
+        {/* F-KIOSK-1: confirmación del discard global. Sin botón "Save" — no
+            tiene sentido guardar lo que se va a descartar. */}
+        <UnsavedChangesModal
+          open={discardConfirmOpen}
+          title="Discard all changes?"
+          description="This reverts every unsaved edit across all sections back to the last saved version. This can't be undone."
+          discardLabel="Discard all"
+          onCancel={() => setDiscardConfirmOpen(false)}
+          onDiscard={() => {
+            handleDiscard();
+            setDiscardConfirmOpen(false);
           }}
         />
       </div>

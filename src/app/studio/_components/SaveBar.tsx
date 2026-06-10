@@ -1,6 +1,6 @@
 'use client';
 
-import { Save, Undo2, Redo2 } from 'lucide-react';
+import { Save, RotateCcw, RefreshCw } from 'lucide-react';
 
 export function SaveBar({
   saveState,
@@ -23,19 +23,19 @@ export function SaveBar({
           onClick={onUndo}
           disabled={!isDirty}
           className="grid h-8 w-8 place-items-center rounded-md text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 disabled:opacity-40 disabled:hover:bg-transparent dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-          aria-label="Discard changes"
-          title="Discard unsaved changes"
+          aria-label="Discard all unsaved changes"
+          title="Discard ALL unsaved changes"
         >
-          <Undo2 className="h-[15px] w-[15px]" />
+          <RotateCcw className="h-[15px] w-[15px]" />
         </button>
         <button
           type="button"
           onClick={onRedo}
           className="grid h-8 w-8 place-items-center rounded-md text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-          aria-label="Redo"
-          title="⌘⇧Z"
+          aria-label="Reload preview"
+          title="Reload preview"
         >
-          <Redo2 className="h-[15px] w-[15px]" />
+          <RefreshCw className="h-[15px] w-[15px]" />
         </button>
         <span className="ml-2 text-[11px] text-zinc-400 dark:text-zinc-600">
           {isDirty ? 'Unsaved changes' : 'No pending changes'}

@@ -1,7 +1,10 @@
 'use client';
 
-import type { PwaNotificationsConfig } from '@/lib/config';
+import type { PwaNotification, PwaNotificationsConfig } from '@/lib/config';
 
+import { useToast } from '../../../_components/Toast';
+
+import { AddItemButton, DeleteItemButton, makeBlankNotification } from './pwa-list-helpers';
 import { PwaField, PwaGroup, PwaPanelHeader } from './pwa-ui';
 
 /**
@@ -37,6 +40,21 @@ export function NotificationsEditor({
 }) {
   const v: PwaNotificationsConfig = { ...EMPTY, ...value, seed: value?.seed ?? [] };
   const set = (patch: Partial<PwaNotificationsConfig>) => onChange({ ...v, ...patch });
+
+  const { show } = useToast();
+  const updateNotif = (i: number, patch: Partial<PwaNotification>) =>
+    set({ seed: v.seed.map((n, idx) => (idx === i ? { ...n, ...patch } : n)) });
+  const addNotif = () => set({ seed: [...v.seed, makeBlankNotification()] });
+  const removeNotif = (i: number) => {
+    const removed = v.seed[i];
+    const prev = v.seed;
+    set({ seed: v.seed.filter((_, idx) => idx !== i) });
+    show(`Deleted notification "${removed?.title || removed?.id}"`, {
+      variant: 'info',
+      durationMs: 6000,
+      action: { label: 'Undo', onClick: () => set({ seed: prev }) },
+    });
+  };
 
   return (
     <div className="flex h-full flex-col">
@@ -119,6 +137,57 @@ export function NotificationsEditor({
             value={v.emptyBody}
             onChange={(emptyBody) => set({ emptyBody })}
           />
+        </PwaGroup>
+
+        <PwaGroup title="Example notifications (demo data — real ones come from the backend)">
+          {v.seed.length === 0 ? (
+            <p className="text-[12px] text-zinc-400 dark:text-zinc-500">
+              No example notifications.
+            </p>
+          ) : (
+            v.seed.map((n, i) => (
+              <div
+                key={n.id}
+                className="flex items-start gap-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-800"
+              >
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <select
+                      aria-label="Notification type"
+                      value={n.type}
+                      onChange={(e) =>
+                        updateNotif(i, { type: e.target.value as PwaNotification['type'] })
+                      }
+                      className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-[12px] text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200"
+                    >
+                      <option value="info">Info</option>
+                      <option value="event">Event</option>
+                      <option value="deal">Deal</option>
+                      <option value="alert">Alert</option>
+                    </select>
+                  </div>
+                  <PwaField
+                    label="Title"
+                    value={n.title}
+                    onChange={(title) => updateNotif(i, { title })}
+                  />
+                  <PwaField
+                    label="Body"
+                    multiline
+                    value={n.body}
+                    onChange={(body) => updateNotif(i, { body })}
+                  />
+                  <PwaField
+                    label="Timestamp (ISO)"
+                    value={n.timestamp}
+                    onChange={(timestamp) => updateNotif(i, { timestamp })}
+                  />
+                </div>
+                <DeleteItemButton label="Delete notification" onClick={() => removeNotif(i)} />
+              </div>
+            ))
+          )}
+          <AddItemButton label="Add example notification" onClick={addNotif} />
         </PwaGroup>
       </div>
     </div>

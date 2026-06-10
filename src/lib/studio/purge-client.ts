@@ -55,17 +55,11 @@ export function buildPrefixesToPurge(slug: string): string[] {
 }
 
 export async function purgePrefix(prefix: string): Promise<number> {
-  let removed = 0;
-  // Direct key.
-  await kv.del(prefix);
-  removed += 1;
-  // Sub-keys con separador `:`.
-  const subKeys = await kv.keys(`${prefix}:*`);
-  for (const k of subKeys) {
-    await kv.del(k);
-    removed += 1;
-  }
-  return removed;
+  // F-CORE-8: el del de la key directa y el scan de sub-keys son independientes
+  // → en paralelo; luego los del de las sub-keys también en paralelo.
+  const [, subKeys] = await Promise.all([kv.del(prefix), kv.keys(`${prefix}:*`)]);
+  await Promise.all(subKeys.map((k) => kv.del(k)));
+  return 1 + subKeys.length;
 }
 
 /**
@@ -78,11 +72,16 @@ export async function purgePrefix(prefix: string): Promise<number> {
  * cleanup. Mejor un cliente a medias purgado que dejar 80% de keys vivas.
  */
 export async function purgeAllClientKeys(slug: string): Promise<void> {
-  for (const prefix of buildPrefixesToPurge(slug)) {
-    try {
-      await purgePrefix(prefix);
-    } catch (err) {
-      console.warn(`[purgeAllClientKeys] purgePrefix(${prefix}) failed`, err);
-    }
-  }
+  // F-CORE-8: los prefijos son independientes entre sí → purgar en paralelo.
+  // Cada uno con su propio try/catch para conservar el no-throw (un prefijo
+  // que falla no aborta el resto del cleanup).
+  await Promise.all(
+    buildPrefixesToPurge(slug).map(async (prefix) => {
+      try {
+        await purgePrefix(prefix);
+      } catch (err) {
+        console.warn(`[purgeAllClientKeys] purgePrefix(${prefix}) failed`, err);
+      }
+    }),
+  );
 }

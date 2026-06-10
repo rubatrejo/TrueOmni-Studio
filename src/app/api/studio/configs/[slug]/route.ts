@@ -506,10 +506,15 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     // operador espera ver al revertir, sin re-templating del FS.
     if (cfgRaw) await takeSnapshot(slug, cfgRaw, 'patch');
 
-    await kv.set(kvKeys.cfg(slug), validated.data);
+    // F-CORE-5: el write del cfg y la lectura de meta son independientes (el
+    // snapshot ya corrió arriba, que es el único orden que importa) → en
+    // paralelo. El set de meta sí depende de su lectura, va después.
+    const [, meta] = await Promise.all([
+      kv.set(kvKeys.cfg(slug), validated.data),
+      kv.get<ConfigMeta>(kvKeys.cfgMeta(slug)),
+    ]);
 
     // Actualizar meta.lastEditedAt
-    const meta = (await kv.get<ConfigMeta>(kvKeys.cfgMeta(slug))) ?? null;
     if (meta) {
       const updatedMeta: ConfigMeta = {
         ...meta,

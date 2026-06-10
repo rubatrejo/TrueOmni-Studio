@@ -19,8 +19,11 @@ export async function GET() {
     const slugs = await kv.smembers(kvKeys.clientsList);
     const configs = await Promise.all(
       slugs.map(async (slug) => {
-        const cfg = await kv.get<KioskConfig>(kvKeys.cfg(slug));
-        const meta = await kv.get<ConfigMeta>(kvKeys.cfgMeta(slug));
+        // F-CORE-5: cfg y meta son lecturas independientes → en paralelo.
+        const [cfg, meta] = await Promise.all([
+          kv.get<KioskConfig>(kvKeys.cfg(slug)),
+          kv.get<ConfigMeta>(kvKeys.cfgMeta(slug)),
+        ]);
         if (!cfg) return null;
         return { ...cfg, meta };
       }),

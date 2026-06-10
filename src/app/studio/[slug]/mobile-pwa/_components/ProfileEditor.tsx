@@ -1,7 +1,15 @@
 'use client';
 
-import type { PwaProfileConfig } from '@/lib/config';
+import type { PwaProfileConfig, PwaProfileEvent, PwaProfileFavorite } from '@/lib/config';
 
+import { useToast } from '../../../_components/Toast';
+
+import {
+  AddItemButton,
+  DeleteItemButton,
+  makeBlankFavorite,
+  makeBlankProfileEvent,
+} from './pwa-list-helpers';
 import { PwaField, PwaGroup, PwaOptionList, PwaPanelHeader } from './pwa-ui';
 
 /**
@@ -92,6 +100,63 @@ export function ProfileEditor({
     },
   };
 
+  const { show } = useToast();
+  const favItems = v.favorites.items;
+  const evtItems = v.upcomingEvents.items;
+  const updateFav = (i: number, patch: Partial<PwaProfileFavorite>) =>
+    onChange({
+      ...v,
+      favorites: {
+        ...v.favorites,
+        items: favItems.map((it, idx) => (idx === i ? { ...it, ...patch } : it)),
+      },
+    });
+  const addFav = () =>
+    onChange({ ...v, favorites: { ...v.favorites, items: [...favItems, makeBlankFavorite()] } });
+  const removeFav = (i: number) => {
+    const prev = favItems;
+    onChange({
+      ...v,
+      favorites: { ...v.favorites, items: favItems.filter((_, idx) => idx !== i) },
+    });
+    show('Deleted favorite', {
+      variant: 'info',
+      durationMs: 6000,
+      action: {
+        label: 'Undo',
+        onClick: () => onChange({ ...v, favorites: { ...v.favorites, items: prev } }),
+      },
+    });
+  };
+  const updateEvt = (i: number, patch: Partial<PwaProfileEvent>) =>
+    onChange({
+      ...v,
+      upcomingEvents: {
+        ...v.upcomingEvents,
+        items: evtItems.map((it, idx) => (idx === i ? { ...it, ...patch } : it)),
+      },
+    });
+  const addEvt = () =>
+    onChange({
+      ...v,
+      upcomingEvents: { ...v.upcomingEvents, items: [...evtItems, makeBlankProfileEvent()] },
+    });
+  const removeEvt = (i: number) => {
+    const prev = evtItems;
+    onChange({
+      ...v,
+      upcomingEvents: { ...v.upcomingEvents, items: evtItems.filter((_, idx) => idx !== i) },
+    });
+    show('Deleted event', {
+      variant: 'info',
+      durationMs: 6000,
+      action: {
+        label: 'Undo',
+        onClick: () => onChange({ ...v, upcomingEvents: { ...v.upcomingEvents, items: prev } }),
+      },
+    });
+  };
+
   const ep = v.editProfile;
   const cp = v.changePassword;
   const d = v.delete;
@@ -100,7 +165,7 @@ export function ProfileEditor({
     <div className="flex h-full flex-col">
       <PwaPanelHeader
         title="Profile & Account"
-        description="White-label texts of the profile, edit, settings, change-password and delete-account screens."
+        description="White-label texts of the profile, edit, settings, change-password and delete-account screens. The favorites / events below are example data (real items come from the user's account)."
       />
       <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
         <PwaGroup title="Profile">
@@ -122,6 +187,42 @@ export function ProfileEditor({
             value={v.favorites.viewMore}
             onChange={(viewMore) => onChange({ ...v, favorites: { ...v.favorites, viewMore } })}
           />
+          {favItems.map((it, i) => (
+            <div
+              key={i}
+              className="flex items-start gap-2 rounded-lg border border-zinc-200 p-2 dark:border-zinc-800"
+            >
+              <div className="flex-1 space-y-2">
+                <PwaField
+                  label="Title"
+                  value={it.title}
+                  onChange={(title) => updateFav(i, { title })}
+                />
+                <PwaField
+                  label="Subcategory"
+                  value={it.subcategory}
+                  onChange={(subcategory) => updateFav(i, { subcategory })}
+                />
+                <PwaField
+                  label="Distance line"
+                  value={it.distance}
+                  onChange={(distance) => updateFav(i, { distance })}
+                />
+                <PwaField
+                  label="Hours line"
+                  value={it.hours}
+                  onChange={(hours) => updateFav(i, { hours })}
+                />
+                <PwaField
+                  label="Image (asset path)"
+                  value={it.image}
+                  onChange={(image) => updateFav(i, { image })}
+                />
+              </div>
+              <DeleteItemButton label="Delete favorite" onClick={() => removeFav(i)} />
+            </div>
+          ))}
+          <AddItemButton label="Add example favorite" onClick={addFav} />
         </PwaGroup>
 
         <PwaGroup title="Upcoming events section">
@@ -137,6 +238,42 @@ export function ProfileEditor({
               onChange({ ...v, upcomingEvents: { ...v.upcomingEvents, viewMore } })
             }
           />
+          {evtItems.map((it, i) => (
+            <div
+              key={i}
+              className="flex items-start gap-2 rounded-lg border border-zinc-200 p-2 dark:border-zinc-800"
+            >
+              <div className="flex-1 space-y-2">
+                <PwaField
+                  label="Title"
+                  value={it.title}
+                  onChange={(title) => updateEvt(i, { title })}
+                />
+                <PwaField
+                  label="Time"
+                  value={it.time}
+                  onChange={(time) => updateEvt(i, { time })}
+                />
+                <PwaField
+                  label="Weekday"
+                  value={it.weekday}
+                  onChange={(weekday) => updateEvt(i, { weekday })}
+                />
+                <PwaField
+                  label="Day number"
+                  value={it.day}
+                  onChange={(day) => updateEvt(i, { day })}
+                />
+                <PwaField
+                  label="Image (asset path)"
+                  value={it.image}
+                  onChange={(image) => updateEvt(i, { image })}
+                />
+              </div>
+              <DeleteItemButton label="Delete event" onClick={() => removeEvt(i)} />
+            </div>
+          ))}
+          <AddItemButton label="Add example event" onClick={addEvt} />
         </PwaGroup>
 
         <PwaGroup title="Edit profile">

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { checkKvValueSize, KV_VALUE_BYTE_CAP } from '@/lib/studio/kv-size-guard';
 import { loadPwaMeta, loadPwaSlice, savePwaSlice } from '@/lib/studio/pwa-config';
 import { PwaConfigSchema } from '@/lib/studio/pwa-schema';
 
@@ -43,6 +44,19 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     return NextResponse.json(
       { error: 'validation failed', details: parsed.error.flatten() },
       { status: 400 },
+    );
+  }
+
+  // F-CORE-12: el slice PWA también está sujeto al cap del valor de KV.
+  const size = checkKvValueSize(parsed.data);
+  if (size.tooLarge) {
+    return NextResponse.json(
+      {
+        error: `PWA config too large for KV: ${size.sizeKb}KB (cap ${size.capKb}KB). Replace heavy uploads with hosted URLs (media fields upload to Blob automatically).`,
+        size: size.sizeBytes,
+        cap: KV_VALUE_BYTE_CAP,
+      },
+      { status: 413 },
     );
   }
 

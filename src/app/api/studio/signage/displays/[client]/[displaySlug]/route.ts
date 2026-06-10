@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { loadSignageClient } from '@/lib/signage/config';
 import { kvSignageClient, kvSignageDisplay, kvSignageSnapshot } from '@/lib/signage/kv-store';
 import { SignageClientFileSchema, SignageDisplayConfigSchema } from '@/lib/signage/schema';
+import { checkKvValueSize, KV_VALUE_BYTE_CAP } from '@/lib/studio/kv-size-guard';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -57,6 +58,19 @@ export async function PUT(req: NextRequest, ctx: RouteContext) {
         error: `display.slug "${parsed.data.slug}" does not match path "${displaySlug}"`,
       },
       { status: 400 },
+    );
+  }
+
+  // F-CORE-12: el display config también está sujeto al cap del valor de KV.
+  const size = checkKvValueSize(parsed.data);
+  if (size.tooLarge) {
+    return NextResponse.json(
+      {
+        error: `Display config too large for KV: ${size.sizeKb}KB (cap ${size.capKb}KB). Replace heavy uploads with hosted URLs.`,
+        size: size.sizeBytes,
+        cap: KV_VALUE_BYTE_CAP,
+      },
+      { status: 413 },
     );
   }
 

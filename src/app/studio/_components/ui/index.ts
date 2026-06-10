@@ -8,3 +8,5 @@
  */
 
 export { Checkbox, ColorPicker, Field, NumberInput, Select, Textarea, TextInput } from './Field';
+export { ToggleSwitch } from './ToggleSwitch';
+export { ConfirmDialog } from './ConfirmDialog';

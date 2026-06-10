@@ -22,8 +22,6 @@ import {
   Croissant,
   Drama,
   Dumbbell,
-  Eye,
-  EyeOff,
   Film,
   Flower2,
   Footprints,
@@ -96,6 +94,7 @@ import {
 } from '@/lib/studio/schema';
 
 import { ImageField } from './ImageField';
+import { ConfirmDialog, ToggleSwitch } from './ui';
 
 /* ────────────────────────────────────────────────────────────────────────── */
 /* Icon helpers (Lucide + custom image)                                       */
@@ -993,16 +992,27 @@ export function SystemModulesEditor({
           )}
         </div>
 
-        {confirmDelete ? (
-          <DeleteConfirm
-            label={confirmDelete.label}
-            itemCount={
-              listings.find((e) => e.key === confirmDelete.key)?.catalog.listings.length ?? 0
-            }
-            onCancel={() => setConfirmDelete(null)}
-            onConfirm={() => handleListingDelete(confirmDelete.key)}
-          />
-        ) : null}
+        {confirmDelete
+          ? (() => {
+              const itemCount =
+                listings.find((e) => e.key === confirmDelete.key)?.catalog.listings.length ?? 0;
+              return (
+                <ConfirmDialog
+                  id="listing-module-delete"
+                  title={`Delete "${confirmDelete.label}"?`}
+                  description={
+                    itemCount === 0
+                      ? 'The module is empty — safe to delete.'
+                      : `This will remove ${itemCount} listing${
+                          itemCount === 1 ? '' : 's'
+                        }, plus its subcategories and features. This cannot be undone.`
+                  }
+                  onCancel={() => setConfirmDelete(null)}
+                  onConfirm={() => handleListingDelete(confirmDelete.key)}
+                />
+              );
+            })()
+          : null}
       </section>
 
       <section>
@@ -1310,49 +1320,6 @@ function ModuleRow({
 /* Toggle                                                                     */
 /* ────────────────────────────────────────────────────────────────────────── */
 
-function ToggleSwitch({
-  enabled,
-  onChange,
-  label,
-  title,
-}: {
-  enabled: boolean;
-  onChange: () => void;
-  label: string;
-  /** Tooltip nativo opcional — útil para comunicar cascadas (audit F-09). */
-  title?: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={enabled}
-      aria-label={`${enabled ? 'Hide' : 'Show'} ${label}`}
-      title={title}
-      onClick={onChange}
-      className={
-        'relative flex h-6 w-10 shrink-0 items-center rounded-full transition ' +
-        (enabled
-          ? 'bg-sky-500/90 hover:bg-sky-500 dark:bg-sky-400/80 dark:hover:bg-sky-400'
-          : 'bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700')
-      }
-    >
-      <span
-        className={
-          'flex h-5 w-5 transform items-center justify-center rounded-full bg-white shadow-sm transition ' +
-          (enabled ? 'translate-x-[18px]' : 'translate-x-0.5')
-        }
-      >
-        {enabled ? (
-          <Eye className="h-2.5 w-2.5 text-sky-600" />
-        ) : (
-          <EyeOff className="h-2.5 w-2.5 text-zinc-400" />
-        )}
-      </span>
-    </button>
-  );
-}
-
 /* ────────────────────────────────────────────────────────────────────────── */
 /* ListingModuleRow — fila de un Listing module dinámico con CRUD inline      */
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -1513,60 +1480,6 @@ function ListingModuleRow({
       </button>
 
       <ToggleSwitch enabled={entry.enabled} onChange={onToggle} label={entry.label} />
-    </div>
-  );
-}
-
-/* ────────────────────────────────────────────────────────────────────────── */
-/* DeleteConfirm — modal inline para borrar un listing module                 */
-/* ────────────────────────────────────────────────────────────────────────── */
-
-function DeleteConfirm({
-  label,
-  itemCount,
-  onCancel,
-  onConfirm,
-}: {
-  label: string;
-  itemCount: number;
-  onCancel: () => void;
-  onConfirm: () => void;
-}) {
-  return (
-    <div
-      role="alertdialog"
-      aria-labelledby="listing-module-delete"
-      className="mt-3 rounded-md border border-red-500/30 bg-red-500/5 p-3"
-    >
-      <p
-        id="listing-module-delete"
-        className="text-[12.5px] font-medium text-red-700 dark:text-red-200"
-      >
-        Delete &quot;{label}&quot;?
-      </p>
-      <p className="mt-1 text-[11.5px] text-red-600/80 dark:text-red-300/80">
-        {itemCount === 0
-          ? 'The module is empty — safe to delete.'
-          : `This will remove ${itemCount} listing${
-              itemCount === 1 ? '' : 's'
-            }, plus its subcategories and features. This cannot be undone.`}
-      </p>
-      <div className="mt-2 flex justify-end gap-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[11.5px] font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          onClick={onConfirm}
-          className="rounded-md bg-red-500/20 px-2.5 py-1 text-[11.5px] font-medium text-red-700 transition hover:bg-red-500/30 dark:text-red-200"
-        >
-          Delete
-        </button>
-      </div>
     </div>
   );
 }

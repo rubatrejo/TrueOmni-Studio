@@ -3,6 +3,7 @@ import path from 'node:path';
 
 import { NextResponse } from 'next/server';
 
+import { SUPER_ADMIN_EMAIL } from '@/auth';
 import {
   getGitHubPublishConfig,
   getRepoFileContent,
@@ -108,11 +109,16 @@ export async function POST(req: Request, { params }: RouteParams) {
   // `STUDIO_ADMIN_EMAILS`. En producción Studio (S7.3) este header lo añade
   // un middleware NextAuth con la session.email del usuario logueado.
   const adminEmails = parseEmailList(process.env.STUDIO_ADMIN_EMAILS);
+  // F-CORE-3: si `STUDIO_ADMIN_EMAILS` está vacía, NO dejamos pasar a cualquier
+  // sesión — el gate falla cerrado al super-admin. Antes el gate solo aplicaba
+  // con allowlist no vacía, así que un deploy sin la env var permitía abrir PRs
+  // a prod desde cualquier sesión autenticada.
+  const effectiveAllowlist = adminEmails.length > 0 ? adminEmails : [SUPER_ADMIN_EMAIL];
   const actorEmail = req.headers.get('x-studio-admin-email')?.toLowerCase().trim();
-  if (mode === 'pr' && adminEmails.length > 0) {
-    if (!actorEmail || !adminEmails.includes(actorEmail)) {
+  if (mode === 'pr') {
+    if (!actorEmail || !effectiveAllowlist.includes(actorEmail)) {
       return NextResponse.json(
-        { error: 'Forbidden: caller is not in STUDIO_ADMIN_EMAILS allowlist.' },
+        { error: 'Forbidden: caller is not in the Studio publish allowlist.' },
         { status: 403 },
       );
     }

@@ -190,6 +190,9 @@ export function SignagePlayer({
   // esperar al ciclo natural. Sin animación de transición — es navegación.
   useEffect(() => {
     function handler(event: MessageEvent) {
+      // F-SIGNAGE-6: el runtime de signage es público; solo aceptamos los
+      // comandos del editor del mismo origin (jump/nav-slide controlan el slide).
+      if (event.origin !== window.location.origin) return;
       const data = event.data as {
         type?: string;
         slideId?: string;
@@ -248,7 +251,8 @@ export function SignagePlayer({
           total: playlistLength,
           templateId: activeTemplateId,
         },
-        '*',
+        // F-SIGNAGE-6: targetOrigin explícito (mismo origin) en vez de '*'.
+        window.location.origin,
       );
     } catch {
       // ignored

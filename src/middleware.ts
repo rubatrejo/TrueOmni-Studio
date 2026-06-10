@@ -22,12 +22,29 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
 
   // Válvula: si NextAuth no está configurado (no hay OAuth App), dejamos
-  // pasar todo. Esto evita que el Studio quede inaccesible en deploys
-  // donde aún no se ha creado la GitHub OAuth App. La regla "fail closed"
-  // sigue activa en signIn callback (sin allowlist no permite login),
-  // pero el chrome del Studio queda navegable como demo.
+  // navegable el chrome del Studio como demo, pero NO abrimos las mutaciones.
+  // Esto evita que el Studio quede inaccesible en deploys donde aún no se ha
+  // creado la GitHub OAuth App, sin dejar la puerta abierta a destrucción.
   if (!process.env.AUTH_GITHUB_ID || !process.env.AUTH_GITHUB_SECRET) {
-    return NextResponse.next();
+    // F-CORE-1: sin auth, un deploy mal configurado dejaba TODO `/api/studio/*`
+    // público — incluido `DELETE /api/studio/clients/[slug]` (borra el cliente).
+    // En PRODUCCIÓN bloqueamos las mutaciones con 503 (las páginas y los GET de
+    // lectura siguen navegables como demo). En desarrollo local NO se bloquea:
+    // el dev no tiene OAuth App configurada y debe poder usar el editor.
+    const isStudioApiMutation =
+      pathname.startsWith('/api/studio') && !['GET', 'HEAD', 'OPTIONS'].includes(req.method);
+    if (process.env.NODE_ENV === 'production' && isStudioApiMutation) {
+      return NextResponse.json(
+        { error: 'Studio auth is not configured on this deployment.' },
+        { status: 503 },
+      );
+    }
+    // F-CORE-10: sin una sesión que lo respalde, `x-studio-admin-email` es
+    // forjable por el cliente. Lo borramos para que ningún handler confíe en un
+    // actor falso (el approval gate del publish lee este header).
+    const headers = new Headers(req.headers);
+    headers.delete('x-studio-admin-email');
+    return NextResponse.next({ request: { headers } });
   }
 
   const isStudioApp = pathname.startsWith('/studio');

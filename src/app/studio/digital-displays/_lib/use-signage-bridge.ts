@@ -75,7 +75,7 @@ export function useSignageBridge() {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'signage:client-update', client }, '*');
+      win.postMessage({ type: 'signage:client-update', client }, window.location.origin);
     } catch (e) {
       // eslint-disable-next-line no-console
       console.warn('[signage:bridge:editor] postMessage failed', e);
@@ -86,7 +86,7 @@ export function useSignageBridge() {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'signage:display-update', display }, '*');
+      win.postMessage({ type: 'signage:display-update', display }, window.location.origin);
     } catch (e) {
       // eslint-disable-next-line no-console
       console.warn('[signage:bridge:editor] postMessage failed', e);
@@ -96,6 +96,8 @@ export function useSignageBridge() {
   // Listener del handshake/heartbeat del runtime + slide-active events.
   useEffect(() => {
     function handler(event: MessageEvent) {
+      // F-SIGNAGE-6: solo aceptamos eventos del runtime del mismo origin.
+      if (event.origin !== window.location.origin) return;
       const data = event.data as ReadyAck | SlideActiveEvent | null;
       if (!data) return;
       if (data.type === 'signage:ready') {
@@ -153,7 +155,7 @@ export function useSignageBridge() {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'signage:jump-slide', slideId }, '*');
+      win.postMessage({ type: 'signage:jump-slide', slideId }, window.location.origin);
     } catch (e) {
       // eslint-disable-next-line no-console
       console.warn('[signage:bridge:editor] jump postMessage failed', e);
@@ -165,7 +167,7 @@ export function useSignageBridge() {
     const win = iframeRef.current?.contentWindow;
     if (!win) return;
     try {
-      win.postMessage({ type: 'signage:nav-slide', direction }, '*');
+      win.postMessage({ type: 'signage:nav-slide', direction }, window.location.origin);
     } catch (e) {
       // eslint-disable-next-line no-console
       console.warn('[signage:bridge:editor] nav postMessage failed', e);
@@ -190,7 +192,10 @@ export function useSignageBridge() {
         if (!win) return;
         if (lastClientRef.current) {
           try {
-            win.postMessage({ type: 'signage:client-update', client: lastClientRef.current }, '*');
+            win.postMessage(
+              { type: 'signage:client-update', client: lastClientRef.current },
+              window.location.origin,
+            );
           } catch {
             // ignored
           }
@@ -199,7 +204,7 @@ export function useSignageBridge() {
           try {
             win.postMessage(
               { type: 'signage:display-update', display: lastDisplayRef.current },
-              '*',
+              window.location.origin,
             );
           } catch {
             // ignored

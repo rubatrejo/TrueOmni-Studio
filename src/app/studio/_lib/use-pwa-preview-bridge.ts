@@ -101,6 +101,8 @@ export function usePwaPreviewBridge() {
   // actual (el host pudo intentar enviar antes de que el listener montara).
   useEffect(() => {
     const handler = (event: MessageEvent) => {
+      // F-CORE-2: solo aceptamos el handshake del iframe del mismo origin.
+      if (event.origin !== window.location.origin) return;
       const data = event.data as { type?: string } | null;
       if (!data || data.type !== 'studio:ready') return;
       setIsReady(true);

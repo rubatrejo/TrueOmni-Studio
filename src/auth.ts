@@ -30,8 +30,10 @@ import GitHub from 'next-auth/providers/github';
 /**
  * Super-admin hardcoded del Studio. Owner del proyecto, no se borra ni se
  * cambia desde env var. Para revocarlo se necesita un commit explícito.
+ * Exportado para que el approval gate del publish (F-CORE-3) falle cerrado a
+ * este email cuando `STUDIO_ADMIN_EMAILS` está vacía.
  */
-const SUPER_ADMIN_EMAIL = 'ruba.trejo@gmail.com';
+export const SUPER_ADMIN_EMAIL = 'ruba.trejo@gmail.com';
 
 function parseAdminEmails(): string[] {
   const raw = process.env.STUDIO_ADMIN_EMAILS;

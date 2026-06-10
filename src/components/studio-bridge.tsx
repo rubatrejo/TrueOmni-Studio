@@ -62,6 +62,11 @@ export function StudioBridge() {
     if (typeof window === 'undefined') return;
 
     const handler = (event: MessageEvent) => {
+      // F-CORE-2: el runtime (`/`, `/pwa`) es público y puede embeberse en un
+      // iframe hostil; sin validar el origin, el parent podría inyectar
+      // `studio:branding-update`/`studio:pwa-nav` (defacement/redirección). Solo
+      // aceptamos mensajes del mismo origin (Studio y runtime comparten dominio).
+      if (event.origin !== window.location.origin) return;
       const data = event.data as {
         type?: string;
         brand?: BrandPatch;
@@ -316,7 +321,8 @@ export function StudioBridge() {
     const announceReady = () => {
       try {
         if (window.parent && window.parent !== window) {
-          window.parent.postMessage({ type: 'studio:ready' }, '*');
+          // F-CORE-2: targetOrigin explícito (mismo origin) en vez de '*'.
+          window.parent.postMessage({ type: 'studio:ready' }, window.location.origin);
         }
       } catch {}
     };

@@ -143,6 +143,7 @@ export default function StudioHome() {
     website?: string;
     location?: string;
     emptyMode?: boolean;
+    starterId?: string;
     products: {
       kiosks: boolean;
       digitalDisplays: boolean;
@@ -162,6 +163,7 @@ export default function StudioHome() {
         location: cityFromFull ? { city: cityFromFull } : undefined,
         locationFull,
         emptyMode: input.emptyMode || undefined,
+        starterId: input.starterId || undefined,
         products: input.products,
       });
       setShowNewModal(false);

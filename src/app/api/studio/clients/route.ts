@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
+import { findPalette } from '@/app/studio/_lib/preset-palettes';
+import { findStarter, type Starter } from '@/app/studio/_lib/starters';
 import { loadSignageClient } from '@/lib/signage/config';
 import { kSignageClient, kSignageClientList } from '@/lib/signage/kv-keys';
 import { SignageClientFileSchema, type SignageClientFile } from '@/lib/signage/schema';
@@ -30,10 +32,12 @@ import {
   rewriteContentInPlace,
 } from '@/lib/studio/rewrite-client-content';
 import {
+  DEFAULT_SYSTEM_MODULES,
   KioskConfigSchema,
   makeBlankConfig,
   type ConfigMeta,
   type KioskConfig,
+  type SystemModules,
 } from '@/lib/studio/schema';
 import {
   applyClonedDisplays,
@@ -138,8 +142,43 @@ const CreateClientBodySchema = z.object({
    * módulos y estructura se preservan para que el editor no quede roto.
    */
   emptyMode: z.boolean().optional(),
+  /**
+   * Starter por vertical (F-HUB-1): aplica paleta + fonts + módulos + preguntas
+   * de Ask AI del catálogo `STARTERS` sobre el template recién clonado. Vacío /
+   * ausente = "Start empty" (solo el default del template).
+   */
+  starterId: z.string().max(64).optional(),
   products: ClientProductsSchema.partial().default({ kiosks: true }),
 });
+
+/**
+ * Aplica los overrides de un starter sobre el config recién bootstrapeado:
+ * paleta (resuelta de `PRESET_PALETTES`), fonts, módulos activos y las preguntas
+ * sugeridas del Ask AI. El `aiTone` del starter no tiene campo en el schema del
+ * kiosk, así que se omite (queda como hint para una fase futura).
+ */
+function applyStarterOverrides(cfg: KioskConfig, starter: Starter): void {
+  const palette = findPalette(starter.paletteId);
+  if (palette) {
+    cfg.branding.primary = palette.primary;
+    cfg.branding.secondary = palette.secondary;
+    cfg.branding.tertiary = palette.tertiary;
+  }
+  cfg.branding.fonts = { display: starter.fonts.display, body: starter.fonts.body };
+  if (cfg.modules) {
+    cfg.modules.systemModules = {
+      ...DEFAULT_SYSTEM_MODULES,
+      ...(cfg.modules.systemModules ?? {}),
+      ...starter.defaultModules,
+    } as SystemModules;
+  }
+  if (cfg.aiAvatar) {
+    cfg.aiAvatar.suggestedQuestions = starter.aiSuggestedQuestions.map((text, i) => ({
+      id: `starter-q${i + 1}`,
+      text,
+    }));
+  }
+}
 
 /**
  * `POST /api/studio/clients` body `{ slug, name, website?, location?, products }`.
@@ -240,6 +279,13 @@ export async function POST(request: Request) {
         cfg.slug = slug;
         cfg.nombre = name;
         cfg.currentVersion = 0;
+      }
+      // F-HUB-1: si se eligió un starter por vertical, aplicar su paleta/fonts/
+      // módulos/preguntas ANTES del rewrite de location (que reescribe sobre la
+      // estructura ya configurada del starter).
+      if (parsed.data.starterId) {
+        const starter = findStarter(parsed.data.starterId);
+        if (starter) applyStarterOverrides(cfg, starter);
       }
       const trimmedLocation = locationFull || parsed.data.location?.city || '';
       const trimmedWebsite = parsed.data.website ?? '';

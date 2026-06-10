@@ -43,6 +43,7 @@ import {
 } from '../_lib/api-client';
 import { getHistory, type LocalVersionEntry } from '../_lib/local-version-history';
 import { extractPaletteFromImage } from '../_lib/palette-from-image';
+import { PRESET_PALETTES } from '../_lib/preset-palettes';
 import { STUDIO_SECTIONS, VERSIONS_SECTION, type StudioSectionKey } from '../_lib/sections';
 import { useStudioSlug } from '../_lib/slug-context';
 
@@ -774,50 +775,8 @@ function ColorRow({
   );
 }
 
-const PRESET_PALETTES = [
-  {
-    name: 'TrueOmni',
-    tagline: 'Tech Blue',
-    primary: '#004F8B',
-    secondary: '#0088CE',
-    tertiary: '#B9BD39',
-  },
-  {
-    name: 'Arizona',
-    tagline: 'Desert',
-    primary: '#5C2317',
-    secondary: '#D2691E',
-    tertiary: '#F4A460',
-  },
-  {
-    name: 'Hotel Beach',
-    tagline: 'Calm',
-    primary: '#1E5F74',
-    secondary: '#42B5D9',
-    tertiary: '#FCD581',
-  },
-  {
-    name: 'Forest',
-    tagline: 'Nature',
-    primary: '#173B30',
-    secondary: '#3E885B',
-    tertiary: '#E0C879',
-  },
-  {
-    name: 'Mono',
-    tagline: 'Editorial',
-    primary: '#0A0A0A',
-    secondary: '#404040',
-    tertiary: '#FACC15',
-  },
-  {
-    name: 'Sunset',
-    tagline: 'Warm',
-    primary: '#7C2D12',
-    secondary: '#EA580C',
-    tertiary: '#FCD34D',
-  },
-];
+// PRESET_PALETTES se movió a `_lib/preset-palettes.ts` (fuente única,
+// también consumida por el server al aplicar un starter). Ver import arriba.
 
 /* ────────────────────────────────────────────────────────────────────────── */
 

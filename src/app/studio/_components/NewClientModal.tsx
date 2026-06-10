@@ -4,12 +4,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutGrid, Monitor, Smartphone, Tablet, Tv, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
+import { findPalette } from '../_lib/preset-palettes';
+import { STARTERS } from '../_lib/starters';
 import { useEscapeClose, useFocusTrap } from '../_lib/use-modal-a11y';
 
 const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
-// "City, ST" — ciudad alfabética con espacios/puntos/guiones, coma, estado de
-// 2 letras mayúsculas (US states). Acepta sufijos opcionales tipo " 12345".
-const LOCATION_REGEX = /^[A-Za-z][A-Za-z .'-]{1,60},\s*[A-Z]{2}$/;
+// F-HUB-8: "City" o "City, Region/Country" — ya no solo US state de 2 letras.
+// Nominatim geocodifica cualquier query, así que aceptamos clientes
+// internacionales ("Paris, France", "Tokyo", "São Paulo, Brazil").
+const LOCATION_REGEX = /^[\p{L}][\p{L} .'-]{1,60}(,\s*[\p{L}][\p{L} .'-]{1,60})?$/u;
 
 export type ProductId = 'kiosks' | 'digitalDisplays' | 'mobilePwa' | 'videoWalls' | 'tablets';
 
@@ -59,6 +62,8 @@ export function NewClientModal({
     website: string;
     location: string;
     emptyMode: boolean;
+    /** Starter por vertical (F-HUB-1); '' = template default. */
+    starterId: string;
     products: NewClientProducts;
   }) => Promise<void>;
 }) {
@@ -73,6 +78,8 @@ export function NewClientModal({
   // Empty mode: arranca el kiosk sin mock data (listings/events/passes/deals/
   // trails/itinerary local_listings/social-wall posts).
   const [emptyMode, setEmptyMode] = useState(false);
+  // Starter por vertical (F-HUB-1): '' = template default (sin override).
+  const [starterId, setStarterId] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const nombreRef = useRef<HTMLInputElement>(null);
@@ -86,6 +93,7 @@ export function NewClientModal({
     setSlugTouched(false);
     setProducts(allProductsOn());
     setEmptyMode(false);
+    setStarterId('');
     setError(null);
     setSubmitting(false);
     setTimeout(() => nombreRef.current?.focus(), 50);
@@ -135,7 +143,7 @@ export function NewClientModal({
       return;
     }
     if (!LOCATION_REGEX.test(trimmedLocation)) {
-      setError('Location must be in the format "City, ST" (e.g. "Davenport, FL")');
+      setError('Location must be a city, e.g. "Davenport, FL" or "Paris, France"');
       return;
     }
     const trimmedWebsite = website.trim();
@@ -155,6 +163,7 @@ export function NewClientModal({
         website: trimmedWebsite,
         location: trimmedLocation,
         emptyMode,
+        starterId,
         products,
       });
     } catch (err) {
@@ -308,6 +317,61 @@ export function NewClientModal({
                     Branding, content and modules are cloned from the TrueOmni template — you can
                     customize anything in the editor afterwards.
                   </p>
+                </div>
+
+                {/* Starter por vertical (F-HUB-1): aplica paleta + fonts + módulos
+                    + preguntas del Ask AI. Opcional — sin selección = template default. */}
+                <div>
+                  <div className="mb-1.5 flex items-baseline justify-between">
+                    <span className="text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+                      Starter template
+                    </span>
+                    <span className="text-[11px] text-zinc-500 dark:text-zinc-500">
+                      Optional — sets a vertical&apos;s palette, fonts &amp; modules.
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {STARTERS.map((s) => {
+                      const pal = findPalette(s.paletteId);
+                      const active = starterId === s.id;
+                      return (
+                        <button
+                          type="button"
+                          key={s.id}
+                          onClick={() => setStarterId(active ? '' : s.id)}
+                          aria-pressed={active}
+                          className={`flex flex-col items-start rounded-md border px-3 py-2.5 text-left transition ${
+                            active
+                              ? 'border-sky-500 bg-sky-50 ring-1 ring-sky-500/30 dark:border-sky-400 dark:bg-sky-500/10'
+                              : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/40 dark:hover:border-zinc-700'
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            <span className="flex gap-0.5" aria-hidden>
+                              <span
+                                className="h-4 w-4 rounded-sm"
+                                style={{ background: pal?.primary }}
+                              />
+                              <span
+                                className="h-4 w-4 rounded-sm"
+                                style={{ background: pal?.secondary }}
+                              />
+                              <span
+                                className="h-4 w-4 rounded-sm"
+                                style={{ background: pal?.tertiary }}
+                              />
+                            </span>
+                            <span className="text-[12px] font-semibold text-zinc-800 dark:text-zinc-100">
+                              {s.label}
+                            </span>
+                          </span>
+                          <span className="mt-1 line-clamp-2 text-[10.5px] leading-snug text-zinc-500 dark:text-zinc-500">
+                            {s.description}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {error && (

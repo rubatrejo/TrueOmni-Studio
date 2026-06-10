@@ -1,6 +1,6 @@
 'use client';
 
-import { Image as ImageIcon, Layers, Palette, Settings, Type } from 'lucide-react';
+import { Image as ImageIcon, Layers, Palette, Settings, Sparkles, Type } from 'lucide-react';
 import { createContext, useContext, useEffect, useId, useRef, useState } from 'react';
 import { HslColorPicker, type HslColor } from 'react-colorful';
 
@@ -10,6 +10,7 @@ import { extractYouTubeId } from '@/lib/studio/youtube';
 import { CustomFontField } from '../../_components/CustomFontField';
 import { MediaField } from '../../_components/MediaField';
 import { TabStrip, type TabStripItem } from '../../_components/TabStrip';
+import { extractPaletteFromImage } from '../../_lib/palette-from-image';
 import { hexToHsl, hslToHex } from '../../digital-displays/_components/tabs/BrandingTab';
 
 // Hallazgo S-31: contexto del id del Field para que TextInput / FontSelect
@@ -74,6 +75,39 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
   function setField<K extends keyof UnifiedClientBranding>(key: K, next: UnifiedClientBranding[K]) {
     onChange({ ...value, [key]: next });
   }
+
+  // F-HUB-2: deriva la paleta desde el logo del cliente. `extractPaletteFromImage`
+  // es client-side (canvas) y devuelve hex; los tokens del branding unificado son
+  // HSL → convertimos con `hexToHsl` (ya importado para ColorRow).
+  const [suggestState, setSuggestState] = useState<'idle' | 'extracting' | 'error'>('idle');
+  const handleSuggestPalette = async () => {
+    const source = value.logos.default || value.logos.idle || value.logos.footer;
+    if (!source) {
+      setSuggestState('error');
+      setTimeout(() => setSuggestState('idle'), 2000);
+      return;
+    }
+    setSuggestState('extracting');
+    try {
+      const palette = await extractPaletteFromImage(source);
+      // `hexToHsl` puede devolver null ante un hex inválido — conservamos el
+      // token previo en ese caso. El cast a string normaliza el HslColor branded.
+      const toHsl = (hex: string, fallback: string): string =>
+        (hexToHsl(hex) as string | null) ?? fallback;
+      setField('brand', {
+        ...value.brand,
+        primary: toHsl(palette.primary, value.brand.primary),
+        secondary: toHsl(palette.secondary, value.brand.secondary),
+        accent: toHsl(palette.tertiary, value.brand.accent),
+      });
+      setSuggestState('idle');
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[Suggest palette]', err);
+      setSuggestState('error');
+      setTimeout(() => setSuggestState('idle'), 2000);
+    }
+  };
 
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40">
@@ -213,6 +247,20 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
                 onChange={(v) => setField('brand', { ...value.brand, neutral: v })}
               />
             </div>
+            {/* F-HUB-2: derivar la paleta desde el logo del cliente. */}
+            <button
+              type="button"
+              onClick={handleSuggestPalette}
+              disabled={suggestState === 'extracting'}
+              className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-[12px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-200 dark:hover:border-zinc-700 dark:hover:bg-zinc-900"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              {suggestState === 'extracting'
+                ? 'Reading logo…'
+                : suggestState === 'error'
+                  ? 'No logo to read'
+                  : 'Suggest palette from logo'}
+            </button>
           </Section>
         ) : null}
 

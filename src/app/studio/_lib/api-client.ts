@@ -102,6 +102,8 @@ export interface CreateClientInput {
   /** Vacía colecciones de mock data (listings/events/passes/deals/trails/
    *  itinerary.localListings/socialWall.posts) tras clonar el template. */
   emptyMode?: boolean;
+  /** Starter por vertical (F-HUB-1): aplica paleta/fonts/módulos/preguntas. */
+  starterId?: string;
   products?: ClientProductsInput;
 }
 

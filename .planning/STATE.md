@@ -4,6 +4,54 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-10 (tarde) — Fase 4 del audit casi completa (quick-wins + F-QA-3 + F-QA-7 + F-PWA-3)
+
+> Continuación de la misma sesión abierta. **Sin `/terminar`** todavía. Entrada commiteada para
+> blindar memoria. Todos los commits pusheados → deploys Vercel READY (el último en build al escribir).
+
+**Hecho (11 commits sobre F-HUB-7, todos en prod):**
+
+- **Batch quick-wins Fase 4:**
+  - `00e9b67` **F-SIGNAGE-8** — borra código muerto de grids 1x2/2x1 del header de Video Walls
+    (floors 0.5/0.55 y `clampForecastDays` no-op nunca se activan; mínimo vivo 2x2 → widthScale
+    0.667). Behavior-identical.
+  - `079fb6f` **F-QA-2** — promueve `ToggleSwitch` + `ConfirmDialog` (ex-DeleteConfirm) a
+    `_components/ui/` compartido; ModulesEditor los consume.
+  - `8b4ab44` **F-CORE-5 + F-CORE-8** — paraleliza KV: `configs` GET/PATCH (cfg+meta) y la purga de
+    cliente (25+ prefijos × del), conservando orden del snapshot y no-throw por prefijo.
+  - `0545f62` **F-CORE-9** — separa `studio:ready` (handshake → re-empuja 18 slots) de
+    `studio:heartbeat` (solo liveness). Actualizado en announcer + host kiosk + host PWA.
+- `a566150` **F-QA-3** — unifica roving-tabindex en `useRovingTabList` (kiosk SidebarTabs + TabStrip
+  - SignageSidebarTabs); `isDisabled` opcional para el skip del kiosk. Único Alto de la fase.
+- `8f62da1` **F-QA-7** — reescribe el E2E `studio-create-client.json` (estaba roto: Location
+  requerido + label cambiado): create → bootstrap/clone → rewrite/geocoding → assert nombre + assert
+  **ausencia de Arizona/Phoenix** en el preview (iframe same-origin). Corre en dev sin login.
+- `502101b`/`ac54529`/`05ef245` **F-PWA-3** — assets a Vercel Blob (brainstormeado + aprobado;
+  DESIGN/PLAN en `.planning/STUDIO-fpwa3-blob-assets-*`). Util compartido `upload-to-blob.ts`
+  (`uploadToBlob`+`useBlobAvailable`, extraído de MediaField) + validación pura `upload-validation.ts`
+  (amplía a `image/x-icon` + `kind=doc`/pdf, 11 tests). `ImageField`+`PdfField` suben a Blob con
+  fallback data-URI. Saca el base64 del config → arregla lag al teclear + config.json pesado. Blob
+  provisionado en prod (confirmado por Rubén).
+
+**Verificado:** cada commit con typecheck + lint (0 warnings) + validate:configs + tests (40→**51**,
++11 de upload-validation). Deploys READY.
+
+**Pendiente / siguiente:**
+
+- **EN CURSO: F-QA-1 / F-QA-12** — split de monolitos (`schema.ts` 2355 líneas / 135 schemas,
+  `ModulesEditor` 1572, `EditorPanel` 1393, `PhotoBoothEditor` 1186, `Shell` 1037,
+  `BillboardEditor` 1027). Esfuerzo L, "oportunista al tocar cada área". Estrategia: split por dominio
+  detrás de un **barrel** que preserve los imports (`@/lib/studio/schema`). `schema.ts` es el archivo
+  más sensible del white-label → máxima cautela, verificar import-by-import.
+- **QA de Rubén** (login + Blob): F-HUB-7 (Test all + badge), F-PWA-3 (upload → URL https no base64),
+  F-QA-3 (nav por teclado en sidebars), F-QA-7 (correr el spec con agent-browser).
+- GC de blobs huérfanos (deuda futura anotada en el DESIGN de F-PWA-3).
+
+**Fase:** audit `STUDIO-AUDIT-2026-06-09` — Fases 1, 2, 3 ✅; **Fase 4 ✅ salvo F-QA-1/F-QA-12**
+(split de monolitos, en curso).
+
+---
+
 ### Sesión 2026-06-10 (mañana) — verificación post corte de luz + F-HUB-7 (cierra la Fase 3 del audit)
 
 > Sesión abierta tras el corte de luz de la madrugada. **No se ha ejecutado `/terminar`** (la

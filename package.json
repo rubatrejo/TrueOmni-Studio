@@ -17,6 +17,8 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "start": "next start",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "validate:configs": "node scripts/validate-configs.mjs",
     "verify:visual": "node scripts/verify-visual.mjs",
@@ -87,7 +89,8 @@
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^3",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.8"
   },
   "pnpm": {
     "ignoredOptionalDependencies": [

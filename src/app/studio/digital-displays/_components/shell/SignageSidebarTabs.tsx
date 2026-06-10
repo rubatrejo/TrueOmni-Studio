@@ -14,9 +14,10 @@ import {
   Share2,
   type LucideIcon,
 } from 'lucide-react';
-import { useRef, type KeyboardEvent } from 'react';
 
 import type { BridgeStatus } from '@/lib/bridge/types';
+
+import { useRovingTabList } from '../../../_lib/use-roving-tab-list';
 
 /**
  * `<SignageSidebarTabs>` — sidebar vertical del editor signage.
@@ -126,38 +127,13 @@ export function SignageSidebarTabs<K extends string = string>({
     (SIGNAGE_SECTIONS as unknown as ReadonlyArray<SignageSection<K>>)) as ReadonlyArray<
     SignageSection<K>
   >;
-  const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
-
-  const focusAndSelect = (idx: number) => {
-    const section = items[idx];
-    if (!section) return;
-    onSelect(section.key);
-    buttonRefs.current[idx]?.focus();
-  };
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>, currentIdx: number) => {
-    const len = items.length;
-    switch (e.key) {
-      case 'ArrowDown':
-      case 'ArrowRight':
-        e.preventDefault();
-        focusAndSelect((currentIdx + 1) % len);
-        break;
-      case 'ArrowUp':
-      case 'ArrowLeft':
-        e.preventDefault();
-        focusAndSelect((currentIdx - 1 + len) % len);
-        break;
-      case 'Home':
-        e.preventDefault();
-        focusAndSelect(0);
-        break;
-      case 'End':
-        e.preventDefault();
-        focusAndSelect(len - 1);
-        break;
-    }
-  };
+  const { buttonRefs, handleKeyDown } = useRovingTabList({
+    count: items.length,
+    onSelect: (idx) => {
+      const section = items[idx];
+      if (section) onSelect(section.key);
+    },
+  });
 
   return (
     <aside className="flex w-full shrink-0 flex-col border-r border-zinc-200 bg-white dark:border-zinc-900 dark:bg-zinc-950 lg:w-[var(--studio-sidebar-w)]">

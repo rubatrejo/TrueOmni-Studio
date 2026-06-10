@@ -37,11 +37,11 @@ import {
   UtensilsCrossed,
   type LucideIcon,
 } from 'lucide-react';
-import { useRef, type KeyboardEvent } from 'react';
 
 import type { SystemModules } from '@/lib/studio/schema';
 
 import type { StudioSection, StudioSectionKey } from '../_lib/sections';
+import { useRovingTabList } from '../_lib/use-roving-tab-list';
 
 const ICONS: Record<string, LucideIcon> = {
   Bell,
@@ -118,58 +118,14 @@ export function SidebarTabs<K extends string = StudioSectionKey>({
     return !systemModules[section.systemModuleKey];
   };
 
-  const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
-
-  const focusAndSelect = (idx: number) => {
-    const section = sections[idx];
-    if (!section || isDisabled(section)) return;
-    onSelect(section.key);
-    buttonRefs.current[idx]?.focus();
-  };
-
-  const findEnabledIndex = (start: number, dir: 1 | -1): number => {
-    const len = sections.length;
-    for (let step = 1; step <= len; step++) {
-      const i = (start + dir * step + len) % len;
-      if (!isDisabled(sections[i])) return i;
-    }
-    return start;
-  };
-
-  const findFirstEnabled = (): number => {
-    const i = sections.findIndex((s) => !isDisabled(s));
-    return i === -1 ? 0 : i;
-  };
-
-  const findLastEnabled = (): number => {
-    for (let i = sections.length - 1; i >= 0; i--) {
-      if (!isDisabled(sections[i])) return i;
-    }
-    return sections.length - 1;
-  };
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>, currentIdx: number) => {
-    switch (e.key) {
-      case 'ArrowDown':
-      case 'ArrowRight':
-        e.preventDefault();
-        focusAndSelect(findEnabledIndex(currentIdx, 1));
-        break;
-      case 'ArrowUp':
-      case 'ArrowLeft':
-        e.preventDefault();
-        focusAndSelect(findEnabledIndex(currentIdx, -1));
-        break;
-      case 'Home':
-        e.preventDefault();
-        focusAndSelect(findFirstEnabled());
-        break;
-      case 'End':
-        e.preventDefault();
-        focusAndSelect(findLastEnabled());
-        break;
-    }
-  };
+  const { buttonRefs, handleKeyDown } = useRovingTabList({
+    count: sections.length,
+    onSelect: (idx) => {
+      const section = sections[idx];
+      if (section) onSelect(section.key);
+    },
+    isDisabled: (idx) => isDisabled(sections[idx]),
+  });
 
   return (
     <aside className="flex w-full shrink-0 flex-col border-r border-zinc-200 bg-white dark:border-zinc-900 dark:bg-zinc-950 lg:w-[var(--studio-sidebar-w)]">

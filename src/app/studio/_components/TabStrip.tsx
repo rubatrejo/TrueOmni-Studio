@@ -1,7 +1,8 @@
 'use client';
 
 import type { LucideIcon } from 'lucide-react';
-import { useRef, type KeyboardEvent } from 'react';
+
+import { useRovingTabList } from '../_lib/use-roving-tab-list';
 
 /**
  * `<TabStrip>` — horizontal tab list reutilizable. Patrón estándar del
@@ -53,39 +54,13 @@ export function TabStrip<K extends string = string>({
   ariaLabel,
   className,
 }: TabStripProps<K>) {
-  const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
-
-  const focusAndSelect = (idx: number) => {
-    const item = items[idx];
-    if (!item) return;
-    onChange(item.key);
-    buttonRefs.current[idx]?.focus();
-  };
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>, currentIdx: number) => {
-    const len = items.length;
-    if (len === 0) return;
-    switch (e.key) {
-      case 'ArrowRight':
-      case 'ArrowDown':
-        e.preventDefault();
-        focusAndSelect((currentIdx + 1) % len);
-        break;
-      case 'ArrowLeft':
-      case 'ArrowUp':
-        e.preventDefault();
-        focusAndSelect((currentIdx - 1 + len) % len);
-        break;
-      case 'Home':
-        e.preventDefault();
-        focusAndSelect(0);
-        break;
-      case 'End':
-        e.preventDefault();
-        focusAndSelect(len - 1);
-        break;
-    }
-  };
+  const { buttonRefs, handleKeyDown } = useRovingTabList({
+    count: items.length,
+    onSelect: (idx) => {
+      const item = items[idx];
+      if (item) onChange(item.key);
+    },
+  });
 
   const baseContainer =
     variant === 'chip'

@@ -404,9 +404,13 @@ function PendingChangesPanel({ slug, manifest }: { slug: string; manifest: Clien
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40">
       <div className="mb-4 flex items-center justify-between gap-3">
+        {/* F-HUB-6: el diff KV↔fs solo cubre Kiosks + Digital Displays. PWA y
+            Video Walls publican por su cuenta y NO entran en este panel — el
+            copy lo deja explícito para que "in sync" no se lea como "todo el
+            cliente está sincronizado". */}
         <SectionHeading
-          title="Pending publish"
-          subtitle="Files where the live config (KV) differs from the published filesystem. JSON whitespace is ignored — only real semantic differences are counted."
+          title="Pending publish · Kiosks & Displays"
+          subtitle="Files where the live config (KV) differs from the published filesystem, for Kiosks and Digital Displays only. PWA and Video Walls publish separately and aren't tracked here. JSON whitespace is ignored — only real semantic differences are counted."
         />
         <button
           type="button"
@@ -431,7 +435,7 @@ function PendingChangesPanel({ slug, manifest }: { slug: string; manifest: Clien
 
       {!err && data && data.totalChanged === 0 && data.fsAvailable && (
         <p className="rounded-md bg-emerald-50 px-3 py-2 text-[12.5px] text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300">
-          ✓ All products are in sync with the published filesystem.
+          ✓ Kiosks and Digital Displays are in sync with the published filesystem.
         </p>
       )}
 

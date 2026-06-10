@@ -91,7 +91,7 @@ export function PwaI18nEditor({
     <div className="flex h-full flex-col">
       <PwaPanelHeader
         title="Languages"
-        description="Translate the mobile app texts per language. The base language is the slice itself; translations are applied at runtime when the user switches language."
+        description="Translate the mobile app texts per language. The base language is the slice itself; translations are applied at runtime when the user switches language. Note: the PWA keeps its own translation catalog, separate from the kiosk's — editing one does not update the other."
       />
       <div className="flex min-h-0 flex-1 flex-col gap-3 px-6 py-6">
         {/* Locale tabs + acciones */}

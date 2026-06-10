@@ -227,6 +227,14 @@ export function I18nEditor({ value, onChange }: I18nEditorProps) {
 
   return (
     <div className="space-y-4">
+      {/* F-HUB-12: kiosk y PWA mantienen catálogos de traducción separados.
+          Nota informativa sutil para que el operador no asuma que editar aquí
+          actualiza la PWA (y viceversa). */}
+      <p className="flex items-center gap-1.5 text-[11.5px] text-zinc-500 dark:text-zinc-400">
+        <Languages className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        These translations apply to the kiosk only. The Mobile PWA has its own separate language
+        catalog.
+      </p>
       <div className="flex flex-wrap items-center gap-2 rounded-md border border-zinc-200 bg-zinc-50 p-2 dark:border-zinc-800 dark:bg-zinc-900/30">
         <div className="flex flex-1 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2 dark:border-zinc-800 dark:bg-zinc-950">
           <Search className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-500" />

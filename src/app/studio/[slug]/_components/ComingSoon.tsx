@@ -1,8 +1,7 @@
 'use client';
 
-import { Bell, Check, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
 
 import { Breadcrumb } from '../../_components/Breadcrumb';
 import { StudioBrand } from '../../_components/StudioBrand';
@@ -12,10 +11,12 @@ import { StudioBrand } from '../../_components/StudioBrand';
  * Reemplaza el placeholder ascético anterior — hallazgo S-14 del audit
  * panorámico v2: los stubs de /mobile-pwa, /video-walls, /tablets eran un
  * placeholder vacío. Ahora muestran teaser informativo + features previstas
- * + timeline distinguible + "Notify me when ready" (waitlist local).
+ * + timeline distinguible.
  *
- * La waitlist no envía email todavía — guarda el flag en `localStorage` con
- * scope por slug + product. El consumer de la API puede leerlo después.
+ * Hallazgo F-HUB-10: el CTA "Notify me when ready" solo escribía un flag en
+ * `localStorage` — no persistía a ningún backend ni disparaba notificación,
+ * así que prometía algo que el producto no cumplía. Se degrada a una nota
+ * honesta que NO promete aviso, en lugar de montar infra de waitlist.
  */
 export interface ComingSoonProps {
   slug: string;
@@ -65,20 +66,6 @@ export function ComingSoon({
   docHref,
 }: ComingSoonProps) {
   const preset = TONE_PRESETS[tone];
-  const storageKey = `studio:waitlist:${slug}:${product}`;
-  const [subscribed, setSubscribed] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return window.localStorage.getItem(storageKey) === '1';
-  });
-
-  const handleSubscribe = () => {
-    try {
-      window.localStorage.setItem(storageKey, '1');
-      setSubscribed(true);
-    } catch {
-      setSubscribed(true); // best-effort si localStorage está bloqueado
-    }
-  };
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
@@ -136,21 +123,12 @@ export function ComingSoon({
             </ul>
 
             <div className="mt-9 flex flex-wrap items-center gap-3 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-              {subscribed ? (
-                <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-100 px-3 py-1.5 text-[12.5px] font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
-                  <Check className="h-3.5 w-3.5" />
-                  We&apos;ll let you know
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleSubscribe}
-                  className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-1.5 text-[12.5px] font-medium text-white transition hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
-                >
-                  <Bell className="h-3.5 w-3.5" />
-                  Notify me when ready
-                </button>
-              )}
+              {/* F-HUB-10: nota honesta — no hay backend de waitlist, así que
+                  no prometemos un aviso automático. El operador sabe que el
+                  producto sigue su roadmap normal. */}
+              <span className="text-[12.5px] text-zinc-500 dark:text-zinc-400">
+                Not available yet — it ships on the timeline above.
+              </span>
               {docHref && (
                 <a
                   href={docHref}

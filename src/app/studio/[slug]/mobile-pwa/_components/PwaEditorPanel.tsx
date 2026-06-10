@@ -23,7 +23,7 @@ import { MoreEditor } from './MoreEditor';
 import { NotificationsEditor } from './NotificationsEditor';
 import { PassesModuleEditor } from './PassesModuleEditor';
 import { ProfileEditor } from './ProfileEditor';
-import { PwaPanelHeader, PwaPlaceholderPanel } from './pwa-ui';
+import { PwaNoLivePreviewBanner, PwaPanelHeader, PwaPlaceholderPanel } from './pwa-ui';
 import { PwaAdsEditor } from './PwaAdsEditor';
 import { PwaI18nEditor } from './PwaI18nEditor';
 import { ScavengerHuntEditor } from './ScavengerHuntEditor';
@@ -260,7 +260,14 @@ export function PwaEditorPanel({
   }
 
   if (sectionKey === 'languages') {
-    return <PwaI18nEditor value={pwa} onChange={onPwaChange} availableLocales={availableLocales} />;
+    // languages va por `studio:locale-update` y recarga el iframe — no hay
+    // preview en tiempo real al tipear; se aplica al guardar y recargar.
+    return (
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <PwaNoLivePreviewBanner />
+        <PwaI18nEditor value={pwa} onChange={onPwaChange} availableLocales={availableLocales} />
+      </div>
+    );
   }
 
   if (sectionKey === 'profile') {
@@ -283,10 +290,14 @@ export function PwaEditorPanel({
   }
 
   const section = PWA_SECTIONS.find((s) => s.key === sectionKey);
+  const isLive = section?.livePreview ?? true;
   return (
-    <PwaPlaceholderPanel
-      title={section?.title ?? 'Section'}
-      description={section?.description ?? ''}
-    />
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      {!isLive && <PwaNoLivePreviewBanner />}
+      <PwaPlaceholderPanel
+        title={section?.title ?? 'Section'}
+        description={section?.description ?? ''}
+      />
+    </div>
   );
 }

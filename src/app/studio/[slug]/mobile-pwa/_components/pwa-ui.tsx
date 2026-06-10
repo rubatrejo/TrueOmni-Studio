@@ -9,6 +9,23 @@ import type { ReactNode } from 'react';
  * Field internos del kiosk y deja el editor PWA con una sola fuente propia.
  */
 
+/**
+ * Aviso sutil que aparece en la parte superior del panel cuando la sección
+ * del editor no tiene preview reactivo (livePreview: false en pwa-sections.ts).
+ * Informa al operador que los cambios se verán al guardar y recargar el preview,
+ * para que no piense que el preview está roto.
+ */
+export function PwaNoLivePreviewBanner() {
+  return (
+    <div className="flex shrink-0 items-center gap-2 border-b border-amber-200/70 bg-amber-50/60 px-6 py-2.5 dark:border-amber-800/40 dark:bg-amber-950/30">
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400 dark:bg-amber-500" />
+      <p className="text-[11.5px] leading-snug text-amber-700 dark:text-amber-400">
+        Vista previa · los cambios de esta sección se reflejan al guardar y recargar.
+      </p>
+    </div>
+  );
+}
+
 export function PwaPanelHeader({ title, description }: { title: string; description: string }) {
   // Mismos tamaños que el header del EditorPanel del kiosk (px-6 py-5, text-xl).
   return (

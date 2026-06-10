@@ -4,6 +4,76 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-10 (madrugada) — audit del Studio Fase 3b (editores PWA) + arranque de Fase 4 (QA/lint)
+
+> ⚡ **Entrada reconstruida a posteriori.** Se fue la luz a media sesión y no se alcanzó a
+> ejecutar `/terminar`. Reconstruida el 2026-06-10 desde `git log` + deploys de Vercel. **No se
+> perdió nada de código:** local `main` == `origin/main` == `54ff51e`, working tree limpio, y los
+> 18 deploys de producción quedaron **READY** (verificado con el MCP de Vercel).
+
+**Hecho (18 commits, 05:50→07:36, todos pusheados a `origin/main` → 18 deploys Vercel READY):**
+
+Continuación del roadmap del audit `STUDIO-AUDIT-2026-06-09` (las Fases 1, 2 y la mayor parte de
+la 3 se cerraron la noche del 2026-06-09; ver entrada siguiente).
+
+- **Fase 3b — editores PWA (F-PWA-5 / F-PWA-6).** Diseño + plan brainstormeados y aprobados:
+  `.planning/STUDIO-fase3b-pwa-editors-{DESIGN,PLAN}.md` (`2c03475`, `2480976`).
+  - **F-PWA-6 (validación, primero como red de seguridad):** nuevo `src/lib/studio/pwa-schema.ts`
+    con `PwaConfigSchema` **permisivo** (`.optional()` + `.passthrough()`, no engorda el monolito
+    `schema.ts`); el PATCH de `api/studio/pwa/[slug]` ahora valida con `safeParse()` → 400 con
+    `flatten()` (`c533aa0`, `14ee253`). Validación inline de URLs sociales/website en Connect
+    (`69e730d`).
+  - **F-PWA-5 (add/remove real):** helpers de listas en `pwa-ui.tsx` (`40f7628`); **pickers de
+    coords** — Mapbox single-point para Scavenger (token por prop desde `config.integraciones`,
+    nunca `process.env`) (`c001d39`) y picker sobre floor-plan x/y % para Wayfinding (`ee7a1d6`);
+    add/remove cableado en **Scavenger Hunt** (hunts+tasks, tipo, coords/geofence, `faf4ada`),
+    **Wayfinding** (floors/amenities/waypoints, `d738248`), **Notifications** (seed demo,
+    `9ab3b75`) y **Profile** (favoritos/eventos demo, `cb57717`).
+
+- **Fase 4 — salud estructural (arranque):**
+  - **F-QA-6:** montada la red de tests unitarios (antes inexistente) — `vitest.config.ts` (paths
+    del tsconfig, env node, stub de `server-only`) + suites del `PwaConfigSchema` (9 tests),
+    `BrandingSchema` y el bootstrap de cliente (`a19a482`, `f9fb0a1`).
+  - **F-QA-8/9/10/11:** limpieza de lint justificada — `no-img-element` y `no-console` con razón
+    (`f1733c2`), `react-hooks/exhaustive-deps` con comentario por cada omisión intencional, **cero
+    cambios de runtime** (`54ff51e`).
+  - **§9 (de paso):** colores de pin del Wayfinding sacados a constantes (chrome del editor,
+    `e2017fd`).
+
+**Verificado:**
+
+- Cada commit: `pnpm typecheck` + `pnpm lint` (sin warnings nuevos) + `validate:configs`. Los 18
+  deploys de producción quedaron **READY** (último = `54ff51e`).
+- QA del runtime público de Scavenger/Wayfinding con un config editado queda **pendiente de Rubén**
+  (el editor exige login GitHub).
+
+**Pendiente / siguiente (hallazgos del audit aún abiertos):**
+
+- **Fase 3 — F-HUB-7** (monitor de salud de integraciones): único hallazgo de la Fase 3 que NO se
+  cerró. Lo cierra del todo.
+- **Fase 4 (resto):** F-QA-7 (E2E "cliente nuevo"), F-QA-1/F-QA-12 (refactor de monolitos —
+  `schema.ts` 2355 líneas, oportunista al tocarlos), F-QA-3 (hook roving), F-QA-2 (extraer
+  primitivas), **F-PWA-3** (materializar assets data-URI), F-CORE-5/8/9 (perf KV/bridge),
+  F-SIGNAGE-8 (código muerto).
+- Endurecer `PwaConfigSchema` (rechazar campos desconocidos) — diferido a propósito; arrancamos
+  permisivos para no romper KV en prod.
+- QA visual de Rubén en prod de los editores PWA (add/remove + pickers de coords).
+
+**Decisiones:**
+
+- **Schema PWA permisivo primero.** `.optional()` + `.passthrough()` valida forma sin rechazar
+  configs ya guardados en KV; el endurecimiento es una pasada posterior. Evita romper kiosks vivos.
+- **F-PWA-6 antes que F-PWA-5** dentro de la fase: el schema entra como red de seguridad antes de
+  añadir operaciones de mutación (add/remove).
+- **Schemas fuera del monolito:** `pwa-schema.ts` aparte para no engordar `schema.ts` (deuda
+  F-QA-1).
+
+**Fase:** Sin milestone formal abierto. Tanda de **fixes del audit del Studio**
+(`STUDIO-AUDIT-2026-06-09`): Fases 1–2 ✅, Fase 3 ✅ salvo F-HUB-7, Fase 4 arrancada (F-QA-6 +
+limpieza de lint). **Esta entrada NO sustituye a `/terminar`** — la sesión sigue abierta.
+
+---
+
 ### Sesión 2026-06-09 — fixes del editor PWA (Quick Access/tiles/idioma) en prod + AUDITORÍA EXTENSIVA del Studio (PDF)
 
 **Hecho (6 commits, los 5 de fixes pusheados a prod → deploys Vercel READY; el audit solo commiteado):**

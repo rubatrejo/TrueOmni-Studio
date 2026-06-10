@@ -48,6 +48,7 @@ export default async function MobilePwaEditorPage({
     readClientFs(slug).catch(() => ({ config: null, tokensCss: null })),
   ]);
   const availableLocales = fsClient.config?.features?.languages?.available ?? null;
+  const mapboxToken = fsClient.config?.integraciones?.mapbox_token ?? '';
 
   // Fallback defensivo: si el cliente aún no tiene unified branding, lo
   // materializamos con defaults para que el editor abra (edge case raro —
@@ -69,6 +70,7 @@ export default async function MobilePwaEditorPage({
       initialBranding={unifiedToKioskBranding(branding)}
       initialUnified={branding}
       availableLocales={availableLocales}
+      mapboxToken={mapboxToken}
     />
   );
 }

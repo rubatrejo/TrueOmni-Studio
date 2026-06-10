@@ -52,6 +52,7 @@ export function PwaEditorPanel({
   branding,
   onBrandingChange,
   availableLocales,
+  mapboxToken,
 }: {
   slug: string;
   sectionKey: PwaSectionKey;
@@ -61,6 +62,8 @@ export function PwaEditorPanel({
   onBrandingChange: (next: Branding) => void;
   /** Idiomas del cliente para el editor i18n (F-PWA-7). */
   availableLocales: string[] | null;
+  /** Token Mapbox para el picker de coords del Scavenger Hunt. */
+  mapboxToken: string;
 }) {
   if (sectionKey === 'branding') {
     return (
@@ -111,6 +114,7 @@ export function PwaEditorPanel({
       <ScavengerHuntEditor
         value={pwa.scavengerHunt}
         onChange={(scavengerHunt) => onPwaChange({ ...pwa, scavengerHunt })}
+        mapboxToken={mapboxToken}
       />
     );
   }

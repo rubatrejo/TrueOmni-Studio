@@ -92,6 +92,7 @@ export function PwaShell({
   initialBranding,
   initialUnified,
   availableLocales,
+  mapboxToken,
 }: {
   slug: string;
   nombre: string;
@@ -104,6 +105,9 @@ export function PwaShell({
   /** Idiomas que ofrece el cliente (`features.languages.available`) para el
    *  editor i18n (F-PWA-7). `null` → el editor usa su lista por defecto. */
   availableLocales: string[] | null;
+  /** Token Mapbox del cliente (`integraciones.mapbox_token`) para los pickers de
+   *  coords de Scavenger/Wayfinding. '' si no está configurado. */
+  mapboxToken: string;
 }) {
   const [activeTab, setActiveTab] = useState<PwaSectionKey>('branding');
   const [mobileTab, setMobileTab] = useState<MobileEditorTab>('editor');
@@ -324,6 +328,7 @@ export function PwaShell({
                   branding={branding}
                   onBrandingChange={setBranding}
                   availableLocales={availableLocales}
+                  mapboxToken={mapboxToken}
                 />
               </div>
               <SaveBar

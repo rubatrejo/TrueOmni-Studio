@@ -1,6 +1,15 @@
 import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 
+import {
+  UPLOAD_MAX_BYTES,
+  mimeToExt,
+  validateUploadFile,
+  validateUploadParams,
+  type UploadKind,
+  type UploadProduct,
+} from '@/lib/studio/upload-validation';
+
 /**
  * `POST /api/studio/upload?slug=<slug>&kind=image|video&product=<kiosk|signage>`
  *
@@ -21,17 +30,10 @@ import { NextResponse } from 'next/server';
  * fallback a data URL inline.
  */
 
-const MAX_BYTES = 5 * 1024 * 1024; // 5MB
-
-const ALLOWED_IMAGE = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml']);
-const ALLOWED_VIDEO = new Set(['video/mp4', 'video/webm']);
-
-const SLUG_PATTERN = /^[a-z0-9-]+$/;
-
 export async function GET() {
   return NextResponse.json({
     available: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
-    maxBytes: MAX_BYTES,
+    maxBytes: UPLOAD_MAX_BYTES,
   });
 }
 
@@ -52,17 +54,12 @@ export async function POST(req: Request) {
   const kindParam = url.searchParams.get('kind') ?? '';
   const productParam = url.searchParams.get('product') ?? 'kiosk';
 
-  if (!SLUG_PATTERN.test(slug)) {
-    return NextResponse.json({ error: 'Invalid slug' }, { status: 400 });
+  const paramCheck = validateUploadParams({ slug, kind: kindParam, product: productParam });
+  if (!paramCheck.ok) {
+    return NextResponse.json({ error: paramCheck.error }, { status: paramCheck.status });
   }
-  if (kindParam !== 'image' && kindParam !== 'video') {
-    return NextResponse.json({ error: 'Invalid kind' }, { status: 400 });
-  }
-  if (productParam !== 'kiosk' && productParam !== 'signage') {
-    return NextResponse.json({ error: 'Invalid product' }, { status: 400 });
-  }
-  const kind = kindParam as 'image' | 'video';
-  const product = productParam as 'kiosk' | 'signage';
+  const kind = kindParam as UploadKind;
+  const product = productParam as UploadProduct;
 
   let formData: FormData;
   try {
@@ -76,25 +73,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Missing file field' }, { status: 400 });
   }
 
-  if (file.size === 0) {
-    return NextResponse.json({ error: 'Empty file' }, { status: 400 });
-  }
-  if (file.size > MAX_BYTES) {
-    return NextResponse.json(
-      { error: `File too large (${file.size}B). Max ${MAX_BYTES}B.` },
-      { status: 413 },
-    );
-  }
-
-  const allowed = kind === 'image' ? ALLOWED_IMAGE : ALLOWED_VIDEO;
-  if (!allowed.has(file.type)) {
-    return NextResponse.json(
-      {
-        error: `Unsupported MIME for ${kind}: ${file.type || 'unknown'}.`,
-        allowed: Array.from(allowed),
-      },
-      { status: 415 },
-    );
+  const fileCheck = validateUploadFile({ kind, mime: file.type, size: file.size });
+  if (!fileCheck.ok) {
+    return NextResponse.json({ error: fileCheck.error }, { status: fileCheck.status });
   }
 
   const ext = mimeToExt(file.type);
@@ -126,25 +107,6 @@ export async function POST(req: Request) {
     console.error('[api/studio/upload]', err);
     const message = err instanceof Error ? err.message : 'Upload failed';
     return NextResponse.json({ error: message }, { status: 500 });
-  }
-}
-
-function mimeToExt(mime: string): string {
-  switch (mime) {
-    case 'image/png':
-      return 'png';
-    case 'image/jpeg':
-      return 'jpg';
-    case 'image/webp':
-      return 'webp';
-    case 'image/svg+xml':
-      return 'svg';
-    case 'video/mp4':
-      return 'mp4';
-    case 'video/webm':
-      return 'webm';
-    default:
-      return 'bin';
   }
 }
 

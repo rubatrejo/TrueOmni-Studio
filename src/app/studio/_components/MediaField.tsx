@@ -1,11 +1,12 @@
 'use client';
 
 import { Film, Image as ImageIcon, Link as LinkIcon, Loader2, Upload, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { resolveStudioAsset } from '../_lib/asset-resolve';
 import { compressImage, readFileAsDataURL } from '../_lib/image-utils';
 import { useStudioSlug } from '../_lib/slug-context';
+import { uploadToBlob, useBlobAvailable } from '../_lib/upload-to-blob';
 
 interface MediaFieldProps {
   label: string;
@@ -72,7 +73,7 @@ export function MediaField({
   const [error, setError] = useState<string | null>(null);
   const [bytes, setBytes] = useState<number | null>(null);
   const [urlInput, setUrlInput] = useState('');
-  const [blobAvailable, setBlobAvailable] = useState<boolean | null>(null);
+  const blobAvailable = useBlobAvailable();
   const slugCtx = useStudioSlug();
   const slug = slugProp ?? slugCtx;
   // El resolver de paths relativos (`assets/foo.png`) solo aplica a kiosk
@@ -92,21 +93,6 @@ export function MediaField({
       : slug
         ? resolveStudioAsset(slug, value)
         : value;
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/studio/upload')
-      .then((r) => (r.ok ? r.json() : { available: false }))
-      .then((data) => {
-        if (!cancelled) setBlobAvailable(Boolean(data.available));
-      })
-      .catch(() => {
-        if (!cancelled) setBlobAvailable(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const detectedKind: 'image' | 'video' =
     kind ?? (value && /\.mp4(\?|$)|\.webm(\?|$)|^data:video\//i.test(value) ? 'video' : 'image');
@@ -139,14 +125,13 @@ export function MediaField({
     setBusy(true);
     try {
       if (useBlob && slug) {
-        const url = await uploadToBlob(
-          file,
+        const url = await uploadToBlob(file, {
           slug,
-          kindRes,
+          kind: kindRes,
           product,
-          (pct) => setProgress(pct),
+          onProgress: (pct) => setProgress(pct),
           xhrRef,
-        );
+        });
         setBytes(file.size);
         onChange({ src: url, kind: kindRes });
         return;
@@ -376,54 +361,4 @@ function formatBytes(b: number): string {
   if (b < 1024) return `${b}B`;
   if (b < 1024 * 1024) return `${(b / 1024).toFixed(0)}KB`;
   return `${(b / (1024 * 1024)).toFixed(1)}MB`;
-}
-
-/**
- * Sube un archivo al endpoint `/api/studio/upload` usando XHR para tener
- * progress events (fetch no los expone). Devuelve la URL pública del
- * blob. Si el endpoint responde 503 (no token), lanza un error con
- * `code: 'no-blob'` para que el caller decida si caer al fallback.
- */
-function uploadToBlob(
-  file: File,
-  slug: string,
-  kind: 'image' | 'video',
-  product: 'kiosk' | 'signage',
-  onProgress: (pct: number) => void,
-  xhrRef: React.MutableRefObject<XMLHttpRequest | null>,
-): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhrRef.current = xhr;
-
-    const params = new URLSearchParams({ slug, kind, product });
-    xhr.open('POST', `/api/studio/upload?${params.toString()}`);
-
-    xhr.upload.onprogress = (ev) => {
-      if (ev.lengthComputable) {
-        onProgress(Math.round((ev.loaded / ev.total) * 100));
-      }
-    };
-
-    xhr.onload = () => {
-      let body: { url?: string; error?: string } = {};
-      try {
-        body = JSON.parse(xhr.responseText) as typeof body;
-      } catch {
-        // ignore
-      }
-      if (xhr.status >= 200 && xhr.status < 300 && body.url) {
-        resolve(body.url);
-      } else {
-        reject(new Error(body.error || `Upload failed (HTTP ${xhr.status}).`));
-      }
-    };
-    xhr.onerror = () => reject(new Error('Network error during upload'));
-    xhr.onabort = () => reject(new Error('Upload aborted'));
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('filename', file.name);
-    xhr.send(formData);
-  });
 }

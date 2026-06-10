@@ -1,9 +1,14 @@
 'use client';
 
-import { ChevronDown, ChevronRight, History, RotateCcw } from 'lucide-react';
+import { Camera, ChevronDown, ChevronRight, History, RotateCcw } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
-import { listSnapshots, restoreSnapshot, type SnapshotListEntry } from '../../_lib/snapshots-api';
+import {
+  createSnapshot,
+  listSnapshots,
+  restoreSnapshot,
+  type SnapshotListEntry,
+} from '../../_lib/snapshots-api';
 
 /**
  * `<VersionsPanel>` — Lista de snapshots del display + restore (DSS6).
@@ -27,6 +32,8 @@ export function VersionsPanel({ clientSlug, displaySlug, refreshTrigger }: Versi
   const [error, setError] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [restoring, setRestoring] = useState(false);
+  const [note, setNote] = useState('');
+  const [creating, setCreating] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -44,6 +51,19 @@ export function VersionsPanel({ clientSlug, displaySlug, refreshTrigger }: Versi
   useEffect(() => {
     void load();
   }, [load, refreshTrigger]);
+
+  async function handleCreate() {
+    setCreating(true);
+    setError(null);
+    const result = await createSnapshot(clientSlug, displaySlug, note.trim() || undefined);
+    setCreating(false);
+    if (!result.ok) {
+      setError(result.error ?? 'Snapshot failed');
+      return;
+    }
+    setNote('');
+    void load();
+  }
 
   async function handleRestore(id: string) {
     setRestoring(true);
@@ -84,6 +104,28 @@ export function VersionsPanel({ clientSlug, displaySlug, refreshTrigger }: Versi
 
       {open ? (
         <>
+          {/* Checkpoint manual — input de nota + botón Snapshot */}
+          <div className="mb-3 flex items-center gap-2">
+            <input
+              type="text"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Note (optional)"
+              className="flex-1 rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[11.5px] text-zinc-800 placeholder:text-zinc-400 focus:border-sky-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200"
+              maxLength={80}
+              disabled={creating}
+            />
+            <button
+              type="button"
+              onClick={() => void handleCreate()}
+              disabled={creating}
+              className="inline-flex items-center gap-1 rounded-md bg-zinc-900 px-2.5 py-1.5 text-[11.5px] font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+            >
+              <Camera className="h-3 w-3" strokeWidth={2.5} />
+              {creating ? 'Saving…' : 'Snapshot'}
+            </button>
+          </div>
+
           {error ? (
             <div className="mb-2 rounded-md bg-red-50 px-3 py-2 text-[11.5px] text-red-700 dark:bg-red-500/10 dark:text-red-400">
               {error}

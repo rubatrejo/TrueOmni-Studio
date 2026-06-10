@@ -119,6 +119,7 @@ export function AdsEditor({
     return (
       <AdEditPanel
         ad={editingAd}
+        otherIds={value.ads.filter((a) => a.id !== editingAd.id).map((a) => a.id)}
         onChange={(patch) => handleItemChange(editingAd.id, patch)}
         onBack={() => setEditingId(null)}
         onDelete={() => handleDelete(editingAd.id)}
@@ -368,6 +369,7 @@ function IconBtn({
 
 function AdEditPanel({
   ad,
+  otherIds,
   onChange,
   onBack,
   onDelete,
@@ -375,6 +377,8 @@ function AdEditPanel({
   kindDimensions,
 }: {
   ad: Ad;
+  /** IDs de los demás ads — para validar unicidad del ID (F-HUB-5). */
+  otherIds: string[];
   onChange: (patch: Partial<Ad>) => void;
   onBack: () => void;
   onDelete: () => void;
@@ -383,6 +387,11 @@ function AdEditPanel({
 }) {
   const setField = <K extends keyof Ad>(key: K, value: Ad[K]) =>
     onChange({ [key]: value } as Partial<Ad>);
+
+  // F-HUB-5: el dismissal/frequency-cap se trackea por ID → IDs colisionados
+  // comparten estado. Avisamos inline si choca con otro ad o queda vacío.
+  const idDuplicate = otherIds.includes(ad.id);
+  const idEmpty = ad.id.trim().length === 0;
 
   const routesText = ad.routes.join('\n');
   const setRoutes = (text: string) => {
@@ -418,12 +427,20 @@ function AdEditPanel({
         <Field
           label="ID"
           hint="Stable identifier (kebab-case). Used internally and to track dismissals."
+          error={
+            idDuplicate
+              ? 'Another ad already uses this ID — dismissals would collide.'
+              : idEmpty
+                ? 'ID is required.'
+                : undefined
+          }
         >
           <TextInput
             value={ad.id}
             onChange={(e) => setField('id', e.target.value.trim().toLowerCase())}
             spellCheck={false}
             className="font-mono"
+            invalid={idDuplicate || idEmpty}
           />
         </Field>
 
@@ -528,10 +545,13 @@ function AdEditPanel({
 function Field({
   label,
   hint,
+  error,
   children,
 }: {
   label: string;
   hint?: string;
+  /** Mensaje de error (rojo, prevalece sobre hint cuando está set). */
+  error?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -540,7 +560,9 @@ function Field({
         {label}
       </label>
       {children}
-      {hint ? (
+      {error ? (
+        <p className="text-[10.5px] leading-snug text-rose-600 dark:text-rose-400">{error}</p>
+      ) : hint ? (
         <p className="text-[10.5px] leading-snug text-zinc-500 dark:text-zinc-500">{hint}</p>
       ) : null}
     </div>

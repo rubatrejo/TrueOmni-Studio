@@ -110,6 +110,9 @@ export function PwaShell({
   const [publishing, setPublishing] = useState(false);
   const [savedPwa, setSavedPwa] = useState<PwaConfig>(initialPwa);
   const [pwa, setPwa] = useState<PwaConfig>(initialPwa);
+  // F-PWA-4: la meta (versión) avanza con cada save; antes el badge usaba siempre
+  // `initialMeta` y se quedaba clavado en la versión de carga.
+  const [meta, setMeta] = useState(initialMeta);
 
   const [savedBranding, setSavedBranding] = useState<Branding>(initialBranding);
   const [branding, setBranding] = useState<Branding>(initialBranding);
@@ -157,11 +160,20 @@ export function PwaShell({
     setSaveState('saving');
     try {
       const tasks: Array<Promise<unknown>> = [];
-      if (dirtyPwa) tasks.push(patchPwaSlice(slug, pwa));
+      let nextMeta: PwaSliceMetaDto | undefined;
+      if (dirtyPwa)
+        tasks.push(
+          patchPwaSlice(slug, pwa).then((m) => {
+            nextMeta = m;
+          }),
+        );
       if (dirtyBranding)
         tasks.push(patchClientBranding(slug, rebuildUnified(initialUnified, branding)));
       await Promise.all(tasks);
-      if (dirtyPwa) setSavedPwa(pwa);
+      if (dirtyPwa) {
+        setSavedPwa(pwa);
+        if (nextMeta) setMeta(nextMeta); // F-PWA-4: badge de versión reactivo.
+      }
       if (dirtyBranding) setSavedBranding(branding);
       setSaveState('saved');
       setTimeout(() => setSaveState('idle'), 1500);
@@ -246,7 +258,7 @@ export function PwaShell({
           slug={slug}
           nombre={nombre}
           favicon={branding.favicon}
-          currentVersion={initialMeta?.currentVersion ?? 0}
+          currentVersion={meta?.currentVersion ?? 0}
           saveState={effectiveSaveState}
           isDirty={isDirty}
           productLabel="Mobile PWA"

@@ -111,11 +111,21 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
                     placeholder="TrueOmni Theme"
                   />
                 </Field>
-                <Field label="Website">
+                <Field
+                  label="Website"
+                  error={
+                    // F-HUB-4: mismo guard de protocolo que el NewClientModal
+                    // (antes el edit aceptaba texto libre, el create no).
+                    value.website && !/^https?:\/\//i.test(value.website.trim())
+                      ? 'Must start with http:// or https://'
+                      : undefined
+                  }
+                >
                   <TextInput
                     value={value.website ?? ''}
                     onChange={(v) => setField('website', v)}
                     placeholder="https://"
+                    invalid={!!value.website && !/^https?:\/\//i.test(value.website.trim())}
                   />
                 </Field>
               </div>
@@ -609,10 +619,13 @@ function Section({
 function Field({
   label,
   hint,
+  error,
   children,
 }: {
   label: string;
   hint?: string;
+  /** Mensaje de error (rojo, prevalece sobre hint cuando está set). */
+  error?: string;
   children: React.ReactNode;
 }) {
   // Hallazgo S-31: id auto-generado + htmlFor explícito. Los hijos
@@ -626,7 +639,9 @@ function Field({
           {label}
         </label>
         {children}
-        {hint ? (
+        {error ? (
+          <span className="text-[11px] text-rose-600 dark:text-rose-400">{error}</span>
+        ) : hint ? (
           <span id={hintId} className="text-[11px] text-zinc-500">
             {hint}
           </span>
@@ -640,10 +655,12 @@ function TextInput({
   value,
   onChange,
   placeholder,
+  invalid,
 }: {
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  invalid?: boolean;
 }) {
   const id = useContext(FieldIdContext) ?? undefined;
   return (
@@ -653,7 +670,11 @@ function TextInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="h-9 w-full rounded-md border border-zinc-200 bg-white px-2.5 text-[12.5px] text-zinc-800 outline-none transition focus:border-sky-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200"
+      className={`h-9 w-full rounded-md border bg-white px-2.5 text-[12.5px] text-zinc-800 outline-none transition dark:bg-zinc-950 dark:text-zinc-200 ${
+        invalid
+          ? 'border-rose-400 focus:border-rose-500'
+          : 'border-zinc-200 focus:border-sky-400 dark:border-zinc-800'
+      }`}
     />
   );
 }

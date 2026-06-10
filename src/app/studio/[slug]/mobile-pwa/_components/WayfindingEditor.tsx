@@ -19,6 +19,17 @@ import { move, PwaField, PwaGroup, PwaPanelHeader, ReorderButtons } from './pwa-
  * waypoints de ruta editables sobre la imagen del plano.
  */
 
+/**
+ * Colores de los marcadores del picker de plano. Son chrome del editor del
+ * Studio (neutros fijos, idénticos para todo cliente, como el teclado iOS de la
+ * PWA): distinguen origen/destino/waypoint. NO son white-label ni se tokenizan
+ * en `tokens.css` (eso es para el runtime del cliente; el editor usa color fijo
+ * igual que el resto de su chrome zinc/sky).
+ */
+const PIN_ORIGIN = '#10b981'; // verde — "you are here" origin
+const PIN_DESTINATION = '#0ea5e9'; // azul — destino de la amenidad
+const PIN_WAYPOINT = '#f59e0b'; // ámbar — waypoint de la ruta
+
 const EMPTY: PwaWayfindingModuleConfig = {
   title: '',
   subtitle: '',
@@ -173,7 +184,7 @@ export function WayfindingEditor({
                   label={'"You are here" origin'}
                   point={f.origin}
                   imageUrl={f.floorPlanImage}
-                  accent="#10b981"
+                  accent={PIN_ORIGIN}
                   onChange={(origin) => updateFloor(fi, { origin })}
                 />
                 <div className="ml-2 space-y-3 border-l border-zinc-200 pl-3 dark:border-zinc-800">
@@ -209,7 +220,7 @@ export function WayfindingEditor({
                         label="Destination"
                         point={a.destination}
                         imageUrl={f.floorPlanImage}
-                        accent="#0ea5e9"
+                        accent={PIN_DESTINATION}
                         onChange={(destination) => updateAmenity(fi, ai, { destination })}
                       />
                       <div className="space-y-2">
@@ -223,7 +234,7 @@ export function WayfindingEditor({
                                 label={`Waypoint ${pi + 1}`}
                                 point={rp}
                                 imageUrl={f.floorPlanImage}
-                                accent="#f59e0b"
+                                accent={PIN_WAYPOINT}
                                 onChange={(p) => setRoutePoint(fi, ai, pi, p)}
                               />
                             </div>

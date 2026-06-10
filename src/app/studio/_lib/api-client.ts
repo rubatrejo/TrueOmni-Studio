@@ -2,6 +2,7 @@
 
 import type { PwaConfig } from '@/lib/config';
 import type { UnifiedClientBranding } from '@/lib/studio/client-branding-sync';
+import type { IntegrationHealthSnapshot } from '@/lib/studio/integrations-health';
 import type {
   AdsModule,
   AiAvatarConfig,
@@ -455,6 +456,34 @@ export async function checkIntegration(
     method: 'POST',
     body: input,
   });
+}
+
+/**
+ * Lee el último snapshot de salud de integraciones persistido (o `null`).
+ * F-HUB-7: alimenta la línea de estado del editor y el badge del hub.
+ */
+export async function getIntegrationsHealth(
+  slug: string,
+): Promise<IntegrationHealthSnapshot | null> {
+  const data = await http<{ slug: string; health: IntegrationHealthSnapshot | null }>(
+    `/api/studio/integrations/health/${slug}`,
+  );
+  return data.health;
+}
+
+/**
+ * Corre el "Test all" y persiste el snapshot. Con `integrations` testea la
+ * working copy del editor; omitido, testea la config guardada en KV.
+ */
+export async function runIntegrationsHealth(
+  slug: string,
+  integrations?: IntegrationsConfig,
+): Promise<IntegrationHealthSnapshot> {
+  const data = await http<{ slug: string; health: IntegrationHealthSnapshot }>(
+    `/api/studio/integrations/health/${slug}`,
+    { method: 'POST', body: integrations !== undefined ? { integrations } : {} },
+  );
+  return data.health;
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */

@@ -143,6 +143,10 @@ export const kvKeys = {
   /** Snapshot inmutable del slice PWA previo a un PATCH/import (undo). */
   pwaSnap: (slug: string, ts: string) => `pwa:${slug}:snap:${ts}`,
   pwaSnapList: (slug: string) => `pwa:${slug}:snap-list`,
+  /** Último snapshot de salud de integraciones del cliente (F-HUB-7). Un solo
+   *  valor (sin historial); TTL 90d para auto-limpieza. Lo escriben tanto el
+   *  "Test all" del editor (working copy) como el barrido de la config guardada. */
+  integHealth: (slug: string) => `integ:${slug}:health`,
   clientsList: 'clients:list',
   pubRequest: (slug: string, reqId: string) => `pub:${slug}:${reqId}`,
   pubQueue: 'pub:queue',

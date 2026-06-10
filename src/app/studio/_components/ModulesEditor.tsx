@@ -113,8 +113,8 @@ function IconNode({
   className?: string;
 }) {
   if (customIcon) {
-    // eslint-disable-next-line @next/next/no-img-element
     return (
+      // eslint-disable-next-line @next/next/no-img-element -- asset dinámico del cliente; next/image no aplica (src arbitrario en runtime)
       <img src={customIcon} alt="" className={`${className} object-contain`} draggable={false} />
     );
   }

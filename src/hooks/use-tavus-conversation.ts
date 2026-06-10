@@ -168,15 +168,18 @@ export function useTavusConversation({
 
     (async () => {
       try {
+        // eslint-disable-next-line no-console -- log de diagnóstico de la integración Tavus
         console.info('[tavus] resolving Tavus conversation (prewarm or fresh)…');
         const conv = await consumePrewarmOrCreate(clientName);
         if (!active) return;
         if (!conv) {
+          // eslint-disable-next-line no-console -- log de diagnóstico de la integración Tavus
           console.warn('[tavus] start failed');
           setTavusUnavailable(true);
           return;
         }
         tavusConvIdRef.current = conv.conversationId;
+        // eslint-disable-next-line no-console -- log de diagnóstico de la integración Tavus
         console.info('[tavus] conversation:', conv.conversationId);
 
         // Daily no permite dos call objects activos a la vez. En StrictMode
@@ -197,6 +200,7 @@ export function useTavusConversation({
           subscribeToTracksAutomatically: true,
         });
         dailyCallRef.current = call as unknown as typeof dailyCallRef.current;
+        // eslint-disable-next-line no-console -- log de diagnóstico de la integración Tavus
         console.info('[tavus] daily callObject created');
 
         const attachTrack = (track: MediaStreamTrack) => {
@@ -214,7 +218,9 @@ export function useTavusConversation({
             const playPromise = el.play();
             if (playPromise) {
               playPromise.then(
+                // eslint-disable-next-line no-console -- log de diagnóstico de la integración Tavus
                 () => console.info('[tavus] avatar element playing'),
+                // eslint-disable-next-line no-console -- log de diagnóstico de la integración Tavus
                 (err) => console.warn('[tavus] avatar play() blocked:', err?.name, err?.message),
               );
             }
@@ -233,6 +239,7 @@ export function useTavusConversation({
           const p = event.participant;
           const t = event.track;
           if (!p || !t) return;
+          // eslint-disable-next-line no-console -- log de diagnóstico de la integración Tavus
           console.info('[tavus] track-started', {
             kind: t.kind,
             local: p.local,
@@ -245,6 +252,7 @@ export function useTavusConversation({
         };
 
         const onJoined = () => {
+          // eslint-disable-next-line no-console -- log de diagnóstico de la integración Tavus
           console.info('[tavus] local joined-meeting — muting mic + max receive quality');
           try {
             call.setLocalAudio(false);
@@ -260,6 +268,7 @@ export function useTavusConversation({
               },
             });
           } catch (err) {
+            // eslint-disable-next-line no-console -- log de diagnóstico de la integración Tavus
             console.warn('[tavus] updateReceiveSettings failed', err);
           }
         };
@@ -288,6 +297,7 @@ export function useTavusConversation({
         const onParticipantJoined = (event: {
           participant: { local: boolean; user_name?: string };
         }) => {
+          // eslint-disable-next-line no-console -- log de diagnóstico de la integración Tavus
           console.info(
             '[tavus] participant-joined',
             event.participant.user_name,
@@ -297,6 +307,7 @@ export function useTavusConversation({
         };
 
         const onError = (err: unknown) => {
+          // eslint-disable-next-line no-console -- log de diagnóstico de la integración Tavus
           console.error('[tavus] daily error', err);
           if (active) {
             setTavusReady(false);
@@ -335,8 +346,10 @@ export function useTavusConversation({
 
         try {
           await call.join({ url: conv.conversationUrl });
+          // eslint-disable-next-line no-console -- log de diagnóstico de la integración Tavus
           console.info('[tavus] call.join() resolved');
         } catch (err) {
+          // eslint-disable-next-line no-console -- log de diagnóstico de la integración Tavus
           console.error('[tavus] join() failed', err);
           if (active) {
             setTavusReady(false);
@@ -344,6 +357,7 @@ export function useTavusConversation({
           }
         }
       } catch (err) {
+        // eslint-disable-next-line no-console -- log de diagnóstico de la integración Tavus
         console.error('[tavus] tavus mount failed', err);
         if (active) setTavusUnavailable(true);
       }
@@ -379,8 +393,10 @@ export function useTavusConversation({
     if (!call) return;
     try {
       call.setLocalAudio(isListening);
+      // eslint-disable-next-line no-console -- log de diagnóstico de la integración Tavus
       console.info('[tavus] mic →', isListening ? 'unmuted' : 'muted');
     } catch (err) {
+      // eslint-disable-next-line no-console -- log de diagnóstico de la integración Tavus
       console.warn('[tavus] setLocalAudio failed', err);
     }
   }, [isListening]);

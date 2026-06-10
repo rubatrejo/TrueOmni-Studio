@@ -42,6 +42,7 @@ export function WayfindingScreen({ config }: WayfindingScreenProps) {
       <div className="scrollbar-hide flex-1 overflow-y-auto">
         {/* Hero: floor plan + tabs superpuestos */}
         <div className="relative w-full bg-[hsl(var(--pwa-floorplan-bg))]">
+          {/* eslint-disable-next-line @next/next/no-img-element -- asset dinámico del cliente; next/image no aplica (src arbitrario en runtime) */}
           <img
             src={floorPlanSrc}
             alt={`${activeFloor.label} floor plan`}

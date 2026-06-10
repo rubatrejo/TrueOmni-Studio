@@ -54,8 +54,8 @@ export function FaviconBadge({
 
   const src = resolveFaviconSrc(favicon, slug);
 
-  // eslint-disable-next-line @next/next/no-img-element
   return (
+    // eslint-disable-next-line @next/next/no-img-element -- asset dinámico del cliente; next/image no aplica (src arbitrario en runtime)
     <img
       ref={imgRef}
       src={src}

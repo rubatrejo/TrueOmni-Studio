@@ -69,6 +69,7 @@ export function VideoImageSlot({
         isVideo ? (
           <video src={url} autoPlay loop muted playsInline className="h-full w-full object-cover" />
         ) : (
+          // eslint-disable-next-line @next/next/no-img-element -- asset dinámico del cliente; next/image no aplica (src arbitrario en runtime)
           <img src={url} alt="" className="h-full w-full object-cover" />
         )
       ) : (
@@ -106,6 +107,7 @@ export function AdSlot({
         isVideo ? (
           <video src={url} autoPlay loop muted playsInline className="h-full w-full object-cover" />
         ) : (
+          // eslint-disable-next-line @next/next/no-img-element -- asset dinámico del cliente; next/image no aplica (src arbitrario en runtime)
           <img src={url} alt="" className="h-full w-full object-cover" />
         )
       ) : (
@@ -214,6 +216,7 @@ function EventCard({
 
     return (
       <div className="relative overflow-hidden rounded-md bg-zinc-900">
+        {/* eslint-disable-next-line @next/next/no-img-element -- asset dinámico del cliente; next/image no aplica (src arbitrario en runtime) */}
         <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
         {/* Date badge — accent color, square, anchored top-left con margen. */}
         <div
@@ -270,6 +273,7 @@ function EventCard({
 
   return (
     <div className="relative overflow-hidden rounded-md bg-zinc-900">
+      {/* eslint-disable-next-line @next/next/no-img-element -- asset dinámico del cliente; next/image no aplica (src arbitrario en runtime) */}
       <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
       {/* Date badge — accent color, top-left. */}
       <div
@@ -382,6 +386,7 @@ export function SocialSlot({
           return (
             <div key={i} className="relative overflow-hidden">
               {url ? (
+                // eslint-disable-next-line @next/next/no-img-element -- asset dinámico del cliente; next/image no aplica (src arbitrario en runtime)
                 <img src={url} alt="" className="h-full w-full object-cover" />
               ) : (
                 <div className="h-full w-full bg-zinc-800" />

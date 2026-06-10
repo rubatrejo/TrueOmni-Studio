@@ -140,6 +140,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     };
     if (creds.personaId) body.persona_id = creds.personaId;
     if (greeting) body.custom_greeting = greeting;
+    // eslint-disable-next-line no-console -- log de diagnóstico de la ruta de arranque del avatar
     console.info('[ai-avatar/start]', {
       conversation_name: body.conversation_name,
       replica_id: creds.replicaId,

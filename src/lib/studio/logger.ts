@@ -48,17 +48,17 @@ export function studioLog(level: LogLevel, fields: LogFields): void {
 
   const serialized = `[studio] ${safeStringify(payload)}`;
 
-  // eslint-disable-next-line no-console
+  // eslint-disable-next-line no-console -- este módulo ES el logger central
   switch (level) {
     case 'info':
-      console.log(serialized);
+      console.log(serialized); // eslint-disable-line no-console -- este módulo ES el logger central
       break;
     case 'warn':
-      console.warn(serialized);
+      console.warn(serialized); // eslint-disable-line no-console -- este módulo ES el logger central
       break;
     case 'error':
     case 'alert':
-      console.error(serialized);
+      console.error(serialized); // eslint-disable-line no-console -- este módulo ES el logger central
       break;
   }
 }

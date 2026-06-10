@@ -39,6 +39,7 @@ export function WayfindingDirections({ config, floor, amenity }: WayfindingDirec
       <div className="scrollbar-hide flex-1 overflow-y-auto">
         {/* Floor plan con ruta overlay */}
         <div className="relative w-full bg-[hsl(var(--pwa-floorplan-bg))]">
+          {/* eslint-disable-next-line @next/next/no-img-element -- asset dinámico del cliente; next/image no aplica (src arbitrario en runtime) */}
           <img
             src={floorPlanSrc}
             alt={`${floor.label} floor plan`}

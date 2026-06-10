@@ -3,12 +3,13 @@ import { NextResponse } from 'next/server';
 import { removeClientFromList } from '@/lib/studio/client-manifest';
 import { kv } from '@/lib/studio/kv';
 import { buildPrefixesToPurge, purgePrefix } from '@/lib/studio/purge-client';
+import { STUDIO_SLUG_REGEX } from '@/lib/studio/slug';
 
 export const dynamic = 'force-dynamic';
 
 type RouteParams = { params: Promise<{ slug: string }> };
 
-const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
+const SLUG_REGEX = STUDIO_SLUG_REGEX;
 const PROTECTED_SLUGS = new Set(['default']);
 
 /**

@@ -11,6 +11,7 @@ import {
   publishToGitHub,
 } from '@/lib/studio/github-publisher';
 import { loadPwaSlice } from '@/lib/studio/pwa-config';
+import { STUDIO_SLUG_REGEX } from '@/lib/studio/slug';
 
 /**
  * `POST /api/studio/publish/[slug]/pwa?dryRun=1&mode=fs|pr`
@@ -53,7 +54,7 @@ export async function POST(req: Request, { params }: RouteParams) {
   const dryRun = url.searchParams.get('dryRun') === '1';
   const requestedMode = url.searchParams.get('mode') as PublishMode | null;
 
-  if (!/^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]?$/.test(slug)) {
+  if (!STUDIO_SLUG_REGEX.test(slug)) {
     return NextResponse.json({ error: 'Invalid slug' }, { status: 400 });
   }
 

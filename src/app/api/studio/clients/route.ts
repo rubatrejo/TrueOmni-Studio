@@ -43,6 +43,7 @@ import {
   applyClonedDisplays,
   cloneSignageContentFromTemplate,
 } from '@/lib/studio/signage-bootstrap';
+import { STUDIO_SLUG_REGEX } from '@/lib/studio/slug';
 import { applyClonedWalls, cloneVideoWallsFromFs } from '@/lib/video-walls/bootstrap-from-fs';
 import { loadVideoWallClient } from '@/lib/video-walls/config';
 import { kVideoWallClient, kVideoWallClientList } from '@/lib/video-walls/kv-keys';
@@ -63,7 +64,7 @@ export interface ClientSummary {
   pinned: boolean;
 }
 
-const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
+const SLUG_REGEX = STUDIO_SLUG_REGEX;
 const TEMPLATE_SLUG = 'default';
 
 /**

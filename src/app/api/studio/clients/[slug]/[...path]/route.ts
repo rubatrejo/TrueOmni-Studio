@@ -3,6 +3,8 @@ import path from 'node:path';
 
 import { NextResponse } from 'next/server';
 
+import { STUDIO_SLUG_REGEX } from '@/lib/studio/slug';
+
 /**
  * Sirve archivos arbitrarios bajo `clients/<slug>/` para que el Studio
  * pueda renderizar previews de assets (frames, backgrounds, thumbnails,
@@ -27,15 +29,13 @@ const MIME_TYPES: Record<string, string> = {
   pdf: 'application/pdf',
 };
 
-const SLUG_PATTERN = /^[a-z0-9-]+$/;
-
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ slug: string; path: string[] }> },
 ): Promise<NextResponse> {
   const { slug, path: segments } = await params;
 
-  if (!SLUG_PATTERN.test(slug)) {
+  if (!STUDIO_SLUG_REGEX.test(slug)) {
     return new NextResponse('forbidden', { status: 403 });
   }
   const relPath = segments.join('/');

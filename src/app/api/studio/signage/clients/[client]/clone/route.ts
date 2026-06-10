@@ -3,11 +3,12 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { loadSignageClient, loadSignageDisplay } from '@/lib/signage/config';
 import { kvSignageClient, kvSignageDisplay } from '@/lib/signage/kv-store';
 import { SignageClientFileSchema, type SignageClientFile } from '@/lib/signage/schema';
+import { STUDIO_SLUG_REGEX } from '@/lib/studio/slug';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
+const SLUG_REGEX = STUDIO_SLUG_REGEX;
 
 interface RouteContext {
   params: Promise<{ client: string }>;

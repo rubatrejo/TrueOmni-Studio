@@ -7,6 +7,7 @@ import {
   type ConfigMeta,
   type KioskConfig,
 } from '@/lib/studio/schema';
+import { STUDIO_SLUG_REGEX } from '@/lib/studio/slug';
 
 /**
  * `/api/studio/configs/[slug]/clone`
@@ -18,7 +19,7 @@ import {
 
 type RouteParams = { params: Promise<{ slug: string }> };
 
-const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
+const SLUG_REGEX = STUDIO_SLUG_REGEX;
 
 export async function POST(req: Request, { params }: RouteParams) {
   const { slug: source } = await params;

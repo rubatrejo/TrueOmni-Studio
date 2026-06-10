@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { STUDIO_SLUG_REGEX } from '@/lib/studio/slug';
 import { GRID_CONFIG_IDS, type GridConfig } from '@/lib/video-walls/dimensions';
 import { kvVideoWall, kvVideoWallClient } from '@/lib/video-walls/kv-store';
 import { VideoWallConfigSchema, type VideoWallConfig } from '@/lib/video-walls/schema';
@@ -73,7 +74,7 @@ export async function POST(req: Request, { params }: RouteParams) {
   }
   const grid = gridRaw as GridConfig;
 
-  if (!/^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/.test(slug)) {
+  if (!STUDIO_SLUG_REGEX.test(slug)) {
     return NextResponse.json(
       { error: 'slug must be lowercase letters, digits, and dashes' },
       { status: 400 },

@@ -10,11 +10,12 @@ import {
   type SignageDisplayConfig,
   type SignageOrientation,
 } from '@/lib/signage/schema';
+import { STUDIO_SLUG_REGEX } from '@/lib/studio/slug';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
+const SLUG_REGEX = STUDIO_SLUG_REGEX;
 const TEMPLATE_CLIENT = 'default';
 const TEMPLATE_DISPLAY = 'lobby-tv';
 

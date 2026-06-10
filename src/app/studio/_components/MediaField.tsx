@@ -163,7 +163,7 @@ export function MediaField({
     const looksVideo = /\.(mp4|webm|mov)(\?|$)/i.test(trimmed);
     // YouTube URLs son video, aunque la URL no termine en `.mp4`. Antes
     // se guardaban como kind='image' y el runtime hero-background-layer
-    // intentaba renderizarlas con `<img>` (que falla). Ahora detectamos
+    // intentaba renderizarlas con `<img loading="lazy">` (que falla). Ahora detectamos
     // youtube.com/youtu.be y forzamos kind='video' para que el runtime
     // active la rama YouTube embed (iframe).
     const looksYouTube = /youtube\.com|youtu\.be/i.test(trimmed);
@@ -222,6 +222,7 @@ export function MediaField({
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img
+                loading="lazy"
                 src={previewSrc}
                 alt={label}
                 className="absolute inset-0 h-full w-full object-cover"

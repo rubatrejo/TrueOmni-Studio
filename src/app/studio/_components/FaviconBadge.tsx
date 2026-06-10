@@ -57,6 +57,7 @@ export function FaviconBadge({
   return (
     // eslint-disable-next-line @next/next/no-img-element -- asset dinámico del cliente; next/image no aplica (src arbitrario en runtime)
     <img
+      loading="lazy"
       ref={imgRef}
       src={src}
       alt=""

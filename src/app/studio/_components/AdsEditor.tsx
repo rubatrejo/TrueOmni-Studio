@@ -252,6 +252,7 @@ function AdRow({
         {ad.image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
+            loading="lazy"
             src={ad.image}
             alt=""
             className="h-12 w-12 shrink-0 rounded object-contain ring-1 ring-zinc-200 dark:ring-zinc-800"

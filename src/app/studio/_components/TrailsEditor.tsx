@@ -284,6 +284,7 @@ export function TrailsEditor({ value, onChange, mapboxToken = '' }: TrailsEditor
             {item.image ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
+                loading="lazy"
                 src={item.image}
                 alt=""
                 className="h-10 w-10 shrink-0 rounded object-cover ring-1 ring-zinc-200 dark:ring-zinc-800"

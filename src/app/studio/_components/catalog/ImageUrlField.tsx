@@ -87,6 +87,7 @@ export function ImageUrlField({
           {value ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
+              loading="lazy"
               src={value}
               alt={label}
               className="h-full w-full object-cover"

@@ -574,6 +574,7 @@ function BrandMediaWithUrl({
           {youtubeId ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
+              loading="lazy"
               src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`}
               alt=""
               className="h-full w-full object-cover"

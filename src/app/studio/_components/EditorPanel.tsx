@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Play, Sparkles } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
 
 import type {
@@ -31,31 +32,107 @@ import { extractPaletteFromImage } from '../_lib/palette-from-image';
 import { PRESET_PALETTES } from '../_lib/preset-palettes';
 import { STUDIO_SECTIONS, VERSIONS_SECTION, type StudioSectionKey } from '../_lib/sections';
 
-import { AdsEditor } from './AdsEditor';
-import { AiAvatarEditor } from './AiAvatarEditor';
-import { BillboardEditor } from './BillboardEditor';
-import { BrochuresEditor } from './BrochuresEditor';
+// Helpers de la tab Branding (siempre montados con el panel) → estáticos.
 import { CustomFontField } from './CustomFontField';
-import { DealsEditor } from './DealsEditor';
-import { VersionsEditor } from './editor-panel/VersionsEditor';
-import { EventsEditor } from './EventsEditor';
 import { FontSelector } from './FontSelector';
-import { GuestbookEditor } from './GuestbookEditor';
-import { I18nEditor } from './I18nEditor';
 import { ImageField } from './ImageField';
-import { IntegrationsEditor } from './IntegrationsEditor';
-import { ItineraryBuilderEditor } from './ItineraryBuilderEditor';
-import { ListingsEditor } from './ListingsEditor';
-import { MapEditor } from './MapEditor';
 import { MediaField } from './MediaField';
-import { HomeDashboardEditor, SystemModulesEditor } from './ModulesEditor';
-import { PassesEditor } from './PassesEditor';
-import { PhotoBoothEditor } from './PhotoBoothEditor';
-import { SocialWallEditor } from './SocialWallEditor';
-import { SurveyEditor } from './SurveyEditor';
-import { TicketsEditor } from './TicketsEditor';
-import { TrailsEditor } from './TrailsEditor';
 import { ColorPicker } from './ui';
+
+/**
+ * F-QA-5: code-splitting de los editores por módulo. Cada uno va detrás de
+ * `sectionKey === 'x' &&`, así que su chunk se descarga solo al abrir esa tab
+ * (no en el bundle inicial del editor del kiosk). `ssr: false` porque son
+ * client-only (cámara, mapbox, canvas, drag&drop). La tab Branding (default)
+ * sigue siendo estática para que la primera vista no tenga fallback.
+ */
+const editorLoading = () => (
+  <div className="p-6 text-[13px] text-zinc-400 dark:text-zinc-500">Loading…</div>
+);
+const AdsEditor = dynamic(() => import('./AdsEditor').then((m) => m.AdsEditor), {
+  ssr: false,
+  loading: editorLoading,
+});
+const AiAvatarEditor = dynamic(() => import('./AiAvatarEditor').then((m) => m.AiAvatarEditor), {
+  ssr: false,
+  loading: editorLoading,
+});
+const BillboardEditor = dynamic(() => import('./BillboardEditor').then((m) => m.BillboardEditor), {
+  ssr: false,
+  loading: editorLoading,
+});
+const BrochuresEditor = dynamic(() => import('./BrochuresEditor').then((m) => m.BrochuresEditor), {
+  ssr: false,
+  loading: editorLoading,
+});
+const DealsEditor = dynamic(() => import('./DealsEditor').then((m) => m.DealsEditor), {
+  ssr: false,
+  loading: editorLoading,
+});
+const VersionsEditor = dynamic(
+  () => import('./editor-panel/VersionsEditor').then((m) => m.VersionsEditor),
+  { ssr: false, loading: editorLoading },
+);
+const EventsEditor = dynamic(() => import('./EventsEditor').then((m) => m.EventsEditor), {
+  ssr: false,
+  loading: editorLoading,
+});
+const GuestbookEditor = dynamic(() => import('./GuestbookEditor').then((m) => m.GuestbookEditor), {
+  ssr: false,
+  loading: editorLoading,
+});
+const I18nEditor = dynamic(() => import('./I18nEditor').then((m) => m.I18nEditor), {
+  ssr: false,
+  loading: editorLoading,
+});
+const IntegrationsEditor = dynamic(
+  () => import('./IntegrationsEditor').then((m) => m.IntegrationsEditor),
+  { ssr: false, loading: editorLoading },
+);
+const ItineraryBuilderEditor = dynamic(
+  () => import('./ItineraryBuilderEditor').then((m) => m.ItineraryBuilderEditor),
+  { ssr: false, loading: editorLoading },
+);
+const ListingsEditor = dynamic(() => import('./ListingsEditor').then((m) => m.ListingsEditor), {
+  ssr: false,
+  loading: editorLoading,
+});
+const MapEditor = dynamic(() => import('./MapEditor').then((m) => m.MapEditor), {
+  ssr: false,
+  loading: editorLoading,
+});
+const HomeDashboardEditor = dynamic(
+  () => import('./ModulesEditor').then((m) => m.HomeDashboardEditor),
+  { ssr: false, loading: editorLoading },
+);
+const SystemModulesEditor = dynamic(
+  () => import('./ModulesEditor').then((m) => m.SystemModulesEditor),
+  { ssr: false, loading: editorLoading },
+);
+const PassesEditor = dynamic(() => import('./PassesEditor').then((m) => m.PassesEditor), {
+  ssr: false,
+  loading: editorLoading,
+});
+const PhotoBoothEditor = dynamic(
+  () => import('./PhotoBoothEditor').then((m) => m.PhotoBoothEditor),
+  { ssr: false, loading: editorLoading },
+);
+const SocialWallEditor = dynamic(
+  () => import('./SocialWallEditor').then((m) => m.SocialWallEditor),
+  { ssr: false, loading: editorLoading },
+);
+const SurveyEditor = dynamic(() => import('./SurveyEditor').then((m) => m.SurveyEditor), {
+  ssr: false,
+  loading: editorLoading,
+});
+const TicketsEditor = dynamic(() => import('./TicketsEditor').then((m) => m.TicketsEditor), {
+  ssr: false,
+  loading: editorLoading,
+});
+const TrailsEditor = dynamic(() => import('./TrailsEditor').then((m) => m.TrailsEditor), {
+  ssr: false,
+  loading: editorLoading,
+});
 
 export function EditorPanel({
   sectionKey,

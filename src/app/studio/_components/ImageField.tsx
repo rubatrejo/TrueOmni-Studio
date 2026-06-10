@@ -115,6 +115,7 @@ export function ImageField({
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
+              loading="lazy"
               src={previewSrc}
               alt={label || 'Image'}
               className="absolute inset-0 h-full w-full object-cover"
@@ -216,7 +217,12 @@ export function ImageField({
         >
           {value ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={previewSrc} alt={label} className="block h-full w-full object-contain p-1" />
+            <img
+              loading="lazy"
+              src={previewSrc}
+              alt={label}
+              className="block h-full w-full object-contain p-1"
+            />
           ) : (
             <Upload className="h-3.5 w-3.5 text-zinc-400" />
           )}
@@ -295,7 +301,12 @@ export function ImageField({
         <>
           <div className="studio-img-checker absolute inset-2 grid place-items-center overflow-hidden rounded-md">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={previewSrc} alt={label} className="max-h-[80%] max-w-[80%] object-contain" />
+            <img
+              loading="lazy"
+              src={previewSrc}
+              alt={label}
+              className="max-h-[80%] max-w-[80%] object-contain"
+            />
           </div>
           <button
             type="button"

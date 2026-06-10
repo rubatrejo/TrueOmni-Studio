@@ -93,6 +93,7 @@ export function FloorPointField({
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          loading="lazy"
           src={resolveAssetUrl(imageUrl)}
           alt=""
           className="block w-full select-none"

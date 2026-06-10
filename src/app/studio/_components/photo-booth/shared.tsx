@@ -57,7 +57,12 @@ export function ListReorderItem<T extends IdItem>({
         <div className="grid h-10 w-10 shrink-0 overflow-hidden rounded-md bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
           {previewKind === 'image' && resolvedPreview ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={resolvedPreview} alt="" className="h-full w-full object-cover" />
+            <img
+              loading="lazy"
+              src={resolvedPreview}
+              alt=""
+              className="h-full w-full object-cover"
+            />
           ) : previewKind === 'filter' ? (
             <span
               className="grid h-full w-full place-items-center bg-gradient-to-br from-zinc-300 to-zinc-500 text-[9px] font-bold text-white"
@@ -189,6 +194,7 @@ export function ChromaPreview({ photoBooth }: { photoBooth: PhotoBoothConfig }) 
           {bgUrl && !bgFailed ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
+              loading="lazy"
               src={bgUrl}
               alt=""
               className="absolute inset-0 h-full w-full object-cover"

@@ -89,7 +89,13 @@ export function IconNode({
   if (customIcon) {
     return (
       // eslint-disable-next-line @next/next/no-img-element -- asset dinámico del cliente; next/image no aplica (src arbitrario en runtime)
-      <img src={customIcon} alt="" className={`${className} object-contain`} draggable={false} />
+      <img
+        loading="lazy"
+        src={customIcon}
+        alt=""
+        className={`${className} object-contain`}
+        draggable={false}
+      />
     );
   }
   const LucideComp: LucideIcon =
@@ -141,7 +147,7 @@ export function IconPickerGrid({
           {customIcon ? (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={customIcon} alt="" className="h-4 w-4 object-contain" />
+              <img loading="lazy" src={customIcon} alt="" className="h-4 w-4 object-contain" />
               Custom icon active
             </>
           ) : (

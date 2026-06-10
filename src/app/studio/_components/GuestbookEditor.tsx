@@ -266,7 +266,12 @@ function PinOptionRow({
         <div className="grid h-12 w-12 shrink-0 overflow-hidden rounded-md bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
           {pin.image ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={pin.image} alt="" className="h-full w-full object-contain p-1" />
+            <img
+              loading="lazy"
+              src={pin.image}
+              alt=""
+              className="h-full w-full object-contain p-1"
+            />
           ) : (
             <div className="grid h-full w-full place-items-center text-zinc-400">
               <MapPin className="h-4 w-4" />
@@ -429,7 +434,7 @@ function SeedPinRow({
         <div className="grid h-10 w-10 shrink-0 overflow-hidden rounded-full bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
           {pin.pinImage ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={pin.pinImage} alt="" className="h-full w-full object-cover" />
+            <img loading="lazy" src={pin.pinImage} alt="" className="h-full w-full object-cover" />
           ) : (
             <div className="grid h-full w-full place-items-center text-zinc-400">
               <MapPin className="h-3.5 w-3.5" />

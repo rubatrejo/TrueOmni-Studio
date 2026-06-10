@@ -234,7 +234,7 @@ function DealRow({
         <div className="grid h-12 w-12 shrink-0 overflow-hidden rounded-md bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
           {deal.cover ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={deal.cover} alt="" className="h-full w-full object-cover" />
+            <img loading="lazy" src={deal.cover} alt="" className="h-full w-full object-cover" />
           ) : (
             <div className="grid h-full w-full place-items-center text-zinc-400">
               <Tag className="h-4 w-4" />

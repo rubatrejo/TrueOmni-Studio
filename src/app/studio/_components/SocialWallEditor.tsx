@@ -326,7 +326,7 @@ function HighlightRow({
       <div className="grid h-10 w-10 shrink-0 overflow-hidden rounded-full bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
         {highlight.image ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={highlight.image} alt="" className="h-full w-full object-cover" />
+          <img loading="lazy" src={highlight.image} alt="" className="h-full w-full object-cover" />
         ) : (
           <div className="grid h-full w-full place-items-center text-zinc-400">
             <ImagePlus className="h-3.5 w-3.5" />
@@ -405,7 +405,7 @@ function PostRow({
         <div className="relative grid h-12 w-12 shrink-0 overflow-hidden rounded-md bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
           {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={cover} alt="" className="h-full w-full object-cover" />
+            <img loading="lazy" src={cover} alt="" className="h-full w-full object-cover" />
           ) : (
             <div className="grid h-full w-full place-items-center text-zinc-400">
               <TypeIc className="h-3.5 w-3.5" />

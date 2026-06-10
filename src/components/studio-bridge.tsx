@@ -318,21 +318,25 @@ export function StudioBridge() {
 
     window.addEventListener('message', handler);
 
-    const announceReady = () => {
+    const postToParent = (type: 'studio:ready' | 'studio:heartbeat') => {
       try {
         if (window.parent && window.parent !== window) {
           // F-CORE-2: targetOrigin explícito (mismo origin) en vez de '*'.
-          window.parent.postMessage({ type: 'studio:ready' }, window.location.origin);
+          window.parent.postMessage({ type }, window.location.origin);
         }
       } catch {}
     };
+    // Handshake inicial (+ reintentos para cubrir races de montaje del host):
+    // el host trata `studio:ready` como (re)conexión y re-empuja todos los slots.
+    const announceReady = () => postToParent('studio:ready');
     announceReady();
     const t1 = setTimeout(announceReady, 50);
     const t2 = setTimeout(announceReady, 250);
     const t3 = setTimeout(announceReady, 800);
-    // Heartbeat: re-anunciamos cada 5s para que el host pueda detectar
-    // desconexiones reales del bridge (postMessage roto, iframe paused…).
-    const heartbeat = setInterval(announceReady, 5000);
+    // F-CORE-9: el heartbeat ya NO reusa `studio:ready` (el host lo trataba como
+    // reconexión y reenviaba los 18 slots cada 5s). Emite `studio:heartbeat`,
+    // que el host solo usa para refrescar `lastAckAt` (detección de liveness).
+    const heartbeat = setInterval(() => postToParent('studio:heartbeat'), 5000);
 
     return () => {
       window.removeEventListener('message', handler);

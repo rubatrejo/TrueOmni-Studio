@@ -104,7 +104,14 @@ export function usePwaPreviewBridge() {
       // F-CORE-2: solo aceptamos el handshake del iframe del mismo origin.
       if (event.origin !== window.location.origin) return;
       const data = event.data as { type?: string } | null;
-      if (!data || data.type !== 'studio:ready') return;
+      if (!data) return;
+      // F-CORE-9: el heartbeat (cada 5s) solo refresca el liveness — no
+      // re-empuja el slice completo al iframe.
+      if (data.type === 'studio:heartbeat') {
+        setLastAckAt(Date.now());
+        return;
+      }
+      if (data.type !== 'studio:ready') return;
       setIsReady(true);
       setLastAckAt(Date.now());
       if (lastBrandingRef.current) sendBrandingNow(lastBrandingRef.current);

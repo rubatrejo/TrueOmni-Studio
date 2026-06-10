@@ -625,7 +625,14 @@ export function usePreviewBridge() {
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       const data = event.data as { type?: string } | null;
-      if (!data || data.type !== 'studio:ready') return;
+      if (!data) return;
+      // F-CORE-9: el heartbeat (cada 5s) solo refresca el liveness — NO es una
+      // reconexión, así que no re-empuja los 18 slots al iframe.
+      if (data.type === 'studio:heartbeat') {
+        setLastAckAt(Date.now());
+        return;
+      }
+      if (data.type !== 'studio:ready') return;
       setIsReady(true);
       setLastAckAt(Date.now());
       if (lastBrandingRef.current) sendBrandingNow(lastBrandingRef.current);

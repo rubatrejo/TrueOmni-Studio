@@ -4,6 +4,53 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-10 (mañana) — verificación post corte de luz + F-HUB-7 (cierra la Fase 3 del audit)
+
+> Sesión abierta tras el corte de luz de la madrugada. **No se ha ejecutado `/terminar`** (la
+> sesión sigue abierta por decisión de Rubén). Esta entrada se commitea aparte para blindar la
+> memoria contra otro corte.
+
+**Verificación del corte de luz:** se confirmó (git + MCP de Vercel) que **nada de código se
+perdió** — los 18 commits de la madrugada (05:50→07:36) estaban commiteados, pusheados y con sus 18
+deploys de producción **READY**. El único daño fue la entrada de STATE.md (reconstruida en
+`16fb9ea`).
+
+**Hecho (3 commits, todos pusheados → deploys Vercel READY):**
+
+- **`16fb9ea`** — `docs(planning)`: reconstrucción de STATE.md (madrugada) + DESIGN/PLAN de F-HUB-7
+  (brainstormeado y aprobado por Rubén).
+- **`bd58b96`** — **F-HUB-7 (motor + endpoint + KV)**: nuevo `src/lib/studio/integrations-health.ts`
+  (motor compartido; decide qué checks correr desde la config y los dispara contra
+  `/integrations/check`, self-fetch concurrency 4; cubre los **9 providers** — el smoke solo cubría
+  6). `smoke/route.ts` refactorizado al motor (mismo contrato). `kvKeys.integHealth(slug)` =
+  `integ:<slug>:health` (TTL 90d). Nuevo `integrations/health/[slug]/route.ts` (POST testea working
+  copy con body o config guardada sin body → persiste snapshot; GET lo lee). Helpers en api-client.
+- **`424e704`** — **F-HUB-7 (UI)**: barra "Test all configured" en el editor de Integrations
+  (resultados de los 9 + línea de estado last-tested/ok/failing/source) + badge de salud en la
+  ProductCard de Kiosks del hub (SSR desde KV). Desvío menor documentado (DESIGN §4.1): resultados
+  en barra consolidada en vez de inyectados por-card (menor churn).
+
+**Verificado:** cada commit con `typecheck` + `lint` (0 warnings) + `validate:configs` 3/3 + **40
+tests** verdes. Los 2 deploys de producción quedaron **READY** (`bd58b96`, `424e704`).
+
+**Pendiente / siguiente:**
+
+- **QA de Rubén** (editor exige login GitHub): correr "Test all configured" en un cliente y verificar
+  el badge en `/studio/<slug>`.
+- **Fase 4 del audit** (en curso): hechos F-QA-6 (tests) y F-QA-8/9/10/11 (lint). **Faltan**: F-QA-7
+  (E2E "cliente nuevo"), F-QA-1/F-QA-12 (refactor de monolitos), F-QA-3 (hook roving), F-QA-2
+  (extraer primitivas), **F-PWA-3** (materializar assets data-URI), F-CORE-5/8/9 (perf KV/bridge),
+  F-SIGNAGE-8 (código muerto).
+- Endurecer `PwaConfigSchema` (rechazar campos desconocidos) — diferido a propósito.
+
+**Decisiones:** schema/motor fuera de los monolitos · "Test all" cubre **las 2** fuentes
+(working-copy y saved) escribiendo el mismo snapshot con `source` · badge solo en la card de Kiosks.
+
+**Fase:** audit `STUDIO-AUDIT-2026-06-09` — Fases 1, 2 y **3 ✅ completas** (F-HUB-7 cierra la 3);
+**Fase 4 en curso**.
+
+---
+
 ### Sesión 2026-06-10 (madrugada) — audit del Studio Fase 3b (editores PWA) + arranque de Fase 4 (QA/lint)
 
 > ⚡ **Entrada reconstruida a posteriori.** Se fue la luz a media sesión y no se alcanzó a

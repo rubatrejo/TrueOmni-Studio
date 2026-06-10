@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
+import { useEscapeClose, useFocusTrap } from '@/app/studio/_lib/use-modal-a11y';
 import type { SignageSlide } from '@/lib/signage/schema';
 
 const TEMPLATE_OPTIONS: readonly { id: string; label: string }[] = [
@@ -55,15 +56,10 @@ export function AddSlideModal({ open, defaultTransition, onClose, onConfirm }: A
     }
   }, [open, defaultTransition]);
 
-  // Cerrar con Esc.
-  useEffect(() => {
-    if (!open) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  // F-QA-4: Escape para cerrar + focus-trap (reemplaza el listener manual).
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  useEscapeClose(open, onClose);
+  useFocusTrap(open, dialogRef);
 
   if (!open) return null;
 
@@ -89,6 +85,7 @@ export function AddSlideModal({ open, defaultTransition, onClose, onConfirm }: A
       }}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Add slide"

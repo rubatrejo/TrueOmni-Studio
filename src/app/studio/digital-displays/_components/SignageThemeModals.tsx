@@ -2,8 +2,10 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, Copy, Loader2, Plus, Trash2, X } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+
+import { useEscapeClose, useFocusTrap } from '@/app/studio/_lib/use-modal-a11y';
 
 export const SIGNAGE_SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/;
 const SLUG_REGEX = SIGNAGE_SLUG_REGEX;
@@ -32,6 +34,13 @@ interface BaseModalProps {
 }
 
 export function BaseModal({ open, onClose, title, icon, iconClass, children }: BaseModalProps) {
+  // F-QA-4: a11y compartida para los 6 modales de signage que delegan en este
+  // shell (New/Duplicate/Delete × Display y Theme). Hooks antes del early return
+  // para no romper las reglas de hooks (en SSR el efecto no corre).
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  useEscapeClose(open, onClose);
+  useFocusTrap(open, dialogRef);
+
   if (typeof document === 'undefined') return null;
 
   return createPortal(
@@ -48,6 +57,7 @@ export function BaseModal({ open, onClose, title, icon, iconClass, children }: B
             className="absolute inset-0 bg-zinc-950/70 backdrop-blur-sm"
           />
           <motion.div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             initial={{ opacity: 0, y: 12, scale: 0.97 }}

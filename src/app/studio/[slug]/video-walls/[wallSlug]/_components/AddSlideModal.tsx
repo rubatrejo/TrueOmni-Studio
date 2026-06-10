@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { useEscapeClose, useFocusTrap } from '@/app/studio/_lib/use-modal-a11y';
 import { getTemplatesForGrid } from '@/components/video-walls/templates/registry';
 import '@/components/video-walls/templates/load-templates';
 import { defaultModuleFor } from '@/lib/signage/template-catalog';
@@ -65,15 +66,10 @@ export function AddSlideModal({
     }
   }, [open, defaultTransition, defaultDurationMs, templates]);
 
-  // Cerrar con Esc.
-  useEffect(() => {
-    if (!open) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  // F-QA-4: Escape para cerrar + focus-trap (reemplaza el listener manual).
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  useEscapeClose(open, onClose);
+  useFocusTrap(open, dialogRef);
 
   if (!open) return null;
 
@@ -105,6 +101,7 @@ export function AddSlideModal({
       }}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Add slide"

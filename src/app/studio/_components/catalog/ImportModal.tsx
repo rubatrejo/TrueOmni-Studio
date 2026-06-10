@@ -22,6 +22,7 @@ import {
   type ImportResult,
   type ImportStats,
 } from '@/app/studio/_lib/import-helpers';
+import { useEscapeClose, useFocusTrap } from '@/app/studio/_lib/use-modal-a11y';
 
 interface ImportModalProps<K extends ImportKind> {
   open: boolean;
@@ -54,8 +55,14 @@ export function ImportModal<K extends ImportKind>({
   const [dragActive, setDragActive] = useState(false);
   const [showAllErrors, setShowAllErrors] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
 
   const labels = KIND_LABELS[kind];
+
+  // F-QA-4: Escape para cerrar + atrapar el foco dentro del modal (reemplaza el
+  // listener de Escape manual que vivía aquí).
+  useEscapeClose(open, onClose);
+  useFocusTrap(open, dialogRef);
 
   useEffect(() => {
     if (!open) {
@@ -66,15 +73,6 @@ export function ImportModal<K extends ImportKind>({
       setShowAllErrors(false);
     }
   }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
 
   const result: ImportResult<K> | null = useMemo(() => {
     if (!text) return null;
@@ -135,6 +133,7 @@ export function ImportModal<K extends ImportKind>({
           />
           <motion.div
             key="modal"
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="import-modal-title"

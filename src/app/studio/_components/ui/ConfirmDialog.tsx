@@ -1,5 +1,7 @@
 'use client';
 
+import { useEscapeClose } from '@/app/studio/_lib/use-modal-a11y';
+
 /**
  * Diálogo de confirmación inline (no modal flotante) — primitiva compartida del
  * Studio. Promovida desde el `DeleteConfirm` inline de ModulesEditor (F-QA-2 del
@@ -7,6 +9,10 @@
  *
  * Genérico: el caller arma `title`/`description` y los labels. `tone='danger'`
  * (default) usa el estilo rojo de borrado; `tone='neutral'` el gris zinc.
+ *
+ * F-QA-4: Escape cancela (mejora a11y de un diálogo de confirmación que suele
+ * ser destructivo). NO se atrapa el foco: es inline, no un overlay, así que un
+ * focus-trap bloquearía tabular al resto de la página.
  */
 export function ConfirmDialog({
   id = 'studio-confirm-dialog',
@@ -27,6 +33,7 @@ export function ConfirmDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  useEscapeClose(true, onCancel);
   const isDanger = tone === 'danger';
   return (
     <div

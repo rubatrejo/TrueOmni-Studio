@@ -4,6 +4,26 @@ import type { PwaConnectWithUsConfig } from '@/lib/config';
 
 import { PwaField, PwaGroup, PwaPanelHeader } from './pwa-ui';
 
+// ---------- Helpers de validación de URL ----------
+
+/** Devuelve un aviso si el valor no parsea como URL válida; null si es válido o vacío. */
+function urlHint(value: string): string | null {
+  if (!value.trim()) return null;
+  try {
+    // eslint-disable-next-line no-new
+    new URL(value);
+    return null;
+  } catch {
+    return 'Looks invalid — include https://';
+  }
+}
+
+/** Muestra el aviso de validación bajo un campo de URL. No renderiza nada si no hay aviso. */
+function FieldHint({ hint }: { hint: string | null }) {
+  if (!hint) return null;
+  return <p className="mt-1 text-[11px] text-amber-600 dark:text-amber-400">{hint}</p>;
+}
+
 /**
  * Editor de la pantalla "Connect With Us" de la PWA (`ConnectWithUsScreen`). Edita
  * los textos white-label y los datos de contacto (redes, teléfono, web, dirección,
@@ -90,11 +110,14 @@ export function ConnectWithUsEditor({
             value={v.phone ?? ''}
             onChange={(phone) => onChange({ ...v, phone })}
           />
-          <PwaField
-            label="Website URL"
-            value={v.website ?? ''}
-            onChange={(website) => onChange({ ...v, website })}
-          />
+          <div>
+            <PwaField
+              label="Website URL"
+              value={v.website ?? ''}
+              onChange={(website) => onChange({ ...v, website })}
+            />
+            <FieldHint hint={urlHint(v.website ?? '')} />
+          </div>
           <PwaField
             label="Call action"
             value={actions.call}
@@ -113,22 +136,38 @@ export function ConnectWithUsEditor({
         </PwaGroup>
 
         <PwaGroup title="Social URLs">
-          <PwaField label="X (Twitter)" value={social.x ?? ''} onChange={(x) => setSocial({ x })} />
-          <PwaField
-            label="Facebook"
-            value={social.facebook ?? ''}
-            onChange={(facebook) => setSocial({ facebook })}
-          />
-          <PwaField
-            label="Instagram"
-            value={social.instagram ?? ''}
-            onChange={(instagram) => setSocial({ instagram })}
-          />
-          <PwaField
-            label="Pinterest"
-            value={social.pinterest ?? ''}
-            onChange={(pinterest) => setSocial({ pinterest })}
-          />
+          <div>
+            <PwaField
+              label="X (Twitter)"
+              value={social.x ?? ''}
+              onChange={(x) => setSocial({ x })}
+            />
+            <FieldHint hint={urlHint(social.x ?? '')} />
+          </div>
+          <div>
+            <PwaField
+              label="Facebook"
+              value={social.facebook ?? ''}
+              onChange={(facebook) => setSocial({ facebook })}
+            />
+            <FieldHint hint={urlHint(social.facebook ?? '')} />
+          </div>
+          <div>
+            <PwaField
+              label="Instagram"
+              value={social.instagram ?? ''}
+              onChange={(instagram) => setSocial({ instagram })}
+            />
+            <FieldHint hint={urlHint(social.instagram ?? '')} />
+          </div>
+          <div>
+            <PwaField
+              label="Pinterest"
+              value={social.pinterest ?? ''}
+              onChange={(pinterest) => setSocial({ pinterest })}
+            />
+            <FieldHint hint={urlHint(social.pinterest ?? '')} />
+          </div>
         </PwaGroup>
 
         <PwaGroup title="Hours">

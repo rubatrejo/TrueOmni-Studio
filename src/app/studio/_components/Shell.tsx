@@ -486,52 +486,58 @@ export function Shell({
   // Se calcula sobre el snapshot completo del editor — no perfecto (el
   // serializer del API puede pesar distinto) pero da la señal correcta para
   // que el operador no se sorprenda con un 413 después de 2h editando.
+  // F-KIOSK-6: debounce 400ms para evitar serializar el config completo en
+  // cada keystroke — el estado mantiene el valor previo mientras espera.
   const KV_SIZE_CAP_BYTES = 950 * 1024;
-  const payloadSizeBytes = useMemo(
-    () =>
-      JSON.stringify({
-        branding,
-        modules,
-        billboard,
-        aiAvatar,
-        survey,
-        deals,
-        photoBooth,
-        brochures,
-        socialWall,
-        guestbook,
-        listings,
-        events,
-        tickets,
-        passes,
-        trails,
-        map,
-        itineraryBuilder: itinerary,
-        ads,
-        integrations,
-      }).length,
-    [
-      branding,
-      modules,
-      billboard,
-      aiAvatar,
-      survey,
-      deals,
-      photoBooth,
-      brochures,
-      socialWall,
-      guestbook,
-      listings,
-      events,
-      tickets,
-      passes,
-      trails,
-      map,
-      itinerary,
-      ads,
-      integrations,
-    ],
-  );
+  const [payloadSizeBytes, setPayloadSizeBytes] = useState(0);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPayloadSizeBytes(
+        JSON.stringify({
+          branding,
+          modules,
+          billboard,
+          aiAvatar,
+          survey,
+          deals,
+          photoBooth,
+          brochures,
+          socialWall,
+          guestbook,
+          listings,
+          events,
+          tickets,
+          passes,
+          trails,
+          map,
+          itineraryBuilder: itinerary,
+          ads,
+          integrations,
+        }).length,
+      );
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [
+    branding,
+    modules,
+    billboard,
+    aiAvatar,
+    survey,
+    deals,
+    photoBooth,
+    brochures,
+    socialWall,
+    guestbook,
+    listings,
+    events,
+    tickets,
+    passes,
+    trails,
+    map,
+    itinerary,
+    ads,
+    integrations,
+  ]);
   const payloadPct = Math.min(999, Math.round((payloadSizeBytes / KV_SIZE_CAP_BYTES) * 100));
   const payloadOverCap = payloadSizeBytes > KV_SIZE_CAP_BYTES;
 

@@ -22,10 +22,10 @@ pasos.
 
 ## Specs disponibles
 
-| Spec                           | Cubre                                                                                                               |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| `studio-create-client.json`    | Crear cliente + activar DD + cambiar brand colors. Hallazgos S-09, S-10, S-11 del audit panorámico v2 (2026-05-08). |
-| `video-walls-create-wall.json` | Smoke del producto Video Walls: dashboard → crear wall → editor → runtime full canvas + crops por celda (VW10).     |
+| Spec                           | Cubre                                                                                                                                                                                               |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `studio-create-client.json`    | Flujo "cliente nuevo" completo (F-QA-7): create → bootstrap/clone → rewriteContent + geocoding → assert nombre del cliente + **ausencia de Arizona/Phoenix** en el preview. Corre en dev sin login. |
+| `video-walls-create-wall.json` | Smoke del producto Video Walls: dashboard → crear wall → editor → runtime full canvas + crops por celda (VW10).                                                                                     |
 
 ## Cómo añadir uno nuevo
 

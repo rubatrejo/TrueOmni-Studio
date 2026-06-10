@@ -1,19 +1,55 @@
 [
+  ["#", "F-QA-7 (audit STUDIO-AUDIT-2026-06-09) — E2E del flujo 'cliente nuevo' COMPLETO."],
+  ["#", "Valida: create → bootstrap (clone) → rewriteContent/geocoding → preview limpio."],
+  ["#", "Corre contra dev (localhost:3000): el middleware NO bloquea mutaciones en dev,"],
+  ["#", "así que no requiere login GitHub. Prerequisito: el slug 'e2e-qa-client' NO debe"],
+  ["#", "existir (bórralo del Studio si una corrida previa lo dejó). Levantar: pnpm kiosk:dev."],
+  ["#", "Ejecutar: agent-browser batch --bail < tests/e2e/studio-create-client.json"],
+
   ["set", "viewport", "1440", "900"],
   ["open", "http://localhost:3000/studio"],
   ["wait", "--load", "networkidle"],
   ["screenshot", ".planning/verifications/e2e-studio-01-dashboard.png"],
+
   ["find", "role", "button", "click", "--name", "Create a new client"],
   ["wait", "--text", "New client"],
-  ["screenshot", ".planning/verifications/e2e-studio-02-modal.png"],
-  ["find", "label", "Name", "fill", "E2E Test Client"],
-  ["find", "label", "Also activate Digital Displays", "click"],
-  ["find", "role", "button", "click", "--name", "Create"],
-  ["wait", "--url", "**/studio/**"],
-  ["screenshot", ".planning/verifications/e2e-studio-03-redirect.png"],
-  ["find", "role", "tab", "click", "--name", "Brand colors"],
+  ["#", "Nombre + location DELIBERADAMENTE no-Arizona para verificar el rewrite del template."],
+  ["find", "label", "Name", "fill", "E2E QA Client"],
+  ["find", "label", "Slug", "fill", "e2e-qa-client"],
+  ["find", "label", "Location", "fill", "Asheville, NC"],
+  ["screenshot", ".planning/verifications/e2e-studio-02-modal-filled.png"],
+  ["#", "Productos: todos activos por default (Kiosk incluido) — no hace falta tocarlos."],
+  ["find", "role", "button", "click", "--name", "Create client"],
+
+  ["#", "El POST clona desde el template + reescribe direcciones/contenido + geocodifica"],
+  ["#", "(Nominatim, externo) → timeout generoso hasta el redirect al hub del cliente."],
+  ["wait", "--url", "**/studio/e2e-qa-client**", "--timeout", "60000"],
   ["wait", "--load", "networkidle"],
-  ["screenshot", ".planning/verifications/e2e-studio-04-branding.png"],
-  ["wait", "--text", "Pending changes"],
-  ["screenshot", ".planning/verifications/e2e-studio-05-pending.png"]
+  ["screenshot", ".planning/verifications/e2e-studio-03-client-hub.png"],
+  ["#", "ASSERT 1 — el nombre del cliente aparece en el chrome del hub (breadcrumb/título)."],
+  ["wait", "--text", "E2E QA Client"],
+
+  ["#", "Abrir el editor del kiosk (trae el iframe de preview live, same-origin en dev)."],
+  ["open", "http://localhost:3000/studio/e2e-qa-client/kiosk"],
+  ["wait", "--load", "networkidle"],
+  ["#", "Esperar a que el iframe del preview cargue contenido sustancial."],
+  [
+    "wait",
+    "--fn",
+    "(()=>{const f=document.querySelector('iframe');const t=(f&&f.contentDocument&&f.contentDocument.body)?f.contentDocument.body.innerText:'';return t.length>200;})()",
+    "--timeout",
+    "30000"
+  ],
+  ["screenshot", ".planning/verifications/e2e-studio-04-kiosk-preview.png"],
+
+  ["#", "ASSERT 2 — el preview NO contiene strings del template Arizona/Phoenix (white-label)."],
+  ["#", "Confirma que rewriteContent + geocoding purgaron el contenido del template."],
+  [
+    "wait",
+    "--fn",
+    "(()=>{const f=document.querySelector('iframe');const t=(f&&f.contentDocument&&f.contentDocument.body)?f.contentDocument.body.innerText:'';return t.length>200 && !/Arizona|Phoenix|Mesa|Glendale|Scottsdale|Tempe/i.test(t);})()",
+    "--timeout",
+    "30000"
+  ],
+  ["screenshot", ".planning/verifications/e2e-studio-05-preview-clean.png"]
 ]

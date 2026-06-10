@@ -25,11 +25,17 @@ export type BrandVideoSource =
  *   - Cualquier otra fuente con `src` no vacío → `{ kind: 'video', src }`.
  *   - Sin `src` → `null` (el slot conserva su placeholder/negro original).
  */
-export function resolveBrandVideoSource(bv: BrandVideoConfig | undefined | null): BrandVideoSource {
+export function resolveBrandVideoSource(
+  bv: BrandVideoConfig | undefined | null,
+  audioEnabled: boolean = false,
+): BrandVideoSource {
   const src = bv?.src?.trim();
   if (!src) return null;
   if (bv?.kind === 'youtube' || isYouTubeUrl(src)) {
-    const embedUrl = buildYouTubeEmbedUrl(src);
+    // F-SIGNAGE-5: propaga el toggle de audio al embed de YouTube (antes el
+    // iframe quedaba siempre muteado, ignorando el toggle). El default sin
+    // `audioEnabled` mantiene muteado a los callers que no lo pasan (Video Wall).
+    const embedUrl = buildYouTubeEmbedUrl(src, !audioEnabled);
     return embedUrl ? { kind: 'youtube', embedUrl } : null;
   }
   return { kind: 'video', src };

@@ -52,12 +52,18 @@ export function useDebouncedAutosave(
   delayMs: number = 1000,
 ) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // F-SIGNAGE-7: el efecto solo depende de [trigger, dirty], así que sin este
+  // ref el setTimeout cerraría sobre la PRIMERA versión de `onSave` (closure
+  // stale) y podría persistir un draft viejo. El ref se actualiza cada render
+  // para que al disparar el debounce se llame siempre la última `onSave`.
+  const onSaveRef = useRef(onSave);
+  onSaveRef.current = onSave;
   useEffect(() => {
     if (!dirty) return;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
       timerRef.current = null;
-      onSave();
+      onSaveRef.current();
     }, delayMs);
     return () => {
       if (timerRef.current) {

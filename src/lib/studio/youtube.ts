@@ -41,14 +41,17 @@ export function isYouTubeUrl(url: string): boolean {
  * URL embed para `<iframe>` con params loop + autoplay + muted + sin chrome.
  * `loop=1` solo funciona si también pasamos `playlist=<id>` (workaround
  * documentado de la IFrame API). `mute=1` es requisito de los browsers
- * modernos para autoplay sin gesto del usuario.
+ * modernos para autoplay sin gesto del usuario, así que `muted` default true;
+ * el caller lo pone en false cuando el operador activó el audio explícitamente
+ * (F-SIGNAGE-5) — en pantallas de signage dedicadas el autoplay con sonido sí
+ * está permitido.
  */
-export function buildYouTubeEmbedUrl(idOrUrl: string): string | null {
+export function buildYouTubeEmbedUrl(idOrUrl: string, muted: boolean = true): string | null {
   const id = idOrUrl.length === 11 ? idOrUrl : extractYouTubeId(idOrUrl);
   if (!id) return null;
   const params = new URLSearchParams({
     autoplay: '1',
-    mute: '1',
+    mute: muted ? '1' : '0',
     loop: '1',
     playlist: id,
     controls: '0',

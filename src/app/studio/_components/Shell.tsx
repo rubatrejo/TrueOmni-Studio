@@ -375,9 +375,12 @@ export function Shell({
     const sys = modules.systemModules ?? DEFAULT_SYSTEM_MODULES;
     const section = STUDIO_SECTIONS.find((s) => s.key === activeTab);
     if (section?.systemModuleKey && !sys[section.systemModuleKey]) {
+      // F-KIOSK-11: avisar del salto para que el operador no crea que perdió
+      // su sección (antes saltaba en silencio).
+      toast.show(`${section.label} is now off — switched to Modules`, { variant: 'info' });
       setActiveTab('modules');
     }
-  }, [modules.systemModules, activeTab]);
+  }, [modules.systemModules, activeTab, toast]);
 
   const brandingDirty = useMemo(
     () => !shallowEqualBranding(branding, savedBranding),

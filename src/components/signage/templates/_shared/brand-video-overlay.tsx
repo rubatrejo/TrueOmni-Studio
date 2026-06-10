@@ -31,7 +31,7 @@ export function SignageBrandVideoOverlay({
   height: number;
   audioEnabled?: boolean;
 }) {
-  const resolved = resolveBrandVideoSource(brandVideo);
+  const resolved = resolveBrandVideoSource(brandVideo, audioEnabled);
   if (!resolved) return null;
 
   return (

@@ -4290,6 +4290,59 @@ Planner aprobado).
 
 ---
 
+### Sesión 2026-06-09 (2) — Remediación del audit del Studio: Fases 1, 2 y 3 (8 commits a prod)
+
+**Hecho (8 commits, todos pusheados → deploys Vercel READY):**
+
+- **Fase 1 (seguridad/previews/footgun):** `1194cef` confirm antes de Discard ALL + no perder
+  renames i18n en race (F-KIOSK-1/2/4). `c97b930` previews que mienten: idioma PWA resuelto,
+  Welcome congela por sección activa, signage reanuda tras click (F-PWA-1/2, F-SIGNAGE-4).
+  `e38e2d1` endurece auth/bridge: fail-open mutaciones→503 (solo prod), origin en postMessage,
+  approval gate cierra al super-admin (F-CORE-1/2/3/10, F-SIGNAGE-6).
+- **Fase 2 (crítico + redes):** `2fa3b39` **CRÍTICO** — los Video Walls ahora ROTAN la playlist
+  por índice determinista por reloj (`src/lib/video-walls/rotation.ts`); paneles sincronizados +
+  dayparting (F-SIGNAGE-1/2/3). `3d46f9d` snapshots PWA (save reversible) + undo en deletes de
+  catálogo (F-CORE-7, F-KIOSK-9). `5e76e17` validaciones: website, ID de ad único, badge versión
+  PWA reactivo (F-HUB-4/5, F-PWA-4).
+- **Fase 3 (onboarding + observabilidad):** `269ffb4` starters por vertical (selector de cards) +
+  paleta-desde-logo + location internacional (F-HUB-1/2/8); `PRESET_PALETTES` → `_lib/preset-palettes.ts`.
+  `7becb77` locales i18n PWA desde `languages.available` + aviso de sync de branding (F-PWA-7,
+  F-CORE-6).
+
+**Verificado:**
+
+- typecheck + lint (0 errores nuevos) + validate:configs 3/3 en cada commit; 8 deploys Vercel READY.
+- QA agent-browser del runtime público (sin auth): Video Walls `default/lobby-3x2` ROTA (3 slides
+  distintos), celdas `0,0`/`0,1` sincronizadas, `?slide=N` congela, sin errores de hidratación;
+  runtime PWA sin regresión; el guard de origin del bridge NO rompe el preview (branding same-origin
+  aplica en vivo). Screenshots en `.planning/verifications/{vw-rotation,pwa-smoke,bridge-qa}-*`.
+
+**Pendiente / siguiente:**
+
+- **Fase 3b** (diferida): F-PWA-5 (editores PWA add/remove + coords/geofence + mini-mapa Mapbox) y
+  F-PWA-6 (schema Zod del slice PWA) — los más pesados de la Fase 3.
+- **Fase 4**: tests (Vitest sobre `schema.ts` + bootstrap; E2E cliente nuevo F-QA-7), refactor de
+  monolitos oportunista (F-QA-1/12), limpieza de los 62 warnings de lint (F-QA-8/9/10).
+- **QA visual en prod por Rubén** (el editor pide auth GitHub, agent-browser no entra): selector de
+  starters + cards, botón paleta-desde-logo, toasts de undo/sync-warning, i18n PWA por idiomas reales.
+
+**Decisiones:**
+
+- Entrega en commits temáticos con push incremental por grupo (cada uno verificado + deploy READY)
+  en vez de un mega-commit — menor blast radius, fácil de revertir.
+- Video Walls: índice determinista por reloj (`slideIndexAtTime(epoch)`) con corte seco, no timer
+  incremental — sincroniza paneles sin coordinación. Transiciones animadas diferidas.
+- F-CORE-1: el 503 de fail-open solo aplica en `NODE_ENV==='production'` (el dev local sin OAuth
+  debe poder usar el editor; el equipo a veces lo corre sin AUTH vars para QA).
+- F-PWA-9 quedó **obsoleto**: re-validar reveló que la migración a `usePwaSection` ya está completa
+  (26/29 secciones previsualizan); un badge sería ruido.
+- F-PWA-5/6 diferidos a Fase 3b por su tamaño (acuerdo con Rubén).
+
+**Fase:** Remediación del audit del Studio (`STUDIO-AUDIT-2026-06-09`): Fase 1 ✅, Fase 2 ✅,
+Fase 3 ✅ (parcial: falta 3b F-PWA-5/6); pendiente Fase 4.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

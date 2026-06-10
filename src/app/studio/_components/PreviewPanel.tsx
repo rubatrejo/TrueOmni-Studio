@@ -64,6 +64,11 @@ export function PreviewPanel({
   );
   const [fullScreen, setFullScreen] = useState(false);
   const [locale, setLocale] = useState<string>('en');
+  // F-PWA-8: el iframe arranca con KIOSK_CLIENT=default (lo que sirve el build
+  // del Studio) y el bridge empuja la marca real ~120-250ms tras el handshake.
+  // Para no mostrar el flash de la marca default, mantenemos el iframe atenuado
+  // hasta poco después del `onLoad` y hacemos fade-in con la marca ya aplicada.
+  const [previewReady, setPreviewReady] = useState(false);
 
   // Hallazgo S-35: al desmontar el editor (navegación a /studio o a otro
   // producto), el iframe queda vivo en memoria del browser hasta que
@@ -140,6 +145,19 @@ export function PreviewPanel({
   // pueda detectar mobile-pwa y renderizar a 390×844 en lugar de 1080×1920.
   const previewSrc =
     product === 'pwa' ? '/pwa' : orientation === 'mobile-pwa' ? '/?viewport=mobile-pwa' : '/';
+
+  // F-PWA-8: al remontar el iframe (reload / cambio de orientación / cliente)
+  // volvemos a ocultarlo hasta el próximo `onLoad` + breve margen.
+  useEffect(() => {
+    setPreviewReady(false);
+  }, [slug, orientation, reloadKey]);
+
+  const handleIframeLoad = () => {
+    onIframeLoad?.();
+    // El handshake del bridge + el push debounced (120ms) aplican la marca real
+    // en este margen; tras él hacemos fade-in para que no se vea el `default`.
+    window.setTimeout(() => setPreviewReady(true), 320);
+  };
 
   return (
     <div className="flex h-full w-full flex-col">
@@ -269,21 +287,32 @@ export function PreviewPanel({
               orientation={orientation}
             />
           ) : (
-            <iframe
-              ref={iframeRef}
-              key={`${slug}-${orientation}-${reloadKey}`}
-              src={previewSrc}
-              title={`${nombre} live preview`}
-              className="absolute left-0 top-0 block border-0"
-              style={{
-                width: w,
-                height: h,
-                transform: `scale(${scale})`,
-                transformOrigin: '0 0',
-              }}
-              loading="eager"
-              onLoad={onIframeLoad}
-            />
+            <>
+              {/* F-PWA-8: fondo neutro mientras el iframe está atenuado, para no
+                  ver ni el flash de la marca default ni un blanco crudo. */}
+              <div
+                aria-hidden="true"
+                className={`absolute inset-0 bg-zinc-100 transition-opacity duration-200 dark:bg-zinc-900 ${
+                  previewReady ? 'pointer-events-none opacity-0' : 'opacity-100'
+                }`}
+              />
+              <iframe
+                ref={iframeRef}
+                key={`${slug}-${orientation}-${reloadKey}`}
+                src={previewSrc}
+                title={`${nombre} live preview`}
+                className="absolute left-0 top-0 block border-0 transition-opacity duration-200"
+                style={{
+                  width: w,
+                  height: h,
+                  transform: `scale(${scale})`,
+                  transformOrigin: '0 0',
+                  opacity: previewReady ? 1 : 0,
+                }}
+                loading="eager"
+                onLoad={handleIframeLoad}
+              />
+            </>
           )}
         </div>
       </div>

@@ -637,6 +637,7 @@ export function Shell({
       });
       setSaveState('error');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- initialMeta?.lastEditor y toast son estables (prop inmutable y ref de contexto); incluirlos recrearía handleSave en cada render sin beneficio real
   }, [
     branding,
     modules,
@@ -757,6 +758,7 @@ export function Shell({
     setI18nBundle(savedI18nBundle);
     setSaveState('idle');
     setPreviewKey((k) => k + 1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setModules (wrapper de setModulesRaw con cascade de i18n/typed modules) es estable (useCallback sin deps), no necesita declararse como dep
   }, [
     savedBranding,
     savedModules,

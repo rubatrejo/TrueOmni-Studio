@@ -94,6 +94,7 @@ export function DirectionsMapWithRoute({
       map.remove();
       mapRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- se usan los campos primitivos (.lat/.lng) de origin y destination para evitar re-init del mapa por nueva referencia de objeto con las mismas coordenadas
   }, [token, origin?.lat, origin?.lng, destination.lat, destination.lng]);
 
   // Pinta/actualiza la polyline cuando cambia `geometry`.

@@ -79,6 +79,7 @@ export function AiResultScreen(props: AiResultScreenProps) {
   });
 
   const [activeTab, setActiveTab] = useState(() => tabs[hasEvents ? 1 : 0]?.key ?? '');
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- activeEntries usa `?? []` que crea nueva referencia cada render cuando el tab no existe; en la práctica el tab siempre existe (se inicializa desde tabs[0]), así que el carouselItems no se recalcula innecesariamente
   const activeEntries = tabs.find((t) => t.key === activeTab)?.entries ?? [];
 
   const carouselItems = useMemo(

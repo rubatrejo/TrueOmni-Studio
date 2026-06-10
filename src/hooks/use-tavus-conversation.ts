@@ -376,6 +376,7 @@ export function useTavusConversation({
         clearTimeout(captionTimerRef.current);
         captionTimerRef.current = null;
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- avatarVideoRef.current en cleanup es intencional: queremos limpiar el srcObject del elemento de video actual al desmontar; la referencia sigue siendo válida porque el DOM persiste hasta que el modal cierra
       if (avatarVideoRef.current) avatarVideoRef.current.srcObject = null;
       if (call) {
         call.leave().catch(() => {});
@@ -385,7 +386,7 @@ export function useTavusConversation({
         fetch(`/api/ai-avatar/end/${encodeURIComponent(id)}`, { method: 'POST' }).catch(() => {});
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- clientName se omite intencionalmente: el efecto no debe re-ejecutarse cuando cambia el nombre mid-conversación; la limpieza de avatarVideoRef.current en cleanup es segura porque el ref apunta al mismo elemento DOM durante toda la vida del efecto
   }, [isOpen]);
 
   useEffect(() => {

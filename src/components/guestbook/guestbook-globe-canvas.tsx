@@ -119,6 +119,7 @@ export const GuestbookGlobeCanvas = forwardRef<
       map.remove();
       mapRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- se usan los campos primitivos (.lat/.lng/.zoom) de earthStart para evitar re-init del globo por nueva referencia del objeto con los mismos valores
   }, [token, earthStart?.center.lat, earthStart?.center.lng, earthStart?.zoom]);
 
   // Renderea los overlayPins como markers que giran con el globo.

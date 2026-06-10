@@ -417,6 +417,7 @@ export function ItineraryBuilderModule(props: ItineraryBuilderModuleProps) {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- textos.itinerary_ai_* son strings de i18n que no cambian durante la sesión de generación; incluirlos recrearía el efecto mientras el AI genera sin sentido real
   }, [
     phase,
     aiAnswers,

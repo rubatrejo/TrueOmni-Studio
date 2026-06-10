@@ -96,6 +96,7 @@ export function DirectionsModal({
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- se usan los campos primitivos (.lat/.lng) en lugar de los objetos completos (clientCoords, listing.coords) para evitar re-fetch por nueva referencia de objeto con las mismas coordenadas
   }, [
     open,
     mode,

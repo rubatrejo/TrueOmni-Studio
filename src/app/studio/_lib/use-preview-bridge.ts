@@ -188,6 +188,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- recordPostSuccess/recordPostFailure son callbacks estables ([] deps); iframeRef es un ref inmutable; se lee vía .current en cada invocación
   }, []);
 
   const sendModulesNow = useCallback((modules: ModulesConfig) => {
@@ -199,6 +200,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón que sendBrandingNow: recordPost* son estables, iframeRef se lee vía .current
   }, []);
 
   const sendBillboardNow = useCallback((billboard: BillboardConfig) => {
@@ -210,6 +212,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current
   }, []);
 
   const openBillboardPreview = useCallback(() => {
@@ -221,6 +224,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- comando fire-and-forget al iframe; recordPost* son callbacks estables sin deps propias
   }, []);
 
   const openHomeDashboardPreview = useCallback(() => {
@@ -232,6 +236,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- comando fire-and-forget al iframe; recordPost* son callbacks estables sin deps propias
   }, []);
 
   const openAiAvatarPreview = useCallback(() => {
@@ -243,6 +248,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- comando fire-and-forget al iframe; recordPost* son callbacks estables sin deps propias
   }, []);
 
   const sendAiNow = useCallback((aiAvatar: AiAvatarConfig) => {
@@ -262,6 +268,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current
   }, []);
 
   const sendSurveyNow = useCallback((survey: SurveyConfig) => {
@@ -273,6 +280,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current
   }, []);
 
   /**
@@ -288,6 +296,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- comando fire-and-forget al iframe; recordPost* son callbacks estables sin deps propias
   }, []);
 
   const sendDealsNow = useCallback((deals: DealsModuleConfig) => {
@@ -299,6 +308,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current
   }, []);
 
   /**
@@ -314,6 +324,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- comando fire-and-forget al iframe; recordPost* son callbacks estables sin deps propias
   }, []);
 
   const sendPhotoBoothNow = useCallback((photoBooth: PhotoBoothConfig) => {
@@ -325,6 +336,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current
   }, []);
 
   const openPhotoBoothPreview = useCallback(() => {
@@ -336,6 +348,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- comando fire-and-forget al iframe; recordPost* son callbacks estables sin deps propias
   }, []);
 
   const sendBrochuresNow = useCallback((brochures: BrochuresModuleConfig) => {
@@ -347,6 +360,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current
   }, []);
 
   const openBrochuresPreview = useCallback(() => {
@@ -358,6 +372,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- comando fire-and-forget al iframe; recordPost* son callbacks estables sin deps propias
   }, []);
 
   const sendSocialWallNow = useCallback((socialWall: SocialWallConfig) => {
@@ -369,6 +384,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current
   }, []);
 
   const openSocialWallPreview = useCallback(() => {
@@ -380,6 +396,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- comando fire-and-forget al iframe; recordPost* son callbacks estables sin deps propias
   }, []);
 
   const sendGuestbookNow = useCallback((guestbook: GuestbookConfig) => {
@@ -391,6 +408,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current
   }, []);
 
   const openGuestbookPreview = useCallback(() => {
@@ -402,6 +420,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- comando fire-and-forget al iframe; recordPost* son callbacks estables sin deps propias
   }, []);
 
   const sendListingsNow = useCallback((listings: ListingsModule) => {
@@ -413,6 +432,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current
   }, []);
 
   const sendEventsNow = useCallback((events: EventsModule) => {
@@ -424,6 +444,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current
   }, []);
 
   const openEventsPreview = useCallback(() => {
@@ -435,6 +456,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- comando fire-and-forget al iframe; recordPost* son callbacks estables sin deps propias
   }, []);
 
   const sendTicketsNow = useCallback((tickets: TicketsModule) => {
@@ -446,6 +468,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current
   }, []);
 
   const openTicketsPreview = useCallback(() => {
@@ -457,6 +480,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- comando fire-and-forget al iframe; recordPost* son callbacks estables sin deps propias
   }, []);
 
   const sendPassesNow = useCallback((passes: PassesModule) => {
@@ -468,6 +492,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current
   }, []);
 
   const openPassesPreview = useCallback(() => {
@@ -479,6 +504,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- comando fire-and-forget al iframe; recordPost* son callbacks estables sin deps propias
   }, []);
 
   const sendTrailsNow = useCallback((trails: TrailsModule) => {
@@ -490,6 +516,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current
   }, []);
 
   const openTrailsPreview = useCallback(() => {
@@ -501,6 +528,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- comando fire-and-forget al iframe; recordPost* son callbacks estables sin deps propias
   }, []);
 
   const sendItineraryNow = useCallback((itineraryBuilder: ItineraryBuilderConfig) => {
@@ -512,6 +540,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current
   }, []);
 
   const openItineraryPreview = useCallback(() => {
@@ -523,6 +552,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- comando fire-and-forget al iframe; recordPost* son callbacks estables sin deps propias
   }, []);
 
   const sendAdsNow = useCallback((ads: AdsModule) => {
@@ -534,6 +564,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current
   }, []);
 
   const sendMapNow = useCallback((map: MapConfig) => {
@@ -545,6 +576,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current
   }, []);
 
   /** Push del IntegrationsConfig al iframe. Hallazgo #14 del audit — antes
@@ -574,6 +606,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current; los campos sensibles (apiKeys) se filtran dentro del callback sin necesidad de re-crear al cambiar integrations externas
   }, []);
 
   const openMapPreview = useCallback(() => {
@@ -585,6 +618,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- comando fire-and-forget al iframe; recordPost* son callbacks estables sin deps propias
   }, []);
 
   // Listener del handshake studio:ready desde el iframe.
@@ -837,7 +871,7 @@ export function usePreviewBridge() {
     } catch (e) {
       recordPostFailure(e);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón bridge: recordPost* estables, iframeRef vía .current; locale no se lee como dep porque se pasa como argumento directo
   }, []);
 
   // Cuando el iframe re-monta, resetea ready para forzar un nuevo handshake.

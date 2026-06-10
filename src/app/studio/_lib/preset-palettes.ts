@@ -30,8 +30,8 @@ export const PRESET_PALETTES: readonly PresetPalette[] = [
     tertiary: '#B9BD39',
   },
   {
-    name: 'Arizona',
-    tagline: 'Desert',
+    name: 'Desert',
+    tagline: 'Terracotta',
     primary: '#5C2317',
     secondary: '#D2691E',
     tertiary: '#F4A460',

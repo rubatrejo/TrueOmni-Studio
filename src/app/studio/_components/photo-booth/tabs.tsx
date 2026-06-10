@@ -218,7 +218,8 @@ function TimerOptionsEditor({
   const [draft, setDraft] = useState('');
   const add = () => {
     const n = Number(draft);
-    if (!Number.isInteger(n) || n < 0 || n > 60) return;
+    // Un timer de 0s no tiene sentido (la cámara dispararía sin cuenta atrás).
+    if (!Number.isInteger(n) || n < 1 || n > 60) return;
     if (options.includes(n)) {
       setDraft('');
       return;
@@ -273,7 +274,7 @@ function TimerOptionsEditor({
       <div className="flex items-center gap-2">
         <input
           type="number"
-          min={0}
+          min={1}
           max={60}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}

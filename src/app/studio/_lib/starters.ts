@@ -17,7 +17,7 @@ export interface Starter {
   label: string;
   description: string;
   /** Paleta de color base. Debe coincidir con un preset de EditorPanel. */
-  paletteId: 'TrueOmni' | 'Arizona' | 'Hotel Beach' | 'Forest' | 'Mono';
+  paletteId: 'TrueOmni' | 'Desert' | 'Hotel Beach' | 'Forest' | 'Mono';
   fonts: {
     display: string;
     body: string;

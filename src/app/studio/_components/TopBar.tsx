@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, Eye, History, Send, Undo2, Redo2, Upload } from 'lucide-react';
+import { Download, Eye, History, Send, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 
@@ -100,23 +100,9 @@ export function TopBar({
         ) : null}
         <span className="mx-1 block h-5 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden="true" />
 
-        <button
-          type="button"
-          aria-label="Undo"
-          className="grid h-8 w-8 place-items-center rounded-md text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-        >
-          <Undo2 className="h-[15px] w-[15px]" />
-        </button>
-        <button
-          type="button"
-          aria-label="Redo"
-          className="grid h-8 w-8 place-items-center rounded-md text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-        >
-          <Redo2 className="h-[15px] w-[15px]" />
-        </button>
-
-        <span className="mx-1 block h-5 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden="true" />
-
+        {/* F-KIOSK-2: los antiguos botones Undo/Redo del TopBar no tenían handler
+            (mentían). Las acciones reales viven en el SaveBar (Discard / Reload
+            preview), así que se eliminaron de aquí en vez de duplicarlas muertas. */}
         <ThemeToggle />
 
         {/* Export / Import full config (hallazgo #25 del audit). */}

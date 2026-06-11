@@ -1,9 +1,23 @@
 import 'server-only';
 
-import { ClientContentSchema, emptyClientContent } from './client-content';
+import {
+  ClientContentSchema,
+  emptyClientContent,
+  isItemVisible,
+  resolveEvent,
+  resolveListing,
+} from './client-content';
 import type { ClientContent } from './client-content';
 import { clientKeys } from './client-manifest';
-import { kv } from './kv';
+import { kv, kvKeys } from './kv';
+import { defaultEvents } from './schema';
+import type {
+  EventItem,
+  KioskConfig,
+  ListingItem,
+  ListingsCatalogEntry,
+  ListingsModule,
+} from './schema';
 
 /**
  * Persistencia del **contenido a nivel cliente** (`client:{slug}:content`).
@@ -73,4 +87,148 @@ export async function saveClientContent(
   const next: ClientContent = { ...content, currentVersion: nextVersion };
   await saveClientContentRaw(slug, next);
   return { ok: true, version: nextVersion };
+}
+
+// ---------------------------------------------------------------------------
+//  Propagación a los productos
+// ---------------------------------------------------------------------------
+
+/** Icono Lucide por módulo canónico; fallback para módulos custom. */
+const CANONICAL_MODULE_ICON: Record<string, string> = {
+  restaurants: 'UtensilsCrossed',
+  'things-to-do': 'Sparkles',
+  stay: 'BedDouble',
+  events: 'CalendarDays',
+};
+
+function iconForModule(key: string): string {
+  return CANONICAL_MODULE_ICON[key] ?? 'MapPin';
+}
+
+function titleCaseSlug(key: string): string {
+  return key
+    .split('-')
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+function uniqStrings(arr: string[]): string[] {
+  return [...new Set(arr.filter((s) => s && s.trim() !== ''))];
+}
+
+/**
+ * Garantiza slugs únicos dentro de un catálogo (el schema lo exige). Dos ids de
+ * feed distintos pueden colapsar al mismo slug → se les añade un sufijo -2, -3…
+ */
+function ensureUniqueSlugs<T extends { slug: string }>(items: T[]): T[] {
+  const seen = new Map<string, number>();
+  return items.map((it) => {
+    const n = seen.get(it.slug) ?? 0;
+    seen.set(it.slug, n + 1);
+    if (n === 0) return it;
+    return { ...it, slug: `${it.slug}-${n + 1}`.slice(0, 96) };
+  });
+}
+
+/**
+ * Aplica el contenido del cliente sobre un `KioskConfig` (función PURA, sin KV).
+ *
+ * - **Listings:** agrupa los items visibles por el `moduleKey` que resuelve su
+ *   `categoryMap` (N→1). Cada grupo se vuelve un `ListingsCatalogEntry` marcado
+ *   `feedConnected`. Los módulos manuales preexistentes (sin `feedConnected` y
+ *   cuyo key no recibe feed) se conservan intactos. Items sin mapeo no se
+ *   propagan (el operador debe mapearlos primero).
+ * - **Events:** todos los items visibles van al único módulo Events del kiosk,
+ *   marcado `feedConnected`. Si no hay events de feed, se deja el módulo tal cual.
+ *
+ * Kiosk y PWA comparten este config, así que con esto ambos quedan alimentados.
+ * Signage no persiste listings/events (resuelve events en runtime) → fuera de
+ * alcance de esta propagación.
+ */
+export function applyContentToKiosk(cfg: KioskConfig, content: ClientContent): KioskConfig {
+  // --- Listings agrupados por módulo destino ---
+  const byModule = new Map<string, { label: string; items: ListingItem[] }>();
+  for (const item of content.listings) {
+    if (!isItemVisible(item)) continue;
+    const mapping = content.categoryMap.find(
+      (cm) =>
+        cm.contentType === 'listing' &&
+        cm.feedId === item.source &&
+        cm.feedCategory === item.feedCategory,
+    );
+    if (!mapping) continue;
+    const resolved = resolveListing(item);
+    if (!resolved) continue;
+    const group = byModule.get(mapping.moduleKey) ?? { label: mapping.label, items: [] };
+    if (mapping.label) group.label = mapping.label;
+    group.items.push(resolved);
+    byModule.set(mapping.moduleKey, group);
+  }
+
+  const feedEntries: ListingsCatalogEntry[] = [...byModule.entries()].map(([key, g]) => {
+    const items = ensureUniqueSlugs(g.items);
+    return {
+      key,
+      label: g.label || titleCaseSlug(key),
+      iconKey: iconForModule(key),
+      enabled: true,
+      feedConnected: true,
+      catalog: {
+        heroImage: '',
+        subcategories: uniqStrings(items.map((i) => i.subcategory)),
+        features: uniqStrings(items.flatMap((i) => i.features)),
+        listings: items,
+      },
+    };
+  });
+
+  const feedKeys = new Set(byModule.keys());
+  const manualModules = (cfg.listings ?? []).filter(
+    (m) => !feedKeys.has(m.key) && !m.feedConnected,
+  );
+  const nextListings: ListingsModule = [...manualModules, ...feedEntries];
+
+  // --- Events: todos los visibles a un solo módulo ---
+  const eventItems = ensureUniqueSlugs(
+    content.events
+      .filter(isItemVisible)
+      .map(resolveEvent)
+      .filter((e): e is EventItem => e !== null),
+  );
+  let nextEvents = cfg.events;
+  if (eventItems.length > 0) {
+    const base = cfg.events ?? defaultEvents();
+    nextEvents = {
+      ...base,
+      feedConnected: true,
+      categories: uniqStrings(eventItems.map((e) => e.category)),
+      venues: uniqStrings(eventItems.map((e) => e.venue)),
+      events: eventItems,
+    };
+  }
+
+  return { ...cfg, listings: nextListings, events: nextEvents };
+}
+
+export interface ContentSyncResult {
+  kiosk: 'ok' | 'absent' | 'failed';
+}
+
+/**
+ * Propaga el contenido del cliente al config del kiosk (`cfg:{slug}`), que el
+ * kiosk y la PWA comparten. No-op si el cliente no tiene contenido o no existe
+ * el kiosk. Best-effort: los errores no se lanzan, se reportan en el resultado.
+ */
+export async function syncContentToProducts(slug: string): Promise<ContentSyncResult> {
+  const content = await loadClientContent(slug);
+  if (!content) return { kiosk: 'absent' };
+  try {
+    const cfg = await kv.get<KioskConfig>(kvKeys.cfg(slug));
+    if (!cfg) return { kiosk: 'absent' };
+    await kv.set(kvKeys.cfg(slug), applyContentToKiosk(cfg, content));
+    return { kiosk: 'ok' };
+  } catch {
+    return { kiosk: 'failed' };
+  }
 }

@@ -4,7 +4,11 @@ import { mergeItems } from '@/lib/ingest/merge';
 import { dedupeById, normalizeEvent, normalizeListing } from '@/lib/ingest/normalize';
 import { getAdapter } from '@/lib/ingest/registry';
 import type { EventContentItem, ListingContentItem } from '@/lib/studio/client-content';
-import { loadClientContentOrEmpty, saveClientContentRaw } from '@/lib/studio/client-content-sync';
+import {
+  loadClientContentOrEmpty,
+  saveClientContentRaw,
+  syncContentToProducts,
+} from '@/lib/studio/client-content-sync';
 import { loadClientManifest } from '@/lib/studio/client-manifest';
 import { checkKvValueSize } from '@/lib/studio/kv-size-guard';
 import { isValidStudioSlug } from '@/lib/studio/slug';
@@ -127,9 +131,13 @@ export async function POST(req: Request, { params }: RouteParams) {
 
   await saveClientContentRaw(slug, next);
 
+  // Propaga el contenido fresco al kiosk (compartido con la PWA). Best-effort.
+  const propagation = await syncContentToProducts(slug);
+
   return NextResponse.json({
     ok: true,
     version: next.currentVersion,
     diff: { listings: listingMerge.diff, events: eventMerge.diff, summary },
+    propagation,
   });
 }

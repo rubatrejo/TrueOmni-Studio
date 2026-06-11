@@ -1272,6 +1272,13 @@ export const ListingsCatalogEntrySchema = z.object({
   customIcon: z.string().max(200000).optional(),
   /** Master toggle de visibilidad del módulo. */
   enabled: z.boolean().default(true),
+  /**
+   * Marca que este módulo se alimenta de un feed de proveedor (contenido a
+   * nivel cliente, ver `client-content-sync.ts`). Cuando es true, el editor de
+   * listings por-producto lo muestra read-only — el contenido se gestiona desde
+   * la tab "Data feeds". Default false = módulo manual editable como siempre.
+   */
+  feedConnected: z.boolean().optional(),
   /** Heroimage + taxonomies + items. */
   catalog: ListingsCatalogSchema,
 });
@@ -1524,6 +1531,8 @@ export const EventsModuleSchema = z.object({
   categories: z.array(z.string().max(64)).default([]),
   venues: z.array(z.string().max(120)).default([]),
   features: z.array(z.string().max(64)).default([]),
+  /** Alimentado por un feed de proveedor → editor por-producto read-only. */
+  feedConnected: z.boolean().optional(),
   events: z.array(EventItemSchema).superRefine(uniqueBySlug).default([]),
 });
 

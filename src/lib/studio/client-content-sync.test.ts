@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
+import type { ClientContent } from './client-content';
 import { emptyClientContent } from './client-content';
 import {
+  applyContentToKiosk,
   loadClientContent,
   loadClientContentOrEmpty,
   saveClientContent,
 } from './client-content-sync';
+import type { KioskConfig, ListingsCatalogEntry } from './schema';
 
 /**
  * Tests del store con KV in-memory (sin credenciales KV en CI → fallback). Cada
@@ -51,5 +54,189 @@ describe('loadClientContentOrEmpty', () => {
     const doc = await loadClientContentOrEmpty('test-content-unknown');
     expect(doc.currentVersion).toBe(0);
     expect(doc.listings).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+//  applyContentToKiosk (propagación pura)
+// ---------------------------------------------------------------------------
+
+function content(over: Partial<ClientContent>): ClientContent {
+  return {
+    feeds: [],
+    categoryMap: [],
+    listings: [],
+    events: [],
+    currentVersion: 0,
+    ...over,
+  };
+}
+
+function emptyCfg(over: Partial<KioskConfig> = {}): KioskConfig {
+  return { listings: [], events: undefined, ...over } as unknown as KioskConfig;
+}
+
+function manualModule(key: string): ListingsCatalogEntry {
+  return {
+    key,
+    label: key,
+    iconKey: 'MapPin',
+    enabled: true,
+    catalog: { heroImage: '', subcategories: [], features: [], listings: [] },
+  };
+}
+
+describe('applyContentToKiosk', () => {
+  it('groups mapped listings into a feed-connected module with the renamed label', () => {
+    const doc = content({
+      categoryMap: [
+        {
+          feedId: 'f1',
+          feedCategory: 'Dining',
+          moduleKey: 'restaurants',
+          label: 'Dine',
+          contentType: 'listing',
+        },
+      ],
+      listings: [
+        {
+          id: 'f1:1',
+          source: 'f1',
+          type: 'listing',
+          feedCategory: 'Dining',
+          feedData: { title: 'Taco Spot', subcategory: 'Mexican' },
+          override: {},
+          flags: [],
+          status: 'active',
+        },
+      ],
+    });
+    const out = applyContentToKiosk(emptyCfg(), doc);
+    const mod = out.listings!.find((m) => m.key === 'restaurants')!;
+    expect(mod.label).toBe('Dine');
+    expect(mod.feedConnected).toBe(true);
+    expect(mod.catalog.listings[0].title).toBe('Taco Spot');
+    expect(mod.catalog.subcategories).toContain('Mexican');
+  });
+
+  it('does not propagate unmapped or hidden items', () => {
+    const doc = content({
+      categoryMap: [], // sin mapeo
+      listings: [
+        {
+          id: 'f1:1',
+          source: 'f1',
+          type: 'listing',
+          feedCategory: 'Dining',
+          feedData: { title: 'Unmapped' },
+          override: {},
+          flags: [],
+          status: 'active',
+        },
+        {
+          id: 'f1:2',
+          source: 'f1',
+          type: 'listing',
+          feedCategory: 'Dining',
+          feedData: { title: 'Hidden' },
+          override: {},
+          flags: [],
+          status: 'hidden',
+        },
+      ],
+    });
+    const out = applyContentToKiosk(emptyCfg(), doc);
+    expect(out.listings).toEqual([]);
+  });
+
+  it('preserves a manual module not fed by any feed', () => {
+    const doc = content({
+      categoryMap: [
+        {
+          feedId: 'f1',
+          feedCategory: 'Dining',
+          moduleKey: 'restaurants',
+          label: '',
+          contentType: 'listing',
+        },
+      ],
+      listings: [
+        {
+          id: 'f1:1',
+          source: 'f1',
+          type: 'listing',
+          feedCategory: 'Dining',
+          feedData: { title: 'Taco Spot' },
+          override: {},
+          flags: [],
+          status: 'active',
+        },
+      ],
+    });
+    const out = applyContentToKiosk(emptyCfg({ listings: [manualModule('shopping')] }), doc);
+    const keys = out.listings!.map((m) => m.key).sort();
+    expect(keys).toEqual(['restaurants', 'shopping']);
+    expect(out.listings!.find((m) => m.key === 'shopping')!.feedConnected).toBeUndefined();
+  });
+
+  it('propagates visible events into a feed-connected events module', () => {
+    const doc = content({
+      events: [
+        {
+          id: 'f2:1',
+          source: 'f2',
+          type: 'event',
+          feedCategory: 'Music',
+          feedData: {
+            title: 'Jazz Night',
+            category: 'Music',
+            date: '2026-07-01',
+            startTime: '18:00',
+            endTime: '20:00',
+            venue: 'The Hall',
+          },
+          override: {},
+          flags: [],
+          status: 'active',
+        },
+      ],
+    });
+    const out = applyContentToKiosk(emptyCfg(), doc);
+    expect(out.events!.feedConnected).toBe(true);
+    expect(out.events!.events[0].title).toBe('Jazz Night');
+    expect(out.events!.categories).toContain('Music');
+    expect(out.events!.venues).toContain('The Hall');
+  });
+
+  it('de-duplicates colliding slugs', () => {
+    const mk = (id: string) => ({
+      id,
+      source: 'f1',
+      type: 'listing' as const,
+      feedCategory: 'Dining',
+      feedData: { title: 'Same' },
+      override: {},
+      flags: [],
+      status: 'active' as const,
+    });
+    const doc = content({
+      categoryMap: [
+        {
+          feedId: 'f1',
+          feedCategory: 'Dining',
+          moduleKey: 'restaurants',
+          label: 'Dine',
+          contentType: 'listing',
+        },
+      ],
+      // Ambos ids colapsan al mismo slug 'f1-x' tras idToSlug? Usamos ids que
+      // producen el mismo slug para forzar la colisión.
+      listings: [mk('f1:dup'), mk('f1:dup ')],
+    });
+    const out = applyContentToKiosk(emptyCfg(), doc);
+    const slugs = out
+      .listings!.find((m) => m.key === 'restaurants')!
+      .catalog.listings.map((l) => l.slug);
+    expect(new Set(slugs).size).toBe(slugs.length); // todos únicos
   });
 });

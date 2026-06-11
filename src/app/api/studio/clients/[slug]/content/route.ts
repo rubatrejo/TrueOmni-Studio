@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 
 import { ClientContentSchema, emptyClientContent } from '@/lib/studio/client-content';
-import { loadClientContent, saveClientContent } from '@/lib/studio/client-content-sync';
+import {
+  loadClientContent,
+  saveClientContent,
+  syncContentToProducts,
+} from '@/lib/studio/client-content-sync';
 import { loadClientManifest } from '@/lib/studio/client-manifest';
 import { checkKvValueSize } from '@/lib/studio/kv-size-guard';
 import { isValidStudioSlug } from '@/lib/studio/slug';
@@ -84,5 +88,8 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     );
   }
 
-  return NextResponse.json({ ok: true, version: result.version });
+  // Propaga el contenido editado (overrides/mapeo/visibilidad) al kiosk +PWA.
+  const propagation = await syncContentToProducts(slug);
+
+  return NextResponse.json({ ok: true, version: result.version, propagation });
 }

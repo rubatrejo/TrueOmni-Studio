@@ -4,6 +4,61 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-11 — F-HUB-9: bulk ops en el dashboard (cierra el audit 68/68)
+
+**Petición de Rubén:** avanzar con F-HUB-9, el único hallazgo abierto del audit
+`STUDIO-AUDIT-2026-06-09` (selección múltiple + barra de acciones batch en el
+dashboard de clientes del Studio).
+
+**Brainstorming (skill) → diseño aprobado.** Decisiones: entrada por checkbox en
+hover + Select all; 4 acciones (Pin/Unpin/Resync/Export/Delete); para Resync,
+**opción A** (correr sobre todos los seleccionados; los KV-only sin template de
+fs devuelven 404 → se reportan como `skipped` en un toast honesto, sin truncado
+silencioso).
+
+**Hecho — commit `3485ad3`, pusheado, deploy Vercel READY:**
+
+- `_lib/bulk-selection.ts` (+test, 14 tests): lógica pura — `pinTargets`/
+  `unpinTargets` (el endpoint pin es toggle → solo el subconjunto que cambia),
+  `selectableSlugs` (excluye `default`), `summarizeResync`/`buildResyncToast`.
+- `_components/BulkActionBar.tsx`: barra flotante sticky abajo-centro.
+- `_components/BulkDeleteModal.tsx`: confirmación con conteo + lista de nombres
+  (patrón `DeleteKioskModal` + `use-modal-a11y`).
+- `api/studio/configs/export-bulk/route.ts` (nuevo): POST `{ slugs }` → un único
+  JSON `{ exportedAt, configs }` (evita el bloqueo de descargas múltiples).
+- `page.tsx`: estado de selección (`Set<string>`), checkbox top-left (desplaza la
+  estrella pinned), click en card togglea en modo selección, acciones por-card
+  ocultas en selección, wiring de la barra + modal + handlers (Promise.allSettled
+  - refresh + toast).
+- `api-client.ts`: `exportConfigsBulk`, `togglePin`, `resyncConfigStatus`
+  (404→skipped sin lanzar).
+
+**Verificado:** typecheck + lint (0 warnings) + **124 tests** (110→124) +
+validate:configs 3/3 + cero hex nuevos. **Smoke funcional real con agent-browser**
+(dev local con auth deshabilitada): hover→checkbox, selección→ring+barra, default
+excluido, Select all, modal de borrado con nombres, y resync con partición
+correcta verificada en los logs (`discover-dekalb`→404 skipped, `demo-cliente-a`→
+200 resynced) + toast honesto. Deploy de producción READY (MCP Vercel).
+
+**Nota operativa:** el dev local apunta al **KV de producción** (vars de
+`.env.local`), así que el test de resync escribió `demo-cliente-a` en prod
+(benigno: cliente demo, resync preserva customizaciones). El cambio de branding
+visto en `discover-dekalb` durante el test fue una **escritura externa** al KV
+compartido, NO de esta feature (sus 2 requests fueron 404 sin escritura).
+
+**Fase:** audit `STUDIO-AUDIT-2026-06-09` — **68/68 CERRADO** (F-HUB-9 cerrado).
+
+**PENDIENTE / siguiente sesión:**
+
+- **QA manual de Rubén con login** de las bulk ops en `trueomni-studio.vercel.app`
+  (Pin/Unpin/Export/Delete + el caso Resync `skipped` sobre un cliente creado en
+  Studio).
+- Sigue pendiente de sesiones previas: credenciales reales de proveedor para el
+  E2E de la ingesta de feeds; extender `feedConnected` a editores de events de
+  digital-displays y PWA.
+
+---
+
 ### Sesión 2026-06-10 (continuación) — Ingesta de feeds de proveedores + mapeo de categorías (8 fases)
 
 **Petición de Rubén:** que cada cliente cargue su data desde feeds de proveedores

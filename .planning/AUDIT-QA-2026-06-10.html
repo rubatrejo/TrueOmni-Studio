@@ -45,7 +45,7 @@
   Cada tarjeta dice <strong>qué cambió</strong>, <strong>dónde verlo</strong> y <strong>cómo probarlo</strong>.
   Tacha el ☐ conforme revises. Los marcados <span class="login">login</span> necesitan tu sesión
   GitHub en el Studio (el editor exige login; el hub no).
-  <p class="legend">Severidad: <span class="sev crit">Crítico</span> <span class="sev hi">Alto</span> <span class="sev med">Medio</span> <span class="sev low">Bajo</span> <span class="sev dif">Diferido</span> — <strong>67 de 68 cerrados · único pendiente F-HUB-9.</strong></p>
+  <p class="legend">Severidad: <span class="sev crit">Crítico</span> <span class="sev hi">Alto</span> <span class="sev med">Medio</span> <span class="sev low">Bajo</span> <span class="sev dif">Diferido</span> — <strong>68 de 68 cerrados (F-HUB-9 cerrado el 2026-06-11, commit 3485ad3).</strong></p>
 </div>
 
 <!-- ═══════════════════════════════════════════ KIOSK ═══════════════════════════════════════════ -->
@@ -455,10 +455,12 @@
 </div>
 
 <div class="item">
-  <div class="top"><span class="chk">☐</span><span class="id">F-HUB-9</span><span class="sev na">No hecho</span><span class="commit">—</span></div>
-  <div class="title">Bulk ops en el dashboard — requiere diseño de producto</div>
+  <div class="top"><span class="chk">☐</span><span class="id">F-HUB-9</span><span class="sev low">Bajo</span><span class="commit">3485ad3</span></div>
+  <div class="title">Bulk ops en el dashboard — implementado (selección múltiple + barra batch)</div>
   <div class="rows">
-    <div class="row"><span class="k">Nota</span><span class="v note">Selección múltiple + acciones masivas es un feature grande que necesita una decisión de UX tuya (cómo seleccionar, qué acciones, confirmación/undo). Se dejó SIN tocar para no degradar el dashboard. Único hallazgo del audit pendiente — candidato a brainstorming en una próxima sesión.</span></div>
+    <div class="row"><span class="k">Cambio</span><span class="v">Checkbox de selección en hover sobre cada card (el cliente <code>default</code> queda excluido). Al marcar uno entra en modo selección y aparece una barra flotante con <strong>Pin · Unpin · Resync · Export · Delete · Select all</strong>.</span></div>
+    <div class="row"><span class="k">Dónde</span><span class="v">Dashboard del Studio (<code>/studio</code>). Pin/Unpin reusan el toggle existente; Export baja un único JSON con los configs; Resync sobre clientes creados en el Studio (sin template de fs) reporta <em>skipped</em>; Delete pide confirmación con la lista de nombres.</span></div>
+    <div class="row"><span class="k">Probar</span><span class="v">Hover sobre una card → marca el checkbox → prueba cada acción de la barra. Verifica que Resync sobre un cliente nuevo muestra el toast "skipped (no filesystem template)".</span></div>
   </div>
 </div>
 

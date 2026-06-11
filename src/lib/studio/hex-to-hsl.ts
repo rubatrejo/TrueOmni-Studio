@@ -5,7 +5,12 @@
  * Tailwind del proyecto resuelve los colores como `hsl(var(--token))`,
  * por lo que las CSS vars almacenan la triple separada por espacios.
  *
- * @example hexToHsl("#0088CE") // → "201 100% 40%"
+ * Los componentes H/S/L se conservan con hasta 3 decimales (no se redondean a
+ * entero) para que el viaje de ida y vuelta hex → HSL → hex sea exacto byte a
+ * byte. Redondear a entero cuantizaba el espacio HSL (~3.6M combos) por debajo
+ * del espacio hex (16.7M) y desplazaba el tono ±1-2 por canal.
+ *
+ * @example hexToHsl("#0088CE") // → "200.388 100% 40.392%"
  */
 export function hexToHsl(hex: string): string {
   let h = hex.trim().replace(/^#/, '');
@@ -43,7 +48,16 @@ export function hexToHsl(hex: string): string {
     H /= 6;
   }
 
-  return `${Math.round(H * 360)} ${Math.round(S * 100)}% ${Math.round(l * 100)}%`;
+  return `${round3(H * 360)} ${round3(S * 100)}% ${round3(l * 100)}%`;
+}
+
+/**
+ * Redondea a 3 decimales. Suficiente para que `hslToHex(hexToHsl(x)) === x`
+ * (el error residual queda <0.01 en el canal 0-255, muy por debajo del paso de
+ * 1 byte) sin arrastrar ruido de coma flotante al token CSS.
+ */
+function round3(n: number): number {
+  return Math.round(n * 1000) / 1000;
 }
 
 /**
@@ -52,7 +66,7 @@ export function hexToHsl(hex: string): string {
  * `tokens.css` (cuyos tokens están en HSL) — el Studio gestiona los
  * brand colors como hex.
  *
- * @example hslToHex("201 100% 40%") // → "#0088CC"
+ * @example hslToHex("200.388 100% 40.392%") // → "#0088CE"
  */
 export function hslToHex(hsl: string): string {
   const m = /^\s*(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)%\s+(-?\d+(?:\.\d+)?)%\s*$/.exec(hsl);

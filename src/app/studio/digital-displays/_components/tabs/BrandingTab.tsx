@@ -416,14 +416,16 @@ function parseHslString(value: string): HslColor | null {
   const m = value.match(/^(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%$/);
   if (!m) return null;
   return {
-    h: Math.round(Number(m[1])),
-    s: Math.round(Number(m[2])),
-    l: Math.round(Number(m[3])),
+    h: Number(m[1]),
+    s: Number(m[2]),
+    l: Number(m[3]),
   };
 }
 
-function formatHsl(c: HslColor): string {
-  return `${Math.round(c.h)} ${Math.round(c.s)}% ${Math.round(c.l)}%`;
+export function formatHsl(c: HslColor): string {
+  // Conserva decimales: el picker entrega enteros, pero un hex tecleado llega
+  // con decimales (round3) y hay que preservarlos para no desplazar el tono.
+  return `${c.h} ${c.s}% ${c.l}%`;
 }
 
 /**
@@ -519,10 +521,19 @@ export function hexToHsl(hex: string): HslColor | null {
     else h = ((r - g) / d + 4) * 60;
   }
   return {
-    h: Math.round(h),
-    s: Math.round(s * 100),
-    l: Math.round(l * 100),
+    h: round3(h),
+    s: round3(s * 100),
+    l: round3(l * 100),
   };
+}
+
+/**
+ * Redondea a 3 decimales: conserva precisión suficiente para que el round-trip
+ * hex → HSL → hex sea exacto byte a byte, sin ensuciar el token con ruido de
+ * coma flotante. Antes se redondeaba a entero y el tono se desplazaba ±1-2.
+ */
+function round3(n: number): number {
+  return Math.round(n * 1000) / 1000;
 }
 
 // ---------------------------------------------------------------------------

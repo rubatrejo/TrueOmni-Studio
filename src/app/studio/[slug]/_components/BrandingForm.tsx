@@ -11,7 +11,7 @@ import { CustomFontField } from '../../_components/CustomFontField';
 import { MediaField } from '../../_components/MediaField';
 import { TabStrip, type TabStripItem } from '../../_components/TabStrip';
 import { extractPaletteFromImage } from '../../_lib/palette-from-image';
-import { hexToHsl, hslToHex } from '../../digital-displays/_components/tabs/BrandingTab';
+import { hexToHsl, hslToHex, formatHsl } from '../../digital-displays/_components/tabs/BrandingTab';
 
 // Hallazgo S-31: contexto del id del Field para que TextInput / FontSelect
 // lean el id auto-generado y lo apliquen al input concreto. Antes el Field
@@ -90,10 +90,13 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
     setSuggestState('extracting');
     try {
       const palette = await extractPaletteFromImage(source);
-      // `hexToHsl` puede devolver null ante un hex inválido — conservamos el
-      // token previo en ese caso. El cast a string normaliza el HslColor branded.
-      const toHsl = (hex: string, fallback: string): string =>
-        (hexToHsl(hex) as string | null) ?? fallback;
+      // `hexToHsl` devuelve un `HslColor` (objeto) o null ante un hex inválido;
+      // lo serializamos con `formatHsl` al formato "H S% L%" que guardan los
+      // tokens. Si es null conservamos el token previo.
+      const toHsl = (hex: string, fallback: string): string => {
+        const c = hexToHsl(hex);
+        return c ? formatHsl(c) : fallback;
+      };
       setField('brand', {
         ...value.brand,
         primary: toHsl(palette.primary, value.brand.primary),
@@ -871,7 +874,7 @@ function ColorRow({
           <HexInput
             hsl={hsl}
             ariaLabel={`${label} hex value`}
-            onChange={(c) => onChange(`${Math.round(c.h)} ${Math.round(c.s)}% ${Math.round(c.l)}%`)}
+            onChange={(c) => onChange(formatHsl(c))}
           />
         ) : (
           <input
@@ -880,9 +883,7 @@ function ColorRow({
             onChange={(e) => {
               const parsed = hexToHsl(e.target.value);
               if (parsed) {
-                onChange(
-                  `${Math.round(parsed.h)} ${Math.round(parsed.s)}% ${Math.round(parsed.l)}%`,
-                );
+                onChange(formatHsl(parsed));
               }
             }}
             placeholder="#RRGGBB"
@@ -901,9 +902,7 @@ function ColorRow({
         <div className="absolute bottom-full right-0 z-20 mb-2 rounded-md border border-zinc-200 bg-white p-3 shadow-lg dark:border-zinc-800 dark:bg-zinc-950">
           <HslColorPicker
             color={hsl}
-            onChange={(c: HslColor) =>
-              onChange(`${Math.round(c.h)} ${Math.round(c.s)}% ${Math.round(c.l)}%`)
-            }
+            onChange={(c: HslColor) => onChange(formatHsl(c))}
             style={{ width: 200, height: 150 }}
           />
           <button
@@ -963,5 +962,5 @@ function HexInput({
 function parseHsl(value: string): HslColor | null {
   const m = value.trim().match(/^(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%$/);
   if (!m) return null;
-  return { h: Math.round(Number(m[1])), s: Math.round(Number(m[2])), l: Math.round(Number(m[3])) };
+  return { h: Number(m[1]), s: Number(m[2]), l: Number(m[3]) };
 }

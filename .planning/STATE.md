@@ -4,6 +4,35 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-11 (cont. 3) — Sub-categorías kiosk: RUNTIME hecho + verificado (checkpoint ~85% ctx)
+
+**Avance sobre el plan `~/.claude/plans/por-que-cuando-cargo-validated-glacier.md`:**
+HECHO y verificado con screenshot (`40ff0f6`, pusheado) — **runtime del KIOSK**:
+
+- `src/components/listings/subcategory-screen.tsx` (NUEVA): grid 2-col de tiles
+  (foto `subcategoryImages[name]` con fallback heroImage + overlay + nombre +
+  FloatingHomeButton). Cada tile → `/home/<module>?cat=<name>`.
+- `home/[module]/page.tsx`: branch por `searchParams.cat` (sin cat + hay sub-cats →
+  SubcategoryScreen; con cat → ListingsModule pre-filtrado).
+- `listings-module.tsx`: prop `initialSubcategory` siembra el FilterState.
+- **Verificado en kiosk:dev:** `/home/restaurants` muestra la pantalla de tiles;
+  `?cat=Mexican` muestra la lista filtrada solo a Mexican. ✓
+
+**PENDIENTE — siguiente sesión (lo que falta del plan):**
+
+1. **PWA:** filtrar al tocar — `listings-list-screen-live.tsx` + páginas
+   `(pwa)/pwa/{restaurants,stay,things-to-do}/list/page.tsx`: resolver categoría por
+   `key` y sembrar el filtro por su `subcategory` (ya está el campo en el tipo).
+2. **Editores:** picker de imagen por sub-cat en `ListingsEditor.tsx` (kiosk →
+   `catalog.subcategoryImages[name]`) y por categoría + dropdown `subcategory` en
+   `mobile-pwa/_components/ListingsModuleEditor.tsx` (PWA). Reusar `ImageField` +
+   `/api/studio/upload`.
+3. **Refinos kiosk:** tile "All" (necesita string i18n) + botón **back** de la lista
+   a la pantalla de sub-cats (hoy solo FloatingHomeButton → home). Iterar visual.
+4. `bootstrap-from-fs.ts` leer `subcategoryImages` + tests.
+
+---
+
 ### Sesión 2026-06-11 (cont. 2) — Sub-categorías kiosk + fotos editables: CAPA DE DATOS (checkpoint a 80% ctx)
 
 **Petición de Rubén:** que el **kiosk** tenga una pantalla de sub-categorías al entrar

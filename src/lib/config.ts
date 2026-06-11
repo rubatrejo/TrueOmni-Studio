@@ -388,6 +388,11 @@ export interface HomeModule {
   heroImage: string;
   /** Lista de subcategorías disponibles en este módulo. Se muestran en cards. */
   subcategories: string[];
+  /**
+   * Foto por sub-categoría (name → URL) para la pantalla de sub-categorías del
+   * kiosk. Paralelo a `subcategories` (no cambia su tipo). Opcional/retrocompat.
+   */
+  subcategoryImages?: Record<string, string>;
   /** Features/servicios filtrables. */
   features: string[];
   listings: Listing[];
@@ -1846,6 +1851,11 @@ export interface PwaListingCategory {
   key: string;
   label: string;
   image: string;
+  /**
+   * Sub-categoría (`listing.subcategory`) a la que filtra esta tile al tocarla.
+   * Vacío/ausente = lista completa (retrocompat con configs existentes).
+   */
+  subcategory?: string;
 }
 
 /** @deprecated Usar `PwaListingCategory`. Alias retrocompatible. */

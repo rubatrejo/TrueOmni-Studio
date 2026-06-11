@@ -206,8 +206,24 @@ export function applyContentToKiosk(cfg: KioskConfig, content: ClientContent): K
     byModule.set(mapping.moduleKey, group);
   }
 
+  // Fotos de sub-categoría existentes por módulo (subidas por el operador) para
+  // NO perderlas en cada re-sync. Se podan a las sub-categorías que siguen vivas.
+  const prevSubImagesByKey = new Map<string, Record<string, string>>();
+  for (const m of cfg.listings ?? []) {
+    const imgs = m.catalog?.subcategoryImages;
+    if (imgs && Object.keys(imgs).length > 0) prevSubImagesByKey.set(m.key, imgs);
+  }
+
   const feedEntries: ListingsCatalogEntry[] = [...byModule.entries()].map(([key, g]) => {
     const items = ensureUniqueSlugs(g.items);
+    const subcategories = uniqStrings(items.map((i) => i.subcategory));
+    const prevImgs = prevSubImagesByKey.get(key);
+    const subcategoryImages: Record<string, string> = {};
+    if (prevImgs) {
+      for (const name of subcategories) {
+        if (prevImgs[name]) subcategoryImages[name] = prevImgs[name];
+      }
+    }
     return {
       key,
       label: g.label || titleCaseSlug(key),
@@ -216,7 +232,8 @@ export function applyContentToKiosk(cfg: KioskConfig, content: ClientContent): K
       feedConnected: true,
       catalog: {
         heroImage: '',
-        subcategories: uniqStrings(items.map((i) => i.subcategory)),
+        subcategories,
+        subcategoryImages,
         features: uniqStrings(items.flatMap((i) => i.features)),
         listings: items,
       },

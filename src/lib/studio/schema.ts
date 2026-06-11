@@ -1240,6 +1240,13 @@ export type ListingItem = z.infer<typeof ListingItemSchema>;
 export const ListingsCatalogSchema = z.object({
   heroImage: z.string().default(''),
   subcategories: z.array(z.string().max(64)).default([]),
+  /**
+   * Foto por sub-categoría (name → URL/dataURL) para la pantalla de
+   * sub-categorías del KIOSK. Mapa paralelo a `subcategories` (no cambia su
+   * tipo string[]) para no romper filtros/propagación. La PWA tiene sus propias
+   * fotos en `features.pwa.<module>.categories[].image`. Editable en el Studio.
+   */
+  subcategoryImages: z.record(z.string(), z.string()).optional(),
   features: z.array(z.string().max(64)).default([]),
   listings: z.array(ListingItemSchema).superRefine(uniqueBySlug).default([]),
 });

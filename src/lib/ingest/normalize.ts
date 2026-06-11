@@ -158,7 +158,19 @@ export function normalizeListing(
 
   const lat = parseCoord(raw.lat);
   const lng = parseCoord(raw.lng);
-  if (lat != null && lng != null && !(lat === 0 && lng === 0)) {
+  // Exige rango geográfico válido: los feeds a veces traen basura (p. ej. un
+  // número de calle colado en `latitude`). Coords inválidas → missing (item
+  // flagged para revisión), NUNCA se guardan fuera de rango: un solo item malo
+  // invalidaría todo el documento contra el schema y se leería como vacío.
+  if (
+    lat != null &&
+    lng != null &&
+    !(lat === 0 && lng === 0) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lng >= -180 &&
+    lng <= 180
+  ) {
     feedData.coords = { lat, lng };
   } else {
     flags.push('missing-coords');
@@ -234,7 +246,19 @@ export function normalizeEvent(
 
   const lat = parseCoord(raw.lat);
   const lng = parseCoord(raw.lng);
-  if (lat != null && lng != null && !(lat === 0 && lng === 0)) {
+  // Exige rango geográfico válido: los feeds a veces traen basura (p. ej. un
+  // número de calle colado en `latitude`). Coords inválidas → missing (item
+  // flagged para revisión), NUNCA se guardan fuera de rango: un solo item malo
+  // invalidaría todo el documento contra el schema y se leería como vacío.
+  if (
+    lat != null &&
+    lng != null &&
+    !(lat === 0 && lng === 0) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lng >= -180 &&
+    lng <= 180
+  ) {
     feedData.coords = { lat, lng };
   } else {
     flags.push('missing-coords');

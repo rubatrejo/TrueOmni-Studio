@@ -1,7 +1,11 @@
 import 'server-only';
 
 import {
+  CategoryMappingSchema,
   ClientContentSchema,
+  EventContentItemSchema,
+  FeedConnectionSchema,
+  ListingContentItemSchema,
   emptyClientContent,
   isItemVisible,
   resolveEvent,
@@ -39,6 +43,42 @@ export async function loadClientContent(slug: string): Promise<ClientContent | n
   const raw = await kv.get<unknown>(clientKeys.content(slug));
   if (!raw) return null;
   const parsed = ClientContentSchema.safeParse(raw);
+  if (parsed.success) return parsed.data;
+  // Resiliencia: un único item con data inválida (p. ej. coords fuera de rango
+  // que un feed trajo sucias) NO debe nukear todo el documento y leerse como
+  // vacío. Validamos por partes y descartamos solo los items inválidos.
+  return salvageClientContent(raw);
+}
+
+/**
+ * Reconstruye un `ClientContent` válido a partir de uno crudo que no pasó el
+ * schema completo, descartando los items/entradas inválidos en lugar de perder
+ * todo el documento. Null si ni siquiera el esqueleto es recuperable.
+ */
+function salvageClientContent(raw: unknown): ClientContent | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const r = raw as Record<string, unknown>;
+  const asArray = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
+  const keepValid = <T>(
+    items: unknown[],
+    schema: { safeParse: (x: unknown) => { success: boolean; data?: T } },
+  ): T[] => {
+    const out: T[] = [];
+    for (const it of items) {
+      const p = schema.safeParse(it);
+      if (p.success && p.data !== undefined) out.push(p.data);
+    }
+    return out;
+  };
+  const candidate = {
+    feeds: keepValid(asArray(r.feeds), FeedConnectionSchema),
+    categoryMap: keepValid(asArray(r.categoryMap), CategoryMappingSchema),
+    listings: keepValid(asArray(r.listings), ListingContentItemSchema),
+    events: keepValid(asArray(r.events), EventContentItemSchema),
+    currentVersion: typeof r.currentVersion === 'number' ? r.currentVersion : 0,
+    lastSyncAt: typeof r.lastSyncAt === 'string' ? r.lastSyncAt : undefined,
+  };
+  const parsed = ClientContentSchema.safeParse(candidate);
   return parsed.success ? parsed.data : null;
 }
 

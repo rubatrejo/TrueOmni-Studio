@@ -217,7 +217,17 @@ function withApiKey(endpoint: string, apiKey: string | undefined): string {
 export async function fetchCustomJson(url: string, apiKey: string | undefined): Promise<unknown> {
   const headers: Record<string, string> = { Accept: 'application/json' };
   if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
-  const res = await fetch(withApiKey(url, apiKey), { headers });
+  // Timeout abortable: un feed lento da un error claro en vez de colgar la
+  // función serverless hasta su límite.
+  let res: Response;
+  try {
+    res = await fetch(withApiKey(url, apiKey), { headers, signal: AbortSignal.timeout(25_000) });
+  } catch (e) {
+    if (e instanceof Error && e.name === 'TimeoutError') {
+      throw new Error(`El feed no respondió a tiempo (timeout) en ${url}`);
+    }
+    throw e;
+  }
   if (!res.ok) {
     throw new Error(`El feed respondió ${res.status} ${res.statusText} en ${url}`);
   }

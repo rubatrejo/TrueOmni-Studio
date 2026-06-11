@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 
-import { ClientContentSchema, emptyClientContent } from '@/lib/studio/client-content';
+import {
+  ClientContentSchema,
+  emptyClientContent,
+  mergeEditorContent,
+} from '@/lib/studio/client-content';
 import {
   loadClientContent,
+  loadClientContentOrEmpty,
   saveClientContent,
   syncContentToProducts,
 } from '@/lib/studio/client-content-sync';
@@ -71,8 +76,15 @@ export async function PATCH(req: Request, { params }: RouteParams) {
 
   const ifVersion = typeof envelope.ifVersion === 'number' ? envelope.ifVersion : undefined;
 
+  // Merge anti-clobber: el editor manda TODO el documento (incl. listings/events
+  // en estado local potencialmente stale tras un Sync). Mergeamos sus campos
+  // editables sobre el contenido ACTUAL del servidor para que un autosave stale
+  // no pueda borrar la data recién sincronizada (race del autosave).
+  const server = await loadClientContentOrEmpty(slug);
+  const merged = mergeEditorContent(server, parsed.data);
+
   // Guard de tamaño antes de escribir (un feed grande puede inflar el doc).
-  const size = checkKvValueSize(parsed.data);
+  const size = checkKvValueSize(merged);
   if (size.tooLarge) {
     return NextResponse.json(
       { error: 'content too large', sizeKb: size.sizeKb, capKb: size.capKb },
@@ -80,7 +92,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     );
   }
 
-  const result = await saveClientContent(slug, parsed.data, ifVersion);
+  const result = await saveClientContent(slug, merged, ifVersion);
   if (result.conflict) {
     return NextResponse.json(
       { error: 'version conflict', currentVersion: result.currentVersion },

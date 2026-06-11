@@ -4,6 +4,68 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-11 (cont.) — Custom feed + 3 fixes + **el Sync de feeds ya carga**
+
+Sesión larga tras F-HUB-9. Cinco entregables, todos en prod (deploys Vercel READY):
+
+**1. Provider "Custom" en Data feeds** (`cdd0d83`). Varios clientes mandan su data
+en endpoints JSON propios. Nuevo proveedor "Custom feed" con URLs de listings +
+events. Adapter `src/lib/ingest/adapters/custom.ts` para el shape `{entries:[...]}`
+(entry_id/category_name/location_name/address1..3/images[]/start_date/categories[]),
+usado por los feeds de Discover DeKalb (`/feeds/partners/` y `/feeds/events/`).
+
+**2. Publish de la PWA ya no 404ea** (`5ef8963`). Si el cliente nunca se publicó,
+el publish bootstrapea el `config.json` completo desde el KV (`buildFilesystemConfig`)
+
+- el slice PWA — "todo de una", sin publicar el kiosk antes. fs y PR.
+
+**3. Altura uniforme de los tabs de Branding & info** (`50897f0`). Data feeds medía
+640px y el resto 430px → saltaba al cambiar de tab. Todos a 640px.
+
+**4-5. EL FIX GRANDE — el Sync de feeds ahora carga la data** (`9eb4375` + `bf6cc71`).
+Síntoma: Test detectaba 115 items pero Sync dejaba "Never synced" + Review vacío,
+sin error. Reproducido (dev con auth off, KV de prod) → **3 bugs encadenados**:
+
+- **CAUSA RAÍZ:** un partner de DeKalb traía `latitude: 534` (nº de calle colado
+  en el campo). `normalize.ts` no validaba rango → coord inválida guardada →
+  `ClientContentSchema.safeParse` de TODO el doc fallaba AL LEER →
+  `loadClientContent` devolvía null → se leía vacío (y el sync, que parte de
+  loadClientContentOrEmpty, re-empezaba de cero). **Test lee/cuenta y por eso
+  pasaba; Sync guarda y al releer todo se caía.** Fix: coords fuera de
+  `[-90,90]/[-180,180]` → missing (item flagged), nunca se guardan; + `loadClientContent`
+  RESILIENTE (`salvageClientContent`) que rescata items válidos en vez de perder todo.
+- **Race del autosave:** el editor guarda todo el ClientContent local y su autosave
+  stale pisaba los items recién sincronizados. Fix: `mergeEditorContent` — el PATCH
+  del content mergea solo lo que el editor posee (feeds/categoryMap + override/status
+  - manuales) sobre los items del servidor; los items de feed quedan protegidos.
+- **Silencioso:** el sync route no tenía try/catch en normalize→merge→save. Fix:
+  try/catch que persiste `lastSyncStatus:'error'` + mensaje; 413 idem; `maxDuration=60`;
+  fetch del custom adapter con timeout abortable (25s).
+- **UX (bf6cc71):** "Apply suggestions" en el mapeo (heurística categoría→módulo:
+  comida→restaurants/Dine, hospedaje→stay/Stay, resto→things-to-do/Experiences,
+  events→Events) + badge de módulo destino / "Not mapped — won't reach products" en Review.
+
+**Verificado E2E contra el feed real:** sync persiste 100 listings + 15 events →
+conexión "Synced" → mapeo → **kiosk poblado (Experiences 51 · Dine 48 · Stay 1 ·
+Events 15)**, compartido con la PWA. +14 tests (custom parser, merge anti-clobber,
+sugerencias) → **145 total**. typecheck + lint (0 warnings) + validate 3/3.
+
+**Estado del cliente real:** `discover-dekalb` quedó configurado + sincronizado +
+mapeado en prod KV durante el E2E (conexión "Custom Dekalb Data" + 115 items + 4
+mapeos de listings). Funciona; Rubén puede refinar mapeos (p. ej. separar "Weddings").
+
+**PENDIENTE / siguiente:**
+
+- QA de Rubén con login del flujo completo en `trueomni-studio.vercel.app`.
+- Cosmético: las categorías de **events** aparecen como "unmapped" en la tabla de
+  mapping aunque no lo necesitan (la propagación de events ignora el mapeo) —
+  "Apply suggestions" las resuelve; podría filtrarse a futuro.
+- Afinar el mapeo de "Weddings" (hoy → things-to-do/Experiences por sugerencia).
+- Credenciales reales de los OTROS proveedores (Simpleview/Tempest/Crowdriff) siguen
+  pendientes para su E2E; el custom ya funciona end-to-end.
+
+---
+
 ### Sesión 2026-06-11 — F-HUB-9: bulk ops en el dashboard (cierra el audit 68/68)
 
 **Petición de Rubén:** avanzar con F-HUB-9, el único hallazgo abierto del audit

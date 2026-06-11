@@ -33,6 +33,7 @@ export function ListingsModule({
   module: mod,
   clientCoords,
   header,
+  initialSubcategory,
 }: {
   moduleKey: string;
   module: HomeModule;
@@ -40,6 +41,11 @@ export function ListingsModule({
   clientCoords?: { lat: number; lng: number };
   /** Hero + header server-rendered (pasado por la page). */
   header: ReactNode;
+  /**
+   * Sub-categoría con la que arranca pre-filtrada la lista (cuando se entra
+   * desde la pantalla de sub-categorías del kiosk). Vacío = lista completa.
+   */
+  initialSubcategory?: string;
 }) {
   // Live preview override del Studio (S3.7 dynamic). El Studio dispatcha
   // kiosk:listings-override con un array de entries (cada entry = un listing
@@ -73,7 +79,9 @@ export function ListingsModule({
 
   const moduleLabel = useModuleLabel(moduleKey, effective.label);
 
-  const [filter, setFilter] = useState<FilterState>(EMPTY_FILTER);
+  const [filter, setFilter] = useState<FilterState>(() =>
+    initialSubcategory ? { ...EMPTY_FILTER, subcategories: [initialSubcategory] } : EMPTY_FILTER,
+  );
   const [sort, setSort] = useState<SortOrder>('popularity');
 
   const [searchOpen, setSearchOpen] = useState(false);

@@ -10,6 +10,7 @@ import { HomeHeader } from '@/components/home/header';
 import { KioskCanvas } from '@/components/kiosk-canvas';
 import { DynamicListingsPlaceholder } from '@/components/listings/dynamic-listings-placeholder';
 import { ListingsModule } from '@/components/listings/listings-module';
+import { SubcategoryScreen } from '@/components/listings/subcategory-screen';
 import { MapModule } from '@/components/map/map-module';
 import { PassesModule } from '@/components/passes/passes-module';
 import { SocialWallModule } from '@/components/social-wall/social-wall-module';
@@ -23,6 +24,8 @@ import { buildMapDetailLookup } from '@/lib/map-detail-lookup';
 
 interface PageProps {
   params: Promise<{ module: string }>;
+  /** `cat` = sub-categoría seleccionada (o `all` para la lista completa). */
+  searchParams: Promise<{ cat?: string }>;
 }
 
 /**
@@ -33,8 +36,9 @@ interface PageProps {
  *     placeholder "Coming soon".
  *   - Si no existe → notFound.
  */
-export default async function ModulePage({ params }: PageProps) {
+export default async function ModulePage({ params, searchParams }: PageProps) {
   const { module } = await params;
+  const { cat } = await searchParams;
   const config = await getConfig();
   const home = config.features?.home;
   if (!home) notFound();
@@ -231,6 +235,23 @@ export default async function ModulePage({ params }: PageProps) {
     );
   }
   if (mod) {
+    // Sin `cat` y con sub-categorías → pantalla de sub-categorías primero.
+    // Con `cat` (o `cat=all`, o sin sub-categorías) → lista (pre-filtrada si aplica).
+    const hasSubcats = (mod.subcategories ?? []).length > 0;
+    if (hasSubcats && !cat) {
+      return (
+        <KioskCanvas>
+          <SubcategoryScreen
+            moduleKey={module}
+            module={mod}
+            header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
+          />
+          <AdsSlot ads={ads} />
+        </KioskCanvas>
+      );
+    }
+    const initialSubcategory =
+      cat && cat !== 'all' && mod.subcategories.includes(cat) ? cat : undefined;
     return (
       <KioskCanvas>
         <ListingsModule
@@ -238,6 +259,7 @@ export default async function ModulePage({ params }: PageProps) {
           module={mod}
           clientCoords={config.client.coords}
           header={<HomeHeader heroImage={mod.heroImage} showLanguage={false} />}
+          initialSubcategory={initialSubcategory}
         />
         <AdsSlot ads={ads} />
       </KioskCanvas>

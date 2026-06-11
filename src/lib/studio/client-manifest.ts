@@ -56,6 +56,10 @@ export const CLIENT_LIST_KEY = 'client:list';
 export const clientKeys = {
   manifest: (slug: string) => `client:${slug}:manifest`,
   branding: (slug: string) => `client:${slug}:branding`,
+  /** Contenido ingerido a nivel cliente (feeds + categoryMap + listings/events
+   *  normalizados). Fuente de verdad del contenido; se propaga a los productos
+   *  igual que el branding. Ver `client-content-sync.ts`. */
+  content: (slug: string) => `client:${slug}:content`,
   syncErrors: (slug: string) => `client:${slug}:sync-errors`,
   /** Lock optimista para evitar migraciones concurrentes. TTL 30s. */
   migrating: (slug: string) => `client:${slug}:migrating`,

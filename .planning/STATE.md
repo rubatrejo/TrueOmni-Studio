@@ -4,6 +4,64 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-11 — Ingesta de feeds de proveedores + mapeo de categorías (8 fases)
+
+**Petición de Rubén:** que cada cliente cargue su data desde feeds de proveedores
+(Simple View, Tempest, Crowdriff, WordPress) en las tabs generales de "Branding &
+info", que alimente listings/events de todos sus productos, con limpieza de data y
+renombrado/mapeo de categorías (Things to Do → "Experiences", Restaurants → "Dine").
+
+**Antes (fix suelto, en prod):** `abbe767` — los color fields del branding
+redondeaban hex→HSL a entero y desplazaban el tono ±1-2. Ahora HSL con 3 decimales
+(round3) en `hex-to-hsl.ts` + `BrandingTab.tsx`; round-trip exacto verificado en los
+16.7M colores. No rompe `hsl(var())`/Mapbox.
+
+**Brainstorming (skill) → plan aprobado** (`~/.claude/plans/peaceful-gliding-clover.md`).
+Decisiones: ingesta Sync→snapshot editable; los 4 proveedores vía adaptadores; mapeo
+categorías N→1 + rename libre; limpieza reglas auto + revisión manual; contenido a
+nivel cliente (`client:{slug}:content`) que se propaga a productos; re-sync = merge
+por ID conservando overrides; entregable "todo de una"; listings+events; editor
+x-producto read-only cuando hay feed.
+
+**Hecho — 8 fases, todas pusheadas (deploys Vercel en cola/READY):**
+
+- `db0a6cf` **F1** modelo + store (`client-content.ts` schema compartido +
+  `client-content-sync.ts` server-only + API GET/PATCH con optimistic concurrency).
+- `593b962` **F2** pipeline puro `src/lib/ingest/` normalize (stripHtml, tel, coords,
+  fechas, flags) + merge por ID (conserva override, removed-upstream). 21 tests.
+- `860896b` **F3** 4 adaptadores (WordPress real; Simpleview/Tempest defensivos
+  endpoint+apiKey configurables; Crowdriff stub honesto) + registry + endpoints
+  sync/test. 27 tests.
+- `9d2eef3` **F4-5+F6** UI tab "Data feeds" (Connections/Category mapping/Review,
+  `DataFeedsEditor.tsx`) + propagación `applyContentToKiosk`/`syncContentToProducts`
+  (agrupa por moduleKey, feedConnected, preserva manuales). Flag `feedConnected` en
+  schema.
+- `37604ac` **F7** editores listings/events del kiosk read-only cuando feedConnected
+  (`FeedManagedBanner` + fieldset disabled).
+- `c5fe6d4` **F8** fix white-label: placeholders de coords neutros (eran Phoenix AZ).
+
+**Verificado:** typecheck + lint (0 warnings) + 110 tests (51→110) + validate:configs
+3/3 en cada fase. auditor-white-label: limpio salvo el placeholder ya corregido.
+
+**Arquitectura clave:** kiosk y PWA COMPARTEN `cfg:{slug}.listings`/`.events` (la PWA
+no tiene store propio de listings) → propagar a cfg alimenta ambos. Signage no
+persiste listings/events (events runtime-resolved) → fuera de alcance.
+
+**PENDIENTE / siguiente sesión:**
+
+- **Credenciales reales por proveedor** (Simple View / Tempest / WordPress / Crowdriff):
+  los adaptadores se construyeron y testearon contra fixtures; el mapeo exacto de
+  campos y el esquema de auth de Simpleview/Tempest deben confirmarse contra una
+  cuenta real. **E2E real bloqueado por esto** (sin feed real, Sync trae 0 items).
+- **QA manual con login** del flujo: conectar feed → Sync → limpiar/mapear → publicar
+  → ver en kiosk/PWA + read-only en editor x-producto.
+- **Extensión:** editores de events de digital-displays y mobile-pwa NO respetan
+  `feedConnected` aún (solo el kiosk). Y el editor PWA de events si edita el mismo cfg.
+- **Deuda:** GC de blobs huérfanos; segmentar `client:{slug}:content` si un feed grande
+  supera el cap de KV.
+
+---
+
 ### Sesión 2026-06-10 (noche) — cierre del audit (67/68) + Full Screen del preview
 
 **Hecho (18 commits de código + 4 de docs, todos pusheados → deploys Vercel READY):**

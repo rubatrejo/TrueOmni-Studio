@@ -1,6 +1,14 @@
 'use client';
 
-import { Image as ImageIcon, Layers, Palette, Settings, Sparkles, Type } from 'lucide-react';
+import {
+  Database,
+  Image as ImageIcon,
+  Layers,
+  Palette,
+  Settings,
+  Sparkles,
+  Type,
+} from 'lucide-react';
 import { createContext, useContext, useEffect, useId, useRef, useState } from 'react';
 import { HslColorPicker, type HslColor } from 'react-colorful';
 
@@ -12,6 +20,8 @@ import { MediaField } from '../../_components/MediaField';
 import { TabStrip, type TabStripItem } from '../../_components/TabStrip';
 import { extractPaletteFromImage } from '../../_lib/palette-from-image';
 import { hexToHsl, hslToHex, formatHsl } from '../../digital-displays/_components/tabs/BrandingTab';
+
+import { DataFeedsEditor } from './DataFeedsEditor';
 
 // Hallazgo S-31: contexto del id del Field para que TextInput / FontSelect
 // lean el id auto-generado y lo apliquen al input concreto. Antes el Field
@@ -38,7 +48,7 @@ export interface BrandingFormProps {
   onChange: (next: UnifiedClientBranding) => void;
 }
 
-type TabKey = 'general' | 'brand' | 'logos' | 'fonts' | 'media';
+type TabKey = 'general' | 'brand' | 'logos' | 'fonts' | 'media' | 'data-feeds';
 
 const TABS: ReadonlyArray<TabStripItem<TabKey>> = [
   { key: 'general', label: 'General', icon: Settings, title: 'Client metadata and location' },
@@ -51,6 +61,12 @@ const TABS: ReadonlyArray<TabStripItem<TabKey>> = [
   { key: 'logos', label: 'Logos', icon: Layers, title: 'Default and dark logo paths' },
   { key: 'fonts', label: 'Fonts', icon: Type, title: 'Display and body typefaces' },
   { key: 'media', label: 'Media', icon: ImageIcon, title: 'Hero image and brand video' },
+  {
+    key: 'data-feeds',
+    label: 'Data feeds',
+    icon: Database,
+    title: 'External feed connections, category mapping and content review',
+  },
 ];
 
 const GOOGLE_FONTS = [
@@ -132,7 +148,14 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
         role="tabpanel"
         id={`${tabsId}-panel-${tab}`}
         aria-labelledby={`${tabsId}-tab-${tab}`}
-        className="flex h-[430px] flex-col justify-center p-6"
+        // El tab Data feeds gestiona su propio scroll/altura (lista de items
+        // potencialmente larga) y no se centra como los demás; los otros tabs
+        // mantienen el alto fijo de 430px con contenido centrado.
+        className={
+          tab === 'data-feeds'
+            ? 'flex h-[640px] flex-col p-6'
+            : 'flex h-[430px] flex-col justify-center p-6'
+        }
       >
         {tab === 'general' ? (
           // 2 secciones lógicas: Identity (Name + Website) + Location
@@ -468,6 +491,8 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
             </div>
           </Section>
         ) : null}
+
+        {tab === 'data-feeds' ? <DataFeedsEditor slug={slug} /> : null}
       </div>
     </div>
   );

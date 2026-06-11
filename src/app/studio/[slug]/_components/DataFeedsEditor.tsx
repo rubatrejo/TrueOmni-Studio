@@ -1236,7 +1236,7 @@ function ReviewItem({
                         },
                       })
                     }
-                    placeholder="33.4484"
+                    placeholder="Latitude (-90 to 90)"
                   />
                 </Field>
                 <Field label="Longitude">
@@ -1250,7 +1250,7 @@ function ReviewItem({
                         },
                       })
                     }
-                    placeholder="-112.0740"
+                    placeholder="Longitude (-180 to 180)"
                   />
                 </Field>
               </div>

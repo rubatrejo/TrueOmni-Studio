@@ -16,9 +16,9 @@
   /*  Cambia estos 3 valores y TODO el kiosk se recolorea solo.             */
   /*  El resto de tokens del archivo derivan de estos vía var(--brand-*).   */
   /* ====================================================================== */
-  --brand-primary: 206 100% 27%; /* #004F8B — Azul oscuro: headers, toolbars, teclado */
-  --brand-secondary: 201 100% 40%; /* #0088CE — Azul medio: CTAs, links, pins, ring */
-  --brand-tertiary: 62 53% 48%; /* #B9BD39 — Olive: highlights, CTA destacado, countdown */
+  --brand-primary: 206.087 100% 27.059%; /* #004E8A — Azul oscuro: headers, toolbars, teclado */
+  --brand-secondary: 203.265 80.328% 52.157%; /* #239BE7 — Azul medio: CTAs, links, pins, ring */
+  --brand-tertiary: 61.818 54.098% 47.843%; /* #B8BC38 — Olive: highlights, CTA destacado, countdown */
 
   /* ---------------------------------------------------------------------- */
   /*  NEUTRALES (no son brand del cliente — fondo y texto base del kiosk)   */

@@ -29,6 +29,7 @@ import {
   isItemVisible,
   resolveEvent,
   resolveListing,
+  suggestModuleForCategory,
 } from '@/lib/studio/client-content';
 
 import { MediaField } from '../../_components/MediaField';
@@ -791,6 +792,28 @@ function MappingSection({
     });
   };
 
+  // Autocompleta las categorías sin mapear con la sugerencia heurística
+  // (respeta las ya mapeadas a mano). Un solo mutate para todas.
+  const applySuggestions = () => {
+    mutate((prev) => {
+      const index = new Map(prev.categoryMap.map((cm) => [`${cm.feedId} ${cm.feedCategory}`, cm]));
+      for (const d of detected) {
+        const key = `${d.feedId} ${d.feedCategory}`;
+        const existing = index.get(key);
+        if (existing?.moduleKey) continue; // ya mapeada a mano → respetar
+        const s = suggestModuleForCategory(d.feedCategory, d.contentType);
+        index.set(key, {
+          feedId: d.feedId,
+          feedCategory: d.feedCategory,
+          moduleKey: s.moduleKey,
+          label: existing?.label || s.label,
+          contentType: existing?.contentType ?? d.contentType,
+        });
+      }
+      return { ...prev, categoryMap: [...index.values()] };
+    });
+  };
+
   if (detected.length === 0) {
     return (
       <EmptyState
@@ -803,9 +826,19 @@ function MappingSection({
 
   return (
     <div className="space-y-3">
-      <p className="text-[12px] text-zinc-500">
-        Map each raw feed category to a module. Several categories can point to the same module.
-      </p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-[12px] text-zinc-500">
+          Map each raw feed category to a module. Several categories can point to the same module.
+        </p>
+        <button
+          type="button"
+          onClick={applySuggestions}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-200 dark:hover:border-zinc-700 dark:hover:bg-zinc-900"
+          title="Auto-fill unmapped categories with a best-guess module (override anything afterwards)"
+        >
+          Apply suggestions
+        </button>
+      </div>
 
       {unmappedCount > 0 ? (
         <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50/70 px-2.5 py-1.5 text-[11.5px] text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
@@ -1130,7 +1163,13 @@ function ReviewSection({
       ) : (
         <div className="space-y-2">
           {filtered.map((item) => (
-            <ReviewItem key={item.id} slug={slug} item={item} mutate={mutate} />
+            <ReviewItem
+              key={item.id}
+              slug={slug}
+              item={item}
+              mutate={mutate}
+              targetModule={moduleKeyOf(item)}
+            />
           ))}
         </div>
       )}
@@ -1138,14 +1177,53 @@ function ReviewSection({
   );
 }
 
+/**
+ * Badge del módulo destino de un item en Review. Avisa cuando un listing no
+ * llegará a los productos por falta de mapeo. Los events siempre van al módulo
+ * Events (la propagación no usa el mapeo para events).
+ */
+function TargetModuleBadge({
+  type,
+  targetModule,
+}: {
+  type: 'listing' | 'event';
+  targetModule: string;
+}) {
+  if (type === 'event') {
+    return (
+      <span className="inline-flex items-center rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+        → events
+      </span>
+    );
+  }
+  if (targetModule) {
+    return (
+      <span className="inline-flex items-center rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+        → {targetModule}
+      </span>
+    );
+  }
+  return (
+    <span
+      className="inline-flex items-center rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+      title="This category isn't mapped, so this item won't reach the kiosk or PWA. Map it in Category mapping."
+    >
+      Not mapped — won&apos;t reach products
+    </span>
+  );
+}
+
 function ReviewItem({
   slug,
   item,
   mutate,
+  targetModule,
 }: {
   slug: string;
   item: AnyItem;
   mutate: (updater: (prev: ClientContent) => ClientContent) => void;
+  /** moduleKey destino resuelto vía categoryMap ('' si la categoría no está mapeada). */
+  targetModule: string;
 }) {
   const [open, setOpen] = useState(false);
   const resolved = item.type === 'listing' ? resolveListing(item) : resolveEvent(item);
@@ -1206,6 +1284,7 @@ function ReviewItem({
           <span className="mt-0.5 flex flex-wrap items-center gap-1">
             <StatusBadge status={item.status} />
             <span className="text-[10.5px] uppercase tracking-wide text-zinc-400">{item.type}</span>
+            <TargetModuleBadge type={item.type} targetModule={targetModule} />
             {item.flags.map((flag) => (
               <FlagBadge key={flag} flag={flag} />
             ))}

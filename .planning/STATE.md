@@ -4,6 +4,51 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-11 (cont. 2) — Sub-categorías kiosk + fotos editables: CAPA DE DATOS (checkpoint a 80% ctx)
+
+**Petición de Rubén:** que el **kiosk** tenga una pantalla de sub-categorías al entrar
+a un módulo de listings (como la PWA), que al tocar una sub-categoría **filtre** la
+lista a ella (kiosk + PWA), y que las **fotos** de cada sub-categoría sean editables
+desde el Studio para ambos productos.
+
+**Decisiones (brainstorming):** sub-categorías **independientes por producto** (editar
+fotos en cada editor) · al tocar **filtra** a esa sub-categoría.
+**Plan aprobado:** `~/.claude/plans/por-que-cuando-cargo-validated-glacier.md` (leerlo
+para retomar — diseño completo, archivos y verificación).
+
+**HECHO esta sesión — solo la CAPA DE DATOS** (`354194b`, pusheado):
+
+- `ListingsCatalogSchema.subcategoryImages?: Record<name,url>` (foto por sub-cat del
+  KIOSK; paralelo a `subcategories: string[]`, no cambia su tipo → no rompe filtros/
+  propagación). Opcional/retrocompat.
+- `HomeModule.subcategoryImages?` + `PwaListingCategory.subcategory?` (sub-cat a la que
+  filtra una tile de la PWA; vacío = lista completa) en `config.ts`.
+- `applyContentToKiosk` preserva las fotos de sub-cat en cada re-sync (merge por nombre).
+- typecheck + lint + 145 tests + validate 3/3.
+
+**PENDIENTE — siguiente sesión (la UI, lo gordo):** seguir el plan aprobado:
+
+1. **Kiosk:** `src/components/listings/subcategory-screen.tsx` (NUEVA, tiles foto+nombre
+   estilo PWA adaptado a 1080×1920, tile "All", FloatingHomeButton). Branch en
+   `src/app/(kiosk)/home/[module]/page.tsx` por `searchParams.cat` (sin cat + hay
+   sub-cats → pantalla; con cat → `ListingsModule` pre-filtrado). `ListingsModule`
+   acepta `initialSubcategory` → siembra `FilterState` (filtro ya existe en
+   `listings-filter.ts:85`). Back a sub-cats desde la lista. **No hay XD → iterar con
+   screenshot (kiosk:dev).**
+2. **PWA:** filtrar al tocar — en `listings-list-screen-live.tsx` + páginas
+   `(pwa)/pwa/{restaurants,stay,things-to-do}/list/page.tsx`: resolver la categoría por
+   `key` y sembrar el filtro por su `subcategory` si la tiene.
+3. **Editores:** picker de imagen por sub-cat en `ListingsEditor.tsx` (kiosk, sección
+   Subcategories/`TaxonomyEditor` ~378 → `catalog.subcategoryImages[name]`) y por
+   categoría + dropdown `subcategory` en `mobile-pwa/_components/ListingsModuleEditor.tsx`
+   (PWA). Reusar `ImageField`/`ImageUrlField` + `/api/studio/upload`.
+4. `bootstrap-from-fs.ts` leer `subcategoryImages`. Tests del schema/propagación.
+
+**Nota:** la config PWA del módulo listings NO tiene zod estricto (passthrough) → basta
+el tipo en config.ts para `subcategory`. Trails (PwaTrailsModuleConfig) fuera.
+
+---
+
 ### Sesión 2026-06-11 (cont.) — Custom feed + 3 fixes + **el Sync de feeds ya carga**
 
 Sesión larga tras F-HUB-9. Cinco entregables, todos en prod (deploys Vercel READY):

@@ -7,6 +7,7 @@ import type { ImportMode, ImportStats } from '@/app/studio/_lib/import-helpers';
 import { type EventItem, type EventsModule, makeBlankEvent } from '@/lib/studio/schema';
 
 import { type AiSuggestedItem } from '../_lib/api-client';
+import { useStudioSlug } from '../_lib/slug-context';
 
 import { AiSuggestModal } from './AiSuggestModal';
 import { CatalogItemForm, type FieldConfig } from './catalog/CatalogItemForm';
@@ -20,6 +21,7 @@ import { ImportModal } from './catalog/ImportModal';
 import { ImportToast } from './catalog/ImportToast';
 import { TaxonomyEditor } from './catalog/TaxonomyEditor';
 import { EditorEmptyState } from './EditorEmptyState';
+import { FeedManagedBanner } from './FeedManagedBanner';
 
 interface EventsEditorProps {
   value: EventsModule;
@@ -29,6 +31,10 @@ interface EventsEditorProps {
 }
 
 export function EventsEditor({ value, onChange, kioskLocation }: EventsEditorProps) {
+  const slug = useStudioSlug();
+  // Read-only cuando el módulo de events se alimenta de un feed de proveedor.
+  // El contenido se gestiona desde la tab "Data feeds" del cliente.
+  const readOnly = value.feedConnected === true;
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
@@ -186,149 +192,164 @@ export function EventsEditor({ value, onChange, kioskLocation }: EventsEditorPro
         title={editingItem.title}
         subtitle={`${editingItem.date} · ${editingItem.startTime}–${editingItem.endTime}`}
         onBack={() => setEditingSlug(null)}
-        onDelete={() => handleItemDelete(editingItem.slug)}
+        // En read-only ocultamos el delete; el back (navegación) sigue activo.
+        onDelete={readOnly ? undefined : () => handleItemDelete(editingItem.slug)}
       >
-        <CatalogItemForm<EventItem>
-          item={editingItem}
-          fields={baseFields}
-          onChange={(patch) => handleItemChange(editingItem.slug, patch)}
-          footer={
-            editingItem.priceMode === 'paid' ? (
-              <PricePaidFields
-                item={editingItem}
-                onChange={(patch) => handleItemChange(editingItem.slug, patch)}
-              />
-            ) : null
-          }
-        />
+        {readOnly ? <FeedManagedBanner slug={slug} /> : null}
+        {/* fieldset disabled + pointer-events-none bloquea inputs y el drag. */}
+        <fieldset
+          disabled={readOnly}
+          className={readOnly ? 'pointer-events-none select-none opacity-60' : undefined}
+        >
+          <CatalogItemForm<EventItem>
+            item={editingItem}
+            fields={baseFields}
+            onChange={(patch) => handleItemChange(editingItem.slug, patch)}
+            footer={
+              editingItem.priceMode === 'paid' ? (
+                <PricePaidFields
+                  item={editingItem}
+                  onChange={(patch) => handleItemChange(editingItem.slug, patch)}
+                />
+              ) : null
+            }
+          />
+        </fieldset>
       </CatalogItemPanel>
     );
   }
 
   return (
     <div className="space-y-4">
-      <ImageUrlField
-        label="Hero image"
-        value={value.heroImage}
-        onChange={(next) => update({ heroImage: next ?? '' })}
-      />
-
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        <TaxonomyEditor
-          label="Categories"
-          items={value.categories}
-          onChange={(next) => update({ categories: next })}
-          getUsage={(item) => value.events.filter((e) => e.category === item).length}
+      {readOnly ? <FeedManagedBanner slug={slug} /> : null}
+      {/* El contenido se ve pero no se edita: disabled controles + sin pointer. */}
+      <fieldset
+        disabled={readOnly}
+        className={readOnly ? 'pointer-events-none select-none space-y-4 opacity-60' : 'space-y-4'}
+      >
+        <ImageUrlField
+          label="Hero image"
+          value={value.heroImage}
+          onChange={(next) => update({ heroImage: next ?? '' })}
         />
-        <TaxonomyEditor
-          label="Venues"
-          items={value.venues}
-          onChange={(next) => update({ venues: next })}
-          getUsage={(item) => value.events.filter((e) => e.venue === item).length}
+
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <TaxonomyEditor
+            label="Categories"
+            items={value.categories}
+            onChange={(next) => update({ categories: next })}
+            getUsage={(item) => value.events.filter((e) => e.category === item).length}
+          />
+          <TaxonomyEditor
+            label="Venues"
+            items={value.venues}
+            onChange={(next) => update({ venues: next })}
+            getUsage={(item) => value.events.filter((e) => e.venue === item).length}
+          />
+          <TaxonomyEditor
+            label="Features"
+            items={value.features}
+            onChange={(next) => update({ features: next })}
+            getUsage={(item) => value.events.filter((e) => e.features.includes(item)).length}
+          />
+        </div>
+
+        <CatalogToolbar
+          search={search}
+          onSearchChange={setSearch}
+          onAdd={handleAdd}
+          addLabel="Add event"
+          onImport={() => setImportOpen(true)}
+          onExport={handleExport}
+          exportEnabled={value.events.length > 0}
+          filter={filter}
+          onFilterChange={setFilter}
+          filterOptions={value.categories.map((c) => ({ value: c, label: c }))}
+          filterPlaceholder="All categories"
+          count={value.events.length}
+          onAiSuggest={kioskLocation ? () => setAiOpen(true) : undefined}
         />
-        <TaxonomyEditor
-          label="Features"
-          items={value.features}
-          onChange={(next) => update({ features: next })}
-          getUsage={(item) => value.events.filter((e) => e.features.includes(item)).length}
+
+        <AiSuggestModal
+          open={aiOpen}
+          kind="events"
+          location={kioskLocation ?? ''}
+          existingSlugs={value.events.map((e) => e.slug)}
+          onClose={() => setAiOpen(false)}
+          onConfirm={(items: AiSuggestedItem[]) => {
+            // Map AI items to EventItem skeletons. Title/description/address
+            // del AI; el resto (date/time/venue/etc.) lo completa el operador.
+            const newEvents: EventItem[] = items.map((it) => ({
+              ...makeBlankEvent(),
+              slug: it.slug,
+              title: it.title,
+              description: it.description,
+              venue: it.address,
+              features: it.tags ?? [],
+            }));
+            onChange({ ...value, events: [...newEvents, ...value.events] });
+          }}
         />
-      </div>
 
-      <CatalogToolbar
-        search={search}
-        onSearchChange={setSearch}
-        onAdd={handleAdd}
-        addLabel="Add event"
-        onImport={() => setImportOpen(true)}
-        onExport={handleExport}
-        exportEnabled={value.events.length > 0}
-        filter={filter}
-        onFilterChange={setFilter}
-        filterOptions={value.categories.map((c) => ({ value: c, label: c }))}
-        filterPlaceholder="All categories"
-        count={value.events.length}
-        onAiSuggest={kioskLocation ? () => setAiOpen(true) : undefined}
-      />
+        <ImportToast
+          stats={lastImport}
+          noun={lastImport && lastImport.total === 1 ? 'event' : 'events'}
+          onDismiss={() => setLastImport(null)}
+        />
 
-      <AiSuggestModal
-        open={aiOpen}
-        kind="events"
-        location={kioskLocation ?? ''}
-        existingSlugs={value.events.map((e) => e.slug)}
-        onClose={() => setAiOpen(false)}
-        onConfirm={(items: AiSuggestedItem[]) => {
-          // Map AI items to EventItem skeletons. Title/description/address
-          // del AI; el resto (date/time/venue/etc.) lo completa el operador.
-          const newEvents: EventItem[] = items.map((it) => ({
-            ...makeBlankEvent(),
-            slug: it.slug,
-            title: it.title,
-            description: it.description,
-            venue: it.address,
-            features: it.tags ?? [],
-          }));
-          onChange({ ...value, events: [...newEvents, ...value.events] });
-        }}
-      />
+        <ImportModal
+          open={importOpen}
+          kind="events"
+          existingItems={value.events}
+          onClose={() => setImportOpen(false)}
+          onImport={handleImport}
+        />
 
-      <ImportToast
-        stats={lastImport}
-        noun={lastImport && lastImport.total === 1 ? 'event' : 'events'}
-        onDismiss={() => setLastImport(null)}
-      />
-
-      <ImportModal
-        open={importOpen}
-        kind="events"
-        existingItems={value.events}
-        onClose={() => setImportOpen(false)}
-        onImport={handleImport}
-      />
-
-      <CatalogList<EventItem>
-        items={visible}
-        onReorder={handleReorder}
-        onItemDelete={handleItemDelete}
-        onItemDuplicate={handleItemDuplicate}
-        onItemsBulkDelete={handleBulkDelete}
-        onItemsBulkDuplicate={handleBulkDuplicate}
-        itemNoun="event"
-        onItemSelect={setEditingSlug}
-        emptyState={
-          value.events.length === 0 ? (
-            <EditorEmptyState
-              icon={Calendar}
-              headline="No events yet"
-              description="Concerts, festivals, exhibitions and recurring activities. Each event becomes a card on the Events tile and can drive ticket conversions."
-              primaryAction={{ label: 'Add event', onClick: handleAdd }}
-            />
-          ) : undefined
-        }
-        renderRow={(item) => (
-          <div className="flex items-center gap-2">
-            {item.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                loading="lazy"
-                src={item.image}
-                alt=""
-                className="h-10 w-10 shrink-0 rounded object-cover ring-1 ring-zinc-200 dark:ring-zinc-800"
+        <CatalogList<EventItem>
+          items={visible}
+          onReorder={handleReorder}
+          onItemDelete={handleItemDelete}
+          onItemDuplicate={handleItemDuplicate}
+          onItemsBulkDelete={handleBulkDelete}
+          onItemsBulkDuplicate={handleBulkDuplicate}
+          itemNoun="event"
+          onItemSelect={setEditingSlug}
+          emptyState={
+            value.events.length === 0 ? (
+              <EditorEmptyState
+                icon={Calendar}
+                headline="No events yet"
+                description="Concerts, festivals, exhibitions and recurring activities. Each event becomes a card on the Events tile and can drive ticket conversions."
+                primaryAction={{ label: 'Add event', onClick: handleAdd }}
               />
-            ) : (
-              <div className="h-10 w-10 shrink-0 rounded bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700" />
-            )}
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-[12.5px] font-medium text-zinc-800 dark:text-zinc-200">
-                {item.title || <span className="italic text-zinc-500">Untitled</span>}
-              </div>
-              <div className="truncate text-[10.5px] text-zinc-500">
-                {item.date} · {item.startTime}–{item.endTime} · {item.category || '—'} ·{' '}
-                {item.priceMode}
+            ) : undefined
+          }
+          renderRow={(item) => (
+            <div className="flex items-center gap-2">
+              {item.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  loading="lazy"
+                  src={item.image}
+                  alt=""
+                  className="h-10 w-10 shrink-0 rounded object-cover ring-1 ring-zinc-200 dark:ring-zinc-800"
+                />
+              ) : (
+                <div className="h-10 w-10 shrink-0 rounded bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700" />
+              )}
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[12.5px] font-medium text-zinc-800 dark:text-zinc-200">
+                  {item.title || <span className="italic text-zinc-500">Untitled</span>}
+                </div>
+                <div className="truncate text-[10.5px] text-zinc-500">
+                  {item.date} · {item.startTime}–{item.endTime} · {item.category || '—'} ·{' '}
+                  {item.priceMode}
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      />
+          )}
+        />
+      </fieldset>
     </div>
   );
 }

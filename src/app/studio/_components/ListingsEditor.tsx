@@ -13,6 +13,7 @@ import {
 } from '@/lib/studio/schema';
 
 import { type AiSuggestKind, type AiSuggestedItem } from '../_lib/api-client';
+import { useStudioSlug } from '../_lib/slug-context';
 
 import { AiSuggestModal } from './AiSuggestModal';
 import { CatalogItemForm, type FieldConfig } from './catalog/CatalogItemForm';
@@ -26,6 +27,7 @@ import { ImportModal } from './catalog/ImportModal';
 import { ImportToast } from './catalog/ImportToast';
 import { TaxonomyEditor } from './catalog/TaxonomyEditor';
 import { EditorEmptyState } from './EditorEmptyState';
+import { FeedManagedBanner } from './FeedManagedBanner';
 import { useToast } from './Toast';
 
 interface ListingsEditorProps {
@@ -40,6 +42,7 @@ interface ListingsEditorProps {
  * Las entries se pueden duplicar / borrar / añadir desde la tab Modules.
  */
 export function ListingsEditor({ value, onChange, kioskLocation }: ListingsEditorProps) {
+  const slug = useStudioSlug();
   const [activeKey, setActiveKey] = useState<string>(value[0]?.key ?? '');
 
   // Si el active key se borra desde Modules, saltamos al primero disponible.
@@ -105,6 +108,7 @@ export function ListingsEditor({ value, onChange, kioskLocation }: ListingsEdito
         onEntryChange={updateEntry}
         onCatalogChange={updateCatalog}
         kioskLocation={kioskLocation}
+        slug={slug}
       />
     </div>
   );
@@ -115,12 +119,17 @@ function ListingsCatalogEditor({
   onEntryChange,
   onCatalogChange,
   kioskLocation,
+  slug,
 }: {
   entry: ListingsCatalogEntry;
   onEntryChange: (patch: Partial<ListingsCatalogEntry>) => void;
   onCatalogChange: (patch: Partial<ListingsCatalog>) => void;
   kioskLocation: string;
+  slug: string | null;
 }) {
+  // Read-only por módulo: solo el entry activo con `feedConnected` se bloquea.
+  // El contenido se gestiona desde la tab "Data feeds" del cliente.
+  const readOnly = entry.feedConnected === true;
   const { show } = useToast();
   const catalog = entry.catalog;
   const [search, setSearch] = useState('');
@@ -312,143 +321,158 @@ function ListingsCatalogEditor({
         title={editingItem.title}
         subtitle={editingItem.slug}
         onBack={() => setEditingSlug(null)}
-        onDelete={() => handleItemDelete(editingItem.slug)}
+        // En read-only ocultamos el delete; el back (navegación) sigue activo.
+        onDelete={readOnly ? undefined : () => handleItemDelete(editingItem.slug)}
       >
-        <CatalogItemForm<ListingItem>
-          item={editingItem}
-          fields={fields}
-          onChange={(patch) => {
-            if (patch.priceRange !== undefined) {
-              const num = Number(patch.priceRange) as 1 | 2 | 3 | 4;
-              handleItemChange(editingItem.slug, { ...patch, priceRange: num });
-            } else {
-              handleItemChange(editingItem.slug, patch);
-            }
-          }}
-        />
+        {readOnly ? <FeedManagedBanner slug={slug} /> : null}
+        {/* fieldset disabled + pointer-events-none bloquea inputs y el drag. */}
+        <fieldset
+          disabled={readOnly}
+          className={readOnly ? 'pointer-events-none select-none opacity-60' : undefined}
+        >
+          <CatalogItemForm<ListingItem>
+            item={editingItem}
+            fields={fields}
+            onChange={(patch) => {
+              if (patch.priceRange !== undefined) {
+                const num = Number(patch.priceRange) as 1 | 2 | 3 | 4;
+                handleItemChange(editingItem.slug, { ...patch, priceRange: num });
+              } else {
+                handleItemChange(editingItem.slug, patch);
+              }
+            }}
+          />
+        </fieldset>
       </CatalogItemPanel>
     );
   }
 
   return (
     <section className="space-y-4">
-      <label className="block space-y-1">
-        <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
-          Module label
-        </span>
-        <input
-          type="text"
-          value={entry.label}
-          onChange={(e) => onEntryChange({ label: e.target.value })}
-          className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100"
+      {readOnly ? <FeedManagedBanner slug={slug} /> : null}
+      {/* El contenido se ve pero no se edita: disabled controles + sin pointer. */}
+      <fieldset
+        disabled={readOnly}
+        className={readOnly ? 'pointer-events-none select-none space-y-4 opacity-60' : 'space-y-4'}
+      >
+        <label className="block space-y-1">
+          <span className="block text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
+            Module label
+          </span>
+          <input
+            type="text"
+            value={entry.label}
+            onChange={(e) => onEntryChange({ label: e.target.value })}
+            className="w-full rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-[12px] text-zinc-900 focus:border-sky-500/60 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-100"
+          />
+        </label>
+
+        <ImageUrlField
+          label="Hero image"
+          value={catalog.heroImage}
+          onChange={(next) => onCatalogChange({ heroImage: next ?? '' })}
+          helpText="Top hero shown above the listings grid."
         />
-      </label>
 
-      <ImageUrlField
-        label="Hero image"
-        value={catalog.heroImage}
-        onChange={(next) => onCatalogChange({ heroImage: next ?? '' })}
-        helpText="Top hero shown above the listings grid."
-      />
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <TaxonomyEditor
+            label="Subcategories"
+            items={catalog.subcategories}
+            onChange={(next) => onCatalogChange({ subcategories: next })}
+            getUsage={(item) => catalog.listings.filter((l) => l.subcategory === item).length}
+          />
+          <TaxonomyEditor
+            label="Features"
+            items={catalog.features}
+            onChange={(next) => onCatalogChange({ features: next })}
+            getUsage={(item) => catalog.listings.filter((l) => l.features.includes(item)).length}
+          />
+        </div>
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        <TaxonomyEditor
-          label="Subcategories"
-          items={catalog.subcategories}
-          onChange={(next) => onCatalogChange({ subcategories: next })}
-          getUsage={(item) => catalog.listings.filter((l) => l.subcategory === item).length}
+        <CatalogToolbar
+          search={search}
+          onSearchChange={setSearch}
+          onAdd={handleAdd}
+          addLabel="Add listing"
+          onImport={() => setImportOpen(true)}
+          onExport={handleExport}
+          exportEnabled={catalog.listings.length > 0}
+          filter={filter}
+          onFilterChange={setFilter}
+          filterOptions={catalog.subcategories.map((s) => ({ value: s, label: s }))}
+          filterPlaceholder="All subcategories"
+          count={catalog.listings.length}
+          onAiSuggest={() => setAiOpen(true)}
         />
-        <TaxonomyEditor
-          label="Features"
-          items={catalog.features}
-          onChange={(next) => onCatalogChange({ features: next })}
-          getUsage={(item) => catalog.listings.filter((l) => l.features.includes(item)).length}
+
+        <AiSuggestModal
+          open={aiOpen}
+          kind={aiKind}
+          location={kioskLocation}
+          existingSlugs={catalog.listings.map((l) => l.slug)}
+          onClose={() => setAiOpen(false)}
+          onConfirm={handleAiAccept}
         />
-      </div>
 
-      <CatalogToolbar
-        search={search}
-        onSearchChange={setSearch}
-        onAdd={handleAdd}
-        addLabel="Add listing"
-        onImport={() => setImportOpen(true)}
-        onExport={handleExport}
-        exportEnabled={catalog.listings.length > 0}
-        filter={filter}
-        onFilterChange={setFilter}
-        filterOptions={catalog.subcategories.map((s) => ({ value: s, label: s }))}
-        filterPlaceholder="All subcategories"
-        count={catalog.listings.length}
-        onAiSuggest={() => setAiOpen(true)}
-      />
+        <ImportToast
+          stats={lastImport}
+          noun={lastImport && lastImport.total === 1 ? 'listing' : 'listings'}
+          onDismiss={() => setLastImport(null)}
+        />
 
-      <AiSuggestModal
-        open={aiOpen}
-        kind={aiKind}
-        location={kioskLocation}
-        existingSlugs={catalog.listings.map((l) => l.slug)}
-        onClose={() => setAiOpen(false)}
-        onConfirm={handleAiAccept}
-      />
+        <ImportModal
+          open={importOpen}
+          kind="listings"
+          existingItems={catalog.listings}
+          onClose={() => setImportOpen(false)}
+          onImport={handleImport}
+        />
 
-      <ImportToast
-        stats={lastImport}
-        noun={lastImport && lastImport.total === 1 ? 'listing' : 'listings'}
-        onDismiss={() => setLastImport(null)}
-      />
-
-      <ImportModal
-        open={importOpen}
-        kind="listings"
-        existingItems={catalog.listings}
-        onClose={() => setImportOpen(false)}
-        onImport={handleImport}
-      />
-
-      <CatalogList<ListingItem>
-        items={visible}
-        onReorder={handleReorder}
-        onItemDelete={handleItemDelete}
-        onItemDuplicate={handleItemDuplicate}
-        onItemsBulkDelete={handleBulkDelete}
-        onItemsBulkDuplicate={handleBulkDuplicate}
-        itemNoun="listing"
-        onItemSelect={setEditingSlug}
-        emptyState={
-          catalog.listings.length === 0 ? (
-            <EditorEmptyState
-              icon={Sparkles}
-              headline={`No ${entry.label.toLowerCase()} yet`}
-              description="Listings power the dynamic Home tiles like Food & Drink, Things to Do or Stay. Each listing has a hero image, description, hours and an optional reservation CTA."
-              primaryAction={{ label: 'Add listing', onClick: handleAdd }}
-            />
-          ) : undefined
-        }
-        renderRow={(item) => (
-          <div className="flex items-center gap-2">
-            {item.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                loading="lazy"
-                src={item.image}
-                alt=""
-                className="h-10 w-10 shrink-0 rounded object-cover ring-1 ring-zinc-200 dark:ring-zinc-800"
+        <CatalogList<ListingItem>
+          items={visible}
+          onReorder={handleReorder}
+          onItemDelete={handleItemDelete}
+          onItemDuplicate={handleItemDuplicate}
+          onItemsBulkDelete={handleBulkDelete}
+          onItemsBulkDuplicate={handleBulkDuplicate}
+          itemNoun="listing"
+          onItemSelect={setEditingSlug}
+          emptyState={
+            catalog.listings.length === 0 ? (
+              <EditorEmptyState
+                icon={Sparkles}
+                headline={`No ${entry.label.toLowerCase()} yet`}
+                description="Listings power the dynamic Home tiles like Food & Drink, Things to Do or Stay. Each listing has a hero image, description, hours and an optional reservation CTA."
+                primaryAction={{ label: 'Add listing', onClick: handleAdd }}
               />
-            ) : (
-              <div className="h-10 w-10 shrink-0 rounded bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700" />
-            )}
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-[12.5px] font-medium text-zinc-800 dark:text-zinc-200">
-                {item.title || <span className="italic text-zinc-500">Untitled</span>}
-              </div>
-              <div className="truncate text-[10.5px] text-zinc-500">
-                {item.subcategory || '—'}
-                {item.features.length > 0 ? ` · ${item.features.length} features` : ''}
+            ) : undefined
+          }
+          renderRow={(item) => (
+            <div className="flex items-center gap-2">
+              {item.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  loading="lazy"
+                  src={item.image}
+                  alt=""
+                  className="h-10 w-10 shrink-0 rounded object-cover ring-1 ring-zinc-200 dark:ring-zinc-800"
+                />
+              ) : (
+                <div className="h-10 w-10 shrink-0 rounded bg-zinc-100 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700" />
+              )}
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[12.5px] font-medium text-zinc-800 dark:text-zinc-200">
+                  {item.title || <span className="italic text-zinc-500">Untitled</span>}
+                </div>
+                <div className="truncate text-[10.5px] text-zinc-500">
+                  {item.subcategory || '—'}
+                  {item.features.length > 0 ? ` · ${item.features.length} features` : ''}
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      />
+          )}
+        />
+      </fieldset>
     </section>
   );
 }

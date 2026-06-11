@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { BrandingSchema, DEFAULT_BRANDING } from './schema';
+import { BrandingSchema, DEFAULT_BRANDING, ListingsCatalogSchema } from './schema';
 
 /**
  * Tests del BrandingSchema (F-QA-6 del audit).
@@ -164,6 +164,58 @@ describe('BrandingSchema', () => {
       secondary: '#0088CE',
       tertiary: '#B9BD39',
       heroLogoSize: 'XXL',
+    });
+    expect(r.success).toBe(false);
+  });
+});
+
+/**
+ * Tests de `ListingsCatalogSchema` enfocados en `subcategoryImages` (fotos por
+ * sub-categoría del kiosk, name → URL). Campo opcional → retrocompat con
+ * configs antiguos que no lo traen.
+ */
+describe('ListingsCatalogSchema — subcategoryImages', () => {
+  it('un catálogo SIN subcategoryImages sigue siendo válido (retrocompat)', () => {
+    const r = ListingsCatalogSchema.safeParse({
+      heroImage: '',
+      subcategories: ['Mexican', 'Italian'],
+      features: [],
+      listings: [],
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      // El campo es opcional: no se inyecta cuando se omite.
+      expect(r.data.subcategoryImages).toBeUndefined();
+    }
+  });
+
+  it('acepta subcategoryImages como mapa string → string', () => {
+    const r = ListingsCatalogSchema.safeParse({
+      heroImage: '',
+      subcategories: ['Mexican', 'Italian'],
+      subcategoryImages: {
+        Mexican: '/uploads/mexican.jpg',
+        Italian: 'https://cdn.example.com/italian.png',
+      },
+      features: [],
+      listings: [],
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.subcategoryImages).toEqual({
+        Mexican: '/uploads/mexican.jpg',
+        Italian: 'https://cdn.example.com/italian.png',
+      });
+    }
+  });
+
+  it('rechaza subcategoryImages con un valor no-string', () => {
+    const r = ListingsCatalogSchema.safeParse({
+      heroImage: '',
+      subcategories: ['Mexican'],
+      subcategoryImages: { Mexican: 123 },
+      features: [],
+      listings: [],
     });
     expect(r.success).toBe(false);
   });

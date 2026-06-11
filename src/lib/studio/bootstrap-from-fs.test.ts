@@ -126,4 +126,65 @@ describe('bootstrapStudioFromFs', () => {
     expect(Array.isArray(result.modules?.tiles)).toBe(true);
     expect(result.modules?.tiles?.length ?? 0).toBeGreaterThan(0);
   });
+
+  it('hidrata subcategoryImages de un módulo de listings leído desde el fs', () => {
+    // FsConfig sintético: un módulo de listings "restaurants" sin `kind`
+    // (shape de catálogo) que trae fotos por sub-categoría que el operador subió.
+    const fsConfig = {
+      client: { slug: 'default', nombre: 'TrueOmni Default' },
+      features: {
+        home: {
+          modules: {
+            restaurants: {
+              label: 'Restaurants',
+              heroImage: '/hero.jpg',
+              subcategories: ['Mexican', 'Italian'],
+              subcategoryImages: {
+                Mexican: '/uploads/mexican.jpg',
+                Italian: '/uploads/italian.jpg',
+              },
+              features: [],
+              listings: [],
+            },
+          },
+        },
+      },
+    };
+    const studio = makeBlankConfig('blank-listings', 'TrueOmni Default');
+    // Forzamos listings a undefined para que el bootstrap los hidrate desde el fs.
+    const studioNoListings = { ...studio, listings: undefined };
+    const result = bootstrapStudioFromFs(studioNoListings, fsConfig, null);
+    const mod = result.listings?.find((m) => m.key === 'restaurants');
+    expect(mod).toBeDefined();
+    expect(mod?.catalog.subcategoryImages).toEqual({
+      Mexican: '/uploads/mexican.jpg',
+      Italian: '/uploads/italian.jpg',
+    });
+  });
+
+  it('un módulo de listings del fs SIN subcategoryImages sigue siendo válido (retrocompat)', () => {
+    const fsConfig = {
+      client: { slug: 'default', nombre: 'TrueOmni Default' },
+      features: {
+        home: {
+          modules: {
+            restaurants: {
+              label: 'Restaurants',
+              heroImage: '/hero.jpg',
+              subcategories: ['Mexican'],
+              features: [],
+              listings: [],
+            },
+          },
+        },
+      },
+    };
+    const studio = makeBlankConfig('blank-listings-2', 'TrueOmni Default');
+    const studioNoListings = { ...studio, listings: undefined };
+    const result = bootstrapStudioFromFs(studioNoListings, fsConfig, null);
+    const mod = result.listings?.find((m) => m.key === 'restaurants');
+    expect(mod).toBeDefined();
+    // Sin fotos en el fs → el campo opcional no se inyecta.
+    expect(mod?.catalog.subcategoryImages).toBeUndefined();
+  });
 });

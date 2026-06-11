@@ -10,7 +10,7 @@ import { usePwaSection } from './pwa-bridge-context';
 
 type ListData = Omit<
   ComponentProps<typeof ListingsListScreen>,
-  'title' | 'tabs' | 'resultsLabel' | 'distanceSuffix' | 'filterTexts'
+  'title' | 'tabs' | 'resultsLabel' | 'distanceSuffix' | 'filterTexts' | 'initialSubcategory'
 >;
 
 /**
@@ -34,9 +34,11 @@ export function ListingsListScreenLive({
   categoryKey?: string;
 }) {
   const cfg = usePwaSection(moduleKey, config) ?? config;
-  const title = categoryKey
-    ? (cfg.categories.find((c) => c.key === categoryKey)?.label ?? cfg.title)
-    : cfg.title;
+  const category = categoryKey ? cfg.categories.find((c) => c.key === categoryKey) : undefined;
+  const title = category?.label ?? cfg.title;
+  // Si la tile tocada tiene una sub-categoría bound → la lista arranca filtrada
+  // a ella. Vacío = lista completa (retrocompat con configs sin `subcategory`).
+  const initialSubcategory = category?.subcategory || undefined;
   return (
     <ListingsListScreen
       {...data}
@@ -45,6 +47,7 @@ export function ListingsListScreenLive({
       resultsLabel={cfg.resultsLabel}
       distanceSuffix={cfg.distanceSuffix}
       filterTexts={cfg.filters}
+      initialSubcategory={initialSubcategory}
     />
   );
 }

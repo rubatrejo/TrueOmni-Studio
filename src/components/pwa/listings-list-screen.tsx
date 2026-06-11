@@ -48,6 +48,12 @@ interface Props {
   navActive?: PwaNavKey;
   /** Pestaña inicial (default "listings"). */
   initialTab?: 'listings' | 'map';
+  /**
+   * Sub-categoría (`listing.subcategory`) con la que arranca pre-filtrada la
+   * lista (cuando se entra tocando una tile del grid con `subcategory` bound).
+   * Vacío = lista completa (retrocompat).
+   */
+  initialSubcategory?: string;
 }
 
 /**
@@ -75,12 +81,15 @@ export function ListingsListScreen({
   basePath,
   navActive,
   initialTab = 'listings',
+  initialSubcategory,
 }: Props) {
   const router = useRouter();
   const [tab, setTab] = useState<'listings' | 'map'>(initialTab);
   // Favoritos persistentes (sessionStorage, compartido con kiosk + Trip Planner) — C3.
   const { isFavorited, toggle: toggleFav } = useFavorites();
-  const [filter, setFilter] = useState<FilterState>(EMPTY_FILTER);
+  const [filter, setFilter] = useState<FilterState>(() =>
+    initialSubcategory ? { ...EMPTY_FILTER, subcategories: [initialSubcategory] } : EMPTY_FILTER,
+  );
   const [filterOpen, setFilterOpen] = useState(false);
 
   // Filtro (reusa applyFilters del kiosk sobre los listings crudos).

@@ -208,6 +208,98 @@ describe('applyContentToKiosk', () => {
     expect(out.events!.venues).toContain('The Hall');
   });
 
+  it('preserves operator-uploaded subcategoryImages across a re-sync (merge by name)', () => {
+    const doc = content({
+      categoryMap: [
+        {
+          feedId: 'f1',
+          feedCategory: 'Dining',
+          moduleKey: 'restaurants',
+          label: 'Dine',
+          contentType: 'listing',
+        },
+      ],
+      listings: [
+        {
+          id: 'f1:1',
+          source: 'f1',
+          type: 'listing',
+          feedCategory: 'Dining',
+          feedData: { title: 'Taco Spot', subcategory: 'Mexican' },
+          override: {},
+          flags: [],
+          status: 'active',
+        },
+        {
+          id: 'f1:2',
+          source: 'f1',
+          type: 'listing',
+          feedCategory: 'Dining',
+          feedData: { title: 'Pasta Place', subcategory: 'Italian' },
+          override: {},
+          flags: [],
+          status: 'active',
+        },
+      ],
+    });
+    // El cfg previo ya tiene fotos de sub-categoría subidas por el operador en
+    // el módulo restaurants (que es alimentado por feed).
+    const prev = manualModule('restaurants');
+    prev.feedConnected = true;
+    prev.catalog.subcategories = ['Mexican', 'Italian'];
+    prev.catalog.subcategoryImages = {
+      Mexican: '/uploads/mexican.jpg',
+      Italian: '/uploads/italian.jpg',
+    };
+    const out = applyContentToKiosk(emptyCfg({ listings: [prev] }), doc);
+    const mod = out.listings!.find((m) => m.key === 'restaurants')!;
+    // Las fotos subidas se conservan tras el re-sync.
+    expect(mod.catalog.subcategoryImages).toEqual({
+      Mexican: '/uploads/mexican.jpg',
+      Italian: '/uploads/italian.jpg',
+    });
+  });
+
+  it('prunes subcategoryImages for subcategories no longer present in the feed', () => {
+    const doc = content({
+      categoryMap: [
+        {
+          feedId: 'f1',
+          feedCategory: 'Dining',
+          moduleKey: 'restaurants',
+          label: 'Dine',
+          contentType: 'listing',
+        },
+      ],
+      // El feed nuevo solo trae 'Mexican' — 'Italian' desapareció.
+      listings: [
+        {
+          id: 'f1:1',
+          source: 'f1',
+          type: 'listing',
+          feedCategory: 'Dining',
+          feedData: { title: 'Taco Spot', subcategory: 'Mexican' },
+          override: {},
+          flags: [],
+          status: 'active',
+        },
+      ],
+    });
+    const prev = manualModule('restaurants');
+    prev.feedConnected = true;
+    prev.catalog.subcategories = ['Mexican', 'Italian'];
+    prev.catalog.subcategoryImages = {
+      Mexican: '/uploads/mexican.jpg',
+      Italian: '/uploads/italian.jpg',
+    };
+    const out = applyContentToKiosk(emptyCfg({ listings: [prev] }), doc);
+    const mod = out.listings!.find((m) => m.key === 'restaurants')!;
+    // La foto de Mexican se conserva; la de Italian (sub-categoría podada) se elimina.
+    expect(mod.catalog.subcategoryImages).toEqual({ Mexican: '/uploads/mexican.jpg' });
+    expect(mod.catalog.subcategories).toContain('Mexican');
+    expect(mod.catalog.subcategories).not.toContain('Italian');
+  });
+
   it('de-duplicates colliding slugs', () => {
     const mk = (id: string) => ({
       id,

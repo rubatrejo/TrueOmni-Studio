@@ -1,6 +1,10 @@
 'use client';
 
-import type { PwaListingsModuleConfig } from '@/lib/config';
+import { Plus, X } from 'lucide-react';
+
+import type { PwaListingCategory, PwaListingsModuleConfig } from '@/lib/config';
+
+import { ImageUrlField } from '../../../_components/catalog/ImageUrlField';
 
 import { PwaField, PwaGroup, PwaOptionList, PwaPanelHeader } from './pwa-ui';
 
@@ -75,6 +79,21 @@ export function ListingsModuleEditor({
   const setFilters = (patch: Partial<PwaListingsModuleConfig['filters']>) =>
     onChange({ ...v, filters: { ...f, ...patch } });
 
+  // Tiles del grid de categorías (foto + label). `subcategory` (opcional) es el
+  // nombre de la sub-categoría del kiosk a la que filtra la lista al tocar la
+  // tile; vacío = lista completa.
+  const setCategory = (idx: number, patch: Partial<PwaListingCategory>) =>
+    onChange({
+      ...v,
+      categories: v.categories.map((c, i) => (i === idx ? { ...c, ...patch } : c)),
+    });
+  const removeCategory = (idx: number) =>
+    onChange({ ...v, categories: v.categories.filter((_, i) => i !== idx) });
+  const addCategory = () => {
+    const key = `category-${v.categories.length + 1}`;
+    onChange({ ...v, categories: [...v.categories, { key, label: '', image: '' }] });
+  };
+
   return (
     <div className="flex h-full flex-col">
       <PwaPanelHeader
@@ -117,6 +136,60 @@ export function ListingsModuleEditor({
             value={v.tabs.map}
             onChange={(map) => onChange({ ...v, tabs: { ...v.tabs, map } })}
           />
+        </PwaGroup>
+
+        <PwaGroup title="Categories (grid tiles)">
+          {v.categories.length === 0 ? (
+            <p className="text-[11px] italic text-zinc-500">No categories yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {v.categories.map((c, idx) => (
+                <div
+                  key={c.key}
+                  className="space-y-2 rounded-md border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900/30"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="font-mono text-[10.5px] text-zinc-400">{c.key}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeCategory(idx)}
+                      aria-label={`Remove ${c.label || c.key}`}
+                      className="grid h-6 w-6 shrink-0 place-items-center rounded text-zinc-500 transition hover:bg-red-500/10 hover:text-red-400"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <PwaField
+                    label="Label"
+                    value={c.label}
+                    onChange={(label) => setCategory(idx, { label })}
+                  />
+                  <ImageUrlField
+                    label="Tile photo"
+                    value={c.image}
+                    onChange={(image) => setCategory(idx, { image: image ?? '' })}
+                  />
+                  <PwaField
+                    label="Filters to subcategory"
+                    value={c.subcategory ?? ''}
+                    onChange={(subcategory) => setCategory(idx, { subcategory })}
+                  />
+                  <p className="text-[11px] text-zinc-500">
+                    Kiosk subcategory name this tile filters to (must match exactly). Empty = full
+                    list.
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={addCategory}
+            className="flex items-center gap-1.5 rounded-md bg-sky-500/15 px-2.5 py-1.5 text-[12px] font-medium text-sky-600 transition hover:bg-sky-500/25 dark:text-sky-300"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add category
+          </button>
         </PwaGroup>
 
         <PwaGroup title="Detail">

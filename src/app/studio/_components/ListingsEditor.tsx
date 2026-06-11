@@ -389,6 +389,36 @@ function ListingsCatalogEditor({
           />
         </div>
 
+        {/* Foto por sub-categoría: se muestra en cada tile de la pantalla de
+            sub-categorías del kiosk. Vacío → fallback a la foto de un listing de
+            esa sub-categoría y, en último caso, al hero del módulo. */}
+        {catalog.subcategories.length > 0 ? (
+          <div className="space-y-2 rounded-md border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900/30">
+            <h4 className="text-[12px] font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+              Subcategory photos
+            </h4>
+            <p className="text-[11px] text-zinc-500">
+              Photo shown on each subcategory tile. Empty = falls back to a listing photo, then the
+              hero image.
+            </p>
+            <div className="space-y-2">
+              {catalog.subcategories.map((name) => (
+                <ImageUrlField
+                  key={name}
+                  label={name}
+                  value={catalog.subcategoryImages?.[name]}
+                  onChange={(next) => {
+                    const map = { ...(catalog.subcategoryImages ?? {}) };
+                    if (next) map[name] = next;
+                    else delete map[name];
+                    onCatalogChange({ subcategoryImages: map });
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         <CatalogToolbar
           search={search}
           onSearchChange={setSearch}

@@ -552,9 +552,25 @@ function bootstrapListings(
     if (KINDED_KEYS.has(key)) continue;
     if (typeof (value as { kind?: unknown }).kind === 'string') continue;
 
+    // Fotos por sub-categoría (name → URL): mapa opcional paralelo a
+    // `subcategories`. Se preserva al hidratar desde el fs igual que el resto
+    // del catálogo; si no es un objeto plano string→string, se omite.
+    const rawSubImages = (value as { subcategoryImages?: unknown }).subcategoryImages;
+    const subcategoryImages =
+      rawSubImages && typeof rawSubImages === 'object' && !Array.isArray(rawSubImages)
+        ? Object.fromEntries(
+            Object.entries(rawSubImages as Record<string, unknown>).filter(
+              ([, v]) => typeof v === 'string',
+            ),
+          )
+        : undefined;
+
     const candidateCatalog = {
       heroImage: typeof value.heroImage === 'string' ? value.heroImage : '',
       subcategories: Array.isArray(value.subcategories) ? value.subcategories : [],
+      ...(subcategoryImages && Object.keys(subcategoryImages).length > 0
+        ? { subcategoryImages }
+        : {}),
       features: Array.isArray(value.features) ? value.features : [],
       listings: Array.isArray(value.listings) ? value.listings : [],
     };

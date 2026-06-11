@@ -10933,12 +10933,14 @@
           {
             "key": "cafes",
             "label": "Cafe's",
-            "image": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop&q=80"
+            "image": "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop&q=80",
+            "subcategory": "Cafes"
           },
           {
             "key": "bars",
             "label": "Bar's",
-            "image": "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&auto=format&fit=crop&q=80"
+            "image": "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&auto=format&fit=crop&q=80",
+            "subcategory": "Bars"
           },
           {
             "key": "night",
@@ -10968,7 +10970,8 @@
           {
             "key": "fine-dining",
             "label": "Fine Dining",
-            "image": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&auto=format&fit=crop&q=80"
+            "image": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&auto=format&fit=crop&q=80",
+            "subcategory": "Fine Dining"
           },
           {
             "key": "vegan",

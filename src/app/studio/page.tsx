@@ -1,19 +1,48 @@
 'use client';
 
-import { LayoutGrid, Loader2, Monitor, Search, Smartphone, Tablet, Tv, X } from 'lucide-react';
+import {
+  Check,
+  LayoutGrid,
+  Loader2,
+  Monitor,
+  Search,
+  Smartphone,
+  Tablet,
+  Tv,
+  X,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 
+import { BulkActionBar } from './_components/BulkActionBar';
+import { BulkDeleteModal } from './_components/BulkDeleteModal';
 import { DeleteKioskModal } from './_components/DeleteKioskModal';
 import { DuplicateKioskModal } from './_components/DuplicateKioskModal';
 import { NewClientModal } from './_components/NewClientModal';
 import { OnboardingTour, replayOnboardingTour } from './_components/OnboardingTour';
 import { StudioPageHeader } from './_components/PageHeader';
 import { SystemStatusBadge } from './_components/SystemStatusBadge';
-import { cloneConfig, createClient, deleteClient } from './_lib/api-client';
+import { useToast } from './_components/Toast';
+import {
+  cloneConfig,
+  createClient,
+  deleteClient,
+  exportConfigsBulk,
+  resyncConfigStatus,
+  togglePin,
+} from './_lib/api-client';
+import {
+  PROTECTED_SLUG,
+  buildResyncToast,
+  pinTargets,
+  resyncToastVariant,
+  selectableSlugs,
+  summarizeResync,
+  unpinTargets,
+} from './_lib/bulk-selection';
 
 /**
  * `/studio` — Dashboard de Clientes (post Fase 3).
@@ -240,6 +269,132 @@ export default function StudioHome() {
     }
   };
 
+  // ── Bulk ops (F-HUB-9) ───────────────────────────────────────────────
+  const { show: showToast } = useToast();
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [showBulkDelete, setShowBulkDelete] = useState(false);
+  const selectionMode = selected.size > 0;
+
+  // Mantén la selección consistente: descarta slugs que ya no existen tras
+  // un refetch (eg. borrados, renombrados).
+  useEffect(() => {
+    setSelected((prev) => {
+      if (prev.size === 0) return prev;
+      const present = new Set(clients.map((c) => c.slug));
+      let changed = false;
+      const next = new Set<string>();
+      prev.forEach((s) => (present.has(s) ? next.add(s) : (changed = true)));
+      return changed ? next : prev;
+    });
+  }, [clients]);
+
+  const toggleSelect = useCallback((slug: string) => {
+    if (slug === PROTECTED_SLUG) return;
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => setSelected(new Set()), []);
+  const selectAll = useCallback(
+    () => setSelected(new Set(selectableSlugs(filteredClients))),
+    [filteredClients],
+  );
+
+  const runBulk = useCallback(async (fn: () => Promise<void>) => {
+    setBulkBusy(true);
+    try {
+      await fn();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Bulk action failed');
+    } finally {
+      setBulkBusy(false);
+    }
+  }, []);
+
+  const handleBulkPin = useCallback(
+    () =>
+      runBulk(async () => {
+        const targets = pinTargets(clients, selected);
+        if (targets.length === 0) return;
+        await Promise.allSettled(targets.map((s) => togglePin(s)));
+        await refresh();
+        showToast(`Pinned ${targets.length} client${targets.length === 1 ? '' : 's'}`, {
+          variant: 'success',
+        });
+      }),
+    [clients, selected, runBulk, refresh, showToast],
+  );
+
+  const handleBulkUnpin = useCallback(
+    () =>
+      runBulk(async () => {
+        const targets = unpinTargets(clients, selected);
+        if (targets.length === 0) return;
+        await Promise.allSettled(targets.map((s) => togglePin(s)));
+        await refresh();
+        showToast(`Unpinned ${targets.length} client${targets.length === 1 ? '' : 's'}`, {
+          variant: 'success',
+        });
+      }),
+    [clients, selected, runBulk, refresh, showToast],
+  );
+
+  const handleBulkResync = useCallback(
+    () =>
+      runBulk(async () => {
+        const slugs = Array.from(selected);
+        if (slugs.length === 0) return;
+        const outcomes = await Promise.all(slugs.map((s) => resyncConfigStatus(s)));
+        const summary = summarizeResync(outcomes);
+        await refresh();
+        showToast(buildResyncToast(summary), { variant: resyncToastVariant(summary) });
+      }),
+    [selected, runBulk, refresh, showToast],
+  );
+
+  const handleBulkExport = useCallback(
+    () =>
+      runBulk(async () => {
+        const slugs = Array.from(selected);
+        if (slugs.length === 0) return;
+        await exportConfigsBulk(slugs);
+        showToast(`Exported ${slugs.length} config${slugs.length === 1 ? '' : 's'}`, {
+          variant: 'success',
+        });
+      }),
+    [selected, runBulk, showToast],
+  );
+
+  const handleBulkDeleteConfirm = useCallback(
+    () =>
+      runBulk(async () => {
+        const slugs = Array.from(selected);
+        if (slugs.length === 0) return;
+        const results = await Promise.allSettled(slugs.map((s) => deleteClient(s)));
+        const failed = results.filter((r) => r.status === 'rejected').length;
+        const ok = slugs.length - failed;
+        setShowBulkDelete(false);
+        clearSelection();
+        await refresh();
+        if (failed > 0) {
+          showToast(`Deleted ${ok}, ${failed} failed`, { variant: 'error' });
+        } else {
+          showToast(`Deleted ${ok} client${ok === 1 ? '' : 's'}`, { variant: 'success' });
+        }
+      }),
+    [selected, runBulk, refresh, clearSelection, showToast],
+  );
+
+  const selectedNames = useMemo(
+    () => clients.filter((c) => selected.has(c.slug)).map((c) => c.name),
+    [clients, selected],
+  );
+
   return (
     <main className="mx-auto flex min-h-screen max-w-[1280px] flex-col px-4 pb-24 pt-12 sm:px-8">
       <StudioPageHeader />
@@ -328,6 +483,9 @@ export default function StudioHome() {
                 onDelete={handleDelete}
                 onClone={handleClone}
                 onPinToggle={handlePinToggle}
+                selected={selected.has(client.slug)}
+                selectionMode={selectionMode}
+                onToggleSelect={toggleSelect}
               />
             ))}
           {!loading && !search && <NewClientCard onClick={() => setShowNewModal(true)} />}
@@ -410,6 +568,29 @@ export default function StudioHome() {
       />
 
       <OnboardingTour />
+
+      <BulkActionBar
+        selectedCount={selected.size}
+        selectableCount={selectableSlugs(filteredClients).length}
+        pinnableCount={pinTargets(clients, selected).length}
+        unpinnableCount={unpinTargets(clients, selected).length}
+        busy={bulkBusy}
+        onSelectAll={selectAll}
+        onClear={clearSelection}
+        onPin={handleBulkPin}
+        onUnpin={handleBulkUnpin}
+        onResync={handleBulkResync}
+        onExport={handleBulkExport}
+        onDelete={() => setShowBulkDelete(true)}
+      />
+
+      <BulkDeleteModal
+        open={showBulkDelete}
+        names={selectedNames}
+        deleting={bulkBusy}
+        onCancel={() => setShowBulkDelete(false)}
+        onConfirm={handleBulkDeleteConfirm}
+      />
     </main>
   );
 }
@@ -435,14 +616,23 @@ function ClientCard({
   onDelete,
   onClone,
   onPinToggle,
+  selected,
+  selectionMode,
+  onToggleSelect,
 }: {
   client: ClientSummary;
   onDelete: (slug: string) => void;
   onClone: (slug: string) => void;
   onPinToggle: (slug: string) => void;
+  selected: boolean;
+  selectionMode: boolean;
+  onToggleSelect: (slug: string) => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const activeProducts = PRODUCT_BADGES.filter((p) => client.products[p.key]);
+  // El cliente `default` no es seleccionable (no se borra/clona).
+  const selectable = client.slug !== 'default';
+  const checkboxVisible = selectable && (hovered || selectionMode);
 
   return (
     <div
@@ -460,7 +650,17 @@ function ClientCard({
             ? `Open client ${client.name}, no products active`
             : `Open client ${client.name}, ${activeProducts.length} product${activeProducts.length === 1 ? '' : 's'} active`
         }
-        className="relative flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md motion-reduce:hover:translate-y-0 dark:border-zinc-800 dark:bg-zinc-900/40 dark:shadow-none dark:hover:border-zinc-700 dark:hover:bg-zinc-900/80 dark:hover:shadow-[0_8px_24px_-12px_rgba(56,189,248,0.25)]"
+        onClick={(e) => {
+          if (selectionMode && selectable) {
+            e.preventDefault();
+            onToggleSelect(client.slug);
+          }
+        }}
+        className={`relative flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md motion-reduce:hover:translate-y-0 dark:bg-zinc-900/40 dark:shadow-none dark:hover:bg-zinc-900/80 dark:hover:shadow-[0_8px_24px_-12px_rgba(56,189,248,0.25)] ${
+          selected
+            ? 'border-sky-500 ring-2 ring-sky-500/60 dark:border-sky-500'
+            : 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700'
+        }`}
       >
         <div
           aria-hidden
@@ -538,8 +738,32 @@ function ClientCard({
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-sky-400/50 to-transparent opacity-0 transition group-hover:opacity-100" />
       </Link>
 
-      {/* Pinned badge (estrella) siempre visible si está pinned. S-13. */}
-      {client.pinned && (
+      {/* Checkbox de selección bulk (F-HUB-9). Aparece en hover o en modo
+          selección; ocupa el top-left y desplaza a la estrella pinned. */}
+      {checkboxVisible && (
+        <button
+          type="button"
+          role="checkbox"
+          aria-checked={selected}
+          aria-label={selected ? `Deselect ${client.name}` : `Select ${client.name}`}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleSelect(client.slug);
+          }}
+          className={`absolute left-3 top-3 z-20 grid h-6 w-6 place-items-center rounded-md border shadow-sm transition ${
+            selected
+              ? 'border-sky-500 bg-sky-500 text-white'
+              : 'border-zinc-300 bg-white/90 text-transparent backdrop-blur hover:border-sky-400 hover:text-sky-300 dark:border-zinc-600 dark:bg-zinc-900/90'
+          }`}
+        >
+          <Check className="h-3.5 w-3.5" strokeWidth={3} />
+        </button>
+      )}
+
+      {/* Pinned badge (estrella) visible si está pinned y el checkbox no
+          ocupa el top-left. S-13. */}
+      {client.pinned && !checkboxVisible && (
         <span
           className="pointer-events-none absolute left-3 top-3 z-10 grid h-6 w-6 place-items-center rounded-full bg-amber-400/95 text-zinc-900 shadow-sm"
           title="Favorite"
@@ -551,7 +775,7 @@ function ClientCard({
         </span>
       )}
 
-      {hovered && client.slug !== 'default' && (
+      {hovered && !selectionMode && client.slug !== 'default' && (
         <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">
           <button
             type="button"

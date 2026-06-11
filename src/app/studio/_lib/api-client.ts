@@ -251,6 +251,54 @@ export function downloadConfigExport(slug: string): void {
 }
 
 /**
+ * Bulk export (F-HUB-9): descarga un ÚNICO JSON con los configs de varios
+ * clientes. El backend ensambla `{ exportedAt, configs: { slug: cfg } }` y
+ * lo devuelve como adjunto; aquí forzamos el save-as desde el blob.
+ */
+export async function exportConfigsBulk(slugs: string[]): Promise<void> {
+  const res = await fetch('/api/studio/configs/export-bulk', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slugs }),
+  });
+  if (!res.ok) throw new Error(`export-bulk failed: ${res.status}`);
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `studio-export-${new Date().toISOString().slice(0, 10)}.json`;
+  a.rel = 'noreferrer';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Toggle del flag `pinned` de un cliente. Mismo endpoint que el pin por-card.
+ * Para bulk pin/unpin el caller solo lo invoca sobre los slugs que cambian
+ * de estado (ver `pinTargets`/`unpinTargets`), ya que el endpoint es toggle.
+ */
+export async function togglePin(slug: string): Promise<void> {
+  const res = await fetch(`/api/studio/clients/${slug}/pin`, { method: 'POST' });
+  if (!res.ok) throw new Error(`pin failed: ${res.status}`);
+}
+
+/**
+ * Resync por slug que NO lanza: clasifica el resultado para el bulk resync.
+ * 404 → `skipped` (cliente sin template de filesystem); ok → `resynced`;
+ * resto → `failed`.
+ */
+export async function resyncConfigStatus(slug: string): Promise<'resynced' | 'skipped' | 'failed'> {
+  try {
+    const res = await fetch(`/api/studio/configs/${slug}/resync`, { method: 'POST' });
+    if (res.ok) return 'resynced';
+    if (res.status === 404) return 'skipped';
+    return 'failed';
+  } catch {
+    return 'failed';
+  }
+}
+
+/**
  * Importa un config JSON al slug indicado. Hallazgo #25 del audit. El backend
  * sobreescribe el slug del JSON con el del path para evitar identity drift.
  */

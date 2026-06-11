@@ -24,7 +24,13 @@ import type { EventItem, ListingItem } from './schema';
 //  Proveedores y conexiones
 // ---------------------------------------------------------------------------
 
-export const FEED_PROVIDERS = ['simpleview', 'tempest', 'crowdriff', 'wordpress'] as const;
+export const FEED_PROVIDERS = [
+  'simpleview',
+  'tempest',
+  'crowdriff',
+  'wordpress',
+  'custom',
+] as const;
 export const FeedProviderSchema = z.enum(FEED_PROVIDERS);
 export type FeedProvider = z.infer<typeof FeedProviderSchema>;
 

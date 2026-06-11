@@ -76,6 +76,7 @@ const PROVIDER_LABEL: Record<FeedProvider, string> = {
   tempest: 'Tempest',
   crowdriff: 'CrowdRiff',
   wordpress: 'WordPress',
+  custom: 'Custom feed',
 };
 
 /** moduleKeys canónicos sugeridos para el mapeo de categorías. */
@@ -607,7 +608,8 @@ function LastSyncLine({ feed }: { feed: FeedConnection }) {
 /**
  * Inputs de credenciales según provider. WordPress usa una API REST (baseUrl +
  * post types); Simpleview/Tempest exponen endpoints REST con apiKey; CrowdRiff
- * solo pide apiKey.
+ * solo pide apiKey; Custom pide dos URLs JSON (listings + events) para clientes
+ * que mandan su propia data (p. ej. los feeds `/feeds/partners/` y `/feeds/events/`).
  */
 function CredentialFields({
   provider,
@@ -644,6 +646,31 @@ function CredentialFields({
             placeholder="event"
             className="font-mono"
           />
+        </Field>
+      </div>
+    );
+  }
+  if (provider === 'custom') {
+    return (
+      <div className="grid grid-cols-2 gap-2.5">
+        <Field label="Listings URL" helpText="JSON feed of partners/listings the client gives you.">
+          <TextInput
+            value={config.listingsUrl ?? ''}
+            onChange={(e) => onChange('listingsUrl', e.target.value)}
+            placeholder="https://example.com/feeds/partners/"
+            className="font-mono"
+          />
+        </Field>
+        <Field label="Events URL" helpText="JSON feed of events. Optional if only listings.">
+          <TextInput
+            value={config.eventsUrl ?? ''}
+            onChange={(e) => onChange('eventsUrl', e.target.value)}
+            placeholder="https://example.com/feeds/events/"
+            className="font-mono"
+          />
+        </Field>
+        <Field label="API key" helpText="Only if the feed requires auth.">
+          <SecretInput value={config.apiKey ?? ''} onChange={(v) => onChange('apiKey', v)} />
         </Field>
       </div>
     );

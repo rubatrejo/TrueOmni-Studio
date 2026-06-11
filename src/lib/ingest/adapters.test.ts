@@ -235,7 +235,7 @@ describe('getAdapter / listProviders', () => {
     }
   });
 
-  it('listProviders devuelve los 4 proveedores', () => {
-    expect(listProviders()).toEqual(['simpleview', 'tempest', 'crowdriff', 'wordpress']);
+  it('listProviders devuelve los 5 proveedores', () => {
+    expect(listProviders()).toEqual(['simpleview', 'tempest', 'crowdriff', 'wordpress', 'custom']);
   });
 });

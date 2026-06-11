@@ -2,6 +2,7 @@ import type { FeedProvider } from '@/lib/studio/client-content';
 import { FEED_PROVIDERS } from '@/lib/studio/client-content';
 
 import { crowdriffAdapter } from './adapters/crowdriff';
+import { customAdapter } from './adapters/custom';
 import { simpleviewAdapter } from './adapters/simpleview';
 import { tempestAdapter } from './adapters/tempest';
 import { wordpressAdapter } from './adapters/wordpress';
@@ -15,12 +16,13 @@ import type { FeedAdapter } from './types';
  * sin conocer la implementación concreta.
  */
 
-/** Record exhaustivo provider→adaptador (el tipo fuerza cubrir los 4). */
+/** Record exhaustivo provider→adaptador (el tipo fuerza cubrir todos). */
 const ADAPTERS: Record<FeedProvider, FeedAdapter> = {
   simpleview: simpleviewAdapter,
   tempest: tempestAdapter,
   crowdriff: crowdriffAdapter,
   wordpress: wordpressAdapter,
+  custom: customAdapter,
 };
 
 /** Devuelve el adaptador de un proveedor. */

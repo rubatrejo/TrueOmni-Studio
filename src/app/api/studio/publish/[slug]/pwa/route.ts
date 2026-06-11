@@ -10,7 +10,10 @@ import {
   isReadOnlyRuntime,
   publishToGitHub,
 } from '@/lib/studio/github-publisher';
+import { kv, kvKeys } from '@/lib/studio/kv';
+import { buildFilesystemConfig } from '@/lib/studio/publish-merger';
 import { loadPwaSlice } from '@/lib/studio/pwa-config';
+import { KioskConfigSchema, type KioskConfig } from '@/lib/studio/schema';
 import { STUDIO_SLUG_REGEX } from '@/lib/studio/slug';
 
 /**
@@ -118,23 +121,32 @@ export async function POST(req: Request, { params }: RouteParams) {
     } else if (ghConfig) {
       currentRaw = await getRepoFileContent(ghConfig, repoPath, ghConfig.baseBranch);
     }
-    if (currentRaw === null) {
-      return NextResponse.json(
-        {
-          error: `clients/${slug}/config.json not found. The PWA inherits the kiosk config — create/publish the client first.`,
-        },
-        { status: 404 },
-      );
-    }
 
     let current: RawConfig;
-    try {
-      current = JSON.parse(currentRaw) as RawConfig;
-    } catch {
-      return NextResponse.json(
-        { error: `clients/${slug}/config.json is not valid JSON.` },
-        { status: 500 },
-      );
+    // Si todavía no hay `config.json` publicado (cliente creado en el Studio y
+    // nunca publicado), lo bootstrapeamos desde la working copy del KV en vez
+    // de fallar con 404. Así el publish de la PWA funciona "todo de una": crea
+    // el config.json completo del kiosk (desde el KV) + el slice de la PWA,
+    // sin obligar a publicar el kiosk primero.
+    const bootstrapped = currentRaw === null;
+    if (bootstrapped) {
+      const studioConfig = await loadConfigFromKv(slug);
+      if (!studioConfig) {
+        return NextResponse.json(
+          { error: `No data in KV for "${slug}". Open the client in the Studio first.` },
+          { status: 404 },
+        );
+      }
+      current = buildFilesystemConfig(studioConfig, null) as RawConfig;
+    } else {
+      try {
+        current = JSON.parse(currentRaw as string) as RawConfig;
+      } catch {
+        return NextResponse.json(
+          { error: `clients/${slug}/config.json is not valid JSON.` },
+          { status: 500 },
+        );
+      }
     }
 
     const merged: RawConfig = {
@@ -142,12 +154,18 @@ export async function POST(req: Request, { params }: RouteParams) {
       features: { ...(current.features ?? {}), pwa: slice },
     };
     const nextContent = formatJson(merged);
-    const changed = nextContent !== currentRaw;
+    // Cuando bootstrapeamos el config.json (no existía), es un create y siempre
+    // hay cambio; si ya existía, comparamos contra el contenido actual.
+    const changed = bootstrapped || nextContent !== currentRaw;
 
     const files = [
       {
         path: repoPath,
-        action: changed ? ('update' as const) : ('unchanged' as const),
+        action: bootstrapped
+          ? ('create' as const)
+          : changed
+            ? ('update' as const)
+            : ('unchanged' as const),
         sizeAfter: Buffer.byteLength(nextContent, 'utf8'),
       },
     ];
@@ -161,6 +179,8 @@ export async function POST(req: Request, { params }: RouteParams) {
     }
 
     if (mode === 'fs') {
+      // El cliente puede no tener carpeta todavía (bootstrap) — la creamos.
+      await fs.mkdir(path.dirname(configPath), { recursive: true });
       await fs.writeFile(configPath, nextContent, 'utf8');
       return NextResponse.json({ slug, dryRun: false, mode, written: 1, files });
     }
@@ -182,4 +202,12 @@ export async function POST(req: Request, { params }: RouteParams) {
     const message = error instanceof Error ? error.message : 'Publish failed';
     return NextResponse.json({ error: message }, { status: 500 });
   }
+}
+
+/** Carga el config del kiosk desde el KV (working copy) para el bootstrap. */
+async function loadConfigFromKv(slug: string): Promise<KioskConfig | null> {
+  const raw = await kv.get(kvKeys.cfg(slug));
+  if (!raw) return null;
+  const parsed = KioskConfigSchema.safeParse(raw);
+  return parsed.success ? parsed.data : null;
 }

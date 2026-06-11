@@ -139,22 +139,23 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
         className="px-3"
       />
 
-      {/* Active panel — altura fija 430px para todos los tabs (incluido
-          Media tras refactor 2026-05-18). El contenido del tab Media se
-          reorganizó en una sola fila horizontal (Kiosk hero · Brand video
-          · Favicon) con YouTube URL compacto debajo del Brand video para
-          que entre sin crecer el card. */}
+      {/* Active panel — altura fija 640px para TODOS los tabs, así cambiar de
+          tab nunca salta el alto del card (Data feeds necesita esa altura por
+          su lista de items; el resto centra su contenido en la misma caja).
+          El contenido del tab Media se reorganizó (2026-05-18) en una sola
+          fila horizontal (Kiosk hero · Brand video · Favicon) con YouTube URL
+          compacto debajo del Brand video. */}
       <div
         role="tabpanel"
         id={`${tabsId}-panel-${tab}`}
         aria-labelledby={`${tabsId}-tab-${tab}`}
         // El tab Data feeds gestiona su propio scroll/altura (lista de items
-        // potencialmente larga) y no se centra como los demás; los otros tabs
-        // mantienen el alto fijo de 430px con contenido centrado.
+        // potencialmente larga) y no se centra; los demás centran su contenido
+        // verticalmente en la misma altura fija.
         className={
           tab === 'data-feeds'
             ? 'flex h-[640px] flex-col p-6'
-            : 'flex h-[430px] flex-col justify-center p-6'
+            : 'flex h-[640px] flex-col justify-center p-6'
         }
       >
         {tab === 'general' ? (

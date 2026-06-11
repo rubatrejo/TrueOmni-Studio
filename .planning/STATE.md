@@ -4,7 +4,7 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
-### Sesión 2026-06-11 — Ingesta de feeds de proveedores + mapeo de categorías (8 fases)
+### Sesión 2026-06-10 (continuación) — Ingesta de feeds de proveedores + mapeo de categorías (8 fases)
 
 **Petición de Rubén:** que cada cliente cargue su data desde feeds de proveedores
 (Simple View, Tempest, Crowdriff, WordPress) en las tabs generales de "Branding &
@@ -59,6 +59,10 @@ persiste listings/events (events runtime-resolved) → fuera de alcance.
   `feedConnected` aún (solo el kiosk). Y el editor PWA de events si edita el mismo cfg.
 - **Deuda:** GC de blobs huérfanos; segmentar `client:{slug}:content` si un feed grande
   supera el cap de KV.
+
+**Fase:** feature nueva fuera del roadmap del audit — **Ingesta de feeds: 8/8 fases
+completas y en producción**. Cierre real bloqueado por credenciales reales de proveedor
+(E2E) + QA con login. Audit `STUDIO-AUDIT-2026-06-09` sigue 67/68 (F-HUB-9 abierto).
 
 ---
 

@@ -4,6 +4,53 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-11 (cont. 4) — Sub-categorías: cierre del feature + fotos unificadas + Data feeds
+
+**Hecho (todo en prod, 11 commits, deploys Vercel READY):**
+
+Cierre de los pendientes de sub-categorías + 7 mejoras de Rubén + unificación de fotos:
+
+- **Kiosk UI como PWA:** `SubcategoryScreen` con `ListingsToolbar` (barra brand: label +
+  search/sort/filter) bajo el hero, tiles apaisadas con label centrado; fallback de foto por
+  sub-cat (subcategoryImages → 1ª imagen de listing → hero). Back button en la lista filtrada
+  (vuelve a sub-cats, no a home).
+- **Filtrado PWA al tocar** una sub-categoría/categoría bound (`initialSubcategory`).
+- **Full Screen del preview** refleja los cambios en edición: el replay del handshake
+  `studio:ready` se dirige a `event.source` (no al iframe fijo) → `replayTargetRef` en
+  `use-preview-bridge`.
+- **Data feeds:** toggle global `contentEnabled` ("Use feed data", OFF→seed) +
+  `placeholderImage` ("Fallback image"); este último en su **sub-tab propia "Placeholder"**
+  entre Connections y Category mapping. Scrollbar oculto en `TabStrip underline`.
+- **+210 listings** (15/sub-cat × 3 módulos) vía `scripts/seed-listings.mjs` (`pnpm seed:listings`,
+  clona+muta, determinista).
+- **Fix fotos sub-cat del kiosk:** `ImageUrlField`(data-URL 200KB, fallaba) → `MediaField`
+  (Blob, 5MB) y **fuera del fieldset read-only** (editables aunque haya feed).
+- **Grid PWA unificado:** muestra las **sub-categorías del kiosk** con **foto compartida**
+  (`buildSubcategoryTiles`); fallback a las `categories` propias si el módulo no tiene sub-cats.
+  Banner en el editor PWA con deeplink a Kiosk → Listings.
+
+**Verificado:** screenshots (grid PWA Mexican…BBQ, filtrado `?cat=Mexican` = 15 RESULTS, dropzone
+Blob en kiosk, tab Placeholder, barra+tiles del kiosk); **154 tests**; typecheck/lint limpios;
+`validate:configs` 3/3; `auditor-white-label` limpio; deploys READY. Verificación visual del
+Studio con server local en modo demo (auth off, vars vacías) por el login de GitHub.
+
+**Pendiente / siguiente:**
+
+- QA visual de Rubén del **Full Screen en vivo** (no se pudo automatizar por el auth del Studio).
+- Las fotos de sub-cat son **compartidas** y se editan **solo en Kiosk → Listings**; la PWA las
+  usa (no hay editor de fotos en la PWA, solo el banner deeplink).
+
+**Decisiones:**
+
+- Fotos de sub-categoría **compartidas** kiosk/PWA (un solo dato en `subcategoryImages` del
+  catálogo del kiosk). No se cruzan documentos KV (`cfg` vs `pwa`); la PWA solo lee.
+- Grid PWA unifica a **sub-categorías** con **fallback** a las `categories` propias (retrocompat).
+- Editor de fotos sube a **Blob** (MediaField), no data-URL.
+
+**Fase:** Fase 3 (pantallas kiosk) — feature transversal de sub-categorías cerrado.
+
+---
+
 ### Sesión 2026-06-11 (cont. 3) — Sub-categorías kiosk: RUNTIME hecho + verificado (checkpoint ~85% ctx)
 
 **Avance sobre el plan `~/.claude/plans/por-que-cuando-cargo-validated-glacier.md`:**

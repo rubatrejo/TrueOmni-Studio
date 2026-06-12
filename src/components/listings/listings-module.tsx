@@ -12,6 +12,7 @@ import { applyFilters, EMPTY_FILTER, isFilterEmpty } from '@/lib/listings-filter
 import type { SortOrder } from '@/lib/listings-sort';
 import { haversineMi, SORT_OPTIONS, sortListings } from '@/lib/listings-sort';
 
+import { BackButton } from './back-button';
 import { FavoriteAddedToast } from './favorite-added-toast';
 import { FilterOverlay } from './filter-overlay';
 import { FloatingHomeButton } from './floating-home-button';
@@ -154,8 +155,13 @@ export function ListingsModule({
         }}
       />
 
-      {/* Floating home button */}
-      <FloatingHomeButton />
+      {/* Si la lista se abrió desde una sub-categoría → Back a la pantalla de
+          sub-categorías (mismo pill, flecha ←). Si no, Home button de siempre. */}
+      {initialSubcategory ? (
+        <BackButton href={`/home/${moduleKey}`} ariaLabel="Volver a categorías" />
+      ) : (
+        <FloatingHomeButton />
+      )}
 
       {/* Overlays dentro del canvas */}
       <FilterOverlay

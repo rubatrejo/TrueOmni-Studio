@@ -35,10 +35,12 @@ export function ListingsListScreenLive({
 }) {
   const cfg = usePwaSection(moduleKey, config) ?? config;
   const category = categoryKey ? cfg.categories.find((c) => c.key === categoryKey) : undefined;
-  const title = category?.label ?? cfg.title;
-  // Si la tile tocada tiene una sub-categoría bound → la lista arranca filtrada
-  // a ella. Vacío = lista completa (retrocompat con configs sin `subcategory`).
-  const initialSubcategory = category?.subcategory || undefined;
+  // Si el grid navega con `?cat=<sub-categoría>` directa (tiles de sub-categorías
+  // del kiosk), `categoryKey` no matchea ninguna `category` → ES el nombre de la
+  // sub-categoría. Si matchea una `category` PWA, usamos su `subcategory` bind.
+  const directSubcategory = categoryKey && !category ? categoryKey : undefined;
+  const title = category?.label ?? directSubcategory ?? cfg.title;
+  const initialSubcategory = category?.subcategory || directSubcategory || undefined;
   return (
     <ListingsListScreen
       {...data}

@@ -1,6 +1,7 @@
 import { ListingsGridScreenLive } from '@/components/pwa/listings-grid-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
+import { buildSubcategoryTiles } from '@/lib/pwa-subcategory-tiles';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,6 +12,7 @@ export const dynamic = 'force-dynamic';
 export default async function PwaRestaurantsPage() {
   const config = await getConfig();
   const r = config.features?.pwa?.restaurants;
+  const subcategoryTiles = buildSubcategoryTiles(config.features?.home?.modules?.restaurants);
 
   if (!r) {
     return (
@@ -29,6 +31,7 @@ export default async function PwaRestaurantsPage() {
         config={r}
         basePath="/pwa/restaurants"
         navActive="dining"
+        subcategoryTiles={subcategoryTiles}
       />
     </MobileCanvas>
   );

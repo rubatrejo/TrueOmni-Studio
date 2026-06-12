@@ -1,6 +1,7 @@
 import { ListingsGridScreenLive } from '@/components/pwa/listings-grid-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
+import { buildSubcategoryTiles } from '@/lib/pwa-subcategory-tiles';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +13,7 @@ export const dynamic = 'force-dynamic';
 export default async function PwaStayPage() {
   const config = await getConfig();
   const s = config.features?.pwa?.stay;
+  const subcategoryTiles = buildSubcategoryTiles(config.features?.home?.modules?.stay);
 
   if (!s) {
     return (
@@ -25,7 +27,12 @@ export default async function PwaStayPage() {
 
   return (
     <MobileCanvas>
-      <ListingsGridScreenLive moduleKey="stay" config={s} basePath="/pwa/stay" />
+      <ListingsGridScreenLive
+        moduleKey="stay"
+        config={s}
+        basePath="/pwa/stay"
+        subcategoryTiles={subcategoryTiles}
+      />
     </MobileCanvas>
   );
 }

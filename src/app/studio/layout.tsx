@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import { StudioThemeProvider } from './_components/StudioThemeProvider';
 import { ToastProvider } from './_components/Toast';
+import { ViewerBanner } from './_components/ViewerBanner';
 
 import './studio.css';
 
@@ -21,7 +22,10 @@ export const metadata: Metadata = {
 export default function StudioLayout({ children }: { children: ReactNode }) {
   return (
     <StudioThemeProvider>
-      <ToastProvider>{children}</ToastProvider>
+      <ToastProvider>
+        <ViewerBanner />
+        {children}
+      </ToastProvider>
     </StudioThemeProvider>
   );
 }

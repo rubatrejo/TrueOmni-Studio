@@ -21,15 +21,11 @@ import { auth } from '@/auth';
 export default auth((req) => {
   const { pathname } = req.nextUrl;
 
-  // Válvula: si NextAuth no está configurado (no hay OAuth App) — o si el login
-  // se deshabilitó a propósito con `STUDIO_AUTH_DISABLED=true` — dejamos
-  // navegable el chrome del Studio como demo (solo lectura), pero NO abrimos las
-  // mutaciones. Esto permite acceder/mostrar el Studio sin login GitHub sin
-  // dejar la puerta abierta a destrucción. Re-habilitar el login = quitar la
-  // flag (con las OAuth vars presentes). La flag NO toca las credenciales de
-  // GitHub, así que el cambio es reversible sin re-crear la OAuth App.
-  const authDisabled = process.env.STUDIO_AUTH_DISABLED === 'true';
-  if (authDisabled || !process.env.AUTH_GITHUB_ID || !process.env.AUTH_GITHUB_SECRET) {
+  // Válvula: si NextAuth no está configurado (no hay OAuth App), dejamos
+  // navegable el chrome del Studio como demo, pero NO abrimos las mutaciones.
+  // Esto evita que el Studio quede inaccesible en deploys donde aún no se ha
+  // creado la GitHub OAuth App, sin dejar la puerta abierta a destrucción.
+  if (!process.env.AUTH_GITHUB_ID || !process.env.AUTH_GITHUB_SECRET) {
     // F-CORE-1: sin auth, un deploy mal configurado dejaba TODO `/api/studio/*`
     // público — incluido `DELETE /api/studio/clients/[slug]` (borra el cliente).
     // En PRODUCCIÓN bloqueamos las mutaciones con 503 (las páginas y los GET de
@@ -71,6 +67,26 @@ export default auth((req) => {
   const email = req.auth?.user?.email;
 
   if (!email) {
+    // Modo viewer: el botón "Access as a viewer" de la pantalla de sign-in
+    // setea la cookie `studio_viewer`. Permite NAVEGAR el Studio (páginas +
+    // GETs de lectura) sin login GitHub, pero las mutaciones se bloquean con
+    // 403 — "ingresar y navegar sin mover nada". El admin (sesión GitHub) gana
+    // siempre: si hay `email`, ni se evalúa esta rama. La cookie no es httpOnly
+    // (la UI la lee para el banner), pero forjarla solo da acceso de lectura,
+    // así que no es un vector de escalada.
+    const isViewer = req.cookies.get('studio_viewer')?.value === '1';
+    if (isViewer) {
+      const isMutation = isStudioApi && !['GET', 'HEAD', 'OPTIONS'].includes(req.method);
+      if (isMutation) {
+        return NextResponse.json({ error: 'Read-only viewer — sign in to edit.' }, { status: 403 });
+      }
+      // Sin sesión que lo respalde, `x-studio-admin-email` es forjable: lo
+      // borramos para que ningún handler confíe en un actor falso.
+      const headers = new Headers(req.headers);
+      headers.delete('x-studio-admin-email');
+      return NextResponse.next({ request: { headers } });
+    }
+
     // Para APIs devolvemos 401 JSON; para páginas redirigimos a sign-in.
     if (isStudioApi) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

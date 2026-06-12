@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Eye, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
@@ -62,6 +62,15 @@ function SignInContent() {
       // Solo se llega aquí si signIn lanza antes del redirect — improbable.
       setIsPending(false);
     }
+  };
+
+  // Entra como viewer: setea la cookie que el middleware reconoce (read-only)
+  // y navega al destino. La cookie NO es httpOnly a propósito — el banner de
+  // la UI la lee; el enforcement de solo-lectura lo hace el middleware.
+  const handleViewer = () => {
+    const oneDay = 60 * 60 * 24;
+    document.cookie = `studio_viewer=1; path=/; max-age=${oneDay}; samesite=lax`;
+    window.location.href = callbackUrl.startsWith('/studio') ? callbackUrl : '/studio';
   };
 
   return (
@@ -145,6 +154,21 @@ function SignInContent() {
               </>
             )}
           </button>
+
+          {/* Acceso de solo lectura — navegar el Studio sin login ni permiso
+              de edición. El admin sigue entrando con GitHub para editar. */}
+          <div className="flex items-center gap-3 text-[13px] text-white/60">
+            <button
+              type="button"
+              onClick={handleViewer}
+              disabled={isPending}
+              className="inline-flex h-11 items-center justify-center gap-2 self-start rounded-lg border border-white/30 px-5 text-[13.5px] font-semibold text-white backdrop-blur-sm transition hover:border-white/60 hover:bg-white/10 disabled:opacity-50"
+            >
+              <Eye className="h-4 w-4" />
+              Access as a viewer
+            </button>
+            <span>Browse without signing in — read only.</span>
+          </div>
         </div>
 
         <div className="font-sans text-[12px] text-white/50">

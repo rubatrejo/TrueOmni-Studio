@@ -4,6 +4,45 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-12 — graphify: grafo de conocimiento del repo + integración al flujo (tooling/DX)
+
+**Hecho:**
+
+- **Grafo completo del repo** con `/graphify` sobre los 1435 archivos → **9,269 nodos,
+  19,346 aristas, 572 comunidades**. AST de 1041 archivos de código (gratis) + extracción
+  semántica de 196 docs/papers y **197 imágenes** vía ~206 subagentes en olas. Output en
+  `graphify-out/` (HTML agregado, `graph.json`, `GRAPH_REPORT.md`); **gitignored**.
+- **Integración de graphify al flujo del proyecto:** hooks de Husky `post-commit` y
+  `post-checkout` (auto-rebuild del grafo, solo código, sin LLM, `PYTHONHASHSEED=0`);
+  `graphify-out/` añadido a `.gitignore`; nueva **sección 10 "Mapa del repo con graphify"**
+  en `CLAUDE.md`; orientación con el grafo (ahorro de tokens) añadida a `/iniciar`.
+- Copiado `iniciar.md` actualizado a `.claude/commands/`.
+
+**Verificado:**
+
+- 69 chunk files válidos; grafo construido sin error (no-empty); HTML agregado generado
+  (572 community nodes). God nodes confirman la **capa config** como núcleo real del proyecto
+  (`ConfigNamespace`/`getConfig`/`textos`/`resolveAssetUrl`) — coherente con la regla white-label.
+
+**Pendiente / siguiente:**
+
+- ~540 comunidades quedan como genéricas (`Cluster N`); solo 30 nombradas a mano.
+- Ruido de **PDF.js** (`public/pdfjs/**`) infla el grafo con cientos de nodos irrelevantes;
+  para refrescos enfocar `graphify ./src --update`, nunca `/graphify .` completo (~4M tokens).
+- Sin cambios de producto: siguen pendientes **Fase 3b** (F-PWA-5/6) y **Fase 4** del audit Studio.
+
+**Decisiones:**
+
+- `graphify-out/` **no entra al repo** (`graph.json` ~9.5 MB); cada dev lo regenera local vía
+  hook de Husky. Clustering determinista con `PYTHONHASHSEED=0`.
+- Para construir el grafo de imágenes sin disparar 197 agentes 1-a-1, se agruparon ~5 imágenes
+  por agente analizando cada una por separado (~60 agentes) — adaptación de escala que preserva
+  la calidad de visión.
+
+**Fase:** Tooling/DX (transversal) — sin tocar producto.
+
+---
+
 ### Sesión 2026-06-11 (cont. 4) — Sub-categorías: cierre del feature + fotos unificadas + Data feeds
 
 **Hecho (todo en prod, 11 commits, deploys Vercel READY):**

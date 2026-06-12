@@ -4,6 +4,76 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-12 (tarde) — Placeholder auto + sub-categorías en feeds + modo viewer del Studio
+
+**Hecho (6 commits, todos en prod → deploys Vercel READY):**
+
+- **`82a32ed` — Placeholder/Fallback image automático.** Genera la foto de
+  fallback 16:9 del cliente desde su website: scrape de la homepage (og:image →
+  twitter:image → `<img>` grandes) + composición con **sharp** (foto cover
+  1280×720 + capa negra 50% + logo del cliente o su **nombre en texto** si el logo
+  aún es el del template). Sin foto utilizable → gradiente con los brand colors.
+  Sube a Vercel Blob → `content.placeholderImage` + sync. Trigger: auto al crear
+  cliente (best-effort) + botón "Generate from website" en Data feeds → Placeholder.
+  Nuevos `placeholder-image.ts` + `placeholder-generate.ts` + endpoint
+  `POST /content/placeholder` + 18 tests.
+- **`08356ef` — fix build:** `sharp` empujó la lambda `api/studio/clients`
+  (~190 MB de assets fs) sobre el cap de 250 MB → ERROR. `outputFileTracingExcludes`
+  de la variante libvips **musl** (Vercel corre glibc) → bajo el límite.
+- **`6240b7d` — docs(CLAUDE.md §9):** reglas nuevas (deps nativas vs cap 250 MB;
+  QA E2E del Studio con spec scriptable, no clicks manuales).
+- **`db0735f` — Sub-categorías en Category mapping + imágenes del feed en Review.**
+  `CategoryMapping` gana campo opcional `subcategory`: columna "Subcategory
+  (optional)" en la tabla, datalist de las ya usadas en el módulo. Vacía = categoría
+  principal; con valor = los items se agrupan bajo esa sub-categoría (precedencia
+  mapping > item). El grid kiosk/PWA ya deriva de `item.subcategory` → sin tocar
+  runtime. **Review:** las fotos del feed ya cargan — la causa era `strVal`
+  (el `override.image` vacío ocultaba `feedData.image`), NO el adaptador; nuevo
+  `pick()` override-no-vacío > feed solo para la imagen. `MediaField` gana prop
+  `placeholderPreview` (muestra el placeholder del cliente cuando el item no trae foto).
+- **`eda87ee` — kill-switch global `STUDIO_AUTH_DISABLED`** (luego **revertido**:
+  no era lo que Rubén quería).
+- **`67bdbf7` — Modo viewer del Studio.** Botón "Access as a viewer" en la pantalla
+  de sign-in → cookie `studio_viewer=1` (no httpOnly) → el middleware deja navegar
+  páginas + GETs sin login, pero **bloquea mutaciones con 403** ("navegar sin mover
+  nada"). El admin con sesión GitHub gana siempre. `ViewerBanner` fijo "Read-only
+  viewer — changes are disabled · Sign in to edit".
+
+**Verificado:**
+
+- 173 tests; typecheck/lint/validate:configs/`auditor-white-label` limpios; los 6
+  deploys de prod quedaron **READY** (último `67bdbf7`).
+- E2E en dev con `discover-dekalb`: placeholder generado en creación + regeneración
+  con foto real de discoverdekalb.com; columna Subcategory guarda en KV; foto del
+  feed (The Halal Guys) carga en Review (`naturalWidth 4800`); modo viewer → `/studio`
+  sin login navega + banner, PATCH→403, GET→200, "Sign in to edit" limpia la cookie.
+- Limpiados los datos de prueba inyectados en el KV real de Dekalb.
+
+**Pendiente / siguiente:**
+
+- QA visual de Rubén en prod: modo viewer (ventana incógnito) y el Full Screen del
+  preview en vivo.
+- El placeholder visual **en Review** de un item sin foto no se capturó (Dekalb no
+  tiene items sin imagen); el runtime sí lo aplica (`withPlaceholder`).
+- Deuda anotada: GC de blobs huérfanos; materializar a Blob las imágenes externas del
+  feed (si una URL del proveedor da hotlink/403 se verá rota); el fix de fondo del cap
+  de lambda es servir los assets fs de `clients/*` estáticos/Blob, no en lambdas.
+
+**Decisiones:**
+
+- **Auth:** descartado el kill-switch global (`STUDIO_AUTH_DISABLED`) en favor del
+  **modo viewer opt-in** (cookie + 403 en mutaciones). Login normal intacto.
+- **Imágenes Review:** causa raíz = `strVal` prefiere override aunque esté vacío; el
+  adaptador custom extrae bien la URL del feed real. Fix quirúrgico solo para la imagen
+  (los inputs de texto mantienen value=override + placeholder=feed).
+- **Deps nativas vs Vercel:** prever el peso contra el cap de 250 MB; excluir la variante
+  musl de libvips del tracing (ver memoria `feedback_vercel_lambda_250mb_native_deps`).
+
+**Fase:** Sin milestone formal abierto — mejoras del Studio (Data feeds + auth) sobre
+producto ya cerrado (Kiosk v1 + Studio + Signage + PWA).
+
+---
+
 ### Sesión 2026-06-12 — graphify: grafo de conocimiento del repo + integración al flujo (tooling/DX)
 
 **Hecho:**

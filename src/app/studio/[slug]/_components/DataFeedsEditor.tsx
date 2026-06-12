@@ -345,6 +345,37 @@ function ConnectionsSection({
 
   return (
     <div className="space-y-3">
+      {/* Ajustes globales de la data ingerida: master switch + foto de fallback. */}
+      <div className="space-y-3 rounded-lg border border-zinc-200 bg-zinc-50/60 p-3 dark:border-zinc-800 dark:bg-zinc-900/30">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[12.5px] font-medium text-zinc-700 dark:text-zinc-200">
+              Use feed data
+            </p>
+            <p className="text-[11px] leading-snug text-zinc-500">
+              When off, products ignore the ingested data and fall back to their seed content.
+            </p>
+          </div>
+          <ToggleSwitch
+            enabled={content.contentEnabled}
+            onChange={() => mutate((prev) => ({ ...prev, contentEnabled: !prev.contentEnabled }))}
+            label="Use feed data"
+            title={content.contentEnabled ? 'Feed data in use' : 'Using seed content'}
+          />
+        </div>
+        <div className="max-w-[220px]">
+          <MediaField
+            label="Fallback image"
+            hint="Reused on any ingested listing/event that has no photo."
+            aspect="4/3"
+            slug={slug}
+            value={content.placeholderImage}
+            kind="image"
+            onChange={(next) => mutate((prev) => ({ ...prev, placeholderImage: next?.src ?? '' }))}
+          />
+        </div>
+      </div>
+
       <div className="flex items-center justify-between">
         <p className="text-[12px] text-zinc-500">
           Connect external feeds. Test the credentials, then sync to pull listings and events.

@@ -152,6 +152,17 @@ export const ClientContentSchema = z.object({
   categoryMap: z.array(CategoryMappingSchema).default([]),
   listings: z.array(ListingContentItemSchema).default([]),
   events: z.array(EventContentItemSchema).default([]),
+  /**
+   * Master switch del uso de la data ingerida. `true` (default) → la data del
+   * feed se propaga a los productos; `false` → se ignora y kiosk/PWA quedan con
+   * su contenido seed/default. Default `true` = comportamiento previo (retrocompat).
+   */
+  contentEnabled: z.boolean().default(true),
+  /**
+   * Foto de fallback global del cliente para listings/events ingeridos que no
+   * traen imagen. Vacío = sin fallback (el item queda con `image: ''`).
+   */
+  placeholderImage: z.string().default(''),
   /** Token de optimistic concurrency; se incrementa en cada save. */
   currentVersion: z.number().int().nonnegative().default(0),
   lastSyncAt: z.string().optional(),
@@ -313,6 +324,9 @@ export function mergeEditorContent(server: ClientContent, incoming: ClientConten
     categoryMap: incoming.categoryMap,
     listings: mergeContentItems(server.listings, incoming.listings),
     events: mergeContentItems(server.events, incoming.events),
+    // Settings globales editables por el operador → vienen del documento entrante.
+    contentEnabled: incoming.contentEnabled,
+    placeholderImage: incoming.placeholderImage,
     lastSyncAt: server.lastSyncAt,
     currentVersion: incoming.currentVersion,
   };

@@ -67,6 +67,8 @@ function content(over: Partial<ClientContent>): ClientContent {
     categoryMap: [],
     listings: [],
     events: [],
+    contentEnabled: true,
+    placeholderImage: '',
     currentVersion: 0,
     ...over,
   };
@@ -117,6 +119,81 @@ describe('applyContentToKiosk', () => {
     expect(mod.feedConnected).toBe(true);
     expect(mod.catalog.listings[0].title).toBe('Taco Spot');
     expect(mod.catalog.subcategories).toContain('Mexican');
+  });
+
+  it('toggle OFF (contentEnabled=false) ignores feed data and keeps the seed cfg', () => {
+    const doc = content({
+      contentEnabled: false,
+      categoryMap: [
+        {
+          feedId: 'f1',
+          feedCategory: 'Dining',
+          moduleKey: 'restaurants',
+          label: 'Dine',
+          contentType: 'listing',
+        },
+      ],
+      listings: [
+        {
+          id: 'f1:1',
+          source: 'f1',
+          type: 'listing',
+          feedCategory: 'Dining',
+          feedData: { title: 'Taco Spot', subcategory: 'Mexican' },
+          override: {},
+          flags: [],
+          status: 'active',
+        },
+      ],
+    });
+    const seed = emptyCfg({ listings: [manualModule('shopping')] });
+    const out = applyContentToKiosk(seed, doc);
+    // Early return → el config seed queda intacto, sin la data del feed.
+    expect(out).toBe(seed);
+    expect(out.listings!.map((m) => m.key)).toEqual(['shopping']);
+  });
+
+  it('fills listings without image using the global placeholderImage', () => {
+    const doc = content({
+      placeholderImage: 'https://cdn/placeholder.jpg',
+      categoryMap: [
+        {
+          feedId: 'f1',
+          feedCategory: 'Dining',
+          moduleKey: 'restaurants',
+          label: 'Dine',
+          contentType: 'listing',
+        },
+      ],
+      listings: [
+        {
+          id: 'f1:1',
+          source: 'f1',
+          type: 'listing',
+          feedCategory: 'Dining',
+          feedData: { title: 'No Photo', subcategory: 'Mexican' },
+          override: {},
+          flags: ['missing-image'],
+          status: 'active',
+        },
+        {
+          id: 'f1:2',
+          source: 'f1',
+          type: 'listing',
+          feedCategory: 'Dining',
+          feedData: { title: 'Has Photo', subcategory: 'Mexican', image: 'https://cdn/real.jpg' },
+          override: {},
+          flags: [],
+          status: 'active',
+        },
+      ],
+    });
+    const out = applyContentToKiosk(emptyCfg(), doc);
+    const mod = out.listings!.find((m) => m.key === 'restaurants')!;
+    const noPhoto = mod.catalog.listings.find((l) => l.title === 'No Photo')!;
+    const hasPhoto = mod.catalog.listings.find((l) => l.title === 'Has Photo')!;
+    expect(noPhoto.image).toBe('https://cdn/placeholder.jpg');
+    expect(hasPhoto.image).toBe('https://cdn/real.jpg');
   });
 
   it('does not propagate unmapped or hidden items', () => {

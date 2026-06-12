@@ -52,6 +52,8 @@ function content(over: Partial<ClientContent> = {}): ClientContent {
     categoryMap: [],
     listings: [],
     events: [],
+    contentEnabled: true,
+    placeholderImage: '',
     currentVersion: 0,
     ...over,
   };

@@ -187,6 +187,15 @@ function ensureUniqueSlugs<T extends { slug: string }>(items: T[]): T[] {
  * alcance de esta propagación.
  */
 export function applyContentToKiosk(cfg: KioskConfig, content: ClientContent): KioskConfig {
+  // Master switch: si el operador apagó el uso de la data del feed, no se
+  // propaga nada y los productos quedan con su contenido seed/default.
+  if (content.contentEnabled === false) return cfg;
+
+  // Foto de fallback global para items sin imagen (vacío = sin fallback).
+  const placeholder = content.placeholderImage?.trim() ?? '';
+  const withPlaceholder = <T extends { image?: string }>(item: T): T =>
+    placeholder && !item.image ? { ...item, image: placeholder } : item;
+
   // --- Listings agrupados por módulo destino ---
   const byModule = new Map<string, { label: string; items: ListingItem[] }>();
   for (const item of content.listings) {
@@ -202,7 +211,7 @@ export function applyContentToKiosk(cfg: KioskConfig, content: ClientContent): K
     if (!resolved) continue;
     const group = byModule.get(mapping.moduleKey) ?? { label: mapping.label, items: [] };
     if (mapping.label) group.label = mapping.label;
-    group.items.push(resolved);
+    group.items.push(withPlaceholder(resolved));
     byModule.set(mapping.moduleKey, group);
   }
 
@@ -251,7 +260,8 @@ export function applyContentToKiosk(cfg: KioskConfig, content: ClientContent): K
     content.events
       .filter(isItemVisible)
       .map(resolveEvent)
-      .filter((e): e is EventItem => e !== null),
+      .filter((e): e is EventItem => e !== null)
+      .map(withPlaceholder),
   );
   let nextEvents = cfg.events;
   if (eventItems.length > 0) {

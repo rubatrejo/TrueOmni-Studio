@@ -493,7 +493,9 @@ export function BrandingForm({ slug, value, onChange }: BrandingFormProps) {
           </Section>
         ) : null}
 
-        {tab === 'data-feeds' ? <DataFeedsEditor slug={slug} /> : null}
+        {tab === 'data-feeds' ? (
+          <DataFeedsEditor slug={slug} website={value.website ?? ''} />
+        ) : null}
       </div>
     </div>
   );

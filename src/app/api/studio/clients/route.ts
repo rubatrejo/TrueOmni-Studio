@@ -520,6 +520,25 @@ export async function POST(request: Request) {
   const manifest = makeBlankManifest(slug, name, products);
   await saveClientManifest(manifest);
 
+  // 5. Placeholder image automático (best-effort, no-fatal): foto del website
+  // del cliente + capa oscura + su NOMBRE en texto — el logo del KV en este
+  // punto es el del template clonado, no el del cliente real, así que
+  // `forceNameText` evita quemar un logo ajeno. El operador puede regenerar
+  // con su logo desde Data feeds → Placeholder. Timeout duro para no colgar
+  // la creación si el website del cliente responde lento.
+  const websiteForPlaceholder = parsed.data.website?.trim() ?? '';
+  if (websiteForPlaceholder && (products.kiosks || products.mobilePwa)) {
+    try {
+      const { generateAndSavePlaceholder } = await import('@/lib/studio/placeholder-generate');
+      await Promise.race([
+        generateAndSavePlaceholder(slug, { forceNameText: true }),
+        new Promise((resolve) => setTimeout(resolve, 15_000, null)),
+      ]);
+    } catch (e) {
+      console.warn('[api/studio/clients] placeholder generation skipped:', e);
+    }
+  }
+
   return NextResponse.json(
     {
       slug,

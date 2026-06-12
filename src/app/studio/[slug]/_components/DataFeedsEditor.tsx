@@ -10,6 +10,7 @@ import {
   Plus,
   RefreshCw,
   Search,
+  Sparkles,
   Trash2,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -53,13 +54,16 @@ import {
  * (`ifVersion`). Ante 409 recarga con GET y reintenta una vez. Sigue el mismo
  * patrón de autosave de `ClientView` para el branding.
  *
- * Tres sub-tabs:
+ * Cuatro sub-tabs:
  *  - Connections: cards por feed (provider + credenciales + Test + Sync).
+ *  - Placeholder: foto de fallback global (manual o generada del website).
  *  - Category mapping: tabla `feedCategory → moduleKey + label + contentType`.
  *  - Review: lista de items con badges, filtros, búsqueda y edición inline.
  */
 export interface DataFeedsEditorProps {
   slug: string;
+  /** Website del cliente (Branding); habilita "Generate from website". */
+  website?: string;
 }
 
 type SaveState = 'idle' | 'loading' | 'saving' | 'saved' | 'error';
@@ -84,7 +88,7 @@ const PROVIDER_LABEL: Record<FeedProvider, string> = {
 /** moduleKeys canónicos sugeridos para el mapeo de categorías. */
 const CANONICAL_MODULES = ['restaurants', 'things-to-do', 'stay', 'events'] as const;
 
-export function DataFeedsEditor({ slug }: DataFeedsEditorProps) {
+export function DataFeedsEditor({ slug, website }: DataFeedsEditorProps) {
   const [subTab, setSubTab] = useState<SubTab>('connections');
   const [content, setContent] = useState<ClientContent | null>(null);
   const [saveState, setSaveState] = useState<SaveState>('loading');
@@ -117,6 +121,17 @@ export function DataFeedsEditor({ slug }: DataFeedsEditorProps) {
   useEffect(() => {
     void load();
   }, [load]);
+
+  // Recarga silenciosa (sin estado 'loading' → no desmonta las secciones).
+  // La usa la generación del placeholder: el endpoint ya guardó en KV con
+  // versión nueva, así que refrescamos content+versión sin perder UI local.
+  const quietReload = useCallback(async () => {
+    const res = await fetch(`/api/studio/clients/${slug}/content`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`reload failed: ${res.status}`);
+    const body = (await res.json()) as { content: ClientContent };
+    versionRef.current = body.content.currentVersion;
+    setContent(body.content);
+  }, [slug]);
 
   // Persiste con optimistic concurrency. Ante 409 recarga e intenta una vez más
   // re-aplicando los cambios locales sobre la versión fresca del servidor.
@@ -234,7 +249,13 @@ export function DataFeedsEditor({ slug }: DataFeedsEditorProps) {
           />
         ) : null}
         {subTab === 'placeholder' ? (
-          <PlaceholderSection slug={slug} content={content} mutate={mutate} />
+          <PlaceholderSection
+            slug={slug}
+            website={website}
+            content={content}
+            mutate={mutate}
+            reload={quietReload}
+          />
         ) : null}
         {subTab === 'mapping' ? <MappingSection content={content} mutate={mutate} /> : null}
         {subTab === 'review' ? (
@@ -402,29 +423,117 @@ function ConnectionsSection({
 
 function PlaceholderSection({
   slug,
+  website,
   content,
   mutate,
+  reload,
 }: {
   slug: string;
+  website?: string;
   content: ClientContent;
   mutate: (updater: (prev: ClientContent) => ClientContent) => void;
+  reload: () => Promise<void>;
 }) {
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
+  const [genNote, setGenNote] = useState<string | null>(null);
+
+  const trimmedWebsite = (website ?? '').trim();
+  let hostname = '';
+  if (trimmedWebsite) {
+    try {
+      hostname = new URL(
+        /^https?:\/\//i.test(trimmedWebsite) ? trimmedWebsite : `https://${trimmedWebsite}`,
+      ).hostname;
+    } catch {
+      hostname = trimmedWebsite;
+    }
+  }
+
+  const handleGenerate = async () => {
+    setGenerating(true);
+    setGenError(null);
+    setGenNote(null);
+    try {
+      const res = await fetch(`/api/studio/clients/${slug}/content/placeholder`, {
+        method: 'POST',
+      });
+      const body = (await res.json().catch(() => ({}))) as {
+        url?: string;
+        source?: 'website' | 'gradient';
+        usedLogo?: boolean;
+        error?: string;
+      };
+      if (!res.ok) throw new Error(body.error ?? `Generation failed (${res.status})`);
+      const center = body.usedLogo ? 'your logo' : 'the client name';
+      setGenNote(
+        body.source === 'website'
+          ? `Composed from a ${hostname} photo + dark layer + ${center}.`
+          : `No usable photo on the website — used a brand gradient + ${center} instead.`,
+      );
+      // El endpoint ya guardó en KV (versión nueva); recargar evita un 409
+      // del autosave y refresca el preview del MediaField.
+      await reload();
+    } catch (e) {
+      setGenError(e instanceof Error ? e.message : 'Generation failed');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   return (
     <div className="space-y-3">
       <p className="text-[12px] text-zinc-500">
         Fallback image reused on any ingested listing or event that has no photo. Leave empty to
         keep items without an image.
       </p>
-      <div className="max-w-[260px]">
+      <div className="max-w-[300px]">
         <MediaField
           label="Fallback image"
-          hint="Used when an ingested item has no photo."
-          aspect="4/3"
+          hint="16:9 — used when an ingested item has no photo."
+          aspect="16/9"
           slug={slug}
           value={content.placeholderImage}
           kind="image"
           onChange={(next) => mutate((prev) => ({ ...prev, placeholderImage: next?.src ?? '' }))}
         />
+      </div>
+      <div className="space-y-1.5">
+        <button
+          type="button"
+          onClick={() => void handleGenerate()}
+          disabled={generating || !trimmedWebsite}
+          title={
+            trimmedWebsite
+              ? `Scrape ${hostname} for a relevant photo and compose the fallback image`
+              : 'Set the client website in Branding first'
+          }
+          className="inline-flex items-center gap-1.5 rounded-md border border-sky-300 bg-sky-50 px-2.5 py-1.5 text-[11.5px] font-medium text-sky-800 transition hover:border-sky-400 hover:bg-sky-100 disabled:opacity-40 dark:border-sky-500/40 dark:bg-sky-500/10 dark:text-sky-200 dark:hover:border-sky-500/60 dark:hover:bg-sky-500/20"
+        >
+          {generating ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Sparkles className="h-3.5 w-3.5" />
+          )}
+          {generating ? `Generating from ${hostname}…` : 'Generate from website'}
+        </button>
+        <p className="text-[11px] text-zinc-400">
+          {trimmedWebsite
+            ? 'Builds a 16:9 image: photo from the website + dark layer + your logo (or the client name until a logo is uploaded).'
+            : 'Set the client website in Branding to enable automatic generation.'}
+        </p>
+        {genNote ? (
+          <p className="flex items-center gap-1 text-[11.5px] text-emerald-600 dark:text-emerald-400">
+            <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+            {genNote}
+          </p>
+        ) : null}
+        {genError ? (
+          <p className="flex items-center gap-1 text-[11.5px] text-rose-600 dark:text-rose-400">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+            {genError}
+          </p>
+        ) : null}
       </div>
     </div>
   );

@@ -148,6 +148,7 @@ export function PwaEditorPanel({
     return (
       <ListingsModuleEditor
         title={title}
+        slug={slug}
         value={pwa[slice]}
         onChange={(next) => onPwaChange({ ...pwa, [slice]: next })}
       />

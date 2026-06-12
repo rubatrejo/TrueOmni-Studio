@@ -1,6 +1,7 @@
 'use client';
 
-import { Plus, X } from 'lucide-react';
+import { ImageIcon, Plus, X } from 'lucide-react';
+import Link from 'next/link';
 
 import type { PwaListingCategory, PwaListingsModuleConfig } from '@/lib/config';
 
@@ -51,10 +52,13 @@ const EMPTY: PwaListingsModuleConfig = {
 
 export function ListingsModuleEditor({
   title,
+  slug,
   value,
   onChange,
 }: {
   title: string;
+  /** Slug del cliente para el deeplink a Kiosk → Listings (fotos compartidas). */
+  slug: string;
   value: PwaListingsModuleConfig | undefined;
   onChange: (next: PwaListingsModuleConfig) => void;
 }) {
@@ -139,6 +143,20 @@ export function ListingsModuleEditor({
         </PwaGroup>
 
         <PwaGroup title="Categories (grid tiles)">
+          <div className="flex items-start gap-2 rounded-md border border-sky-200 bg-sky-50/70 p-2.5 text-[11.5px] leading-relaxed text-sky-800 dark:border-sky-900/40 dark:bg-sky-950/20 dark:text-sky-300">
+            <ImageIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <p>
+              The grid shows the kiosk subcategories and their photos when the module has any. Edit
+              those shared photos in{' '}
+              <Link
+                href={`/studio/${slug}/kiosk`}
+                className="font-semibold underline underline-offset-2 hover:text-sky-600"
+              >
+                Kiosk → Listings
+              </Link>
+              . The categories below are a fallback for modules without subcategories.
+            </p>
+          </div>
           {v.categories.length === 0 ? (
             <p className="text-[11px] italic text-zinc-500">No categories yet.</p>
           ) : (

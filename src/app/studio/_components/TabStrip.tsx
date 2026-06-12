@@ -65,7 +65,7 @@ export function TabStrip<K extends string = string>({
   const baseContainer =
     variant === 'chip'
       ? 'inline-flex items-center gap-1 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-900'
-      : 'flex items-center gap-1 overflow-x-auto border-b border-zinc-200 dark:border-zinc-800';
+      : 'scrollbar-hide flex items-center gap-1 overflow-x-auto border-b border-zinc-200 dark:border-zinc-800';
 
   return (
     <div

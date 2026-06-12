@@ -47,6 +47,10 @@ yarn-error.log*
 # históricos locales, no se borran pero tampoco entran al repo).
 .playwright-mcp/
 
+# graphify — grafo de conocimiento del repo. graph.json pesa ~9.5 MB y el hook
+# de Husky lo regenera en cada commit; cada dev lo construye local, no al repo.
+graphify-out/
+
 # Orphans históricos de /verificar-visual: PNGs ya validados archivados
 # localmente por pnpm clean:screenshots. Pesan MB y no aportan al repo.
 .planning/verifications/_orphans-*/

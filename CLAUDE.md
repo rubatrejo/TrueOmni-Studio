@@ -219,7 +219,20 @@ El subagent `auditor-white-label` fuerza estas reglas antes de cada commit.
 
 ---
 
-## 10. Índice de referencias
+## 10. Mapa del repo con graphify (ahorro de contexto)
+
+El repo tiene un grafo de conocimiento en `graphify-out/` (generado con graphify; se actualiza solo en cada commit vía hook de Husky). **Úsalo para gastar menos tokens y contexto.**
+
+- **ANTES de leer archivos fuente**, consulta `graphify-out/wiki/index.md` y `graphify-out/GRAPH_REPORT.md` para orientarte. Usa `graphify-out/graph.json` para resolver dependencias (qué se conecta con qué) sin abrir el código.
+- **Abre archivos fuente completos SOLO** cuando el grafo no tenga el detalle necesario. Nada de "léete todo el proyecto": pregunta enfocado (p. ej. "según el grafo, qué archivos tocan el flujo de pago / el branding del cliente").
+- **Hubs reales del proyecto (god nodes — todo pasa por aquí):** `ConfigNamespace`, `getConfig`, `TemplateNamespace`, `textos` (i18n), `usePwaSection()`, `resolveAssetUrl()`. Si tocas uno, asume impacto amplio y verifica no-regresión.
+- **Estructura macro según el grafo:** tres productos white-label que comparten el layer token+config — **Kiosk**, **PWA**, **Signage/Displays**, más el **Studio** (editores). El grafo lo confirma con clusters tipo "Client Provisioning API", "Kiosk Config Schema", "Signage Display API", "Studio \* Editor".
+- **Ruido conocido:** `public/pdfjs/**` (PDF.js vendoreado) infla el grafo con cientos de nodos irrelevantes (comunidades "PDF.js …") y aristas falsas hacia `pdf.worker.min.js`. Ignóralos; no son código del kiosk. Al regenerar a mano, **enfoca**: `graphify ./src --update` (no la raíz completa, que cuesta ~4M tokens de extracción).
+- El grafo **no sustituye** el protocolo pixel-perfect (sección 6) ni SKILLS.md; es solo para navegar y entender el código rápido.
+
+---
+
+## 11. Índice de referencias
 
 - `.planning/PROJECT.md` — visión.
 - `.planning/REQUIREMENTS.md` — alcance v1/v2.

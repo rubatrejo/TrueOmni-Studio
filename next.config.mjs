@@ -29,6 +29,18 @@ const nextConfig = {
   outputFileTracingIncludes: {
     '/**': ['./clients/*/config.json', './clients/*/tokens.css', './clients/*/i18n/*.json'],
   },
+  // sharp (placeholder 16:9 del Studio) instala DOS variantes de libvips para
+  // linux: glibc y musl. Vercel corre glibc, así que la musl (~16 MB) es peso
+  // muerto que empujó la lambda `api/studio/clients` sobre el cap de 250 MB
+  // (ya carga ~190 MB de assets fs de clients/* por el catch-all que los
+  // sirve). Excluirla del tracing la devuelve bajo el límite. Deuda anotada:
+  // el fix de fondo es servir los assets fs desde Blob/static, no en lambdas.
+  outputFileTracingExcludes: {
+    '*': [
+      './node_modules/.pnpm/@img+sharp-libvips-linuxmusl-x64@*/**',
+      './node_modules/.pnpm/@img+sharp-linuxmusl-x64@*/**',
+    ],
+  },
   // Lint corre via `pnpm check` (CI gate separado). Dejar `next lint` dentro
   // del build production rompía deploys en Vercel por warnings cumulativos
   // de archivos no tocados en la rama actual. Los errores de TypeScript

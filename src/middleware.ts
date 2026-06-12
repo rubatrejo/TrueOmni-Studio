@@ -21,11 +21,15 @@ import { auth } from '@/auth';
 export default auth((req) => {
   const { pathname } = req.nextUrl;
 
-  // Válvula: si NextAuth no está configurado (no hay OAuth App), dejamos
-  // navegable el chrome del Studio como demo, pero NO abrimos las mutaciones.
-  // Esto evita que el Studio quede inaccesible en deploys donde aún no se ha
-  // creado la GitHub OAuth App, sin dejar la puerta abierta a destrucción.
-  if (!process.env.AUTH_GITHUB_ID || !process.env.AUTH_GITHUB_SECRET) {
+  // Válvula: si NextAuth no está configurado (no hay OAuth App) — o si el login
+  // se deshabilitó a propósito con `STUDIO_AUTH_DISABLED=true` — dejamos
+  // navegable el chrome del Studio como demo (solo lectura), pero NO abrimos las
+  // mutaciones. Esto permite acceder/mostrar el Studio sin login GitHub sin
+  // dejar la puerta abierta a destrucción. Re-habilitar el login = quitar la
+  // flag (con las OAuth vars presentes). La flag NO toca las credenciales de
+  // GitHub, así que el cambio es reversible sin re-crear la OAuth App.
+  const authDisabled = process.env.STUDIO_AUTH_DISABLED === 'true';
+  if (authDisabled || !process.env.AUTH_GITHUB_ID || !process.env.AUTH_GITHUB_SECRET) {
     // F-CORE-1: sin auth, un deploy mal configurado dejaba TODO `/api/studio/*`
     // público — incluido `DELETE /api/studio/clients/[slug]` (borra el cliente).
     // En PRODUCCIÓN bloqueamos las mutaciones con 503 (las páginas y los GET de

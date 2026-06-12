@@ -63,10 +63,11 @@ export interface DataFeedsEditorProps {
 }
 
 type SaveState = 'idle' | 'loading' | 'saving' | 'saved' | 'error';
-type SubTab = 'connections' | 'mapping' | 'review';
+type SubTab = 'connections' | 'placeholder' | 'mapping' | 'review';
 
 const SUB_TABS: ReadonlyArray<TabStripItem<SubTab>> = [
   { key: 'connections', label: 'Connections', title: 'Feed providers and credentials' },
+  { key: 'placeholder', label: 'Placeholder', title: 'Fallback image for items without a photo' },
   { key: 'mapping', label: 'Category mapping', title: 'Map raw feed categories to modules' },
   { key: 'review', label: 'Review', title: 'Review, edit and hide ingested items' },
 ];
@@ -232,6 +233,9 @@ export function DataFeedsEditor({ slug }: DataFeedsEditorProps) {
             reload={load}
           />
         ) : null}
+        {subTab === 'placeholder' ? (
+          <PlaceholderSection slug={slug} content={content} mutate={mutate} />
+        ) : null}
         {subTab === 'mapping' ? <MappingSection content={content} mutate={mutate} /> : null}
         {subTab === 'review' ? (
           <ReviewSection slug={slug} content={content} mutate={mutate} nextId={nextId} />
@@ -345,35 +349,22 @@ function ConnectionsSection({
 
   return (
     <div className="space-y-3">
-      {/* Ajustes globales de la data ingerida: master switch + foto de fallback. */}
-      <div className="space-y-3 rounded-lg border border-zinc-200 bg-zinc-50/60 p-3 dark:border-zinc-800 dark:bg-zinc-900/30">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-[12.5px] font-medium text-zinc-700 dark:text-zinc-200">
-              Use feed data
-            </p>
-            <p className="text-[11px] leading-snug text-zinc-500">
-              When off, products ignore the ingested data and fall back to their seed content.
-            </p>
-          </div>
-          <ToggleSwitch
-            enabled={content.contentEnabled}
-            onChange={() => mutate((prev) => ({ ...prev, contentEnabled: !prev.contentEnabled }))}
-            label="Use feed data"
-            title={content.contentEnabled ? 'Feed data in use' : 'Using seed content'}
-          />
+      {/* Master switch del uso de la data ingerida. */}
+      <div className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 bg-zinc-50/60 p-3 dark:border-zinc-800 dark:bg-zinc-900/30">
+        <div>
+          <p className="text-[12.5px] font-medium text-zinc-700 dark:text-zinc-200">
+            Use feed data
+          </p>
+          <p className="text-[11px] leading-snug text-zinc-500">
+            When off, products ignore the ingested data and fall back to their seed content.
+          </p>
         </div>
-        <div className="max-w-[220px]">
-          <MediaField
-            label="Fallback image"
-            hint="Reused on any ingested listing/event that has no photo."
-            aspect="4/3"
-            slug={slug}
-            value={content.placeholderImage}
-            kind="image"
-            onChange={(next) => mutate((prev) => ({ ...prev, placeholderImage: next?.src ?? '' }))}
-          />
-        </div>
+        <ToggleSwitch
+          enabled={content.contentEnabled}
+          onChange={() => mutate((prev) => ({ ...prev, contentEnabled: !prev.contentEnabled }))}
+          label="Use feed data"
+          title={content.contentEnabled ? 'Feed data in use' : 'Using seed content'}
+        />
       </div>
 
       <div className="flex items-center justify-between">
@@ -401,6 +392,40 @@ function ConnectionsSection({
           <ConnectionCard key={feed.id} slug={slug} feed={feed} mutate={mutate} reload={reload} />
         ))
       )}
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/*  Placeholder — foto de fallback global para items sin imagen               */
+/* ──────────────────────────────────────────────────────────────────────── */
+
+function PlaceholderSection({
+  slug,
+  content,
+  mutate,
+}: {
+  slug: string;
+  content: ClientContent;
+  mutate: (updater: (prev: ClientContent) => ClientContent) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <p className="text-[12px] text-zinc-500">
+        Fallback image reused on any ingested listing or event that has no photo. Leave empty to
+        keep items without an image.
+      </p>
+      <div className="max-w-[260px]">
+        <MediaField
+          label="Fallback image"
+          hint="Used when an ingested item has no photo."
+          aspect="4/3"
+          slug={slug}
+          value={content.placeholderImage}
+          kind="image"
+          onChange={(next) => mutate((prev) => ({ ...prev, placeholderImage: next?.src ?? '' }))}
+        />
+      </div>
     </div>
   );
 }

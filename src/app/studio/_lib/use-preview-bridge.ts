@@ -87,6 +87,12 @@ export type BrandingPatch = {
 
 export function usePreviewBridge() {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  // Override temporal del destino de los postMessage. Durante el replay del
+  // handshake `studio:ready` apunta al iframe que acaba de cargar (`event.source`)
+  // para que el snapshot completo se dirija a ESE iframe — sea el preview
+  // pequeño o el del Full Screen (que carga la misma ruta y emite su propio
+  // `studio:ready`). Fuera del replay es `null` → se usa el iframe principal.
+  const replayTargetRef = useRef<Window | null>(null);
   const lastBrandingRef = useRef<BrandingPatch | null>(null);
   const lastModulesRef = useRef<ModulesConfig | null>(null);
   const lastLocaleRef = useRef<string | null>(null);
@@ -160,7 +166,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendBrandingNow = useCallback((branding: BrandingPatch) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage(
@@ -192,7 +198,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendModulesNow = useCallback((modules: ModulesConfig) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:modules-update', modules }, IFRAME_TARGET_ORIGIN);
@@ -204,7 +210,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendBillboardNow = useCallback((billboard: BillboardConfig) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:billboard-update', billboard }, IFRAME_TARGET_ORIGIN);
@@ -216,7 +222,7 @@ export function usePreviewBridge() {
   }, []);
 
   const openBillboardPreview = useCallback(() => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:billboard-open-preview' }, IFRAME_TARGET_ORIGIN);
@@ -228,7 +234,7 @@ export function usePreviewBridge() {
   }, []);
 
   const openHomeDashboardPreview = useCallback(() => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:home-dashboard-open-preview' }, IFRAME_TARGET_ORIGIN);
@@ -240,7 +246,7 @@ export function usePreviewBridge() {
   }, []);
 
   const openAiAvatarPreview = useCallback(() => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:ai-avatar-open-preview' }, IFRAME_TARGET_ORIGIN);
@@ -252,7 +258,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendAiNow = useCallback((aiAvatar: AiAvatarConfig) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       // Solo mandamos al kiosk los campos visualmente relevantes — apiKey nunca
@@ -272,7 +278,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendSurveyNow = useCallback((survey: SurveyConfig) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:survey-update', survey }, IFRAME_TARGET_ORIGIN);
@@ -288,7 +294,7 @@ export function usePreviewBridge() {
    * tile. Útil para que el editor del Studio muestre el flow al editar.
    */
   const openSurveyPreview = useCallback(() => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:survey-open-preview' }, IFRAME_TARGET_ORIGIN);
@@ -300,7 +306,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendDealsNow = useCallback((deals: DealsModuleConfig) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:deals-update', deals }, IFRAME_TARGET_ORIGIN);
@@ -316,7 +322,7 @@ export function usePreviewBridge() {
    * el grid de cupones desde el editor del Studio.
    */
   const openDealsPreview = useCallback(() => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:deals-open-preview' }, IFRAME_TARGET_ORIGIN);
@@ -328,7 +334,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendPhotoBoothNow = useCallback((photoBooth: PhotoBoothConfig) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:photo-booth-update', photoBooth }, IFRAME_TARGET_ORIGIN);
@@ -340,7 +346,7 @@ export function usePreviewBridge() {
   }, []);
 
   const openPhotoBoothPreview = useCallback(() => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:photo-booth-open-preview' }, IFRAME_TARGET_ORIGIN);
@@ -352,7 +358,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendBrochuresNow = useCallback((brochures: BrochuresModuleConfig) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:brochures-update', brochures }, IFRAME_TARGET_ORIGIN);
@@ -364,7 +370,7 @@ export function usePreviewBridge() {
   }, []);
 
   const openBrochuresPreview = useCallback(() => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:brochures-open-preview' }, IFRAME_TARGET_ORIGIN);
@@ -376,7 +382,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendSocialWallNow = useCallback((socialWall: SocialWallConfig) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:social-wall-update', socialWall }, IFRAME_TARGET_ORIGIN);
@@ -388,7 +394,7 @@ export function usePreviewBridge() {
   }, []);
 
   const openSocialWallPreview = useCallback(() => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:social-wall-open-preview' }, IFRAME_TARGET_ORIGIN);
@@ -400,7 +406,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendGuestbookNow = useCallback((guestbook: GuestbookConfig) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:guestbook-update', guestbook }, IFRAME_TARGET_ORIGIN);
@@ -412,7 +418,7 @@ export function usePreviewBridge() {
   }, []);
 
   const openGuestbookPreview = useCallback(() => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:guestbook-open-preview' }, IFRAME_TARGET_ORIGIN);
@@ -424,7 +430,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendListingsNow = useCallback((listings: ListingsModule) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:listings-update', listings }, IFRAME_TARGET_ORIGIN);
@@ -436,7 +442,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendEventsNow = useCallback((events: EventsModule) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:events-update', events }, IFRAME_TARGET_ORIGIN);
@@ -448,7 +454,7 @@ export function usePreviewBridge() {
   }, []);
 
   const openEventsPreview = useCallback(() => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:events-open-preview' }, IFRAME_TARGET_ORIGIN);
@@ -460,7 +466,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendTicketsNow = useCallback((tickets: TicketsModule) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:tickets-update', tickets }, IFRAME_TARGET_ORIGIN);
@@ -472,7 +478,7 @@ export function usePreviewBridge() {
   }, []);
 
   const openTicketsPreview = useCallback(() => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:tickets-open-preview' }, IFRAME_TARGET_ORIGIN);
@@ -484,7 +490,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendPassesNow = useCallback((passes: PassesModule) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:passes-update', passes }, IFRAME_TARGET_ORIGIN);
@@ -496,7 +502,7 @@ export function usePreviewBridge() {
   }, []);
 
   const openPassesPreview = useCallback(() => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:passes-open-preview' }, IFRAME_TARGET_ORIGIN);
@@ -508,7 +514,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendTrailsNow = useCallback((trails: TrailsModule) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:trails-update', trails }, IFRAME_TARGET_ORIGIN);
@@ -520,7 +526,7 @@ export function usePreviewBridge() {
   }, []);
 
   const openTrailsPreview = useCallback(() => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:trails-open-preview' }, IFRAME_TARGET_ORIGIN);
@@ -532,7 +538,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendItineraryNow = useCallback((itineraryBuilder: ItineraryBuilderConfig) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:itinerary-update', itineraryBuilder }, IFRAME_TARGET_ORIGIN);
@@ -544,7 +550,7 @@ export function usePreviewBridge() {
   }, []);
 
   const openItineraryPreview = useCallback(() => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:itinerary-open-preview' }, IFRAME_TARGET_ORIGIN);
@@ -556,7 +562,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendAdsNow = useCallback((ads: AdsModule) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:ads-update', ads }, IFRAME_TARGET_ORIGIN);
@@ -568,7 +574,7 @@ export function usePreviewBridge() {
   }, []);
 
   const sendMapNow = useCallback((map: MapConfig) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:map-update', map }, IFRAME_TARGET_ORIGIN);
@@ -586,7 +592,7 @@ export function usePreviewBridge() {
    *  el iframe puede usar es el Mapbox token (cliente) y el weather
    *  provider/city/units (no la apiKey del provider, que es server-side). */
   const sendIntegrationsNow = useCallback((integrations: IntegrationsConfig) => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       const safe = {
@@ -610,7 +616,7 @@ export function usePreviewBridge() {
   }, []);
 
   const openMapPreview = useCallback(() => {
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:map-open-preview' }, IFRAME_TARGET_ORIGIN);
@@ -635,12 +641,17 @@ export function usePreviewBridge() {
       if (data.type !== 'studio:ready') return;
       setIsReady(true);
       setLastAckAt(Date.now());
+      // Dirige TODO el replay al iframe que acaba de emitir el ready (el preview
+      // pequeño o el del Full Screen, que carga la misma ruta). Sin esto el
+      // snapshot iría siempre al iframe principal y el Full Screen arrancaría con
+      // el config publicado, sin los cambios en edición.
+      replayTargetRef.current = (event.source as Window | null) ?? null;
       if (lastBrandingRef.current) sendBrandingNow(lastBrandingRef.current);
       if (lastModulesRef.current) sendModulesNow(lastModulesRef.current);
       // Re-sincroniza el locale del preview tras un reload del iframe (el
       // dropdown EN/ES/… persiste aunque se recargue o se navegue de pantalla).
       if (lastLocaleRef.current) {
-        const win = iframeRef.current?.contentWindow;
+        const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
         if (win) {
           try {
             win.postMessage(
@@ -669,6 +680,8 @@ export function usePreviewBridge() {
       if (lastAdsRef.current) sendAdsNow(lastAdsRef.current);
       if (lastMapRef.current) sendMapNow(lastMapRef.current);
       if (lastIntegrationsRef.current) sendIntegrationsNow(lastIntegrationsRef.current);
+      // Fin del replay síncrono → vuelve a apuntar al iframe principal.
+      replayTargetRef.current = null;
     };
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
@@ -870,7 +883,7 @@ export function usePreviewBridge() {
    *  zustand. No hay debounce — el cambio es discreto (dropdown). */
   const pushLocale = useCallback((locale: string) => {
     lastLocaleRef.current = locale;
-    const win = iframeRef.current?.contentWindow;
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
     if (!win) return;
     try {
       win.postMessage({ type: 'studio:locale-update', locale }, IFRAME_TARGET_ORIGIN);

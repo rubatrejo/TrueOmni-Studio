@@ -21,6 +21,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "validate:configs": "node scripts/validate-configs.mjs",
+    "seed:listings": "node scripts/seed-listings.mjs",
     "verify:visual": "node scripts/verify-visual.mjs",
     "clean:screenshots": "node scripts/clean-dev-screenshots.mjs",
     "prepare": "husky"

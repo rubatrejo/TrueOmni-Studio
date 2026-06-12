@@ -927,11 +927,26 @@ function MappingSection({
     (d) => !mapIndex.has(`${d.feedId} ${d.feedCategory}`),
   ).length;
 
+  // Sub-categorías ya escritas por moduleKey (para el datalist de sugerencias):
+  // conforme el operador nombra sub-categorías en unas filas, se autocompletan
+  // en las demás del mismo módulo.
+  const subcatsByModule = useMemo(() => {
+    const m = new Map<string, Set<string>>();
+    for (const cm of content.categoryMap) {
+      const sub = cm.subcategory?.trim();
+      if (!cm.moduleKey || !sub) continue;
+      const set = m.get(cm.moduleKey) ?? new Set<string>();
+      set.add(sub);
+      m.set(cm.moduleKey, set);
+    }
+    return m;
+  }, [content.categoryMap]);
+
   // Upsert de un mapeo (feedId + feedCategory es la clave natural).
   const setMapping = (
     feedId: string,
     feedCategory: string,
-    patch: Partial<Pick<CategoryMapping, 'moduleKey' | 'label' | 'contentType'>>,
+    patch: Partial<Pick<CategoryMapping, 'moduleKey' | 'label' | 'subcategory' | 'contentType'>>,
     contentType: 'listing' | 'event',
   ) => {
     mutate((prev) => {
@@ -951,6 +966,7 @@ function MappingSection({
         feedCategory,
         moduleKey: patch.moduleKey ?? '',
         label: patch.label ?? '',
+        subcategory: patch.subcategory ?? '',
         contentType: patch.contentType ?? contentType,
       };
       return { ...prev, categoryMap: [...prev.categoryMap, created] };
@@ -972,6 +988,7 @@ function MappingSection({
           feedCategory: d.feedCategory,
           moduleKey: s.moduleKey,
           label: existing?.label || s.label,
+          subcategory: existing?.subcategory ?? '',
           contentType: existing?.contentType ?? d.contentType,
         });
       }
@@ -993,7 +1010,9 @@ function MappingSection({
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <p className="text-[12px] text-zinc-500">
-          Map each raw feed category to a module. Several categories can point to the same module.
+          Map each raw feed category to a module and an optional subcategory. Several categories can
+          point to the same module; leave the subcategory empty to send items straight to the
+          module.
         </p>
         <button
           type="button"
@@ -1018,6 +1037,7 @@ function MappingSection({
             <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-[11px] font-semibold text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-400">
               <th className="px-3 py-2">Feed category</th>
               <th className="px-3 py-2">Module key</th>
+              <th className="px-3 py-2">Subcategory (optional)</th>
               <th className="px-3 py-2">Label (visible name)</th>
               <th className="px-3 py-2">Type</th>
             </tr>
@@ -1027,7 +1047,13 @@ function MappingSection({
               const existing = mapIndex.get(`${d.feedId} ${d.feedCategory}`);
               const moduleKey = existing?.moduleKey ?? '';
               const label = existing?.label ?? '';
+              const subcategory = existing?.subcategory ?? '';
               const ctype = existing?.contentType ?? d.contentType;
+              // Sugerencias = sub-categorías ya usadas en este módulo, menos la
+              // que ya está escrita en esta fila.
+              const subcatHints = [...(subcatsByModule.get(moduleKey) ?? [])].filter(
+                (s) => s !== subcategory,
+              );
               const canonicalHint = CANONICAL_MODULES.includes(
                 moduleKey as (typeof CANONICAL_MODULES)[number],
               )
@@ -1051,6 +1077,16 @@ function MappingSection({
                       value={moduleKey}
                       onChange={(v) =>
                         setMapping(d.feedId, d.feedCategory, { moduleKey: v }, d.contentType)
+                      }
+                    />
+                  </td>
+                  <td className="px-3 py-2 align-top">
+                    <SubcategoryInput
+                      value={subcategory}
+                      hints={subcatHints}
+                      disabled={ctype === 'event'}
+                      onChange={(v) =>
+                        setMapping(d.feedId, d.feedCategory, { subcategory: v }, d.contentType)
                       }
                     />
                   </td>
@@ -1117,6 +1153,43 @@ function ModuleKeyInput({ value, onChange }: { value: string; onChange: (v: stri
       <datalist id={listId}>
         {CANONICAL_MODULES.map((m) => (
           <option key={m} value={m} />
+        ))}
+      </datalist>
+    </div>
+  );
+}
+
+/**
+ * Input de sub-categoría (texto libre) con datalist de las sub-categorías ya
+ * usadas en el mismo módulo. Vacío = la feed category va directo al módulo
+ * (categoría principal). Deshabilitado para events (no usan sub-categorías).
+ */
+function SubcategoryInput({
+  value,
+  hints,
+  disabled,
+  onChange,
+}: {
+  value: string;
+  hints: string[];
+  disabled: boolean;
+  onChange: (v: string) => void;
+}) {
+  const listId = useMemo(() => `subcat-suggestions-${Math.random().toString(36).slice(2, 8)}`, []);
+  if (disabled) {
+    return <span className="text-[11px] text-zinc-400 dark:text-zinc-600">—</span>;
+  }
+  return (
+    <div className="relative">
+      <TextInput
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="(main category)"
+        list={listId}
+      />
+      <datalist id={listId}>
+        {hints.map((h) => (
+          <option key={h} value={h} />
         ))}
       </datalist>
     </div>
@@ -1334,6 +1407,7 @@ function ReviewSection({
               item={item}
               mutate={mutate}
               targetModule={moduleKeyOf(item)}
+              placeholderImage={content.placeholderImage}
             />
           ))}
         </div>
@@ -1383,12 +1457,15 @@ function ReviewItem({
   item,
   mutate,
   targetModule,
+  placeholderImage,
 }: {
   slug: string;
   item: AnyItem;
   mutate: (updater: (prev: ClientContent) => ClientContent) => void;
   /** moduleKey destino resuelto vía categoryMap ('' si la categoría no está mapeada). */
   targetModule: string;
+  /** Placeholder global del cliente — preview de fallback cuando el item no trae foto. */
+  placeholderImage: string;
 }) {
   const [open, setOpen] = useState(false);
   const resolved = item.type === 'listing' ? resolveListing(item) : resolveEvent(item);
@@ -1426,6 +1503,18 @@ function ReviewItem({
       : typeof fd[k] === 'string'
         ? (fd[k] as string)
         : '';
+  // Para la imagen sí queremos ver la foto del feed: el `override.image` viene
+  // como string vacío por default del schema, así que `strVal` (que prefiere
+  // override aunque esté vacío) la ocultaba. Precedencia correcta: override solo
+  // si NO está vacío, sino la del feed. Los inputs de texto mantienen el patrón
+  // value=override + placeholder=feed (el feed se ve en gris, no se rompe).
+  const pick = (k: string): string => {
+    const o = ov[k];
+    if (typeof o === 'string' && o.trim() !== '') return o;
+    const f = fd[k];
+    return typeof f === 'string' ? f : '';
+  };
+  const imageVal = pick('image');
   const coords = (ov.coords ?? fd.coords) as { lat?: number; lng?: number } | undefined;
 
   return (
@@ -1467,9 +1556,10 @@ function ReviewItem({
                 hint=""
                 aspect="4/3"
                 slug={slug}
-                value={strVal('image')}
+                value={imageVal}
                 kind="image"
                 hideUrlInput
+                placeholderPreview={placeholderImage}
                 onChange={(next) => setOverride({ image: next?.src ?? '' })}
               />
             </div>

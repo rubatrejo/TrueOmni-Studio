@@ -33,6 +33,11 @@ interface MediaFieldProps {
    *  campo es para assets pequeños (logos, favicons) donde el paste-URL es
    *  innecesario y solo añade ruido vertical en el formulario. */
   hideUrlInput?: boolean;
+  /** Imagen mostrada (atenuada) en el dropzone cuando `value` está vacío, para
+   *  indicar el fallback que se usará en runtime (e.g. el placeholder global del
+   *  cliente). No es el value real: el botón de subida sigue disponible encima y
+   *  `onChange` no se dispara con esta imagen. Sin el prop = estado vacío normal. */
+  placeholderPreview?: string;
   onChange: (next: { src: string; kind: 'image' | 'video' } | undefined) => void;
 }
 
@@ -63,6 +68,7 @@ export function MediaField({
   value,
   kind,
   hideUrlInput = false,
+  placeholderPreview,
   onChange,
 }: MediaFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -276,6 +282,35 @@ export function MediaField({
                 {formatBytes(bytes)}
               </span>
             ) : null}
+          </>
+        ) : placeholderPreview ? (
+          // Sin imagen propia pero con fallback (e.g. placeholder global del
+          // cliente): se muestra atenuado para indicar lo que se usará en
+          // runtime, con el botón de subida encima para reemplazarlo.
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              loading="lazy"
+              src={slug ? resolveStudioAsset(slug, placeholderPreview) : placeholderPreview}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover opacity-40"
+            />
+            <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur-sm">
+              <ImageIcon className="h-3 w-3" />
+              Fallback
+            </span>
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              disabled={busy}
+              aria-label={`Upload ${label}`}
+              className="absolute inset-0 grid place-items-center text-white transition disabled:opacity-50"
+            >
+              <span className="rounded-full bg-white/90 px-3 py-1.5 text-[12px] font-semibold text-zinc-900 shadow-lg">
+                <Upload className="mr-1 inline h-3.5 w-3.5" />
+                {label}
+              </span>
+            </button>
           </>
         ) : (
           <button

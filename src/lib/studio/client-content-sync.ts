@@ -209,9 +209,15 @@ export function applyContentToKiosk(cfg: KioskConfig, content: ClientContent): K
     if (!mapping) continue;
     const resolved = resolveListing(item);
     if (!resolved) continue;
+    // Sub-categoría del mapping: override la del item del feed SOLO si está
+    // definida (precedencia: mapping > item). Vacía = la categoría va directo
+    // al módulo y se respeta la sub-categoría que traiga el item (si trae).
+    const withSub = mapping.subcategory
+      ? { ...resolved, subcategory: mapping.subcategory }
+      : resolved;
     const group = byModule.get(mapping.moduleKey) ?? { label: mapping.label, items: [] };
     if (mapping.label) group.label = mapping.label;
-    group.items.push(withPlaceholder(resolved));
+    group.items.push(withPlaceholder(withSub));
     byModule.set(mapping.moduleKey, group);
   }
 

@@ -86,6 +86,13 @@ export const CategoryMappingSchema = z.object({
     }),
   /** Nombre visible del módulo destino (rename). Vacío = usar el default. */
   label: z.string().max(64).default(''),
+  /**
+   * Sub-categoría destino dentro del módulo. Vacío = la categoría va directo al
+   * módulo (categoría principal); con valor = los items se agrupan bajo esta
+   * sub-categoría dentro del módulo (override de la del item del feed solo si
+   * está definida). Aplica solo a listings; los events no usan sub-categorías.
+   */
+  subcategory: z.string().max(64).default(''),
   contentType: ContentTypeSchema,
 });
 export type CategoryMapping = z.infer<typeof CategoryMappingSchema>;

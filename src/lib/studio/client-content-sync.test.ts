@@ -97,6 +97,7 @@ describe('applyContentToKiosk', () => {
           feedCategory: 'Dining',
           moduleKey: 'restaurants',
           label: 'Dine',
+          subcategory: '',
           contentType: 'listing',
         },
       ],
@@ -130,6 +131,7 @@ describe('applyContentToKiosk', () => {
           feedCategory: 'Dining',
           moduleKey: 'restaurants',
           label: 'Dine',
+          subcategory: '',
           contentType: 'listing',
         },
       ],
@@ -162,6 +164,7 @@ describe('applyContentToKiosk', () => {
           feedCategory: 'Dining',
           moduleKey: 'restaurants',
           label: 'Dine',
+          subcategory: '',
           contentType: 'listing',
         },
       ],
@@ -194,6 +197,61 @@ describe('applyContentToKiosk', () => {
     const hasPhoto = mod.catalog.listings.find((l) => l.title === 'Has Photo')!;
     expect(noPhoto.image).toBe('https://cdn/placeholder.jpg');
     expect(hasPhoto.image).toBe('https://cdn/real.jpg');
+  });
+
+  it('mapping subcategory overrides the item subcategory and feeds the grid', () => {
+    const doc = content({
+      categoryMap: [
+        {
+          feedId: 'f1',
+          feedCategory: 'Eat & Drink',
+          moduleKey: 'restaurants',
+          label: 'Dine',
+          subcategory: 'Casual',
+          contentType: 'listing',
+        },
+        {
+          feedId: 'f1',
+          feedCategory: 'Fine Dining',
+          moduleKey: 'restaurants',
+          label: 'Dine',
+          subcategory: '', // vacío = respeta la del item del feed
+          contentType: 'listing',
+        },
+      ],
+      listings: [
+        {
+          id: 'f1:1',
+          source: 'f1',
+          type: 'listing',
+          feedCategory: 'Eat & Drink',
+          feedData: { title: 'Burger Joint', subcategory: 'Ignored' },
+          override: {},
+          flags: [],
+          status: 'active',
+        },
+        {
+          id: 'f1:2',
+          source: 'f1',
+          type: 'listing',
+          feedCategory: 'Fine Dining',
+          feedData: { title: 'Le Posh', subcategory: 'Upscale' },
+          override: {},
+          flags: [],
+          status: 'active',
+        },
+      ],
+    });
+    const out = applyContentToKiosk(emptyCfg(), doc);
+    const mod = out.listings!.find((m) => m.key === 'restaurants')!;
+    const burger = mod.catalog.listings.find((l) => l.title === 'Burger Joint')!;
+    const posh = mod.catalog.listings.find((l) => l.title === 'Le Posh')!;
+    // Mapping con subcategoría → override la del item.
+    expect(burger.subcategory).toBe('Casual');
+    // Mapping con subcategoría vacía → respeta la del item del feed.
+    expect(posh.subcategory).toBe('Upscale');
+    // Ambas alimentan el grid de sub-categorías del módulo.
+    expect(mod.catalog.subcategories).toEqual(expect.arrayContaining(['Casual', 'Upscale']));
   });
 
   it('does not propagate unmapped or hidden items', () => {
@@ -234,6 +292,7 @@ describe('applyContentToKiosk', () => {
           feedCategory: 'Dining',
           moduleKey: 'restaurants',
           label: '',
+          subcategory: '',
           contentType: 'listing',
         },
       ],
@@ -293,6 +352,7 @@ describe('applyContentToKiosk', () => {
           feedCategory: 'Dining',
           moduleKey: 'restaurants',
           label: 'Dine',
+          subcategory: '',
           contentType: 'listing',
         },
       ],
@@ -345,6 +405,7 @@ describe('applyContentToKiosk', () => {
           feedCategory: 'Dining',
           moduleKey: 'restaurants',
           label: 'Dine',
+          subcategory: '',
           contentType: 'listing',
         },
       ],
@@ -395,6 +456,7 @@ describe('applyContentToKiosk', () => {
           feedCategory: 'Dining',
           moduleKey: 'restaurants',
           label: 'Dine',
+          subcategory: '',
           contentType: 'listing',
         },
       ],

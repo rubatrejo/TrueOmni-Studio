@@ -126,6 +126,7 @@ describe('mergeEditorContent', () => {
           feedCategory: 'Restaurants',
           moduleKey: 'restaurants',
           label: 'Dine',
+          subcategory: '',
           contentType: 'listing',
         },
       ],

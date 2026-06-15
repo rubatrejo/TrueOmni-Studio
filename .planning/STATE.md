@@ -4,6 +4,60 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-15 — Cierre audit (F-QA-12) + deuda infra Blob + 6 fixes/features del editor del kiosk
+
+**Hecho (11 commits a prod, todos deploys Vercel READY):**
+
+- **Audit STUDIO-AUDIT-2026-06-09 cerrado al 100%.** Rubén pidió "F-HUB-7 + Fase 4";
+  al verificar por commit/código, TODO ya estaba hecho salvo **F-QA-12** → lo cerré:
+  `c015d68` parte `schema.ts` (2371 líneas) por dominio en `src/lib/studio/schema/*` +
+  barrel; API pública idéntica (212 exports), primitivas internas. `1d1a210` corrige
+  el STATE (los "Pendiente" de 06-10/06-12 estaban stale).
+- **Deuda de infra (frente assets→Blob):** `c8fde76` materializa imágenes externas del
+  feed a Blob (`materialize-images.ts`, arregla hotlink/403). `e8056be` GC de blobs al
+  borrar/recrear cliente (`blob-gc.ts`). `e92133d` PLAN de la migración grande (servir
+  assets fs de `clients/*` desde Blob, 3 fases reversibles) — NO ejecutada (blast radius).
+- **Editor del kiosk (pedidos de Rubén):** `86f769c` fix del 413 "Config too large" —
+  materializa data-URIs pesados del config a Blob al guardar (`materialize-data-uris.ts`).
+  `4c05582` idle respeta módulo Languages (oculta selector + "Powered by" en var 2/3/4) +
+  "Touch Here" en Title Case + toggle UPPERCASE. `952d762` botón Touch Here (var 1)
+  editable: color texto/fondo/borde + opacidad fondo + redondez por esquina. `439d44f`
+  preview refleja módulos desactivados (cache en window) + renames de labels en vivo
+  (push del bundle i18n al preview). `d9926b9` Ads/Languages/AI-Avatar respetan el toggle
+  en el preview (cache de systemModules) + color de texto del botón. `e58d8e2` fix crash
+  del editor con configs viejos (deep-merge de `touchHere` con defaults).
+
+**Verificado:**
+
+- typecheck + lint + 205 tests (28 nuevos) + validate:configs 3/3 en cada commit.
+- 11 deploys de prod **READY** (último `e58d8e2`). Verificación DOM en runtime real:
+  split schema sin regresión, touch label Title Case, languages off → powered-by,
+  botón color/opacidad/borde/esquinas, i18n rename en vivo, AI FAB se oculta.
+
+**Pendiente / siguiente:**
+
+- **NUEVA FEATURE (siguiente sesión):** opacidad editable de la capa oscura entre la
+  imagen y el título de los tiles del Home Dashboard, en el editor del **kiosk Y la PWA**.
+  Patrón: setting global de tiles (calcar `tileTitleFontSize` end-to-end). Kiosk: la capa
+  es `category-tile.tsx:42` (`rgba(17,16,13,0.352)` hardcoded). PWA: tile en
+  `dashboard-screen.tsx`/`dashboard-live.tsx`. ~12 ediciones (schema+config+tile+grid+
+  HomeShell/override+slider ×2 productos). OJO: defaultear el campo para configs viejos.
+- Audit: solo queda endurecer `PwaConfigSchema` (diferido a propósito) + QA visual de Rubén.
+- QA de Rubén en prod de los fixes de hoy (editor del kiosk + preview).
+
+**Decisiones:**
+
+- F-QA-12: barrel mantiene `@/lib/studio/schema` estable; primitivas NO se re-exportan.
+- assets→Blob grande NO se ejecutó (blast radius máximo); queda PLAN para sesión dedicada.
+- Overrides del preview (modules/systemModules/i18n) se **cachean en `window`** para que
+  los hosts que montan tarde los apliquen; fuera del preview el cache no existe.
+- Case del touch label en JS (`toTouchCase`), no CSS `capitalize` (el string fuente es MAYÚS).
+
+**Fase:** Sin milestone formal — mejoras del editor del kiosk/Studio + cierre de deuda
+del audit, sobre producto cerrado (Kiosk v1 + Studio + Signage + PWA).
+
+---
+
 ### Sesión 2026-06-12 (tarde) — Placeholder auto + sub-categorías en feeds + modo viewer del Studio
 
 **Hecho (6 commits, todos en prod → deploys Vercel READY):**

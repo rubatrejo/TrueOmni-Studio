@@ -1,6 +1,6 @@
 import 'server-only';
 
-import opentype from 'opentype.js';
+import { parse as parseFont } from 'opentype.js';
 import sharp from 'sharp';
 
 import { ROBOTO_BOLD_BASE64 } from './fonts/roboto-bold';
@@ -17,7 +17,7 @@ import { splitNameLines } from './placeholder-image';
 const ROBOTO_BOLD = (() => {
   const buf = Buffer.from(ROBOTO_BOLD_BASE64, 'base64');
   const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
-  return opentype.parse(ab);
+  return parseFont(ab);
 })();
 
 /** Ancho (px) que ocupa `text` a `fontSize`, con la fuente embebida. */

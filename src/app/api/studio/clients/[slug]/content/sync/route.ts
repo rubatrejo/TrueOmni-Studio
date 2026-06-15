@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { materializeFeedImages } from '@/lib/ingest/materialize-images';
 import { mergeItems } from '@/lib/ingest/merge';
 import { dedupeById, normalizeEvent, normalizeListing } from '@/lib/ingest/normalize';
 import { getAdapter } from '@/lib/ingest/registry';
@@ -110,8 +111,18 @@ export async function POST(req: Request, { params }: RouteParams) {
         .filter((x): x is EventContentItem => x !== null),
     ).items;
 
-    const listingMerge = mergeItems(content.listings, normListings, feedId);
-    const eventMerge = mergeItems(content.events, normEvents, feedId);
+    // Materializa las imágenes externas del feed a nuestro Blob ANTES del merge,
+    // así el `feedData.image` que se persiste apunta a una URL estable bajo
+    // nuestro control (no al CDN del proveedor, que puede expirar/403). Gated por
+    // BLOB_READ_WRITE_TOKEN e idempotente: sin token o ante un fallo conserva la
+    // URL externa, nunca aborta el sync.
+    const [matListings, matEvents] = await Promise.all([
+      materializeFeedImages(slug, normListings),
+      materializeFeedImages(slug, normEvents),
+    ]);
+
+    const listingMerge = mergeItems(content.listings, matListings, feedId);
+    const eventMerge = mergeItems(content.events, matEvents, feedId);
 
     const summary = {
       added: listingMerge.diff.added + eventMerge.diff.added,

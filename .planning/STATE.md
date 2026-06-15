@@ -99,7 +99,9 @@ producto ya cerrado (Kiosk v1 + Studio + Signage + PWA).
 - ~540 comunidades quedan como genéricas (`Cluster N`); solo 30 nombradas a mano.
 - Ruido de **PDF.js** (`public/pdfjs/**`) infla el grafo con cientos de nodos irrelevantes;
   para refrescos enfocar `graphify ./src --update`, nunca `/graphify .` completo (~4M tokens).
-- Sin cambios de producto: siguen pendientes **Fase 3b** (F-PWA-5/6) y **Fase 4** del audit Studio.
+- Sin cambios de producto. (Corrección 2026-06-15: la **Fase 3b F-PWA-5/6 ya se cerró**
+  el 2026-06-10 madrugada — este renglón arrastraba texto viejo. Lo que sigue abierto del
+  audit es **Fase 3 F-HUB-7** y el **resto de la Fase 4**; ver entrada 2026-06-10.)
 
 **Decisiones:**
 
@@ -614,15 +616,22 @@ la 3 se cerraron la noche del 2026-06-09; ver entrada siguiente).
 
 **Pendiente / siguiente (hallazgos del audit aún abiertos):**
 
-- **Fase 3 — F-HUB-7** (monitor de salud de integraciones): único hallazgo de la Fase 3 que NO se
-  cerró. Lo cierra del todo.
-- **Fase 4 (resto):** F-QA-7 (E2E "cliente nuevo"), F-QA-1/F-QA-12 (refactor de monolitos —
-  `schema.ts` 2355 líneas, oportunista al tocarlos), F-QA-3 (hook roving), F-QA-2 (extraer
-  primitivas), **F-PWA-3** (materializar assets data-URI), F-CORE-5/8/9 (perf KV/bridge),
-  F-SIGNAGE-8 (código muerto).
-- Endurecer `PwaConfigSchema` (rechazar campos desconocidos) — diferido a propósito; arrancamos
-  permisivos para no romper KV en prod.
-- QA visual de Rubén en prod de los editores PWA (add/remove + pickers de coords).
+> ⚠️ **Corrección 2026-06-15:** esta lista quedó STALE. La sesión del 2026-06-10 siguió
+> DESPUÉS de esta reconstrucción y cerró casi todo. Estado real verificado por commit/código
+> el 2026-06-15:
+>
+> - **F-HUB-7** ✅ `bd58b96` (motor de salud + "Test all" + snapshot KV + badge).
+> - **F-QA-7** ✅ `8f62da1` (spec E2E completo con asserts nombre + ausencia Arizona/Phoenix).
+> - **F-QA-3** ✅ `a566150` (`use-roving-tab-list.ts`). **F-QA-2** ✅ (`_components/ui/ConfirmDialog.tsx`+`ToggleSwitch.tsx`).
+> - **F-PWA-3** ✅ `ac54529`+ (`upload-to-blob.ts`, ImageField/PdfField materializan a Blob).
+> - **F-CORE-5/8/9** ✅ (Promise.all en configs/purge; heartbeat≠ready en bridge).
+> - **F-SIGNAGE-8** ✅ (grid 1x2/2x1 retirado del catálogo).
+> - **F-QA-1** ✅ mayormente (`ModulesEditor` 1572→775, `EditorPanel` 1393→965; carpetas
+>   `modules/`/`billboard/`/`photo-booth/`/`editor-panel/`).
+> - **ABIERTO único:** **F-QA-12** (partir `schema.ts`, hoy 2371 líneas) — el audit lo marca
+>   "(No urgente) solo al tocarlo sustancialmente". NO forzar el split (white-label depende de él).
+> - Endurecer `PwaConfigSchema` (rechazar desconocidos) — diferido a propósito (permisivo primero).
+> - QA visual de Rubén en prod (editores PWA add/remove + pickers de coords + modo viewer).
 
 **Decisiones:**
 

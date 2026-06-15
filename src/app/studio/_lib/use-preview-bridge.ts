@@ -112,6 +112,7 @@ export function usePreviewBridge() {
   const lastItineraryRef = useRef<ItineraryBuilderConfig | null>(null);
   const lastAdsRef = useRef<AdsModule | null>(null);
   const lastMapRef = useRef<MapConfig | null>(null);
+  const lastI18nRef = useRef<Record<string, Record<string, string>> | null>(null);
   const brandingDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const modulesDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const billboardDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -208,6 +209,26 @@ export function usePreviewBridge() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón que sendBrandingNow: recordPost* son estables, iframeRef se lee vía .current
   }, []);
+
+  /** Empuja el bundle i18n completo al iframe (refleja renames en vivo). */
+  const sendI18nNow = useCallback((bundle: Record<string, Record<string, string>>) => {
+    const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
+    if (!win) return;
+    try {
+      win.postMessage({ type: 'studio:i18n-update', i18nBundle: bundle }, IFRAME_TARGET_ORIGIN);
+      recordPostSuccess();
+    } catch (e) {
+      recordPostFailure(e);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mismo patrón que sendModulesNow
+  }, []);
+  const pushI18n = useCallback(
+    (bundle: Record<string, Record<string, string>>) => {
+      lastI18nRef.current = bundle;
+      sendI18nNow(bundle);
+    },
+    [sendI18nNow],
+  );
 
   const sendBillboardNow = useCallback((billboard: BillboardConfig) => {
     const win = replayTargetRef.current ?? iframeRef.current?.contentWindow;
@@ -648,6 +669,7 @@ export function usePreviewBridge() {
       replayTargetRef.current = (event.source as Window | null) ?? null;
       if (lastBrandingRef.current) sendBrandingNow(lastBrandingRef.current);
       if (lastModulesRef.current) sendModulesNow(lastModulesRef.current);
+      if (lastI18nRef.current) sendI18nNow(lastI18nRef.current);
       // Re-sincroniza el locale del preview tras un reload del iframe (el
       // dropdown EN/ES/… persiste aunque se recargue o se navegue de pantalla).
       if (lastLocaleRef.current) {
@@ -688,6 +710,7 @@ export function usePreviewBridge() {
   }, [
     sendBrandingNow,
     sendModulesNow,
+    sendI18nNow,
     sendBillboardNow,
     sendAiNow,
     sendSurveyNow,
@@ -955,6 +978,7 @@ export function usePreviewBridge() {
     openMapPreview,
     pushIntegrations,
     pushLocale,
+    pushI18n,
     isReady,
     bridgeStatus,
     /** True si han fallado 5+ postMessage consecutivos. Útil para mostrar

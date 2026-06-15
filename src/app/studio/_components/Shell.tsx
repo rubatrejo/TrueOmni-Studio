@@ -314,9 +314,20 @@ export function Shell({
     pushAds,
     pushIntegrations,
     pushLocale,
+    pushI18n,
     bridgeStatus,
     onIframeLoad,
   } = usePreviewBridge();
+
+  // Empuja el bundle i18n al preview cuando cambia (debounced). Los labels del
+  // runtime (tiles del Home, headers de módulo) salen de las keys i18n, así que
+  // un rename de módulo/tile debe llegar por aquí para reflejarse en vivo sin
+  // republicar. Gated por i18nLoaded para no mandar un bundle vacío al arrancar.
+  useEffect(() => {
+    if (!i18nLoaded) return;
+    const id = setTimeout(() => pushI18n(i18nBundle), 150);
+    return () => clearTimeout(id);
+  }, [i18nBundle, i18nLoaded, pushI18n]);
 
   // Hallazgos S-32 / S-33: los 18 useEffects individuales que empujaban
   // cada slot del state al iframe vivían aquí inflando Shell.tsx y

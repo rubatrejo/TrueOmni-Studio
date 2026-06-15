@@ -90,6 +90,8 @@ export function StudioBridge() {
         map?: unknown;
         integrations?: unknown;
         locale?: string;
+        /** Bundle i18n completo (locale → strings) para reflejar renames en vivo. */
+        i18nBundle?: Record<string, Record<string, string>>;
         /** Slice `features.pwa` completo enviado por el editor PWA del Studio. */
         pwa?: unknown;
         /** Ruta destino para `studio:pwa-nav` (navegación del preview PWA). */
@@ -109,6 +111,17 @@ export function StudioBridge() {
           break;
         case 'studio:modules-update':
           if (data.modules) applyModulesOverride(data.modules);
+          break;
+        case 'studio:i18n-update':
+          // Bundle i18n completo: refleja renames de tiles/módulos en vivo en el
+          // preview (los labels del runtime salen de las keys i18n, no del config).
+          if (data.i18nBundle) {
+            (window as Window & { __kioskI18nOverride?: unknown }).__kioskI18nOverride =
+              data.i18nBundle;
+            window.dispatchEvent(
+              new CustomEvent('kiosk:i18n-override', { detail: { bundle: data.i18nBundle } }),
+            );
+          }
           break;
         case 'studio:billboard-update':
           if (data.billboard) applyBillboardOverride(data.billboard);
@@ -480,12 +493,19 @@ export const KIOSK_INTEGRATIONS_OVERRIDE_EVENT = 'kiosk:integrations-override';
 
 function applyModulesOverride(modules: ModulesPatch) {
   if (typeof window === 'undefined') return;
-  window.dispatchEvent(
-    new CustomEvent(KIOSK_MODULES_OVERRIDE_EVENT, {
-      detail: { tiles: modules.tiles, tileTitleFontSize: modules.tileTitleFontSize },
-    }),
-  );
+  const tilesDetail = { tiles: modules.tiles, tileTitleFontSize: modules.tileTitleFontSize };
+  // Cache en window: si el Home se monta DESPUÉS de este evento (navegación
+  // interna del iframe, o el preview venía de otra pantalla), lo lee al montar
+  // y aplica el toggle/orden/labels sin esperar a un nuevo push. Sin esto, un
+  // módulo recién desactivado podía seguir visible hasta el próximo cambio.
+  const w = window as Window & {
+    __kioskModulesOverride?: unknown;
+    __kioskSystemModulesOverride?: unknown;
+  };
+  w.__kioskModulesOverride = tilesDetail;
+  window.dispatchEvent(new CustomEvent(KIOSK_MODULES_OVERRIDE_EVENT, { detail: tilesDetail }));
   if (modules.systemModules) {
+    w.__kioskSystemModulesOverride = modules.systemModules;
     window.dispatchEvent(
       new CustomEvent(KIOSK_SYSTEM_MODULES_EVENT, { detail: modules.systemModules }),
     );

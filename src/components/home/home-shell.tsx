@@ -62,8 +62,23 @@ export function HomeShell({
   tileTitleFontSize?: number;
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
-  const [override, setOverride] = useState<ModulesOverridePayload | null>(null);
-  const [sysOverride, setSysOverride] = useState<SystemModulesPayload | null>(null);
+  // Inicializa desde el cache en window (lo deja el studio-bridge): cubre el caso
+  // en que el Home se monta DESPUÉS del evento de override (navegación interna del
+  // preview). Sin esto, un módulo recién desactivado seguía visible al volver al Home.
+  const [override, setOverride] = useState<ModulesOverridePayload | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return (
+      (window as Window & { __kioskModulesOverride?: ModulesOverridePayload })
+        .__kioskModulesOverride ?? null
+    );
+  });
+  const [sysOverride, setSysOverride] = useState<SystemModulesPayload | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return (
+      (window as Window & { __kioskSystemModulesOverride?: SystemModulesPayload })
+        .__kioskSystemModulesOverride ?? null
+    );
+  });
 
   useEffect(() => {
     const handler = (e: Event) => {

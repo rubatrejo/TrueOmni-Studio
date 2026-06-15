@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import type { LocaleStrings } from '@/lib/i18n';
@@ -45,10 +45,43 @@ export function I18nProvider({
   const initFromSession = useLocaleStore((s) => s.initFromSession);
   const setLocale = useLocaleStore((s) => s.setLocale);
 
+  // Override del bundle i18n empujado por el Studio (preview en vivo). Los labels
+  // del runtime (tiles, headers de módulo) salen de las keys i18n, así que un
+  // rename en el editor debe llegar por aquí para reflejarse sin republicar.
+  // Se inicializa desde el cache en window por si el provider monta tarde.
+  const [i18nOverride, setI18nOverride] = useState<Record<string, LocaleStrings> | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return (
+      (window as Window & { __kioskI18nOverride?: Record<string, LocaleStrings> })
+        .__kioskI18nOverride ?? null
+    );
+  });
+
   // Hidratación: leer sessionStorage al montar.
   useEffect(() => {
     initFromSession(defaultLocale, available);
   }, [initFromSession, defaultLocale, available]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handler = (event: Event) => {
+      const bundle = (event as CustomEvent<{ bundle?: Record<string, LocaleStrings> }>).detail
+        ?.bundle;
+      if (bundle && typeof bundle === 'object') setI18nOverride(bundle);
+    };
+    window.addEventListener('kiosk:i18n-override', handler as EventListener);
+    return () => window.removeEventListener('kiosk:i18n-override', handler as EventListener);
+  }, []);
+
+  // Mezcla el override sobre el mapa SSR (override gana por locale + key).
+  const effectiveLocalesMap = useMemo<Record<string, LocaleStrings>>(() => {
+    if (!i18nOverride) return localesMap;
+    const out: Record<string, LocaleStrings> = { ...localesMap };
+    for (const [loc, strings] of Object.entries(i18nOverride)) {
+      out[loc] = { ...(localesMap[loc] ?? {}), ...strings };
+    }
+    return out;
+  }, [localesMap, i18nOverride]);
 
   // Listener para el locale picker del Studio (#10 audit). Cuando el operador
   // cambia el dropdown EN/ES/FR/DE/PT/JA en el preview panel, dispatchea
@@ -67,8 +100,8 @@ export function I18nProvider({
   }, [available, setLocale]);
 
   const value = useMemo<I18nContextValue>(
-    () => ({ localesMap, defaultLocale, available }),
-    [localesMap, defaultLocale, available],
+    () => ({ localesMap: effectiveLocalesMap, defaultLocale, available }),
+    [effectiveLocalesMap, defaultLocale, available],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

@@ -103,13 +103,26 @@ export function BillboardEditor({
         : billboard.variant === 2
           ? '/assets/billboard-2/hero.png'
           : '/assets/billboard-0/hero.jpg';
+  const storedVariant = billboard[variantKey] as BillboardB0Config | undefined;
   const b0: BillboardB0Config = {
     ...DEFAULT_BILLBOARD_B0,
-    ...(billboard[variantKey] ?? {}),
+    ...(storedVariant ?? {}),
     background: {
       ...DEFAULT_BILLBOARD_B0.background,
       src: variantDefaultSrc,
-      ...((billboard[variantKey] as BillboardB0Config | undefined)?.background ?? {}),
+      ...(storedVariant?.background ?? {}),
+    },
+    // Deep-merge de touchHere con sus defaults: los configs guardados ANTES de
+    // añadir textColor/bgColor/bgOpacity/borderColor/radius/uppercase no traen
+    // esos campos, y el editor accede a ellos (p. ej. radius.topLeft) → sin este
+    // merge, un cliente viejo crasheaba el editor ("Something went wrong").
+    touchHere: {
+      ...DEFAULT_BILLBOARD_B0.touchHere,
+      ...(storedVariant?.touchHere ?? {}),
+      radius: {
+        ...DEFAULT_BILLBOARD_B0.touchHere.radius,
+        ...(storedVariant?.touchHere?.radius ?? {}),
+      },
     },
   } as BillboardB0Config;
   const setB0 = (patch: Partial<BillboardB0Config>) =>

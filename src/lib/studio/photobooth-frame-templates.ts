@@ -1,39 +1,53 @@
 import 'server-only';
 
-import { parse as parseFont } from 'opentype.js';
+import { type Font, parse as parseFont } from 'opentype.js';
 import sharp from 'sharp';
 
 import { ROBOTO_BOLD_BASE64 } from './fonts/roboto-bold';
 import { splitNameLines } from './placeholder-image';
 
 /**
- * TODO el texto de los frames se VECTORIZA a paths SVG con opentype.js + una
- * fuente TTF embebida (Roboto Bold). Motivo: librsvg (motor de sharp) NO tiene
- * fuentes del sistema en el entorno serverless de Vercel, así que cualquier
- * `<text>` sale como TOFU (□□□). Al convertir el texto a `<path>` (geometría
- * pura) el render NO depende de ninguna fuente del entorno y es idéntico en
- * local y en producción.
+ * TODO el texto de los frames se VECTORIZA a paths SVG con opentype.js. Motivo:
+ * librsvg (motor de sharp) NO tiene fuentes del sistema en el entorno serverless
+ * de Vercel, así que cualquier `<text>` sale como TOFU (□□□). Al convertir el
+ * texto a `<path>` (geometría pura) el render NO depende de ninguna fuente del
+ * entorno y es idéntico en local y en producción.
+ *
+ * La fuente usada es la DISPLAY del branding del cliente (resuelta a TTF/OTF);
+ * si no se puede resolver, se cae a esta Roboto Bold embebida por defecto.
  */
-const ROBOTO_BOLD = (() => {
+export const DEFAULT_FONT: Font = (() => {
   const buf = Buffer.from(ROBOTO_BOLD_BASE64, 'base64');
   const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
   return parseFont(ab);
 })();
 
-/** Ancho (px) que ocupa `text` a `fontSize`, con la fuente embebida. */
-function measureText(text: string, fontSize: number): number {
-  return ROBOTO_BOLD.getAdvanceWidth(text, fontSize);
+/** Parsea un Buffer de fuente (TTF/OTF/WOFF) a `Font`; `null`/fallo → `null`. */
+export function parseFontBuffer(buffer: Buffer | null): Font | null {
+  if (!buffer) return null;
+  try {
+    const ab = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+    return parseFont(ab);
+  } catch {
+    return null;
+  }
+}
+
+/** Ancho (px) que ocupa `text` a `fontSize` con `font`. */
+function measureText(font: Font, text: string, fontSize: number): number {
+  return font.getAdvanceWidth(text, fontSize);
 }
 
 /** Una línea de texto como `<path>` vectorizado. `x` ya viene ajustado al anchor. */
 function glyphPath(
+  font: Font,
   text: string,
   x: number,
   baseline: number,
   fontSize: number,
   fill: string,
 ): string {
-  const path = ROBOTO_BOLD.getPath(text, x, baseline, fontSize);
+  const path = font.getPath(text, x, baseline, fontSize);
   return `<path d="${path.toPathData(1)}" fill="${fill}"/>`;
 }
 
@@ -42,6 +56,7 @@ function glyphPath(
  * vertical del bloque; `anchor` controla el alineado horizontal respecto a `cx`.
  */
 function textBlock(
+  font: Font,
   lines: string[],
   cx: number,
   cy: number,
@@ -53,9 +68,9 @@ function textBlock(
   const firstBaseline = cy - ((lines.length - 1) * lineHeight) / 2 + fontSize * 0.35;
   return lines
     .map((line, i) => {
-      const w = measureText(line, fontSize);
+      const w = measureText(font, line, fontSize);
       const x = anchor === 'start' ? cx : anchor === 'end' ? cx - w : cx - w / 2;
-      return glyphPath(line, x, firstBaseline + i * lineHeight, fontSize, fill);
+      return glyphPath(font, line, x, firstBaseline + i * lineHeight, fontSize, fill);
     })
     .join('\n');
 }
@@ -89,6 +104,8 @@ export interface FrameTemplateInput {
   photoBuffer: Buffer | null;
   /** Texto editable de ESTE frame (frase o hashtag según la plantilla; vacío = se omite). */
   text: string;
+  /** Fuente Display del cliente ya parseada (null = usar Roboto Bold por defecto). */
+  displayFont?: Font | null;
 }
 
 /** Contexto puro (sin Buffers) que recibe `buildSvg` — imágenes ya como data-URI. */
@@ -103,6 +120,8 @@ export interface FrameSvgContext {
   photoDataUri: string | null;
   /** Texto editable de este frame (frase o hashtag; vacío = se omite). */
   text: string;
+  /** Fuente con la que se vectoriza TODO el texto del frame. */
+  font: Font;
 }
 
 export interface FrameTemplate {
@@ -127,14 +146,21 @@ function escapeXml(text: string): string {
 }
 
 /** Nombre del cliente centrado (1–2 líneas), vectorizado y escalado a ≤900px de ancho. */
-function nameText(clientName: string, cx: number, cy: number, fill: string, maxFont = 64): string {
+function nameText(
+  font: Font,
+  clientName: string,
+  cx: number,
+  cy: number,
+  fill: string,
+  maxFont = 64,
+): string {
   const lines = splitNameLines(clientName);
   const widthCap = 900;
-  const widest = Math.max(...lines.map((l) => measureText(l, maxFont)), 1);
+  const widest = Math.max(...lines.map((l) => measureText(font, l, maxFont)), 1);
   const fontSize =
     widest > widthCap ? Math.max(24, Math.floor((maxFont * widthCap) / widest)) : maxFont;
   const lineHeight = Math.round(fontSize * 1.14);
-  return textBlock(lines, cx, cy, fontSize, fill, 'middle', lineHeight);
+  return textBlock(font, lines, cx, cy, fontSize, fill, 'middle', lineHeight);
 }
 
 /**
@@ -143,6 +169,7 @@ function nameText(clientName: string, cx: number, cy: number, fill: string, maxF
  * no cabe en `widthPx`. `cx` es el punto de anclaje según el anchor.
  */
 function taglineText(
+  font: Font,
   text: string,
   cx: number,
   cy: number,
@@ -153,11 +180,11 @@ function taglineText(
 ): string {
   const lines = opts?.singleLine ? [text.trim().replace(/\s+/g, ' ')] : splitNameLines(text);
   const widthPx = opts?.widthPx ?? 820;
-  const widest = Math.max(...lines.map((l) => measureText(l, maxFont)), 1);
+  const widest = Math.max(...lines.map((l) => measureText(font, l, maxFont)), 1);
   const fontSize =
     widest > widthPx ? Math.max(22, Math.floor((maxFont * widthPx) / widest)) : maxFont;
   const lineHeight = Math.round(fontSize * 1.18);
-  return textBlock(lines, cx, cy, fontSize, fill, anchor, lineHeight);
+  return textBlock(font, lines, cx, cy, fontSize, fill, anchor, lineHeight);
 }
 
 const SVG_OPEN = `<svg width="${FRAME_WIDTH}" height="${FRAME_HEIGHT}" viewBox="0 0 ${FRAME_WIDTH} ${FRAME_HEIGHT}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">`;
@@ -198,7 +225,7 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
            <rect x="0" y="0" width="${FRAME_WIDTH}" height="${FRAME_HEIGHT}" fill="url(#bg)" clip-path="url(#ring)"/>`;
       const footer = c.logoDataUri
         ? logoImage(c.logoDataUri, FRAME_WIDTH / 2 - 230, footerCy - 70, 460, 140)
-        : nameText(c.clientName, FRAME_WIDTH / 2, footerCy, '#ffffff', 60);
+        : nameText(c.font, c.clientName, FRAME_WIDTH / 2, footerCy, '#ffffff', 60);
       return `${SVG_OPEN}
         ${photoLayer}
         <rect x="${innerX}" y="${innerY}" width="${innerW}" height="${innerH}" fill="none" stroke="#ffffff" stroke-width="16"/>
@@ -215,7 +242,7 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
     buildSvg: (c) => {
       const logo = c.logoDataUri
         ? logoImage(c.logoDataUri, FRAME_WIDTH / 2 - 240, 70, 480, 150)
-        : nameText(c.clientName, FRAME_WIDTH / 2, 165, '#ffffff', 64);
+        : nameText(c.font, c.clientName, FRAME_WIDTH / 2, 165, '#ffffff', 64);
       // brochazo: polígono orgánico arriba con gradiente primary→secondary.
       return `${SVG_OPEN}
         <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
@@ -237,7 +264,7 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       const barY = FRAME_HEIGHT - barH;
       const content = c.logoDataUri
         ? logoImage(c.logoDataUri, FRAME_WIDTH / 2 - 260, barY + barH / 2 - 80, 520, 160)
-        : nameText(c.clientName, FRAME_WIDTH / 2, barY + barH / 2, '#ffffff', 68);
+        : nameText(c.font, c.clientName, FRAME_WIDTH / 2, barY + barH / 2, '#ffffff', 68);
       return `${SVG_OPEN}
         <rect x="0" y="${barY}" width="${FRAME_WIDTH}" height="${barH}" fill="${escapeXml(c.primaryHex)}"/>
         ${content}
@@ -279,7 +306,7 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       const label = c.logoDataUri
         ? logoImage(c.logoDataUri, W / 2 - 200, pillY - 150, 400, 130)
         : `<rect x="${pillX}" y="${pillY}" width="${pillW}" height="${pillH}" rx="${pillH / 2}" fill="${fill}"/>
-           ${nameText(c.clientName, W / 2, pillY + pillH / 2, '#ffffff', 46)}`;
+           ${nameText(c.font, c.clientName, W / 2, pillY + pillH / 2, '#ffffff', 46)}`;
       return `${SVG_OPEN}
         ${corners}
         ${label}
@@ -296,14 +323,23 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       const bandH = 230;
       const top = c.logoDataUri
         ? logoImage(c.logoDataUri, FRAME_WIDTH / 2 - 240, bandH / 2 - 75, 480, 150)
-        : nameText(c.clientName, FRAME_WIDTH / 2, bandH / 2, '#ffffff', 60);
+        : nameText(c.font, c.clientName, FRAME_WIDTH / 2, bandH / 2, '#ffffff', 60);
       // Banda inferior: hashtag editable centrado.
       const bottom = c.text
-        ? taglineText(c.text, FRAME_WIDTH / 2, FRAME_HEIGHT - bandH / 2, '#ffffff', 'middle', 68, {
-            singleLine: true,
-            widthPx: 980,
-          })
-        : nameText(c.clientName, FRAME_WIDTH / 2, FRAME_HEIGHT - bandH / 2, '#ffffff', 64);
+        ? taglineText(
+            c.font,
+            c.text,
+            FRAME_WIDTH / 2,
+            FRAME_HEIGHT - bandH / 2,
+            '#ffffff',
+            'middle',
+            68,
+            {
+              singleLine: true,
+              widthPx: 980,
+            },
+          )
+        : nameText(c.font, c.clientName, FRAME_WIDTH / 2, FRAME_HEIGHT - bandH / 2, '#ffffff', 64);
       return `${SVG_OPEN}
         <rect x="0" y="0" width="${FRAME_WIDTH}" height="${bandH}" fill="${escapeXml(c.primaryHex)}"/>
         <rect x="0" y="${FRAME_HEIGHT - bandH}" width="${FRAME_WIDTH}" height="${bandH}" fill="${escapeXml(c.secondaryHex)}"/>
@@ -324,7 +360,7 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       const footerCy = FRAME_HEIGHT - 250;
       const footer = c.logoDataUri
         ? logoImage(c.logoDataUri, FRAME_WIDTH / 2 - 200, footerCy - 60, 400, 120)
-        : nameText(c.clientName, FRAME_WIDTH / 2, footerCy, '#ffffff', 52);
+        : nameText(c.font, c.clientName, FRAME_WIDTH / 2, footerCy, '#ffffff', 52);
       return `${SVG_OPEN}
         <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stop-color="${escapeXml(c.primaryHex)}"/>
@@ -345,7 +381,7 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       const cy = FRAME_HEIGHT - 230;
       const content = c.logoDataUri
         ? logoImage(c.logoDataUri, FRAME_WIDTH / 2 - 300, cy - 95, 600, 190)
-        : nameText(c.clientName, FRAME_WIDTH / 2, cy, escapeXml(c.primaryHex), 76);
+        : nameText(c.font, c.clientName, FRAME_WIDTH / 2, cy, escapeXml(c.primaryHex), 76);
       return `${SVG_OPEN}${content}</svg>`;
     },
   },
@@ -365,9 +401,9 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       const wedge = `<polygon points="745,1614 ${W},1606 ${W},${H} 560,${H}" fill="${escapeXml(c.tertiaryHex)}"/>`;
       const logo = c.logoDataUri
         ? logoImage(c.logoDataUri, 64, 1742, 380, 150)
-        : nameText(c.clientName, 250, H - 130, '#ffffff', 48);
+        : nameText(c.font, c.clientName, 250, H - 130, '#ffffff', 48);
       const tag = c.text
-        ? taglineText(c.text, W - 56, 1822, '#ffffff', 'end', 58, {
+        ? taglineText(c.font, c.text, W - 56, 1822, '#ffffff', 'end', 58, {
             widthPx: 620,
           })
         : '';
@@ -393,12 +429,12 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       <rect x="0" y="0" width="${W}" height="${H}" fill="${escapeXml(c.primaryHex)}" clip-path="url(#r9)"/>`;
       const logo = c.logoDataUri
         ? logoImage(c.logoDataUri, 80, 50, 420, 150)
-        : nameText(c.clientName, W / 2, topH / 2 + 10, '#ffffff', 56);
-      // Frase en la banda inferior: fuente de marca + CENTRADA (feedback Rubén
-      // 2026-06-15: texto con el nombre del cliente, centrado).
+        : nameText(c.font, c.clientName, W / 2, topH / 2 + 10, '#ffffff', 56);
+      // Frase en la banda inferior: CENTRADA, en UN solo renglón (feedback Rubén).
       const tag = c.text
-        ? taglineText(c.text, W / 2, H - botH / 2, '#ffffff', 'middle', 60, {
-            widthPx: W - 2 * side - 80,
+        ? taglineText(c.font, c.text, W / 2, H - botH / 2, '#ffffff', 'middle', 60, {
+            singleLine: true,
+            widthPx: W - 2 * side - 60,
           })
         : '';
       return `${SVG_OPEN}${ring}${logo}${tag}</svg>`;
@@ -418,16 +454,17 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       const topLeft = `<polygon points="0,0 875,0 775,210 210,210 210,1080 0,1290" fill="${escapeXml(c.secondaryHex)}"/>`;
       // Bracket navy abajo-der = mismo bracket rotado 180° respecto al centro.
       const bottomRight = `<polygon points="870,840 ${W},630 ${W},${H} 205,${H} 305,1710 870,1710" fill="${escapeXml(c.primaryHex)}"/>`;
-      // Frase en la banda olive superior: ALINEADA A LA IZQUIERDA (1-2 líneas).
+      // Frase en la banda olive superior: IZQUIERDA, en UN solo renglón (feedback Rubén).
       const tag = c.text
-        ? taglineText(c.text, 55, 116, '#ffffff', 'start', 52, {
-            widthPx: 700,
+        ? taglineText(c.font, c.text, 55, 116, '#ffffff', 'start', 52, {
+            singleLine: true,
+            widthPx: 760,
           })
         : '';
       // Logo centrado en la banda navy inferior.
       const logo = c.logoDataUri
         ? logoImage(c.logoDataUri, W / 2 - 210, 1748, 420, 130)
-        : nameText(c.clientName, W / 2, H - 110, '#ffffff', 46);
+        : nameText(c.font, c.clientName, W / 2, H - 110, '#ffffff', 46);
       return `${SVG_OPEN}${topLeft}${bottomRight}${tag}${logo}</svg>`;
     },
   },
@@ -476,6 +513,7 @@ export async function renderFramePng(
     logoDataUri,
     photoDataUri,
     text: input.text,
+    font: input.displayFont ?? DEFAULT_FONT,
   });
   return sharp(Buffer.from(svg, 'utf8'))
     .resize(FRAME_WIDTH, FRAME_HEIGHT, { fit: 'fill' })

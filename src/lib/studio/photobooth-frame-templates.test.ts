@@ -2,10 +2,12 @@ import sharp from 'sharp';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import {
+  DEFAULT_FONT,
   FRAME_HEIGHT,
   FRAME_TEMPLATES,
   FRAME_WIDTH,
   THUMB_SIZE,
+  parseFontBuffer,
   renderFramePng,
   renderFrameThumbnail,
   type FrameTemplateInput,
@@ -93,6 +95,7 @@ describe('photobooth-frame-templates', () => {
       logoDataUri: null,
       photoDataUri: null,
       text: 'Visit Discover Somewhere',
+      font: DEFAULT_FONT,
     });
     // El texto se VECTORIZA a <path fill="#ffffff">, no <text> (que saldría tofu).
     expect(svg).toContain('<path d="');
@@ -116,12 +119,18 @@ describe('photobooth-frame-templates', () => {
         logoDataUri: null,
         photoDataUri: null,
         text: 'Visit Somewhere',
+        font: DEFAULT_FONT,
       });
       expect(svg, id).not.toContain('<text');
       expect(svg, id).not.toContain('@font-face');
       expect(svg, id).not.toContain('data:font');
       expect(svg, id).toContain('<path d="');
     }
+  });
+
+  it('parseFontBuffer: null y buffers inválidos → null (cae a Roboto por defecto)', () => {
+    expect(parseFontBuffer(null)).toBeNull();
+    expect(parseFontBuffer(Buffer.from('no soy una fuente'))).toBeNull();
   });
 
   it('renderFrameThumbnail devuelve PNG 256×256', async () => {

@@ -4,7 +4,9 @@ import { put } from '@vercel/blob';
 
 import { loadUnifiedBranding, toHex } from '@/lib/studio/client-branding-sync';
 import { kv, kvKeys } from '@/lib/studio/kv';
+import { resolveDisplayFontBuffer } from '@/lib/studio/photobooth-display-font';
 import { defaultFrameText, FRAME_TEXT_KIND } from '@/lib/studio/photobooth-frame-meta';
+import { parseFontBuffer } from '@/lib/studio/photobooth-frame-templates';
 import {
   FRAME_TEMPLATES,
   renderFramePng,
@@ -85,6 +87,9 @@ export async function generateAndSavePhotoBoothFrames(
   }
 
   const clientName = unified.name || slug;
+  // Fuente Display del branding del cliente para vectorizar el texto de los
+  // frames (best-effort; null → Roboto Bold por defecto).
+  const displayFont = parseFontBuffer(await resolveDisplayFontBuffer(unified.fonts));
   const baseInput: Omit<FrameTemplateInput, 'text'> = {
     primaryHex: toHex(unified.brand.primary),
     secondaryHex: toHex(unified.brand.secondary),
@@ -92,6 +97,7 @@ export async function generateAndSavePhotoBoothFrames(
     logoBuffer,
     clientName,
     photoBuffer,
+    displayFont,
   };
 
   // Frames branded-auto previos por templateId → para preservar el texto

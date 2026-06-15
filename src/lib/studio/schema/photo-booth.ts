@@ -65,6 +65,12 @@ export const PhotoBoothSchema = z.object({
   enabled: z.boolean(),
   backgrounds: z.array(PhotoBoothBackgroundSchema).min(1).max(50),
   frames: z.array(PhotoBoothFrameSchema).max(50),
+  /** Frase/tagline editable que los frames branded con texto imprimen (ej.
+   *  "Closer than you think. Cooler than you expect."). Vacío → se omite. */
+  frameTagline: z.string().max(120).optional(),
+  /** Hashtag editable que imprimen los frames branded que lo usan (ej.
+   *  "#DiscoverDeKalb"). Vacío → cae al nombre del cliente. */
+  frameHashtag: z.string().max(60).optional(),
   filters: z.array(PhotoBoothFilterSchema).max(50),
   stickers: z.array(PhotoBoothStickerSchema).max(50),
   timer: PhotoBoothTimerSchema.optional(),

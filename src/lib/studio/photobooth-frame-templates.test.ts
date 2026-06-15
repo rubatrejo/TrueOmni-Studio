@@ -39,6 +39,8 @@ const baseInput = (over: Partial<FrameTemplateInput> = {}): FrameTemplateInput =
   logoBuffer: fakeLogo,
   clientName: 'Discover Somewhere',
   photoBuffer: fakePhoto,
+  tagline: 'Closer than you think. Cooler than you expect.',
+  hashtag: '#DiscoverSomewhere',
   ...over,
 });
 
@@ -53,10 +55,10 @@ async function centerAlpha(png: Buffer): Promise<number> {
 }
 
 describe('photobooth-frame-templates', () => {
-  it('hay 6 plantillas con ids únicos', () => {
-    expect(FRAME_TEMPLATES).toHaveLength(6);
+  it('hay 10 plantillas con ids únicos', () => {
+    expect(FRAME_TEMPLATES).toHaveLength(10);
     const ids = new Set(FRAME_TEMPLATES.map((t) => t.id));
-    expect(ids.size).toBe(6);
+    expect(ids.size).toBe(10);
   });
 
   for (const tpl of FRAME_TEMPLATES) {

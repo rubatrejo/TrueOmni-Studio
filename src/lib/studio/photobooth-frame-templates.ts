@@ -31,6 +31,10 @@ export interface FrameTemplateInput {
   clientName: string;
   /** Foto scrapeada del website (null = degradar a fondo brand). */
   photoBuffer: Buffer | null;
+  /** Frase editable del cliente (vacío = se omite). */
+  tagline: string;
+  /** Hashtag editable del cliente (vacío = cae al nombre). */
+  hashtag: string;
 }
 
 /** Contexto puro (sin Buffers) que recibe `buildSvg` — imágenes ya como data-URI. */
@@ -43,6 +47,10 @@ export interface FrameSvgContext {
   logoDataUri: string | null;
   /** Foto como data-URI PNG cover 1080×1920 (null = sin foto). */
   photoDataUri: string | null;
+  /** Frase editable (vacío = se omite). */
+  tagline: string;
+  /** Hashtag editable (vacío = cae al nombre). */
+  hashtag: string;
 }
 
 export interface FrameTemplate {
@@ -220,11 +228,12 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       const top = c.logoDataUri
         ? logoImage(c.logoDataUri, FRAME_WIDTH / 2 - 240, bandH / 2 - 75, 480, 150)
         : nameText(c.clientName, FRAME_WIDTH / 2, bandH / 2, '#ffffff', 60);
+      const bottomText = c.hashtag || c.clientName;
       return `${SVG_OPEN}
         <rect x="0" y="0" width="${FRAME_WIDTH}" height="${bandH}" fill="${escapeXml(c.primaryHex)}"/>
         <rect x="0" y="${FRAME_HEIGHT - bandH}" width="${FRAME_WIDTH}" height="${bandH}" fill="${escapeXml(c.secondaryHex)}"/>
         ${top}
-        ${nameText(c.clientName, FRAME_WIDTH / 2, FRAME_HEIGHT - bandH / 2, '#ffffff', 56)}
+        ${nameText(bottomText, FRAME_WIDTH / 2, FRAME_HEIGHT - bandH / 2, '#ffffff', 56)}
       </svg>`;
     },
   },
@@ -236,10 +245,11 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
     usesPhoto: false,
     buildSvg: (c) => {
       const bw = 96; // grosor del borde (ancho)
-      const footerCy = FRAME_HEIGHT - 150;
+      // Footer despegado del borde inferior (deja aire entre logo y stroke).
+      const footerCy = FRAME_HEIGHT - 250;
       const footer = c.logoDataUri
-        ? logoImage(c.logoDataUri, FRAME_WIDTH / 2 - 220, footerCy - 65, 440, 130)
-        : nameText(c.clientName, FRAME_WIDTH / 2, footerCy, '#ffffff', 56);
+        ? logoImage(c.logoDataUri, FRAME_WIDTH / 2 - 200, footerCy - 60, 400, 120)
+        : nameText(c.clientName, FRAME_WIDTH / 2, footerCy, '#ffffff', 52);
       return `${SVG_OPEN}
         <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stop-color="${escapeXml(c.primaryHex)}"/>
@@ -248,6 +258,83 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
           fill="none" stroke="url(#g)" stroke-width="${bw}"/>
         ${footer}
       </svg>`;
+    },
+  },
+
+  // 7) Solo el logo del cliente centrado abajo (minimalista). (ref Frame-1)
+  {
+    id: 'branded-logo-bottom',
+    label: 'Logo',
+    usesPhoto: false,
+    buildSvg: (c) => {
+      const cy = FRAME_HEIGHT - 230;
+      const content = c.logoDataUri
+        ? logoImage(c.logoDataUri, FRAME_WIDTH / 2 - 300, cy - 95, 600, 190)
+        : nameText(c.clientName, FRAME_WIDTH / 2, cy, escapeXml(c.primaryHex), 76);
+      return `${SVG_OPEN}${content}</svg>`;
+    },
+  },
+
+  // 8) Banda inferior con corte DIAGONAL en 2 colores; logo abajo-izq + tagline abajo-der. (ref Frame-2)
+  {
+    id: 'branded-angled-band',
+    label: 'Angled',
+    usesPhoto: false,
+    buildSvg: (c) => {
+      const top = FRAME_HEIGHT - 300;
+      const W = FRAME_WIDTH;
+      const H = FRAME_HEIGHT;
+      const band = `<polygon points="0,${top + 60} ${W},${top} ${W},${H} 0,${H}" fill="${escapeXml(c.secondaryHex)}"/>`;
+      const wedge = `<polygon points="${W * 0.6},${top + 24} ${W},${top} ${W},${H} ${W * 0.46},${H}" fill="${escapeXml(c.tertiaryHex)}"/>`;
+      const logo = c.logoDataUri
+        ? logoImage(c.logoDataUri, 70, H - 230, 360, 150)
+        : nameText(c.clientName, 280, H - 150, '#ffffff', 48);
+      const tag = c.tagline ? nameText(c.tagline, W * 0.74, H - 150, '#ffffff', 44) : '';
+      return `${SVG_OPEN}${band}${wedge}${logo}${tag}</svg>`;
+    },
+  },
+
+  // 9) Borde sólido brand: banda superior (logo) + banda inferior (tagline) + lados finos. (ref Frame-3)
+  {
+    id: 'branded-solid-border-tab',
+    label: 'Border Tab',
+    usesPhoto: false,
+    buildSvg: (c) => {
+      const side = 70;
+      const topH = 250;
+      const botH = 170;
+      const W = FRAME_WIDTH;
+      const H = FRAME_HEIGHT;
+      // ring sólido = canvas completo menos el rect interior (centro transparente).
+      const ring = `<defs><clipPath id="r9" clip-rule="evenodd">
+        <path d="M0 0 H${W} V${H} H0 Z M${side} ${topH} H${W - side} V${H - botH} H${side} Z"/>
+      </clipPath></defs>
+      <rect x="0" y="0" width="${W}" height="${H}" fill="${escapeXml(c.primaryHex)}" clip-path="url(#r9)"/>`;
+      const logo = c.logoDataUri
+        ? logoImage(c.logoDataUri, 80, 50, 420, 150)
+        : nameText(c.clientName, W / 2, topH / 2 + 10, '#ffffff', 56);
+      const tag = c.tagline ? nameText(c.tagline, W / 2, H - botH / 2, '#ffffff', 44) : '';
+      return `${SVG_OPEN}${ring}${logo}${tag}</svg>`;
+    },
+  },
+
+  // 10) Cuñas diagonales: banda superior (tagline) + inferior (logo), bordes inclinados. (ref Frame-4)
+  {
+    id: 'branded-diagonal-corners',
+    label: 'Diagonal',
+    usesPhoto: false,
+    buildSvg: (c) => {
+      const W = FRAME_WIDTH;
+      const H = FRAME_HEIGHT;
+      const topBand = `<polygon points="0,0 ${W},0 ${W},180 0,300" fill="${escapeXml(c.secondaryHex)}"/>`;
+      const botBand = `<polygon points="0,${H - 180} ${W},${H - 300} ${W},${H} 0,${H}" fill="${escapeXml(c.primaryHex)}"/>`;
+      const tag = c.tagline
+        ? nameText(c.tagline, W / 2, 130, '#ffffff', 46)
+        : nameText(c.clientName, W / 2, 130, '#ffffff', 52);
+      const logo = c.logoDataUri
+        ? logoImage(c.logoDataUri, W / 2 - 220, H - 230, 440, 150)
+        : nameText(c.hashtag || c.clientName, W / 2, H - 130, '#ffffff', 48);
+      return `${SVG_OPEN}${topBand}${botBand}${tag}${logo}</svg>`;
     },
   },
 ];
@@ -294,6 +381,8 @@ export async function renderFramePng(
     clientName: input.clientName,
     logoDataUri,
     photoDataUri,
+    tagline: input.tagline,
+    hashtag: input.hashtag,
   });
   return sharp(Buffer.from(svg, 'utf8'))
     .resize(FRAME_WIDTH, FRAME_HEIGHT, { fit: 'fill' })

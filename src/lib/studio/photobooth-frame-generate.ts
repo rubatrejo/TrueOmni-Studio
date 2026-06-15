@@ -96,6 +96,8 @@ export async function generateAndSavePhotoBoothFrames(
     logoBuffer,
     clientName: unified.name || slug,
     photoBuffer,
+    tagline: cfg.photoBooth?.frameTagline ?? '',
+    hashtag: cfg.photoBooth?.frameHashtag ?? '',
   };
 
   // Render + subida a Blob, SECUENCIAL (acota RAM/picos de sharp en la lambda).

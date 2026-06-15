@@ -437,7 +437,25 @@ export function FramesTab({
       title="Frames"
       hint="Transparent PNG overlays on top of the photo (1080×1920). Empty list hides the Frames tab."
     >
-      <div className="mb-3 rounded-lg border border-sky-500/20 bg-sky-500/5 px-3 py-2.5">
+      <div className="mb-3 space-y-2.5 rounded-lg border border-sky-500/20 bg-sky-500/5 px-3 py-2.5">
+        <Field label="Tagline (frase de los frames)">
+          <input
+            value={photoBooth.frameTagline ?? ''}
+            onChange={(e) => onChange({ ...photoBooth, frameTagline: e.target.value })}
+            className={inputCls}
+            maxLength={120}
+            placeholder="Closer than you think. Cooler than you expect."
+          />
+        </Field>
+        <Field label="Hashtag">
+          <input
+            value={photoBooth.frameHashtag ?? ''}
+            onChange={(e) => onChange({ ...photoBooth, frameHashtag: e.target.value })}
+            className={inputCls}
+            maxLength={60}
+            placeholder="#DiscoverDeKalb"
+          />
+        </Field>
         <button
           type="button"
           onClick={generateBranded}
@@ -446,11 +464,12 @@ export function FramesTab({
         >
           {generating ? 'Generating…' : 'Generate branded frames'}
         </button>
-        <p className="mt-1.5 text-[11px] text-zinc-500 dark:text-zinc-400">
-          Auto-creates frames from this client&apos;s brand colors, logo and website photo. Frames
-          you uploaded by hand are kept. Reloads when done.
+        <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+          Auto-creates frames from this client&apos;s brand colors, logo, website photo, tagline and
+          hashtag. Save your text first, then generate to bake it in. Frames you uploaded by hand
+          are kept. Reloads when done.
         </p>
-        {genError ? <p className="mt-1 text-[11px] text-red-500">{genError}</p> : null}
+        {genError ? <p className="text-[11px] text-red-500">{genError}</p> : null}
       </div>
       {photoBooth.frames.length === 0 ? (
         <EmptyState text="No frames yet." />

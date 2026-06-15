@@ -56,6 +56,7 @@ import {
 
 import { getI18n, patchConfig, patchI18n } from '../_lib/api-client';
 import { recordSave as recordSaveLocal } from '../_lib/local-version-history';
+import { modulesEqual } from '../_lib/modules-equal';
 import { STUDIO_SECTIONS, type StudioSectionKey } from '../_lib/sections';
 import { StudioSlugProvider } from '../_lib/slug-context';
 import { usePreviewBridge } from '../_lib/use-preview-bridge';
@@ -401,10 +402,7 @@ export function Shell({
     () => !shallowEqualBranding(branding, savedBranding),
     [branding, savedBranding],
   );
-  const modulesDirty = useMemo(
-    () => !shallowEqualModules(modules, savedModules),
-    [modules, savedModules],
-  );
+  const modulesDirty = useMemo(() => !modulesEqual(modules, savedModules), [modules, savedModules]);
   const billboardDirty = useMemo(
     () => !shallowEqualBillboard(billboard, savedBillboard),
     [billboard, savedBillboard],
@@ -1079,23 +1077,6 @@ function shallowEqualBranding(a: Branding, b: Branding): boolean {
   if (JSON.stringify(a.homeHero ?? null) !== JSON.stringify(b.homeHero ?? null)) return false;
   if (JSON.stringify(a.heroGradient ?? null) !== JSON.stringify(b.heroGradient ?? null))
     return false;
-  return true;
-}
-
-function shallowEqualModules(a: ModulesConfig, b: ModulesConfig): boolean {
-  if (a.tiles.length !== b.tiles.length) return false;
-  for (let i = 0; i < a.tiles.length; i++) {
-    const ta = a.tiles[i];
-    const tb = b.tiles[i];
-    if (ta.key !== tb.key) return false;
-    if (ta.label !== tb.label) return false;
-    if (ta.enabled !== tb.enabled) return false;
-  }
-  const sa = a.systemModules;
-  const sb = b.systemModules;
-  if ((sa?.ads ?? true) !== (sb?.ads ?? true)) return false;
-  if ((sa?.languages ?? true) !== (sb?.languages ?? true)) return false;
-  if ((sa?.aiAvatar ?? true) !== (sb?.aiAvatar ?? true)) return false;
   return true;
 }
 

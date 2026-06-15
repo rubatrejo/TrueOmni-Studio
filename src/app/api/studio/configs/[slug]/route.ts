@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { bootstrapStudioFromFs, readClientFs } from '@/lib/studio/bootstrap-from-fs';
 import { kv, kvKeys } from '@/lib/studio/kv';
+import { materializeConfigDataUris } from '@/lib/studio/materialize-data-uris';
 import {
   AiAvatarSchema,
   BillboardSchema,
@@ -470,13 +471,26 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       );
     }
 
-    const serialized = JSON.stringify(validated.data);
+    // Materializa a Blob cualquier data: URI pesado inlinado en el config (logos,
+    // backgrounds, imágenes pegadas como data:) ANTES del check de tamaño. Es la
+    // causa raíz del "413 Config too large for KV": así el config nunca crece por
+    // imágenes inline y el save no vuelve a fallar. Best-effort + token-gated; si
+    // no hay token o falla, el guard de tamaño de abajo sigue como red de seguridad.
+    let dataToSave = validated.data;
+    try {
+      const mat = await materializeConfigDataUris(slug, validated.data);
+      if (mat.changed) dataToSave = mat.config;
+    } catch (err) {
+      console.warn('[api/studio/configs/[slug] PATCH] materializeConfigDataUris failed', err);
+    }
+
+    const serialized = JSON.stringify(dataToSave);
     if (serialized.length > KV_VALUE_BYTE_CAP) {
       const sizeKb = Math.round(serialized.length / 1024);
       const capKb = Math.round(KV_VALUE_BYTE_CAP / 1024);
       // Pista para el operador: enumerar los campos pesados detectados.
       const heavyFields: string[] = [];
-      const cfg = validated.data as unknown as Record<string, unknown>;
+      const cfg = dataToSave as unknown as Record<string, unknown>;
       const isHeavy = (v: unknown) =>
         typeof v === 'string' && v.startsWith('data:') && v.length > 200_000;
       const branding = cfg.branding as Record<string, unknown> | undefined;
@@ -537,7 +551,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
         }
       : null;
     await Promise.all([
-      kv.set(kvKeys.cfg(slug), validated.data),
+      kv.set(kvKeys.cfg(slug), dataToSave),
       updatedMeta ? kv.set(kvKeys.cfgMeta(slug), updatedMeta) : Promise.resolve(),
     ]);
 

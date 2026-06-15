@@ -78,6 +78,8 @@ export const BillboardB0Schema = z.object({
       /** True = texto en MAYÚSCULAS. False (default) = Title Case (primera
        *  letra de cada palabra en mayúscula). */
       uppercase: z.boolean().default(false),
+      /** Color del texto del botón (solo Variant 1 / B0). Default blanco. */
+      textColor: z.string().default('#ffffff'),
       /** Color del fondo del botón (solo Variant 1 / B0). Default gris oscuro. */
       bgColor: z.string().default('#2e2e2e'),
       /** Opacidad 0-1 del fondo del botón (solo B0). 1 = opaco. */
@@ -101,6 +103,7 @@ export const BillboardB0Schema = z.object({
       height: 342,
       fontSize: 90,
       uppercase: false,
+      textColor: '#ffffff',
       bgColor: '#2e2e2e',
       bgOpacity: 1,
       borderColor: '#ffffff',
@@ -158,6 +161,7 @@ export const DEFAULT_BILLBOARD_B0: BillboardB0Config = {
     height: 342,
     fontSize: 90,
     uppercase: false,
+    textColor: '#ffffff',
     bgColor: '#2e2e2e',
     bgOpacity: 1,
     borderColor: '#ffffff',

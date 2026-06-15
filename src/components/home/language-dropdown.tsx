@@ -6,6 +6,8 @@ import { useAvailableLocales, useCurrentLocale } from '@/components/i18n-provide
 import { LOCALE_LABELS } from '@/lib/i18n';
 import { useLocaleStore } from '@/stores/locale-store';
 
+import { readSystemModulesCache } from '../system-modules-cache';
+
 /**
  * Botón de idiomas 244×80 olive + dropdown que ABRE HACIA ARRIBA.
  * Idiomas vienen del config del cliente (`features.languages.available`).
@@ -13,7 +15,7 @@ import { useLocaleStore } from '@/stores/locale-store';
  */
 export function LanguageDropdown() {
   const [open, setOpen] = useState(false);
-  const [hidden, setHidden] = useState(false);
+  const [hidden, setHidden] = useState(() => readSystemModulesCache()?.languages === false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const available = useAvailableLocales();

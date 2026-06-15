@@ -6,6 +6,7 @@ import { prewarmAiAvatar } from '@/components/ai/ai-modal';
 import { AiModalHost } from '@/components/ai/ai-modal-host';
 import { AskAiTrigger } from '@/components/ai/ask-ai-trigger';
 import { KIOSK_CLIENT_NAME_OVERRIDE_EVENT, getCachedClientName } from '@/components/studio-bridge';
+import { readSystemModulesCache } from '@/components/system-modules-cache';
 
 interface AskAiTextos {
   title: string;
@@ -47,7 +48,13 @@ type AiAvatarDetail = {
  * comporta como antes.
  */
 export function AskAiHost(props: AskAiHostProps) {
-  const [hidden, setHidden] = useState(!props.enabled);
+  // Estado inicial: el override del Studio (cache) gana sobre props.enabled, así
+  // el bubble respeta el toggle aunque monte después del evento de override.
+  const [hidden, setHidden] = useState(() => {
+    const cached = readSystemModulesCache();
+    if (cached && typeof cached.aiAvatar === 'boolean') return !cached.aiAvatar;
+    return !props.enabled;
+  });
   const [override, setOverride] = useState<AiAvatarDetail | null>(null);
   // Reactive client name del bridge del Studio. Sustituye `{client_name}`
   // en greeting cuando el operador edita el nombre del kiosk en preview.

@@ -389,6 +389,11 @@ export function BillboardEditor({
                 onChange={(height) => setB0({ touchHere: { ...b0.touchHere, height } })}
               />
               <ColorRow
+                label="Text color"
+                value={b0.touchHere.textColor}
+                onChange={(textColor) => setB0({ touchHere: { ...b0.touchHere, textColor } })}
+              />
+              <ColorRow
                 label="Button color"
                 value={b0.touchHere.bgColor}
                 onChange={(bgColor) => setB0({ touchHere: { ...b0.touchHere, bgColor } })}

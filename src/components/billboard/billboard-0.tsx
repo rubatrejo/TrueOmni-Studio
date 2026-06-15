@@ -71,8 +71,9 @@ export function Billboard0({ languagesEnabled = true }: BillboardVariantProps = 
         }}
       >
         <p
-          className="text-center font-display font-bold text-white"
+          className="text-center font-display font-bold"
           style={{
+            color: touchHere.textColor,
             fontSize: `${touchHere.fontSize}px`,
             lineHeight: `${Math.round(touchHere.fontSize * 1.22)}px`,
             whiteSpace: 'pre-line',

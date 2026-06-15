@@ -19,6 +19,15 @@ export const PhotoBoothFrameSchema = z.object({
   image: z.string(),
   label: z.string().min(1).max(64),
   thumbnail: z.string().optional(),
+  /**
+   * Origen del frame. `branded-auto` = generado automáticamente desde el
+   * branding del cliente (regenerable, se reemplaza al regenerar). Ausente o
+   * `custom` = subido/editado por el operador (NUNCA lo pisa la regeneración).
+   * Opcional → todos los configs existentes siguen validando (retrocompat).
+   */
+  source: z.enum(['custom', 'branded-auto']).optional(),
+  /** Plantilla que generó este frame branded-auto (clave de upsert idempotente). */
+  templateId: z.string().max(64).optional(),
 });
 
 export const PhotoBoothFilterSchema = z.object({

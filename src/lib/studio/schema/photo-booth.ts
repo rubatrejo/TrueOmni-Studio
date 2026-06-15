@@ -28,6 +28,12 @@ export const PhotoBoothFrameSchema = z.object({
   source: z.enum(['custom', 'branded-auto']).optional(),
   /** Plantilla que generó este frame branded-auto (clave de upsert idempotente). */
   templateId: z.string().max(64).optional(),
+  /**
+   * Texto editable horneado en el PNG del frame branded-auto (frase o hashtag,
+   * según la plantilla). Editable por frame desde el editor; se preserva al
+   * regenerar. Vacío al generar = default basado en el nombre del cliente.
+   */
+  text: z.string().max(160).optional(),
 });
 
 export const PhotoBoothFilterSchema = z.object({

@@ -36,11 +36,9 @@ export interface FrameTemplateInput {
   clientName: string;
   /** Foto scrapeada del website (null = degradar a fondo brand). */
   photoBuffer: Buffer | null;
-  /** Frase editable del cliente (vacío = se omite). */
-  tagline: string;
-  /** Hashtag editable del cliente (vacío = cae al nombre). */
-  hashtag: string;
-  /** Fuente de marca para incrustar y usar en el tagline (null = sans del sistema). */
+  /** Texto editable de ESTE frame (frase o hashtag según la plantilla; vacío = se omite). */
+  text: string;
+  /** Fuente de marca para incrustar y usar en el texto (null = sans del sistema). */
   taglineFont?: EmbeddedFont | null;
 }
 
@@ -54,11 +52,9 @@ export interface FrameSvgContext {
   logoDataUri: string | null;
   /** Foto como data-URI PNG cover 1080×1920 (null = sin foto). */
   photoDataUri: string | null;
-  /** Frase editable (vacío = se omite). */
-  tagline: string;
-  /** Hashtag editable (vacío = cae al nombre). */
-  hashtag: string;
-  /** `font-family` CSS para el tagline (brand font con fallback de sistema). */
+  /** Texto editable de este frame (frase o hashtag; vacío = se omite). */
+  text: string;
+  /** `font-family` CSS para el texto (brand font con fallback de sistema). */
   taglineFontFamily: string;
 }
 
@@ -268,12 +264,24 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       const top = c.logoDataUri
         ? logoImage(c.logoDataUri, FRAME_WIDTH / 2 - 240, bandH / 2 - 75, 480, 150)
         : nameText(c.clientName, FRAME_WIDTH / 2, bandH / 2, '#ffffff', 60);
-      const bottomText = c.hashtag || c.clientName;
+      // Banda inferior: hashtag editable centrado, en la fuente de marca.
+      const bottom = c.text
+        ? taglineText(
+            c.text,
+            FRAME_WIDTH / 2,
+            FRAME_HEIGHT - bandH / 2,
+            '#ffffff',
+            c.taglineFontFamily,
+            'middle',
+            56,
+            { singleLine: true, widthPx: 960 },
+          )
+        : nameText(c.clientName, FRAME_WIDTH / 2, FRAME_HEIGHT - bandH / 2, '#ffffff', 56);
       return `${SVG_OPEN}
         <rect x="0" y="0" width="${FRAME_WIDTH}" height="${bandH}" fill="${escapeXml(c.primaryHex)}"/>
         <rect x="0" y="${FRAME_HEIGHT - bandH}" width="${FRAME_WIDTH}" height="${bandH}" fill="${escapeXml(c.secondaryHex)}"/>
         ${top}
-        ${nameText(bottomText, FRAME_WIDTH / 2, FRAME_HEIGHT - bandH / 2, '#ffffff', 56)}
+        ${bottom}
       </svg>`;
     },
   },
@@ -331,8 +339,8 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       const logo = c.logoDataUri
         ? logoImage(c.logoDataUri, 64, 1742, 380, 150)
         : nameText(c.clientName, 250, H - 130, '#ffffff', 48);
-      const tag = c.tagline
-        ? taglineText(c.tagline, W - 56, 1825, '#ffffff', c.taglineFontFamily, 'end', 50, {
+      const tag = c.text
+        ? taglineText(c.text, W - 56, 1825, '#ffffff', c.taglineFontFamily, 'end', 50, {
             singleLine: true,
             widthPx: 560,
           })
@@ -360,18 +368,13 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       const logo = c.logoDataUri
         ? logoImage(c.logoDataUri, 80, 50, 420, 150)
         : nameText(c.clientName, W / 2, topH / 2 + 10, '#ffffff', 56);
-      // Frase en la banda inferior: fuente de marca + ALINEADA A LA DERECHA
-      // (feedback Rubén 2026-06-15).
-      const tag = c.tagline
-        ? taglineText(
-            c.tagline,
-            W - side - 36,
-            H - botH / 2,
-            '#ffffff',
-            c.taglineFontFamily,
-            'end',
-            44,
-          )
+      // Frase en la banda inferior: fuente de marca + CENTRADA (feedback Rubén
+      // 2026-06-15: texto con el nombre del cliente, centrado).
+      const tag = c.text
+        ? taglineText(c.text, W / 2, H - botH / 2, '#ffffff', c.taglineFontFamily, 'middle', 44, {
+            singleLine: true,
+            widthPx: W - 2 * side - 60,
+          })
         : '';
       return `${SVG_OPEN}${ring}${logo}${tag}</svg>`;
     },
@@ -390,17 +393,17 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       const topLeft = `<polygon points="0,0 875,0 775,210 210,210 210,1080 0,1290" fill="${escapeXml(c.secondaryHex)}"/>`;
       // Bracket navy abajo-der = mismo bracket rotado 180° respecto al centro.
       const bottomRight = `<polygon points="870,840 ${W},630 ${W},${H} 205,${H} 305,1710 870,1710" fill="${escapeXml(c.primaryHex)}"/>`;
-      // Tagline en la banda olive superior (script de la marca, una línea).
-      const tag = c.tagline
-        ? taglineText(c.tagline, 55, 132, '#ffffff', c.taglineFontFamily, 'start', 44, {
+      // Frase en la banda olive superior: fuente de marca, ALINEADA A LA IZQUIERDA.
+      const tag = c.text
+        ? taglineText(c.text, 55, 132, '#ffffff', c.taglineFontFamily, 'start', 44, {
             singleLine: true,
             widthPx: 800,
           })
-        : nameText(c.clientName, 440, 130, '#ffffff', 52);
+        : '';
       // Logo centrado en la banda navy inferior.
       const logo = c.logoDataUri
         ? logoImage(c.logoDataUri, W / 2 - 210, 1748, 420, 130)
-        : nameText(c.hashtag || c.clientName, W / 2, H - 110, '#ffffff', 46);
+        : nameText(c.clientName, W / 2, H - 110, '#ffffff', 46);
       return `${SVG_OPEN}${topLeft}${bottomRight}${tag}${logo}</svg>`;
     },
   },
@@ -449,8 +452,7 @@ export async function renderFramePng(
     clientName: input.clientName,
     logoDataUri,
     photoDataUri,
-    tagline: input.tagline,
-    hashtag: input.hashtag,
+    text: input.text,
     taglineFontFamily: resolveTaglineFontFamily(taglineFont),
   });
   // Incrusta el @font-face de la fuente de marca justo tras la etiqueta <svg>

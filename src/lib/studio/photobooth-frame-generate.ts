@@ -5,6 +5,7 @@ import { put } from '@vercel/blob';
 import { loadUnifiedBranding, toHex } from '@/lib/studio/client-branding-sync';
 import { kv, kvKeys } from '@/lib/studio/kv';
 import { resolveBrandDisplayFont } from '@/lib/studio/photobooth-frame-fonts';
+import { defaultFrameText, FRAME_TEXT_KIND } from '@/lib/studio/photobooth-frame-meta';
 import {
   FRAME_TEMPLATES,
   renderFramePng,
@@ -87,26 +88,46 @@ export async function generateAndSavePhotoBoothFrames(
   // Fuente de marca para el tagline (best-effort; null = sans del sistema).
   const taglineFont = await resolveBrandDisplayFont(unified.fonts);
 
-  const input: FrameTemplateInput = {
+  const clientName = unified.name || slug;
+  const baseInput: Omit<FrameTemplateInput, 'text'> = {
     primaryHex: toHex(unified.brand.primary),
     secondaryHex: toHex(unified.brand.secondary),
     tertiaryHex: toHex(unified.brand.accent),
     logoBuffer,
-    clientName: unified.name || slug,
+    clientName,
     photoBuffer,
-    tagline: cfg.photoBooth?.frameTagline ?? '',
-    hashtag: cfg.photoBooth?.frameHashtag ?? '',
     taglineFont,
   };
+
+  // Frames branded-auto previos por templateId → para preservar el texto
+  // editado por el operador y el label renombrado al regenerar.
+  const existing = cfg.photoBooth?.frames ?? [];
+  const prevByTemplate = new Map(
+    existing
+      .filter((f) => f.source === 'branded-auto' && f.templateId)
+      .map((f) => [f.templateId as string, f]),
+  );
 
   // Render + subida a Blob, SECUENCIAL (acota RAM/picos de sharp en la lambda).
   const ts = Date.now();
   const branded: PhotoBoothFrame[] = [];
   for (const tpl of FRAME_TEMPLATES) {
-    const framePng = await renderFramePng(tpl, input);
+    const prev = prevByTemplate.get(tpl.id);
+    // Texto por frame: el editado por el operador gana; luego el campo global
+    // (retrocompat) y, por último, el default basado en el nombre del cliente.
+    const kind = FRAME_TEXT_KIND[tpl.id];
+    const text = kind
+      ? prev?.text?.trim() ||
+        (kind === 'hashtag'
+          ? cfg.photoBooth?.frameHashtag?.trim()
+          : cfg.photoBooth?.frameTagline?.trim()) ||
+        defaultFrameText(kind, clientName)
+      : '';
+
+    const framePng = await renderFramePng(tpl, { ...baseInput, text });
     const thumbPng = await renderFrameThumbnail(framePng, {
-      primaryHex: input.primaryHex,
-      secondaryHex: input.secondaryHex,
+      primaryHex: baseInput.primaryHex,
+      secondaryHex: baseInput.secondaryHex,
     });
     const frameBlob = await put(`kiosks/${slug}/photobooth/frame-${tpl.id}-${ts}.png`, framePng, {
       access: 'public',
@@ -120,29 +141,18 @@ export async function generateAndSavePhotoBoothFrames(
       addRandomSuffix: false,
       allowOverwrite: true,
     });
+    // Preserva el label si el operador lo renombró.
+    const label = prev?.label && prev.label !== tpl.label ? prev.label : tpl.label;
     branded.push({
       id: tpl.id,
       image: frameBlob.url,
       thumbnail: thumbBlob.url,
-      label: tpl.label,
+      label,
       source: 'branded-auto',
       templateId: tpl.id,
+      ...(text ? { text } : {}),
     });
   }
-
-  // Merge respetando el override del operador.
-  const existing = cfg.photoBooth?.frames ?? [];
-  // Preserva el label si el operador renombró un branded-auto previo.
-  const prevLabelByTemplate = new Map(
-    existing
-      .filter((f) => f.source === 'branded-auto' && f.templateId)
-      .map((f) => [f.templateId as string, f.label]),
-  );
-  const mergedBranded = branded.map((b) => {
-    const prevLabel = prevLabelByTemplate.get(b.templateId as string);
-    const tplDefault = FRAME_TEMPLATES.find((t) => t.id === b.templateId)?.label;
-    return prevLabel && prevLabel !== tplDefault ? { ...b, label: prevLabel } : b;
-  });
 
   // Tanto en creación como al regenerar desde el editor, los frames que vienen
   // del THEME/template (source undefined) y los branded-auto previos se BORRAN
@@ -151,7 +161,7 @@ export async function generateAndSavePhotoBoothFrames(
   // (Feedback Rubén 2026-06-15: "Generate tiene que borrar los que ya estaban".)
   const preserved = existing.filter((f) => f.image === '' || f.source === 'custom');
 
-  const nextFrames = [...preserved, ...mergedBranded];
+  const nextFrames = [...preserved, ...branded];
 
   const parsed = PhotoBoothSchema.safeParse({
     ...(cfg.photoBooth ?? DEFAULT_PHOTO_BOOTH),

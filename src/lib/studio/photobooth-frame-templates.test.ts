@@ -39,8 +39,7 @@ const baseInput = (over: Partial<FrameTemplateInput> = {}): FrameTemplateInput =
   logoBuffer: fakeLogo,
   clientName: 'Discover Somewhere',
   photoBuffer: fakePhoto,
-  tagline: 'Closer than you think. Cooler than you expect.',
-  hashtag: '#DiscoverSomewhere',
+  text: 'Visit Discover Somewhere',
   ...over,
 });
 
@@ -84,7 +83,7 @@ describe('photobooth-frame-templates', () => {
     });
   }
 
-  it('Border Tab imprime el tagline alineado a la DERECHA con la fuente de marca', () => {
+  it('Border Tab imprime el texto CENTRADO con la fuente de marca', () => {
     const tpl = FRAME_TEMPLATES.find((t) => t.id === 'branded-solid-border-tab')!;
     const svg = tpl.buildSvg({
       primaryHex: '#0a6cff',
@@ -93,13 +92,28 @@ describe('photobooth-frame-templates', () => {
       clientName: 'Discover Somewhere',
       logoDataUri: null,
       photoDataUri: null,
-      tagline: 'DeKalibrate Deeper',
-      hashtag: '',
+      text: 'Visit Discover Somewhere',
       taglineFontFamily: "'Montserrat', Helvetica, Arial, sans-serif",
     });
-    expect(svg).toContain('text-anchor="end"');
+    expect(svg).toContain('text-anchor="middle"');
     expect(svg).toContain("'Montserrat'");
-    expect(svg).toContain('Deeper');
+    expect(svg).toContain('Visit Discover Somewhere');
+  });
+
+  it('Diagonal imprime el texto alineado a la IZQUIERDA', () => {
+    const tpl = FRAME_TEMPLATES.find((t) => t.id === 'branded-diagonal-corners')!;
+    const svg = tpl.buildSvg({
+      primaryHex: '#0a6cff',
+      secondaryHex: '#00d4aa',
+      tertiaryHex: '#ffb300',
+      clientName: 'Discover Somewhere',
+      logoDataUri: null,
+      photoDataUri: null,
+      text: 'Closer than you think.',
+      taglineFontFamily: 'Helvetica, Arial, sans-serif',
+    });
+    expect(svg).toContain('text-anchor="start"');
+    expect(svg).toContain('Closer than you think.');
   });
 
   it('renderFramePng embebe @font-face cuando hay taglineFont', async () => {

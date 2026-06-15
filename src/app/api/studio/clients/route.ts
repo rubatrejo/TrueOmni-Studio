@@ -258,6 +258,13 @@ export async function POST(request: Request) {
         console.warn(`[POST /api/studio/clients] orphan purgePrefix(${prefix}) failed`, err);
       }
     }
+    // GC de los blobs huérfanos del slug (uploads/placeholder/feed previos).
+    try {
+      const { purgeClientBlobs } = await import('@/lib/studio/blob-gc');
+      await purgeClientBlobs(slug);
+    } catch (err) {
+      console.warn(`[POST /api/studio/clients] orphan purgeClientBlobs failed`, err);
+    }
     // También limpia membership en SETs por si quedaron stale.
     try {
       await kv.srem('clients:list', slug);

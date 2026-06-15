@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { purgeClientBlobs } from '@/lib/studio/blob-gc';
 import { removeClientFromList } from '@/lib/studio/client-manifest';
 import { kv } from '@/lib/studio/kv';
 import { buildPrefixesToPurge, purgePrefix } from '@/lib/studio/purge-client';
@@ -65,6 +66,14 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
       await removeClientFromList(slug, 'studio-delete');
     } catch (err) {
       console.warn('[api/studio/clients/[slug] DELETE] removeClientFromList failed', err);
+    }
+
+    // 3b. GC de Vercel Blob: borra los blobs del cliente (uploads + placeholder +
+    //     feed materializado). Best-effort, token-gated; no abortar el delete.
+    try {
+      await purgeClientBlobs(slug);
+    } catch (err) {
+      console.warn('[api/studio/clients/[slug] DELETE] purgeClientBlobs failed', err);
     }
 
     // 4. Invalida el cache de auto-migración para que el dashboard refleje

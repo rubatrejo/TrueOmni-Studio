@@ -11,7 +11,7 @@ import {
   type BillboardVariantSettings,
 } from '@/lib/studio/schema';
 
-import { KIOSK_BILLBOARD_OVERRIDE_EVENT } from '../studio-bridge';
+import { KIOSK_BILLBOARD_OVERRIDE_EVENT, KIOSK_SYSTEM_MODULES_EVENT } from '../studio-bridge';
 
 type BillboardOverride = {
   logoSize?: BillboardLogoSize;
@@ -90,6 +90,27 @@ export function useBillboardOverride(): BillboardOverride {
   }, []);
 
   return override;
+}
+
+/**
+ * ¿Está activo el módulo Languages? Arranca del valor real del config
+ * (`features.languages.enabled`, pasado como `initial` desde el server) y se
+ * actualiza en vivo con el override del Studio para el preview. Cuando está
+ * desactivado, el idle oculta el selector de idioma en TODAS las variantes y
+ * pone el "Powered by" en su lugar (variantes 2/3/4).
+ */
+export function useLanguagesEnabled(initial: boolean): boolean {
+  const [enabled, setEnabled] = useState(initial);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onSys = (e: Event) => {
+      const detail = (e as CustomEvent<{ languages?: boolean }>).detail;
+      if (typeof detail?.languages === 'boolean') setEnabled(detail.languages);
+    };
+    window.addEventListener(KIOSK_SYSTEM_MODULES_EVENT, onSys as EventListener);
+    return () => window.removeEventListener(KIOSK_SYSTEM_MODULES_EVENT, onSys as EventListener);
+  }, []);
+  return enabled;
 }
 
 /** Devuelve la altura en px del logo idle según el override (default M=128). */

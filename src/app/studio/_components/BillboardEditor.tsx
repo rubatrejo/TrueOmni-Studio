@@ -323,6 +323,47 @@ export function BillboardEditor({
             </div>
           </div>
 
+          {/* Touch Here — text case (Title Case por default / UPPERCASE) */}
+          <div className="space-y-1.5">
+            <span className="block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+              Text case
+            </span>
+            <div
+              role="radiogroup"
+              aria-label="Touch Here text case"
+              className="inline-flex rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-800 dark:bg-zinc-950"
+            >
+              <button
+                role="radio"
+                aria-checked={!b0.touchHere.uppercase}
+                type="button"
+                onClick={() => setB0({ touchHere: { ...b0.touchHere, uppercase: false } })}
+                className={
+                  'rounded-md px-3 py-1 text-[11.5px] transition ' +
+                  (!b0.touchHere.uppercase
+                    ? 'bg-sky-500 text-white shadow-sm'
+                    : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40')
+                }
+              >
+                Title Case
+              </button>
+              <button
+                role="radio"
+                aria-checked={b0.touchHere.uppercase}
+                type="button"
+                onClick={() => setB0({ touchHere: { ...b0.touchHere, uppercase: true } })}
+                className={
+                  'rounded-md px-3 py-1 text-[11.5px] transition ' +
+                  (b0.touchHere.uppercase
+                    ? 'bg-sky-500 text-white shadow-sm'
+                    : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40')
+                }
+              >
+                UPPERCASE
+              </button>
+            </div>
+          </div>
+
           {/* Touch Here — width / height / fontSize sliders. Width/height
               solo aplican al botón visible de Variant 1 (B0). En B1/B2/B3 el
               touchHere se renderiza como texto inline sobre el hero, así que

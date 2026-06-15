@@ -26,7 +26,13 @@ type BillboardVariant = keyof typeof VARIANTS;
  * El KioskCanvas se monta fuera (en `page.tsx`) para que el dev-nav
  * quede fuera del transform.
  */
-export function BillboardLiveSwitcher({ initial }: { initial: BillboardVariant }) {
+export function BillboardLiveSwitcher({
+  initial,
+  languagesEnabled = true,
+}: {
+  initial: BillboardVariant;
+  languagesEnabled?: boolean;
+}) {
   const [variant, setVariant] = useState<BillboardVariant>(initial);
 
   useEffect(() => {
@@ -43,5 +49,5 @@ export function BillboardLiveSwitcher({ initial }: { initial: BillboardVariant }
   }, []);
 
   const Component = VARIANTS[variant];
-  return <Component />;
+  return <Component languagesEnabled={languagesEnabled} />;
 }

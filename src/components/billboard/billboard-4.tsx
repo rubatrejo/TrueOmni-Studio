@@ -1,10 +1,11 @@
 'use client';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
-import { LanguageDropdown } from '@/components/home/language-dropdown';
 
 import { AccessibilityIcon } from './billboard-footer-parts';
-import { useBillboardFooterLogoHeight } from './use-billboard-override';
+import { BillboardLanguageSlot } from './billboard-language-slot';
+import type { BillboardVariantProps } from './types';
+import { useBillboardFooterLogoHeight, useLanguagesEnabled } from './use-billboard-override';
 
 /**
  * Billboard 4 — variante "Bandas horizontales + sidebars verticales".
@@ -19,8 +20,9 @@ import { useBillboardFooterLogoHeight } from './use-billboard-override';
  * - Banda 4 (y=1330..1730): grass/lake photo + icono arrow circle grande.
  * - Footer (y=1730..1920): hsl(var(--brand-primary)) con TrueOmni + accesibilidad + ENGLISH.
  */
-export function Billboard4() {
+export function Billboard4({ languagesEnabled = true }: BillboardVariantProps = {}) {
   const footerLogoH = useBillboardFooterLogoHeight();
+  const langEnabled = useLanguagesEnabled(languagesEnabled);
   return (
     <div
       data-billboard="4"
@@ -96,9 +98,7 @@ export function Billboard4() {
           <TrueOmniLogo slot="footer" className="h-full w-auto text-white" />
         </span>
         <AccessibilityIcon size={80} color="#fff" />
-        <div data-billboard-no-link>
-          <LanguageDropdown />
-        </div>
+        <BillboardLanguageSlot languagesEnabled={langEnabled} />
       </div>
 
       {/* Sidebar EVENTS — left, sobre banda 2 (y=330..830) */}

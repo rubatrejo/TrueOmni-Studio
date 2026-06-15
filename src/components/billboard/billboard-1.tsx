@@ -3,11 +3,11 @@
 import Link from 'next/link';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
-import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
 import { BillboardBackground } from './billboard-background';
 import { AccessibilityIcon } from './billboard-footer-parts';
+import { BillboardLanguageSlot } from './billboard-language-slot';
 import { OverlayLayer } from './billboard-overlay';
 import { CameraIcon } from './icons/camera-icon';
 import { RouteIcon } from './icons/route-icon';
@@ -18,10 +18,13 @@ import {
   resolveSlotLabel,
 } from './module-info';
 import { SlotImage } from './slot-image';
+import { toTouchCase } from './touch-label';
+import type { BillboardVariantProps } from './types';
 import {
   useBillboardFooterLogoHeight,
   useBillboardOverride,
   useBillboardSettings,
+  useLanguagesEnabled,
 } from './use-billboard-override';
 
 /**
@@ -43,8 +46,9 @@ import {
  * Todos los textos y posiciones son verbatim del SVG (Protocolo
  * pixel-perfect paso 2). Icono click-2384 copiado 1:1 sin lucide.
  */
-export function Billboard1() {
+export function Billboard1({ languagesEnabled = true }: BillboardVariantProps = {}) {
   const t = useTextosMap();
+  const langEnabled = useLanguagesEnabled(languagesEnabled);
   const { modules } = useBillboardOverride();
   const { background, touchHere, overlayOpacity, overlay } = useBillboardSettings(1);
   const heroSrc = background.src || '/assets/billboard-1/hero.jpg';
@@ -54,9 +58,10 @@ export function Billboard1() {
   // no botón). Solo label/twoLines/fontSize.
   const rawTouchLabel =
     touchHere.label.trim().length > 0 ? touchHere.label : (t.billboard_touch_here ?? 'Touch\nHere');
-  const touchLabel = touchHere.twoLines
-    ? rawTouchLabel.replace(/\s+/, '\n')
-    : rawTouchLabel.replace(/\n+/g, ' ');
+  const touchLabel = toTouchCase(
+    touchHere.twoLines ? rawTouchLabel.replace(/\s+/, '\n') : rawTouchLabel.replace(/\n+/g, ' '),
+    touchHere.uppercase,
+  );
   // Slot labels: si el usuario asignó un módulo distinto al hardcoded del SVG,
   // sustituimos solo el texto. Imagen/icono/color del slot quedan tal cual
   // (decoración heredada del SVG — cambiar imagen e icono por slot es v2.1).
@@ -285,7 +290,7 @@ export function Billboard1() {
         <OverlayLayer overlayOpacity={overlayOpacity} overlay={overlay} />
         {/* TOUCH TO START text @ (804, 898) absolute → relative to card. */}
         <div
-          className="absolute text-center font-display font-bold uppercase leading-[1.2] text-white"
+          className="absolute text-center font-display font-bold leading-[1.2] text-white"
           style={{
             left: '0',
             right: '0',
@@ -350,9 +355,7 @@ export function Billboard1() {
           <TrueOmniLogo slot="footer" className="h-full w-auto text-white" />
         </span>
         <AccessibilityIcon size={80} color="#fff" />
-        <div data-billboard-no-link>
-          <LanguageDropdown />
-        </div>
+        <BillboardLanguageSlot languagesEnabled={langEnabled} />
       </div>
     </div>
   );

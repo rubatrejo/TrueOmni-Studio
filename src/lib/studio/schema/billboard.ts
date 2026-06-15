@@ -75,8 +75,18 @@ export const BillboardB0Schema = z.object({
       height: z.number().int().min(120).max(500).default(342),
       /** Tamaño de fuente en px. Default SVG: 90. */
       fontSize: z.number().int().min(24).max(220).default(90),
+      /** True = texto en MAYÚSCULAS. False (default) = Title Case (primera
+       *  letra de cada palabra en mayúscula). */
+      uppercase: z.boolean().default(false),
     })
-    .default({ label: '', twoLines: true, width: 548, height: 342, fontSize: 90 }),
+    .default({
+      label: '',
+      twoLines: true,
+      width: 548,
+      height: 342,
+      fontSize: 90,
+      uppercase: false,
+    }),
   /** Opacidad del overlay oscuro entre background y contenido. 0 = sin
    *  overlay, 1 = totalmente negro. Útil cuando el bg es muy claro y el
    *  logo blanco se pierde. (Legacy: si overlay.mode no se setea, este
@@ -122,7 +132,7 @@ export type BillboardB0Config = z.infer<typeof BillboardB0Schema>;
 
 export const DEFAULT_BILLBOARD_B0: BillboardB0Config = {
   background: { type: 'image', src: '/assets/billboard-0/hero.jpg' },
-  touchHere: { label: '', twoLines: true, width: 548, height: 342, fontSize: 90 },
+  touchHere: { label: '', twoLines: true, width: 548, height: 342, fontSize: 90, uppercase: false },
   overlayOpacity: 0,
   overlay: {
     mode: 'solid',

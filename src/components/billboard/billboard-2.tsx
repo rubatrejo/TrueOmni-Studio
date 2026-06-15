@@ -4,19 +4,22 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
-import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
 import { BillboardBackground } from './billboard-background';
 import { AccessibilityIcon } from './billboard-footer-parts';
+import { BillboardLanguageSlot } from './billboard-language-slot';
 import { OverlayLayer } from './billboard-overlay';
 import { MODULE_BILLBOARD_INFO, resolveSlotHref } from './module-info';
+import { toTouchCase } from './touch-label';
+import type { BillboardVariantProps } from './types';
 import {
   BILLBOARD_LOGO_SLOT_WIDTH,
   useBillboardLogoHeight,
   useBillboardLogoPosition,
   useBillboardOverride,
   useBillboardSettings,
+  useLanguagesEnabled,
 } from './use-billboard-override';
 
 /**
@@ -53,8 +56,9 @@ const DEFAULT_CARDS: readonly CardData[] = [
   },
 ];
 
-export function Billboard2() {
+export function Billboard2({ languagesEnabled = true }: BillboardVariantProps = {}) {
   const t = useTextosMap();
+  const langEnabled = useLanguagesEnabled(languagesEnabled);
   const logoH = useBillboardLogoHeight();
   const logoPos = useBillboardLogoPosition(2);
   const { modules } = useBillboardOverride();
@@ -65,9 +69,10 @@ export function Billboard2() {
   // touchHere.width/height NO aplican (texto + arrow inline, no botón).
   const rawTouchLabel =
     touchHere.label.trim().length > 0 ? touchHere.label : (t.billboard_touch_here ?? 'Touch Here');
-  const touchLabel = touchHere.twoLines
-    ? rawTouchLabel.replace(/\s+/, '\n')
-    : rawTouchLabel.replace(/\n+/g, ' ');
+  const touchLabel = toTouchCase(
+    touchHere.twoLines ? rawTouchLabel.replace(/\s+/, '\n') : rawTouchLabel.replace(/\n+/g, ' '),
+    touchHere.uppercase,
+  );
 
   // CARDS reactivo: por cada slot 0..3, si `billboard.modules[i]` está
   // asignado y existe en MODULE_BILLBOARD_INFO, usar esa info; si no, fallback
@@ -223,7 +228,7 @@ export function Billboard2() {
         style={{ left: '50%', top: '1410px', transform: 'translateX(-50%)' }}
       >
         <span
-          className="font-display font-bold uppercase leading-none text-white"
+          className="font-display font-bold leading-none text-white"
           style={{
             fontSize: `${touchHere.fontSize}px`,
             letterSpacing: '0.02em',
@@ -260,9 +265,7 @@ export function Billboard2() {
           10:37 a.m.
         </span>
         <AccessibilityIcon size={80} color="#fff" />
-        <div data-billboard-no-link>
-          <LanguageDropdown />
-        </div>
+        <BillboardLanguageSlot languagesEnabled={langEnabled} />
       </div>
     </div>
   );

@@ -19,11 +19,14 @@ export default async function KioskHomePage({ searchParams }: PageProps) {
         ? fromConfig
         : 0;
   const initial = (raw >= 0 && raw <= 4 ? raw : 0) as 0 | 1 | 2 | 3 | 4;
+  // Módulo Languages: el idle oculta el selector de idioma si está desactivado
+  // (y pone el "Powered by" en su lugar en las variantes 2/3/4).
+  const languagesEnabled = config.features?.languages?.enabled ?? true;
 
   return (
     <BillboardLink>
       <KioskCanvas>
-        <BillboardLiveSwitcher initial={initial} />
+        <BillboardLiveSwitcher initial={initial} languagesEnabled={languagesEnabled} />
       </KioskCanvas>
     </BillboardLink>
   );

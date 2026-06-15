@@ -35,10 +35,15 @@ export async function Billboard({ variant: override }: BillboardProps = {}) {
   const raw = override ?? config.features?.billboard_variant;
   const variant: BillboardVariant =
     typeof raw === 'number' && raw in VARIANTS ? (raw as BillboardVariant) : 0;
+  // Módulo Languages: si está desactivado, el idle oculta el selector de idioma
+  // (y pone el "Powered by" en su lugar en las variantes 2/3/4). El valor real
+  // del runtime vive en `features.languages.enabled`; el preview del Studio lo
+  // sobreescribe en vivo vía evento.
+  const languagesEnabled = config.features?.languages?.enabled ?? true;
   const Component = VARIANTS[variant];
   return (
     <KioskCanvas>
-      <Component />
+      <Component languagesEnabled={languagesEnabled} />
     </KioskCanvas>
   );
 }

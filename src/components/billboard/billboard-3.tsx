@@ -3,14 +3,16 @@
 import Link from 'next/link';
 
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
-import { LanguageDropdown } from '@/components/home/language-dropdown';
 import { useTextosMap } from '@/components/i18n-provider';
 
 import { BillboardBackground } from './billboard-background';
 import { AccessibilityIcon } from './billboard-footer-parts';
+import { BillboardLanguageSlot } from './billboard-language-slot';
 import { OverlayLayer } from './billboard-overlay';
 import { resolveSlotHref, resolveSlotImage, resolveSlotLabel } from './module-info';
 import { SlotImage } from './slot-image';
+import { toTouchCase } from './touch-label';
+import type { BillboardVariantProps } from './types';
 import {
   BILLBOARD_LOGO_SLOT_WIDTH,
   useBillboardFooterLogoHeight,
@@ -18,6 +20,7 @@ import {
   useBillboardLogoPosition,
   useBillboardOverride,
   useBillboardSettings,
+  useLanguagesEnabled,
 } from './use-billboard-override';
 
 /**
@@ -31,8 +34,9 @@ import {
  *   (things-to-do.jpg como "bikes").
  * - Footer (y=1720..1920): hsl(var(--brand-primary)) con TrueOmni + accesibilidad + ENGLISH.
  */
-export function Billboard3() {
+export function Billboard3({ languagesEnabled = true }: BillboardVariantProps = {}) {
   const t = useTextosMap();
+  const langEnabled = useLanguagesEnabled(languagesEnabled);
   const logoH = useBillboardLogoHeight();
   const logoPos = useBillboardLogoPosition(3);
   const { modules } = useBillboardOverride();
@@ -43,9 +47,10 @@ export function Billboard3() {
   // touchHere.width/height NO aplican (texto + arrow inline, no botón).
   const rawTouchLabel =
     touchHere.label.trim().length > 0 ? touchHere.label : (t.billboard_touch_here ?? 'Touch Here');
-  const touchLabel = touchHere.twoLines
-    ? rawTouchLabel.replace(/\s+/, '\n')
-    : rawTouchLabel.replace(/\n+/g, ' ');
+  const touchLabel = toTouchCase(
+    touchHere.twoLines ? rawTouchLabel.replace(/\s+/, '\n') : rawTouchLabel.replace(/\n+/g, ' '),
+    touchHere.uppercase,
+  );
   // Slots 0..3 del 2×2: top-left → top-right → bottom-left → bottom-right.
   const slot0 = resolveSlotLabel(modules?.[0], { label: 'Food &', labelLine2: 'Drink' });
   const slot1 = resolveSlotLabel(modules?.[1], { label: 'Events' });
@@ -131,7 +136,7 @@ export function Billboard3() {
           style={{ top: '500px' }}
         >
           <span
-            className="font-display font-bold uppercase text-white"
+            className="font-display font-bold text-white"
             style={{
               fontSize: `${touchHere.fontSize}px`,
               letterSpacing: '0.02em',
@@ -233,9 +238,7 @@ export function Billboard3() {
           <TrueOmniLogo slot="footer" className="h-full w-auto text-white" />
         </span>
         <AccessibilityIcon size={80} color="#fff" />
-        <div data-billboard-no-link>
-          <LanguageDropdown />
-        </div>
+        <BillboardLanguageSlot languagesEnabled={langEnabled} />
       </div>
     </div>
   );

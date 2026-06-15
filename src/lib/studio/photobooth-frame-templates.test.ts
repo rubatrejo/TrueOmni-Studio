@@ -53,10 +53,10 @@ async function centerAlpha(png: Buffer): Promise<number> {
 }
 
 describe('photobooth-frame-templates', () => {
-  it('hay 5 plantillas con ids únicos', () => {
-    expect(FRAME_TEMPLATES).toHaveLength(5);
+  it('hay 6 plantillas con ids únicos', () => {
+    expect(FRAME_TEMPLATES).toHaveLength(6);
     const ids = new Set(FRAME_TEMPLATES.map((t) => t.id));
-    expect(ids.size).toBe(5);
+    expect(ids.size).toBe(6);
   });
 
   for (const tpl of FRAME_TEMPLATES) {
@@ -84,7 +84,10 @@ describe('photobooth-frame-templates', () => {
 
   it('renderFrameThumbnail devuelve PNG 256×256', async () => {
     const png = await renderFramePng(FRAME_TEMPLATES[0], baseInput());
-    const thumb = await renderFrameThumbnail(png);
+    const thumb = await renderFrameThumbnail(png, {
+      primaryHex: '#0a6cff',
+      secondaryHex: '#00d4aa',
+    });
     const meta = await sharp(thumb).metadata();
     expect(meta.format).toBe('png');
     expect(meta.width).toBe(THUMB_SIZE);

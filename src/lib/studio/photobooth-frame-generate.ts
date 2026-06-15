@@ -103,7 +103,10 @@ export async function generateAndSavePhotoBoothFrames(
   const branded: PhotoBoothFrame[] = [];
   for (const tpl of FRAME_TEMPLATES) {
     const framePng = await renderFramePng(tpl, input);
-    const thumbPng = await renderFrameThumbnail(framePng);
+    const thumbPng = await renderFrameThumbnail(framePng, {
+      primaryHex: input.primaryHex,
+      secondaryHex: input.secondaryHex,
+    });
     const frameBlob = await put(`kiosks/${slug}/photobooth/frame-${tpl.id}-${ts}.png`, framePng, {
       access: 'public',
       contentType: 'image/png',

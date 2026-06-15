@@ -8,6 +8,9 @@ import type { HomeTile } from '@/lib/config';
 /** Tamaño por defecto del título del tile (px). Verbatim del SVG Dashboard. */
 export const DEFAULT_TILE_TITLE_FONT_SIZE = 50;
 
+/** Opacidad por defecto (%) de la capa oscura del tile. ≈ 0.352 verbatim del SVG. */
+export const DEFAULT_TILE_OVERLAY_OPACITY = 35;
+
 interface Props {
   tile: HomeTile;
   /** Si se provee, el tile dispara el callback en lugar de navegar. */
@@ -15,6 +18,10 @@ interface Props {
   /** Tamaño de la tipografía del título (px). Global a todos los tiles del
    *  dashboard — editable desde el Studio (Home Dashboard → Home tiles). */
   titleFontSize?: number;
+  /** Opacidad (0–100 %) de la capa oscura entre foto y título. Global a todos
+   *  los tiles — editable desde el Studio. Si `undefined`, se usa el valor
+   *  verbatim del SVG (0.352) para no alterar configs existentes. */
+  overlayOpacity?: number;
 }
 
 /**
@@ -30,7 +37,11 @@ export function CategoryTile({
   tile,
   onClick,
   titleFontSize = DEFAULT_TILE_TITLE_FONT_SIZE,
+  overlayOpacity,
 }: Props) {
+  // Si el operador no fijó opacidad, usar el literal verbatim del SVG (0.352)
+  // para no alterar lo que clientes existentes ya ven. Con valor → value/100.
+  const overlayAlpha = overlayOpacity == null ? 0.352 : overlayOpacity / 100;
   const t = useTextos();
   const i18nKey = `tile_label_${tile.key.replace(/-/g, '_')}`;
   const resolved = t(i18nKey);
@@ -39,7 +50,10 @@ export function CategoryTile({
     <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={tile.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      <div className="absolute inset-0" style={{ backgroundColor: 'rgba(17,16,13,0.352)' }} />
+      <div
+        className="absolute inset-0"
+        style={{ backgroundColor: `rgba(17,16,13,${overlayAlpha})` }}
+      />
       <span
         className="absolute flex items-center justify-center text-center font-display font-bold leading-[1.22] text-white"
         style={{

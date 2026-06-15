@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { BrandingSchema, DEFAULT_BRANDING, ListingsCatalogSchema } from './schema';
+import { BrandingSchema, DEFAULT_BRANDING, ListingsCatalogSchema, ModulesSchema } from './schema';
 
 /**
  * Tests del BrandingSchema (F-QA-6 del audit).
@@ -218,5 +218,30 @@ describe('ListingsCatalogSchema — subcategoryImages', () => {
       listings: [],
     });
     expect(r.success).toBe(false);
+  });
+});
+
+describe('ModulesSchema — tileOverlayOpacity', () => {
+  const baseTiles = [{ key: 'restaurants', label: 'Restaurants', enabled: true }];
+
+  it('omitido sigue siendo válido (retrocompat) y queda undefined', () => {
+    const r = ModulesSchema.safeParse({ tiles: baseTiles });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.tileOverlayOpacity).toBeUndefined();
+  });
+
+  it('acepta y preserva un porcentaje entero en rango (0, 35, 100)', () => {
+    for (const v of [0, 35, 100]) {
+      const r = ModulesSchema.safeParse({ tiles: baseTiles, tileOverlayOpacity: v });
+      expect(r.success).toBe(true);
+      if (r.success) expect(r.data.tileOverlayOpacity).toBe(v);
+    }
+  });
+
+  it('rechaza valores fuera de rango (>100 o <0) y no enteros', () => {
+    for (const v of [150, -1, 35.5]) {
+      const r = ModulesSchema.safeParse({ tiles: baseTiles, tileOverlayOpacity: v });
+      expect(r.success).toBe(false);
+    }
   });
 });

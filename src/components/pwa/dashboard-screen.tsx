@@ -23,6 +23,9 @@ interface DashboardScreenProps {
   logoSize?: 'S' | 'M' | 'L' | 'XL';
   /** Offset del logo en px, sumado a la posición base (left:20, top:48). */
   logoOffset?: { x: number; y: number };
+  /** Opacidad (0–100 %) de la capa oscura sobre la foto de cada tile. Si
+   *  `undefined`, default 40 % (negro) — el look verbatim del XD. */
+  tileOverlayOpacity?: number;
 }
 
 /** Ancho del logo del header por tamaño (px). 'M' = 154 (verbatim del XD). */
@@ -63,7 +66,10 @@ export function DashboardScreen({
   notifications,
   logoSize,
   logoOffset,
+  tileOverlayOpacity,
 }: DashboardScreenProps) {
+  // Default 40 % (negro) = look verbatim del XD; con valor → value/100.
+  const tileOverlayAlpha = tileOverlayOpacity == null ? 0.4 : tileOverlayOpacity / 100;
   const router = useRouter();
   const { unreadCount } = useNotifications(notifications);
   const logoW = LOGO_SIZE_PX[logoSize ?? 'M'];
@@ -229,7 +235,10 @@ export function DashboardScreen({
                 }`}
                 style={bg(t.image)}
               >
-                <span className="absolute inset-0 bg-black/40" />
+                <span
+                  className="absolute inset-0"
+                  style={{ backgroundColor: `rgba(0,0,0,${tileOverlayAlpha})` }}
+                />
                 <span className="absolute inset-0 flex items-center justify-center whitespace-pre-line px-3 text-center text-[15px] font-bold leading-tight text-white">
                   {t.label}
                 </span>

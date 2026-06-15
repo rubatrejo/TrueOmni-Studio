@@ -57,6 +57,7 @@ export default async function HomePage() {
         allTiles={allTiles}
         survey={home.survey}
         tileTitleFontSize={home.tileTitleFontSize}
+        tileOverlayOpacity={home.tileOverlayOpacity}
       />
       <AdsSlot ads={ads} />
       <SurveyHost survey={home.survey} client={{ slug: config.client.slug }} />

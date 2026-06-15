@@ -13,6 +13,8 @@ type ModulesOverridePayload = {
   tiles: Array<{ key: string; label: string; enabled: boolean; wide?: boolean; image?: string }>;
   /** Tamaño global de la tipografía de los títulos de los tiles (px). */
   tileTitleFontSize?: number;
+  /** Opacidad global (0–100 %) de la capa oscura de los tiles. */
+  tileOverlayOpacity?: number;
 };
 
 type SystemModulesPayload = Record<string, boolean>;
@@ -52,6 +54,7 @@ export function HomeShell({
   allTiles,
   survey,
   tileTitleFontSize,
+  tileOverlayOpacity,
 }: {
   header: ReactNode;
   listings: readonly HomeListing[];
@@ -60,6 +63,9 @@ export function HomeShell({
   /** Tamaño global (px) de los títulos de los tiles — del config publicado.
    *  El override live del Studio (si llega) tiene prioridad. */
   tileTitleFontSize?: number;
+  /** Opacidad global (0–100 %) de la capa oscura de los tiles — del config
+   *  publicado. El override live del Studio (si llega) tiene prioridad. */
+  tileOverlayOpacity?: number;
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
   // Inicializa desde el cache en window (lo deja el studio-bridge): cubre el caso
@@ -164,6 +170,7 @@ export function HomeShell({
           tiles={visibleTiles}
           onSurveyTap={openSurvey}
           titleFontSize={override?.tileTitleFontSize ?? tileTitleFontSize}
+          overlayOpacity={override?.tileOverlayOpacity ?? tileOverlayOpacity}
         />
       </main>
       <div

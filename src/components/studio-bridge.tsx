@@ -414,6 +414,8 @@ type ModulesPatch = {
   systemModules?: { ads: boolean; languages: boolean; aiAvatar: boolean };
   /** Tamaño global de la tipografía de los títulos de los tiles (px). */
   tileTitleFontSize?: number;
+  /** Opacidad global (0–100 %) de la capa oscura de los tiles. */
+  tileOverlayOpacity?: number;
 };
 
 /** Settings idle de una variante del Billboard. Mismo shape que `b0`
@@ -493,7 +495,11 @@ export const KIOSK_INTEGRATIONS_OVERRIDE_EVENT = 'kiosk:integrations-override';
 
 function applyModulesOverride(modules: ModulesPatch) {
   if (typeof window === 'undefined') return;
-  const tilesDetail = { tiles: modules.tiles, tileTitleFontSize: modules.tileTitleFontSize };
+  const tilesDetail = {
+    tiles: modules.tiles,
+    tileTitleFontSize: modules.tileTitleFontSize,
+    tileOverlayOpacity: modules.tileOverlayOpacity,
+  };
   // Cache en window: si el Home se monta DESPUÉS de este evento (navegación
   // interna del iframe, o el preview venía de otra pantalla), lo lee al montar
   // y aplica el toggle/orden/labels sin esperar a un nuevo push. Sin esto, un

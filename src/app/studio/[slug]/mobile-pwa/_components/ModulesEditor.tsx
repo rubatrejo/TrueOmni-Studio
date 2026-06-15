@@ -177,6 +177,46 @@ export function ModulesEditor({
           </section>
         ) : null}
 
+        {/* Opacidad de la capa oscura sobre la foto de los tiles. Global a
+            todos por igual. Default 40 % (verbatim del XD). */}
+        <PwaGroup title="Tiles">
+          <div className="flex items-center gap-3">
+            <label
+              htmlFor="pwa-tile-overlay-opacity"
+              className="shrink-0 text-[11.5px] font-medium text-zinc-700 dark:text-zinc-300"
+            >
+              Tile overlay opacity
+            </label>
+            <input
+              id="pwa-tile-overlay-opacity"
+              type="range"
+              min={0}
+              max={100}
+              step={1}
+              value={v.tileOverlayOpacity ?? 40}
+              onChange={(e) => onChange({ ...v, tileOverlayOpacity: Number(e.target.value) })}
+              className="h-1.5 flex-1 cursor-pointer accent-sky-500"
+            />
+            <span className="w-12 shrink-0 text-right font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
+              {v.tileOverlayOpacity ?? 40}%
+            </span>
+            {v.tileOverlayOpacity !== undefined && v.tileOverlayOpacity !== 40 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  const next = { ...v };
+                  delete next.tileOverlayOpacity;
+                  onChange(next);
+                }}
+                title="Reset to default (40%)"
+                className="shrink-0 rounded-md border border-zinc-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-zinc-500 transition hover:border-sky-500/30 hover:text-sky-700 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-400 dark:hover:text-sky-300"
+              >
+                Reset
+              </button>
+            ) : null}
+          </div>
+        </PwaGroup>
+
         {/* Dashboard tiles — misma UI que el editor del kiosk (drag · rename ·
             Wide · visibilidad), con el ImageField del tile justo debajo. */}
         <section className="space-y-3">

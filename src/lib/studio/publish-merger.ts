@@ -342,6 +342,13 @@ function applyModulesAndTiles(
     delete home.tileTitleFontSize;
   }
 
+  // Opacidad global (0–100 %) de la capa oscura de los tiles.
+  if (typeof modules.tileOverlayOpacity === 'number') {
+    home.tileOverlayOpacity = modules.tileOverlayOpacity;
+  } else {
+    delete home.tileOverlayOpacity;
+  }
+
   if (wayfindingTile) {
     const cur = obj(home, 'wayfinding');
     cur.enabled = wayfindingTile.enabled;

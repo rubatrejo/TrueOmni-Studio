@@ -8,6 +8,8 @@ interface Props {
   onSurveyTap?: () => void;
   /** Tamaño global de la tipografía de los títulos de los tiles (px). */
   titleFontSize?: number;
+  /** Opacidad global (0–100 %) de la capa oscura de los tiles. */
+  overlayOpacity?: number;
 }
 
 /**
@@ -15,7 +17,7 @@ interface Props {
  * y vertical. Total ancho: 460+30+460 = 950 centrado en el canvas con 64px
  * padding-left (y 66px padding-right para totalizar 1080).
  */
-export function CategoryGrid({ tiles, onSurveyTap, titleFontSize }: Props) {
+export function CategoryGrid({ tiles, onSurveyTap, titleFontSize, overlayOpacity }: Props) {
   return (
     <div
       className="grid grid-cols-2"
@@ -33,6 +35,7 @@ export function CategoryGrid({ tiles, onSurveyTap, titleFontSize }: Props) {
           tile={tile}
           onClick={tile.key === 'survey' && onSurveyTap ? onSurveyTap : undefined}
           titleFontSize={titleFontSize}
+          overlayOpacity={overlayOpacity}
         />
       ))}
     </div>

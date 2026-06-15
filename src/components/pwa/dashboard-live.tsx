@@ -31,6 +31,7 @@ export function DashboardLive({
       notifications={notifications}
       logoSize={d.logoSize}
       logoOffset={d.logoOffset}
+      tileOverlayOpacity={d.tileOverlayOpacity}
     />
   );
 }

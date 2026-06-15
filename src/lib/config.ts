@@ -913,6 +913,11 @@ export interface PwaDashboardConfig {
   /** Desplazamiento del logo del header en px (default {x:0,y:0}). Se suma a
    *  la posición base (left:20, top:48). Permite mover el logo. */
   logoOffset?: { x: number; y: number };
+  /** Opacidad (0–100 %) de la capa oscura entre la foto y el título de los tiles
+   *  del grid. Si `undefined`, el runtime usa el default (40 %, negro). Solo la
+   *  opacidad es editable; el color (negro) no. Análogo al `tileOverlayOpacity`
+   *  del Home del kiosk, pero independiente por producto. */
+  tileOverlayOpacity?: number;
 }
 
 /** Ítem de la lista del More Menu. */
@@ -1977,6 +1982,9 @@ export interface KioskConfig {
       /** Tamaño global (px) de la tipografía de los títulos de los tiles del
        *  grid. Si `undefined`, el runtime usa el default de 50px. */
       tileTitleFontSize?: number;
+      /** Opacidad (0–100 %) de la capa oscura entre foto y título de los tiles.
+       *  Si `undefined`, el runtime usa el default (≈35 %). */
+      tileOverlayOpacity?: number;
       wayfinding?: {
         enabled: boolean;
         label: string;

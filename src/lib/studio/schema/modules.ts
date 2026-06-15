@@ -92,6 +92,13 @@ export const ModulesSchema = z.object({
    * del SVG Dashboard).
    */
   tileTitleFontSize: z.number().int().min(20).max(120).optional(),
+  /**
+   * Opacidad (0–100 %) de la capa oscura entre la foto y el título de los tiles
+   * del Home Dashboard. Aplica a TODOS los tiles por igual. Si `undefined`, el
+   * runtime usa el default de `category-tile` (≈35 %, rgba(17,16,13,0.352)
+   * verbatim del SVG). El color de la capa NO es editable, solo su opacidad.
+   */
+  tileOverlayOpacity: z.number().int().min(0).max(100).optional(),
 });
 
 export type ModuleEntry = z.infer<typeof ModuleEntrySchema>;

@@ -429,6 +429,9 @@ export function FramesTab({
         id: newPhotoBoothId('frame'),
         image: '',
         label: 'New frame',
+        // Subido a mano → 'custom': "Generate branded frames" lo conserva
+        // (a diferencia de los del theme o los branded-auto, que se reemplazan).
+        source: 'custom',
       },
     ]);
 

@@ -2,6 +2,11 @@ import 'server-only';
 
 import sharp from 'sharp';
 
+import {
+  type EmbeddedFont,
+  fontFaceStyle,
+  taglineFontFamily as resolveTaglineFontFamily,
+} from './photobooth-frame-fonts';
 import { splitNameLines } from './placeholder-image';
 
 /**
@@ -35,6 +40,8 @@ export interface FrameTemplateInput {
   tagline: string;
   /** Hashtag editable del cliente (vacío = cae al nombre). */
   hashtag: string;
+  /** Fuente de marca para incrustar y usar en el tagline (null = sans del sistema). */
+  taglineFont?: EmbeddedFont | null;
 }
 
 /** Contexto puro (sin Buffers) que recibe `buildSvg` — imágenes ya como data-URI. */
@@ -51,6 +58,8 @@ export interface FrameSvgContext {
   tagline: string;
   /** Hashtag editable (vacío = cae al nombre). */
   hashtag: string;
+  /** `font-family` CSS para el tagline (brand font con fallback de sistema). */
+  taglineFontFamily: string;
 }
 
 export interface FrameTemplate {
@@ -87,6 +96,37 @@ function nameText(clientName: string, cx: number, cy: number, fill: string, maxF
         `<text x="${cx}" y="${firstBaseline + i * lineHeight}" text-anchor="middle"
            font-family="Helvetica, Arial, sans-serif" font-weight="700"
            font-size="${fontSize}" fill="${fill}" letter-spacing="1">${escapeXml(line)}</text>`,
+    )
+    .join('\n');
+}
+
+/**
+ * Frase/tagline en la fuente de marca del cliente, con `text-anchor`
+ * configurable (`start`/`middle`/`end`). Reparte en 1–2 líneas y escala el
+ * tamaño al largo. `cx` es el punto de anclaje según el anchor.
+ */
+function taglineText(
+  text: string,
+  cx: number,
+  cy: number,
+  fill: string,
+  fontFamily: string,
+  anchor: 'start' | 'middle' | 'end' = 'middle',
+  maxFont = 46,
+  opts?: { singleLine?: boolean; widthPx?: number },
+): string {
+  const lines = opts?.singleLine ? [text.trim().replace(/\s+/g, ' ')] : splitNameLines(text);
+  const longest = Math.max(...lines.map((l) => l.length), 1);
+  const widthPx = opts?.widthPx ?? 820;
+  const fontSize = Math.max(24, Math.min(maxFont, Math.floor(widthPx / (0.55 * longest))));
+  const lineHeight = Math.round(fontSize * 1.18);
+  const firstBaseline = cy - ((lines.length - 1) * lineHeight) / 2 + fontSize * 0.35;
+  return lines
+    .map(
+      (line, i) =>
+        `<text x="${cx}" y="${firstBaseline + i * lineHeight}" text-anchor="${anchor}"
+           font-family="${fontFamily}" font-weight="700"
+           font-size="${fontSize}" fill="${fill}">${escapeXml(line)}</text>`,
     )
     .join('\n');
 }
@@ -275,21 +315,28 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
     },
   },
 
-  // 8) Banda inferior con corte DIAGONAL en 2 colores; logo abajo-izq + tagline abajo-der. (ref Frame-2)
+  // 8) Banda inferior con cuña diagonal (olive + tan a la derecha); logo abajo-izq
+  //    + tagline abajo-der en una línea. (ref Frame-2 Discover DeKalb)
   {
     id: 'branded-angled-band',
     label: 'Angled',
     usesPhoto: false,
     buildSvg: (c) => {
-      const top = FRAME_HEIGHT - 300;
       const W = FRAME_WIDTH;
       const H = FRAME_HEIGHT;
-      const band = `<polygon points="0,${top + 60} ${W},${top} ${W},${H} 0,${H}" fill="${escapeXml(c.secondaryHex)}"/>`;
-      const wedge = `<polygon points="${W * 0.6},${top + 24} ${W},${top} ${W},${H} ${W * 0.46},${H}" fill="${escapeXml(c.tertiaryHex)}"/>`;
+      // Banda olive con borde superior diagonal (sube ligeramente a la derecha).
+      const band = `<polygon points="0,1700 ${W},1610 ${W},${H} 0,${H}" fill="${escapeXml(c.secondaryHex)}"/>`;
+      // Cuña tan/gold en la esquina inferior-derecha (divisor diagonal).
+      const wedge = `<polygon points="745,1614 ${W},1606 ${W},${H} 560,${H}" fill="${escapeXml(c.tertiaryHex)}"/>`;
       const logo = c.logoDataUri
-        ? logoImage(c.logoDataUri, 70, H - 230, 360, 150)
-        : nameText(c.clientName, 280, H - 150, '#ffffff', 48);
-      const tag = c.tagline ? nameText(c.tagline, W * 0.74, H - 150, '#ffffff', 44) : '';
+        ? logoImage(c.logoDataUri, 64, 1742, 380, 150)
+        : nameText(c.clientName, 250, H - 130, '#ffffff', 48);
+      const tag = c.tagline
+        ? taglineText(c.tagline, W - 56, 1825, '#ffffff', c.taglineFontFamily, 'end', 50, {
+            singleLine: true,
+            widthPx: 560,
+          })
+        : '';
       return `${SVG_OPEN}${band}${wedge}${logo}${tag}</svg>`;
     },
   },
@@ -313,12 +360,25 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       const logo = c.logoDataUri
         ? logoImage(c.logoDataUri, 80, 50, 420, 150)
         : nameText(c.clientName, W / 2, topH / 2 + 10, '#ffffff', 56);
-      const tag = c.tagline ? nameText(c.tagline, W / 2, H - botH / 2, '#ffffff', 44) : '';
+      // Frase en la banda inferior: fuente de marca + ALINEADA A LA DERECHA
+      // (feedback Rubén 2026-06-15).
+      const tag = c.tagline
+        ? taglineText(
+            c.tagline,
+            W - side - 36,
+            H - botH / 2,
+            '#ffffff',
+            c.taglineFontFamily,
+            'end',
+            44,
+          )
+        : '';
       return `${SVG_OPEN}${ring}${logo}${tag}</svg>`;
     },
   },
 
-  // 10) Cuñas diagonales: banda superior (tagline) + inferior (logo), bordes inclinados. (ref Frame-4)
+  // 10) Brackets angulares entrelazados: bracket olive arriba-izq (tagline) +
+  //     bracket navy abajo-der (logo); centro transparente en molinete. (ref Frame-4)
   {
     id: 'branded-diagonal-corners',
     label: 'Diagonal',
@@ -326,15 +386,22 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
     buildSvg: (c) => {
       const W = FRAME_WIDTH;
       const H = FRAME_HEIGHT;
-      const topBand = `<polygon points="0,0 ${W},0 ${W},180 0,300" fill="${escapeXml(c.secondaryHex)}"/>`;
-      const botBand = `<polygon points="0,${H - 180} ${W},${H - 300} ${W},${H} 0,${H}" fill="${escapeXml(c.primaryHex)}"/>`;
+      // Bracket olive (banda superior + franja izquierda) con extremos en diagonal.
+      const topLeft = `<polygon points="0,0 875,0 775,210 210,210 210,1080 0,1290" fill="${escapeXml(c.secondaryHex)}"/>`;
+      // Bracket navy abajo-der = mismo bracket rotado 180° respecto al centro.
+      const bottomRight = `<polygon points="870,840 ${W},630 ${W},${H} 205,${H} 305,1710 870,1710" fill="${escapeXml(c.primaryHex)}"/>`;
+      // Tagline en la banda olive superior (script de la marca, una línea).
       const tag = c.tagline
-        ? nameText(c.tagline, W / 2, 130, '#ffffff', 46)
-        : nameText(c.clientName, W / 2, 130, '#ffffff', 52);
+        ? taglineText(c.tagline, 55, 132, '#ffffff', c.taglineFontFamily, 'start', 44, {
+            singleLine: true,
+            widthPx: 800,
+          })
+        : nameText(c.clientName, 440, 130, '#ffffff', 52);
+      // Logo centrado en la banda navy inferior.
       const logo = c.logoDataUri
-        ? logoImage(c.logoDataUri, W / 2 - 220, H - 230, 440, 150)
-        : nameText(c.hashtag || c.clientName, W / 2, H - 130, '#ffffff', 48);
-      return `${SVG_OPEN}${topBand}${botBand}${tag}${logo}</svg>`;
+        ? logoImage(c.logoDataUri, W / 2 - 210, 1748, 420, 130)
+        : nameText(c.hashtag || c.clientName, W / 2, H - 110, '#ffffff', 46);
+      return `${SVG_OPEN}${topLeft}${bottomRight}${tag}${logo}</svg>`;
     },
   },
 ];
@@ -374,6 +441,7 @@ export async function renderFramePng(
     tpl.usesPhoto && input.photoBuffer
       ? await toPngDataUri(input.photoBuffer, FRAME_WIDTH, FRAME_HEIGHT, 'cover')
       : null;
+  const taglineFont = input.taglineFont ?? null;
   const svg = tpl.buildSvg({
     primaryHex: input.primaryHex,
     secondaryHex: input.secondaryHex,
@@ -383,8 +451,14 @@ export async function renderFramePng(
     photoDataUri,
     tagline: input.tagline,
     hashtag: input.hashtag,
+    taglineFontFamily: resolveTaglineFontFamily(taglineFont),
   });
-  return sharp(Buffer.from(svg, 'utf8'))
+  // Incrusta el @font-face de la fuente de marca justo tras la etiqueta <svg>
+  // (librsvg solo resuelve fuentes embebidas / del sistema).
+  const svgWithFont = taglineFont
+    ? svg.replace(SVG_OPEN, `${SVG_OPEN}${fontFaceStyle(taglineFont)}`)
+    : svg;
+  return sharp(Buffer.from(svgWithFont, 'utf8'))
     .resize(FRAME_WIDTH, FRAME_HEIGHT, { fit: 'fill' })
     .png()
     .toBuffer();

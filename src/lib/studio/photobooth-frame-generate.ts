@@ -4,6 +4,7 @@ import { put } from '@vercel/blob';
 
 import { loadUnifiedBranding, toHex } from '@/lib/studio/client-branding-sync';
 import { kv, kvKeys } from '@/lib/studio/kv';
+import { resolveBrandDisplayFont } from '@/lib/studio/photobooth-frame-fonts';
 import {
   FRAME_TEMPLATES,
   renderFramePng,
@@ -52,12 +53,6 @@ export async function generateAndSavePhotoBoothFrames(
   opts?: {
     /** Fuerza nombre en texto (el logo del KV es el del template al crear). */
     forceNameText?: boolean;
-    /**
-     * `true` (creación): reemplaza los frames genéricos, conservando solo la
-     * opción "None" (image vacío). `false`/ausente (botón regenerar): preserva
-     * TODO lo que no sea `branded-auto` (None, genéricos re-añadidos, custom).
-     */
-    replaceGenerics?: boolean;
   },
 ): Promise<FrameGenerateResult> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
@@ -89,6 +84,9 @@ export async function generateAndSavePhotoBoothFrames(
     if (website) photoBuffer = await scrapeBestImage(website);
   }
 
+  // Fuente de marca para el tagline (best-effort; null = sans del sistema).
+  const taglineFont = await resolveBrandDisplayFont(unified.fonts);
+
   const input: FrameTemplateInput = {
     primaryHex: toHex(unified.brand.primary),
     secondaryHex: toHex(unified.brand.secondary),
@@ -98,6 +96,7 @@ export async function generateAndSavePhotoBoothFrames(
     photoBuffer,
     tagline: cfg.photoBooth?.frameTagline ?? '',
     hashtag: cfg.photoBooth?.frameHashtag ?? '',
+    taglineFont,
   };
 
   // Render + subida a Blob, SECUENCIAL (acota RAM/picos de sharp en la lambda).
@@ -145,9 +144,12 @@ export async function generateAndSavePhotoBoothFrames(
     return prevLabel && prevLabel !== tplDefault ? { ...b, label: prevLabel } : b;
   });
 
-  const preserved = opts?.replaceGenerics
-    ? existing.filter((f) => f.image === '') // creación: solo "None"
-    : existing.filter((f) => f.source !== 'branded-auto'); // regenerar: todo lo no-auto
+  // Tanto en creación como al regenerar desde el editor, los frames que vienen
+  // del THEME/template (source undefined) y los branded-auto previos se BORRAN
+  // y se reemplazan por el set nuevo. Solo se conserva la opción "None"
+  // (image vacío) y los frames que el operador subió a mano (source 'custom').
+  // (Feedback Rubén 2026-06-15: "Generate tiene que borrar los que ya estaban".)
+  const preserved = existing.filter((f) => f.image === '' || f.source === 'custom');
 
   const nextFrames = [...preserved, ...mergedBranded];
 

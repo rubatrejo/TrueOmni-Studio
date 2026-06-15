@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { forwardRef, useEffect, useRef } from 'react';
 
 import type { PhotoBoothFrame } from '@/lib/config';
 
@@ -22,11 +22,11 @@ interface StartScreenProps {
 /**
  * UI de la fase `'live'` del Photo Booth.
  *
- * El carrusel de frames es scrollable horizontalmente y el botón START
- * ("TAKE PHOTO") es UN ITEM MÁS dentro del scroll, posicionado en la mitad
- * del array. El usuario puede scrollear y el START se mueve con los demás
- * thumbnails. Home button alineado al `top:1000` (consistente con
- * `FloatingHomeButton` del resto del kiosk).
+ * El carrusel de frames es scrollable horizontalmente. El frame SELECCIONADO
+ * crece, recibe un borde de color brand y muestra DENTRO el botón "TAKE PHOTO"
+ * (icono + texto): se dispara la foto tocando el propio frame elegido (feedback
+ * de Rubén 2026-06-15 — ya no hay un shutter fijo separado en el centro). Home
+ * button alineado al `top:1000` (consistente con `FloatingHomeButton`).
  */
 export function StartScreen({
   frames,
@@ -42,21 +42,21 @@ export function StartScreen({
   ariaShutter,
 }: StartScreenProps) {
   const CAROUSEL_TOP = 1507 - 130; // 1377
-  const CAROUSEL_HEIGHT = 260;
+  const CAROUSEL_HEIGHT = 300;
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const selectedRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    // Centrar el scroll para que el START item (en medio del array) quede
-    // centrado en la vista inicial.
+    // Centrar en la vista el frame seleccionado (es el que muestra el shutter).
     const el = scrollRef.current;
+    const sel = selectedRef.current;
     if (!el) return;
-    el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
-  }, [frames.length]);
-
-  // Punto medio del array para insertar el START (como item del scroll).
-  const midIndex = Math.ceil(frames.length / 2);
-  const leftFrames = frames.slice(0, midIndex);
-  const rightFrames = frames.slice(midIndex);
+    if (sel) {
+      el.scrollLeft = sel.offsetLeft - (el.clientWidth - sel.offsetWidth) / 2;
+    } else {
+      el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
+    }
+  }, [frames.length, selectedFrameId]);
 
   return (
     <>
@@ -139,27 +139,24 @@ export function StartScreen({
             alignItems: 'center',
             height: '100%',
             gap: 24,
-            padding: '0 48px',
+            padding: '0 420px', // aire a los lados para poder centrar cualquier frame
             width: 'max-content',
           }}
         >
-          {leftFrames.map((frame) => (
-            <FrameThumb
-              key={`l-${frame.id}`}
-              frame={frame}
-              selected={selectedFrameId === frame.id}
-              onSelect={() => onSelectFrame(frame.id)}
-            />
-          ))}
-          <ShutterItem ariaLabel={ariaShutter} onPress={onStart} />
-          {rightFrames.map((frame) => (
-            <FrameThumb
-              key={`r-${frame.id}`}
-              frame={frame}
-              selected={selectedFrameId === frame.id}
-              onSelect={() => onSelectFrame(frame.id)}
-            />
-          ))}
+          {frames.map((frame) => {
+            const selected = selectedFrameId === frame.id;
+            return (
+              <FrameThumb
+                key={frame.id}
+                ref={selected ? selectedRef : undefined}
+                frame={frame}
+                selected={selected}
+                ariaShutter={ariaShutter}
+                onSelect={() => onSelectFrame(frame.id)}
+                onShoot={onStart}
+              />
+            );
+          })}
         </div>
       </div>
 
@@ -247,28 +244,45 @@ export function StartScreen({
 interface FrameThumbProps {
   frame: PhotoBoothFrame & { resolvedThumbnail: string };
   selected: boolean;
+  ariaShutter: string;
   onSelect: () => void;
+  onShoot: () => void;
 }
 
-function FrameThumb({ frame, selected, onSelect }: FrameThumbProps) {
+const THUMB_SIZE = 200;
+const THUMB_SELECTED_SIZE = 264;
+
+/**
+ * Thumbnail de frame en el carrusel. El SELECCIONADO crece, su borde se pinta
+ * con el color brand (`--photo-tabs-bg`) y muestra encima el shutter "TAKE
+ * PHOTO" (icono + texto): tocarlo dispara la foto con ese frame. Los no
+ * seleccionados, al tocarlos, solo se seleccionan.
+ */
+const FrameThumb = forwardRef<HTMLButtonElement, FrameThumbProps>(function FrameThumb(
+  { frame, selected, ariaShutter, onSelect, onShoot },
+  ref,
+) {
+  const size = selected ? THUMB_SELECTED_SIZE : THUMB_SIZE;
   return (
     <button
+      ref={ref}
       type="button"
-      aria-label={frame.label}
-      onClick={onSelect}
+      aria-label={selected ? ariaShutter : frame.label}
+      onClick={selected ? onShoot : onSelect}
       style={{
+        position: 'relative',
         flex: '0 0 auto',
-        width: 200,
-        height: 200,
+        width: size,
+        height: size,
         padding: 0,
         borderRadius: '50%',
-        border: '10px solid #fff',
+        border: selected ? '10px solid hsl(var(--photo-tabs-bg))' : '10px solid #fff',
         background: '#fff',
         overflow: 'hidden',
         boxShadow: selected
-          ? '0 0 0 6px hsl(var(--photo-tabs-bg)), 0 0 32px 8px hsl(var(--photo-tabs-bg) / 0.6)'
+          ? '0 0 0 4px #fff, 0 0 36px 10px hsl(var(--photo-tabs-bg) / 0.55)'
           : undefined,
-        transition: 'box-shadow 0.15s ease-out',
+        transition: 'width 0.18s ease-out, height 0.18s ease-out, border-color 0.18s ease-out',
       }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -278,59 +292,40 @@ function FrameThumb({ frame, selected, onSelect }: FrameThumbProps) {
         draggable={false}
         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
       />
+      {selected && (
+        <span
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            background: 'rgba(0,0,0,0.42)',
+            color: '#fff',
+            fontFamily: "'Open Sans', system-ui",
+            fontSize: 24,
+            fontWeight: 700,
+            lineHeight: 1.1,
+            textShadow: '0 2px 6px rgba(0,0,0,0.45)',
+          }}
+        >
+          <svg width={66} height={57} viewBox="0 0 72 62" aria-hidden="true">
+            <path
+              d="M59.262,4.963V38.3a5.358,5.358,0,0,1-1.62,3.935,5.358,5.358,0,0,1-3.935,1.62H5.556a5.358,5.358,0,0,1-3.935-1.62A5.358,5.358,0,0,1,0,38.3V4.963A5.358,5.358,0,0,1,1.62,1.028,5.358,5.358,0,0,1,5.556-0.592H15.741l1.389-3.82a6.7,6.7,0,0,1,1.215-1.852,5.426,5.426,0,0,1,1.794-1.273,5.355,5.355,0,0,1,2.2-.463H36.923a5.278,5.278,0,0,1,3.125.984,6.033,6.033,0,0,1,2.083,2.6l1.389,3.82H53.706a5.358,5.358,0,0,1,3.935,1.62A5.358,5.358,0,0,1,59.262,4.963ZM39.469,31.469a13.394,13.394,0,0,0,4.051-9.838,13.394,13.394,0,0,0-4.051-9.838,13.394,13.394,0,0,0-9.838-4.051,13.394,13.394,0,0,0-9.838,4.051,13.394,13.394,0,0,0-4.051,9.838,13.394,13.394,0,0,0,4.051,9.838,13.394,13.394,0,0,0,9.838,4.051A13.394,13.394,0,0,0,39.469,31.469Z"
+              transform="translate(6 10)"
+              fill="#fff"
+            />
+          </svg>
+          <span style={{ textAlign: 'center' }}>
+            TAKE
+            <br />
+            PHOTO
+          </span>
+        </span>
+      )}
     </button>
   );
-}
-
-interface ShutterItemProps {
-  ariaLabel: string;
-  onPress: () => void;
-}
-
-/**
- * Botón shutter "TAKE PHOTO" como item del scroll. Más grande que los
- * thumbnails (260×260 vs 212×212) para destacar como acción principal. El
- * usuario puede scrollearlo junto con los frames (feedback de Rubén:
- * "Ese botón también es parte del carrusel scrollable y se mueve con los
- * demás thumbnails").
- */
-function ShutterItem({ ariaLabel, onPress }: ShutterItemProps) {
-  return (
-    <button
-      type="button"
-      aria-label={ariaLabel}
-      onClick={onPress}
-      style={{
-        flex: '0 0 auto',
-        width: 260,
-        height: 260,
-        padding: 0,
-        borderRadius: '50%',
-        border: '10px solid #fff',
-        background: 'rgba(0,0,0,0.35)',
-        color: '#fff',
-        fontFamily: "'Open Sans', system-ui",
-        fontSize: 28,
-        fontWeight: 700,
-        lineHeight: 1.1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 6,
-      }}
-    >
-      <svg width={72} height={62} viewBox="0 0 72 62" aria-hidden="true">
-        <path
-          d="M59.262,4.963V38.3a5.358,5.358,0,0,1-1.62,3.935,5.358,5.358,0,0,1-3.935,1.62H5.556a5.358,5.358,0,0,1-3.935-1.62A5.358,5.358,0,0,1,0,38.3V4.963A5.358,5.358,0,0,1,1.62,1.028,5.358,5.358,0,0,1,5.556-0.592H15.741l1.389-3.82a6.7,6.7,0,0,1,1.215-1.852,5.426,5.426,0,0,1,1.794-1.273,5.355,5.355,0,0,1,2.2-.463H36.923a5.278,5.278,0,0,1,3.125.984,6.033,6.033,0,0,1,2.083,2.6l1.389,3.82H53.706a5.358,5.358,0,0,1,3.935,1.62A5.358,5.358,0,0,1,59.262,4.963ZM39.469,31.469a13.394,13.394,0,0,0,4.051-9.838,13.394,13.394,0,0,0-4.051-9.838,13.394,13.394,0,0,0-9.838-4.051,13.394,13.394,0,0,0-9.838,4.051,13.394,13.394,0,0,0-4.051,9.838,13.394,13.394,0,0,0,4.051,9.838,13.394,13.394,0,0,0,9.838,4.051A13.394,13.394,0,0,0,39.469,31.469Z"
-          transform="translate(6 10)"
-          fill="#fff"
-        />
-      </svg>
-      <div style={{ textAlign: 'center' }}>
-        <div>TAKE</div>
-        <div>PHOTO</div>
-      </div>
-    </button>
-  );
-}
+});

@@ -557,7 +557,7 @@ export async function POST(request: Request) {
       const { generateAndSavePhotoBoothFrames } =
         await import('@/lib/studio/photobooth-frame-generate');
       await Promise.race([
-        generateAndSavePhotoBoothFrames(slug, { forceNameText: true, replaceGenerics: true }),
+        generateAndSavePhotoBoothFrames(slug, { forceNameText: true }),
         new Promise((resolve) => setTimeout(resolve, 20_000, null)),
       ]);
     } catch (e) {

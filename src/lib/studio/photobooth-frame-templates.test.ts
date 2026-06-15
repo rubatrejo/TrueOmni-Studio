@@ -84,6 +84,43 @@ describe('photobooth-frame-templates', () => {
     });
   }
 
+  it('Border Tab imprime el tagline alineado a la DERECHA con la fuente de marca', () => {
+    const tpl = FRAME_TEMPLATES.find((t) => t.id === 'branded-solid-border-tab')!;
+    const svg = tpl.buildSvg({
+      primaryHex: '#0a6cff',
+      secondaryHex: '#00d4aa',
+      tertiaryHex: '#ffb300',
+      clientName: 'Discover Somewhere',
+      logoDataUri: null,
+      photoDataUri: null,
+      tagline: 'DeKalibrate Deeper',
+      hashtag: '',
+      taglineFontFamily: "'Montserrat', Helvetica, Arial, sans-serif",
+    });
+    expect(svg).toContain('text-anchor="end"');
+    expect(svg).toContain("'Montserrat'");
+    expect(svg).toContain('Deeper');
+  });
+
+  it('renderFramePng embebe @font-face cuando hay taglineFont', async () => {
+    const tpl = FRAME_TEMPLATES.find((t) => t.id === 'branded-solid-border-tab')!;
+    // woff2 data-URI mínimo (librsvg cae a la sans si no lo puede parsear; el
+    // render no debe fallar ni perder el centro transparente).
+    const png = await renderFramePng(
+      tpl,
+      baseInput({
+        logoBuffer: null,
+        taglineFont: {
+          family: 'Montserrat',
+          dataUri: 'data:font/woff2;base64,AA==',
+          format: 'woff2',
+        },
+      }),
+    );
+    expect(await centerAlpha(png)).toBe(0);
+    expect((await sharp(png).metadata()).width).toBe(FRAME_WIDTH);
+  });
+
   it('renderFrameThumbnail devuelve PNG 256×256', async () => {
     const png = await renderFramePng(FRAME_TEMPLATES[0], baseInput());
     const thumb = await renderFrameThumbnail(png, {

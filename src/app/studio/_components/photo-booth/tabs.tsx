@@ -13,6 +13,7 @@ import {
   type PhotoBoothSticker,
 } from '@/lib/studio/schema';
 
+import { useStudioSlug } from '../../_lib/slug-context';
 import { ImageField } from '../ImageField';
 
 import {
@@ -388,6 +389,32 @@ export function FramesTab({
   photoBooth: PhotoBoothConfig;
   onChange: (next: PhotoBoothConfig) => void;
 }) {
+  const slug = useStudioSlug();
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
+
+  // Regenera los frames branded en el server (escribe el cfg en KV). Tras éxito
+  // recargamos para traer los frames nuevos (mismo patrón que el revert de
+  // Versions). No pisa los frames subidos a mano (source !== 'branded-auto').
+  const generateBranded = async () => {
+    if (!slug || generating) return;
+    setGenerating(true);
+    setGenError(null);
+    try {
+      const res = await fetch(`/api/studio/clients/${slug}/content/photobooth-frames`, {
+        method: 'POST',
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(body.error ?? `Generation failed (${res.status})`);
+      }
+      window.location.reload();
+    } catch (e) {
+      setGenError(e instanceof Error ? e.message : 'Generation failed');
+      setGenerating(false);
+    }
+  };
+
   const setList = (list: PhotoBoothFrame[]) => onChange({ ...photoBooth, frames: list });
 
   const update = (id: string, patch: Partial<PhotoBoothFrame>) =>
@@ -410,6 +437,21 @@ export function FramesTab({
       title="Frames"
       hint="Transparent PNG overlays on top of the photo (1080×1920). Empty list hides the Frames tab."
     >
+      <div className="mb-3 rounded-lg border border-sky-500/20 bg-sky-500/5 px-3 py-2.5">
+        <button
+          type="button"
+          onClick={generateBranded}
+          disabled={generating}
+          className="inline-flex items-center gap-1.5 rounded-md bg-sky-600 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-sky-500 disabled:opacity-50"
+        >
+          {generating ? 'Generating…' : 'Generate branded frames'}
+        </button>
+        <p className="mt-1.5 text-[11px] text-zinc-500 dark:text-zinc-400">
+          Auto-creates frames from this client&apos;s brand colors, logo and website photo. Frames
+          you uploaded by hand are kept. Reloads when done.
+        </p>
+        {genError ? <p className="mt-1 text-[11px] text-red-500">{genError}</p> : null}
+      </div>
       {photoBooth.frames.length === 0 ? (
         <EmptyState text="No frames yet." />
       ) : (

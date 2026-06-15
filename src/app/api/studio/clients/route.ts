@@ -546,6 +546,25 @@ export async function POST(request: Request) {
     }
   }
 
+  // 6. Frames branded del Photo Booth automáticos (best-effort, no-fatal):
+  // reemplaza los 5 frames genéricos bespoke por 5 plantillas con el branding
+  // del cliente (brand colors + nombre en texto + foto del website), conservando
+  // la opción "None". `forceNameText` por la misma razón que el placeholder (el
+  // logo del KV aún es el del template). El operador regenera con su logo desde
+  // el editor (Photo Booth → Frames). Timeout mayor: son 5 frames + thumbs.
+  if (products.kiosks) {
+    try {
+      const { generateAndSavePhotoBoothFrames } =
+        await import('@/lib/studio/photobooth-frame-generate');
+      await Promise.race([
+        generateAndSavePhotoBoothFrames(slug, { forceNameText: true, replaceGenerics: true }),
+        new Promise((resolve) => setTimeout(resolve, 20_000, null)),
+      ]);
+    } catch (e) {
+      console.warn('[api/studio/clients] photo booth frame generation skipped:', e);
+    }
+  }
+
   return NextResponse.json(
     {
       slug,

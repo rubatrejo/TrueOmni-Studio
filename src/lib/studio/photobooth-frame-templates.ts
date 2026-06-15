@@ -1,16 +1,64 @@
 import 'server-only';
 
+import opentype from 'opentype.js';
 import sharp from 'sharp';
 
+import { ROBOTO_BOLD_BASE64 } from './fonts/roboto-bold';
 import { splitNameLines } from './placeholder-image';
 
 /**
- * Fuente para TODO el texto de los frames. Solo la sans del sistema: librsvg
- * (motor de sharp) NO renderiza fiablemente fuentes embebidas vía @font-face
- * (dibuja TOFU en vez de los glifos). El resto del kiosk ya usa esta misma
- * estrategia (placeholder, nameText) y se ve bien en producción.
+ * TODO el texto de los frames se VECTORIZA a paths SVG con opentype.js + una
+ * fuente TTF embebida (Roboto Bold). Motivo: librsvg (motor de sharp) NO tiene
+ * fuentes del sistema en el entorno serverless de Vercel, así que cualquier
+ * `<text>` sale como TOFU (□□□). Al convertir el texto a `<path>` (geometría
+ * pura) el render NO depende de ninguna fuente del entorno y es idéntico en
+ * local y en producción.
  */
-const SYSTEM_SANS = 'Helvetica, Arial, sans-serif';
+const ROBOTO_BOLD = (() => {
+  const buf = Buffer.from(ROBOTO_BOLD_BASE64, 'base64');
+  const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+  return opentype.parse(ab);
+})();
+
+/** Ancho (px) que ocupa `text` a `fontSize`, con la fuente embebida. */
+function measureText(text: string, fontSize: number): number {
+  return ROBOTO_BOLD.getAdvanceWidth(text, fontSize);
+}
+
+/** Una línea de texto como `<path>` vectorizado. `x` ya viene ajustado al anchor. */
+function glyphPath(
+  text: string,
+  x: number,
+  baseline: number,
+  fontSize: number,
+  fill: string,
+): string {
+  const path = ROBOTO_BOLD.getPath(text, x, baseline, fontSize);
+  return `<path d="${path.toPathData(1)}" fill="${fill}"/>`;
+}
+
+/**
+ * Bloque de texto (1+ líneas) vectorizado y alineado. `cy` es el centro
+ * vertical del bloque; `anchor` controla el alineado horizontal respecto a `cx`.
+ */
+function textBlock(
+  lines: string[],
+  cx: number,
+  cy: number,
+  fontSize: number,
+  fill: string,
+  anchor: 'start' | 'middle' | 'end',
+  lineHeight: number,
+): string {
+  const firstBaseline = cy - ((lines.length - 1) * lineHeight) / 2 + fontSize * 0.35;
+  return lines
+    .map((line, i) => {
+      const w = measureText(line, fontSize);
+      const x = anchor === 'start' ? cx : anchor === 'end' ? cx - w : cx - w / 2;
+      return glyphPath(line, x, firstBaseline + i * lineHeight, fontSize, fill);
+    })
+    .join('\n');
+}
 
 /**
  * Plantillas SVG parametrizadas para los frames branded del Photo Booth.
@@ -55,8 +103,6 @@ export interface FrameSvgContext {
   photoDataUri: string | null;
   /** Texto editable de este frame (frase o hashtag; vacío = se omite). */
   text: string;
-  /** `font-family` CSS para el texto (brand font con fallback de sistema). */
-  taglineFontFamily: string;
 }
 
 export interface FrameTemplate {
@@ -80,52 +126,38 @@ function escapeXml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
-/** Texto del nombre del cliente centrado en una banda (1–2 líneas, color sobre fondo). */
+/** Nombre del cliente centrado (1–2 líneas), vectorizado y escalado a ≤900px de ancho. */
 function nameText(clientName: string, cx: number, cy: number, fill: string, maxFont = 64): string {
   const lines = splitNameLines(clientName);
-  const longest = Math.max(...lines.map((l) => l.length), 1);
-  const fontSize = Math.max(28, Math.min(maxFont, Math.floor(900 / (0.62 * longest))));
-  const lineHeight = Math.round(fontSize * 1.12);
-  const firstBaseline = cy - ((lines.length - 1) * lineHeight) / 2 + fontSize * 0.35;
-  return lines
-    .map(
-      (line, i) =>
-        `<text x="${cx}" y="${firstBaseline + i * lineHeight}" text-anchor="middle"
-           font-family="Helvetica, Arial, sans-serif" font-weight="700"
-           font-size="${fontSize}" fill="${fill}" letter-spacing="1">${escapeXml(line)}</text>`,
-    )
-    .join('\n');
+  const widthCap = 900;
+  const widest = Math.max(...lines.map((l) => measureText(l, maxFont)), 1);
+  const fontSize =
+    widest > widthCap ? Math.max(24, Math.floor((maxFont * widthCap) / widest)) : maxFont;
+  const lineHeight = Math.round(fontSize * 1.14);
+  return textBlock(lines, cx, cy, fontSize, fill, 'middle', lineHeight);
 }
 
 /**
- * Frase/tagline en la fuente de marca del cliente, con `text-anchor`
- * configurable (`start`/`middle`/`end`). Reparte en 1–2 líneas y escala el
- * tamaño al largo. `cx` es el punto de anclaje según el anchor.
+ * Frase/tagline vectorizada, con `text-anchor` configurable (`start`/`middle`/
+ * `end`). Reparte en 1–2 líneas (salvo `singleLine`) y reduce el tamaño solo si
+ * no cabe en `widthPx`. `cx` es el punto de anclaje según el anchor.
  */
 function taglineText(
   text: string,
   cx: number,
   cy: number,
   fill: string,
-  fontFamily: string,
   anchor: 'start' | 'middle' | 'end' = 'middle',
   maxFont = 46,
   opts?: { singleLine?: boolean; widthPx?: number },
 ): string {
   const lines = opts?.singleLine ? [text.trim().replace(/\s+/g, ' ')] : splitNameLines(text);
-  const longest = Math.max(...lines.map((l) => l.length), 1);
   const widthPx = opts?.widthPx ?? 820;
-  const fontSize = Math.max(24, Math.min(maxFont, Math.floor(widthPx / (0.55 * longest))));
+  const widest = Math.max(...lines.map((l) => measureText(l, maxFont)), 1);
+  const fontSize =
+    widest > widthPx ? Math.max(22, Math.floor((maxFont * widthPx) / widest)) : maxFont;
   const lineHeight = Math.round(fontSize * 1.18);
-  const firstBaseline = cy - ((lines.length - 1) * lineHeight) / 2 + fontSize * 0.35;
-  return lines
-    .map(
-      (line, i) =>
-        `<text x="${cx}" y="${firstBaseline + i * lineHeight}" text-anchor="${anchor}"
-           font-family="${fontFamily}" font-weight="700"
-           font-size="${fontSize}" fill="${fill}">${escapeXml(line)}</text>`,
-    )
-    .join('\n');
+  return textBlock(lines, cx, cy, fontSize, fill, anchor, lineHeight);
 }
 
 const SVG_OPEN = `<svg width="${FRAME_WIDTH}" height="${FRAME_HEIGHT}" viewBox="0 0 ${FRAME_WIDTH} ${FRAME_HEIGHT}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">`;
@@ -267,16 +299,10 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
         : nameText(c.clientName, FRAME_WIDTH / 2, bandH / 2, '#ffffff', 60);
       // Banda inferior: hashtag editable centrado.
       const bottom = c.text
-        ? taglineText(
-            c.text,
-            FRAME_WIDTH / 2,
-            FRAME_HEIGHT - bandH / 2,
-            '#ffffff',
-            c.taglineFontFamily,
-            'middle',
-            68,
-            { singleLine: true, widthPx: 980 },
-          )
+        ? taglineText(c.text, FRAME_WIDTH / 2, FRAME_HEIGHT - bandH / 2, '#ffffff', 'middle', 68, {
+            singleLine: true,
+            widthPx: 980,
+          })
         : nameText(c.clientName, FRAME_WIDTH / 2, FRAME_HEIGHT - bandH / 2, '#ffffff', 64);
       return `${SVG_OPEN}
         <rect x="0" y="0" width="${FRAME_WIDTH}" height="${bandH}" fill="${escapeXml(c.primaryHex)}"/>
@@ -341,7 +367,7 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
         ? logoImage(c.logoDataUri, 64, 1742, 380, 150)
         : nameText(c.clientName, 250, H - 130, '#ffffff', 48);
       const tag = c.text
-        ? taglineText(c.text, W - 56, 1822, '#ffffff', c.taglineFontFamily, 'end', 58, {
+        ? taglineText(c.text, W - 56, 1822, '#ffffff', 'end', 58, {
             widthPx: 620,
           })
         : '';
@@ -371,7 +397,7 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       // Frase en la banda inferior: fuente de marca + CENTRADA (feedback Rubén
       // 2026-06-15: texto con el nombre del cliente, centrado).
       const tag = c.text
-        ? taglineText(c.text, W / 2, H - botH / 2, '#ffffff', c.taglineFontFamily, 'middle', 60, {
+        ? taglineText(c.text, W / 2, H - botH / 2, '#ffffff', 'middle', 60, {
             widthPx: W - 2 * side - 80,
           })
         : '';
@@ -394,7 +420,7 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       const bottomRight = `<polygon points="870,840 ${W},630 ${W},${H} 205,${H} 305,1710 870,1710" fill="${escapeXml(c.primaryHex)}"/>`;
       // Frase en la banda olive superior: ALINEADA A LA IZQUIERDA (1-2 líneas).
       const tag = c.text
-        ? taglineText(c.text, 55, 116, '#ffffff', c.taglineFontFamily, 'start', 52, {
+        ? taglineText(c.text, 55, 116, '#ffffff', 'start', 52, {
             widthPx: 700,
           })
         : '';
@@ -450,11 +476,6 @@ export async function renderFramePng(
     logoDataUri,
     photoDataUri,
     text: input.text,
-    // SIEMPRE la sans del sistema. NO embeber la fuente de marca vía @font-face:
-    // librsvg (el motor de sharp) NO decodifica woff2 embebido de forma fiable y
-    // dibuja TOFU (cajas vacías) en vez de caer al fallback. El resto del kiosk
-    // (placeholder, nameText) ya usa la sans del sistema y se ve bien en prod.
-    taglineFontFamily: SYSTEM_SANS,
   });
   return sharp(Buffer.from(svg, 'utf8'))
     .resize(FRAME_WIDTH, FRAME_HEIGHT, { fit: 'fill' })

@@ -83,7 +83,7 @@ describe('photobooth-frame-templates', () => {
     });
   }
 
-  it('Border Tab imprime el texto CENTRADO', () => {
+  it('Border Tab vectoriza el texto a <path> (no <text>)', () => {
     const tpl = FRAME_TEMPLATES.find((t) => t.id === 'branded-solid-border-tab')!;
     const svg = tpl.buildSvg({
       primaryHex: '#0a6cff',
@@ -93,43 +93,35 @@ describe('photobooth-frame-templates', () => {
       logoDataUri: null,
       photoDataUri: null,
       text: 'Visit Discover Somewhere',
-      taglineFontFamily: 'Helvetica, Arial, sans-serif',
     });
-    expect(svg).toContain('text-anchor="middle"');
-    expect(svg).toContain('Somewhere');
+    // El texto se VECTORIZA a <path fill="#ffffff">, no <text> (que saldría tofu).
+    expect(svg).toContain('<path d="');
+    expect(svg).toContain('fill="#ffffff"');
+    expect(svg).not.toContain('<text');
   });
 
-  it('Diagonal imprime el texto alineado a la IZQUIERDA', () => {
-    const tpl = FRAME_TEMPLATES.find((t) => t.id === 'branded-diagonal-corners')!;
-    const svg = tpl.buildSvg({
-      primaryHex: '#0a6cff',
-      secondaryHex: '#00d4aa',
-      tertiaryHex: '#ffb300',
-      clientName: 'Discover Somewhere',
-      logoDataUri: null,
-      photoDataUri: null,
-      text: 'Closer cooler',
-      taglineFontFamily: 'Helvetica, Arial, sans-serif',
-    });
-    expect(svg).toContain('text-anchor="start"');
-    expect(svg).toContain('Closer cooler');
-  });
-
-  it('el texto usa la sans del sistema y NO embebe @font-face (evita el tofu de librsvg)', () => {
-    const tpl = FRAME_TEMPLATES.find((t) => t.id === 'branded-solid-border-tab')!;
-    const svg = tpl.buildSvg({
-      primaryHex: '#0a6cff',
-      secondaryHex: '#00d4aa',
-      tertiaryHex: '#ffb300',
-      clientName: 'Discover Somewhere',
-      logoDataUri: null,
-      photoDataUri: null,
-      text: 'Visit Discover Somewhere',
-      taglineFontFamily: 'Helvetica, Arial, sans-serif',
-    });
-    expect(svg).toContain('Helvetica, Arial, sans-serif');
-    expect(svg).not.toContain('@font-face');
-    expect(svg).not.toContain('data:font');
+  it('los frames con texto lo VECTORIZAN (sin <text> ni @font-face) → evita el tofu de librsvg', () => {
+    for (const id of [
+      'branded-top-bottom-bands',
+      'branded-solid-border-tab',
+      'branded-diagonal-corners',
+      'branded-angled-band',
+    ]) {
+      const tpl = FRAME_TEMPLATES.find((t) => t.id === id)!;
+      const svg = tpl.buildSvg({
+        primaryHex: '#0a6cff',
+        secondaryHex: '#00d4aa',
+        tertiaryHex: '#ffb300',
+        clientName: 'Discover Somewhere',
+        logoDataUri: null,
+        photoDataUri: null,
+        text: 'Visit Somewhere',
+      });
+      expect(svg, id).not.toContain('<text');
+      expect(svg, id).not.toContain('@font-face');
+      expect(svg, id).not.toContain('data:font');
+      expect(svg, id).toContain('<path d="');
+    }
   });
 
   it('renderFrameThumbnail devuelve PNG 256×256', async () => {

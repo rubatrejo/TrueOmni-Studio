@@ -78,6 +78,21 @@ export const BillboardB0Schema = z.object({
       /** True = texto en MAYÚSCULAS. False (default) = Title Case (primera
        *  letra de cada palabra en mayúscula). */
       uppercase: z.boolean().default(false),
+      /** Color del fondo del botón (solo Variant 1 / B0). Default gris oscuro. */
+      bgColor: z.string().default('#2e2e2e'),
+      /** Opacidad 0-1 del fondo del botón (solo B0). 1 = opaco. */
+      bgOpacity: z.number().min(0).max(1).default(1),
+      /** Color del borde del botón (solo B0). Default blanco. */
+      borderColor: z.string().default('#ffffff'),
+      /** Redondez (px) por esquina del botón (solo B0). Default 20 cada una. */
+      radius: z
+        .object({
+          topLeft: z.number().int().min(0).max(200).default(20),
+          topRight: z.number().int().min(0).max(200).default(20),
+          bottomRight: z.number().int().min(0).max(200).default(20),
+          bottomLeft: z.number().int().min(0).max(200).default(20),
+        })
+        .default({ topLeft: 20, topRight: 20, bottomRight: 20, bottomLeft: 20 }),
     })
     .default({
       label: '',
@@ -86,6 +101,10 @@ export const BillboardB0Schema = z.object({
       height: 342,
       fontSize: 90,
       uppercase: false,
+      bgColor: '#2e2e2e',
+      bgOpacity: 1,
+      borderColor: '#ffffff',
+      radius: { topLeft: 20, topRight: 20, bottomRight: 20, bottomLeft: 20 },
     }),
   /** Opacidad del overlay oscuro entre background y contenido. 0 = sin
    *  overlay, 1 = totalmente negro. Útil cuando el bg es muy claro y el
@@ -132,7 +151,18 @@ export type BillboardB0Config = z.infer<typeof BillboardB0Schema>;
 
 export const DEFAULT_BILLBOARD_B0: BillboardB0Config = {
   background: { type: 'image', src: '/assets/billboard-0/hero.jpg' },
-  touchHere: { label: '', twoLines: true, width: 548, height: 342, fontSize: 90, uppercase: false },
+  touchHere: {
+    label: '',
+    twoLines: true,
+    width: 548,
+    height: 342,
+    fontSize: 90,
+    uppercase: false,
+    bgColor: '#2e2e2e',
+    bgOpacity: 1,
+    borderColor: '#ffffff',
+    radius: { topLeft: 20, topRight: 20, bottomRight: 20, bottomLeft: 20 },
+  },
   overlayOpacity: 0,
   overlay: {
     mode: 'solid',

@@ -7,6 +7,7 @@ import { useTextosMap } from '@/components/i18n-provider';
 import { BillboardBackground } from './billboard-background';
 import { BillboardPoweredBy } from './billboard-language-slot';
 import { OverlayLayer } from './billboard-overlay';
+import { hexToRgba } from './color';
 import { toTouchCase } from './touch-label';
 import type { BillboardVariantProps } from './types';
 import {
@@ -64,9 +65,9 @@ export function Billboard0({ languagesEnabled = true }: BillboardVariantProps = 
           top: `${touchTop}px`,
           width: `${touchHere.width}px`,
           height: `${touchHere.height}px`,
-          backgroundColor: '#2e2e2e',
-          borderRadius: '20px',
-          boxShadow: 'inset 0 0 0 10px #fff',
+          backgroundColor: hexToRgba(touchHere.bgColor, touchHere.bgOpacity),
+          borderRadius: `${touchHere.radius.topLeft}px ${touchHere.radius.topRight}px ${touchHere.radius.bottomRight}px ${touchHere.radius.bottomLeft}px`,
+          boxShadow: `inset 0 0 0 10px ${touchHere.borderColor}`,
         }}
       >
         <p

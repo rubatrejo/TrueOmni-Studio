@@ -388,6 +388,65 @@ export function BillboardEditor({
                 value={b0.touchHere.height}
                 onChange={(height) => setB0({ touchHere: { ...b0.touchHere, height } })}
               />
+              <ColorRow
+                label="Button color"
+                value={b0.touchHere.bgColor}
+                onChange={(bgColor) => setB0({ touchHere: { ...b0.touchHere, bgColor } })}
+              />
+              <SliderRow
+                label="Background opacity"
+                min={0}
+                max={100}
+                step={5}
+                unit="%"
+                value={Math.round(b0.touchHere.bgOpacity * 100)}
+                onChange={(pct) =>
+                  setB0({
+                    touchHere: {
+                      ...b0.touchHere,
+                      bgOpacity: Math.max(0, Math.min(1, pct / 100)),
+                    },
+                  })
+                }
+                hint="0% = botón transparente (solo se ve el borde y el texto)."
+              />
+              <ColorRow
+                label="Border color"
+                value={b0.touchHere.borderColor}
+                onChange={(borderColor) => setB0({ touchHere: { ...b0.touchHere, borderColor } })}
+              />
+              {/* Redondez por esquina del botón. */}
+              <div className="space-y-2 rounded-lg border border-zinc-200 p-2.5 dark:border-zinc-800">
+                <span className="block text-[12px] font-medium text-zinc-800 dark:text-zinc-200">
+                  Corner radius
+                </span>
+                {(
+                  [
+                    ['topLeft', 'Top-left'],
+                    ['topRight', 'Top-right'],
+                    ['bottomRight', 'Bottom-right'],
+                    ['bottomLeft', 'Bottom-left'],
+                  ] as const
+                ).map(([corner, label]) => (
+                  <SliderRow
+                    key={corner}
+                    label={label}
+                    min={0}
+                    max={200}
+                    step={2}
+                    unit="px"
+                    value={b0.touchHere.radius[corner]}
+                    onChange={(v) =>
+                      setB0({
+                        touchHere: {
+                          ...b0.touchHere,
+                          radius: { ...b0.touchHere.radius, [corner]: v },
+                        },
+                      })
+                    }
+                  />
+                ))}
+              </div>
             </>
           )}
           <SliderRow

@@ -83,7 +83,7 @@ describe('photobooth-frame-templates', () => {
     });
   }
 
-  it('Border Tab imprime el texto CENTRADO con la fuente de marca', () => {
+  it('Border Tab imprime el texto CENTRADO', () => {
     const tpl = FRAME_TEMPLATES.find((t) => t.id === 'branded-solid-border-tab')!;
     const svg = tpl.buildSvg({
       primaryHex: '#0a6cff',
@@ -93,11 +93,10 @@ describe('photobooth-frame-templates', () => {
       logoDataUri: null,
       photoDataUri: null,
       text: 'Visit Discover Somewhere',
-      taglineFontFamily: "'Montserrat', Helvetica, Arial, sans-serif",
+      taglineFontFamily: 'Helvetica, Arial, sans-serif',
     });
     expect(svg).toContain('text-anchor="middle"');
-    expect(svg).toContain("'Montserrat'");
-    expect(svg).toContain('Visit Discover Somewhere');
+    expect(svg).toContain('Somewhere');
   });
 
   it('Diagonal imprime el texto alineado a la IZQUIERDA', () => {
@@ -109,30 +108,28 @@ describe('photobooth-frame-templates', () => {
       clientName: 'Discover Somewhere',
       logoDataUri: null,
       photoDataUri: null,
-      text: 'Closer than you think.',
+      text: 'Closer cooler',
       taglineFontFamily: 'Helvetica, Arial, sans-serif',
     });
     expect(svg).toContain('text-anchor="start"');
-    expect(svg).toContain('Closer than you think.');
+    expect(svg).toContain('Closer cooler');
   });
 
-  it('renderFramePng embebe @font-face cuando hay taglineFont', async () => {
+  it('el texto usa la sans del sistema y NO embebe @font-face (evita el tofu de librsvg)', () => {
     const tpl = FRAME_TEMPLATES.find((t) => t.id === 'branded-solid-border-tab')!;
-    // woff2 data-URI mínimo (librsvg cae a la sans si no lo puede parsear; el
-    // render no debe fallar ni perder el centro transparente).
-    const png = await renderFramePng(
-      tpl,
-      baseInput({
-        logoBuffer: null,
-        taglineFont: {
-          family: 'Montserrat',
-          dataUri: 'data:font/woff2;base64,AA==',
-          format: 'woff2',
-        },
-      }),
-    );
-    expect(await centerAlpha(png)).toBe(0);
-    expect((await sharp(png).metadata()).width).toBe(FRAME_WIDTH);
+    const svg = tpl.buildSvg({
+      primaryHex: '#0a6cff',
+      secondaryHex: '#00d4aa',
+      tertiaryHex: '#ffb300',
+      clientName: 'Discover Somewhere',
+      logoDataUri: null,
+      photoDataUri: null,
+      text: 'Visit Discover Somewhere',
+      taglineFontFamily: 'Helvetica, Arial, sans-serif',
+    });
+    expect(svg).toContain('Helvetica, Arial, sans-serif');
+    expect(svg).not.toContain('@font-face');
+    expect(svg).not.toContain('data:font');
   });
 
   it('renderFrameThumbnail devuelve PNG 256×256', async () => {

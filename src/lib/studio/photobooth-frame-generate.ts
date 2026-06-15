@@ -4,7 +4,6 @@ import { put } from '@vercel/blob';
 
 import { loadUnifiedBranding, toHex } from '@/lib/studio/client-branding-sync';
 import { kv, kvKeys } from '@/lib/studio/kv';
-import { resolveBrandDisplayFont } from '@/lib/studio/photobooth-frame-fonts';
 import { defaultFrameText, FRAME_TEXT_KIND } from '@/lib/studio/photobooth-frame-meta';
 import {
   FRAME_TEMPLATES,
@@ -85,9 +84,6 @@ export async function generateAndSavePhotoBoothFrames(
     if (website) photoBuffer = await scrapeBestImage(website);
   }
 
-  // Fuente de marca para el tagline (best-effort; null = sans del sistema).
-  const taglineFont = await resolveBrandDisplayFont(unified.fonts);
-
   const clientName = unified.name || slug;
   const baseInput: Omit<FrameTemplateInput, 'text'> = {
     primaryHex: toHex(unified.brand.primary),
@@ -96,7 +92,6 @@ export async function generateAndSavePhotoBoothFrames(
     logoBuffer,
     clientName,
     photoBuffer,
-    taglineFont,
   };
 
   // Frames branded-auto previos por templateId → para preservar el texto

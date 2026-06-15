@@ -2,12 +2,15 @@ import 'server-only';
 
 import sharp from 'sharp';
 
-import {
-  type EmbeddedFont,
-  fontFaceStyle,
-  taglineFontFamily as resolveTaglineFontFamily,
-} from './photobooth-frame-fonts';
 import { splitNameLines } from './placeholder-image';
+
+/**
+ * Fuente para TODO el texto de los frames. Solo la sans del sistema: librsvg
+ * (motor de sharp) NO renderiza fiablemente fuentes embebidas vía @font-face
+ * (dibuja TOFU en vez de los glifos). El resto del kiosk ya usa esta misma
+ * estrategia (placeholder, nameText) y se ve bien en producción.
+ */
+const SYSTEM_SANS = 'Helvetica, Arial, sans-serif';
 
 /**
  * Plantillas SVG parametrizadas para los frames branded del Photo Booth.
@@ -38,8 +41,6 @@ export interface FrameTemplateInput {
   photoBuffer: Buffer | null;
   /** Texto editable de ESTE frame (frase o hashtag según la plantilla; vacío = se omite). */
   text: string;
-  /** Fuente de marca para incrustar y usar en el texto (null = sans del sistema). */
-  taglineFont?: EmbeddedFont | null;
 }
 
 /** Contexto puro (sin Buffers) que recibe `buildSvg` — imágenes ya como data-URI. */
@@ -264,7 +265,7 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       const top = c.logoDataUri
         ? logoImage(c.logoDataUri, FRAME_WIDTH / 2 - 240, bandH / 2 - 75, 480, 150)
         : nameText(c.clientName, FRAME_WIDTH / 2, bandH / 2, '#ffffff', 60);
-      // Banda inferior: hashtag editable centrado, en la fuente de marca.
+      // Banda inferior: hashtag editable centrado.
       const bottom = c.text
         ? taglineText(
             c.text,
@@ -273,10 +274,10 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
             '#ffffff',
             c.taglineFontFamily,
             'middle',
-            56,
-            { singleLine: true, widthPx: 960 },
+            68,
+            { singleLine: true, widthPx: 980 },
           )
-        : nameText(c.clientName, FRAME_WIDTH / 2, FRAME_HEIGHT - bandH / 2, '#ffffff', 56);
+        : nameText(c.clientName, FRAME_WIDTH / 2, FRAME_HEIGHT - bandH / 2, '#ffffff', 64);
       return `${SVG_OPEN}
         <rect x="0" y="0" width="${FRAME_WIDTH}" height="${bandH}" fill="${escapeXml(c.primaryHex)}"/>
         <rect x="0" y="${FRAME_HEIGHT - bandH}" width="${FRAME_WIDTH}" height="${bandH}" fill="${escapeXml(c.secondaryHex)}"/>
@@ -340,9 +341,8 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
         ? logoImage(c.logoDataUri, 64, 1742, 380, 150)
         : nameText(c.clientName, 250, H - 130, '#ffffff', 48);
       const tag = c.text
-        ? taglineText(c.text, W - 56, 1825, '#ffffff', c.taglineFontFamily, 'end', 50, {
-            singleLine: true,
-            widthPx: 560,
+        ? taglineText(c.text, W - 56, 1822, '#ffffff', c.taglineFontFamily, 'end', 58, {
+            widthPx: 620,
           })
         : '';
       return `${SVG_OPEN}${band}${wedge}${logo}${tag}</svg>`;
@@ -371,9 +371,8 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       // Frase en la banda inferior: fuente de marca + CENTRADA (feedback Rubén
       // 2026-06-15: texto con el nombre del cliente, centrado).
       const tag = c.text
-        ? taglineText(c.text, W / 2, H - botH / 2, '#ffffff', c.taglineFontFamily, 'middle', 44, {
-            singleLine: true,
-            widthPx: W - 2 * side - 60,
+        ? taglineText(c.text, W / 2, H - botH / 2, '#ffffff', c.taglineFontFamily, 'middle', 60, {
+            widthPx: W - 2 * side - 80,
           })
         : '';
       return `${SVG_OPEN}${ring}${logo}${tag}</svg>`;
@@ -393,11 +392,10 @@ export const FRAME_TEMPLATES: readonly FrameTemplate[] = [
       const topLeft = `<polygon points="0,0 875,0 775,210 210,210 210,1080 0,1290" fill="${escapeXml(c.secondaryHex)}"/>`;
       // Bracket navy abajo-der = mismo bracket rotado 180° respecto al centro.
       const bottomRight = `<polygon points="870,840 ${W},630 ${W},${H} 205,${H} 305,1710 870,1710" fill="${escapeXml(c.primaryHex)}"/>`;
-      // Frase en la banda olive superior: fuente de marca, ALINEADA A LA IZQUIERDA.
+      // Frase en la banda olive superior: ALINEADA A LA IZQUIERDA (1-2 líneas).
       const tag = c.text
-        ? taglineText(c.text, 55, 132, '#ffffff', c.taglineFontFamily, 'start', 44, {
-            singleLine: true,
-            widthPx: 800,
+        ? taglineText(c.text, 55, 116, '#ffffff', c.taglineFontFamily, 'start', 52, {
+            widthPx: 700,
           })
         : '';
       // Logo centrado en la banda navy inferior.
@@ -444,7 +442,6 @@ export async function renderFramePng(
     tpl.usesPhoto && input.photoBuffer
       ? await toPngDataUri(input.photoBuffer, FRAME_WIDTH, FRAME_HEIGHT, 'cover')
       : null;
-  const taglineFont = input.taglineFont ?? null;
   const svg = tpl.buildSvg({
     primaryHex: input.primaryHex,
     secondaryHex: input.secondaryHex,
@@ -453,14 +450,13 @@ export async function renderFramePng(
     logoDataUri,
     photoDataUri,
     text: input.text,
-    taglineFontFamily: resolveTaglineFontFamily(taglineFont),
+    // SIEMPRE la sans del sistema. NO embeber la fuente de marca vía @font-face:
+    // librsvg (el motor de sharp) NO decodifica woff2 embebido de forma fiable y
+    // dibuja TOFU (cajas vacías) en vez de caer al fallback. El resto del kiosk
+    // (placeholder, nameText) ya usa la sans del sistema y se ve bien en prod.
+    taglineFontFamily: SYSTEM_SANS,
   });
-  // Incrusta el @font-face de la fuente de marca justo tras la etiqueta <svg>
-  // (librsvg solo resuelve fuentes embebidas / del sistema).
-  const svgWithFont = taglineFont
-    ? svg.replace(SVG_OPEN, `${SVG_OPEN}${fontFaceStyle(taglineFont)}`)
-    : svg;
-  return sharp(Buffer.from(svgWithFont, 'utf8'))
+  return sharp(Buffer.from(svg, 'utf8'))
     .resize(FRAME_WIDTH, FRAME_HEIGHT, { fit: 'fill' })
     .png()
     .toBuffer();

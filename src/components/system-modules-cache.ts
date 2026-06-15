@@ -23,3 +23,25 @@ export function readSystemModulesCache(): SystemModulesCache | null {
       .__kioskSystemModulesOverride ?? null
   );
 }
+
+/**
+ * Resuelve el estado `hidden` inicial (y de re-sincronización) de un host
+ * global del Home a partir del cache del Studio.
+ *
+ * Regla: si el preview empujó un override booleano para esa key, GANA sobre el
+ * `fallbackEnabled` del config (que en el preview siempre llega "on" porque el
+ * iframe renderiza el config `default` del filesystem, no el del KV). Fuera del
+ * Studio el cache no existe → manda `fallbackEnabled`.
+ *
+ * Única fuente de verdad para los 3 hosts (ads, languages, aiAvatar): tanto su
+ * `useState` inicial como cualquier efecto de re-sync deben llamar a esto, para
+ * que un efecto no "pise" el cache al montar (regresión del FAB de Ask AI).
+ */
+export function resolveSystemModuleHidden(
+  key: 'ads' | 'languages' | 'aiAvatar',
+  fallbackEnabled: boolean,
+): boolean {
+  const cached = readSystemModulesCache();
+  if (cached && typeof cached[key] === 'boolean') return !cached[key];
+  return !fallbackEnabled;
+}

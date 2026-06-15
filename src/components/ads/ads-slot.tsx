@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import type { Ad } from '@/lib/config';
 
-import { readSystemModulesCache } from '../system-modules-cache';
+import { resolveSystemModuleHidden } from '../system-modules-cache';
 
 import { AdBottom } from './ad-bottom';
 import { AdHero } from './ad-hero';
@@ -27,7 +27,7 @@ export function AdsSlot({ ads }: { ads: readonly Ad[] }) {
   const { popupAd, heroAd, bottomAd, dismiss } = useAds(ads);
   // Estado inicial desde el cache: respeta el toggle aunque el slot monte
   // después del evento de override (navegación interna del preview).
-  const [hidden, setHidden] = useState(() => readSystemModulesCache()?.ads === false);
+  const [hidden, setHidden] = useState(() => resolveSystemModuleHidden('ads', true));
 
   useEffect(() => {
     if (typeof window === 'undefined') return;

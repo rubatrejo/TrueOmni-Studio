@@ -6,7 +6,7 @@ import { prewarmAiAvatar } from '@/components/ai/ai-modal';
 import { AiModalHost } from '@/components/ai/ai-modal-host';
 import { AskAiTrigger } from '@/components/ai/ask-ai-trigger';
 import { KIOSK_CLIENT_NAME_OVERRIDE_EVENT, getCachedClientName } from '@/components/studio-bridge';
-import { readSystemModulesCache } from '@/components/system-modules-cache';
+import { resolveSystemModuleHidden } from '@/components/system-modules-cache';
 
 interface AskAiTextos {
   title: string;
@@ -50,11 +50,7 @@ type AiAvatarDetail = {
 export function AskAiHost(props: AskAiHostProps) {
   // Estado inicial: el override del Studio (cache) gana sobre props.enabled, así
   // el bubble respeta el toggle aunque monte después del evento de override.
-  const [hidden, setHidden] = useState(() => {
-    const cached = readSystemModulesCache();
-    if (cached && typeof cached.aiAvatar === 'boolean') return !cached.aiAvatar;
-    return !props.enabled;
-  });
+  const [hidden, setHidden] = useState(() => resolveSystemModuleHidden('aiAvatar', props.enabled));
   const [override, setOverride] = useState<AiAvatarDetail | null>(null);
   // Reactive client name del bridge del Studio. Sustituye `{client_name}`
   // en greeting cuando el operador edita el nombre del kiosk en preview.
@@ -83,8 +79,13 @@ export function AskAiHost(props: AskAiHostProps) {
     return () => clearTimeout(t);
   }, [props.enabled, effectiveClientName]);
 
+  // Re-sync ante cambios de props.enabled SIN pisar el override del preview:
+  // el cache del Studio (si existe) sigue mandando. Antes este efecto hacía
+  // `setHidden(!props.enabled)` y, como props.enabled es siempre `true` cuando
+  // el host se monta, reaparecía el FAB al montar aunque el operador lo tuviera
+  // apagado en el Studio (regresión).
   useEffect(() => {
-    setHidden(!props.enabled);
+    setHidden(resolveSystemModuleHidden('aiAvatar', props.enabled));
   }, [props.enabled]);
 
   useEffect(() => {

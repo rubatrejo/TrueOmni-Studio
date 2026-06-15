@@ -4,6 +4,57 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-15 (cont.) — 2 bugs del editor + opacidad de tiles + frames branded del Photo Booth
+
+**Hecho (todo en prod, deploys Vercel READY):**
+
+- **Bug AI Avatar apagado seguía apareciendo** (`7e2c88b`). Causa raíz: el fix de
+  `d9926b9` quedó incompleto — `ask-ai-host` tenía un `useEffect(()=>setHidden(!props.enabled))`
+  que, con `props.enabled` SIEMPRE `true` (hardcoded en home/page), pisaba el cache al
+  montar. Era el único de los 3 hosts globales con ese efecto. Fix: helper único
+  `resolveSystemModuleHidden` (cache gana) en init Y efecto, en los 3 hosts. Confirmado
+  por Rubén.
+- **Opacidad editable de la capa oscura de los tiles del Home** (kiosk + PWA, `0e9cb65`).
+  Independiente por producto, solo opacidad, default = valor actual (cero cambio visual:
+  kiosk 0.352, PWA 0.40), rango 0–100%. Kiosk calca `tileTitleFontSize` end-to-end; PWA
+  cadena propia. Slider "Tile overlay opacity" en ambos editores.
+- **Bug botón Save opaco al editar tiles** (`fa62cdc`). Causa raíz: `shallowEqualModules`
+  comparaba campo-por-campo e IGNORABA tileTitleFontSize/tileOverlayOpacity/wide/image/
+  iconOverrides/customIcons → esos cambios no marcaban dirty. Fix: `modulesEqual` con
+  JSON.stringify (extraído a `_lib/modules-equal.ts` + 7 tests), como ya hizo el billboard.
+- **Frames del Photo Booth auto-branded por cliente** (`e673b44`, `48f5196`, `eee5780`,
+  `2736a74`). Cada cliente obtiene sus propios frames generados con su branding (brand
+  colors + logo/nombre + foto del website) reemplazando los 5 genéricos bespoke. Patrón
+  calcado del placeholder (sharp + Blob + auto-trigger al crear cliente + botón en editor).
+  10 plantillas SVG (centro transparente garantizado, 32 tests) + thumbnails que llenan
+  el círculo + tagline/hashtag editables por cliente (`frameTagline`/`frameHashtag` en
+  PhotoBoothSchema). Override del operador respetado (`source: branded-auto` vs custom,
+  upsert por templateId). Escribe `cfg.photoBooth.frames` vía el write-path del config
+  (NO syncContentToProducts).
+
+**Decisiones / hallazgos:**
+
+- **Slug-sigue-al-nombre: investigado y DESCARTADO a conciencia** (spec `042ccab`). Los
+  módulos que Rubén renombra (Eat&Drink/See&Do/Trip Planner/Stay) son TODOS canónicos →
+  su slug es load-bearing (ruta + contenido + claves PWA tipadas `ListingsModuleKey`/
+  `usePwaSection` god-node + content KV). Re-sluggear canónicos = refactor PWA profundo
+  (milestone aparte). Se deja el slug estable; el nombre visible ya se actualiza en todo.
+- **Límite de verificación local:** el editor del Studio exige auth GitHub en dev →
+  no driveable headless. Bugs del editor (Save, AI Avatar preview, generación de frames)
+  se verifican por unit test + análisis + el USUARIO confirma en su Studio de prod.
+- **sharp/fuentes:** librsvg solo usa fuentes del sistema → el tagline sale en sans bold,
+  no script. Embeber fuente script = decisión abierta (próxima sesión).
+
+**Pendiente / próxima sesión:**
+
+- **Feedback de Rubén sobre los frames v2** (los estaba viendo al cerrar). Spec de
+  follow-up con lo ya pedido: `.planning/2026-06-15-photobooth-frames-followup.md`
+  (afinar posiciones, fuente script del tagline, posible poda de los 10 estilos).
+- Endurecer `PwaConfigSchema` (diferido del audit). Migración assets fs `clients/*` → Blob
+  (PLAN `e92133d`, blast radius alto).
+
+---
+
 ### Sesión 2026-06-15 — Cierre audit (F-QA-12) + deuda infra Blob + 6 fixes/features del editor del kiosk
 
 **Hecho (11 commits a prod, todos deploys Vercel READY):**

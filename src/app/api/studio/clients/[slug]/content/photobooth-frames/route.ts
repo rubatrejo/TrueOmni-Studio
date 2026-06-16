@@ -23,7 +23,7 @@ interface RouteParams {
  * Respuestas: 200 `{ count, source, usedLogo }` · 404 cliente inexistente ·
  * 503 sin Blob configurado.
  */
-export async function POST(_req: Request, { params }: RouteParams) {
+export async function POST(req: Request, { params }: RouteParams) {
   const { slug } = await params;
   if (!isValidStudioSlug(slug)) {
     return NextResponse.json({ error: 'invalid slug' }, { status: 400 });
@@ -33,9 +33,20 @@ export async function POST(_req: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'client not found' }, { status: 404 });
   }
 
+  // Textos actuales del editor por templateId (para que el cambio se hornee SIN
+  // depender de que el config ya esté guardado en KV — fix del bug "editar el
+  // texto no se refleja en el kiosk").
+  let textByTemplate: Record<string, string> | undefined;
+  try {
+    const body = (await req.json()) as { text?: Record<string, string> };
+    if (body?.text && typeof body.text === 'object') textByTemplate = body.text;
+  } catch {
+    // sin body → usa el texto del KV/defaults
+  }
+
   try {
     // Botón manual → preserva todo lo no-auto (no reemplaza genéricos/custom).
-    const result = await generateAndSavePhotoBoothFrames(slug);
+    const result = await generateAndSavePhotoBoothFrames(slug, { textByTemplate });
     if (!result.ok) {
       return NextResponse.json({ error: result.error }, { status: result.status ?? 500 });
     }

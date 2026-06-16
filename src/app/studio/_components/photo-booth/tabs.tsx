@@ -402,8 +402,18 @@ export function FramesTab({
     setGenerating(true);
     setGenError(null);
     try {
+      // Manda los textos ACTUALES del editor (por templateId) para que el cambio
+      // se hornee aunque el config no se haya guardado todavía en KV.
+      const text: Record<string, string> = {};
+      for (const f of photoBooth.frames) {
+        if (f.source === 'branded-auto' && f.templateId && typeof f.text === 'string') {
+          text[f.templateId] = f.text;
+        }
+      }
       const res = await fetch(`/api/studio/clients/${slug}/content/photobooth-frames`, {
         method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ text }),
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { error?: string };

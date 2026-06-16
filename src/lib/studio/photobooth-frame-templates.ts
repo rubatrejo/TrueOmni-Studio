@@ -33,27 +33,28 @@ export function parseFontBuffer(buffer: Buffer | null): Font | null {
   }
 }
 
-/** Ancho (px) que ocupa `text` a `fontSize` con `font`. */
+/**
+ * Ancho VISUAL real (px) que ocupa `text` a `fontSize`, medido con el bounding
+ * box del path. NO usamos `getAdvanceWidth`: en fuentes script/handwritten el
+ * avance tipográfico es menor que el trazo real (swash/overhang), lo que hacía
+ * que el texto NO se escalara y se saliera de la banda (se cortaba).
+ */
 function measureText(font: Font, text: string, fontSize: number): number {
-  return font.getAdvanceWidth(text, fontSize);
-}
-
-/** Una línea de texto como `<path>` vectorizado. `x` ya viene ajustado al anchor. */
-function glyphPath(
-  font: Font,
-  text: string,
-  x: number,
-  baseline: number,
-  fontSize: number,
-  fill: string,
-): string {
-  const path = font.getPath(text, x, baseline, fontSize);
-  return `<path d="${path.toPathData(1)}" fill="${fill}"/>`;
+  if (!text) return 0;
+  const bb = font.getPath(text, 0, 0, fontSize).getBoundingBox();
+  const x1 = Number.isFinite(bb.x1) ? bb.x1 : 0;
+  const x2 = Number.isFinite(bb.x2) ? bb.x2 : 0;
+  return Math.max(0, x2 - x1);
 }
 
 /**
- * Bloque de texto (1+ líneas) vectorizado y alineado. `cy` es el centro
- * vertical del bloque; `anchor` controla el alineado horizontal respecto a `cx`.
+ * Bloque de texto (1+ líneas) vectorizado y alineado por su BOUNDING BOX visual.
+ *
+ * CLAVE: emite UN `<path>` POR GLIFO (no un path único por línea). librsvg trunca
+ * los atributos `d` muy largos (un texto largo de una sola línea genera un `d` de
+ * ~17 K chars y se corta a la mitad). Un path por glifo nunca se acerca a ese
+ * límite. Los glifos fluyen por su `advance` desde el origen alineado, así el
+ * resultado es idéntico a un path único pero sin truncarse.
  */
 function textBlock(
   font: Font,
@@ -66,13 +67,27 @@ function textBlock(
   lineHeight: number,
 ): string {
   const firstBaseline = cy - ((lines.length - 1) * lineHeight) / 2 + fontSize * 0.35;
-  return lines
-    .map((line, i) => {
-      const w = measureText(font, line, fontSize);
-      const x = anchor === 'start' ? cx : anchor === 'end' ? cx - w : cx - w / 2;
-      return glyphPath(font, line, x, firstBaseline + i * lineHeight, fontSize, fill);
-    })
-    .join('\n');
+  const out: string[] = [];
+  lines.forEach((line, i) => {
+    const baseline = firstBaseline + i * lineHeight;
+    // Alinea el bloque por el bounding box visual de la línea completa.
+    const bb = font.getPath(line, 0, baseline, fontSize).getBoundingBox();
+    const x1 = Number.isFinite(bb.x1) ? bb.x1 : 0;
+    const x2 = Number.isFinite(bb.x2) ? bb.x2 : 0;
+    let pen = anchor === 'start' ? cx - x1 : anchor === 'end' ? cx - x2 : cx - (x1 + x2) / 2;
+    // Un <path> POR GLIFO. librsvg trunca los `d` largos de forma errática (a
+    // veces a pocos miles de chars), así que un texto largo como path único se
+    // corta. Por glifo, cada `d` es pequeño y nunca se trunca; los glifos fluyen
+    // por su advance, igual que un texto normal.
+    for (const ch of line) {
+      if (ch !== ' ') {
+        const d = font.getPath(ch, pen, baseline, fontSize).toPathData(1);
+        if (d) out.push(`<path d="${d}" fill="${fill}"/>`);
+      }
+      pen += font.getAdvanceWidth(ch, fontSize);
+    }
+  });
+  return out.join('\n');
 }
 
 /**

@@ -55,6 +55,8 @@ export async function generateAndSavePhotoBoothFrames(
   opts?: {
     /** Fuerza nombre en texto (el logo del KV es el del template al crear). */
     forceNameText?: boolean;
+    /** Texto actual del editor por templateId (gana sobre el del KV/defaults). */
+    textByTemplate?: Record<string, string>;
   },
 ): Promise<FrameGenerateResult> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
@@ -118,7 +120,8 @@ export async function generateAndSavePhotoBoothFrames(
     // (retrocompat) y, por último, el default basado en el nombre del cliente.
     const kind = FRAME_TEXT_KIND[tpl.id];
     const text = kind
-      ? prev?.text?.trim() ||
+      ? opts?.textByTemplate?.[tpl.id]?.trim() ||
+        prev?.text?.trim() ||
         (kind === 'hashtag'
           ? cfg.photoBooth?.frameHashtag?.trim()
           : cfg.photoBooth?.frameTagline?.trim()) ||

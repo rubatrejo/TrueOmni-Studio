@@ -415,11 +415,25 @@ export function FramesTab({
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ text }),
       });
+      const body = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        frames?: PhotoBoothFrame[];
+      };
       if (!res.ok) {
-        const body = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(body.error ?? `Generation failed (${res.status})`);
       }
-      window.location.reload();
+      // Refresca los frames en el estado SIN recargar (recargar mandaba el
+      // preview al idle y sacaba al operador de la pantalla). El bridge propaga
+      // el nuevo config al preview en vivo.
+      if (body.frames) {
+        lastBakedText.current = JSON.stringify(
+          body.frames
+            .filter((f) => f.source === 'branded-auto' && f.templateId)
+            .map((f) => [f.templateId, f.text ?? '']),
+        );
+        onChange({ ...photoBooth, frames: body.frames });
+      }
+      setGenerating(false);
     } catch (e) {
       setGenError(e instanceof Error ? e.message : 'Generation failed');
       setGenerating(false);

@@ -46,6 +46,8 @@ export interface FrameGenerateResult {
   /** De dónde salió la foto de las plantillas: website o gradiente brand. */
   source?: 'website' | 'gradient';
   usedLogo?: boolean;
+  /** Lista completa de frames resultante (para refrescar el editor sin recargar). */
+  frames?: PhotoBoothFrame[];
   status?: number;
   error?: string;
 }
@@ -194,5 +196,6 @@ export async function generateAndSavePhotoBoothFrames(
     count: branded.length,
     source: photoBuffer ? 'website' : 'gradient',
     usedLogo: Boolean(logoBuffer),
+    frames: parsed.data.frames,
   };
 }

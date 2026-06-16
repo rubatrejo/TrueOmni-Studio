@@ -54,6 +54,7 @@ export async function POST(req: Request, { params }: RouteParams) {
       count: result.count,
       source: result.source,
       usedLogo: result.usedLogo,
+      frames: result.frames,
     });
   } catch (err) {
     console.error('[api/studio/content/photobooth-frames]', err);

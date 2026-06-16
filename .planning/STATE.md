@@ -4,6 +4,66 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-15 (noche) — refinamiento iterativo de los frames branded del Photo Booth
+
+**Contexto:** feedback de Rubén en varias tandas sobre los frames v2. Todo en prod,
+deploys Vercel READY (último `9853506`). Commits: `219a440`, `724b973`, `c01797a`,
+`e3bec35`, `6479654`, `fa100ca`, `3187499`, `9853506`.
+
+**Hecho (todo confirmado por Rubén salvo lo último, pendiente de su QA):**
+
+- **Diagonal (`branded-diagonal-corners`) y Angled (`branded-angled-band`) reescritos
+  fieles a las refs de Discover DeKalb** (Frame-4 brackets angulares entrelazados olive
+  arriba-izq + navy abajo-der; Frame-2 banda olive diagonal + cuña tan/gold). Refs en
+  GDrive `.../Discover Dekalb/.../Frames/Frame-2.png` y `Frame-4.png`.
+- **Generate borra los frames del theme** (source undefined) y los branded-auto previos;
+  conserva solo None + customs (`source:'custom'`, marcado en `add()` del editor).
+- **Texto editable POR FRAME** (no global): `PhotoBoothFrame.text` en el schema; cada frame
+  branded-auto guarda su texto, horneado y preservado al regenerar. Defaults "Visit
+  {Cliente}" / "#Visit{Cliente}" (`photobooth-frame-meta.ts`: FRAME_TEXT_KIND/isTextFrame/
+  defaultFrameText). Editor: input "Text" por frame; se quitaron los campos globales
+  Tagline/Hashtag (siguen en schema para retrocompat).
+- **Bands hashtag centrado abajo; Border Tab frase centrada un renglón; Diagonal frase
+  arriba-izq un renglón; Angled frase abajo-der.**
+- **Fuente Display del branding** en TODO el texto de los frames (`photobooth-display-font.ts`:
+  custom ttf/otf/woff directo, o Google Font → descarga TTF con CSS1 + UA antiguo, weights
+  700,400). Fallback a Roboto Bold embebida (`fonts/roboto-bold.ts`).
+- **Selección de frame en el kiosk** (`start-screen.tsx`): el frame elegido crece + borde
+  de color brand + botón Take Photo dentro; se quitó el shutter central fijo.
+
+**Bugs grandes resueltos (claves para sesión fresca):**
+
+- **TOFU**: librsvg (motor de sharp) NO tiene fuentes del sistema en Vercel → cualquier
+  `<text>` salía como cajas. Fix definitivo: el texto se **VECTORIZA a `<path>` con
+  opentype.js** (geometría pura, no depende del entorno; dump local = idéntico a prod).
+- **Texto largo se cortaba**: librsvg **trunca atributos `d` largos** (errático, a pocos
+  miles de chars). Fix: **un `<path>` POR GLIFO** (cada `d` pequeño, nunca trunca). Ancho/
+  alineado por `getBoundingBox` real (no `getAdvanceWidth`, que subestima en fuentes script).
+  Nota: per-glifo es perfecto en fuentes **sans** (caso real del branding); en **script**
+  decorativas (Pacifico) deja micro-gaps en las ligaduras.
+- **Editar el texto no se reflejaba**: se auto-regenera el frame ~1.8s tras dejar de
+  escribir (debounce + ref guard), enviando los textos actuales en el body del POST.
+- **Regenerar recargaba todo y sacaba al idle**: se quitó `window.location.reload()`; el
+  endpoint devuelve los frames nuevos y el editor los aplica al estado (`onChange`) SIN
+  recargar; el bridge propaga al preview en vivo.
+
+**Verificado:** typecheck + lint + 259 tests + validate:configs en cada commit + dumps
+visuales (fondo gris, mediciones de extent del texto) + 8 deploys READY (un ERROR
+intermedio por `opentype.js` sin default export → named import).
+
+**Pendiente / próxima sesión:**
+
+- **QA de Rubén** del último deploy (`9853506`): editar texto NO debe sacar del Photo Booth.
+- **Limpieza**: borrar los scripts QA temporales untracked
+  `src/lib/studio/_dump-frames.test.ts` y `src/lib/studio/_inspect.test.ts` (no pude por
+  permiso de `rm`; no entran a git).
+- **Mejora de fondo (opcional)**: renderizar el texto del frame como overlay HTML/CSS en el
+  kiosk (no horneado en el PNG) → cambiaría en vivo sin regenerar y soportaría script
+  perfecto. Es rediseño (separar texto del PNG + posicionar overlay en runtime + en la foto
+  compuesta). No urgente.
+
+---
+
 ### Sesión 2026-06-15 (cont.) — 2 bugs del editor + opacidad de tiles + frames branded del Photo Booth
 
 **Hecho (todo en prod, deploys Vercel READY):**

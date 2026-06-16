@@ -2,7 +2,7 @@
 
 import { Reorder } from 'framer-motion';
 import { Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { isTextFrame } from '@/lib/studio/photobooth-frame-meta';
 import {
@@ -426,6 +426,30 @@ export function FramesTab({
     }
   };
 
+  // Auto-regenera los frames branded cuando cambia su TEXTO (el texto va horneado
+  // en el PNG → hay que re-renderizar para que se vea). Debounce tras dejar de
+  // escribir; el `ref` guarda el último estado horneado para no regenerar al
+  // montar ni en bucle. (Fix: "cambio el texto y no se refleja en el frame".)
+  const textSig = JSON.stringify(
+    photoBooth.frames
+      .filter((f) => f.source === 'branded-auto' && f.templateId)
+      .map((f) => [f.templateId, f.text ?? '']),
+  );
+  const lastBakedText = useRef<string | null>(null);
+  useEffect(() => {
+    if (lastBakedText.current === null) {
+      lastBakedText.current = textSig; // montaje: ya está horneado, no regenerar
+      return;
+    }
+    if (lastBakedText.current === textSig) return;
+    const t = setTimeout(() => {
+      lastBakedText.current = textSig;
+      void generateBranded();
+    }, 1800);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [textSig]);
+
   const setList = (list: PhotoBoothFrame[]) => onChange({ ...photoBooth, frames: list });
 
   const update = (id: string, patch: Partial<PhotoBoothFrame>) =>
@@ -514,7 +538,7 @@ export function FramesTab({
                         placeholder="Visit DeKalb"
                       />
                       <p className="mt-1 text-[10.5px] text-zinc-400 dark:text-zinc-600">
-                        Baked into the image — regenerate branded frames to apply.
+                        Re-bakes the frame automatically a moment after you stop typing.
                       </p>
                     </Field>
                   ) : null}

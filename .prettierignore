@@ -4,6 +4,13 @@ out
 coverage
 pnpm-lock.yaml
 clients/*/assets
+# Configs de cliente GENERADOS por el publish (JSON.stringify del KV), no código
+# a mano: el endpoint hace diff SEMÁNTICO (no de formato), así que prettier --check
+# los marcaba como mal formateados (arrays multilínea vs printWidth:100) y reventaba
+# el CI del PR de publish. Se excluyen del format check (igual que clients/*/assets).
+clients/*/config.json
+clients/*/config.schema.json
+clients/*/i18n/*.json
 designs
 *.svg
 .planning/verifications

@@ -131,10 +131,15 @@ export async function generateAndSavePhotoBoothFrames(
       : '';
 
     const framePng = await renderFramePng(tpl, { ...baseInput, text });
-    const thumbPng = await renderFrameThumbnail(framePng, {
-      primaryHex: baseInput.primaryHex,
-      secondaryHex: baseInput.secondaryHex,
-    });
+    const thumbPng = await renderFrameThumbnail(
+      tpl,
+      {
+        primaryHex: baseInput.primaryHex,
+        secondaryHex: baseInput.secondaryHex,
+        tertiaryHex: baseInput.tertiaryHex,
+      },
+      logoBuffer,
+    );
     const frameBlob = await put(`kiosks/${slug}/photobooth/frame-${tpl.id}-${ts}.png`, framePng, {
       access: 'public',
       contentType: 'image/png',

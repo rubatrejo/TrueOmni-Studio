@@ -106,7 +106,9 @@ function textBlock(
 
 export const FRAME_WIDTH = 1080;
 export const FRAME_HEIGHT = 1920;
-export const THUMB_SIZE = 256;
+/** Lado del thumbnail circular horneado (PNG). 512 para nitidez en retina
+ *  (el selector del kiosk lo muestra a ~200–264px y el editor más pequeño). */
+export const THUMB_SIZE = 512;
 
 export interface FrameTemplateInput {
   primaryHex: string;
@@ -536,25 +538,158 @@ export async function renderFramePng(
     .toBuffer();
 }
 
+// ── thumbnails circulares (emblema por frame) ─────────────────────────────────
+
 /**
- * Deriva el thumbnail cuadrado (256²) del PNG del frame. Lo compone sobre un
- * fondo con el gradiente brand para que CUBRA TODO el círculo del selector (sin
- * centro hueco). Usa `fit: 'inside'` para que la decoración top/bottom del frame
- * no se recorte; el gradiente rellena los costados.
+ * Cada frame tiene un THUMBNAIL CIRCULAR propio que evoca su diseño: el marco se
+ * mapea al borde del disco (bandas → casquetes, anillos, cuñas, brackets) sobre
+ * una "foto de muestra" central, más el logo del cliente en la zona de marca.
+ * Llena TODO el círculo (sin centro hueco ni letterbox) y hace match con el frame.
+ *
+ * El SVG se hornea a PNG `THUMB_SIZE²` con todo dentro de un `<g clip-path>`
+ * circular → las esquinas quedan transparentes (el selector las recorta con
+ * `border-radius:50%` de todos modos). Colores 100% del branding del cliente;
+ * el gradiente "foto" es un placeholder NEUTRO de muestra (no es branding).
+ */
+const T_C = THUMB_SIZE / 2;
+const T_R = THUMB_SIZE / 2 - 6;
+/** Blanco del marco Postcard — mismo `#ffffff` que el stroke del frame real. */
+const THUMB_WHITE = '#ffffff';
+
+interface ThumbContext {
+  primaryHex: string;
+  secondaryHex: string;
+  tertiaryHex: string;
+  /** Logo del cliente como data-URI (null = se omite, solo formas). */
+  logoDataUri: string | null;
+}
+
+/** Gradiente radial cálido que simula una foto enmarcada (placeholder neutro). */
+const THUMB_PHOTO_DEF = `<radialGradient id="tphoto" cx="0.5" cy="0.32" r="0.95">
+  <stop offset="0%" stop-color="#ffd9a0"/>
+  <stop offset="45%" stop-color="#f0934a"/>
+  <stop offset="100%" stop-color="#5b3b6e"/>
+</radialGradient>`;
+
+/** Arco grueso del anillo entre `a0` y `a1` (grados, y-down). */
+function tArc(a0: number, a1: number, rr: number, sw: number, color: string): string {
+  const rad = (d: number) => (d * Math.PI) / 180;
+  const x0 = T_C + rr * Math.cos(rad(a0));
+  const y0 = T_C + rr * Math.sin(rad(a0));
+  const x1 = T_C + rr * Math.cos(rad(a1));
+  const y1 = T_C + rr * Math.sin(rad(a1));
+  const large = a1 - a0 > 180 ? 1 : 0;
+  return `<path d="M ${x0} ${y0} A ${rr} ${rr} 0 ${large} 1 ${x1} ${y1}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="butt"/>`;
+}
+
+/** Logo centrado en (cx,cy) dentro de una caja w×h; vacío si no hay logo. */
+function thumbLogo(c: ThumbContext, cx: number, cy: number, w = 188, h = 58): string {
+  return c.logoDataUri ? logoImage(c.logoDataUri, cx - w / 2, cy - h / 2, w, h) : '';
+}
+
+/** Rect de foto de muestra a sangre (se recorta al círculo por el clip). */
+const THUMB_PHOTO_FILL = `<rect x="0" y="0" width="${THUMB_SIZE}" height="${THUMB_SIZE}" fill="url(#tphoto)"/>`;
+
+const TS = THUMB_SIZE;
+
+/** Builders del emblema circular por templateId (centro relleno, llena el disco). */
+const THUMB_BUILDERS: Record<string, (c: ThumbContext) => string> = {
+  // Postcard — anillo blanco grueso + tab navy inferior con logo.
+  'branded-photo-frame': (c) => `
+    <circle cx="${T_C}" cy="${T_C}" r="${T_R}" fill="${THUMB_WHITE}"/>
+    <circle cx="${T_C}" cy="${T_C}" r="${T_R - 46}" fill="url(#tphoto)"/>
+    <rect x="0" y="${TS - 74}" width="${TS}" height="74" fill="${escapeXml(c.primaryHex)}"/>
+    ${thumbLogo(c, T_C, TS - 38, 168, 46)}`,
+
+  // Brush — casquete superior con brochazo en gradiente brand + logo.
+  'branded-paint-top': (c) => `
+    ${THUMB_PHOTO_FILL}
+    <path d="M0 0 H${TS} V150 Q ${TS * 0.74} 208 ${T_C} 158 Q ${TS * 0.26} 110 0 172 Z" fill="url(#tbrand)"/>
+    ${thumbLogo(c, T_C, 92)}`,
+
+  // Bottom Bar — casquete inferior sólido brand + logo.
+  'branded-bottom-bar': (c) => `
+    ${THUMB_PHOTO_FILL}
+    <rect x="0" y="${TS - 150}" width="${TS}" height="150" fill="${escapeXml(c.primaryHex)}"/>
+    ${thumbLogo(c, T_C, TS - 74, 206, 64)}`,
+
+  // Corners — 4 ticks blancos en el anillo (diagonales) + pill inferior + logo.
+  'branded-corner-brackets': (c) => `
+    ${THUMB_PHOTO_FILL}
+    ${tArc(200, 250, T_R - 20, 16, '#ffffff')}
+    ${tArc(290, 340, T_R - 20, 16, '#ffffff')}
+    ${tArc(20, 70, T_R - 20, 16, '#ffffff')}
+    ${tArc(110, 160, T_R - 20, 16, '#ffffff')}
+    <rect x="${T_C - 130}" y="${TS - 122}" width="260" height="74" rx="37" fill="${escapeXml(c.primaryHex)}"/>
+    ${thumbLogo(c, T_C, TS - 85, 168, 46)}`,
+
+  // Bands — casquete primary arriba (logo) + casquete secondary abajo.
+  'branded-top-bottom-bands': (c) => `
+    ${THUMB_PHOTO_FILL}
+    <rect x="0" y="0" width="${TS}" height="124" fill="${escapeXml(c.primaryHex)}"/>
+    <rect x="0" y="${TS - 112}" width="${TS}" height="112" fill="${escapeXml(c.secondaryHex)}"/>
+    ${thumbLogo(c, T_C, 62)}`,
+
+  // Frame — anillo grueso en gradiente brand + centro foto.
+  'branded-border': () => `
+    <circle cx="${T_C}" cy="${T_C}" r="${T_R}" fill="url(#tbrand)"/>
+    <circle cx="${T_C}" cy="${T_C}" r="${T_R - 62}" fill="url(#tphoto)"/>`,
+
+  // Logo — foto limpia + logo centrado abajo, sin marco (minimalista).
+  'branded-logo-bottom': (c) => `
+    ${THUMB_PHOTO_FILL}
+    ${thumbLogo(c, T_C, TS - 70, 240, 76)}`,
+
+  // Angled — cuña inferior diagonal (banda secondary + cuña tertiary der) + logo izq.
+  'branded-angled-band': (c) => `
+    ${THUMB_PHOTO_FILL}
+    <polygon points="0,${TS - 150} ${TS},${TS - 200} ${TS},${TS} 0,${TS}" fill="${escapeXml(c.secondaryHex)}"/>
+    <polygon points="${T_C + 44},${TS - 187} ${TS},${TS - 200} ${TS},${TS} ${T_C - 40},${TS}" fill="${escapeXml(c.tertiaryHex)}"/>
+    ${thumbLogo(c, T_C - 116, TS - 70, 156, 56)}`,
+
+  // Border Tab — anillo navy + tab inferior + logo arriba.
+  'branded-solid-border-tab': (c) => `
+    <circle cx="${T_C}" cy="${T_C}" r="${T_R}" fill="${escapeXml(c.primaryHex)}"/>
+    <circle cx="${T_C}" cy="${T_C}" r="${T_R - 56}" fill="url(#tphoto)"/>
+    ${thumbLogo(c, T_C, 64, 176, 56)}
+    <path d="M ${T_C - 150} ${TS - 56} Q ${T_C} ${TS - 108} ${T_C + 150} ${TS - 56} L ${T_C + 150} ${TS} L ${T_C - 150} ${TS} Z" fill="${escapeXml(c.primaryHex)}"/>`,
+
+  // Diagonal — dos arcos opuestos en molinete (secondary arriba-izq, primary abajo-der).
+  'branded-diagonal-corners': (c) => `
+    ${THUMB_PHOTO_FILL}
+    ${tArc(178, 272, T_R - 28, 50, escapeXml(c.secondaryHex))}
+    ${tArc(-2, 92, T_R - 28, 50, escapeXml(c.primaryHex))}
+    ${thumbLogo(c, T_C, TS - 40, 150, 44)}`,
+};
+
+/**
+ * Hornea el thumbnail circular de un frame. Usa el builder del emblema por
+ * `templateId`; para ids desconocidos (frames custom/futuros) cae a un disco
+ * genérico (gradiente brand + logo) en vez de fallar.
  */
 export async function renderFrameThumbnail(
-  framePng: Buffer,
-  colors: { primaryHex: string; secondaryHex: string },
+  tpl: FrameTemplate,
+  colors: { primaryHex: string; secondaryHex: string; tertiaryHex: string },
+  logoBuffer: Buffer | null,
 ): Promise<Buffer> {
-  const gradientSvg = `<svg width="${THUMB_SIZE}" height="${THUMB_SIZE}" xmlns="http://www.w3.org/2000/svg">
-    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="${escapeXml(colors.primaryHex)}"/>
-      <stop offset="100%" stop-color="${escapeXml(colors.secondaryHex)}"/></linearGradient></defs>
-    <rect width="${THUMB_SIZE}" height="${THUMB_SIZE}" fill="url(#g)"/></svg>`;
-  const bg = await sharp(Buffer.from(gradientSvg)).png().toBuffer();
-  const scaled = await sharp(framePng).resize(THUMB_SIZE, THUMB_SIZE, { fit: 'inside' }).toBuffer();
-  return sharp(bg)
-    .composite([{ input: scaled, gravity: 'center' }])
-    .png()
-    .toBuffer();
+  const logoDataUri = logoBuffer ? await toPngDataUri(logoBuffer, 360, 180, 'inside') : null;
+  const ctx: ThumbContext = {
+    primaryHex: colors.primaryHex,
+    secondaryHex: colors.secondaryHex,
+    tertiaryHex: colors.tertiaryHex,
+    logoDataUri,
+  };
+  const builder = THUMB_BUILDERS[tpl.id];
+  const body = builder
+    ? builder(ctx)
+    : // Fallback genérico: disco con gradiente brand + logo centrado.
+      `<circle cx="${T_C}" cy="${T_C}" r="${T_R}" fill="url(#tbrand)"/>${thumbLogo(ctx, T_C, T_C, 280, 120)}`;
+  const brandDef = `<linearGradient id="tbrand" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="${escapeXml(colors.primaryHex)}"/>
+    <stop offset="100%" stop-color="${escapeXml(colors.secondaryHex)}"/></linearGradient>`;
+  const svg = `<svg width="${TS}" height="${TS}" viewBox="0 0 ${TS} ${TS}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>${THUMB_PHOTO_DEF}${brandDef}<clipPath id="tcirc"><circle cx="${T_C}" cy="${T_C}" r="${T_R}"/></clipPath></defs>
+    <g clip-path="url(#tcirc)">${body}</g>
+  </svg>`;
+  return sharp(Buffer.from(svg, 'utf8')).resize(TS, TS, { fit: 'fill' }).png().toBuffer();
 }

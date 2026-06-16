@@ -133,15 +133,16 @@ describe('photobooth-frame-templates', () => {
     expect(parseFontBuffer(Buffer.from('no soy una fuente'))).toBeNull();
   });
 
-  it('renderFrameThumbnail devuelve PNG 256×256', async () => {
-    const png = await renderFramePng(FRAME_TEMPLATES[0], baseInput());
-    const thumb = await renderFrameThumbnail(png, {
-      primaryHex: '#0a6cff',
-      secondaryHex: '#00d4aa',
-    });
-    const meta = await sharp(thumb).metadata();
-    expect(meta.format).toBe('png');
-    expect(meta.width).toBe(THUMB_SIZE);
-    expect(meta.height).toBe(THUMB_SIZE);
+  it(`renderFrameThumbnail hornea un PNG circular ${THUMB_SIZE}² por cada template`, async () => {
+    const colors = { primaryHex: '#0a6cff', secondaryHex: '#00d4aa', tertiaryHex: '#c9b07f' };
+    for (const tpl of FRAME_TEMPLATES) {
+      const thumb = await renderFrameThumbnail(tpl, colors, null);
+      const meta = await sharp(thumb).metadata();
+      expect(meta.format, tpl.id).toBe('png');
+      expect(meta.width, tpl.id).toBe(THUMB_SIZE);
+      expect(meta.height, tpl.id).toBe(THUMB_SIZE);
+      // Esquinas transparentes → el emblema vive dentro del círculo (canal alpha).
+      expect(meta.hasAlpha, tpl.id).toBe(true);
+    }
   });
 });

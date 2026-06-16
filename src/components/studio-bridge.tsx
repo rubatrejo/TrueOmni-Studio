@@ -520,6 +520,14 @@ function applyModulesOverride(modules: ModulesPatch) {
 
 function applyBillboardOverride(b: BillboardPatch) {
   if (typeof window === 'undefined') return;
+  // Cache en window: si el Billboard idle se monta DESPUÉS de este push (el
+  // preview venía de otra pantalla —p.ej. Photo Booth, que navega con un full
+  // reload— y el idle se re-monta al expirar el timer de inactividad), el hook
+  // `useBillboardOverride` lo lee al montar y NO cae a los defaults ("Touch
+  // Here" + hero del template). Sin esto, el evento se dispara mientras el
+  // Billboard no está montado, nadie lo escucha y el override se pierde.
+  // Simétrico con applyModulesOverride/applyListingsOverride.
+  (window as Window & { __kioskBillboardOverride?: BillboardPatch }).__kioskBillboardOverride = b;
   window.dispatchEvent(new CustomEvent(KIOSK_BILLBOARD_OVERRIDE_EVENT, { detail: b }));
 }
 

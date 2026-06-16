@@ -548,6 +548,14 @@ function applyDealsOverride(deals: unknown) {
 
 function applyPhotoBoothOverride(photoBooth: unknown) {
   if (typeof window === 'undefined') return;
+  // Cache en window: la página `/home/photo-booth` es un Server Component async
+  // (await getConfig + fetchWeather), así que el PhotoBoothModule se hidrata
+  // TARDE — a veces después de que el bridge ya re-empujó el override en el
+  // handshake `studio:ready` (tras un full reload del preview al re-entrar al
+  // módulo). Sin cache, ese evento no tiene oyente y el módulo cae a los frames
+  // default del template. El módulo lo lee al montar. Simétrico con
+  // applyModulesOverride/applyListingsOverride/applyBillboardOverride.
+  (window as Window & { __kioskPhotoBooth?: unknown }).__kioskPhotoBooth = photoBooth;
   window.dispatchEvent(new CustomEvent(KIOSK_PHOTO_BOOTH_OVERRIDE_EVENT, { detail: photoBooth }));
 }
 

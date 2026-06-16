@@ -464,6 +464,12 @@ export function FramesTab({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [textSig]);
 
+  // El botón "Generate" solo aparece la PRIMERA vez (mientras no haya frames
+  // branded-auto). Una vez generados, se oculta (feedback Rubén): regenerar a
+  // mano desincronizaba el estado y reintroducía los frames viejos. Editar el
+  // texto de un frame lo re-hornea automáticamente (no necesita el botón).
+  const hasBrandedAuto = photoBooth.frames.some((f) => f.source === 'branded-auto');
+
   const setList = (list: PhotoBoothFrame[]) => onChange({ ...photoBooth, frames: list });
 
   const update = (id: string, patch: Partial<PhotoBoothFrame>) =>
@@ -490,19 +496,29 @@ export function FramesTab({
       hint="Transparent PNG overlays on top of the photo (1080×1920). Empty list hides the Frames tab."
     >
       <div className="mb-3 space-y-2.5 rounded-lg border border-sky-500/20 bg-sky-500/5 px-3 py-2.5">
-        <button
-          type="button"
-          onClick={generateBranded}
-          disabled={generating}
-          className="inline-flex items-center gap-1.5 rounded-md bg-sky-600 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-sky-500 disabled:opacity-50"
-        >
-          {generating ? 'Generating…' : 'Generate branded frames'}
-        </button>
-        <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-          Auto-creates frames from this client&apos;s brand colors, logo and website photo. Each
-          frame&apos;s text (phrase / hashtag) is editable below — save it, then regenerate to bake
-          it into the image. Frames you uploaded by hand are kept. Reloads when done.
-        </p>
+        {hasBrandedAuto ? (
+          <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+            Branded frames were generated from this client&apos;s brand colors, logo and website
+            photo{generating ? ' · re-baking…' : ''}. Edit a frame&apos;s text below to re-bake it
+            automatically. Frames you uploaded by hand are kept.
+          </p>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={generateBranded}
+              disabled={generating}
+              className="inline-flex items-center gap-1.5 rounded-md bg-sky-600 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-sky-500 disabled:opacity-50"
+            >
+              {generating ? 'Generating…' : 'Generate branded frames'}
+            </button>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+              Auto-creates frames from this client&apos;s brand colors, logo and website photo. Each
+              frame&apos;s text (phrase / hashtag) is editable below once generated. Frames you
+              uploaded by hand are kept.
+            </p>
+          </>
+        )}
         {genError ? <p className="text-[11px] text-red-500">{genError}</p> : null}
       </div>
       {photoBooth.frames.length === 0 ? (

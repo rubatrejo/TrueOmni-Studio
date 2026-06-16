@@ -116,11 +116,20 @@ export function PhotoBoothModule({
   // pasa-thru data: URLs sin tocar).
   const [override, setOverride] = useState<PhotoBoothConfig | null>(null);
   useEffect(() => {
+    const isValid = (c: unknown): c is PhotoBoothConfig =>
+      !!c &&
+      Array.isArray((c as PhotoBoothConfig).backgrounds) &&
+      Array.isArray((c as PhotoBoothConfig).filters);
+    // Recupera el último override cacheado por el bridge. Este módulo se hidrata
+    // tarde (page async), así que el push del Studio en `studio:ready` puede
+    // haberse disparado ANTES de que este handler existiera; sin esto, al
+    // re-entrar al Photo Booth en el preview los frames caían a los del template
+    // default ("me vuelven a salir los otros").
+    const cached = (window as Window & { __kioskPhotoBooth?: unknown }).__kioskPhotoBooth;
+    if (isValid(cached)) setOverride(cached);
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<PhotoBoothConfig>).detail;
-      if (detail && Array.isArray(detail.backgrounds) && Array.isArray(detail.filters)) {
-        setOverride(detail);
-      }
+      if (isValid(detail)) setOverride(detail);
     };
     window.addEventListener('kiosk:photo-booth-override', handler);
     return () => window.removeEventListener('kiosk:photo-booth-override', handler);

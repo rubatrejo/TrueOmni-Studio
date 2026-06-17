@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { useModuleHeroBridge } from '@/components/home/use-module-hero-bridge';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import type { HomeSocialWallModule, SocialPost, SocialSource } from '@/lib/config';
 import { filterPosts } from '@/lib/social-sources';
@@ -49,6 +50,9 @@ export function SocialWallModule({
   }, []);
 
   const effective = override ?? mod;
+
+  // Empuja el hero efectivo al HomeHeader (preview live del Studio).
+  useModuleHeroBridge(effective.heroImage);
 
   // Sources disponibles: las keys de `handles` presentes.
   const sources = useMemo<SocialSource[]>(() => {

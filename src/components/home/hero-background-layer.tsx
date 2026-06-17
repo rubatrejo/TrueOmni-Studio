@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react';
 
 import {
   KIOSK_HERO_OVERRIDE_EVENT,
+  KIOSK_MODULE_HERO_OVERRIDE_EVENT,
   getCachedHeroOverride,
+  getCachedModuleHero,
   type HeroOverrideDetail,
+  type ModuleHeroDetail,
 } from '@/components/studio-bridge';
 import { buildYouTubeEmbedUrl, isYouTubeUrl } from '@/lib/studio/youtube';
 
@@ -26,6 +29,16 @@ interface HeroBackgroundLayerProps {
    * etc.) es ruido visual heredar el hero del Dashboard.
    */
   listenForOverride?: boolean;
+  /**
+   * Si `true`, escucha `kiosk:module-hero-override` para recibir el hero
+   * EFECTIVO del módulo (Listings, Events, Social Wall, etc.) que el editor
+   * del Studio empuja en vivo. Lo activan los `<HomeHeader>` de los módulos
+   * (NO el Home Dashboard, que usa `listenForOverride`/`branding.homeHero`).
+   * Solo aplica cuando hay `initialSrc` (un header sin imagen —`null`— no
+   * adopta el hero del módulo: ese `null` es intencional, p.ej. los headers
+   * compactos del Guestbook form/map).
+   */
+  listenForModuleHero?: boolean;
 }
 
 /**
@@ -46,6 +59,7 @@ export function HeroBackgroundLayer({
   height,
   gradientExtra,
   listenForOverride = false,
+  listenForModuleHero = false,
 }: HeroBackgroundLayerProps) {
   const [src, setSrc] = useState<string | null>(initialSrc);
   const [kind, setKind] = useState<'image' | 'video'>(initialKind);
@@ -77,6 +91,28 @@ export function HeroBackgroundLayer({
     window.addEventListener(KIOSK_HERO_OVERRIDE_EVENT, onOverride);
     return () => window.removeEventListener(KIOSK_HERO_OVERRIDE_EVENT, onOverride);
   }, [listenForOverride]);
+
+  // Hero del MÓDULO (Listings/Events/Social Wall/…): el componente client del
+  // módulo empuja su hero efectivo vía `dispatchModuleHero`; aquí lo aplicamos.
+  // No tocamos el comportamiento del home hero (listenForOverride). Solo cuando
+  // hay imagen inicial — un header `null` (Guestbook form/map, Map) no la adopta.
+  useEffect(() => {
+    if (!listenForModuleHero || initialSrc == null) return;
+    const cached = getCachedModuleHero();
+    if (cached?.src) {
+      setSrc(cached.src);
+      setKind(cached.kind);
+    }
+    const onModuleHero = (event: Event) => {
+      const detail = (event as CustomEvent<ModuleHeroDetail>).detail;
+      if (detail?.src) {
+        setSrc(detail.src);
+        setKind(detail.kind);
+      }
+    };
+    window.addEventListener(KIOSK_MODULE_HERO_OVERRIDE_EVENT, onModuleHero);
+    return () => window.removeEventListener(KIOSK_MODULE_HERO_OVERRIDE_EVENT, onModuleHero);
+  }, [listenForModuleHero, initialSrc]);
 
   // Si el src es una URL de YouTube, renderizamos un iframe embed en
   // lugar de un `<video>` HTML — el `<video>` solo reproduce archivos

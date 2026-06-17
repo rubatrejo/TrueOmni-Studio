@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 
 import { WeekPicker } from '@/components/events/week-picker';
 import { SearchOverlay } from '@/components/home/search-overlay';
+import { useModuleHeroBridge } from '@/components/home/use-module-hero-bridge';
 import { useModuleLabel, useTextosMap } from '@/components/i18n-provider';
 import { FavoriteAddedToast } from '@/components/listings/favorite-added-toast';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
@@ -84,6 +85,9 @@ export function TicketsModule({
       window.removeEventListener('kiosk:events-override', onEvents);
     };
   }, [mod.label, mod.heroImage, mod.categories, mod.venues, mod.features]);
+
+  // Empuja el hero efectivo al HomeHeader (preview live del Studio).
+  useModuleHeroBridge(effective.heroImage);
 
   const moduleLabel = useModuleLabel(moduleKey, effective.label);
   const today = useMemo(() => todayISO(clientTimezone), [clientTimezone]);

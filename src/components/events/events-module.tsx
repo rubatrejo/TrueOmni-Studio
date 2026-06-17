@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { SearchOverlay } from '@/components/home/search-overlay';
+import { useModuleHeroBridge } from '@/components/home/use-module-hero-bridge';
 import { useModuleLabel } from '@/components/i18n-provider';
 import { FavoriteAddedToast } from '@/components/listings/favorite-added-toast';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
@@ -73,6 +74,9 @@ export function EventsModule({
     window.addEventListener('kiosk:events-override', handler);
     return () => window.removeEventListener('kiosk:events-override', handler);
   }, [mod.label, mod.heroImage, mod.categories, mod.venues, mod.features]);
+
+  // Empuja el hero efectivo al HomeHeader (preview live del Studio).
+  useModuleHeroBridge(effective.heroImage);
 
   const [selectedDate, setSelectedDate] = useState<string>(today);
   const [filter, setFilter] = useState<EventsFilterState>(EMPTY_EVENTS_FILTER);

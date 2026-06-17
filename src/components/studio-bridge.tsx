@@ -402,6 +402,46 @@ export const KIOSK_HERO_OVERRIDE_EVENT = 'kiosk:hero-override';
 export const KIOSK_CLIENT_NAME_OVERRIDE_EVENT = 'kiosk:client-name-override';
 export const KIOSK_CLIENT_COORDS_OVERRIDE_EVENT = 'kiosk:client-coords-override';
 
+/**
+ * Canal del hero header de un MÓDULO (Listings, Events, Social Wall, etc.).
+ *
+ * Distinto de `kiosk:hero-override` (que es EXCLUSIVO del Home Dashboard, viene
+ * de `branding.homeHero`). Cada componente client de módulo empuja su hero
+ * EFECTIVO (el del override del editor o el del config) vía `dispatchModuleHero`
+ * y el `<HeroBackgroundLayer>` del `<HomeHeader>` del módulo lo escucha cuando
+ * `listenForModuleHero=true`. Así el hero del módulo se refleja en el preview
+ * del Studio sin republish — el `<HomeHeader>` es un Server Component estático y
+ * por sí solo no reacciona al override del módulo.
+ */
+export const KIOSK_MODULE_HERO_OVERRIDE_EVENT = 'kiosk:module-hero-override';
+
+/** Detalle del evento de hero de módulo. */
+export type ModuleHeroDetail = { src: string; kind: 'image' | 'video' };
+
+// Cache module-scoped: si el `<HeroBackgroundLayer>` del módulo se monta DESPUÉS
+// del dispatch (típico: la page async hidrata tarde, o se navega entre rutas en
+// el iframe del Studio), lo lee al montar y NO se pierde el override. Simétrico
+// con `getCachedHeroOverride` del home.
+let cachedModuleHero: ModuleHeroDetail | null = null;
+
+/** Lee el último hero de módulo que se haya empujado (o null). */
+export function getCachedModuleHero(): ModuleHeroDetail | null {
+  return cachedModuleHero;
+}
+
+/**
+ * Empuja el hero EFECTIVO de un módulo al `<HeroBackgroundLayer>` del
+ * `<HomeHeader>` del módulo. Idempotente en runtime real (sin Studio): el src
+ * coincide con el `initialSrc` del SSR → no cambia nada visualmente.
+ */
+export function dispatchModuleHero(src: string, kind: 'image' | 'video' = 'image') {
+  if (typeof window === 'undefined') return;
+  cachedModuleHero = { src, kind };
+  window.dispatchEvent(
+    new CustomEvent(KIOSK_MODULE_HERO_OVERRIDE_EVENT, { detail: { src, kind } }),
+  );
+}
+
 export type HeroOverrideDetail = {
   homeHero?: { kind: 'image' | 'video'; src: string };
   heroGradient?: { from: string; to: string; angle: number };

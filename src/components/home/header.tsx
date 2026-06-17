@@ -99,6 +99,7 @@ export async function HomeHeader({
         height={height}
         gradientExtra={gradientExtra}
         listenForOverride={applyDashboardOverride}
+        listenForModuleHero={!applyDashboardOverride}
       />
 
       {/* Logo del cliente @ (65, 38) — slot="default", alineado a la izquierda.

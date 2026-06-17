@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { SearchOverlay } from '@/components/home/search-overlay';
+import { useModuleHeroBridge } from '@/components/home/use-module-hero-bridge';
 import { useModuleLabel, useTextosMap } from '@/components/i18n-provider';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { ListingsToolbar } from '@/components/listings/listings-toolbar';
@@ -82,6 +83,10 @@ export function DealsModule({
   }, [mod.label, mod.heroImage, mod.featureCatalog]);
 
   const effective = override ?? mod;
+
+  // Empuja el hero efectivo al HomeHeader (preview live del Studio).
+  useModuleHeroBridge(effective.heroImage);
+
   const activeDeals = useMemo(() => filterActiveDeals(effective.deals), [effective.deals]);
 
   const featureCatalog = useMemo(

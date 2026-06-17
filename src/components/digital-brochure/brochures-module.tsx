@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { useModuleHeroBridge } from '@/components/home/use-module-hero-bridge';
 import { useModuleLabel } from '@/components/i18n-provider';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { filterBrochures } from '@/lib/brochures-filter';
@@ -52,6 +53,9 @@ export function BrochuresModule({
   }, [mod.label, mod.heroImage, mod.categories]);
 
   const effective = override ?? mod;
+
+  // Empuja el hero efectivo al HomeHeader (preview live del Studio).
+  useModuleHeroBridge(effective.heroImage);
 
   // Si la categoría activa ya no existe en el override, vuelve a "all".
   useEffect(() => {

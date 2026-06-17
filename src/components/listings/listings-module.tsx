@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { SearchOverlay } from '@/components/home/search-overlay';
+import { useModuleHeroBridge } from '@/components/home/use-module-hero-bridge';
 import { useModuleLabel } from '@/components/i18n-provider';
 import type { HomeListing, HomeModule, Listing } from '@/lib/config';
 import { useFavorites } from '@/lib/favorites';
@@ -77,6 +78,9 @@ export function ListingsModule({
     window.addEventListener('kiosk:listings-override', handler);
     return () => window.removeEventListener('kiosk:listings-override', handler);
   }, [moduleKey, mod.label, mod.heroImage, mod.subcategories, mod.features, mod.listings]);
+
+  // Empuja el hero efectivo del catálogo activo al HomeHeader (preview live).
+  useModuleHeroBridge(effective.heroImage);
 
   const moduleLabel = useModuleLabel(moduleKey, effective.label);
 

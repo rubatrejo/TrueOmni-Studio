@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { useModuleHeroBridge } from '@/components/home/use-module-hero-bridge';
 import { useTextosMap } from '@/components/i18n-provider';
 import type { HomeGuestbookModule } from '@/lib/config';
 import { filterPinsByProximity } from '@/lib/guestbook-bbox';
@@ -88,6 +89,13 @@ export function GuestbookModule({
     return () => window.removeEventListener('kiosk:guestbook-override', handler);
   }, []);
   const effective = override ?? mod;
+
+  // Empuja el hero efectivo (pantalla Start) al HomeHeader del startHeader
+  // (preview live del Studio). Solo el startHeader tiene imagen; los headers
+  // compactos de form/map usan `heroImage={null}` y NO la adoptan (gate por
+  // `initialSrc != null` en HeroBackgroundLayer).
+  useModuleHeroBridge(effective.heroImage);
+
   const [userData, setUserData] = useState<GuestbookFormData | null>(null);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [userAddress, setUserAddress] = useState<string>('');

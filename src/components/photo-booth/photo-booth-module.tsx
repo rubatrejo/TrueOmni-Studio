@@ -161,6 +161,14 @@ export function PhotoBoothModule({
     }));
   }, [override, incomingStickers]);
   const filters = override ? override.filters : incomingFilters;
+  // Share background: cuando hay override del Studio, lo resolvemos desde
+  // `override.shareBackground` (igual que backgrounds/frames). El prop
+  // `shareBackgroundSrc` es estático (resuelto en SSR) y NO refleja el cambio
+  // del editor — sin esto, al editar el share background salía el del theme.
+  const effectiveShareBackgroundSrc = useMemo(() => {
+    if (!override) return shareBackgroundSrc;
+    return override.shareBackground ? resolvePhotoBoothAsset(override.shareBackground) : undefined;
+  }, [override, shareBackgroundSrc]);
   const live = useTextosMap();
   const pickPB = (key: string, fb: string) => live[key] ?? fb;
   const textos: PhotoBoothTextos = {
@@ -692,7 +700,7 @@ export function PhotoBoothModule({
             '{id}',
             `pb-${Date.now()}`,
           )}
-          shareBackgroundSrc={shareBackgroundSrc}
+          shareBackgroundSrc={effectiveShareBackgroundSrc}
           social={config.social}
           onBack={() => setPhase('editing')}
           onEmail={() => setEmailOpen(true)}

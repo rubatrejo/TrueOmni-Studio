@@ -18,6 +18,7 @@ import {
   patchClientBranding,
   patchPwaSlice,
   publishPwaSlice,
+  publishStandalone,
   type PwaSliceMetaDto,
 } from '../../../_lib/api-client';
 import { StudioSlugProvider } from '../../../_lib/slug-context';
@@ -116,6 +117,27 @@ export function PwaShell({
   const toast = useToast();
 
   const [publishing, setPublishing] = useState(false);
+  const [exportingStandalone, setExportingStandalone] = useState(false);
+
+  // Export standalone SOLO de la PWA (cada editor exporta su producto).
+  const handleExportStandalone = useCallback(async () => {
+    if (exportingStandalone) return;
+    setExportingStandalone(true);
+    try {
+      const res = await publishStandalone(slug, 'pwa');
+      toast.show('PWA export dispatched', {
+        variant: 'success',
+        description: `Track the build run: ${res.runsUrl}`,
+      });
+    } catch (err) {
+      toast.show('Export failed', {
+        variant: 'error',
+        description: err instanceof Error ? err.message : String(err),
+      });
+    } finally {
+      setExportingStandalone(false);
+    }
+  }, [exportingStandalone, slug, toast]);
   const [savedPwa, setSavedPwa] = useState<PwaConfig>(initialPwa);
   const [pwa, setPwa] = useState<PwaConfig>(initialPwa);
   // F-PWA-4: la meta (versión) avanza con cada save; antes el badge usaba siempre
@@ -273,6 +295,8 @@ export function PwaShell({
           previewHref="/pwa"
           showExportImport={false}
           onPublish={() => void handlePublish()}
+          onExportStandalone={() => void handleExportStandalone()}
+          exportingStandalone={exportingStandalone}
         />
 
         <MobileTabBar active={mobileTab} onChange={setMobileTab} className="lg:hidden" />

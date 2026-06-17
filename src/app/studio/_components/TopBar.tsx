@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, Eye, History, Send, Upload } from 'lucide-react';
+import { Download, Eye, History, Loader2, Package, Send, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 
@@ -24,6 +24,8 @@ export function TopBar({
   onOpenVersions,
   versionsActive,
   onPublish,
+  onExportStandalone,
+  exportingStandalone,
   productLabel = 'Kiosk',
   previewHref,
   showExportImport = true,
@@ -43,6 +45,11 @@ export function TopBar({
   onOpenVersions?: () => void;
   versionsActive?: boolean;
   onPublish?: () => void;
+  /** Si se pasa, muestra un botón "Export" que genera el repo standalone del
+   *  producto actual. El Kiosk NO lo usa (su export vive en el PublishModal);
+   *  el editor PWA sí, para exportar SOLO la PWA. */
+  onExportStandalone?: () => void;
+  exportingStandalone?: boolean;
   /** Etiqueta del último crumb + producto. Default `'Kiosk'`; el editor PWA
    *  pasa `'Mobile PWA'`. */
   productLabel?: string;
@@ -118,6 +125,23 @@ export function TopBar({
           <Eye className="h-3.5 w-3.5" />
           <span className="hidden xl:inline">Open in tab</span>
         </Link>
+
+        {onExportStandalone ? (
+          <button
+            type="button"
+            onClick={onExportStandalone}
+            disabled={exportingStandalone}
+            title="Export this product as a self-contained standalone repo + zip"
+            className="inline-flex items-center gap-1.5 rounded-md border border-emerald-200 bg-white px-2.5 py-1.5 text-[12px] font-medium text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-50 disabled:opacity-50 dark:border-emerald-900/50 dark:bg-zinc-900 dark:text-emerald-300 dark:hover:bg-emerald-950/30"
+          >
+            {exportingStandalone ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Package className="h-3.5 w-3.5" />
+            )}
+            <span className="hidden xl:inline">Export</span>
+          </button>
+        ) : null}
 
         <button
           type="button"

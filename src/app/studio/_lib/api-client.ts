@@ -604,3 +604,29 @@ export async function publishToFilesystem(
   const qs = params.toString() ? `?${params.toString()}` : '';
   return http<PublishResult>(`/api/studio/publish/${slug}${qs}`, { method: 'POST' });
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+ *  Standalone export (dispara la Action `kiosk-exporter` → repo + zip)
+ * ──────────────────────────────────────────────────────────────────────── */
+
+export interface StandaloneExportResult {
+  dispatched: boolean;
+  slug: string;
+  product: 'kiosk' | 'pwa';
+  manifestUrl: string;
+  runsUrl: string;
+}
+
+/**
+ * Dispara la generación de un kiosk/PWA standalone autocontenido del cliente.
+ * El backend arma el manifest, lo sube a Blob y dispara la Action del builder;
+ * responde 202 con el link a la run (`runsUrl`).
+ */
+export async function publishStandalone(
+  slug: string,
+  product: 'kiosk' | 'pwa',
+): Promise<StandaloneExportResult> {
+  return http<StandaloneExportResult>(`/api/studio/publish-standalone/${slug}?product=${product}`, {
+    method: 'POST',
+  });
+}

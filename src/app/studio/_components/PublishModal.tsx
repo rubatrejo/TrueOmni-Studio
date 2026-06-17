@@ -8,16 +8,21 @@ import {
   FileText,
   GitPullRequest,
   Loader2,
+  Monitor,
+  Package,
   RotateCcw,
+  Smartphone,
   Upload,
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import {
+  publishStandalone,
   publishToFilesystem,
   type PublishFileChange,
   type PublishPrInfo,
+  type StandaloneExportResult,
 } from '../_lib/api-client';
 import { recordPublish as recordPublishLocal } from '../_lib/local-version-history';
 import { useEscapeClose, useFocusTrap } from '../_lib/use-modal-a11y';
@@ -245,6 +250,8 @@ export function PublishModal({
                   ) : null}
                 </>
               )}
+
+              {phase !== 'preview-loading' ? <StandaloneExportSection slug={slug} /> : null}
             </div>
 
             <div className="flex items-center justify-end gap-2 border-t border-zinc-100 px-5 py-3 dark:border-zinc-800">
@@ -426,4 +433,102 @@ function shortenPath(full: string): string {
   // muestra solo desde "clients/" en adelante
   const idx = full.indexOf('clients/');
   return idx >= 0 ? full.slice(idx) : full;
+}
+
+/**
+ * Sección "Export as standalone app" — dispara la Action `kiosk-exporter` que
+ * genera un repo `kiosk-<slug>` autocontenido (código del producto + todos los
+ * assets materializados) + zip. Es asíncrono (la build vive en GitHub Actions);
+ * aquí solo disparamos y linkeamos a la run. No interfiere con el flujo fs/pr.
+ */
+function StandaloneExportSection({ slug }: { slug: string }) {
+  const [busy, setBusy] = useState<'kiosk' | 'pwa' | null>(null);
+  const [result, setResult] = useState<StandaloneExportResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleExport = async (product: 'kiosk' | 'pwa') => {
+    setBusy(product);
+    setError(null);
+    setResult(null);
+    try {
+      const res = await publishStandalone(slug, product);
+      setResult(res);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Standalone export failed');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <details className="mt-2 rounded-md border border-zinc-200 bg-zinc-50/60 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900/40">
+      <summary className="flex cursor-pointer items-center gap-2 text-[12px] font-semibold text-zinc-700 dark:text-zinc-300">
+        <Package className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+        Export as standalone app
+        <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+          beta
+        </span>
+      </summary>
+      <div className="mt-2 space-y-2">
+        <p className="text-[11px] leading-relaxed text-zinc-500">
+          Builds a self-contained repo <span className="font-mono">kiosk-{slug}</span> (product code
+          + all assets materialized) and a downloadable zip. Runs on GitHub Actions — track progress
+          in the build run.
+        </p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => handleExport('kiosk')}
+            disabled={busy !== null}
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-[12px] font-medium text-zinc-700 transition hover:border-emerald-300 hover:bg-emerald-50 disabled:opacity-40 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-emerald-800 dark:hover:bg-emerald-950/30"
+          >
+            {busy === 'kiosk' ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Monitor className="h-3.5 w-3.5" />
+            )}
+            Export Kiosk
+          </button>
+          <button
+            type="button"
+            onClick={() => handleExport('pwa')}
+            disabled={busy !== null}
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-[12px] font-medium text-zinc-700 transition hover:border-emerald-300 hover:bg-emerald-50 disabled:opacity-40 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-emerald-800 dark:hover:bg-emerald-950/30"
+          >
+            {busy === 'pwa' ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Smartphone className="h-3.5 w-3.5" />
+            )}
+            Export PWA
+          </button>
+        </div>
+
+        {error ? (
+          <div
+            role="alert"
+            className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50/70 px-3 py-2 text-[11.5px] text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200"
+          >
+            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <span>{error}</span>
+          </div>
+        ) : null}
+
+        {result ? (
+          <a
+            href={result.runsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-[11.5px] text-emerald-900 transition hover:border-emerald-300 hover:bg-emerald-100 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200 dark:hover:bg-emerald-900/40"
+          >
+            <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+            <span className="flex-1">
+              Build dispatched for <strong>{result.product}</strong> — track the run
+            </span>
+            <ExternalLink className="h-3 w-3 shrink-0 opacity-70" />
+          </a>
+        ) : null}
+      </div>
+    </details>
+  );
 }

@@ -258,6 +258,71 @@ function buildPrBody(slug: string, files: PublishFile[], actor?: string): string
     .join('\n');
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+ * Standalone export — dispatch de la Action `export-standalone.yml`
+ * ──────────────────────────────────────────────────────────────────────── */
+
+/** Owner/repo/workflow del builder de kiosks standalone. */
+export const EXPORTER_OWNER = 'rubatrejo';
+export const EXPORTER_REPO = 'kiosk-exporter';
+export const EXPORTER_WORKFLOW = 'export-standalone.yml';
+
+export interface ExporterDispatchConfig {
+  token: string;
+  owner: string;
+  repo: string;
+  workflow: string;
+  ref: string;
+}
+
+/**
+ * Lee la config para disparar la Action del builder desde process.env. El
+ * token (`EXPORTER_GITHUB_TOKEN`) es el mismo gh token de Rubén con scope
+ * repo+workflow (ya configurado como secret del builder; en Vercel va como
+ * env var del proyecto del Studio). Si falta devuelve `null` y el caller
+ * responde 503.
+ */
+export function getExporterDispatchConfig(): ExporterDispatchConfig | null {
+  const token = process.env.EXPORTER_GITHUB_TOKEN;
+  if (!token) return null;
+  return {
+    token,
+    owner: process.env.EXPORTER_GITHUB_OWNER ?? EXPORTER_OWNER,
+    repo: process.env.EXPORTER_GITHUB_REPO ?? EXPORTER_REPO,
+    workflow: process.env.EXPORTER_GITHUB_WORKFLOW ?? EXPORTER_WORKFLOW,
+    ref: process.env.EXPORTER_GITHUB_REF ?? 'main',
+  };
+}
+
+/** URL de las runs del builder (para que la UI linkee a la run disparada). */
+export function exporterRunsUrl(config: ExporterDispatchConfig): string {
+  return `https://github.com/${config.owner}/${config.repo}/actions/workflows/${config.workflow}`;
+}
+
+/**
+ * Dispara la Action `export-standalone.yml` del builder vía
+ * `createWorkflowDispatch`. El manifest (config + tokens + i18n) ya vive en
+ * Blob; aquí solo pasamos `slug`, `product` y la URL del manifest como inputs
+ * del workflow.
+ */
+export async function dispatchExporterWorkflow(
+  config: ExporterDispatchConfig,
+  inputs: { slug: string; product: 'kiosk' | 'pwa'; manifestUrl: string },
+): Promise<void> {
+  const octokit = new Octokit({ auth: config.token });
+  await octokit.actions.createWorkflowDispatch({
+    owner: config.owner,
+    repo: config.repo,
+    workflow_id: config.workflow,
+    ref: config.ref,
+    inputs: {
+      slug: inputs.slug,
+      product: inputs.product,
+      manifest_url: inputs.manifestUrl,
+    },
+  });
+}
+
 async function mapWithConcurrency<T, R>(
   items: readonly T[],
   concurrency: number,

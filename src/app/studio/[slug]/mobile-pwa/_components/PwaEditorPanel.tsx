@@ -5,6 +5,7 @@ import { normalizePwaDashboard } from '@/lib/pwa-dashboard';
 import type { Branding } from '@/lib/studio/schema';
 
 import { BrandingSyncBanner } from '../../../_components/BrandingSyncBanner';
+import { PublishEditor } from '../../../_components/editor-panel/PublishEditor';
 import { BrandingEditor } from '../../../_components/EditorPanel';
 import { PWA_SECTIONS, type PwaSectionKey } from '../_lib/pwa-sections';
 
@@ -53,6 +54,8 @@ export function PwaEditorPanel({
   onBrandingChange,
   availableLocales,
   mapboxToken,
+  currentVersion,
+  onPublish,
 }: {
   slug: string;
   sectionKey: PwaSectionKey;
@@ -64,6 +67,10 @@ export function PwaEditorPanel({
   availableLocales: string[] | null;
   /** Token Mapbox para el picker de coords del Scavenger Hunt. */
   mapboxToken: string;
+  /** Versión publicada actual (para la sección Publish & Approvals). */
+  currentVersion: number;
+  /** Dispara el publish del PWA (mismo flujo que el botón del TopBar). */
+  onPublish: () => void;
 }) {
   if (sectionKey === 'branding') {
     return (
@@ -291,6 +298,19 @@ export function PwaEditorPanel({
   }
 
   const section = PWA_SECTIONS.find((s) => s.key === sectionKey);
+
+  if (sectionKey === 'publish') {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-5">
+        <PublishEditor
+          currentVersion={currentVersion}
+          approver={section?.description.match(/[\w.+-]+@[\w.-]+/)?.[0] ?? 'ruben@trueomni.com'}
+          onPublish={onPublish}
+        />
+      </div>
+    );
+  }
+
   const isLive = section?.livePreview ?? true;
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">

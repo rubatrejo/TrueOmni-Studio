@@ -73,6 +73,10 @@ const VersionsEditor = dynamic(
   () => import('./editor-panel/VersionsEditor').then((m) => m.VersionsEditor),
   { ssr: false, loading: editorLoading },
 );
+const PublishEditor = dynamic(
+  () => import('./editor-panel/PublishEditor').then((m) => m.PublishEditor),
+  { ssr: false, loading: editorLoading },
+);
 const EventsEditor = dynamic(() => import('./EventsEditor').then((m) => m.EventsEditor), {
   ssr: false,
   loading: editorLoading,
@@ -295,6 +299,7 @@ export function EditorPanel({
     sectionKey === 'i18n' ||
     sectionKey === 'ads' ||
     sectionKey === 'integrations' ||
+    sectionKey === 'publish' ||
     sectionKey === 'versions';
 
   const previewAction = getPreviewActionFor(sectionKey, {
@@ -578,6 +583,15 @@ export function EditorPanel({
             currentVersion={currentVersion}
             lastPublishedAt={lastPublishedAt}
             lastEditor={lastEditor}
+            onPublish={onPublish}
+          />
+        )}
+        {sectionKey === 'publish' && (
+          <PublishEditor
+            currentVersion={currentVersion}
+            lastPublishedAt={lastPublishedAt}
+            lastEditor={lastEditor}
+            approver={section.description.match(/[\w.+-]+@[\w.-]+/)?.[0] ?? 'ruben@trueomni.com'}
             onPublish={onPublish}
           />
         )}

@@ -353,6 +353,8 @@ export function PwaShell({
                   onBrandingChange={setBranding}
                   availableLocales={availableLocales}
                   mapboxToken={mapboxToken}
+                  currentVersion={meta?.currentVersion ?? 0}
+                  onPublish={() => void handlePublish()}
                 />
               </div>
               <SaveBar

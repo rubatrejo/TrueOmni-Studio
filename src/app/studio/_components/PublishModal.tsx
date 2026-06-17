@@ -16,6 +16,7 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import {
   publishStandalone,
@@ -55,6 +56,11 @@ export function PublishModal({
   const [written, setWritten] = useState(0);
   // Countdown para auto-cerrar el modal tras success.
   const [autoCloseSec, setAutoCloseSec] = useState<number | null>(null);
+  // El modal se renderiza por portal a document.body para que su `fixed` sea
+  // relativo al viewport (no a un ancestro con transform del editor) y quede
+  // centrado en toda la pantalla. `mounted` evita createPortal en SSR.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!open) return;
@@ -127,18 +133,24 @@ export function PublishModal({
     }
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
       {open && (
-        <>
-          <motion.div
-            key="backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
+        <motion.div
+          key="publish-modal-root"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+        >
+          <button
+            type="button"
+            aria-label="Close"
             onClick={onClose}
-            className="fixed inset-0 z-40 bg-zinc-950/70 backdrop-blur-md"
+            className="absolute inset-0 cursor-default bg-zinc-950/70 backdrop-blur-md"
           />
           <motion.div
             key="modal"
@@ -150,7 +162,7 @@ export function PublishModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-x-0 top-[10vh] z-50 mx-auto flex max-h-[80vh] w-[600px] max-w-[94vw] flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
+            className="relative z-10 flex max-h-[85vh] w-[600px] max-w-[94vw] flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
           >
             <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5 dark:border-zinc-800">
               <div>
@@ -307,9 +319,10 @@ export function PublishModal({
               ) : null}
             </div>
           </motion.div>
-        </>
+        </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
 

@@ -471,9 +471,10 @@ function StandaloneExportSection({ slug }: { slug: string }) {
       </summary>
       <div className="mt-2 space-y-2">
         <p className="text-[11px] leading-relaxed text-zinc-500">
-          Builds a self-contained repo <span className="font-mono">kiosk-{slug}</span> (product code
-          + all assets materialized) and a downloadable zip. Runs on GitHub Actions — track progress
-          in the build run.
+          Builds a self-contained repo{' '}
+          <span className="font-mono">TrueOmni-{slug}-&lt;product&gt;-MM-DD-YYYY</span> (product
+          code + all assets materialized) and a downloadable zip. Runs on GitHub Actions — track
+          progress in the build run.
         </p>
         <div className="flex gap-2">
           <button

@@ -23,22 +23,29 @@ import type { MaterializeAssetsDeps } from '../src/lib/studio/export/materialize
 import { createFsDeps } from '../src/lib/studio/export/materialize-assets-fs';
 
 const slug = process.argv[2];
+const product = process.argv.find((a) => a.startsWith('--product='))?.split('=')[1] ?? 'kiosk';
 const dest =
-  process.argv[3] && !process.argv[3].startsWith('--') ? process.argv[3] : `/tmp/kiosk-${slug}`;
+  process.argv[3] && !process.argv[3].startsWith('--')
+    ? process.argv[3]
+    : `/tmp/${product}-${slug}`;
 const dry = process.argv.includes('--dry');
 
-if (!slug) {
-  console.error('uso: npx tsx scripts/export-standalone.ts <slug> [destDir] [--dry]');
+if (!slug || (product !== 'kiosk' && product !== 'pwa')) {
+  console.error(
+    'uso: npx tsx scripts/export-standalone.ts <slug> [destDir] --product=kiosk|pwa [--dry]',
+  );
   process.exit(1);
 }
 
 const root = process.cwd();
 
 async function main() {
-  // 1. Copiar el árbol del runtime (kiosk+PWA, sin Studio/Signage/Walls).
-  execFileSync('node', [join(root, 'scripts/export-runtime-tree.mjs'), dest, slug], {
-    stdio: 'inherit',
-  });
+  // 1. Copiar el árbol del runtime de ESTE producto (sin el otro, sin Studio/Signage/Walls).
+  execFileSync(
+    'node',
+    [join(root, 'scripts/export-runtime-tree.mjs'), dest, slug, `--product=${product}`],
+    { stdio: 'inherit' },
+  );
 
   // 2. Materializar los assets del config a paths locales.
   const configPath = `clients/${slug}/config.json`;

@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 /**
  * Fase 3 del milestone "Publish → Kiosk Standalone": extrae del monorepo el
- * árbol de CÓDIGO del runtime (Kiosk 1080×1920 + PWA companion) a un directorio
- * destino, PODANDO el Studio (editor), la auth, y los productos fuera de alcance
- * (Signage / Video Walls). El árbol resultante es un repo Next.js autónomo que
- * corre el kiosk de un cliente con `KIOSK_CLIENT=<slug>`.
+ * árbol de CÓDIGO de UN producto del runtime a un directorio destino, PODANDO el
+ * Studio (editor), la auth, los productos fuera de alcance (Signage / Video
+ * Walls) Y EL OTRO PRODUCTO del runtime. Cada producto se exporta individual:
+ *   --product=kiosk → solo el Kiosk (1080×1920), SIN la PWA.
+ *   --product=pwa   → solo la PWA companion, SIN el Kiosk.
+ * Es seguro: el kiosk no importa nada de la PWA, y la PWA no importa rutas del
+ * kiosk (solo componentes compartidos, que viajan en ambos). El árbol resultante
+ * es un repo Next.js autónomo que corre con `KIOSK_CLIENT=<slug>`.
  *
  * Acoplamiento verificado (2026-06-16): el runtime solo usa de `lib/studio` el
  * `schema` (tipos), `kv`, `youtube` y `brand-video` — todos autocontenidos. NO
@@ -26,6 +30,17 @@ const SRC = process.cwd();
 const DEST = process.argv[2] ?? '/tmp/kiosk-standalone';
 const SLUG = process.argv[3] ?? 'default';
 const WITH_ASSETS = process.argv.includes('--with-assets');
+const PRODUCT = process.argv.find((a) => a.startsWith('--product='))?.split('=')[1] ?? 'kiosk';
+if (PRODUCT !== 'kiosk' && PRODUCT !== 'pwa') {
+  console.error(`--product debe ser 'kiosk' o 'pwa' (recibido: ${PRODUCT})`);
+  process.exit(1);
+}
+// El OTRO producto se poda: sus rutas + sus componentes/libs exclusivos. Lo
+// compartido (config, listings, events, map, social-wall, …) viaja en ambos.
+const OTHER_PRODUCT = {
+  kiosk: ['src/app/(pwa)', 'src/components/pwa'],
+  pwa: ['src/app/(kiosk)', 'src/components/billboard'],
+}[PRODUCT];
 
 /** Rutas (relativas a la raíz) que NO viajan al árbol standalone. */
 const EXCLUDE = new Set(
@@ -62,6 +77,9 @@ const EXCLUDE = new Set(
     'src/components/video-walls',
     // el propio toolchain de export no viaja al repo del cliente
     'scripts/export-runtime-tree.mjs',
+    'scripts/export-standalone.ts',
+    // el OTRO producto del runtime (kiosk⇄pwa) se poda
+    ...OTHER_PRODUCT,
   ].map((p) => p.split('/').join(sep)),
 );
 
@@ -83,6 +101,15 @@ function isExcluded(absPath) {
   // src/lib/studio/<x>: conservar solo las utilidades runtime; podar el resto.
   if (parts[0] === 'src' && parts[1] === 'lib' && parts[2] === 'studio' && parts.length >= 4) {
     if (!STUDIO_RUNTIME_KEEP.has(parts[3])) return true;
+  }
+  // kiosk-only: podar las libs PWA-exclusivas (src/lib/pwa-*.ts).
+  if (
+    PRODUCT === 'kiosk' &&
+    parts[0] === 'src' &&
+    parts[1] === 'lib' &&
+    parts[2]?.startsWith('pwa-')
+  ) {
+    return true;
   }
   // clients/<x>: solo viaja el cliente target (+ default como fallback + _template).
   if (parts[0] === 'clients' && parts.length >= 2) {

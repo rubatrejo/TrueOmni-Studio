@@ -169,24 +169,26 @@ describe('collectImages (context-aware naming, estructura real plana)', () => {
   const byRef = (imgs: { ref: string; target?: { dir: string; base: string }; kind?: string }[]) =>
     Object.fromEntries(imgs.map((i) => [i.ref, i.target]));
 
-  it('listings: categoría del MÓDULO (label) + subcategoría/título del item → feed anidado', () => {
+  it('listings: módulo (label + listings) → feed/<Categoría>/<Subcat>/<naming> (estructura FS)', () => {
     const cfg = {
-      listings: [
-        {
-          label: 'Eat & Drink',
-          key: 'restaurants',
-          catalog: {
-            listings: [
-              {
-                subcategory: 'Italian',
-                title: "Mario's Pizza",
-                image: 'https://cdn/mario.jpg',
-                galleryUrls: ['https://cdn/g1.jpg', 'https://cdn/g2.jpg'],
-              },
-            ],
+      features: {
+        home: {
+          modules: {
+            restaurants: {
+              label: 'Eat & Drink',
+              heroImage: 'https://cdn/rest-hero.jpg',
+              listings: [
+                {
+                  subcategory: 'Italian',
+                  title: "Mario's Pizza",
+                  image: 'https://cdn/mario.jpg',
+                  galleryUrls: ['https://cdn/g1.jpg', 'https://cdn/g2.jpg'],
+                },
+              ],
+            },
           },
         },
-      ],
+      },
     };
     const t = byRef(collectImages(cfg, { clientName: 'Hello Harford' }));
     expect(t['https://cdn/mario.jpg']).toEqual({
@@ -196,23 +198,39 @@ describe('collectImages (context-aware naming, estructura real plana)', () => {
     expect(t['https://cdn/g1.jpg']?.base).toBe(
       'Hello_Harford-Eat_and_Drink-Italian-Marios_Pizza-1',
     );
+    // header del módulo → feed/<Categoría>/_header (naming por field)
+    expect(t['https://cdn/rest-hero.jpg']).toEqual({
+      dir: 'assets/feed/Eat_and_Drink',
+      base: 'Hello_Harford-heroImage',
+    });
   });
 
-  it('events: category por item → feed/Events/<EventCategory>/...', () => {
+  it('events: módulo (label + events) con category por item → feed/<Cat>/<EventCategory>/...', () => {
     const cfg = {
       events: {
-        heroImage: 'https://cdn/events-hero.jpg',
+        label: 'Upcoming Events',
         events: [{ category: 'Music', title: 'Jazz Night', image: 'https://cdn/jazz.jpg' }],
       },
     };
     const t = byRef(collectImages(cfg, { clientName: 'Acme' }));
     expect(t['https://cdn/jazz.jpg']).toEqual({
-      dir: 'assets/feed/Events/Music',
-      base: 'Acme-Events-Music-Jazz_Night',
+      dir: 'assets/feed/Upcoming_Events/Music',
+      base: 'Acme-Upcoming_Events-Music-Jazz_Night',
     });
-    // header del módulo → feed/Events/_header (naming por field)
-    expect(t['https://cdn/events-hero.jpg']).toEqual({
-      dir: 'assets/feed/Events',
+  });
+
+  it('módulo bucket (social-wall: label sin listings/events) → assets/<Label>/', () => {
+    const cfg = {
+      'social-wall': {
+        label: 'Social Wall',
+        heroImage: 'https://cdn/sw-hero.jpg',
+        highlights: [{ id: 'h1', image: 'https://cdn/h1.jpg' }],
+      },
+    };
+    const t = byRef(collectImages(cfg, { clientName: 'Acme' }));
+    expect(t['https://cdn/h1.jpg']).toEqual({ dir: 'assets/Social Wall', base: 'Acme-h1' });
+    expect(t['https://cdn/sw-hero.jpg']).toEqual({
+      dir: 'assets/Social Wall',
       base: 'Acme-heroImage',
     });
   });

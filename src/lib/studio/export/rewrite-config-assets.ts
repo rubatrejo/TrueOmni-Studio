@@ -49,6 +49,7 @@ export const IMAGE_FIELDS: ReadonlySet<string> = new Set([
   'fallbackHero',
   'loadingImage',
   'headerImage',
+  'hero_image',
 ]);
 
 /** ¿El string es una referencia a un asset materializable (http/data/relativo assets)? */
@@ -132,21 +133,26 @@ const SECONDARY_IMAGE_FIELDS: ReadonlySet<string> = new Set([
   'menuImage',
 ]);
 
-/** Carpeta amigable (Title Case) para los assets de cada módulo top-level. */
-const FOLDER_LABEL: Readonly<Record<string, string>> = {
-  socialWall: 'Social Wall',
-  guestbook: 'Guestbook',
-  deals: 'Deals',
-  passes: 'Passes',
-  tickets: 'Tickets',
-  brochures: 'Brochures',
-  itineraryBuilder: 'Trip Planner',
+/** Arrays de contenido que marcan a un objeto como "módulo de feed" (categoría propia). */
+const FEED_CONTENT_KEYS = ['listings', 'events', 'trails'] as const;
+
+/** Cualquier array de contenido → marca el objeto como un módulo (tiene `label`). */
+const MODULE_CONTENT_KEYS: ReadonlySet<string> = new Set([
+  ...FEED_CONTENT_KEYS,
+  'deals',
+  'passes',
+  'highlights',
+  'brochures',
+  'pinCatalog',
+  'posts',
+  'activities',
+]);
+
+/** Contenedores SIN `label` → carpeta bucket amigable. */
+const CONTAINER_BUCKET: Readonly<Record<string, string>> = {
+  advertisements: 'Ads',
   ads: 'Ads',
-  ai: 'Ask AI',
-  aiAvatar: 'Ask AI',
-  billboard: 'Idle',
-  map: 'Map',
-  survey: 'Survey',
+  itinerary: 'Trip Planner',
 };
 
 /** Campos que son el HEADER/hero de una sección. */
@@ -194,8 +200,7 @@ interface CollectCtx {
   inImage: boolean;
   field?: string;
   client: string;
-  depth: number;
-  /** Top-level module key (listings/events/socialWall/branding/…). */
+  /** Solo se usa para `branding` (logos + media {kind,src}). */
   module?: string;
   /** Carpeta bucket amigable para módulos NO-feed (assets/<bucketLabel>/…). */
   bucketLabel?: string;
@@ -226,9 +231,7 @@ function targetFor(ctx: CollectCtx, ref: string): AssetTarget | undefined {
   // aquí no llevan target.
   if (isRelativeRef(ref)) return undefined;
 
-  const isHeader =
-    (ctx.field && HEADER_FIELDS.has(ctx.field)) ||
-    (ctx.module === 'billboard' && ctx.field === 'background');
+  const isHeader = Boolean(ctx.field && HEADER_FIELDS.has(ctx.field));
 
   // Header / hero de sección.
   if (isHeader) {
@@ -290,39 +293,46 @@ function walkImages(value: unknown, ctx: CollectCtx, out: CollectedImage[]): voi
     const o = value as Record<string, unknown>;
     const base: CollectCtx = { ...ctx };
 
-    // Categoría de un módulo de listings (cada elemento del array `listings`).
-    if (ctx.module === 'listings' && typeof o.label === 'string' && 'catalog' in o) {
-      base.feedCategory = tokenize(o.label);
+    // ── Detección de MÓDULO por `label` + contenido (estructura real
+    //    features.home.modules.<key> = { label, heroImage, listings|events|… }).
+    //    Funciona a cualquier profundidad (no depende del nivel top-level).
+    const label = typeof o.label === 'string' && o.label ? o.label : null;
+    const hasContent = Object.keys(o).some((k) => MODULE_CONTENT_KEYS.has(k));
+    if (label && (hasContent || 'heroImage' in o)) {
+      const isFeed = FEED_CONTENT_KEYS.some((k) => k in o);
+      if (isFeed) {
+        base.feedCategory = tokenize(label);
+        base.bucketLabel = undefined;
+      } else {
+        base.bucketLabel = label; // carpeta amigable = el label del módulo
+        base.feedCategory = undefined;
+      }
+      base.itemName = undefined;
     }
-    // Item de feed → fija subcategoría + título.
-    if (ctx.feedCategory && isFeedItem(o)) {
+
+    // ── Item de feed (listing/event/trail) → fija subcategoría + título.
+    if (base.feedCategory && isFeedItem(o)) {
       base.itemTitle = tokenize(o.title as string);
-      if (ctx.module === 'events' && typeof o.category === 'string') {
-        base.subcategory = tokenize(o.category);
-      } else if (typeof o.subcategory === 'string' && o.subcategory) {
+      if (typeof o.subcategory === 'string' && o.subcategory) {
         base.subcategory = tokenize(o.subcategory);
+      } else if (typeof o.category === 'string' && o.category) {
+        base.subcategory = tokenize(o.category); // events: category por item
       }
     }
-    // Nombre del item dentro de un bucket (para el archivo).
-    if (ctx.bucketLabel && !ctx.feedCategory) {
-      const idLike = o.id ?? o.slug ?? o.key ?? o.title ?? o.label ?? o.name;
+    // ── Nombre del item dentro de un bucket (para nombrar el archivo).
+    if (base.bucketLabel && !base.feedCategory) {
+      const idLike = o.id ?? o.slug ?? o.key ?? o.title ?? o.name;
       if (typeof idLike === 'string' && idLike) base.itemName = idToken(idLike);
     }
+
     for (const [k, v] of Object.entries(o)) {
       const child: CollectCtx = {
         ...base,
-        depth: base.depth + 1,
         inImage: base.inImage || IMAGE_FIELDS.has(k) || (k === 'src' && base.mediaParent != null),
         field: IMAGE_FIELDS.has(k) || (k === 'src' && base.mediaParent != null) ? k : base.field,
       };
-      // Asignación de módulo (solo en top-level: depth 0 → sus keys son módulos).
-      if (base.depth === 0) {
-        child.module = k;
-        child.bucketLabel = FOLDER_LABEL[k];
-        child.feedCategory = k === 'events' ? 'Events' : k === 'trails' ? 'Trails' : undefined;
-        child.itemName = undefined;
-      }
-      // Branding media {kind,src}.
+      // Branding (logos + media {kind,src}).
+      if (k === 'branding') child.module = 'branding';
       if (base.module === 'branding' && MEDIA_SRC_PARENTS.has(k)) child.mediaParent = k;
       // Fonts del branding → recolectar el nombre/URL como kind:'font'.
       if (base.module === 'branding' && k === 'fonts' && v && typeof v === 'object') {
@@ -337,15 +347,21 @@ function walkImages(value: unknown, ctx: CollectCtx, out: CollectedImage[]): voi
         }
         continue;
       }
-      // Photo Booth: subcarpetas frames/backgrounds/stickers (se mantiene).
+      // Photo Booth: subcarpetas frames/backgrounds/stickers.
       if (k === 'photoBooth') {
         child.bucketLabel = 'photo-booth';
+        child.feedCategory = undefined;
         child.itemName = undefined;
       } else if (
         base.bucketLabel === 'photo-booth' &&
         (k === 'frames' || k === 'backgrounds' || k === 'stickers')
       ) {
         child.bucketLabel = `photo-booth/${k}`;
+      } else if (CONTAINER_BUCKET[k]) {
+        // Contenedores sin label (advertisements, itinerary).
+        child.bucketLabel = CONTAINER_BUCKET[k];
+        child.feedCategory = undefined;
+        child.itemName = undefined;
       }
       walkImages(v, child, out);
     }
@@ -359,11 +375,7 @@ function walkImages(value: unknown, ctx: CollectCtx, out: CollectedImage[]): voi
  */
 export function collectImages(config: unknown, opts: { clientName: string }): CollectedImage[] {
   const out: CollectedImage[] = [];
-  walkImages(
-    config,
-    { inImage: false, depth: 0, client: tokenize(opts.clientName) || 'Client' },
-    out,
-  );
+  walkImages(config, { inImage: false, client: tokenize(opts.clientName) || 'Client' }, out);
   const seen = new Set<string>();
   const deduped: CollectedImage[] = [];
   for (const img of out) {

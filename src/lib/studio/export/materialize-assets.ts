@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto';
 
+import type { AssetTarget, CollectedImage } from './rewrite-config-assets';
+
 /**
  * Materialización de assets a archivos locales para el export STANDALONE (Fase 2
  * del milestone "Publish → Kiosk Standalone"). Toma las refs que produce
@@ -78,23 +80,55 @@ type OneResult =
   | { kind: 'skipped' }
   | { kind: 'failed' };
 
-async function materializeOne(ref: string, deps: MaterializeAssetsDeps): Promise<OneResult> {
+/** Reservador de paths: garantiza unicidad sufijando `-2/-3` ante colisión. */
+type Reserve = (dir: string, base: string, ext: string) => string;
+
+function makeReserve(): Reserve {
+  const used = new Set<string>();
+  return (dir, base, ext) => {
+    let candidate = `${dir}/${base}.${ext}`;
+    let n = 2;
+    while (used.has(candidate)) candidate = `${dir}/${base}-${n++}.${ext}`;
+    used.add(candidate);
+    return candidate;
+  };
+}
+
+/** Path local para una ref http/data: usa el target semántico si existe, si no, hash. */
+function localPath(
+  ref: string,
+  ext: string,
+  target: AssetTarget | undefined,
+  fallbackDir: string,
+  reserve: Reserve,
+): string {
+  if (target) return reserve(target.dir, target.base, ext);
+  return `${fallbackDir}/${shortHash(ref)}.${ext}`;
+}
+
+async function materializeOne(
+  img: CollectedImage,
+  deps: MaterializeAssetsDeps,
+  reserve: Reserve,
+): Promise<OneResult> {
+  const { ref, target } = img;
   switch (classify(ref)) {
     case 'http': {
       const src = await deps.fetchUrl(ref);
       if (!src) return { kind: 'failed' };
-      const local = `assets/feed/${shortHash(ref)}.${src.ext}`;
+      const local = localPath(ref, src.ext, target, 'assets/feed/_misc', reserve);
       await deps.writeAsset(local, src.buffer);
       return { kind: 'downloaded', local };
     }
     case 'data': {
       const src = deps.decodeDataUri(ref);
       if (!src) return { kind: 'failed' };
-      const local = `assets/inline/${shortHash(ref)}.${src.ext}`;
+      const local = localPath(ref, src.ext, target, 'assets/inline', reserve);
       await deps.writeAsset(local, src.buffer);
       return { kind: 'inlined', local };
     }
     case 'relative': {
+      // Los relativos conservan su path del template (preserva la estructura).
       const norm = ref.startsWith('/') ? ref.slice(1) : ref;
       const src = await deps.readTemplateAsset(norm);
       if (!src) return { kind: 'failed' };
@@ -129,13 +163,23 @@ async function mapWithConcurrency<T, R>(
  * (para `rewriteImageRefs`) y un reporte. Dedup por ref; best-effort.
  */
 export async function materializeAssets(
-  refs: string[],
+  refs: ReadonlyArray<string | CollectedImage>,
   deps: MaterializeAssetsDeps,
   opts: { concurrency?: number } = {},
 ): Promise<MaterializeAssetsResult> {
-  const unique = Array.from(new Set(refs));
-  const results = await mapWithConcurrency(unique, opts.concurrency ?? DEFAULT_CONCURRENCY, (ref) =>
-    materializeOne(ref, deps).catch((): OneResult => ({ kind: 'failed' })),
+  // Acepta strings (naming legacy hash) o CollectedImage (target semántico).
+  // Dedup por ref conservando el primer item (su target).
+  const seen = new Set<string>();
+  const unique: CollectedImage[] = [];
+  for (const r of refs) {
+    const img = typeof r === 'string' ? { ref: r } : r;
+    if (seen.has(img.ref)) continue;
+    seen.add(img.ref);
+    unique.push(img);
+  }
+  const reserve = makeReserve();
+  const results = await mapWithConcurrency(unique, opts.concurrency ?? DEFAULT_CONCURRENCY, (img) =>
+    materializeOne(img, deps, reserve).catch((): OneResult => ({ kind: 'failed' })),
   );
 
   const map = new Map<string, string>();
@@ -146,7 +190,8 @@ export async function materializeAssets(
     skipped: 0,
     failed: [],
   };
-  unique.forEach((ref, i) => {
+  unique.forEach((img, i) => {
+    const ref = img.ref;
     const r = results[i];
     if (r.kind === 'failed') {
       report.failed.push(ref);

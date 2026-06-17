@@ -61,7 +61,11 @@ async function main() {
     deps = { ...deps, fetchUrl: async () => null };
   }
 
-  const { config: localized, report } = await localizeConfig(config, deps, { concurrency: 16 });
+  const clientName: string = config?.client?.nombre || config?.client?.name || slug;
+  const { config: localized, report } = await localizeConfig(config, deps, {
+    concurrency: 16,
+    clientName,
+  });
 
   // 3. Escribir el config localizado (mismo formato que el publish: 2 espacios + \n).
   await writeFile(join(dest, configPath), JSON.stringify(localized, null, 2) + '\n', 'utf8');

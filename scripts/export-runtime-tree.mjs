@@ -75,6 +75,10 @@ const EXCLUDE = new Set(
     'src/lib/ingest',
     'src/components/signage',
     'src/components/video-walls',
+    // Data de OTROS productos: cada Publish es independiente; un export de kiosk
+    // NO debe arrastrar el contenido de signage ni de video-walls (#4 feedback).
+    'clients-signage',
+    'clients-walls',
     // el propio toolchain de export no viaja al repo del cliente
     'scripts/export-runtime-tree.mjs',
     'scripts/export-standalone.ts',

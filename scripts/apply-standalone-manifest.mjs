@@ -29,7 +29,7 @@ if (!res.ok) {
   process.exit(1);
 }
 const manifest = await res.json();
-const { slug, config, tokensCss, i18n } = manifest;
+const { slug, config, tokensCss, i18n, studioConfig } = manifest;
 if (!slug || !config) {
   console.error('Manifest inválido: falta `slug` o `config`.');
   process.exit(1);
@@ -56,6 +56,19 @@ if (i18n && typeof i18n === 'object') {
   }
 }
 
+// El config crudo del editor (botón Download) se guarda en un temp; el workflow
+// lo coloca en la RAÍZ del repo standalone como `<slug>-config.json` (#5).
+let studioConfigSaved = false;
+if (studioConfig) {
+  const tmp = process.env.RUNNER_TEMP || '/tmp';
+  await writeFile(
+    join(tmp, 'studio-config.json'),
+    JSON.stringify(studioConfig, null, 2) + '\n',
+    'utf8',
+  );
+  studioConfigSaved = true;
+}
+
 console.log(
-  `✓ manifest aplicado a clients/${slug}/ (config${tokensCss ? ' + tokens' : ''} + ${locales} locales)`,
+  `✓ manifest aplicado a clients/${slug}/ (config${tokensCss ? ' + tokens' : ''} + ${locales} locales${studioConfigSaved ? ' + studio-config' : ''})`,
 );

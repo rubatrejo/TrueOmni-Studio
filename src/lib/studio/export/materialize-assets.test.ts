@@ -25,14 +25,53 @@ function makeDeps(over: Partial<MaterializeAssetsDeps> = {}) {
 }
 
 describe('materializeAssets', () => {
-  it('descarga una URL http a assets/feed/<hash>.<ext> y la mapea', async () => {
+  it('descarga una URL http sin contexto a assets/feed/_misc/<hash>.<ext>', async () => {
     const { deps, writes } = makeDeps();
     const { map, report } = await materializeAssets(['https://cdn/x.jpg'], deps);
     const local = map.get('https://cdn/x.jpg');
-    expect(local).toMatch(/^assets\/feed\/[a-f0-9]{8,}\.jpg$/);
+    expect(local).toMatch(/^assets\/feed\/_misc\/[a-f0-9]{8,}\.jpg$/);
     expect(writes).toHaveLength(1);
     expect(writes[0].rel).toBe(local);
     expect(report.downloaded).toBe(1);
+  });
+
+  it('context-aware: enruta una imagen con target a su carpeta semántica', async () => {
+    const { deps, writes } = makeDeps();
+    const { map } = await materializeAssets(
+      [
+        {
+          ref: 'https://cdn/x.jpg',
+          target: { dir: 'assets/feed/Restaurants', base: 'Acme-Restaurants-Italian-Marios' },
+        },
+      ],
+      deps,
+    );
+    expect(map.get('https://cdn/x.jpg')).toBe(
+      'assets/feed/Restaurants/Acme-Restaurants-Italian-Marios.jpg',
+    );
+    expect(writes[0].rel).toBe('assets/feed/Restaurants/Acme-Restaurants-Italian-Marios.jpg');
+  });
+
+  it('context-aware: colisión de mismo target → sufijo -2', async () => {
+    const { deps } = makeDeps();
+    const { map } = await materializeAssets(
+      [
+        {
+          ref: 'https://cdn/a.jpg',
+          target: { dir: 'assets/photo-booth/backgrounds', base: 'Acme-bg' },
+        },
+        {
+          ref: 'https://cdn/b.jpg',
+          target: { dir: 'assets/photo-booth/backgrounds', base: 'Acme-bg' },
+        },
+      ],
+      deps,
+    );
+    const paths = [map.get('https://cdn/a.jpg'), map.get('https://cdn/b.jpg')].sort();
+    expect(paths).toEqual([
+      'assets/photo-booth/backgrounds/Acme-bg-2.jpg',
+      'assets/photo-booth/backgrounds/Acme-bg.jpg',
+    ]);
   });
 
   it('copia un asset relativo assets/... al mismo path', async () => {

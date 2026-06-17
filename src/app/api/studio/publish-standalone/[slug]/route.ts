@@ -131,6 +131,10 @@ export async function POST(req: Request, { params }: RouteParams) {
       config: mergedConfig,
       tokensCss,
       i18n: bundle ?? null,
+      // Config crudo del editor (el mismo JSON del botón Download del Studio).
+      // El builder lo escribe en la raíz del repo como `<slug>-config.json` para
+      // que el developer pueda re-importarlo al Studio (#5 feedback).
+      studioConfig,
     };
 
     // ── Subir manifest a Blob (random suffix → URL no adivinable) ──

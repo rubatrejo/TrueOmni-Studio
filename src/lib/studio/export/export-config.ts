@@ -3,7 +3,7 @@ import {
   type MaterializeAssetsDeps,
   type MaterializeReport,
 } from './materialize-assets';
-import { collectImageRefs, rewriteImageRefs } from './rewrite-config-assets';
+import { collectImages, rewriteImageRefs } from './rewrite-config-assets';
 
 /**
  * Pipeline de localización del config para el export STANDALONE (Fase 4): une las
@@ -19,9 +19,9 @@ import { collectImageRefs, rewriteImageRefs } from './rewrite-config-assets';
 export async function localizeConfig<T>(
   config: T,
   deps: MaterializeAssetsDeps,
-  opts?: { concurrency?: number },
+  opts?: { concurrency?: number; clientName?: string },
 ): Promise<{ config: T; report: MaterializeReport }> {
-  const refs = collectImageRefs(config);
-  const { map, report } = await materializeAssets(refs, deps, opts);
+  const images = collectImages(config, { clientName: opts?.clientName ?? 'Client' });
+  const { map, report } = await materializeAssets(images, deps, opts);
   return { config: rewriteImageRefs(config, map), report };
 }

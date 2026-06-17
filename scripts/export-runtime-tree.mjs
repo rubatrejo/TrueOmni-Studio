@@ -60,6 +60,12 @@ const EXCLUDE = new Set(
     'graphify-out',
     'docs',
     'CLAUDE.md',
+    // CI/hooks/IDE del monorepo: el repo entregable NO debe correr la CI del
+    // monorepo (genera emails de "CI failed") ni los git hooks de Husky.
+    '.github',
+    '.husky',
+    '.vscode',
+    '.claude',
     // public: el kiosk standalone NO necesita los assets del Studio. Se conserva
     // public/pdfjs (lo usa el lector de brochures del kiosk) y public/brochures.
     'public/studio',

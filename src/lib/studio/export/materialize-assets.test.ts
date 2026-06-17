@@ -25,11 +25,11 @@ function makeDeps(over: Partial<MaterializeAssetsDeps> = {}) {
 }
 
 describe('materializeAssets', () => {
-  it('descarga una URL http sin contexto a assets/feed/_misc/<hash>.<ext>', async () => {
+  it('descarga una URL http sin contexto a assets/Home Dashboard/<hash>.<ext>', async () => {
     const { deps, writes } = makeDeps();
     const { map, report } = await materializeAssets(['https://cdn/x.jpg'], deps);
     const local = map.get('https://cdn/x.jpg');
-    expect(local).toMatch(/^assets\/feed\/_misc\/[a-f0-9]{8,}\.jpg$/);
+    expect(local).toMatch(/^assets\/Home Dashboard\/[a-f0-9]{8,}\.jpg$/);
     expect(writes).toHaveLength(1);
     expect(writes[0].rel).toBe(local);
     expect(report.downloaded).toBe(1);
@@ -189,7 +189,8 @@ describe('integración Fase 1 + Fase 2', () => {
     const { deps } = makeDeps();
     const { map } = await materializeAssets(collectImageRefs(cfg), deps);
     const localized = rewriteImageRefs(cfg, map);
-    expect(localized.heroImage).toMatch(/^assets\/feed\//);
+    // collectImageRefs (legacy, sin contexto) → fallback Home Dashboard.
+    expect(localized.heroImage).toMatch(/^assets\/(feed|Home Dashboard)\//);
     expect(localized.branding.logo).toBe('assets/logo.svg');
     expect(localized.website).toBe('https://example.com');
   });

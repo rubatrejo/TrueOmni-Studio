@@ -146,7 +146,8 @@ async function materializeOne(
     case 'http': {
       const src = await deps.fetchUrl(ref);
       if (!src) return { kind: 'failed' };
-      const local = localPath(ref, src.ext, target, 'assets/feed/_misc', reserve);
+      // Sin contexto reconocible → "Home Dashboard" (#5; antes feed/_misc).
+      const local = localPath(ref, src.ext, target, 'assets/Home Dashboard', reserve);
       await deps.writeAsset(local, src.buffer);
       return { kind: 'downloaded', local };
     }

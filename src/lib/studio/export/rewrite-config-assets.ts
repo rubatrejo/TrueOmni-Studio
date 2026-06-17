@@ -155,6 +155,13 @@ const CONTAINER_BUCKET: Readonly<Record<string, string>> = {
   itinerary: 'Trip Planner',
 };
 
+/** Keys de sección (no bajo `modules`) → su tile.key para el gating de activo. */
+const GATE_KEY: Readonly<Record<string, string>> = {
+  photoBooth: 'photo-booth',
+  itinerary: 'itinerary-builder',
+  survey: 'survey',
+};
+
 /** Campos que son el HEADER/hero de una sección. */
 const HEADER_FIELDS: ReadonlySet<string> = new Set([
   'heroImage',
@@ -214,6 +221,12 @@ interface CollectCtx {
   /** Padre `{kind, src}` del branding (homeHero/brandVideo/idleBackground). */
   mediaParent?: string;
   galleryIndex?: number;
+  /** Estamos dentro del contenedor `features.home.modules` (sus hijos son módulos). */
+  inModules?: boolean;
+  /** Estamos dentro del array `features.home.tiles`. */
+  inTiles?: boolean;
+  /** Set de módulos activos (tile.key con enabled !== false); undefined = no gating. */
+  enabledModules?: ReadonlySet<string>;
 }
 
 /** ¿El objeto es un item de contenido de feed (tiene título + algo de imagen)? */
@@ -319,17 +332,30 @@ function walkImages(value: unknown, ctx: CollectCtx, out: CollectedImage[]): voi
         base.subcategory = tokenize(o.category); // events: category por item
       }
     }
+    // ── Tile del Home (#2): su `image` → assets/Home Dashboard/tiles/<key>.
+    if (base.inTiles && typeof o.key === 'string' && o.key) {
+      base.bucketLabel = 'Home Dashboard/tiles';
+      base.feedCategory = undefined;
+      base.itemName = idToken(o.key);
+    }
     // ── Nombre del item dentro de un bucket (para nombrar el archivo).
-    if (base.bucketLabel && !base.feedCategory) {
+    else if (base.bucketLabel && !base.feedCategory) {
       const idLike = o.id ?? o.slug ?? o.key ?? o.title ?? o.name;
       if (typeof idLike === 'string' && idLike) base.itemName = idToken(idLike);
     }
 
     for (const [k, v] of Object.entries(o)) {
+      // ── Gating de módulo INACTIVO (#1): se omite por completo su subárbol.
+      if (base.enabledModules) {
+        const gate = GATE_KEY[k] ?? (base.inModules ? k : undefined);
+        if (gate && !base.enabledModules.has(gate)) continue;
+      }
       const child: CollectCtx = {
         ...base,
         inImage: base.inImage || IMAGE_FIELDS.has(k) || (k === 'src' && base.mediaParent != null),
         field: IMAGE_FIELDS.has(k) || (k === 'src' && base.mediaParent != null) ? k : base.field,
+        inModules: k === 'modules',
+        inTiles: k === 'tiles',
       };
       // Branding (logos + media {kind,src}).
       if (k === 'branding') child.module = 'branding';
@@ -369,13 +395,38 @@ function walkImages(value: unknown, ctx: CollectCtx, out: CollectedImage[]): voi
 }
 
 /**
+ * Conjunto de módulos ACTIVOS (#1): `tile.key` de los tiles del Home con
+ * `enabled !== false`. Si no hay tiles, devuelve undefined (sin gating).
+ */
+export function activeModules(config: unknown): ReadonlySet<string> | undefined {
+  const tiles = (config as { features?: { home?: { tiles?: unknown } } })?.features?.home?.tiles;
+  if (!Array.isArray(tiles)) return undefined;
+  const set = new Set<string>();
+  for (const t of tiles) {
+    if (t && typeof t === 'object') {
+      const tile = t as { key?: unknown; enabled?: unknown };
+      if (typeof tile.key === 'string' && tile.enabled !== false) set.add(tile.key);
+    }
+  }
+  return set;
+}
+
+/**
  * Recolecta las imágenes del config CON su destino semántico (context-aware).
- * `clientName` se usa como prefijo del naming (e.g. "Hello_Harford"). Deduplica
- * por ref conservando el primer contexto visto.
+ * `clientName` se usa como prefijo del naming (e.g. "Hello_Harford"). Solo
+ * recolecta los módulos ACTIVOS (por `tile.enabled`). Deduplica por ref.
  */
 export function collectImages(config: unknown, opts: { clientName: string }): CollectedImage[] {
   const out: CollectedImage[] = [];
-  walkImages(config, { inImage: false, client: tokenize(opts.clientName) || 'Client' }, out);
+  walkImages(
+    config,
+    {
+      inImage: false,
+      client: tokenize(opts.clientName) || 'Client',
+      enabledModules: activeModules(config),
+    },
+    out,
+  );
   const seen = new Set<string>();
   const deduped: CollectedImage[] = [];
   for (const img of out) {

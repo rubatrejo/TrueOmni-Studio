@@ -305,4 +305,53 @@ describe('collectImages (context-aware naming, estructura real plana)', () => {
     expect(refs).toContain('https://cdn/i.jpg');
     expect(refs).not.toContain('https://example.com');
   });
+
+  it('módulos inactivos (#1): omite el contenido de un módulo con tile.enabled=false', () => {
+    const cfg = {
+      features: {
+        home: {
+          tiles: [
+            { key: 'restaurants', enabled: true },
+            { key: 'guestbook', enabled: false },
+          ],
+          modules: {
+            restaurants: {
+              label: 'Eat & Drink',
+              listings: [{ subcategory: 'Italian', title: 'X', image: 'https://cdn/r.jpg' }],
+            },
+            guestbook: {
+              label: 'Guestbook',
+              heroImage: 'https://cdn/gb-hero.jpg',
+              pinCatalog: [{ id: 'p1', image: 'https://cdn/gb.jpg' }],
+            },
+          },
+        },
+      },
+    };
+    const refs = collectImages(cfg, { clientName: 'Acme' }).map((i) => i.ref);
+    expect(refs).toContain('https://cdn/r.jpg'); // restaurants activo
+    expect(refs).not.toContain('https://cdn/gb.jpg'); // guestbook inactivo → omitido
+    expect(refs).not.toContain('https://cdn/gb-hero.jpg');
+  });
+
+  it('tiles activos (#2): tile.image → assets/Home Dashboard/tiles/ con name=tile.key', () => {
+    const cfg = {
+      features: {
+        home: {
+          tiles: [
+            { key: 'events', enabled: true, image: 'https://cdn/events-tile.jpg' },
+            { key: 'map', enabled: false, image: 'https://cdn/map-tile.jpg' },
+          ],
+        },
+      },
+    };
+    const imgs = collectImages(cfg, { clientName: 'Acme' });
+    const byRef2 = byRef(imgs);
+    expect(byRef2['https://cdn/events-tile.jpg']).toEqual({
+      dir: 'assets/Home Dashboard/tiles',
+      base: 'Acme-events',
+    });
+    // tile inactivo no se exporta
+    expect(imgs.map((i) => i.ref)).not.toContain('https://cdn/map-tile.jpg');
+  });
 });

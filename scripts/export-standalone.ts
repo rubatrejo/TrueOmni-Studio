@@ -74,19 +74,23 @@ async function main() {
   // 3. Escribir el config localizado (mismo formato que el publish: 2 espacios + \n).
   await writeFile(join(dest, configPath), JSON.stringify(localized, null, 2) + '\n', 'utf8');
 
-  // 3b. Fonts del branding (#7): viven en el studioConfig (no en el FS config),
-  //     que apply-standalone-manifest deja en $RUNNER_TEMP/studio-config.json.
-  //     Best-effort: descarga los archivos a assets/branding/fonts/. No se
-  //     reescribe el config (las fonts se referencian por nombre, no por path).
-  let fontsDownloaded = 0;
+  // 3b. Branding-extras (#7): fonts + brand backgrounds (homeHero/brandVideo/
+  //     idleBackground) viven en el studioConfig (NO en el FS config, que solo
+  //     trae logos), que apply-standalone-manifest deja en
+  //     $RUNNER_TEMP/studio-config.json. Best-effort: descarga a assets/branding/
+  //     (+ /fonts). No se reescribe el config (no se referencian por path local).
+  let brandingExtras = 0;
   if (!dry && process.env.RUNNER_TEMP) {
     try {
       const studio = JSON.parse(
         await readFile(join(process.env.RUNNER_TEMP, 'studio-config.json'), 'utf8'),
       );
-      const fonts = studio?.branding?.fonts ?? {};
-      const fontImages: CollectedImage[] = [];
-      for (const v of Object.values(fonts)) {
+      const branding = studio?.branding ?? {};
+      const sanitize = (s: string) => s.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '');
+      const extras: CollectedImage[] = [];
+
+      // Fonts → assets/branding/fonts/
+      for (const v of Object.values(branding.fonts ?? {})) {
         let ref: string | null = null;
         let name = 'font';
         if (typeof v === 'string' && v.trim()) {
@@ -100,21 +104,34 @@ async function main() {
           }
         }
         if (ref) {
-          const base = name.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'font';
-          fontImages.push({ ref, kind: 'font', target: { dir: 'assets/branding/fonts', base } });
+          extras.push({
+            ref,
+            kind: 'font',
+            target: { dir: 'assets/branding/fonts', base: sanitize(name) || 'font' },
+          });
         }
       }
-      if (fontImages.length) {
-        const { report: fr } = await materializeAssets(fontImages, deps, { concurrency: 8 });
-        fontsDownloaded = fr.downloaded;
+
+      // Brand backgrounds/media {kind, src} → assets/branding/
+      for (const key of ['homeHero', 'brandVideo', 'idleBackground']) {
+        const media = branding[key] as { src?: string } | undefined;
+        const src = media?.src;
+        if (typeof src === 'string' && /^https?:\/\//i.test(src)) {
+          extras.push({ ref: src, target: { dir: 'assets/branding', base: sanitize(key) } });
+        }
+      }
+
+      if (extras.length) {
+        const { report: er } = await materializeAssets(extras, deps, { concurrency: 8 });
+        brandingExtras = er.downloaded;
       }
     } catch {
-      // sin studio-config o sin fonts → se omite.
+      // sin studio-config → se omite.
     }
   }
 
   console.log('\n── export-standalone report ──');
-  if (fontsDownloaded) console.log(`fonts:       ${fontsDownloaded}`);
+  if (brandingExtras) console.log(`branding:    ${brandingExtras} (fonts + backgrounds)`);
   console.log(`slug:        ${slug}`);
   console.log(`dest:        ${dest}`);
   console.log(`downloaded:  ${report.downloaded}`);

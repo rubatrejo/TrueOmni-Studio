@@ -57,6 +57,12 @@ export const ListingsCatalogSchema = z.object({
    */
   subcategoryImages: z.record(z.string(), z.string()).optional(),
   features: z.array(z.string().max(64)).default([]),
+  /**
+   * Si es `true`, el kiosk salta la pantalla de sub-categorías de este módulo y
+   * va directo a la lista de listings. Flag por-producto del KIOSK (la PWA tiene
+   * el suyo en su config de listings). `.default(false)` no rompe configs viejos.
+   */
+  skipSubcategories: z.boolean().default(false),
   listings: z.array(ListingItemSchema).superRefine(uniqueBySlug).default([]),
 });
 
@@ -121,6 +127,7 @@ const EMPTY_LISTINGS_CATALOG: ListingsCatalog = {
   heroImage: '',
   subcategories: [],
   features: [],
+  skipSubcategories: false,
   listings: [],
 };
 
@@ -173,6 +180,7 @@ export function migrateListings(raw: unknown): ListingsModule {
           heroImage: typeof c.heroImage === 'string' ? c.heroImage : '',
           subcategories: Array.isArray(c.subcategories) ? (c.subcategories as string[]) : [],
           features: Array.isArray(c.features) ? (c.features as string[]) : [],
+          skipSubcategories: c.skipSubcategories === true,
           listings: Array.isArray(c.listings) ? (c.listings as ListingItem[]) : [],
         };
       }
@@ -257,6 +265,7 @@ export function duplicateListingEntry(
       heroImage: source.catalog.heroImage,
       subcategories: [...source.catalog.subcategories],
       features: [...source.catalog.features],
+      skipSubcategories: source.catalog.skipSubcategories,
       // Clonar los items con nuevos slugs (cada listing.slug debe ser único
       // dentro del KioskConfig). Cambiamos prefijo por la nueva key.
       listings: source.catalog.listings.map((l, i) => ({
@@ -290,6 +299,7 @@ export function makeBlankListingEntry(
         heroImage: template.catalog.heroImage,
         subcategories: [...template.catalog.subcategories],
         features: [...template.catalog.features],
+        skipSubcategories: template.catalog.skipSubcategories,
         listings: template.catalog.listings.map((l, i) => ({
           ...l,
           slug: `${key}-${String(i + 1).padStart(3, '0')}`,

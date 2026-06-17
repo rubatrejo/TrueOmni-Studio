@@ -572,6 +572,7 @@ function bootstrapListings(
         ? { subcategoryImages }
         : {}),
       features: Array.isArray(value.features) ? value.features : [],
+      skipSubcategories: value.skipSubcategories === true,
       listings: Array.isArray(value.listings) ? value.listings : [],
     };
     const parsed = ListingsCatalogSchema.safeParse(candidateCatalog);

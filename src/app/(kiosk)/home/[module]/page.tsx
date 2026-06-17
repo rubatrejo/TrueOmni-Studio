@@ -238,7 +238,7 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
     // Sin `cat` y con sub-categorías → pantalla de sub-categorías primero.
     // Con `cat` (o `cat=all`, o sin sub-categorías) → lista (pre-filtrada si aplica).
     const hasSubcats = (mod.subcategories ?? []).length > 0;
-    if (hasSubcats && !cat) {
+    if (hasSubcats && !cat && !mod.skipSubcategories) {
       return (
         <KioskCanvas>
           <SubcategoryScreen

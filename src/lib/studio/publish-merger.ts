@@ -272,6 +272,7 @@ export function buildFilesystemConfig(
         heroImage: c.heroImage,
         subcategories: c.subcategories,
         features: c.features,
+        ...(c.skipSubcategories ? { skipSubcategories: true } : {}),
         listings: c.listings,
       };
     }

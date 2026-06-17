@@ -30,6 +30,7 @@ import { EditorEmptyState } from './EditorEmptyState';
 import { FeedManagedBanner } from './FeedManagedBanner';
 import { MediaField } from './MediaField';
 import { useToast } from './Toast';
+import { ToggleSwitch } from './ui/ToggleSwitch';
 
 interface ListingsEditorProps {
   value: ListingsModule;
@@ -432,6 +433,25 @@ function ListingsCatalogEditor({
             getUsage={(item) => catalog.listings.filter((l) => l.features.includes(item)).length}
           />
         </div>
+
+        {catalog.subcategories.length > 0 ? (
+          <div className="flex items-start justify-between gap-3 rounded-md border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900/30">
+            <div className="space-y-0.5">
+              <p className="text-[12px] font-medium text-zinc-900 dark:text-zinc-100">
+                Skip subcategories
+              </p>
+              <p className="text-[11px] text-zinc-500">
+                Go straight to the listings when this module is opened (the subcategories screen is
+                skipped).
+              </p>
+            </div>
+            <ToggleSwitch
+              enabled={catalog.skipSubcategories === true}
+              onChange={() => onCatalogChange({ skipSubcategories: !catalog.skipSubcategories })}
+              label="skip subcategories"
+            />
+          </div>
+        ) : null}
 
         <CatalogToolbar
           search={search}

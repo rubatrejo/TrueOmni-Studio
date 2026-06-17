@@ -395,6 +395,13 @@ export interface HomeModule {
   subcategoryImages?: Record<string, string>;
   /** Features/servicios filtrables. */
   features: string[];
+  /**
+   * Si es `true`, al tocar el tile del módulo se salta la pantalla de
+   * sub-categorías del kiosk y se va directo a la lista de listings. Flag
+   * por-módulo del KIOSK (independiente del flag homónimo de la PWA). Default
+   * `false`/ausente = comportamiento de siempre (mostrar sub-categorías).
+   */
+  skipSubcategories?: boolean;
   listings: Listing[];
 }
 
@@ -1887,6 +1894,13 @@ export interface PwaListingsModuleConfig {
   openUntilPrefix: string;
   /** Labels de los tabs Listings / Map. */
   tabs: { listings: string; map: string };
+  /**
+   * Si es `true`, la PWA salta el grid de sub-categorías de este módulo y va
+   * directo a la lista (`/pwa/<key>/list`). Flag por-producto de la PWA,
+   * independiente del flag homónimo del KIOSK (`HomeModule.skipSubcategories`).
+   * Default `false`/ausente = mostrar el grid como hoy.
+   */
+  skipSubcategories?: boolean;
   /** Tiles del grid de categorías (#1). */
   categories: PwaListingCategory[];
   /** Labels de la pantalla de detalle. */

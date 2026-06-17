@@ -224,9 +224,13 @@ export function applyContentToKiosk(cfg: KioskConfig, content: ClientContent): K
   // Fotos de sub-categoría existentes por módulo (subidas por el operador) para
   // NO perderlas en cada re-sync. Se podan a las sub-categorías que siguen vivas.
   const prevSubImagesByKey = new Map<string, Record<string, string>>();
+  // Flag "skip subcategories" previo por módulo — se preserva en cada re-sync
+  // igual que las fotos de sub-categoría, para no perder lo que el operador eligió.
+  const prevSkipSubcatsByKey = new Map<string, boolean>();
   for (const m of cfg.listings ?? []) {
     const imgs = m.catalog?.subcategoryImages;
     if (imgs && Object.keys(imgs).length > 0) prevSubImagesByKey.set(m.key, imgs);
+    if (m.catalog?.skipSubcategories === true) prevSkipSubcatsByKey.set(m.key, true);
   }
 
   const feedEntries: ListingsCatalogEntry[] = [...byModule.entries()].map(([key, g]) => {
@@ -250,6 +254,7 @@ export function applyContentToKiosk(cfg: KioskConfig, content: ClientContent): K
         subcategories,
         subcategoryImages,
         features: uniqStrings(items.flatMap((i) => i.features)),
+        skipSubcategories: prevSkipSubcatsByKey.get(key) === true,
         listings: items,
       },
     };

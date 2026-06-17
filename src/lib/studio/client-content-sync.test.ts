@@ -84,7 +84,13 @@ function manualModule(key: string): ListingsCatalogEntry {
     label: key,
     iconKey: 'MapPin',
     enabled: true,
-    catalog: { heroImage: '', subcategories: [], features: [], listings: [] },
+    catalog: {
+      heroImage: '',
+      subcategories: [],
+      features: [],
+      skipSubcategories: false,
+      listings: [],
+    },
   };
 }
 

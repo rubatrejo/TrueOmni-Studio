@@ -6,6 +6,7 @@ import Link from 'next/link';
 import type { PwaListingCategory, PwaListingsModuleConfig } from '@/lib/config';
 
 import { ImageUrlField } from '../../../_components/catalog/ImageUrlField';
+import { ToggleSwitch } from '../../../_components/ui/ToggleSwitch';
 
 import { PwaField, PwaGroup, PwaOptionList, PwaPanelHeader } from './pwa-ui';
 
@@ -143,6 +144,22 @@ export function ListingsModuleEditor({
         </PwaGroup>
 
         <PwaGroup title="Categories (grid tiles)">
+          <div className="flex items-start justify-between gap-3 rounded-md border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900/30">
+            <div className="space-y-0.5">
+              <p className="text-[12px] font-medium text-zinc-900 dark:text-zinc-100">
+                Skip subcategories
+              </p>
+              <p className="text-[11px] text-zinc-500">
+                Go straight to the listings — the subcategories grid is skipped when this module is
+                opened.
+              </p>
+            </div>
+            <ToggleSwitch
+              enabled={v.skipSubcategories === true}
+              onChange={() => onChange({ ...v, skipSubcategories: !v.skipSubcategories })}
+              label="skip subcategories"
+            />
+          </div>
           <div className="flex items-start gap-2 rounded-md border border-sky-200 bg-sky-50/70 p-2.5 text-[11.5px] leading-relaxed text-sky-800 dark:border-sky-900/40 dark:bg-sky-950/20 dark:text-sky-300">
             <ImageIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             <p>

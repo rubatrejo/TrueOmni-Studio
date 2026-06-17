@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation';
+
 import { ListingsGridScreenLive } from '@/components/pwa/listings-grid-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
@@ -23,6 +25,11 @@ export default async function PwaStayPage() {
         </div>
       </MobileCanvas>
     );
+  }
+
+  // Flag por-producto de la PWA: saltar el grid y entrar directo a la lista.
+  if (s.skipSubcategories === true) {
+    redirect('/pwa/stay/list');
   }
 
   return (

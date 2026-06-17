@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation';
+
 import { ListingsGridScreenLive } from '@/components/pwa/listings-grid-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
@@ -22,6 +24,11 @@ export default async function PwaRestaurantsPage() {
         </div>
       </MobileCanvas>
     );
+  }
+
+  // Flag por-producto de la PWA: saltar el grid y entrar directo a la lista.
+  if (r.skipSubcategories === true) {
+    redirect('/pwa/restaurants/list');
   }
 
   return (

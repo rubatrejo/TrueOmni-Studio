@@ -4,6 +4,77 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-17 — Milestone "Kiosk Standalone" Fase 6 (última milla) E2E + 4 rondas de feedback
+
+**Todo en prod** (monorepo `main`: `4a77965`→`141ed10`; workflow en repo `rubatrejo/kiosk-exporter`).
+Deploys Vercel READY en cada push.
+
+**Fase 6 cerrada — el publish standalone funciona E2E desde el Studio:**
+
+- Endpoint `POST /api/studio/publish-standalone/[slug]?product=kiosk|pwa` (`4a77965`): admin gate
+  clonado del publish PR, arma manifest (config FS merged + tokens + i18n + studioConfig crudo),
+  lo sube a Blob y dispara la Action vía `octokit.actions.createWorkflowDispatch` (env
+  `EXPORTER_GITHUB_TOKEN`). Helpers `dispatchExporterWorkflow`/`getExporterDispatchConfig`/
+  `exporterRunsUrl` en `github-publisher.ts`.
+- Workflow `export-standalone.yml` en `rubatrejo/kiosk-exporter` (Rubén lo sube con
+  `! bash /tmp/push-workflow.sh` — yo NO puedo pushear a ese repo: el clasificador de seguridad
+  lo bloquea por exfil; el YAML lo genero en `/tmp/export-standalone.yml`). Pasos: checkout
+  monorepo + apply-standalone-manifest + `npx tsx scripts/export-standalone.ts` + push repo
+  `TrueOmni-<Cliente>-<Producto>-MM-DD-YYYY` (PATCH name para forzar Title Case) + zip artifact +
+  verify build best-effort. `$RUNNER_TEMP` como dest (cpSync prohíbe copiar dir dentro de sí mismo).
+- `EXPORTER_GITHUB_TOKEN` ya está como env var en Vercel (Rubén) y como secret del builder.
+- **Run real E2E verde** (hello-harford, product=kiosk): repo + zip + verify build OK.
+
+**4 rondas de feedback sobre el repo generado (todas resueltas en código, en prod):**
+
+- Materialización **context-aware** contra la estructura REAL del FS config
+  (`features.home.modules.<key>` con `label`=categoría; NO el studioConfig plano — ese fue el bug
+  que costó 2 rondas). `_misc` bajó de 325 → ~6. Feed por categoría real
+  (`feed/Eat_and_Drink/Mexican`, `feed/Upcoming_Events/Music`, etc.).
+- **Solo módulos ACTIVOS** (`activeModules()` por `tiles[].enabled`): módulo con tile off se omite
+  (config + assets). Tiles activos → `Home Dashboard/tiles/<key>`.
+- **Assets de CÓDIGO** (clave): muchos los referencia el código con paths fijos
+  (`home/header-bg.jpg` hero, `ai/trigger.svg` botón AI, billboard idle, favicon, logos) y NO están
+  en el config → `export-standalone.ts` grepea el `src/` exportado y los copia a su path original
+  (con fallback default), gateando módulos inactivos. Pins del Map = SVG inline en `map-pin-icons.ts`
+  (viajan en src/).
+- Carpetas: removidos `docs/`/`CLAUDE.md`/`public/studio`/`.github`/`.husky` (esto último mató los
+  emails "CI failed" del repo generado); `home`→`Home Dashboard`; branding (logos + homeHero/
+  idleBackground/fonts descargadas) → `assets/branding/(+fonts)`; `assets/integrations/` (mapbox
+  token + README); `ASSETS.md` catálogo en la raíz. Naming repo/zip/artifact Title Case.
+- **Export por producto**: el editor Kiosk muestra solo "Export Kiosk" (en PublishModal); el editor
+  PWA tiene botón "Export" en su TopBar (`publishStandalone(slug,'pwa')`). Displays: su export
+  standalone aún NO existe (la Action solo soporta kiosk|pwa).
+
+**Libs del export** (`src/lib/studio/export/`): `rewrite-config-assets.ts` (`collectImages`
+context-aware + `activeModules`), `materialize-assets.ts` (target + fonts + relative-rename
+home→Home Dashboard + fallback Home Dashboard), `materialize-assets-fs.ts` (`fetchFont` Google
+CSS1 TTF). 51 tests del export. `scripts/`: `export-standalone.ts`, `export-runtime-tree.mjs`,
+`apply-standalone-manifest.mjs`.
+
+**Verificado:** typecheck + lint + 321 tests + dry-run local + test local del colector contra el FS
+config construido con `buildFilesystemConfig` + run real E2E del builder verde.
+
+**PENDIENTE para la próxima sesión (continúa feedback de Rubén):**
+
+- Rubén iba a **re-correr Export Kiosk** para verificar el repo del 3er/4º round (módulos activos +
+  assets de código + integrations + ASSETS.md + repo Title Case). Falta su QA visual del repo.
+- Probar E2E el nuevo botón **Export PWA** del editor PWA (recién pusheado, sin run real aún).
+- **Displays/Signage**: construir su export standalone (la Action y `export-runtime-tree` solo
+  soportan kiosk|pwa; falta el árbol signage + su botón).
+- Menores: warning Node20 de las Actions (cosmético, GitHub-side, no suprimible aún); brand
+  backgrounds homeHero/idleBackground NO viajan si no están en studioConfig.branding; rotar el
+  token `gho_` que se imprimió en el transcript (y actualizar Vercel + secret builder); limpieza de
+  temporales untracked (bloqueada por permiso `rm`: `clients/_pretest_/`, `*-tmp.mjs`,
+  `_dump-*.test.ts`).
+
+**Cómo se dispara un export** (recordatorio): Studio → editor del producto → botón Export/Publish →
+endpoint → Blob manifest → dispatch Action `kiosk-exporter` → repo `TrueOmni-<Cliente>-<Prod>-fecha`
+
+- zip. Si se cambia el workflow YAML, Rubén lo re-sube con `! bash /tmp/push-workflow.sh`.
+
+---
+
 ### Sesión 2026-06-16/17 — Milestone "Kiosk Standalone" (Fases 0–5) + fixes Studio (idle, thumbnails, frames, CI)
 
 **Hecho (todo en prod, deploys Vercel READY):**

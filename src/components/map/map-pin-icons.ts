@@ -437,8 +437,18 @@ export function customPinSvg(iconKey: string, color: string): string {
 /** Cluster — azul oscuro (primary del kiosk) 90×90 con número blanco bold. */
 export function clusterSvg(count: number): string {
   const fill = resolveBrandColor('--brand-primary', '#0066cc');
+  return clusterSvgWithColor(count, fill);
+}
+
+/**
+ * Variante Node-safe de `clusterSvg`: recibe el COLOR LITERAL ya resuelto (sin
+ * depender del browser / `getComputedStyle`). La usa el export standalone para
+ * materializar el pin de cluster del Map / Trip Planner como ARCHIVO `.svg`,
+ * con el `--brand-primary` resuelto del `tokens.css` del cliente.
+ */
+export function clusterSvgWithColor(count: number, color: string): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 90 90">
-    <circle cx="45" cy="45" r="38" fill="${fill}" stroke="#ffffff" stroke-width="4"/>
+    <circle cx="45" cy="45" r="38" fill="${color}" stroke="#ffffff" stroke-width="4"/>
     <text x="45" y="55" text-anchor="middle" fill="#ffffff" font-family="Helvetica, Arial, sans-serif" font-size="32" font-weight="700">${count}</text>
   </svg>`;
 }

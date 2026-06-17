@@ -15,14 +15,16 @@
  *          flujo (copia de assets relativos + data: + reescritura) sin red.
  */
 import { execFileSync } from 'node:child_process';
-import { cp, mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
 import {
   CANONICAL_MAP_SOURCES,
+  clusterSvgWithColor,
   pinColorForExport,
   pinSvgWithColor,
 } from '../src/components/map/map-pin-icons';
+import { trueOmniWordmarkSvg } from '../src/components/brand/true-omni-logo';
 import { localizeConfig } from '../src/lib/studio/export/export-config';
 import {
   canonicalAssetPath,
@@ -52,6 +54,33 @@ const root = process.cwd();
 /** Token de nombre de cliente para filenames: símbolos/espacios → `_`, conserva caja. */
 function sanitizeName(s: string): string {
   return (s || 'Client').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'Client';
+}
+
+/**
+ * Tokeniza una etiqueta a un filename seguro y legible (#1): `&` → `and`, el
+ * resto de símbolos/espacios → `-`, sin guiones dobles ni al inicio/fin.
+ * Ej: "Eat & Drink" → "Eat-and-Drink", "Things to Do" → "Things-to-Do".
+ */
+function tokenizeLabel(s: string): string {
+  return (s || '')
+    .replace(/&/g, ' and ')
+    .replace(/[^A-Za-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+/**
+ * Nombre de la carpeta top-level de assets del cliente (#3): Title-Case con
+ * guiones + sufijo `-Assets` (mismo naming que el repo). Ej: "Hello Harford"
+ * → "Hello-Harford-Assets".
+ */
+function clientFolderName(name: string): string {
+  const titled = (name || 'Client')
+    .split(/[^A-Za-z0-9]+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join('-');
+  return `${titled || 'Client'}-Assets`;
 }
 
 /** Cuenta archivos (recursivo) bajo un dir, para el catálogo ASSETS.md. */
@@ -256,11 +285,11 @@ async function main() {
       if (topFolder === 'ai' && !sysOn('aiAvatar')) continue;
       if (topFolder === 'ads' && !sysOn('ads')) continue;
 
-      // Fuente: el billboard activo SOLO del cliente (sin fallback al theme,
-      // decisión #1); el resto cliente→default.
-      const baseDirs = bm
-        ? [join(root, `clients/${slug}/assets`)]
-        : [join(root, `clients/${slug}/assets`), join(root, 'clients/default/assets')];
+      // Fuente: cliente→default para TODO, INCLUIDO el billboard (#2): el idle
+      // screen siempre muestra algo, así que la variante activa cae al default
+      // si el cliente no trae assets propios (antes el billboard era cliente-only
+      // sin fallback; se cambió para que el idle nunca quede vacío).
+      const baseDirs = [join(root, `clients/${slug}/assets`), join(root, 'clients/default/assets')];
       let srcPath: string | null = null;
       for (const baseDir of baseDirs) {
         const candidate = join(baseDir, rel);
@@ -272,10 +301,14 @@ async function main() {
           /* siguiente */
         }
       }
-      if (!srcPath) continue; // no existe (o billboard sin asset propio) → se omite
+      if (!srcPath) continue; // no existe ni en cliente ni en default → se omite
 
-      // Destino capitalizado (#7).
-      const outRel = canonicalAssetPath(`assets/${rel}`).replace(/^assets\//, '');
+      // Destino capitalizado (#7). El billboard va a `Billboard/Idle/` (#2):
+      // los assets de la variante activa del idle screen viven todos juntos
+      // ahí (la variante concreta ya está gateada arriba por `billboardVariant`).
+      const outRel = bm
+        ? `Billboard/Idle/${rel.split('/').slice(1).join('/')}`
+        : canonicalAssetPath(`assets/${rel}`).replace(/^assets\//, '');
       const destPath = join(dest, `clients/${slug}/assets`, outRel);
       await mkdir(dirname(destPath), { recursive: true });
       await cp(srcPath, destPath);
@@ -308,7 +341,7 @@ async function main() {
     [/assets\/guestbook\//g, 'assets/Guestbook/'],
     [/assets\/pwa\//g, 'assets/PWA/'],
     [/assets\/ads\//g, 'assets/Ads/'],
-    [/assets\/billboard-\d+\//g, 'assets/Billboard/'],
+    [/assets\/billboard-\d+\//g, 'assets/Billboard/Idle/'],
   ];
   let codeRefsRewritten = 0;
   try {
@@ -363,6 +396,21 @@ async function main() {
         '<path d="M0 300H780M0 600H780M0 900H780M260 0V1200M520 0V1200"/></g>' +
         '<text x="390" y="610" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" ' +
         'font-size="28" fill="#9aa0a6">Map placeholder</text></svg>';
+      // Etiquetas reales de las categorías del cliente para nombrar cada pin
+      // (#1): restaurants → "Eat & Drink" → "Eat-and-Drink.svg". Si no hay
+      // label, cae al source key capitalizado.
+      const moduleLabels = (
+        localized as { features?: { home?: { modules?: Record<string, { label?: string }> } } }
+      )?.features?.home?.modules;
+      const pinFilename = (source: string): string => {
+        const label = moduleLabels?.[source]?.label;
+        const token = label ? tokenizeLabel(label) : '';
+        return token || sanitizeName(source.charAt(0).toUpperCase() + source.slice(1));
+      };
+      // Color del cluster: --brand-primary del cliente (resuelto a hsl(...)),
+      // fallback al azul kiosk. count de muestra para el pin de ejemplo.
+      const primaryRaw = (brandVars['--brand-primary'] ?? '').trim();
+      const clusterColor = primaryRaw ? `hsl(${primaryRaw.split(/\s+/).join(', ')})` : '#0066cc';
       const pinDirs = [
         ...(active?.has('map') ? [`clients/${slug}/assets/Map`] : []),
         ...(active?.has('itinerary-builder') ? [`clients/${slug}/assets/Trip Planner`] : []),
@@ -372,9 +420,16 @@ async function main() {
         await mkdir(pinsDir, { recursive: true });
         for (const source of CANONICAL_MAP_SOURCES) {
           const color = pinColorForExport(source, brandVars);
-          await writeFile(join(pinsDir, `${source}.svg`), pinSvgWithColor(source, color), 'utf8');
+          await writeFile(
+            join(pinsDir, `${pinFilename(source)}.svg`),
+            pinSvgWithColor(source, color),
+            'utf8',
+          );
           mapAssets++;
         }
+        // Pin de cluster (#1): un solo SVG por carpeta, color = brand-primary.
+        await writeFile(join(pinsDir, 'Cluster.svg'), clusterSvgWithColor(5, clusterColor), 'utf8');
+        mapAssets++;
       }
       if (active?.has('map')) {
         await writeFile(
@@ -387,6 +442,24 @@ async function main() {
     } catch {
       // sin pins → se omite (best-effort).
     }
+  }
+
+  // 3h. Logo "Powered by TrueOmni" del footer del idle screen (#4): el footer
+  //     del Billboard idle lo renderiza inline (SVG en `true-omni-logo.tsx`).
+  //     Se materializa como ARCHIVO `.svg` autónomo (blanco, como en el footer)
+  //     junto al resto del idle en `Billboard/Idle/` para que el Dev lo tenga.
+  let brandLogos = 0;
+  try {
+    const idleDir = join(dest, `clients/${slug}/assets/Billboard/Idle`);
+    await mkdir(idleDir, { recursive: true });
+    await writeFile(
+      join(idleDir, 'Powered-by-TrueOmni.svg'),
+      trueOmniWordmarkSvg('#ffffff'),
+      'utf8',
+    );
+    brandLogos++;
+  } catch {
+    // best-effort.
   }
 
   // 3d. Carpeta de integraciones (#E): el Dev necesita saber qué cablear
@@ -453,7 +526,62 @@ async function main() {
     'utf8',
   );
 
+  // 3i. Rename de la carpeta top-level `clients/` → `<ClientName>-Assets/` (#3):
+  //     la carpeta de DATA del cliente queda con el naming del repo
+  //     (`Hello-Harford-Assets/hello-harford/...`) en vez de `clients/...`. Se
+  //     renombra SOLO el parent (`clients` → `<ClientName>-Assets`); el `<slug>/`
+  //     interno (config.json + assets/ + i18n/ + tokens.css) se conserva. Luego
+  //     se reescriben TODAS las refs del runtime exportado que apuntan a
+  //     `clients/` (el loader `path.join(process.cwd(), 'clients', slug, ...)`,
+  //     el asset route handler, tokens, i18n…) para que apunten al dir nuevo.
+  const assetsFolder = clientFolderName(clientName);
+  let dataRefsRewritten = 0;
+  try {
+    // 1) Renombrar el dir destino `clients/` → `<ClientName>-Assets/`.
+    await rename(join(dest, 'clients'), join(dest, assetsFolder));
+
+    // 2) Reescribir las refs en el src/ exportado. El runtime referencia la
+    //    carpeta de dos formas: como ARG de `path.join(..., 'clients', ...)`
+    //    (string literal `'clients'`) y como segmento de paths literales
+    //    `clients/<algo>` en docs/strings. Se reescriben ambas. NO se tocan
+    //    `clients-signage`/`clients-walls` (otros productos) — el regex exige
+    //    que tras `clients` venga `'`, `/` o fin, nunca `-`.
+    const reArg = /(['"])clients\1/g; // 'clients' como arg de path.join
+    const rePath = /\bclients\//g; // segmento "clients/" en paths/strings
+    const listedData = execFileSync(
+      'grep',
+      [
+        '-rlE',
+        '--include=*.ts',
+        '--include=*.tsx',
+        '([\'"]clients[\'"]|\\bclients/)',
+        join(dest, 'src'),
+      ],
+      { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
+    )
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    for (const file of listedData) {
+      const before = await readFile(file, 'utf8');
+      // Cuidado con `clients-signage`/`clients-walls`: el split por `clients/`
+      // no los toca (van seguidos de `-`), y `'clients'` exacto tampoco.
+      const after = before
+        .replace(reArg, `$1${assetsFolder}$1`)
+        .replace(rePath, `${assetsFolder}/`);
+      if (after !== before) {
+        await writeFile(file, after, 'utf8');
+        dataRefsRewritten++;
+      }
+    }
+  } catch (e) {
+    console.error('[export] rename clients/ → <ClientName>-Assets/ falló:', e);
+  }
+
   console.log('\n── export-standalone report ──');
+  if (brandLogos) console.log(`brand logos: ${brandLogos} (Powered-by-TrueOmni)`);
+  if (dataRefsRewritten)
+    console.log(`data refs:   ${dataRefsRewritten} files rewritten (${assetsFolder})`);
   if (brandingExtras) console.log(`branding:    ${brandingExtras} (fonts + backgrounds)`);
   if (codeAssets) console.log(`code assets: ${codeAssets}`);
   if (codeRefsRewritten) console.log(`code refs:   ${codeRefsRewritten} files rewritten (caps)`);

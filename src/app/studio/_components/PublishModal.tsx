@@ -441,13 +441,23 @@ function shortenPath(full: string): string {
  * assets materializados) + zip. Es asíncrono (la build vive en GitHub Actions);
  * aquí solo disparamos y linkeamos a la run. No interfiere con el flujo fs/pr.
  */
-function StandaloneExportSection({ slug }: { slug: string }) {
-  const [busy, setBusy] = useState<'kiosk' | 'pwa' | null>(null);
+function StandaloneExportSection({
+  slug,
+  product = 'kiosk',
+}: {
+  slug: string;
+  /** Producto del editor actual: cada editor exporta SOLO su producto. */
+  product?: 'kiosk' | 'pwa';
+}) {
+  const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<StandaloneExportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleExport = async (product: 'kiosk' | 'pwa') => {
-    setBusy(product);
+  const label = product === 'pwa' ? 'Export PWA' : 'Export Kiosk';
+  const Icon = product === 'pwa' ? Smartphone : Monitor;
+
+  const handleExport = async () => {
+    setBusy(true);
     setError(null);
     setResult(null);
     try {
@@ -456,7 +466,7 @@ function StandaloneExportSection({ slug }: { slug: string }) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Standalone export failed');
     } finally {
-      setBusy(null);
+      setBusy(false);
     }
   };
 
@@ -471,37 +481,23 @@ function StandaloneExportSection({ slug }: { slug: string }) {
       </summary>
       <div className="mt-2 space-y-2">
         <p className="text-[11px] leading-relaxed text-zinc-500">
-          Builds a self-contained repo{' '}
-          <span className="font-mono">TrueOmni-{slug}-&lt;product&gt;-MM-DD-YYYY</span> (product
-          code + all assets materialized) and a downloadable zip. Runs on GitHub Actions — track
-          progress in the build run.
+          Builds a self-contained <span className="font-mono">{product}</span> repo (product code +
+          all assets) and a downloadable zip. Runs on GitHub Actions — track progress in the build
+          run.
         </p>
         <div className="flex gap-2">
           <button
             type="button"
-            onClick={() => handleExport('kiosk')}
-            disabled={busy !== null}
+            onClick={handleExport}
+            disabled={busy}
             className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-[12px] font-medium text-zinc-700 transition hover:border-emerald-300 hover:bg-emerald-50 disabled:opacity-40 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-emerald-800 dark:hover:bg-emerald-950/30"
           >
-            {busy === 'kiosk' ? (
+            {busy ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <Monitor className="h-3.5 w-3.5" />
+              <Icon className="h-3.5 w-3.5" />
             )}
-            Export Kiosk
-          </button>
-          <button
-            type="button"
-            onClick={() => handleExport('pwa')}
-            disabled={busy !== null}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-[12px] font-medium text-zinc-700 transition hover:border-emerald-300 hover:bg-emerald-50 disabled:opacity-40 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-emerald-800 dark:hover:bg-emerald-950/30"
-          >
-            {busy === 'pwa' ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Smartphone className="h-3.5 w-3.5" />
-            )}
-            Export PWA
+            {label}
           </button>
         </div>
 

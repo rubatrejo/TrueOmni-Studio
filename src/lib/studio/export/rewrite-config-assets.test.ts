@@ -299,6 +299,20 @@ describe('collectImages (context-aware naming, estructura real plana)', () => {
     expect(t['assets/logo.svg']).toBeUndefined();
   });
 
+  it('ads (#5): el archivo se nombra por el TIPO de ad (kind), no por el id', () => {
+    const cfg = {
+      advertisements: [
+        { id: 'lolas-lunch', kind: 'hero', image: 'https://cdn/a1.png' },
+        { id: 'uber-eats-nfl', kind: 'popup', image: 'https://cdn/a2.png' },
+        { id: 'history-of-art', kind: 'bottom', image: 'https://cdn/a3.png' },
+      ],
+    };
+    const t = byRef(collectImages(cfg, { clientName: 'Acme' }));
+    expect(t['https://cdn/a1.png']).toEqual({ dir: 'assets/Ads', base: 'Acme-hero' });
+    expect(t['https://cdn/a2.png']).toEqual({ dir: 'assets/Ads', base: 'Acme-popup' });
+    expect(t['https://cdn/a3.png']).toEqual({ dir: 'assets/Ads', base: 'Acme-bottom' });
+  });
+
   it('no recolecta campos de link (website)', () => {
     const cfg = { socialWall: { image: 'https://cdn/i.jpg', website: 'https://example.com' } };
     const refs = collectImages(cfg, { clientName: 'Acme' }).map((i) => i.ref);

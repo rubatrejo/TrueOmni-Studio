@@ -43,20 +43,36 @@ export interface MaterializeAssetsDeps {
   fetchFont?(nameOrUrl: string): Promise<AssetSource | null>;
 }
 
-/** Rename de carpeta de primer nivel bajo `assets/` (folders amigables, #3). */
-const RELATIVE_DIR_RENAME: Readonly<Record<string, string>> = {
+/**
+ * Canonicaliza la carpeta de primer nivel bajo `assets/` a su nombre amigable y
+ * CAPITALIZADO (#7: toda carpeta empieza con mayúscula). Los buckets config-driven
+ * que ya vienen de un `label` (Social Wall, Trip Planner, Digital Brochures…)
+ * pasan sin cambio; aquí se normalizan las carpetas en minúscula que produce el
+ * código (paths fijos del runtime) o el naming legacy (feed, branding, ads, ai…).
+ */
+const ASSET_DIR_CANONICAL: Readonly<Record<string, string>> = {
   home: 'Home Dashboard',
+  feed: 'Feed',
+  branding: 'Branding',
+  ads: 'Ads',
+  ai: 'AI',
+  guestbook: 'Guestbook',
+  'photo-booth': 'Photo Booth',
+  integrations: 'Integrations',
+  inline: 'Inline',
+  map: 'Map',
+  pwa: 'PWA',
 };
 
-/** Aplica el rename de carpeta a un path relativo `assets/<dir>/...`. */
-function renameRelative(relPath: string): string {
+/** Aplica el canónico a la 1ª carpeta de un path `assets/<dir>/...` (todas las variantes
+ *  `billboard-N` → `Billboard`). Idempotente: una carpeta ya capitalizada no cambia. */
+export function canonicalAssetPath(relPath: string): string {
   const parts = relPath.split('/');
-  // parts[0] === 'assets'; parts[1] === <dir>
-  if (parts.length >= 3 && parts[0] === 'assets' && RELATIVE_DIR_RENAME[parts[1]]) {
-    parts[1] = RELATIVE_DIR_RENAME[parts[1]];
-    return parts.join('/');
-  }
-  return relPath;
+  if (parts.length < 3 || parts[0] !== 'assets') return relPath;
+  const dir = parts[1];
+  if (/^billboard-\d+$/.test(dir)) parts[1] = 'Billboard';
+  else if (ASSET_DIR_CANONICAL[dir]) parts[1] = ASSET_DIR_CANONICAL[dir];
+  return parts.join('/');
 }
 
 export interface MaterializeReport {
@@ -132,12 +148,14 @@ async function materializeOne(
 ): Promise<OneResult> {
   const { ref, target, kind } = img;
 
-  // Fuente del branding (#7): descarga el TTF/woff2 a assets/branding/fonts.
+  // Fuente del branding (#7): descarga el TTF/woff2 a assets/Branding/fonts.
   if (kind === 'font') {
     if (!deps.fetchFont) return { kind: 'skipped' };
     const src = await deps.fetchFont(ref);
     if (!src) return { kind: 'failed' };
-    const local = localPath(ref, src.ext, target, 'assets/branding/fonts', reserve);
+    const local = canonicalAssetPath(
+      localPath(ref, src.ext, target, 'assets/branding/fonts', reserve),
+    );
     await deps.writeAsset(local, src.buffer);
     return { kind: 'downloaded', local };
   }
@@ -147,25 +165,27 @@ async function materializeOne(
       const src = await deps.fetchUrl(ref);
       if (!src) return { kind: 'failed' };
       // Sin contexto reconocible → "Home Dashboard" (#5; antes feed/_misc).
-      const local = localPath(ref, src.ext, target, 'assets/Home Dashboard', reserve);
+      const local = canonicalAssetPath(
+        localPath(ref, src.ext, target, 'assets/Home Dashboard', reserve),
+      );
       await deps.writeAsset(local, src.buffer);
       return { kind: 'downloaded', local };
     }
     case 'data': {
       const src = deps.decodeDataUri(ref);
       if (!src) return { kind: 'failed' };
-      const local = localPath(ref, src.ext, target, 'assets/inline', reserve);
+      const local = canonicalAssetPath(localPath(ref, src.ext, target, 'assets/inline', reserve));
       await deps.writeAsset(local, src.buffer);
       return { kind: 'inlined', local };
     }
     case 'relative': {
-      // Los relativos conservan su path del template, con rename de carpeta
-      // amigable (home → Home Dashboard, #3). Se lee del path ORIGINAL y se
-      // escribe al renombrado.
+      // Los relativos conservan su path del template, con canónico de carpeta
+      // capitalizada (home → Home Dashboard, ai → AI, #3/#7). Se lee del path
+      // ORIGINAL y se escribe al canónico.
       const norm = ref.startsWith('/') ? ref.slice(1) : ref;
       const src = await deps.readTemplateAsset(norm);
       if (!src) return { kind: 'failed' };
-      const dest = renameRelative(norm);
+      const dest = canonicalAssetPath(norm);
       await deps.writeAsset(dest, src.buffer);
       return { kind: 'copied', local: dest };
     }

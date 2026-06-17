@@ -30,8 +30,8 @@ describe('localizeConfig (E2E con adaptador fs real, sin red)', () => {
     expect(existsSync(join(destClientDir, 'assets/logo.png'))).toBe(true);
     expect(readFileSync(join(destClientDir, 'assets/logo.png')).toString()).toBe('LOGO');
 
-    // data: decodificado a assets/inline/ + archivo escrito
-    expect(config.avatar).toMatch(/^assets\/inline\/[a-f0-9]+\.png$/);
+    // data: decodificado a assets/Inline/ + archivo escrito
+    expect(config.avatar).toMatch(/^assets\/Inline\/[a-f0-9]+\.png$/);
     expect(existsSync(join(destClientDir, config.avatar))).toBe(true);
 
     // link externo intacto

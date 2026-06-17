@@ -1,7 +1,33 @@
 import { describe, expect, it } from 'vitest';
 
-import { materializeAssets, type MaterializeAssetsDeps } from './materialize-assets';
+import {
+  canonicalAssetPath,
+  materializeAssets,
+  type MaterializeAssetsDeps,
+} from './materialize-assets';
 import { collectImageRefs, rewriteImageRefs } from './rewrite-config-assets';
+
+describe('canonicalAssetPath (#7 — toda carpeta capitalizada)', () => {
+  it('capitaliza carpetas code-driven en minúscula', () => {
+    expect(canonicalAssetPath('assets/home/header-bg.jpg')).toBe(
+      'assets/Home Dashboard/header-bg.jpg',
+    );
+    expect(canonicalAssetPath('assets/ai/trigger.svg')).toBe('assets/AI/trigger.svg');
+    expect(canonicalAssetPath('assets/photo-booth/frames/x.png')).toBe(
+      'assets/Photo Booth/frames/x.png',
+    );
+    expect(canonicalAssetPath('assets/feed/Eat/x.jpg')).toBe('assets/Feed/Eat/x.jpg');
+    expect(canonicalAssetPath('assets/pwa/welcome.jpg')).toBe('assets/PWA/welcome.jpg');
+  });
+  it('cualquier billboard-N → Billboard', () => {
+    expect(canonicalAssetPath('assets/billboard-0/hero.jpg')).toBe('assets/Billboard/hero.jpg');
+    expect(canonicalAssetPath('assets/billboard-3/x.png')).toBe('assets/Billboard/x.png');
+  });
+  it('idempotente: carpetas ya capitalizadas y archivos en raíz no cambian', () => {
+    expect(canonicalAssetPath('assets/Social Wall/x.jpg')).toBe('assets/Social Wall/x.jpg');
+    expect(canonicalAssetPath('assets/logo.svg')).toBe('assets/logo.svg');
+  });
+});
 
 /** Deps mockeadas (sin red/fs): registran las escrituras y devuelven buffers fijos. */
 function makeDeps(over: Partial<MaterializeAssetsDeps> = {}) {
@@ -47,9 +73,9 @@ describe('materializeAssets', () => {
       deps,
     );
     expect(map.get('https://cdn/x.jpg')).toBe(
-      'assets/feed/Restaurants/Acme-Restaurants-Italian-Marios.jpg',
+      'assets/Feed/Restaurants/Acme-Restaurants-Italian-Marios.jpg',
     );
-    expect(writes[0].rel).toBe('assets/feed/Restaurants/Acme-Restaurants-Italian-Marios.jpg');
+    expect(writes[0].rel).toBe('assets/Feed/Restaurants/Acme-Restaurants-Italian-Marios.jpg');
   });
 
   it('context-aware: colisión de mismo target → sufijo -2', async () => {
@@ -69,8 +95,8 @@ describe('materializeAssets', () => {
     );
     const paths = [map.get('https://cdn/a.jpg'), map.get('https://cdn/b.jpg')].sort();
     expect(paths).toEqual([
-      'assets/photo-booth/backgrounds/Acme-bg-2.jpg',
-      'assets/photo-booth/backgrounds/Acme-bg.jpg',
+      'assets/Photo Booth/backgrounds/Acme-bg-2.jpg',
+      'assets/Photo Booth/backgrounds/Acme-bg.jpg',
     ]);
   });
 
@@ -92,7 +118,7 @@ describe('materializeAssets', () => {
     expect(writes[0].rel).toBe('assets/Home Dashboard/tiles/restaurants.jpg');
   });
 
-  it('font: kind=font usa fetchFont y va a assets/branding/fonts (#7)', async () => {
+  it('font: kind=font usa fetchFont y va a assets/Branding/fonts (#7)', async () => {
     const { deps, writes } = makeDeps({
       async fetchFont() {
         return { buffer: Buffer.from('font'), ext: 'ttf' };
@@ -102,8 +128,8 @@ describe('materializeAssets', () => {
       [{ ref: 'Poppins', kind: 'font', target: { dir: 'assets/branding/fonts', base: 'Poppins' } }],
       deps,
     );
-    expect(map.get('Poppins')).toBe('assets/branding/fonts/Poppins.ttf');
-    expect(writes[0].rel).toBe('assets/branding/fonts/Poppins.ttf');
+    expect(map.get('Poppins')).toBe('assets/Branding/fonts/Poppins.ttf');
+    expect(writes[0].rel).toBe('assets/Branding/fonts/Poppins.ttf');
     expect(report.downloaded).toBe(1);
   });
 
@@ -120,10 +146,10 @@ describe('materializeAssets', () => {
     expect(map.get('/assets/logo.png')).toBe('assets/logo.png');
   });
 
-  it('decodifica un data: a assets/inline/<hash>.<ext>', async () => {
+  it('decodifica un data: a assets/Inline/<hash>.<ext>', async () => {
     const { deps } = makeDeps();
     const { map, report } = await materializeAssets(['data:image/png;base64,AAAA'], deps);
-    expect(map.get('data:image/png;base64,AAAA')).toMatch(/^assets\/inline\/[a-f0-9]{8,}\.png$/);
+    expect(map.get('data:image/png;base64,AAAA')).toMatch(/^assets\/Inline\/[a-f0-9]{8,}\.png$/);
     expect(report.inlined).toBe(1);
   });
 

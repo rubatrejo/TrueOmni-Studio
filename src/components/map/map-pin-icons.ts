@@ -322,6 +322,59 @@ export function pinDataUri(source: MapSource, iconKeyOverride?: string): string 
   return `data:image/svg+xml;utf8,${encodeURIComponent(buildPinSvg(source, iconKeyOverride))}`;
 }
 
+/** Sources canónicos del Map, para enumerar/materializar pins (export standalone). */
+export const CANONICAL_MAP_SOURCES = [
+  'restaurants',
+  'things-to-do',
+  'stay',
+  'events',
+  'trails',
+] as const;
+
+/**
+ * Construye el SVG completo de un pin con un COLOR LITERAL (sin depender del
+ * browser / `getComputedStyle`). Lo usa el export standalone para materializar
+ * los pins del Map y del Trip Planner como ARCHIVOS `.svg` (no inline), igual
+ * que `buildPinSvg` pero recibiendo el color ya resuelto.
+ */
+export function pinSvgWithColor(
+  source: MapSource,
+  color: string,
+  iconKeyOverride?: string,
+): string {
+  const icon =
+    (iconKeyOverride && EXTENDED_ICONS[iconKeyOverride]) ||
+    (isCanonicalMapSource(source) ? ICONS[source as CanonicalMapSource] : EXTENDED_ICONS.info);
+  const box = iconBoxFor(source);
+  const x = CIRCLE_CX_IN_SCALED - box / 2;
+  const y = CIRCLE_CY_IN_SCALED - box / 2;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${PIN_W}" height="${PIN_H}" viewBox="0 0 ${PIN_W} ${PIN_H}">
+    <g transform="scale(2)">
+      <path d="${TEARDROP_PATH}" fill="${color}"/>
+      <g transform="translate(5 5)">
+        <ellipse cx="29.988" cy="29.865" rx="28.988" ry="28.865" fill="#ffffff"/>
+      </g>
+    </g>
+    <svg x="${x}" y="${y}" width="${box}" height="${box}" viewBox="${icon.viewBox}" fill="${color}" color="${color}">${icon.body}</svg>
+  </svg>`;
+}
+
+/**
+ * Resuelve el color de un pin canónico para el export, sin browser: los
+ * literales (events/trails) van directos; los basados en CSS var se resuelven
+ * contra los `--brand-*` HSL extraídos del `tokens.css` del cliente. Mantiene
+ * el mapeo source→var como única fuente de verdad aquí (no se duplica fuera).
+ */
+export function pinColorForExport(
+  source: CanonicalMapSource,
+  brandVars: Record<string, string>,
+): string {
+  const def = MAP_PIN_CSS[source];
+  if (def.kind === 'literal') return def.value;
+  const raw = (brandVars[def.name] ?? '').trim();
+  return raw ? `hsl(${raw.split(/\s+/).join(', ')})` : '#000';
+}
+
 /**
  * Pin seleccionado — mantiene color + icono de la categoría pero con un
  * crecimiento SUTIL (×1.12) y halo + shadow para notar la selección sin

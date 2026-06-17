@@ -7,6 +7,7 @@ import {
   DEFAULT_PHOTO_BOOTH,
   DEFAULT_SOCIAL_WALL,
   DEFAULT_SURVEY,
+  MODULE_KEY_TO_SYSTEM_FIELD,
   defaultEvents,
   defaultListings,
   defaultPasses,
@@ -327,10 +328,24 @@ function applyModulesAndTiles(
       imageByKey.set(t.key, t.image);
     }
   }
+
+  // El tile está activo SOLO si su toggle propio Y su master-switch
+  // (`systemModules`) lo están. El operador apaga un módulo desde el master
+  // switch (systemModules) y eso debe ocultar el tile en el kiosk publicado y
+  // EXCLUIRLO del export standalone (su feed/tiles/assets no viajan). Sin este
+  // cruce, `tile.enabled` quedaba siempre `true` y el gating del export creía
+  // que todo estaba activo. Si el tile no tiene master-switch, gana su toggle.
+  const sm = modules.systemModules;
+  const systemOn = (key: string): boolean => {
+    const field = MODULE_KEY_TO_SYSTEM_FIELD[key];
+    if (!field || !sm) return true;
+    return sm[field] !== false;
+  };
+
   home.tiles = homeTiles.map((t) => ({
     key: t.key,
     label: t.label,
-    enabled: t.enabled,
+    enabled: t.enabled && systemOn(t.key),
     image: t.image ?? imageByKey.get(t.key) ?? '',
     ...(t.wide ? { wide: true } : {}),
   }));
@@ -351,13 +366,12 @@ function applyModulesAndTiles(
 
   if (wayfindingTile) {
     const cur = obj(home, 'wayfinding');
-    cur.enabled = wayfindingTile.enabled;
+    cur.enabled = wayfindingTile.enabled && systemOn('wayfinding');
     cur.label = wayfindingTile.label;
   }
 
   // systemModules → flags dispersos.
-  if (modules.systemModules) {
-    const sm = modules.systemModules;
+  if (sm) {
     if (home.askAi && typeof home.askAi === 'object') {
       (home.askAi as Record<string, unknown>).enabled = sm.aiAvatar;
     }

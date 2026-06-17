@@ -18,8 +18,14 @@ import { execFileSync } from 'node:child_process';
 import { cp, mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
+import {
+  CANONICAL_MAP_SOURCES,
+  pinColorForExport,
+  pinSvgWithColor,
+} from '../src/components/map/map-pin-icons';
 import { localizeConfig } from '../src/lib/studio/export/export-config';
 import {
+  canonicalAssetPath,
   materializeAssets,
   type MaterializeAssetsDeps,
 } from '../src/lib/studio/export/materialize-assets';
@@ -42,6 +48,11 @@ if (!slug || (product !== 'kiosk' && product !== 'pwa')) {
 }
 
 const root = process.cwd();
+
+/** Token de nombre de cliente para filenames: símbolos/espacios → `_`, conserva caja. */
+function sanitizeName(s: string): string {
+  return (s || 'Client').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'Client';
+}
 
 /** Cuenta archivos (recursivo) bajo un dir, para el catálogo ASSETS.md. */
 async function countFiles(dir: string): Promise<number> {
@@ -69,6 +80,43 @@ async function main() {
   const configPath = `clients/${slug}/config.json`;
   const config = JSON.parse(await readFile(join(root, configPath), 'utf8'));
 
+  // studioConfig crudo (branding extras + master switches). Se carga UNA vez y
+  // se reutiliza en 3b/3c. `systemModules` gatea módulos system-wide (ads, AI)
+  // que NO son tiles del grid.
+  let studioConfig: {
+    branding?: Record<string, unknown>;
+    modules?: { systemModules?: Record<string, boolean> };
+  } | null = null;
+  if (process.env.RUNNER_TEMP) {
+    try {
+      studioConfig = JSON.parse(
+        await readFile(join(process.env.RUNNER_TEMP, 'studio-config.json'), 'utf8'),
+      );
+    } catch {
+      /* sin studio-config → sin gating system-wide */
+    }
+  }
+  const systemModules = (studioConfig?.modules?.systemModules ?? {}) as Record<string, boolean>;
+  const sysOn = (k: string) => systemModules[k] !== false;
+
+  // Purga de módulos system-wide APAGADOS antes de materializar (#2): sus
+  // assets son config-driven (referenciados en el config) y el gate del grep
+  // de código no los alcanza. Si el operador apagó Ads o el AI avatar, su
+  // contenido NO debe viajar al export.
+  if (!sysOn('ads')) {
+    delete (config as { advertisements?: unknown }).advertisements;
+    const feats = (config as { features?: Record<string, unknown> }).features;
+    if (feats) delete feats.advertisements;
+  }
+  if (!sysOn('aiAvatar')) {
+    const askAi = (config as { features?: { home?: { askAi?: Record<string, unknown> } } })
+      ?.features?.home?.askAi;
+    if (askAi && typeof askAi === 'object') {
+      delete askAi.avatar;
+      delete askAi.heroVideo;
+    }
+  }
+
   let deps: MaterializeAssetsDeps = createFsDeps({
     clientAssetsDir: join(root, `clients/${slug}/assets`),
     defaultAssetsDir: join(root, 'clients/default/assets'),
@@ -94,12 +142,9 @@ async function main() {
   //     $RUNNER_TEMP/studio-config.json. Best-effort: descarga a assets/branding/
   //     (+ /fonts). No se reescribe el config (no se referencian por path local).
   let brandingExtras = 0;
-  if (!dry && process.env.RUNNER_TEMP) {
+  if (!dry && studioConfig) {
     try {
-      const studio = JSON.parse(
-        await readFile(join(process.env.RUNNER_TEMP, 'studio-config.json'), 'utf8'),
-      );
-      const branding = studio?.branding ?? {};
+      const branding = studioConfig.branding ?? {};
       const sanitize = (s: string) => s.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '');
       const extras: CollectedImage[] = [];
 
@@ -126,12 +171,19 @@ async function main() {
         }
       }
 
-      // Brand backgrounds/media {kind, src} → assets/branding/
+      // Brand backgrounds/media {kind, src}. El HERO del home (#4) va a la
+      // carpeta de tiles con naming de cliente; el resto (brandVideo,
+      // idleBackground) quedan en Branding/.
+      const clientToken = sanitize(clientName) || 'Client';
       for (const key of ['homeHero', 'brandVideo', 'idleBackground']) {
         const media = branding[key] as { src?: string } | undefined;
         const src = media?.src;
         if (typeof src === 'string' && /^https?:\/\//i.test(src)) {
-          extras.push({ ref: src, target: { dir: 'assets/branding', base: sanitize(key) } });
+          const target =
+            key === 'homeHero'
+              ? { dir: 'assets/Home Dashboard/tiles', base: `${clientToken}-hero` }
+              : { dir: 'assets/Branding', base: `${clientToken}-${sanitize(key)}` };
+          extras.push({ ref: src, target });
         }
       }
 
@@ -144,16 +196,28 @@ async function main() {
     }
   }
 
-  // 3c. Assets referenciados por el CÓDIGO (#C): el runtime los pide por path
-  //     fijo (assets/home/header-bg.jpg, assets/ai/trigger.svg, billboard, botones,
-  //     favicon, logos…) y NO están en el config → hay que copiarlos a su path
-  //     original o el kiosk los 404ea. Se descubren grepeando el src/ exportado.
+  // 3c. Assets referenciados por el CÓDIGO: el runtime los pide por path fijo
+  //     (assets/home/header-bg.jpg, assets/ai/trigger.svg, billboard, botones,
+  //     favicon, logos…) y NO están en el config. Se descubren grepeando el src/
+  //     exportado y se copian GATEADOS (#1/#2/#4): SOLO la variante de billboard
+  //     activa (y solo del cliente, sin fallback al theme), systemModules para
+  //     ai/ads, producto para pwa, y tiles de módulos inactivos. El destino va
+  //     capitalizado (#7); los src refs se reescriben en 3f para que el runtime
+  //     siga encontrándolos.
   const active = activeModules(localized);
-  // top-folder → tile.key para gatear assets de módulos inactivos.
-  const FOLDER_GATE: Record<string, string> = {
+
+  // `systemModules`/`sysOn` ya se cargaron arriba (gatean ai/ads).
+  const billboardVariant = Number(
+    (localized as { features?: { billboard_variant?: unknown } })?.features?.billboard_variant ?? 0,
+  );
+  const clientToken = sanitizeName(clientName);
+
+  // top-folder de un tile → su key para gatear por `active`.
+  const TILE_GATE: Record<string, string> = {
     guestbook: 'guestbook',
     'photo-booth': 'photo-booth',
   };
+
   let codeAssets = 0;
   try {
     const raw = execFileSync(
@@ -179,14 +243,26 @@ async function main() {
       .filter((rel) => !rel.includes('..'));
     for (const rel of rels) {
       const topFolder = rel.split('/')[0];
-      const gate = FOLDER_GATE[topFolder];
-      if (gate && active && !active.has(gate)) continue; // módulo inactivo
-      // resolver: cliente primero, default como fallback.
+
+      // PWA chrome solo en el export pwa.
+      if (topFolder === 'pwa' && product !== 'pwa') continue;
+      // Billboard: SOLO la variante activa (#1).
+      const bm = /^billboard-(\d+)$/.exec(topFolder);
+      if (bm && Number(bm[1]) !== billboardVariant) continue;
+      // Tiles de módulos inactivos.
+      const tileGate = TILE_GATE[topFolder];
+      if (tileGate && active && !active.has(tileGate)) continue;
+      // Master switches del operador: AI avatar / Ads.
+      if (topFolder === 'ai' && !sysOn('aiAvatar')) continue;
+      if (topFolder === 'ads' && !sysOn('ads')) continue;
+
+      // Fuente: el billboard activo SOLO del cliente (sin fallback al theme,
+      // decisión #1); el resto cliente→default.
+      const baseDirs = bm
+        ? [join(root, `clients/${slug}/assets`)]
+        : [join(root, `clients/${slug}/assets`), join(root, 'clients/default/assets')];
       let srcPath: string | null = null;
-      for (const baseDir of [
-        join(root, `clients/${slug}/assets`),
-        join(root, 'clients/default/assets'),
-      ]) {
+      for (const baseDir of baseDirs) {
         const candidate = join(baseDir, rel);
         try {
           await readFile(candidate);
@@ -196,20 +272,127 @@ async function main() {
           /* siguiente */
         }
       }
-      if (!srcPath) continue; // no existe en cliente ni default → se omite
-      const destPath = join(dest, `clients/${slug}/assets`, rel);
+      if (!srcPath) continue; // no existe (o billboard sin asset propio) → se omite
+
+      // Destino capitalizado (#7).
+      const outRel = canonicalAssetPath(`assets/${rel}`).replace(/^assets\//, '');
+      const destPath = join(dest, `clients/${slug}/assets`, outRel);
       await mkdir(dirname(destPath), { recursive: true });
       await cp(srcPath, destPath);
       codeAssets++;
+
+      // Logos SVG de marca (#6): además del path raíz que pide el runtime, se
+      // copian a Branding/ con naming de cliente para tenerlos junto al resto.
+      if (/^(logo|logo-dark)\.svg$/.test(rel)) {
+        const brandBase =
+          rel === 'logo-dark.svg' ? `${clientToken}-logo-dark` : `${clientToken}-logo`;
+        const brandDest = join(dest, `clients/${slug}/assets/Branding`, `${brandBase}.svg`);
+        await mkdir(dirname(brandDest), { recursive: true });
+        await cp(srcPath, brandDest);
+        codeAssets++;
+      }
     }
   } catch {
     // grep sin matches o sin src → se omite.
   }
 
+  // 3f. Reescritura de refs en el src/ exportado (#7): las carpetas code-driven
+  //     se capitalizaron en 3c, así que el código que las pide por path fijo
+  //     (assets/home/…, assets/ai/…, billboard-N, photo-booth, guestbook, pwa,
+  //     ads) debe apuntar al nombre nuevo o el runtime las 404ea. Se reescribe
+  //     in-place en cada archivo de src/.
+  const CODE_REF_RENAMES: Array<[RegExp, string]> = [
+    [/assets\/home\//g, 'assets/Home Dashboard/'],
+    [/assets\/ai\//g, 'assets/AI/'],
+    [/assets\/photo-booth\//g, 'assets/Photo Booth/'],
+    [/assets\/guestbook\//g, 'assets/Guestbook/'],
+    [/assets\/pwa\//g, 'assets/PWA/'],
+    [/assets\/ads\//g, 'assets/Ads/'],
+    [/assets\/billboard-\d+\//g, 'assets/Billboard/'],
+  ];
+  let codeRefsRewritten = 0;
+  try {
+    const listed = execFileSync(
+      'grep',
+      [
+        '-rlE',
+        '--include=*.ts',
+        '--include=*.tsx',
+        'assets/(home|ai|photo-booth|guestbook|pwa|ads|billboard-[0-9])/',
+        join(dest, 'src'),
+      ],
+      { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
+    )
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    for (const file of listed) {
+      const before = await readFile(file, 'utf8');
+      let after = before;
+      for (const [re, to] of CODE_REF_RENAMES) after = after.replace(re, to);
+      if (after !== before) {
+        await writeFile(file, after, 'utf8');
+        codeRefsRewritten++;
+      }
+    }
+  } catch {
+    // grep sin matches → nada que reescribir.
+  }
+
+  // 3g. Map + Trip Planner (#8/#9): los pins son SVG inline en el código; aquí
+  //     se materializan como ARCHIVOS .svg por categoría (color resuelto del
+  //     tokens.css del cliente) + un placeholder de mapa. El mismo set de pins
+  //     viaja en Map/Pins y Trip Planner/Pins.
+  let mapAssets = 0;
+  if (active?.has('map') || active?.has('itinerary-builder')) {
+    try {
+      // brand-* HSL del tokens.css del cliente (para el color de los pins).
+      const brandVars: Record<string, string> = {};
+      try {
+        const css = await readFile(join(dest, `clients/${slug}/tokens.css`), 'utf8');
+        for (const m of css.matchAll(/(--brand-[a-z]+)\s*:\s*([^;]+);/g)) {
+          brandVars[m[1].trim()] = m[2].trim();
+        }
+      } catch {
+        /* sin tokens.css → colores literales/fallback */
+      }
+      const mapPlaceholder =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="780" height="1200" viewBox="0 0 780 1200">' +
+        '<rect width="780" height="1200" fill="#e8eaed"/>' +
+        '<g stroke="#cfd4da" stroke-width="2">' +
+        '<path d="M0 300H780M0 600H780M0 900H780M260 0V1200M520 0V1200"/></g>' +
+        '<text x="390" y="610" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" ' +
+        'font-size="28" fill="#9aa0a6">Map placeholder</text></svg>';
+      const pinDirs = [
+        ...(active?.has('map') ? [`clients/${slug}/assets/Map`] : []),
+        ...(active?.has('itinerary-builder') ? [`clients/${slug}/assets/Trip Planner`] : []),
+      ];
+      for (const baseRel of pinDirs) {
+        const pinsDir = join(dest, baseRel, 'Pins');
+        await mkdir(pinsDir, { recursive: true });
+        for (const source of CANONICAL_MAP_SOURCES) {
+          const color = pinColorForExport(source, brandVars);
+          await writeFile(join(pinsDir, `${source}.svg`), pinSvgWithColor(source, color), 'utf8');
+          mapAssets++;
+        }
+      }
+      if (active?.has('map')) {
+        await writeFile(
+          join(dest, `clients/${slug}/assets/Map/placeholder.svg`),
+          mapPlaceholder,
+          'utf8',
+        );
+        mapAssets++;
+      }
+    } catch {
+      // sin pins → se omite (best-effort).
+    }
+  }
+
   // 3d. Carpeta de integraciones (#E): el Dev necesita saber qué cablear
   //     (mapbox token, APIs…). Se escribe el bloque `integraciones` + un README.
   const integr = (localized as { integraciones?: unknown }).integraciones ?? {};
-  const integrDir = join(dest, `clients/${slug}/assets/integrations`);
+  const integrDir = join(dest, `clients/${slug}/assets/Integrations`);
   await mkdir(integrDir, { recursive: true });
   await writeFile(
     join(integrDir, 'integrations.json'),
@@ -273,6 +456,8 @@ async function main() {
   console.log('\n── export-standalone report ──');
   if (brandingExtras) console.log(`branding:    ${brandingExtras} (fonts + backgrounds)`);
   if (codeAssets) console.log(`code assets: ${codeAssets}`);
+  if (codeRefsRewritten) console.log(`code refs:   ${codeRefsRewritten} files rewritten (caps)`);
+  if (mapAssets) console.log(`map assets:  ${mapAssets} (pins + placeholder)`);
   console.log(`slug:        ${slug}`);
   console.log(`dest:        ${dest}`);
   console.log(`downloaded:  ${report.downloaded}`);

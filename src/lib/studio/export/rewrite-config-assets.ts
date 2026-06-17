@@ -340,7 +340,12 @@ function walkImages(value: unknown, ctx: CollectCtx, out: CollectedImage[]): voi
     }
     // ── Nombre del item dentro de un bucket (para nombrar el archivo).
     else if (base.bucketLabel && !base.feedCategory) {
-      const idLike = o.id ?? o.slug ?? o.key ?? o.title ?? o.name;
+      // Ads (#5): el archivo se nombra por el TIPO de ad (hero/bottom/popup),
+      // no por su id. Varios del mismo tipo → materialize sufija -2/-3.
+      const idLike =
+        base.bucketLabel === 'Ads' && typeof o.kind === 'string' && o.kind
+          ? o.kind
+          : (o.id ?? o.slug ?? o.key ?? o.title ?? o.name);
       if (typeof idLike === 'string' && idLike) base.itemName = idToken(idLike);
     }
 

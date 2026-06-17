@@ -165,18 +165,19 @@ describe('integración contra el config real (clients/default/config.json)', () 
   });
 });
 
-describe('collectImages (context-aware naming)', () => {
-  const byRef = (imgs: { ref: string; target?: { dir: string; base: string } }[]) =>
+describe('collectImages (context-aware naming, estructura real plana)', () => {
+  const byRef = (imgs: { ref: string; target?: { dir: string; base: string }; kind?: string }[]) =>
     Object.fromEntries(imgs.map((i) => [i.ref, i.target]));
 
-  it('imágenes de un listing → feed/<Category>/<Client>-<Category>-<Subcat>-<Name>', () => {
+  it('listings: categoría del MÓDULO (label) + subcategoría/título del item → feed anidado', () => {
     const cfg = {
-      features: {
-        home: {
-          restaurants: {
+      listings: [
+        {
+          label: 'Eat & Drink',
+          key: 'restaurants',
+          catalog: {
             listings: [
               {
-                category: 'Restaurants',
                 subcategory: 'Italian',
                 title: "Mario's Pizza",
                 image: 'https://cdn/mario.jpg',
@@ -185,28 +186,81 @@ describe('collectImages (context-aware naming)', () => {
             ],
           },
         },
-      },
+      ],
     };
     const t = byRef(collectImages(cfg, { clientName: 'Hello Harford' }));
     expect(t['https://cdn/mario.jpg']).toEqual({
-      dir: 'assets/feed/Restaurants',
-      base: 'Hello_Harford-Restaurants-Italian-Marios_Pizza',
+      dir: 'assets/feed/Eat_and_Drink/Italian',
+      base: 'Hello_Harford-Eat_and_Drink-Italian-Marios_Pizza',
     });
-    expect(t['https://cdn/g1.jpg']?.base).toBe('Hello_Harford-Restaurants-Italian-Marios_Pizza-1');
-    expect(t['https://cdn/g2.jpg']?.base).toBe('Hello_Harford-Restaurants-Italian-Marios_Pizza-2');
+    expect(t['https://cdn/g1.jpg']?.base).toBe(
+      'Hello_Harford-Eat_and_Drink-Italian-Marios_Pizza-1',
+    );
+  });
+
+  it('events: category por item → feed/Events/<EventCategory>/...', () => {
+    const cfg = {
+      events: {
+        heroImage: 'https://cdn/events-hero.jpg',
+        events: [{ category: 'Music', title: 'Jazz Night', image: 'https://cdn/jazz.jpg' }],
+      },
+    };
+    const t = byRef(collectImages(cfg, { clientName: 'Acme' }));
+    expect(t['https://cdn/jazz.jpg']).toEqual({
+      dir: 'assets/feed/Events/Music',
+      base: 'Acme-Events-Music-Jazz_Night',
+    });
+    // header del módulo → feed/Events/_header (naming por field)
+    expect(t['https://cdn/events-hero.jpg']).toEqual({
+      dir: 'assets/feed/Events',
+      base: 'Acme-heroImage',
+    });
+  });
+
+  it('branding: logos + media {kind,src} → assets/branding; colores no son assets', () => {
+    const cfg = {
+      branding: {
+        primary: '#fff',
+        logo: 'https://cdn/logo.png',
+        idleBackground: { kind: 'image', src: 'https://cdn/idlebg.jpg' },
+      },
+    };
+    const t = byRef(collectImages(cfg, { clientName: 'Acme' }));
+    expect(t['https://cdn/logo.png']).toEqual({ dir: 'assets/branding', base: 'Acme-logo' });
+    expect(t['https://cdn/idlebg.jpg']).toEqual({
+      dir: 'assets/branding',
+      base: 'Acme-idleBackground',
+    });
+  });
+
+  it('branding fonts → kind:font hacia assets/branding/fonts', () => {
+    const cfg = { branding: { fonts: { display: 'Poppins', body: 'Inter' } } };
+    const imgs = collectImages(cfg, { clientName: 'Acme' });
+    const poppins = imgs.find((i) => i.ref === 'Poppins');
+    expect(poppins?.kind).toBe('font');
+    expect(poppins?.target).toEqual({ dir: 'assets/branding/fonts', base: 'Poppins' });
+    expect(imgs.find((i) => i.ref === 'Inter')?.kind).toBe('font');
+  });
+
+  it('tiles: salta los items con enabled === false (#4)', () => {
+    const cfg = {
+      modules: {
+        tiles: [
+          { key: 'a', enabled: true, image: 'https://cdn/a.jpg' },
+          { key: 'b', enabled: false, image: 'https://cdn/b.jpg' },
+        ],
+      },
+    };
+    const refs = collectImages(cfg, { clientName: 'Acme' }).map((i) => i.ref);
+    expect(refs).toContain('https://cdn/a.jpg');
+    expect(refs).not.toContain('https://cdn/b.jpg');
   });
 
   it('photoBooth frames/backgrounds → su carpeta semántica con el id del item', () => {
     const cfg = {
-      features: {
-        home: {
-          photoBooth: {
-            frames: [
-              { id: 'frame-0', image: 'https://cdn/f0.png', thumbnail: 'https://cdn/f0t.png' },
-            ],
-            backgrounds: [{ id: 'statue-of-liberty', image: 'https://cdn/sol.jpg' }],
-          },
-        },
+      photoBooth: {
+        frames: [{ id: 'frame-0', image: 'https://cdn/f0.png', thumbnail: 'https://cdn/f0t.png' }],
+        backgrounds: [{ id: 'statue-of-liberty', image: 'https://cdn/sol.jpg' }],
       },
     };
     const t = byRef(collectImages(cfg, { clientName: 'Acme' }));
@@ -221,14 +275,14 @@ describe('collectImages (context-aware naming)', () => {
     });
   });
 
-  it('assets relativos → sin target (conservan su path del template)', () => {
+  it('assets relativos → sin target (rename de carpeta lo hace materialize)', () => {
     const cfg = { branding: { logo: 'assets/logo.svg' } };
     const t = byRef(collectImages(cfg, { clientName: 'Acme' }));
     expect(t['assets/logo.svg']).toBeUndefined();
   });
 
   it('no recolecta campos de link (website)', () => {
-    const cfg = { features: { x: { image: 'https://cdn/i.jpg', website: 'https://example.com' } } };
+    const cfg = { socialWall: { image: 'https://cdn/i.jpg', website: 'https://example.com' } };
     const refs = collectImages(cfg, { clientName: 'Acme' }).map((i) => i.ref);
     expect(refs).toContain('https://cdn/i.jpg');
     expect(refs).not.toContain('https://example.com');

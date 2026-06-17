@@ -53,11 +53,17 @@ const EXCLUDE = new Set(
     'coverage',
     '.turbo',
     '.vercel',
-    // no-código (planeación, tests, fuentes de diseño, grafo)
+    // no-código (planeación, tests, fuentes de diseño, grafo, docs internos)
     'tests',
     '.planning',
     'designs',
     'graphify-out',
+    'docs',
+    'CLAUDE.md',
+    // public: el kiosk standalone NO necesita los assets del Studio. Se conserva
+    // public/pdfjs (lo usa el lector de brochures del kiosk) y public/brochures.
+    'public/studio',
+    'public/sign-in-bg.jpg',
     // Studio: editor UI + backend + auth (el standalone es público, sin editor)
     'src/app/studio',
     'src/app/api/studio',

@@ -38,6 +38,25 @@ export interface MaterializeAssetsDeps {
   decodeDataUri(uri: string): AssetSource | null;
   /** Escribe el asset al destino bajo `relPath` (relativo a la carpeta del cliente). */
   writeAsset(relPath: string, buffer: Buffer): Promise<void>;
+  /** Descarga el archivo de una fuente (nombre Google Font o URL directa); null si falla.
+   *  Opcional: si no se provee, las refs `kind:'font'` se omiten (best-effort). */
+  fetchFont?(nameOrUrl: string): Promise<AssetSource | null>;
+}
+
+/** Rename de carpeta de primer nivel bajo `assets/` (folders amigables, #3). */
+const RELATIVE_DIR_RENAME: Readonly<Record<string, string>> = {
+  home: 'Home Dashboard',
+};
+
+/** Aplica el rename de carpeta a un path relativo `assets/<dir>/...`. */
+function renameRelative(relPath: string): string {
+  const parts = relPath.split('/');
+  // parts[0] === 'assets'; parts[1] === <dir>
+  if (parts.length >= 3 && parts[0] === 'assets' && RELATIVE_DIR_RENAME[parts[1]]) {
+    parts[1] = RELATIVE_DIR_RENAME[parts[1]];
+    return parts.join('/');
+  }
+  return relPath;
 }
 
 export interface MaterializeReport {
@@ -111,7 +130,18 @@ async function materializeOne(
   deps: MaterializeAssetsDeps,
   reserve: Reserve,
 ): Promise<OneResult> {
-  const { ref, target } = img;
+  const { ref, target, kind } = img;
+
+  // Fuente del branding (#7): descarga el TTF/woff2 a assets/branding/fonts.
+  if (kind === 'font') {
+    if (!deps.fetchFont) return { kind: 'skipped' };
+    const src = await deps.fetchFont(ref);
+    if (!src) return { kind: 'failed' };
+    const local = localPath(ref, src.ext, target, 'assets/branding/fonts', reserve);
+    await deps.writeAsset(local, src.buffer);
+    return { kind: 'downloaded', local };
+  }
+
   switch (classify(ref)) {
     case 'http': {
       const src = await deps.fetchUrl(ref);
@@ -128,12 +158,15 @@ async function materializeOne(
       return { kind: 'inlined', local };
     }
     case 'relative': {
-      // Los relativos conservan su path del template (preserva la estructura).
+      // Los relativos conservan su path del template, con rename de carpeta
+      // amigable (home → Home Dashboard, #3). Se lee del path ORIGINAL y se
+      // escribe al renombrado.
       const norm = ref.startsWith('/') ? ref.slice(1) : ref;
       const src = await deps.readTemplateAsset(norm);
       if (!src) return { kind: 'failed' };
-      await deps.writeAsset(norm, src.buffer);
-      return { kind: 'copied', local: norm };
+      const dest = renameRelative(norm);
+      await deps.writeAsset(dest, src.buffer);
+      return { kind: 'copied', local: dest };
     }
     default:
       return { kind: 'skipped' };

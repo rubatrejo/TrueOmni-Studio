@@ -82,6 +82,38 @@ describe('materializeAssets', () => {
     expect(report.copied).toBe(1);
   });
 
+  it('relative-rename: assets/home/... → assets/Home Dashboard/... (#3)', async () => {
+    const { deps, writes } = makeDeps();
+    const { map } = await materializeAssets(['/assets/home/tiles/restaurants.jpg'], deps);
+    expect(map.get('/assets/home/tiles/restaurants.jpg')).toBe(
+      'assets/Home Dashboard/tiles/restaurants.jpg',
+    );
+    // se LEE del path original pero se ESCRIBE al renombrado
+    expect(writes[0].rel).toBe('assets/Home Dashboard/tiles/restaurants.jpg');
+  });
+
+  it('font: kind=font usa fetchFont y va a assets/branding/fonts (#7)', async () => {
+    const { deps, writes } = makeDeps({
+      async fetchFont() {
+        return { buffer: Buffer.from('font'), ext: 'ttf' };
+      },
+    });
+    const { map, report } = await materializeAssets(
+      [{ ref: 'Poppins', kind: 'font', target: { dir: 'assets/branding/fonts', base: 'Poppins' } }],
+      deps,
+    );
+    expect(map.get('Poppins')).toBe('assets/branding/fonts/Poppins.ttf');
+    expect(writes[0].rel).toBe('assets/branding/fonts/Poppins.ttf');
+    expect(report.downloaded).toBe(1);
+  });
+
+  it('font: sin fetchFont → skipped (best-effort)', async () => {
+    const { deps } = makeDeps();
+    const { map, report } = await materializeAssets([{ ref: 'Poppins', kind: 'font' }], deps);
+    expect(map.has('Poppins')).toBe(false);
+    expect(report.skipped).toBe(1);
+  });
+
   it('normaliza /assets/... a assets/...', async () => {
     const { deps } = makeDeps();
     const { map } = await materializeAssets(['/assets/logo.png'], deps);

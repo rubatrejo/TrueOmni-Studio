@@ -44,6 +44,11 @@ export const IMAGE_FIELDS: ReadonlySet<string> = new Set([
   'poster',
   'galleryUrls',
   'subcategoryImages',
+  // headers / heros de módulo (estructura real del config)
+  'wizardHeroImage',
+  'fallbackHero',
+  'loadingImage',
+  'headerImage',
 ]);
 
 /** ¿El string es una referencia a un asset materializable (http/data/relativo assets)? */
@@ -106,6 +111,8 @@ export interface AssetTarget {
 export interface CollectedImage {
   ref: string;
   target?: AssetTarget;
+  /** `font` → no es una URL de imagen sino un nombre/URL de fuente a descargar. */
+  kind?: 'font';
 }
 
 /** Campos de imagen "secundarios" — se sufijan con el nombre del campo para no
@@ -125,16 +132,38 @@ const SECONDARY_IMAGE_FIELDS: ReadonlySet<string> = new Set([
   'menuImage',
 ]);
 
-/** Key de módulo → carpeta bucket (para imágenes NO-listing). */
-const BUCKET_BY_KEY: Readonly<Record<string, string>> = {
-  billboard: 'billboard',
-  billboards: 'billboard',
-  ads: 'ads',
-  guestbook: 'guestbook',
-  ai: 'ai',
-  brochures: 'brochures',
-  social: 'social-wall',
+/** Carpeta amigable (Title Case) para los assets de cada módulo top-level. */
+const FOLDER_LABEL: Readonly<Record<string, string>> = {
+  socialWall: 'Social Wall',
+  guestbook: 'Guestbook',
+  deals: 'Deals',
+  passes: 'Passes',
+  tickets: 'Tickets',
+  brochures: 'Brochures',
+  itineraryBuilder: 'Trip Planner',
+  ads: 'Ads',
+  ai: 'Ask AI',
+  aiAvatar: 'Ask AI',
+  billboard: 'Idle',
+  map: 'Map',
+  survey: 'Survey',
 };
+
+/** Campos que son el HEADER/hero de una sección. */
+const HEADER_FIELDS: ReadonlySet<string> = new Set([
+  'heroImage',
+  'wizardHeroImage',
+  'fallbackHero',
+  'loadingImage',
+  'headerImage',
+]);
+
+/** Objetos `{kind, src}` del branding cuya `src` es un asset (media). */
+const MEDIA_SRC_PARENTS: ReadonlySet<string> = new Set([
+  'homeHero',
+  'brandVideo',
+  'idleBackground',
+]);
 
 /** Normaliza texto humano para nombre de archivo: espacios/símbolos → `_`, conserva caja. */
 function tokenize(s: string): string {
@@ -165,50 +194,81 @@ interface CollectCtx {
   inImage: boolean;
   field?: string;
   client: string;
-  bucket?: string;
-  itemName?: string;
-  category?: string;
+  depth: number;
+  /** Top-level module key (listings/events/socialWall/branding/…). */
+  module?: string;
+  /** Carpeta bucket amigable para módulos NO-feed (assets/<bucketLabel>/…). */
+  bucketLabel?: string;
+  /** Categoría del feed (módulo de listings → su label; events → "Events"; trails → "Trails"). */
+  feedCategory?: string;
   subcategory?: string;
-  listingName?: string;
+  /** Nombre del item de feed (listing/event/trail). */
+  itemTitle?: string;
+  /** Id/label del item dentro de un bucket (para nombrar el archivo). */
+  itemName?: string;
+  /** Padre `{kind, src}` del branding (homeHero/brandVideo/idleBackground). */
+  mediaParent?: string;
   galleryIndex?: number;
 }
 
-function isListingItem(o: Record<string, unknown>): boolean {
+/** ¿El objeto es un item de contenido de feed (tiene título + algo de imagen)? */
+function isFeedItem(o: Record<string, unknown>): boolean {
   return (
-    typeof o.category === 'string' &&
-    o.category.length > 0 &&
-    (typeof o.title === 'string' || typeof o.name === 'string')
+    typeof o.title === 'string' &&
+    o.title.length > 0 &&
+    ('image' in o || 'galleryUrls' in o || 'subcategory' in o || 'category' in o) &&
+    !('catalog' in o)
   );
 }
 
 function targetFor(ctx: CollectCtx, ref: string): AssetTarget | undefined {
-  // Relativos: conservan su path → sin target (materialize copia al mismo sitio).
+  // Relativos: el rename de carpeta (home → Home Dashboard) lo hace materialize;
+  // aquí no llevan target.
   if (isRelativeRef(ref)) return undefined;
 
-  // Dentro de un listing → feed por categoría con naming semántico.
-  if (ctx.category && ctx.listingName) {
-    let base = [ctx.client, ctx.category, ctx.subcategory, ctx.listingName]
+  const isHeader =
+    (ctx.field && HEADER_FIELDS.has(ctx.field)) ||
+    (ctx.module === 'billboard' && ctx.field === 'background');
+
+  // Header / hero de sección.
+  if (isHeader) {
+    const fieldName = ctx.field ?? 'header';
+    if (ctx.feedCategory) {
+      return { dir: `assets/feed/${ctx.feedCategory}`, base: `${ctx.client}-${fieldName}` };
+    }
+    if (ctx.bucketLabel) {
+      return { dir: `assets/${ctx.bucketLabel}`, base: `${ctx.client}-${fieldName}` };
+    }
+  }
+
+  // Branding (logos, media {kind,src}). Las fonts se recolectan aparte (kind:'font').
+  if (ctx.module === 'branding') {
+    const name = ctx.field === 'src' ? (ctx.mediaParent ?? 'media') : (ctx.field ?? 'asset');
+    return { dir: 'assets/branding', base: `${ctx.client}-${name}` };
+  }
+
+  // Item de feed (listing/event/trail) → feed/<Categoría>/<Subcategoría>/<naming>.
+  if (ctx.feedCategory && ctx.itemTitle) {
+    let base = [ctx.client, ctx.feedCategory, ctx.subcategory, ctx.itemTitle]
       .filter(Boolean)
       .join('-');
-    if (ctx.field === 'galleryUrls' && ctx.galleryIndex != null) {
-      base += `-${ctx.galleryIndex + 1}`;
-    } else if (ctx.field && SECONDARY_IMAGE_FIELDS.has(ctx.field)) {
-      base += `-${ctx.field}`;
-    }
-    return { dir: `assets/feed/${ctx.category}`, base };
+    if (ctx.field === 'galleryUrls' && ctx.galleryIndex != null) base += `-${ctx.galleryIndex + 1}`;
+    else if (ctx.field && SECONDARY_IMAGE_FIELDS.has(ctx.field)) base += `-${ctx.field}`;
+    const dir = ctx.subcategory
+      ? `assets/feed/${ctx.feedCategory}/${ctx.subcategory}`
+      : `assets/feed/${ctx.feedCategory}`;
+    return { dir, base };
   }
 
-  // Dentro de un módulo conocido → carpeta bucket.
-  if (ctx.bucket) {
+  // Item de un módulo bucket (socialWall, deals, passes, ads, trip planner…).
+  if (ctx.bucketLabel) {
     const name = ctx.itemName ?? ctx.field ?? 'asset';
     let base = `${ctx.client}-${name}`;
-    if (ctx.itemName && ctx.field && SECONDARY_IMAGE_FIELDS.has(ctx.field)) {
-      base += `-${ctx.field}`;
-    }
-    return { dir: `assets/${ctx.bucket}`, base };
+    if (ctx.itemName && ctx.field && SECONDARY_IMAGE_FIELDS.has(ctx.field)) base += `-${ctx.field}`;
+    return { dir: `assets/${ctx.bucketLabel}`, base };
   }
 
-  // Sin contexto → fallback hash en materialize.
+  // Sin contexto → fallback hash (assets/feed/_misc) en materialize.
   return undefined;
 }
 
@@ -219,40 +279,73 @@ function walkImages(value: unknown, ctx: CollectCtx, out: CollectedImage[]): voi
   }
   if (Array.isArray(value)) {
     const isGallery = ctx.field === 'galleryUrls';
-    value.forEach((v, i) => walkImages(v, isGallery ? { ...ctx, galleryIndex: i } : ctx, out));
+    value.forEach((v, i) => {
+      // Tiles inactivos (#4): no se exportan.
+      if (v && typeof v === 'object' && (v as Record<string, unknown>).enabled === false) return;
+      walkImages(v, isGallery ? { ...ctx, galleryIndex: i } : ctx, out);
+    });
     return;
   }
   if (value && typeof value === 'object') {
     const o = value as Record<string, unknown>;
     const base: CollectCtx = { ...ctx };
-    if (isListingItem(o)) {
-      base.category = tokenize(o.category as string);
-      const sub = (o.subcategory ?? o.subCategory) as unknown;
-      base.subcategory = typeof sub === 'string' && sub ? tokenize(sub) : undefined;
-      base.listingName = tokenize((o.title ?? o.name) as string);
-      base.bucket = undefined;
-      base.itemName = undefined;
-    } else if (base.bucket) {
-      const idLike = o.id ?? o.slug ?? o.key ?? o.label ?? o.name ?? o.title;
+
+    // Categoría de un módulo de listings (cada elemento del array `listings`).
+    if (ctx.module === 'listings' && typeof o.label === 'string' && 'catalog' in o) {
+      base.feedCategory = tokenize(o.label);
+    }
+    // Item de feed → fija subcategoría + título.
+    if (ctx.feedCategory && isFeedItem(o)) {
+      base.itemTitle = tokenize(o.title as string);
+      if (ctx.module === 'events' && typeof o.category === 'string') {
+        base.subcategory = tokenize(o.category);
+      } else if (typeof o.subcategory === 'string' && o.subcategory) {
+        base.subcategory = tokenize(o.subcategory);
+      }
+    }
+    // Nombre del item dentro de un bucket (para el archivo).
+    if (ctx.bucketLabel && !ctx.feedCategory) {
+      const idLike = o.id ?? o.slug ?? o.key ?? o.title ?? o.label ?? o.name;
       if (typeof idLike === 'string' && idLike) base.itemName = idToken(idLike);
     }
     for (const [k, v] of Object.entries(o)) {
       const child: CollectCtx = {
         ...base,
-        inImage: base.inImage || IMAGE_FIELDS.has(k),
-        field: IMAGE_FIELDS.has(k) ? k : base.field,
+        depth: base.depth + 1,
+        inImage: base.inImage || IMAGE_FIELDS.has(k) || (k === 'src' && base.mediaParent != null),
+        field: IMAGE_FIELDS.has(k) || (k === 'src' && base.mediaParent != null) ? k : base.field,
       };
+      // Asignación de módulo (solo en top-level: depth 0 → sus keys son módulos).
+      if (base.depth === 0) {
+        child.module = k;
+        child.bucketLabel = FOLDER_LABEL[k];
+        child.feedCategory = k === 'events' ? 'Events' : k === 'trails' ? 'Trails' : undefined;
+        child.itemName = undefined;
+      }
+      // Branding media {kind,src}.
+      if (base.module === 'branding' && MEDIA_SRC_PARENTS.has(k)) child.mediaParent = k;
+      // Fonts del branding → recolectar el nombre/URL como kind:'font'.
+      if (base.module === 'branding' && k === 'fonts' && v && typeof v === 'object') {
+        for (const font of Object.values(v as Record<string, unknown>)) {
+          if (typeof font === 'string' && font.trim()) {
+            out.push({
+              ref: font,
+              kind: 'font',
+              target: { dir: 'assets/branding/fonts', base: tokenize(font) },
+            });
+          }
+        }
+        continue;
+      }
+      // Photo Booth: subcarpetas frames/backgrounds/stickers (se mantiene).
       if (k === 'photoBooth') {
-        child.bucket = 'photo-booth';
+        child.bucketLabel = 'photo-booth';
         child.itemName = undefined;
       } else if (
-        base.bucket === 'photo-booth' &&
+        base.bucketLabel === 'photo-booth' &&
         (k === 'frames' || k === 'backgrounds' || k === 'stickers')
       ) {
-        child.bucket = `photo-booth/${k}`;
-      } else if (BUCKET_BY_KEY[k]) {
-        child.bucket = BUCKET_BY_KEY[k];
-        child.itemName = undefined;
+        child.bucketLabel = `photo-booth/${k}`;
       }
       walkImages(v, child, out);
     }
@@ -266,7 +359,11 @@ function walkImages(value: unknown, ctx: CollectCtx, out: CollectedImage[]): voi
  */
 export function collectImages(config: unknown, opts: { clientName: string }): CollectedImage[] {
   const out: CollectedImage[] = [];
-  walkImages(config, { inImage: false, client: tokenize(opts.clientName) || 'Client' }, out);
+  walkImages(
+    config,
+    { inImage: false, depth: 0, client: tokenize(opts.clientName) || 'Client' },
+    out,
+  );
   const seen = new Set<string>();
   const deduped: CollectedImage[] = [];
   for (const img of out) {

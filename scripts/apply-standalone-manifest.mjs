@@ -29,7 +29,7 @@ if (!res.ok) {
   process.exit(1);
 }
 const manifest = await res.json();
-const { slug, config, tokensCss, i18n, studioConfig } = manifest;
+const { slug, product, config, tokensCss, i18n, studioConfig } = manifest;
 if (!slug || !config) {
   console.error('Manifest inválido: falta `slug` o `config`.');
   process.exit(1);
@@ -58,9 +58,9 @@ if (i18n && typeof i18n === 'object') {
 
 // El config crudo del editor (botón Download) se guarda en un temp; el workflow
 // lo coloca en la RAÍZ del repo standalone como `<slug>-config.json` (#5).
+const tmp = process.env.RUNNER_TEMP || '/tmp';
 let studioConfigSaved = false;
 if (studioConfig) {
-  const tmp = process.env.RUNNER_TEMP || '/tmp';
   await writeFile(
     join(tmp, 'studio-config.json'),
     JSON.stringify(studioConfig, null, 2) + '\n',
@@ -69,6 +69,28 @@ if (studioConfig) {
   studioConfigSaved = true;
 }
 
+// Naming personalizado del repo/zip/artifact (#9): TrueOmni-<Cliente>-<Producto>-MM-DD-YYYY
+// (Title Case, partes unidas con guion). Lo computa aquí (Node, no en bash) y lo
+// deja en repo-name.txt para que el workflow lo use consistente en repo+zip+artifact.
+function titleCaseHyphen(s) {
+  return String(s || '')
+    .trim()
+    .replace(/['’]/g, '')
+    .replace(/[^A-Za-z0-9]+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join('-');
+}
+const clientName = (studioConfig && studioConfig.nombre) || slug;
+const prod = product || 'kiosk';
+const now = new Date();
+const mm = String(now.getMonth() + 1).padStart(2, '0');
+const dd = String(now.getDate()).padStart(2, '0');
+const repoName = `TrueOmni-${titleCaseHyphen(clientName)}-${titleCaseHyphen(prod)}-${mm}-${dd}-${now.getFullYear()}`;
+await writeFile(join(tmp, 'repo-name.txt'), repoName, 'utf8');
+
 console.log(
-  `✓ manifest aplicado a clients/${slug}/ (config${tokensCss ? ' + tokens' : ''} + ${locales} locales${studioConfigSaved ? ' + studio-config' : ''})`,
+  `✓ manifest aplicado a clients/${slug}/ (config${tokensCss ? ' + tokens' : ''} + ${locales} locales${studioConfigSaved ? ' + studio-config' : ''}) → repo: ${repoName}`,
 );

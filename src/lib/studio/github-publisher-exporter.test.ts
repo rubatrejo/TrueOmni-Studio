@@ -9,7 +9,7 @@ import {
 } from './github-publisher';
 
 /**
- * Helpers del dispatch de la Action `export-standalone.yml` (última milla del
+ * Helpers del dispatch de la Action `export-product.yml` (última milla del
  * milestone "Publish → Kiosk Standalone"). Solo testeamos las funciones puras
  * env-based; el `createWorkflowDispatch` real lo cubre la verificación E2E.
  */
@@ -74,11 +74,11 @@ describe('exporterRunsUrl', () => {
       token: 't',
       owner: 'rubatrejo',
       repo: 'kiosk-exporter',
-      workflow: 'export-standalone.yml',
+      workflow: 'export-product.yml',
       ref: 'main',
     });
     expect(url).toBe(
-      'https://github.com/rubatrejo/kiosk-exporter/actions/workflows/export-standalone.yml',
+      'https://github.com/rubatrejo/kiosk-exporter/actions/workflows/export-product.yml',
     );
   });
 });

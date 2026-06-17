@@ -34,7 +34,7 @@ import { STUDIO_SLUG_REGEX } from '@/lib/studio/slug';
  *   2. Lo sube a Vercel Blob (URL con random suffix → no adivinable; el dispatch
  *      ya va autenticado por token, así que la URL actúa como capability — sin
  *      HMAC en v1).
- *   3. Dispara la Action `export-standalone.yml` del builder `kiosk-exporter`
+ *   3. Dispara la Action `export-product.yml` del builder `kiosk-exporter`
  *      vía `createWorkflowDispatch` con `{ slug, product, manifest_url }`. La
  *      Action clona el monorepo, corre `scripts/export-standalone.ts` con red
  *      real (baja todos los assets), arma el repo `kiosk-<slug>` + zip.

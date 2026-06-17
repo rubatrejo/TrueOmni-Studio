@@ -259,13 +259,13 @@ function buildPrBody(slug: string, files: PublishFile[], actor?: string): string
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
- * Standalone export — dispatch de la Action `export-standalone.yml`
+ * Standalone export — dispatch de la Action `export-product.yml`
  * ──────────────────────────────────────────────────────────────────────── */
 
 /** Owner/repo/workflow del builder de kiosks standalone. */
 export const EXPORTER_OWNER = 'rubatrejo';
 export const EXPORTER_REPO = 'kiosk-exporter';
-export const EXPORTER_WORKFLOW = 'export-standalone.yml';
+export const EXPORTER_WORKFLOW = 'export-product.yml';
 
 export interface ExporterDispatchConfig {
   token: string;
@@ -300,7 +300,7 @@ export function exporterRunsUrl(config: ExporterDispatchConfig): string {
 }
 
 /**
- * Dispara la Action `export-standalone.yml` del builder vía
+ * Dispara la Action `export-product.yml` del builder vía
  * `createWorkflowDispatch`. El manifest (config + tokens + i18n) ya vive en
  * Blob; aquí solo pasamos `slug`, `product` y la URL del manifest como inputs
  * del workflow.

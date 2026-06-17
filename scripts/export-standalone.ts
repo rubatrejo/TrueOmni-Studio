@@ -444,6 +444,47 @@ async function main() {
     }
   }
 
+  // 3h-bg. Idle background del OPERADOR (no el del theme): el fondo del Billboard
+  //     idle que el operador subió vive en `studioConfig.billboard.background`
+  //     (gana sobre el theme y sobre `branding.idleBackground` — ver
+  //     use-billboard-override.ts). Vive en el KV, NO en el FS config, por eso el
+  //     code-grep caía al theme `billboard-<N>/hero.jpg`. Si hay imagen subida
+  //     (URL http), se descarga y (a) se guarda con nombre claro y (b) reemplaza
+  //     el hero del theme que el runtime de la variante activa pide
+  //     (VARIANT_DEFAULT_BACKGROUND), para que el idle standalone muestre la
+  //     imagen del cliente. Si el operador no subió (src relativo) queda la del
+  //     theme/default que el code-grep ya copió.
+  let idleBgAssets = 0;
+  if (!dry) {
+    try {
+      const bb = (studioConfig as { billboard?: Record<string, unknown> } | null)?.billboard ?? {};
+      const shared = bb.background as { type?: string; src?: string } | undefined;
+      const perVariant = (
+        bb[`b${billboardVariant}`] as { background?: { type?: string; src?: string } } | undefined
+      )?.background;
+      const media = shared?.src ? shared : perVariant;
+      const src = media?.src;
+      if (typeof src === 'string' && /^https?:\/\//i.test(src) && media?.type !== 'video') {
+        const asset = await deps.fetchUrl(src);
+        if (asset) {
+          const idleDir = join(dest, `clients/${slug}/assets/Billboard/Idle`);
+          await mkdir(idleDir, { recursive: true });
+          // Nombre claro para el deliverable.
+          await writeFile(
+            join(idleDir, `${clientToken}-idle-background.${asset.ext}`),
+            asset.buffer,
+          );
+          // Reemplaza el hero del theme que pide el runtime de la variante activa.
+          const heroFile = billboardVariant === 2 ? 'hero.png' : 'hero.jpg';
+          await writeFile(join(idleDir, heroFile), asset.buffer);
+          idleBgAssets += 1;
+        }
+      }
+    } catch {
+      // best-effort: sin idle bg subido → queda el del theme.
+    }
+  }
+
   // 3h. Logo "Powered by TrueOmni" del footer del idle screen (#4): el footer
   //     del Billboard idle lo renderiza inline (SVG en `true-omni-logo.tsx`).
   //     Se materializa como ARCHIVO `.svg` autónomo (blanco, como en el footer)
@@ -580,6 +621,7 @@ async function main() {
 
   console.log('\n── export-standalone report ──');
   if (brandLogos) console.log(`brand logos: ${brandLogos} (Powered-by-TrueOmni)`);
+  if (idleBgAssets) console.log(`idle bg:     ${idleBgAssets} (operator upload → Billboard/Idle)`);
   if (dataRefsRewritten)
     console.log(`data refs:   ${dataRefsRewritten} files rewritten (${assetsFolder})`);
   if (brandingExtras) console.log(`branding:    ${brandingExtras} (fonts + backgrounds)`);

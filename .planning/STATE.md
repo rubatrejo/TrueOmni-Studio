@@ -4,6 +4,71 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-16/17 — Milestone "Kiosk Standalone" (Fases 0–5) + fixes Studio (idle, thumbnails, frames, CI)
+
+**Hecho (todo en prod, deploys Vercel READY):**
+
+- **Fix idle billboard** (`bb21611`): `applyBillboardOverride` no cacheaba en `window`
+  (asimétrico con modules/listings); al volver del Photo Booth + timeout, el idle caía a
+  defaults ("Touch Here" + hero template) en vez del branding. Fix simétrico.
+- **Thumbnails circulares del Photo Booth** (`75f5648`): emblema circular por frame
+  (`THUMB_BUILDERS` en `photobooth-frame-templates.ts`), 512², reemplaza el mini-retrato
+  letterboxed. El kiosk/editor ya consumen `frame.thumbnail` sin cambios.
+- **Frames stale + botón Generate** (`63ae92f`): `applyPhotoBoothOverride` cachea en
+  `window.__kioskPhotoBooth` + `PhotoBoothModule` lo lee al montar (el module se hidrata
+  tarde → el push del bridge se perdía → frames del template). Botón "Generate branded
+  frames" solo aparece la 1ª vez (sin `source:'branded-auto'`).
+- **CI fix** (`062d89e`): `.prettierignore` excluye `clients/*/config.json|config.schema.json|
+i18n/*.json` (generados con JSON.stringify, rompían `prettier --check` del PR de publish).
+  PR #9 quedó verde (se actualizó su rama con main).
+- **Milestone "Publish → Kiosk Standalone" Fases 0–5** (`005df19`→`2926006`):
+  - F1 `rewrite-config-assets.ts`: `collectImageRefs`/`rewriteImageRefs`/`IMAGE_FIELDS`
+    (allowlist por campo; links como website/ticketsUrl NUNCA se tocan).
+  - F2 `materialize-assets.ts`: `materializeAssets` (http→assets/feed, relativa→copia,
+    data:→assets/inline; best-effort, dedup; deps inyectables).
+  - F3 `scripts/export-runtime-tree.mjs`: poda el monorepo a UN producto. **Export por
+    producto** (`--product=kiosk|pwa`): kiosk SIN pwa / pwa SIN kiosk (verificado: kiosk no
+    importa pwa, pwa no importa rutas kiosk). Borra Studio/Signage/Walls; de lib/studio solo
+    viajan schema/kv/youtube/brand-video. Gate: `tsc --noEmit` 0 errores en ambas variantes.
+  - F4 `materialize-assets-fs.ts` (`createFsDeps`: adaptador real fetch/fs/decode) +
+    `export-config.ts` (`localizeConfig`).
+  - F5 `scripts/export-standalone.ts`: orquestador CLI (árbol + materialización), corre con
+    `npx tsx`. Verificado en seco contra default (105 assets relativos copiados, árbol kiosk
+    sin (pwa)).
+- **Repo builder `rubatrejo/kiosk-exporter` creado** + secret `EXPORTER_GITHUB_TOKEN`
+  configurado (reusa el token de gh de Rubén, scope repo+workflow).
+
+**Verificado:** typecheck + lint + **312 tests** (35 nuevos del export, TDD red→green) +
+dumps visuales (thumbnails, frames) + gate tsc de los árboles podados (kiosk/pwa, 0 errores) +
+dry-run del export local. Deploys Vercel READY en cada push.
+
+**Pendiente / siguiente (Fase 6 — última milla, sesión fresca):**
+
+- Workflow `export-standalone.yml` en `kiosk-exporter` (clona monorepo, corre el CLI con red
+  real + `--with-assets`, git push a `kiosk-<slug>`, zip). El secret ya está puesto.
+- Endpoint `/api/studio/publish-standalone/[slug]` (admin gate + manifest del config a Blob +
+  `octokit.actions.createWorkflowDispatch`) + 2 botones en el Studio (Publish Kiosk / Publish PWA).
+- `EXPORTER_GITHUB_TOKEN` como env var en Vercel (para el dispatch desde el Studio).
+- Primer export real (hello-harford, product=kiosk) end-to-end.
+- **Limpieza pendiente** (no pude por permiso `rm`): temporales untracked `clients/_pretest_/`,
+  `measure-tmp.mjs`, `thumb-mock-tmp.mjs`, `thumb-mock10-tmp.mjs`,
+  `src/lib/studio/_dump-{frames,thumbs}.test.ts`, `_inspect.test.ts`.
+
+**Decisiones:**
+
+- Export por producto (no kiosk+PWA juntos): cada Publish exporta solo su producto. El otro
+  route group + sus exclusivos se podan; lo compartido viaja en ambos.
+- CI fix por `.prettierignore` (no formatear con prettier en el publish): los config son
+  generados y el endpoint ya hace diff semántico, no de formato.
+- Token de la Action: se reusa el token de gh de Rubén como secret (autorizado); no puedo
+  generar tokens de GitHub (interactivo).
+- Plan del milestone: `~/.claude/plans/ok-ahora-quiero-que-cozy-elephant.md`.
+
+**Fase:** Milestone "Publish → Kiosk Standalone" — Fases 0–5 ✅ (en prod) · Fase 6 (Action +
+endpoint + UI + run real) pendiente para sesión fresca.
+
+---
+
 ### Sesión 2026-06-15 (noche) — refinamiento iterativo de los frames branded del Photo Booth
 
 **Contexto:** feedback de Rubén en varias tandas sobre los frames v2. Todo en prod,

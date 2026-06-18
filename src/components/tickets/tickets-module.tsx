@@ -11,6 +11,7 @@ import { FavoriteAddedToast } from '@/components/listings/favorite-added-toast';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { ListingsToolbar } from '@/components/listings/listings-toolbar';
 import { SortOverlay } from '@/components/listings/sort-overlay';
+import { getCachedEvents, getCachedTickets } from '@/components/studio-bridge';
 import type { EventItem, HomeListing, HomeTicketsModule } from '@/lib/config';
 import { addDays, addWeeks, todayISO } from '@/lib/events-date';
 import { applyEventsFilters, EMPTY_EVENTS_FILTER } from '@/lib/events-filter';
@@ -61,23 +62,28 @@ export function TicketsModule({
   const effectiveAllEvents: readonly EventItem[] = eventsOverride ?? allEvents;
 
   useEffect(() => {
-    const onTickets = (e: Event) => {
-      const detail = (e as CustomEvent<Partial<HomeTicketsModule>>).detail;
-      if (!detail) return;
+    const applyTickets = (detail: unknown) => {
+      const d = detail as Partial<HomeTicketsModule> | undefined;
+      if (!d) return;
       setModuleOverride({
         kind: 'tickets',
-        label: detail.label ?? mod.label,
-        heroImage: detail.heroImage ?? mod.heroImage,
-        categories: detail.categories ?? mod.categories,
-        venues: detail.venues ?? mod.venues,
-        features: detail.features ?? mod.features,
+        label: d.label ?? mod.label,
+        heroImage: d.heroImage ?? mod.heroImage,
+        categories: d.categories ?? mod.categories,
+        venues: d.venues ?? mod.venues,
+        features: d.features ?? mod.features,
       });
     };
-    const onEvents = (e: Event) => {
-      const detail = (e as CustomEvent<{ events?: EventItem[] }>).detail;
-      if (!detail || !Array.isArray(detail.events)) return;
-      setEventsOverride(detail.events);
+    const applyEvents = (detail: unknown) => {
+      const d = detail as { events?: EventItem[] } | undefined;
+      if (!d || !Array.isArray(d.events)) return;
+      setEventsOverride(d.events);
     };
+    // Hidrata desde el cache del bridge (edita→navega). No-op en runtime real.
+    applyTickets(getCachedTickets());
+    applyEvents(getCachedEvents());
+    const onTickets = (e: Event) => applyTickets((e as CustomEvent<unknown>).detail);
+    const onEvents = (e: Event) => applyEvents((e as CustomEvent<unknown>).detail);
     window.addEventListener('kiosk:tickets-override', onTickets);
     window.addEventListener('kiosk:events-override', onEvents);
     return () => {

@@ -11,6 +11,7 @@ import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { ListingsGrid } from '@/components/listings/listings-grid';
 import { ListingsToolbar } from '@/components/listings/listings-toolbar';
 import { SortOverlay } from '@/components/listings/sort-overlay';
+import { getCachedTrails } from '@/components/studio-bridge';
 import type { HomeListing, HomeTrailsModule, Listing, Trail } from '@/lib/config';
 import { useTrailFavorites } from '@/lib/favorites';
 import type { SortOrder } from '@/lib/listings-sort';
@@ -51,30 +52,33 @@ export function TrailsModule({
   const [override, setOverride] = useState<HomeTrailsModule | null>(null);
   const effective: HomeTrailsModule = override ?? mod;
   useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (
-        e as CustomEvent<{
-          label?: string;
-          heroImage?: string;
-          subcategories?: string[];
-          features?: string[];
-          difficulties?: HomeTrailsModule['difficulties'];
-          trailTypes?: HomeTrailsModule['trailTypes'];
-          trails?: Trail[];
-        }>
-      ).detail;
-      if (!detail || !Array.isArray(detail.trails)) return;
+    const apply = (detail: unknown) => {
+      const d = detail as
+        | {
+            label?: string;
+            heroImage?: string;
+            subcategories?: string[];
+            features?: string[];
+            difficulties?: HomeTrailsModule['difficulties'];
+            trailTypes?: HomeTrailsModule['trailTypes'];
+            trails?: Trail[];
+          }
+        | undefined;
+      if (!d || !Array.isArray(d.trails)) return;
       setOverride({
         kind: 'trails',
-        label: detail.label ?? mod.label,
-        heroImage: detail.heroImage ?? mod.heroImage,
-        subcategories: detail.subcategories ?? mod.subcategories,
-        features: detail.features ?? mod.features,
-        difficulties: detail.difficulties ?? mod.difficulties,
-        trailTypes: detail.trailTypes ?? mod.trailTypes,
-        trails: detail.trails,
+        label: d.label ?? mod.label,
+        heroImage: d.heroImage ?? mod.heroImage,
+        subcategories: d.subcategories ?? mod.subcategories,
+        features: d.features ?? mod.features,
+        difficulties: d.difficulties ?? mod.difficulties,
+        trailTypes: d.trailTypes ?? mod.trailTypes,
+        trails: d.trails,
       });
     };
+    // Hidrata desde el cache del bridge (edita→navega). No-op en runtime real.
+    apply(getCachedTrails());
+    const handler = (e: Event) => apply((e as CustomEvent<unknown>).detail);
     window.addEventListener('kiosk:trails-override', handler);
     return () => window.removeEventListener('kiosk:trails-override', handler);
   }, [mod.label, mod.heroImage, mod.subcategories, mod.features, mod.difficulties, mod.trailTypes]);

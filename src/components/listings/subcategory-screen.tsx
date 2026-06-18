@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { SearchOverlay } from '@/components/home/search-overlay';
+import { useModuleHeroBridge } from '@/components/home/use-module-hero-bridge';
 import { useModuleLabel } from '@/components/i18n-provider';
-import type { HomeListing, HomeModule } from '@/lib/config';
+import { getCachedListings } from '@/components/studio-bridge';
+import type { HomeListing, HomeModule, Listing } from '@/lib/config';
 
 import { FloatingHomeButton } from './floating-home-button';
 import { ListingsToolbar } from './listings-toolbar';
@@ -43,11 +45,57 @@ export function SubcategoryScreen({
   header: ReactNode;
 }) {
   const router = useRouter();
-  const moduleLabel = useModuleLabel(moduleKey, mod.label);
+
+  // Live preview override del Studio (mismo canal que `ListingsModule`). La page
+  // default `/home/<module>` con sub-categorías monta ESTA pantalla (no
+  // `ListingsModule`), así que sin esto el `kiosk:listings-override` —y por tanto
+  // el hero del módulo— no se reflejaba aquí. Buscamos la entry por `moduleKey`.
+  const [override, setOverride] = useState<HomeModule | null>(null);
+  const effective: HomeModule = override ?? mod;
+  useEffect(() => {
+    const apply = (detail: unknown) => {
+      if (!Array.isArray(detail)) return;
+      const entry = detail.find(
+        (en): en is ListingsEntryPatch =>
+          !!en && typeof en === 'object' && (en as ListingsEntryPatch).key === moduleKey,
+      );
+      const sub = entry?.catalog;
+      if (!entry || !sub) return;
+      setOverride({
+        kind: 'listings',
+        label: entry.label ?? mod.label,
+        heroImage: sub.heroImage ?? mod.heroImage,
+        subcategories: sub.subcategories ?? mod.subcategories,
+        subcategoryImages: mod.subcategoryImages,
+        features: sub.features ?? mod.features,
+        listings: (sub.listings ?? mod.listings) as Listing[],
+      });
+    };
+    // Hidrata desde el cache del bridge (edita→navega). No-op en runtime real.
+    apply(getCachedListings());
+    const handler = (e: Event) => apply((e as CustomEvent<unknown>).detail);
+    window.addEventListener('kiosk:listings-override', handler);
+    return () => window.removeEventListener('kiosk:listings-override', handler);
+  }, [
+    moduleKey,
+    mod.label,
+    mod.heroImage,
+    mod.subcategories,
+    mod.subcategoryImages,
+    mod.features,
+    mod.listings,
+  ]);
+
+  // Empuja el hero efectivo del módulo al HomeHeader (preview live del Studio),
+  // igual que `ListingsModule`. Sin esto el `<HomeHeader>` (Server Component)
+  // de esta pantalla nunca recibía el hero del override.
+  useModuleHeroBridge(effective.heroImage);
+
+  const moduleLabel = useModuleLabel(moduleKey, effective.label);
   const [searchOpen, setSearchOpen] = useState(false);
 
-  const images = mod.subcategoryImages ?? {};
-  const tiles = mod.subcategories.filter((name) => name && name.trim() !== '');
+  const images = effective.subcategoryImages ?? {};
+  const tiles = effective.subcategories.filter((name) => name && name.trim() !== '');
 
   // Fallback de foto por sub-categoría: la imagen del primer listing que
   // pertenece a esa sub-categoría. Así cada tile muestra una foto real y
@@ -55,24 +103,24 @@ export function SubcategoryScreen({
   // con la PWA). `subcategoryImages` (editable) siempre gana.
   const firstImageBySubcat = useMemo(() => {
     const byName: Record<string, string> = {};
-    for (const l of mod.listings) {
+    for (const l of effective.listings) {
       if (l.subcategory && l.image && !byName[l.subcategory]) {
         byName[l.subcategory] = l.image;
       }
     }
     return byName;
-  }, [mod.listings]);
+  }, [effective.listings]);
 
   // Mapeo Listing → HomeListing para el SearchOverlay (igual que ListingsModule).
   const searchListings: HomeListing[] = useMemo(
     () =>
-      mod.listings.map((l) => ({
+      effective.listings.map((l) => ({
         slug: l.slug,
         title: l.title,
         category: moduleKey,
         image: l.image,
       })),
-    [mod.listings, moduleKey],
+    [effective.listings, moduleKey],
   );
 
   // Sort/Filter no operan sobre tiles → llevan a la lista completa del módulo.
@@ -106,7 +154,7 @@ export function SubcategoryScreen({
           }}
         >
           {tiles.map((name) => {
-            const image = images[name] || firstImageBySubcat[name] || mod.heroImage || '';
+            const image = images[name] || firstImageBySubcat[name] || effective.heroImage || '';
             return (
               <Link
                 key={name}
@@ -145,3 +193,18 @@ export function SubcategoryScreen({
     </div>
   );
 }
+
+/** Shape de cada entry recibida en `kiosk:listings-override` (array). Mismo
+ *  shape que el de `ListingsModule`. */
+type ListingsEntryPatch = {
+  key: string;
+  label?: string;
+  iconKey?: string;
+  enabled?: boolean;
+  catalog?: {
+    heroImage?: string;
+    subcategories?: string[];
+    features?: string[];
+    listings?: Listing[];
+  };
+};

@@ -583,6 +583,7 @@ function applySurveyOverride(survey: unknown) {
 
 function applyDealsOverride(deals: unknown) {
   if (typeof window === 'undefined') return;
+  cachedDeals = deals;
   window.dispatchEvent(new CustomEvent(KIOSK_DEALS_OVERRIDE_EVENT, { detail: deals }));
 }
 
@@ -599,18 +600,69 @@ function applyPhotoBoothOverride(photoBooth: unknown) {
   window.dispatchEvent(new CustomEvent(KIOSK_PHOTO_BOOTH_OVERRIDE_EVENT, { detail: photoBooth }));
 }
 
+// Cache module-scoped por módulo. Mismo motivo que `getCachedListings`/
+// `getCachedModuleHero`: el preview del Studio NO se auto-navega al módulo que
+// se edita, así que el operador puede empujar un override (incl. su `heroImage`)
+// mientras el componente del módulo NO está montado. Sin cache ese evento cae al
+// vacío y se pierde; el módulo, al montar después, lee el cache y refleja el
+// override (hero incluido). Idempotente en runtime real (cache vacío → no-op).
+let cachedSocialWall: unknown = null;
+let cachedEvents: unknown = null;
+let cachedPasses: unknown = null;
+let cachedDeals: unknown = null;
+let cachedGuestbook: unknown = null;
+let cachedTrails: unknown = null;
+let cachedBrochures: unknown = null;
+let cachedTickets: unknown = null;
+
+/** Lee el último override de Social Wall cacheado (o null). */
+export function getCachedSocialWall(): unknown {
+  return cachedSocialWall;
+}
+/** Lee el último override de Events cacheado (o null). */
+export function getCachedEvents(): unknown {
+  return cachedEvents;
+}
+/** Lee el último override de Passes cacheado (o null). */
+export function getCachedPasses(): unknown {
+  return cachedPasses;
+}
+/** Lee el último override de Deals cacheado (o null). */
+export function getCachedDeals(): unknown {
+  return cachedDeals;
+}
+/** Lee el último override de Guestbook cacheado (o null). */
+export function getCachedGuestbook(): unknown {
+  return cachedGuestbook;
+}
+/** Lee el último override de Trails cacheado (o null). */
+export function getCachedTrails(): unknown {
+  return cachedTrails;
+}
+/** Lee el último override de Brochures cacheado (o null). */
+export function getCachedBrochures(): unknown {
+  return cachedBrochures;
+}
+/** Lee el último override de Tickets cacheado (o null). */
+export function getCachedTickets(): unknown {
+  return cachedTickets;
+}
+
 function applyBrochuresOverride(brochures: unknown) {
   if (typeof window === 'undefined') return;
+  cachedBrochures = brochures;
   window.dispatchEvent(new CustomEvent(KIOSK_BROCHURES_OVERRIDE_EVENT, { detail: brochures }));
 }
 
 function applySocialWallOverride(socialWall: unknown) {
   if (typeof window === 'undefined') return;
+  cachedSocialWall = socialWall;
   window.dispatchEvent(new CustomEvent(KIOSK_SOCIAL_WALL_OVERRIDE_EVENT, { detail: socialWall }));
 }
 
 function applyGuestbookOverride(guestbook: unknown) {
   if (typeof window === 'undefined') return;
+  cachedGuestbook = guestbook;
   window.dispatchEvent(new CustomEvent(KIOSK_GUESTBOOK_OVERRIDE_EVENT, { detail: guestbook }));
 }
 
@@ -630,21 +682,25 @@ export function getCachedListings(): unknown {
 
 function applyEventsOverride(events: unknown) {
   if (typeof window === 'undefined') return;
+  cachedEvents = events;
   window.dispatchEvent(new CustomEvent(KIOSK_EVENTS_OVERRIDE_EVENT, { detail: events }));
 }
 
 function applyTicketsOverride(tickets: unknown) {
   if (typeof window === 'undefined') return;
+  cachedTickets = tickets;
   window.dispatchEvent(new CustomEvent(KIOSK_TICKETS_OVERRIDE_EVENT, { detail: tickets }));
 }
 
 function applyPassesOverride(passes: unknown) {
   if (typeof window === 'undefined') return;
+  cachedPasses = passes;
   window.dispatchEvent(new CustomEvent(KIOSK_PASSES_OVERRIDE_EVENT, { detail: passes }));
 }
 
 function applyTrailsOverride(trails: unknown) {
   if (typeof window === 'undefined') return;
+  cachedTrails = trails;
   window.dispatchEvent(new CustomEvent(KIOSK_TRAILS_OVERRIDE_EVENT, { detail: trails }));
 }
 

@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { useModuleHeroBridge } from '@/components/home/use-module-hero-bridge';
 import { useModuleLabel } from '@/components/i18n-provider';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
+import { getCachedBrochures } from '@/components/studio-bridge';
 import { filterBrochures } from '@/lib/brochures-filter';
 import type { BrochureItem, HomeDigitalBrochureModule } from '@/lib/config';
 
@@ -30,24 +31,27 @@ export function BrochuresModule({
   // Live override desde el Studio (S3.4).
   const [override, setOverride] = useState<HomeDigitalBrochureModule | null>(null);
   useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (
-        e as CustomEvent<{
-          label?: string;
-          heroImage?: string;
-          categories?: string[];
-          brochures?: BrochureItem[];
-        }>
-      ).detail;
-      if (!detail || !Array.isArray(detail.brochures)) return;
+    const apply = (detail: unknown) => {
+      const d = detail as
+        | {
+            label?: string;
+            heroImage?: string;
+            categories?: string[];
+            brochures?: BrochureItem[];
+          }
+        | undefined;
+      if (!d || !Array.isArray(d.brochures)) return;
       setOverride({
         kind: 'digital-brochure',
-        label: detail.label ?? mod.label,
-        heroImage: detail.heroImage ?? mod.heroImage,
-        categories: detail.categories ?? mod.categories,
-        brochures: detail.brochures,
+        label: d.label ?? mod.label,
+        heroImage: d.heroImage ?? mod.heroImage,
+        categories: d.categories ?? mod.categories,
+        brochures: d.brochures,
       });
     };
+    // Hidrata desde el cache del bridge (edita→navega). No-op en runtime real.
+    apply(getCachedBrochures());
+    const handler = (e: Event) => apply((e as CustomEvent<unknown>).detail);
     window.addEventListener('kiosk:brochures-override', handler);
     return () => window.removeEventListener('kiosk:brochures-override', handler);
   }, [mod.label, mod.heroImage, mod.categories]);

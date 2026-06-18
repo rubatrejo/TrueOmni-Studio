@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 
 import { useModuleHeroBridge } from '@/components/home/use-module-hero-bridge';
 import { useTextosMap } from '@/components/i18n-provider';
+import { getCachedGuestbook } from '@/components/studio-bridge';
 import type { HomeGuestbookModule } from '@/lib/config';
 import { filterPinsByProximity } from '@/lib/guestbook-bbox';
 import { geocodeZip } from '@/lib/guestbook-geo';
@@ -80,11 +81,14 @@ export function GuestbookModule({
   // Live override desde el Studio (S3.6).
   const [override, setOverride] = useState<HomeGuestbookModule | null>(null);
   useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent<HomeGuestbookModule>).detail;
-      if (!detail || !Array.isArray(detail.pinCatalog)) return;
-      setOverride({ ...detail, kind: 'guestbook' });
+    const apply = (detail: unknown) => {
+      const d = detail as HomeGuestbookModule | undefined;
+      if (!d || !Array.isArray(d.pinCatalog)) return;
+      setOverride({ ...d, kind: 'guestbook' });
     };
+    // Hidrata desde el cache del bridge (edita→navega). No-op en runtime real.
+    apply(getCachedGuestbook());
+    const handler = (e: Event) => apply((e as CustomEvent<unknown>).detail);
     window.addEventListener('kiosk:guestbook-override', handler);
     return () => window.removeEventListener('kiosk:guestbook-override', handler);
   }, []);

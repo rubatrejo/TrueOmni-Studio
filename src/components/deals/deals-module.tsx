@@ -9,6 +9,7 @@ import { useModuleLabel, useTextosMap } from '@/components/i18n-provider';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { ListingsToolbar } from '@/components/listings/listings-toolbar';
 import { SortOverlay } from '@/components/listings/sort-overlay';
+import { getCachedDeals } from '@/components/studio-bridge';
 import type { Deal, HomeDealsModule, HomeListing } from '@/lib/config';
 import {
   applyDealsFilter,
@@ -58,26 +59,29 @@ export function DealsModule({
   // por postMessage. En runtime normal queda en null y se usa `mod` directo.
   const [override, setOverride] = useState<HomeDealsModule | null>(null);
   useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (
-        e as CustomEvent<{
-          label?: string;
-          heroImage?: string;
-          featureCatalog?: string[];
-          deals?: Deal[];
-          qrLogo?: string;
-        }>
-      ).detail;
-      if (!detail || !Array.isArray(detail.deals)) return;
+    const apply = (detail: unknown) => {
+      const d = detail as
+        | {
+            label?: string;
+            heroImage?: string;
+            featureCatalog?: string[];
+            deals?: Deal[];
+            qrLogo?: string;
+          }
+        | undefined;
+      if (!d || !Array.isArray(d.deals)) return;
       setOverride({
         kind: 'deals',
-        label: detail.label ?? mod.label,
-        heroImage: detail.heroImage ?? mod.heroImage,
-        featureCatalog: detail.featureCatalog ?? mod.featureCatalog,
-        deals: detail.deals,
-        qrLogo: detail.qrLogo,
+        label: d.label ?? mod.label,
+        heroImage: d.heroImage ?? mod.heroImage,
+        featureCatalog: d.featureCatalog ?? mod.featureCatalog,
+        deals: d.deals,
+        qrLogo: d.qrLogo,
       });
     };
+    // Hidrata desde el cache del bridge (edita→navega). No-op en runtime real.
+    apply(getCachedDeals());
+    const handler = (e: Event) => apply((e as CustomEvent<unknown>).detail);
     window.addEventListener('kiosk:deals-override', handler);
     return () => window.removeEventListener('kiosk:deals-override', handler);
   }, [mod.label, mod.heroImage, mod.featureCatalog]);

@@ -10,6 +10,7 @@ import { FavoriteAddedToast } from '@/components/listings/favorite-added-toast';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
 import { ListingsToolbar } from '@/components/listings/listings-toolbar';
 import { SortOverlay } from '@/components/listings/sort-overlay';
+import { getCachedEvents } from '@/components/studio-bridge';
 import type { EventItem, HomeEventsModule, HomeListing } from '@/lib/config';
 import { addDays, addWeeks, todayISO } from '@/lib/events-date';
 import { applyEventsFilters, EMPTY_EVENTS_FILTER } from '@/lib/events-filter';
@@ -49,28 +50,31 @@ export function EventsModule({
   const [override, setOverride] = useState<HomeEventsModule | null>(null);
   const effective: HomeEventsModule = override ?? mod;
   useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (
-        e as CustomEvent<{
-          label?: string;
-          heroImage?: string;
-          categories?: string[];
-          venues?: string[];
-          features?: string[];
-          events?: EventItem[];
-        }>
-      ).detail;
-      if (!detail || !Array.isArray(detail.events)) return;
+    const apply = (detail: unknown) => {
+      const d = detail as
+        | {
+            label?: string;
+            heroImage?: string;
+            categories?: string[];
+            venues?: string[];
+            features?: string[];
+            events?: EventItem[];
+          }
+        | undefined;
+      if (!d || !Array.isArray(d.events)) return;
       setOverride({
         kind: 'events',
-        label: detail.label ?? mod.label,
-        heroImage: detail.heroImage ?? mod.heroImage,
-        categories: detail.categories ?? mod.categories,
-        venues: detail.venues ?? mod.venues,
-        features: detail.features ?? mod.features,
-        events: detail.events,
+        label: d.label ?? mod.label,
+        heroImage: d.heroImage ?? mod.heroImage,
+        categories: d.categories ?? mod.categories,
+        venues: d.venues ?? mod.venues,
+        features: d.features ?? mod.features,
+        events: d.events,
       });
     };
+    // Hidrata desde el cache del bridge (edita→navega). No-op en runtime real.
+    apply(getCachedEvents());
+    const handler = (e: Event) => apply((e as CustomEvent<unknown>).detail);
     window.addEventListener('kiosk:events-override', handler);
     return () => window.removeEventListener('kiosk:events-override', handler);
   }, [mod.label, mod.heroImage, mod.categories, mod.venues, mod.features]);

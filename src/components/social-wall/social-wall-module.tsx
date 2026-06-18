@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 
 import { useModuleHeroBridge } from '@/components/home/use-module-hero-bridge';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
+import { getCachedSocialWall } from '@/components/studio-bridge';
 import type { HomeSocialWallModule, SocialPost, SocialSource } from '@/lib/config';
 import { filterPosts } from '@/lib/social-sources';
 
@@ -40,11 +41,16 @@ export function SocialWallModule({
   // Live override desde el Studio (S3.5).
   const [override, setOverride] = useState<HomeSocialWallModule | null>(null);
   useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent<HomeSocialWallModule>).detail;
-      if (!detail || !Array.isArray(detail.posts)) return;
-      setOverride({ ...detail, kind: 'social-wall' });
+    const apply = (detail: unknown) => {
+      const d = detail as HomeSocialWallModule | undefined;
+      if (!d || !Array.isArray(d.posts)) return;
+      setOverride({ ...d, kind: 'social-wall' });
     };
+    // Hidrata desde el cache del bridge: si el operador editó este módulo ANTES
+    // de navegar aquí, el override (hero incluido) ya está cacheado y lo
+    // adoptamos al montar. En runtime real el cache está vacío → no-op.
+    apply(getCachedSocialWall());
+    const handler = (e: Event) => apply((e as CustomEvent<unknown>).detail);
     window.addEventListener('kiosk:social-wall-override', handler);
     return () => window.removeEventListener('kiosk:social-wall-override', handler);
   }, []);

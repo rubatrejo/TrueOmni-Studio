@@ -7,6 +7,7 @@ import { SearchOverlay } from '@/components/home/search-overlay';
 import { useModuleHeroBridge } from '@/components/home/use-module-hero-bridge';
 import { useModuleLabel, useTextosMap } from '@/components/i18n-provider';
 import { FloatingHomeButton } from '@/components/listings/floating-home-button';
+import { getCachedPasses } from '@/components/studio-bridge';
 import type { HomeListing, HomePassesModule, PassItem } from '@/lib/config';
 
 import { PassesGrid } from './passes-grid';
@@ -25,24 +26,27 @@ export function PassesModule({ moduleKey, module: mod, header }: Props) {
   const [override, setOverride] = useState<HomePassesModule | null>(null);
   const effective: HomePassesModule = override ?? mod;
   useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (
-        e as CustomEvent<{
-          label?: string;
-          heroImage?: string;
-          passes?: PassItem[];
-          qrLogo?: string;
-        }>
-      ).detail;
-      if (!detail || !Array.isArray(detail.passes)) return;
+    const apply = (detail: unknown) => {
+      const d = detail as
+        | {
+            label?: string;
+            heroImage?: string;
+            passes?: PassItem[];
+            qrLogo?: string;
+          }
+        | undefined;
+      if (!d || !Array.isArray(d.passes)) return;
       setOverride({
         kind: 'passes',
-        label: detail.label ?? mod.label,
-        heroImage: detail.heroImage ?? mod.heroImage,
-        passes: detail.passes,
-        qrLogo: detail.qrLogo ?? mod.qrLogo,
+        label: d.label ?? mod.label,
+        heroImage: d.heroImage ?? mod.heroImage,
+        passes: d.passes,
+        qrLogo: d.qrLogo ?? mod.qrLogo,
       });
     };
+    // Hidrata desde el cache del bridge (edita→navega). No-op en runtime real.
+    apply(getCachedPasses());
+    const handler = (e: Event) => apply((e as CustomEvent<unknown>).detail);
     window.addEventListener('kiosk:passes-override', handler);
     return () => window.removeEventListener('kiosk:passes-override', handler);
   }, [mod.label, mod.heroImage, mod.qrLogo]);

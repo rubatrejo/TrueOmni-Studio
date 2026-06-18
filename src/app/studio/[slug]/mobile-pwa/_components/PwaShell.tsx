@@ -4,6 +4,7 @@ import { Play } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { PwaConfig } from '@/lib/config';
+import { resolvePwaImages, type PwaImageSources } from '@/lib/pwa-image-inheritance';
 import { isPwaModuleVisible, PWA_TOGGLEABLE_MODULES } from '@/lib/pwa-module-visibility';
 import type { UnifiedClientBranding } from '@/lib/studio/client-branding-sync';
 import { hexToHsl } from '@/lib/studio/hex-to-hsl';
@@ -94,6 +95,7 @@ export function PwaShell({
   initialBranding,
   initialUnified,
   kioskSystemModules,
+  kioskTileImages,
   availableLocales,
   mapboxToken,
 }: {
@@ -110,6 +112,13 @@ export function PwaShell({
    * visibilidad de módulos en la PWA (panel "Modules" + bloqueo de edición).
    */
   kioskSystemModules: SystemModules;
+  /**
+   * Mapa `key → image` de las tiles del Kiosk (`modules.tiles`). Fuente de la
+   * herencia silenciosa de imágenes de los tiles del Dashboard PWA (un tile
+   * con imagen vacía hereda la del kiosk con la misma key). Ver
+   * `resolvePwaImages` en `@/lib/pwa-image-inheritance`.
+   */
+  kioskTileImages: Record<string, string>;
   /** Idiomas que ofrece el cliente (`features.languages.available`) para el
    *  editor i18n (F-PWA-7). `null` → el editor usa su lista por defecto. */
   availableLocales: string[] | null;
@@ -179,11 +188,26 @@ export function PwaShell({
     pushBranding(brandingToPatch(branding, nombre));
   }, [branding, nombre, pushBranding]);
 
+  // Fuentes de imagen del Kiosk para la herencia silenciosa (hero/idle del
+  // branding editable + tiles read-only). Solo se hereda de imágenes (no video).
+  const kioskImageSources = useMemo<PwaImageSources>(
+    () => ({
+      homeHero: branding.homeHero?.kind === 'image' ? branding.homeHero.src : undefined,
+      idleBackground:
+        branding.idleBackground?.kind === 'image' ? branding.idleBackground.src : undefined,
+      tileImages: kioskTileImages,
+    }),
+    [branding.homeHero, branding.idleBackground, kioskTileImages],
+  );
+
   // Empuja el slice PWA + el systemModules del Kiosk al preview en cada cambio
-  // (el runtime necesita ambos para resolver la herencia de visibilidad).
+  // (el runtime necesita ambos para resolver la herencia de visibilidad). El
+  // slice se envía con las imágenes ya resueltas (herencia silenciosa del kiosk)
+  // — el estado `pwa` que se guarda/publica conserva los campos vacíos; solo el
+  // preview ve la imagen heredada. El publish hornea esta misma resolución.
   useEffect(() => {
-    pushPwa(pwa, kioskSystemModules);
-  }, [pwa, kioskSystemModules, pushPwa]);
+    pushPwa(resolvePwaImages(pwa, kioskImageSources), kioskSystemModules);
+  }, [pwa, kioskImageSources, kioskSystemModules, pushPwa]);
 
   // Visibilidad efectiva de cada módulo (override PWA → herencia del Kiosk).
   // Las secciones de módulos NO visibles se deshabilitan en el sidebar (Lock).

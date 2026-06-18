@@ -60,6 +60,12 @@ export default async function MobilePwaEditorPage({
     ...DEFAULT_SYSTEM_MODULES,
     ...(rawKiosk?.modules?.systemModules ?? {}),
   };
+  // Mapa key → image de las tiles del Kiosk → fuente de la herencia silenciosa
+  // de imágenes de los tiles del Dashboard PWA (ver resolvePwaImages).
+  const kioskTileImages: Record<string, string> = {};
+  for (const t of rawKiosk?.modules?.tiles ?? []) {
+    if (t.image) kioskTileImages[t.key] = t.image;
+  }
 
   // Fallback defensivo: si el cliente aún no tiene unified branding, lo
   // materializamos con defaults para que el editor abra (edge case raro —
@@ -81,6 +87,7 @@ export default async function MobilePwaEditorPage({
       initialBranding={unifiedToKioskBranding(branding)}
       initialUnified={branding}
       kioskSystemModules={kioskSystemModules}
+      kioskTileImages={kioskTileImages}
       availableLocales={availableLocales}
       mapboxToken={mapboxToken}
     />

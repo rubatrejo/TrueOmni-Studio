@@ -4,6 +4,61 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-18 — Export Signage + validación Export PWA + panel Modules PWA (herencia del Kiosk) + plan imágenes Kiosk→PWA
+
+**Hecho (todo en prod, deploys Vercel READY):**
+
+- **Export standalone de Signage/Digital Displays** (`32e954f`): paridad con kiosk/pwa. Signage
+  tiene estructura propia (`clients-signage/<slug>/` con client/events/social/news/displays/i18n/
+  tokens), así que el manifest viaja como `PublishFile[]` ya construido (reusa builders de
+  `publish-files.ts`) y los scripts ramifican por producto. Endpoint `publish-standalone` acepta
+  `product=signage`; `apply-standalone-manifest.mjs` escribe `files[]`; `export-runtime-tree.mjs`
+  generaliza la poda (`PRODUCT_EXCLUSIVE`+`DATA_DIR`, poda `diagnostics.ts`/`publish-files.ts` del
+  standalone); `export-standalone.ts` → `mainSignage` materializa assets + rename
+  `clients-signage/`→`<Cliente>-Assets/`. Botón Export en `SignageTopBar`+`DisplayEditor`.
+  **El workflow externo `export-product.yml` NO necesitó cambios** (input `product` es string libre
+  - pasa-through a los scripts ya signage-aware).
+- **Export PWA validado E2E** (no fue bug — falsa alarma de timezone: revisé runs a las 08:29 MST
+  ANTES del dispatch de Rubén ~09:40). `TrueOmni-Hello-Harford-Pwa-06-18-2026` generado, **Verify
+  build verde**, formato == kiosk. El token de Vercel `EXPORTER_GITHUB_TOKEN` está OK.
+- **Editor PWA — panel "Modules" con herencia del Kiosk** (`b7084fe` + fix `a49b8ad`): el Kiosk es
+  el producto principal; la PWA hereda visibilidad de módulos por LECTURA del `systemModules` del
+  kiosk (override manual gana). Helper `src/lib/pwa-module-visibility.ts` (+14 tests). Campo
+  `features.pwa.moduleVisibility`. Panel `PwaSystemModulesEditor` (Shared with Kiosk: badge Synced/
+  Manual + Reset · PWA-only: toggle). Bloqueo de edición (reusa `SidebarTabs` con prop opcional
+  `disabledKeys` + auto-salto). Runtime oculta off en dashboard/quick-access/bottom-nav/ruta
+  (`PwaRouteGuard`). Bridge lleva `kioskSystemModules` para resolver en vivo. Publish hornea la
+  visibilidad efectiva en `moduleVisibility`. PWA-only toggleables = scavenger-hunt/connect-with-us/
+  help (conservador, sin chrome core).
+
+**Verificado:**
+
+- typecheck + lint + 14 tests (helper visibilidad) + dev `/pwa/dashboard` 200 + 3 deploys READY.
+- Export PWA: run real verde + repo inspeccionado (estructura == kiosk, `src/app/(pwa)` sin `(kiosk)`).
+- No-regresión kiosk: componentes compartidos extendidos solo con props opcionales.
+
+**Pendiente / siguiente:**
+
+- **EJECUTAR el plan aprobado: herencia de imágenes de contenido Kiosk→PWA** (fallback silencioso).
+  Plan completo en `~/.claude/plans/piped-booping-hippo.md`. Decisiones: idle bg → fondo Welcome+Login;
+  override silencioso (vacío hereda/lleno overridea/borrar revierte); reusar mismo asset (object-cover).
+  5 superficies: tiles dashboard, hero dashboard, idle bg, hero por módulo, social wall. Mismo
+  3-pronged que módulos (helper + bridge + publish bake). **Arrancar en sesión fresca.**
+- QA visual del editor PWA (panel Modules, toggle→iframe+candado) por Rubén — agent-browser no entra con auth.
+- Validar el set PWA-only del panel Modules (¿añadir alguno más?).
+- Limpieza de ~10 temporales untracked (`_dump-*.test.ts`, `_repro-pwa-dispatch.mts`,
+  `*-tmp.*`, `clients/_pretest_/`, `clients/hello-harford/` del repro local) — `rm` bloqueado en sesión.
+
+**Decisiones:**
+
+- Signage export: manifest como `PublishFile[]` (reusa builders) en vez de re-implementar el merge kiosk.
+- Herencia (módulos e imágenes): por LECTURA, no se copia estado; override opt-in (respeta regla anti-footgun).
+- Producción: hornear lo resuelto al publicar (no hay KV/bridge); preview resuelve en vivo por bridge.
+
+**Fase:** Milestone PWA / Studio — conexiones Kiosk↔PWA (módulos ✅, imágenes 📋 planificado).
+
+---
+
 ### Sesión 2026-06-17 (tarde/noche) — Export deliverable + Studio Publish/hero + brainstorm Social Wall feeds
 
 **Todo en prod (main, deploys Vercel READY). Commits `b9ffb43`→`d36e062`.**

@@ -22,8 +22,8 @@ export function PwaRouteGuard() {
   const router = useRouter();
   const isModuleVisible = usePwaModuleVisibility();
 
-  // Segmento de módulo de `/pwa/<seg>/...`.
-  const seg = pathname.split('/')[2] ?? '';
+  // Segmento de módulo de `/pwa/<seg>/...` (`usePathname` puede ser null).
+  const seg = (pathname ?? '').split('/')[2] ?? '';
   const moduleKey = isPwaToggleableModule(seg) ? seg : null;
   const blocked = moduleKey !== null && !isModuleVisible(moduleKey);
 

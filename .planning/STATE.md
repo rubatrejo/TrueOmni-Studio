@@ -4,6 +4,36 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-17 (tarde/noche) — Export deliverable + Studio Publish/hero + brainstorm Social Wall feeds
+
+**Todo en prod (main, deploys Vercel READY). Commits `b9ffb43`→`d36e062`.**
+
+**Export standalone (carpeta que se descarga al Publish) — varias rondas de feedback de Rubén, cada una verificada regenerando el export REAL de hello-harford en local (KV creds en `.env.local` + `buildFilesystemConfig`):**
+
+- `b9ffb43` — workflow del builder renombrado `export-standalone.yml` → **`export-product.yml`** (constante `EXPORTER_WORKFLOW` + el repo `rubatrejo/kiosk-exporter`; Rubén lo re-subió con `! bash /tmp/push-workflow.sh`). El script `export-standalone.ts` y el endpoint `publish-standalone` CONSERVAN su nombre.
+- `b9ec3d5` — **causa raíz módulos inactivos que se colaban:** el gating leía `tiles[].enabled` (siempre true); ahora `publish-merger.applyModulesAndTiles` cruza con `systemModules` (`MODULE_KEY_TO_SYSTEM_FIELD`). Afecta también el publish PR (correcto). + billboard solo variante activa, capitalización de TODA carpeta (`canonicalAssetPath` + reescritura de refs del src/), hero a tiles, ads por kind, logos SVG a Branding, Map/Pins + placeholder, Trip Planner/Pins, sin pwa.
+- `0b93fa2` — pins por **etiqueta real del cliente** (`Eat-and-Drink.svg`…) + `Cluster.svg`; carpeta **`Billboard/Idle/`**; **`Powered-by-TrueOmni.svg`** (refactor DRY `WORDMARK_PATHS`+`trueOmniWordmarkSvg()` en `true-omni-logo.tsx`); rename `clients/` → **`<ClientName>-Assets/`** + reescritura de refs del runtime.
+- `5f23e0d` — **Billboard/Idle background = el que el OPERADOR subió** (`studioConfig.billboard.background.src`, Blob en KV), NO el theme `billboard-0/hero.jpg`. El idle bg vive en el KV, no en el FS config → por eso caía al theme.
+
+**Studio (editor):**
+
+- `14b86a2` — **PublishModal** se renderiza por **portal a document.body** + centrado flex (antes su `fixed` quedaba relativo a un ancestro con transform). Sección **"Publish & Approvals"** real (`PublishEditor` nuevo) en lugar del placeholder ComingSoon — cableada en Kiosk (EditorPanel) y PWA (PwaEditorPanel/PwaShell).
+- `a5a548b` — opción **"Skip subcategories"** por módulo de listings (Kiosk y PWA), flag independiente por producto; runtime salta SubcategoryScreen (kiosk) / redirige a `/list` (pwa).
+- **Hero headers de módulos no se reflejaban en el preview** (`31e6e6c` + `d36e062`). Bug sistemático: el hero lo pinta `HomeHeader` (server) pasado como prop estático; `HeroBackgroundLayer` solo escuchaba el override del Home Dashboard. Fix: canal `kiosk:module-hero-override` + hook `useModuleHeroBridge` + **cache de override por módulo** (como listings) e **hidratación al montar** (clave: el preview es interactivo y no se auto-navega → si editas con el módulo no montado, el override se perdía). **Verificado EMPÍRICAMENTE con agent-browser** (3/3 casos: editar→navegar, SubcategoryScreen, montado). + share background del Photo Booth ahora sale del override.
+  - **Lección:** dejé de parchar a ciegas; el segundo fix se verificó levantando `pnpm kiosk:dev` + agent-browser disparando el `postMessage` real. El primer intento "falló" por usar el evento DOM crudo (no cachea) en vez del postMessage que sí ejecuta `applyXOverride`.
+
+**Brainstorm Social Wall feeds reales (NO implementado — diferido a próxima sesión):**
+
+- Hoy los posts del Social Wall son **100% estáticos** del config; los tabs/iconos salen de `handles`.
+- Rubén quiere conectar IG/X/Pinterest/YouTube reales por cliente y que los iconos solo salgan de redes **conectadas**.
+- **Decisión: usar CrowdRiff** (agregador; credenciales `integrations.crowdriff.*` YA en schema/editor pero sin cablear al fetch). Fallback obligatorio: sin conexión → placeholders actuales editables.
+- **Plan escrito en `.planning/SOCIAL-WALL-FEEDS-PLAN.md`** (copia del plan aprobado).
+- **BLOQUEANTES para ejecutar:** (1) contrato real de la API de CrowdRiff (endpoint gallery + auth + JSON de muestra); (2) confirmar qué redes entrega el gallery (CrowdRiff suele NO cubrir YouTube/Pinterest → YouTube iría por su propia API en fase 2). Se difirió por contexto agotado + dependencia externa.
+
+**Pendiente próxima sesión:** ejecutar el plan del Social Wall (cuando Rubén junte API key + gallery ID + sample de CrowdRiff). Limpieza de ~50 untracked temporales (PNGs de verificación, `*-tmp.*`, `clients/hello-harford/` del repro local).
+
+---
+
 ### Sesión 2026-06-17 — Milestone "Kiosk Standalone" Fase 6 (última milla) E2E + 4 rondas de feedback
 
 **Todo en prod** (monorepo `main`: `4a77965`→`141ed10`; workflow en repo `rubatrejo/kiosk-exporter`).

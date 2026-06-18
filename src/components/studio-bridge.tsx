@@ -94,6 +94,8 @@ export function StudioBridge() {
         i18nBundle?: Record<string, Record<string, string>>;
         /** Slice `features.pwa` completo enviado por el editor PWA del Studio. */
         pwa?: unknown;
+        /** `systemModules` del Kiosk (herencia de visibilidad de módulos PWA). */
+        kioskSystemModules?: unknown;
         /** Ruta destino para `studio:pwa-nav` (navegación del preview PWA). */
         route?: string;
         /** Sección activa del editor PWA (`studio:pwa-active-section`). */
@@ -306,6 +308,9 @@ export function StudioBridge() {
           // Editor PWA → runtime PWA. Empuja el slice `features.pwa` completo;
           // el `PwaBridgeProvider` lo aplica reactivamente a las pantallas.
           if (data.pwa) applyPwaOverride(data.pwa);
+          // El systemModules del Kiosk viaja junto al slice para resolver la
+          // herencia de visibilidad de módulos en el preview (que carga `default`).
+          if (data.kioskSystemModules) applyPwaKioskModules(data.kioskSystemModules);
           break;
         case 'studio:pwa-active-section':
           // Editor PWA → runtime PWA: qué sección se está editando ahora. Lo usan
@@ -748,12 +753,29 @@ function applyPwaOverride(pwa: unknown) {
 interface PwaBridgeWindow extends Window {
   __pwaConfigOverride?: unknown;
   __pwaActiveSection?: string;
+  __pwaKioskModules?: unknown;
 }
 
 /** Lee el último slice `features.pwa` que el bridge haya aplicado, o `null`. */
 export function getCachedPwaOverride(): unknown {
   if (typeof window === 'undefined') return null;
   return (window as PwaBridgeWindow).__pwaConfigOverride ?? null;
+}
+
+/** Evento global que el `PwaBridgeProvider` escucha para recibir el
+ *  `systemModules` del Kiosk (fuente de la herencia de visibilidad de módulos). */
+export const PWA_KIOSK_MODULES_EVENT = 'pwa:kiosk-modules';
+
+function applyPwaKioskModules(systemModules: unknown) {
+  if (typeof window === 'undefined') return;
+  (window as PwaBridgeWindow).__pwaKioskModules = systemModules;
+  window.dispatchEvent(new CustomEvent(PWA_KIOSK_MODULES_EVENT, { detail: systemModules }));
+}
+
+/** Lee el último `systemModules` del Kiosk que el bridge haya anunciado, o `null`. */
+export function getCachedPwaKioskModules(): unknown {
+  if (typeof window === 'undefined') return null;
+  return (window as PwaBridgeWindow).__pwaKioskModules ?? null;
 }
 
 /** Evento global que el `PwaBridgeProvider` escucha para saber qué sección del

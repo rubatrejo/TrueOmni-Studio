@@ -10,6 +10,7 @@ import {
   MoreNavIcon,
 } from './dashboard-icons';
 import { Layer } from './mobile-layer';
+import { usePwaModuleVisibility } from './pwa-bridge-context';
 
 const BRAND = 'hsl(var(--brand-primary))';
 const PWA = 'hsl(var(--pwa-primary))';
@@ -41,6 +42,26 @@ export const NAV_ARIA: Record<PwaNavKey, string> = {
   more: 'More',
 };
 
+/** Celda del nav → key del módulo que la gobierna. `home`/`more` son chrome (siempre). */
+const NAV_KEY_TO_MODULE: Partial<Record<PwaNavKey, string>> = {
+  events: 'events',
+  dining: 'restaurants',
+  map: 'map',
+};
+
+/**
+ * `PWA_NAV` filtrado por la visibilidad efectiva de módulos: las celdas de
+ * módulos desactivados (override PWA o herencia del Kiosk) se omiten; `home` y
+ * `more` siempre quedan. Fuente única usada por el bottom nav y `InLayerNav`.
+ */
+export function usePwaVisibleNav(): typeof PWA_NAV {
+  const isVisible = usePwaModuleVisibility();
+  return PWA_NAV.filter((cell) => {
+    const moduleKey = NAV_KEY_TO_MODULE[cell.key];
+    return !moduleKey || isVisible(moduleKey);
+  });
+}
+
 /**
  * Bottom nav compartido de la PWA (Dashboard, More, …). Iconos Font Awesome 6;
  * la celda `active` se resalta con `--pwa-primary`. Fijo (no scrollea).
@@ -48,10 +69,11 @@ export const NAV_ARIA: Record<PwaNavKey, string> = {
  */
 export function PwaBottomNav({ active }: { active?: PwaNavKey }) {
   const router = useRouter();
+  const nav = usePwaVisibleNav();
   return (
     <Layer h={56} className="shrink-0" style={{ backgroundColor: BRAND }}>
       <div className="flex h-full w-full">
-        {PWA_NAV.map(({ key, Icon, href }) => (
+        {nav.map(({ key, Icon, href }) => (
           <button
             key={key}
             type="button"

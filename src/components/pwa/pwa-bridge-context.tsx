@@ -5,10 +5,14 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import {
   PWA_ACTIVE_SECTION_EVENT,
   PWA_CONFIG_OVERRIDE_EVENT,
+  PWA_KIOSK_MODULES_EVENT,
   getCachedPwaActiveSection,
+  getCachedPwaKioskModules,
   getCachedPwaOverride,
 } from '@/components/studio-bridge';
 import type { PwaConfig } from '@/lib/config';
+import { isPwaModuleVisible } from '@/lib/pwa-module-visibility';
+import type { SystemModules } from '@/lib/studio/schema';
 
 /**
  * Provider del override reactivo del slice `features.pwa`.
@@ -32,23 +36,36 @@ type PwaBridgeContextValue = {
   isOverridden: boolean;
   /** Sección del editor PWA activa ahora mismo, o `null` fuera del Studio. */
   activeSection: string | null;
+  /**
+   * `systemModules` del Kiosk del cliente (fuente de la herencia de visibilidad).
+   * En producción viene del server (`initialKioskSystemModules`); en el preview
+   * llega por el bridge junto al slice PWA.
+   */
+  kioskSystemModules: Partial<SystemModules> | null;
 };
 
 const PwaBridgeContext = createContext<PwaBridgeContextValue>({
   pwa: null,
   isOverridden: false,
   activeSection: null,
+  kioskSystemModules: null,
 });
 
 export function PwaBridgeProvider({
   initial,
+  initialKioskSystemModules = null,
   children,
 }: {
   initial: PwaConfig | null;
+  /** `systemModules` del Kiosk del cliente (server-side) para la herencia. */
+  initialKioskSystemModules?: Partial<SystemModules> | null;
   children: ReactNode;
 }) {
   const [override, setOverride] = useState<PwaConfig | null>(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [kioskModulesOverride, setKioskModulesOverride] = useState<Partial<SystemModules> | null>(
+    null,
+  );
 
   useEffect(() => {
     // Hidrata con el último override cacheado (cubre el caso de navegación SPA
@@ -57,6 +74,8 @@ export function PwaBridgeProvider({
     if (cached) setOverride(cached as PwaConfig);
     const cachedSection = getCachedPwaActiveSection();
     if (cachedSection) setActiveSection(cachedSection);
+    const cachedKiosk = getCachedPwaKioskModules();
+    if (cachedKiosk) setKioskModulesOverride(cachedKiosk as Partial<SystemModules>);
 
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
@@ -66,17 +85,27 @@ export function PwaBridgeProvider({
       const detail = (e as CustomEvent).detail;
       if (typeof detail === 'string') setActiveSection(detail);
     };
+    const kioskHandler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail && typeof detail === 'object')
+        setKioskModulesOverride(detail as Partial<SystemModules>);
+    };
     window.addEventListener(PWA_CONFIG_OVERRIDE_EVENT, handler);
     window.addEventListener(PWA_ACTIVE_SECTION_EVENT, sectionHandler);
+    window.addEventListener(PWA_KIOSK_MODULES_EVENT, kioskHandler);
     return () => {
       window.removeEventListener(PWA_CONFIG_OVERRIDE_EVENT, handler);
       window.removeEventListener(PWA_ACTIVE_SECTION_EVENT, sectionHandler);
+      window.removeEventListener(PWA_KIOSK_MODULES_EVENT, kioskHandler);
     };
   }, []);
 
   const pwa = override ?? initial;
+  const kioskSystemModules = kioskModulesOverride ?? initialKioskSystemModules;
   return (
-    <PwaBridgeContext.Provider value={{ pwa, isOverridden: override !== null, activeSection }}>
+    <PwaBridgeContext.Provider
+      value={{ pwa, isOverridden: override !== null, activeSection, kioskSystemModules }}
+    >
       {children}
     </PwaBridgeContext.Provider>
   );
@@ -117,4 +146,31 @@ export function usePwaSection<K extends keyof PwaConfig>(
   const { pwa } = useContext(PwaBridgeContext);
   const fromBridge = pwa?.[key];
   return (fromBridge ?? fallback) as PwaConfig[K];
+}
+
+/**
+ * Visibilidad EFECTIVA de un módulo en la PWA, reactiva al editor:
+ * override manual (`pwa.moduleVisibility`) → herencia del Kiosk (`systemModules`)
+ * → default ON. Funciona en producción (config del server) y en el preview
+ * (override + kioskSystemModules del bridge). Las superficies del runtime
+ * (dashboard, quick-access, bottom nav, rutas) la usan para ocultar módulos off.
+ */
+export function usePwaModuleVisible(moduleKey: string): boolean {
+  const { pwa, kioskSystemModules } = useContext(PwaBridgeContext);
+  return isPwaModuleVisible(moduleKey, {
+    kioskSystemModules,
+    pwaModuleVisibility: pwa?.moduleVisibility ?? null,
+  });
+}
+
+/**
+ * Devuelve un predicado `(moduleKey) => boolean` para resolver visibilidad de
+ * VARIOS módulos sin violar las reglas de hooks (lee el contexto una vez). Lo
+ * usan las superficies que iteran listas (dashboard tiles, quick-access).
+ */
+export function usePwaModuleVisibility(): (moduleKey: string) => boolean {
+  const { pwa, kioskSystemModules } = useContext(PwaBridgeContext);
+  const visibility = pwa?.moduleVisibility ?? null;
+  return (moduleKey: string) =>
+    isPwaModuleVisible(moduleKey, { kioskSystemModules, pwaModuleVisibility: visibility });
 }

@@ -1182,6 +1182,13 @@ export interface PwaProfileConfig {
  * Se va poblando por pantalla; de momento Welcome (P1) + Login + Dashboard + More.
  */
 export interface PwaConfig {
+  /**
+   * Override manual de visibilidad de módulos en la PWA. `{ <moduleKey>: boolean }`.
+   * Una key AUSENTE = heredar (módulos compartidos siguen el `systemModules` del
+   * kiosk; módulos PWA-only quedan ON por default). Una key PRESENTE = override
+   * manual del operador (gana sobre la herencia). Ver `src/lib/pwa-module-visibility.ts`.
+   */
+  moduleVisibility?: Record<string, boolean>;
   welcome?: PwaWelcomeConfig;
   login?: PwaLoginConfig;
   dashboard?: PwaDashboardConfig;

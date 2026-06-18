@@ -1,12 +1,13 @@
 'use client';
 
 import { Play } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { PwaConfig } from '@/lib/config';
+import { isPwaModuleVisible, PWA_TOGGLEABLE_MODULES } from '@/lib/pwa-module-visibility';
 import type { UnifiedClientBranding } from '@/lib/studio/client-branding-sync';
 import { hexToHsl } from '@/lib/studio/hex-to-hsl';
-import type { Branding } from '@/lib/studio/schema';
+import type { Branding, SystemModules } from '@/lib/studio/schema';
 
 import { MobileTabBar, type MobileEditorTab } from '../../../_components/MobileTabBar';
 import { PreviewPanel } from '../../../_components/PreviewPanel';
@@ -92,6 +93,7 @@ export function PwaShell({
   initialMeta,
   initialBranding,
   initialUnified,
+  kioskSystemModules,
   availableLocales,
   mapboxToken,
 }: {
@@ -103,6 +105,11 @@ export function PwaShell({
   initialBranding: Branding;
   /** Unified branding base (para preservar name/location/neutral al guardar). */
   initialUnified: UnifiedClientBranding;
+  /**
+   * `systemModules` del Kiosk del cliente (read-only). Fuente de la herencia de
+   * visibilidad de módulos en la PWA (panel "Modules" + bloqueo de edición).
+   */
+  kioskSystemModules: SystemModules;
   /** Idiomas que ofrece el cliente (`features.languages.available`) para el
    *  editor i18n (F-PWA-7). `null` → el editor usa su lista por defecto. */
   availableLocales: string[] | null;
@@ -172,10 +179,35 @@ export function PwaShell({
     pushBranding(brandingToPatch(branding, nombre));
   }, [branding, nombre, pushBranding]);
 
-  // Empuja el slice PWA al preview en cada cambio (debounced 120ms en el hook).
+  // Empuja el slice PWA + el systemModules del Kiosk al preview en cada cambio
+  // (el runtime necesita ambos para resolver la herencia de visibilidad).
   useEffect(() => {
-    pushPwa(pwa);
-  }, [pwa, pushPwa]);
+    pushPwa(pwa, kioskSystemModules);
+  }, [pwa, kioskSystemModules, pushPwa]);
+
+  // Visibilidad efectiva de cada módulo (override PWA → herencia del Kiosk).
+  // Las secciones de módulos NO visibles se deshabilitan en el sidebar (Lock).
+  const disabledKeys = useMemo(() => {
+    const set = new Set<PwaSectionKey>();
+    const visibilityInput = {
+      kioskSystemModules,
+      pwaModuleVisibility: pwa.moduleVisibility ?? {},
+    };
+    for (const key of PWA_TOGGLEABLE_MODULES) {
+      if (!isPwaModuleVisible(key, visibilityInput)) set.add(key as PwaSectionKey);
+    }
+    return set;
+  }, [kioskSystemModules, pwa.moduleVisibility]);
+
+  // Auto-salto: si la sección activa pertenece a un módulo recién apagado, saltar
+  // al panel "Modules" (paridad con el Shell del kiosk, F-KIOSK-11).
+  useEffect(() => {
+    if (disabledKeys.has(activeTab)) {
+      const label = PWA_SECTIONS.find((s) => s.key === activeTab)?.label ?? activeTab;
+      toast.show(`${label} is off — switched to Modules`, { variant: 'info' });
+      setActiveTab('module-visibility');
+    }
+  }, [disabledKeys, activeTab, toast]);
 
   const pwaDirty = JSON.stringify(pwa) !== JSON.stringify(savedPwa);
   const brandingDirty = JSON.stringify(branding) !== JSON.stringify(savedBranding);
@@ -312,6 +344,7 @@ export function PwaShell({
                 setActiveTab(k);
                 setMobileTab('editor');
               }}
+              disabledKeys={disabledKeys}
               bridgeStatus={bridgeStatus}
               onReloadPreview={() => setPreviewKey((k) => k + 1)}
             />
@@ -351,6 +384,7 @@ export function PwaShell({
                   onPwaChange={setPwa}
                   branding={branding}
                   onBrandingChange={setBranding}
+                  kioskSystemModules={kioskSystemModules}
                   availableLocales={availableLocales}
                   mapboxToken={mapboxToken}
                   currentVersion={meta?.currentVersion ?? 0}

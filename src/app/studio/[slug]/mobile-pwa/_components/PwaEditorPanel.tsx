@@ -2,7 +2,7 @@
 
 import type { PwaConfig } from '@/lib/config';
 import { normalizePwaDashboard } from '@/lib/pwa-dashboard';
-import type { Branding } from '@/lib/studio/schema';
+import type { Branding, SystemModules } from '@/lib/studio/schema';
 
 import { BrandingSyncBanner } from '../../../_components/BrandingSyncBanner';
 import { PublishEditor } from '../../../_components/editor-panel/PublishEditor';
@@ -27,6 +27,7 @@ import { ProfileEditor } from './ProfileEditor';
 import { PwaNoLivePreviewBanner, PwaPanelHeader, PwaPlaceholderPanel } from './pwa-ui';
 import { PwaAdsEditor } from './PwaAdsEditor';
 import { PwaI18nEditor } from './PwaI18nEditor';
+import { PwaSystemModulesEditor } from './PwaSystemModulesEditor';
 import { ScavengerHuntEditor } from './ScavengerHuntEditor';
 import { SearchEditor } from './SearchEditor';
 import { SocialWallModuleEditor } from './SocialWallModuleEditor';
@@ -52,6 +53,7 @@ export function PwaEditorPanel({
   onPwaChange,
   branding,
   onBrandingChange,
+  kioskSystemModules,
   availableLocales,
   mapboxToken,
   currentVersion,
@@ -63,6 +65,8 @@ export function PwaEditorPanel({
   onPwaChange: (next: PwaConfig) => void;
   branding: Branding;
   onBrandingChange: (next: Branding) => void;
+  /** `systemModules` del Kiosk del cliente (read-only) para la herencia del panel Modules. */
+  kioskSystemModules: SystemModules;
   /** Idiomas del cliente para el editor i18n (F-PWA-7). */
   availableLocales: string[] | null;
   /** Token Mapbox para el picker de coords del Scavenger Hunt. */
@@ -82,6 +86,24 @@ export function PwaEditorPanel({
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
           <BrandingSyncBanner slug={slug} product="pwa" />
           <BrandingEditor branding={branding} onChange={onBrandingChange} />
+        </div>
+      </div>
+    );
+  }
+
+  if (sectionKey === 'module-visibility') {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white dark:bg-zinc-950">
+        <PwaPanelHeader
+          title="Modules"
+          description="Turn modules on/off. Each module inherits the Kiosk by default; override any of them manually. Disabled modules disappear from the app and lock their editor section."
+        />
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+          <PwaSystemModulesEditor
+            moduleVisibility={pwa.moduleVisibility ?? {}}
+            kioskSystemModules={kioskSystemModules}
+            onChange={(moduleVisibility) => onPwaChange({ ...pwa, moduleVisibility })}
+          />
         </div>
       </div>
     );

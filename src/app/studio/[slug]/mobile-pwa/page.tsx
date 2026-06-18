@@ -8,7 +8,9 @@ import {
   type UnifiedClientBranding,
 } from '@/lib/studio/client-branding-sync';
 import { loadClientManifest } from '@/lib/studio/client-manifest';
+import { kv, kvKeys } from '@/lib/studio/kv';
 import { ensurePwaSlice, loadPwaMeta, loadPwaSlice } from '@/lib/studio/pwa-config';
+import { DEFAULT_SYSTEM_MODULES, type KioskConfig } from '@/lib/studio/schema';
 
 import { PwaShell } from './_components/PwaShell';
 
@@ -50,6 +52,15 @@ export default async function MobilePwaEditorPage({
   const availableLocales = fsClient.config?.features?.languages?.available ?? null;
   const mapboxToken = fsClient.config?.integraciones?.mapbox_token ?? '';
 
+  // systemModules del Kiosk (KV studioConfig) → fuente de la herencia de
+  // visibilidad de módulos en la PWA. Fallback a defaults (todo ON) si el KV
+  // está frío: la PWA hereda "todo visible", que es el estado sin customizar.
+  const rawKiosk = await kv.get<KioskConfig>(kvKeys.cfg(slug)).catch(() => null);
+  const kioskSystemModules = {
+    ...DEFAULT_SYSTEM_MODULES,
+    ...(rawKiosk?.modules?.systemModules ?? {}),
+  };
+
   // Fallback defensivo: si el cliente aún no tiene unified branding, lo
   // materializamos con defaults para que el editor abra (edge case raro —
   // el auto-migrate normalmente ya lo creó).
@@ -69,6 +80,7 @@ export default async function MobilePwaEditorPage({
       initialMeta={meta}
       initialBranding={unifiedToKioskBranding(branding)}
       initialUnified={branding}
+      kioskSystemModules={kioskSystemModules}
       availableLocales={availableLocales}
       mapboxToken={mapboxToken}
     />

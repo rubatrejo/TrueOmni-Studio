@@ -4,6 +4,8 @@ import path from 'node:path';
 import { NextResponse } from 'next/server';
 
 import { SUPER_ADMIN_EMAIL } from '@/auth';
+import type { PwaConfig } from '@/lib/config';
+import { resolvePwaVisibility } from '@/lib/pwa-module-visibility';
 import {
   getGitHubPublishConfig,
   getRepoFileContent,
@@ -13,7 +15,7 @@ import {
 import { kv, kvKeys } from '@/lib/studio/kv';
 import { buildFilesystemConfig } from '@/lib/studio/publish-merger';
 import { loadPwaSlice } from '@/lib/studio/pwa-config';
-import { KioskConfigSchema, type KioskConfig } from '@/lib/studio/schema';
+import { DEFAULT_SYSTEM_MODULES, KioskConfigSchema, type KioskConfig } from '@/lib/studio/schema';
 import { STUDIO_SLUG_REGEX } from '@/lib/studio/slug';
 
 /**
@@ -111,6 +113,24 @@ export async function POST(req: Request, { params }: RouteParams) {
   try {
     const slice = await loadPwaSlice(slug);
 
+    // Hornear la visibilidad EFECTIVA de módulos en el slice publicado: en
+    // producción no hay KV/bridge, así que la herencia del Kiosk (systemModules)
+    // se resuelve aquí y se congela en `moduleVisibility` (todas las keys
+    // explícitas). El runtime PWA la lee directo; el preview sigue resolviéndola
+    // en vivo por el bridge.
+    const kioskCfg = await loadConfigFromKv(slug);
+    const kioskSystemModules = {
+      ...DEFAULT_SYSTEM_MODULES,
+      ...(kioskCfg?.modules?.systemModules ?? {}),
+    };
+    const bakedSlice: PwaConfig = {
+      ...slice,
+      moduleVisibility: resolvePwaVisibility({
+        kioskSystemModules,
+        pwaModuleVisibility: slice.moduleVisibility ?? null,
+      }),
+    };
+
     const configPath = path.join(process.cwd(), 'clients', slug, 'config.json');
     const repoPath = path.relative(process.cwd(), configPath).replaceAll(path.sep, '/');
 
@@ -130,14 +150,13 @@ export async function POST(req: Request, { params }: RouteParams) {
     // sin obligar a publicar el kiosk primero.
     const bootstrapped = currentRaw === null;
     if (bootstrapped) {
-      const studioConfig = await loadConfigFromKv(slug);
-      if (!studioConfig) {
+      if (!kioskCfg) {
         return NextResponse.json(
           { error: `No data in KV for "${slug}". Open the client in the Studio first.` },
           { status: 404 },
         );
       }
-      current = buildFilesystemConfig(studioConfig, null) as RawConfig;
+      current = buildFilesystemConfig(kioskCfg, null) as RawConfig;
     } else {
       try {
         current = JSON.parse(currentRaw as string) as RawConfig;
@@ -151,7 +170,7 @@ export async function POST(req: Request, { params }: RouteParams) {
 
     const merged: RawConfig = {
       ...current,
-      features: { ...(current.features ?? {}), pwa: slice },
+      features: { ...(current.features ?? {}), pwa: bakedSlice },
     };
     const nextContent = formatJson(merged);
     // Cuando bootstrapeamos el config.json (no existía), es un create y siempre

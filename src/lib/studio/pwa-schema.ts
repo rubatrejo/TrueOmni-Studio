@@ -154,5 +154,7 @@ export const PwaConfigSchema = z
     notifications: PwaNotificationsConfigSchema.optional(),
     profile: PwaProfileConfigSchema.optional(),
     connectWithUs: PwaConnectWithUsConfigSchema.optional(),
+    /** Override manual de visibilidad de módulos (ausente = heredar del kiosk). */
+    moduleVisibility: z.record(z.string(), z.boolean()).optional(),
   })
   .passthrough();

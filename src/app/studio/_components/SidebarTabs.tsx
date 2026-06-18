@@ -96,6 +96,7 @@ export function SidebarTabs<K extends string = StudioSectionKey>({
   activeKey,
   onSelect,
   systemModules,
+  disabledKeys,
   bridgeStatus = 'connected',
   onReloadPreview,
 }: {
@@ -105,15 +106,22 @@ export function SidebarTabs<K extends string = StudioSectionKey>({
   /**
    * Si la sección depende de un módulo (`section.systemModuleKey`) y ese
    * módulo está OFF en `systemModules`, la sección se dibuja en gris y
-   * no es clickable.
+   * no es clickable. (Patrón del kiosk.)
    */
   systemModules?: SystemModules;
+  /**
+   * Set de keys de sección a deshabilitar directamente (gris + lock + no
+   * clickable). Agnóstico al producto — lo usa la PWA, cuya visibilidad de
+   * módulos no se mapea 1:1 a `SystemModules`. Se combina con `systemModules`.
+   */
+  disabledKeys?: ReadonlySet<K>;
   /** Estado real del bridge postMessage (audit F-17). */
   bridgeStatus?: 'connecting' | 'connected' | 'stale' | 'lost';
   /** Recarga el iframe del preview (incrementa `reloadKey`). */
   onReloadPreview?: () => void;
 }) {
   const isDisabled = (section: SidebarSectionLike<K>): boolean => {
+    if (disabledKeys?.has(section.key)) return true;
     if (!systemModules || !section.systemModuleKey) return false;
     return !systemModules[section.systemModuleKey];
   };

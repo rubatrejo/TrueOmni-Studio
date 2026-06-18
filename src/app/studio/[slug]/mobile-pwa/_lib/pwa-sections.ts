@@ -15,6 +15,7 @@ import type { SidebarSectionLike } from '../../../_components/SidebarTabs';
 
 export type PwaSectionKey =
   | 'branding'
+  | 'module-visibility'
   | 'welcome'
   | 'login'
   | 'modules'
@@ -71,6 +72,17 @@ export const PWA_SECTIONS: readonly PwaSection[] = [
     phase: 'P1',
     // El branding va por el canal `studio:branding-update` (no usePwaSection),
     // pero sí tiene preview reactivo vía StudioBridge.
+    livePreview: true,
+  },
+  {
+    key: 'module-visibility',
+    num: '02',
+    label: 'Modules',
+    title: 'Modules',
+    description:
+      'Turn modules on/off for the PWA. By default each module inherits from the Kiosk; override any of them manually here. Disabled modules disappear from the app and their editor section locks.',
+    icon: 'ToggleRight',
+    phase: 'P1',
     livePreview: true,
   },
   {

@@ -11,6 +11,7 @@ import { resolvePwaTileRoute } from '@/lib/pwa-routes';
 import { PwaBottomNav } from './bottom-nav';
 import { NotificationIcon, ProfileIcon, SearchIcon } from './dashboard-icons';
 import { Layer, S } from './mobile-layer';
+import { usePwaModuleVisibility } from './pwa-bridge-context';
 
 interface DashboardScreenProps {
   logoAlt: string;
@@ -75,9 +76,14 @@ export function DashboardScreen({
   const logoW = LOGO_SIZE_PX[logoSize ?? 'M'];
   const logoX = 20 + (logoOffset?.x ?? 0);
   const logoY = 48 + (logoOffset?.y ?? 0);
+  // Visibilidad efectiva de módulos (override PWA → herencia del Kiosk). Un
+  // módulo desactivado desaparece del hero (quick-access) y del grid de tiles.
+  const isModuleVisible = usePwaModuleVisibility();
   // Quick Access y los tiles del grid son mutuamente excluyentes: un módulo que
   // ya aparece como acceso rápido del hero no se repite en el grid de abajo.
-  const quickAccessKeys = new Set(quickAccess.slice(0, 4).map((q) => q.key));
+  // Filtramos los desactivados y re-indexamos (el hero tiene 4 slots fijos).
+  const visibleQuickAccess = quickAccess.filter((q) => isModuleVisible(q.key)).slice(0, 4);
+  const quickAccessKeys = new Set(visibleQuickAccess.map((q) => q.key));
   return (
     <div className="flex h-full w-full flex-col bg-background">
       {/* Header fijo — tamaños/posiciones verbatim del XD (110 alto; logo 154×29 a
@@ -170,7 +176,7 @@ export function DashboardScreen({
           style={{ left: 0, top: 193, width: 375, height: 83, backgroundColor: PWA }}
         />
         {/* 4 accesos rápidos: halo blanco 78% + card 66×74 + label */}
-        {quickAccess.slice(0, 4).map((q, i) => {
+        {visibleQuickAccess.map((q, i) => {
           const cx = CARD_X[i] + 33; // centro de la card
           return (
             // key con índice: dos accesos rápidos pueden apuntar al mismo módulo.
@@ -221,7 +227,9 @@ export function DashboardScreen({
       <div className="scrollbar-hide flex-1 overflow-y-auto bg-background">
         <div className="grid grid-cols-2 gap-4 px-5 pb-5 pt-5">
           {tiles
-            .filter((t) => t.enabled !== false && !quickAccessKeys.has(t.key))
+            .filter(
+              (t) => t.enabled !== false && !quickAccessKeys.has(t.key) && isModuleVisible(t.key),
+            )
             .map((t) => (
               <button
                 key={t.key}

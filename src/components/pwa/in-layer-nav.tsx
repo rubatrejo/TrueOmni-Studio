@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 
-import { NAV_ARIA, PWA_NAV, type PwaNavKey } from './bottom-nav';
+import { NAV_ARIA, usePwaVisibleNav, type PwaNavKey } from './bottom-nav';
 
 /**
  * Bottom nav para pantallas que se renderizan dentro de un layer 375-space escalado
@@ -12,12 +12,13 @@ import { NAV_ARIA, PWA_NAV, type PwaNavKey } from './bottom-nav';
  */
 export function InLayerNav({ active }: { active?: PwaNavKey }) {
   const router = useRouter();
+  const nav = usePwaVisibleNav();
   return (
     <div
       className="absolute left-0 flex"
       style={{ top: 756.5, width: 375, height: 56, backgroundColor: 'hsl(var(--brand-primary))' }}
     >
-      {PWA_NAV.map(({ key, Icon, href }) => (
+      {nav.map(({ key, Icon, href }) => (
         <button
           key={key}
           type="button"

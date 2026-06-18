@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PwaConfig } from '@/lib/config';
 import { resolvePwaForLocale } from '@/lib/pwa-i18n';
 import { hexToHsl } from '@/lib/studio/hex-to-hsl';
+import type { SystemModules } from '@/lib/studio/schema';
 
 /**
  * Bridge editor PWA → iframe `/pwa`.
@@ -35,6 +36,7 @@ export type PwaBrandingPatch = {
 export function usePwaPreviewBridge() {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const lastPwaRef = useRef<PwaConfig | null>(null);
+  const lastKioskSystemModulesRef = useRef<SystemModules | null>(null);
   const lastBrandingRef = useRef<PwaBrandingPatch | null>(null);
   const lastLocaleRef = useRef<string | null>(null);
   const lastSectionRef = useRef<string | null>(null);
@@ -64,13 +66,20 @@ export function usePwaPreviewBridge() {
   }, []);
 
   const sendPwaNow = useCallback(
-    (pwa: PwaConfig) => {
+    (pwa: PwaConfig, kioskSystemModules?: SystemModules | null) => {
       // F-PWA-1: resolver el slice para el locale activo del preview antes de
       // enviarlo. Si no se resuelve, el handshake re-empuja el slice base y pisa
       // la traducción que el layout resolvió server-side (la sección Languages
       // quedaba inverificable en vivo). resolvePwaForLocale es no-op en el base.
       const resolved = resolvePwaForLocale(pwa, lastLocaleRef.current ?? undefined) ?? pwa;
-      post({ type: 'studio:pwa-update', pwa: resolved });
+      // `kioskSystemModules` viaja junto al slice para que el runtime PWA resuelva
+      // la herencia de visibilidad de módulos (el preview carga el cliente
+      // `default`, así que el systemModules real del cliente debe llegar por aquí).
+      post({
+        type: 'studio:pwa-update',
+        pwa: resolved,
+        kioskSystemModules: kioskSystemModules ?? undefined,
+      });
     },
     [post],
   );
@@ -115,7 +124,7 @@ export function usePwaPreviewBridge() {
       setIsReady(true);
       setLastAckAt(Date.now());
       if (lastBrandingRef.current) sendBrandingNow(lastBrandingRef.current);
-      if (lastPwaRef.current) sendPwaNow(lastPwaRef.current);
+      if (lastPwaRef.current) sendPwaNow(lastPwaRef.current, lastKioskSystemModulesRef.current);
       // F-PWA-2: re-sincroniza la sección activa del editor para que el preview
       // sepa cuándo congelar comportamientos de runtime que estorban al editar
       // (p. ej. el auto-advance del Welcome splash).
@@ -132,10 +141,11 @@ export function usePwaPreviewBridge() {
   }, [sendBrandingNow, sendPwaNow, post]);
 
   const pushPwa = useCallback(
-    (pwa: PwaConfig) => {
+    (pwa: PwaConfig, kioskSystemModules?: SystemModules | null) => {
       lastPwaRef.current = pwa;
+      lastKioskSystemModulesRef.current = kioskSystemModules ?? null;
       if (pwaDebounceRef.current) clearTimeout(pwaDebounceRef.current);
-      pwaDebounceRef.current = setTimeout(() => sendPwaNow(pwa), DEBOUNCE_MS);
+      pwaDebounceRef.current = setTimeout(() => sendPwaNow(pwa, kioskSystemModules), DEBOUNCE_MS);
     },
     [sendPwaNow],
   );

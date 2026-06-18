@@ -42,6 +42,24 @@ describe('pwa-module-visibility', () => {
         true,
       );
     });
+
+    it('ai-avatar hereda OFF del Kiosk (systemModules.aiAvatar=false)', () => {
+      expect(
+        isPwaModuleVisible('ai-avatar', {
+          kioskSystemModules: { aiAvatar: false },
+          pwaModuleVisibility: null,
+        }),
+      ).toBe(false);
+    });
+
+    it('ai-avatar hereda ON del Kiosk', () => {
+      expect(
+        isPwaModuleVisible('ai-avatar', {
+          kioskSystemModules: { aiAvatar: true },
+          pwaModuleVisibility: {},
+        }),
+      ).toBe(true);
+    });
   });
 
   describe('isPwaModuleVisible — override manual PWA gana sobre la herencia', () => {
@@ -61,6 +79,15 @@ describe('pwa-module-visibility', () => {
           pwaModuleVisibility: { events: false },
         }),
       ).toBe(false);
+    });
+
+    it('ai-avatar: override ON aunque el Kiosk lo tenga OFF', () => {
+      expect(
+        isPwaModuleVisible('ai-avatar', {
+          kioskSystemModules: { aiAvatar: false },
+          pwaModuleVisibility: { 'ai-avatar': true },
+        }),
+      ).toBe(true);
     });
   });
 
@@ -100,6 +127,7 @@ describe('pwa-module-visibility', () => {
     it('isPwaSharedModule', () => {
       expect(isPwaSharedModule('events')).toBe(true);
       expect(isPwaSharedModule('trip-planner')).toBe(true);
+      expect(isPwaSharedModule('ai-avatar')).toBe(true);
       expect(isPwaSharedModule('scavenger-hunt')).toBe(false);
       expect(isPwaSharedModule('profile')).toBe(false);
     });

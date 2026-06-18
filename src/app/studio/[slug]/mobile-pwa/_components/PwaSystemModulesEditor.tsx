@@ -12,6 +12,7 @@ import {
   Route,
   Share2,
   Smartphone,
+  Sparkles,
   Tag,
   Ticket,
   TicketCheck,
@@ -57,12 +58,24 @@ const ICONS: Record<string, LucideIcon> = {
   Route,
   Trophy,
   Smartphone,
+  Sparkles,
   ClipboardList,
   ToggleRight,
   Link2,
 };
 
+/**
+ * Label + icono para módulos toggleables que NO tienen sección propia en el
+ * editor PWA (se configuran desde el editor del Kiosk). `ai-avatar` es shared:
+ * el operador lo activa/desactiva aquí pero edita su contenido en el Kiosk.
+ */
+const MODULE_INFO_OVERRIDES: Record<string, { label: string; icon: string }> = {
+  'ai-avatar': { label: 'AI Avatar', icon: 'Sparkles' },
+};
+
 function moduleInfo(key: string): { label: string; Icon: LucideIcon } {
+  const override = MODULE_INFO_OVERRIDES[key];
+  if (override) return { label: override.label, Icon: ICONS[override.icon] ?? ToggleRight };
   const section = PWA_SECTIONS.find((s) => s.key === key);
   return { label: section?.label ?? key, Icon: ICONS[section?.icon ?? ''] ?? ToggleRight };
 }

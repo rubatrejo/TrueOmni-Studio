@@ -7,6 +7,8 @@ import { prewarmAiAvatar } from '@/hooks/use-tavus-conversation';
 import type { AskAiSuggestedQuestion } from '@/lib/config';
 import { useAiStore } from '@/stores/ai-store';
 
+import { usePwaModuleVisible } from '../pwa-bridge-context';
+
 import { PwaAskAiModal } from './pwa-ask-ai-modal';
 import { PwaAskAiTrigger } from './pwa-ask-ai-trigger';
 
@@ -47,10 +49,15 @@ export function PwaAskAiHost({
 }: PwaAskAiHostProps) {
   const locale = useCurrentLocale();
   const hydrate = useAiStore((s) => s.hydrate);
+  // El AI Avatar es un módulo COMPARTIDO con el kiosk: hereda la visibilidad de
+  // `systemModules.aiAvatar` (override manual en el panel "Modules" de la PWA gana).
+  // Reactivo al preview del Studio vía el bridge. Ver `pwa-module-visibility.ts`.
+  const visible = usePwaModuleVisible('ai-avatar');
 
   const fill = (t: string) => t.replaceAll('{client_name}', clientName);
 
   useEffect(() => {
+    if (!visible) return;
     hydrate({
       greeting: fill(greeting),
       suggestedQuestions: suggestedQuestions.map((q) => ({
@@ -63,14 +70,18 @@ export function PwaAskAiHost({
       locale,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hydrate, greeting, fallbackResponse, clientName, locale]);
+  }, [hydrate, greeting, fallbackResponse, clientName, locale, visible]);
 
   // Pre-warm la conversación Tavus en background poco después de montar, igual
   // que el `ask-ai-host` del kiosk — así el primer open abre casi instantáneo.
   useEffect(() => {
+    if (!visible) return;
     const t = setTimeout(() => prewarmAiAvatar(clientName), 1500);
     return () => clearTimeout(t);
-  }, [clientName]);
+  }, [clientName, visible]);
+
+  // Módulo desactivado (heredado del kiosk u override manual en la PWA) → sin FAB.
+  if (!visible) return null;
 
   return (
     <>

@@ -32,6 +32,7 @@ export const PWA_SHARED_MODULES = [
   'stay',
   'wayfinding',
   'trip-planner',
+  'ai-avatar',
 ] as const;
 
 /**
@@ -67,6 +68,7 @@ export const PWA_KEY_TO_KIOSK_FIELD: Readonly<Record<string, keyof SystemModules
   stay: 'stay',
   wayfinding: 'wayfinding',
   'trip-planner': 'itineraryBuilder',
+  'ai-avatar': 'aiAvatar',
 };
 
 export interface PwaVisibilityInput {

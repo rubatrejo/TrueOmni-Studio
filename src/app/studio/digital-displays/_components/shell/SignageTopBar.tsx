@@ -1,6 +1,6 @@
 'use client';
 
-import { Eye, Send } from 'lucide-react';
+import { Eye, Loader2, Package, Send } from 'lucide-react';
 import Link from 'next/link';
 
 import { Breadcrumb, ScreenCrumbIcon } from '../../../_components/Breadcrumb';
@@ -17,7 +17,8 @@ import { ThemeToggle } from '../../../_components/ThemeToggle';
  *  - El botón Publish dispara la modal del Publish tab (DSS7.5).
  *
  * No expone Versions button propio (la sección Versions es un tab del sidebar).
- * No expone Export/Import por ahora (lo entrega el display editor).
+ * Si se pasa `onExportStandalone`, muestra un botón "Export" que genera el repo
+ * standalone del producto signage del cliente (igual que el TopBar del kiosk/PWA).
  */
 export interface SignageTopBarProps {
   slug: string;
@@ -29,6 +30,11 @@ export interface SignageTopBarProps {
   isDirty: boolean;
   previewHref: string | null;
   onPublish?: () => void;
+  /** Si se pasa, muestra un botón "Export" que genera el repo standalone del
+   *  producto signage del cliente (repo + zip vía la Action del builder). */
+  onExportStandalone?: () => void;
+  /** Estado de carga del export (deshabilita el botón + spinner). */
+  exportingStandalone?: boolean;
   /** Override del breadcrumb del producto. Default "Digital Displays". */
   productLabel?: string;
   /** Override del href del breadcrumb del producto. Default `/studio/<slug>`. */
@@ -45,6 +51,8 @@ export function SignageTopBar({
   isDirty,
   previewHref,
   onPublish,
+  onExportStandalone,
+  exportingStandalone = false,
   productLabel = 'Digital Displays',
   productHref,
   clientLabel,
@@ -82,6 +90,23 @@ export function SignageTopBar({
             <Eye className="h-3.5 w-3.5" />
             <span className="hidden xl:inline">Open in tab</span>
           </Link>
+        ) : null}
+
+        {onExportStandalone ? (
+          <button
+            type="button"
+            onClick={onExportStandalone}
+            disabled={exportingStandalone}
+            title="Export this product as a self-contained standalone repo + zip"
+            className="inline-flex items-center gap-1.5 rounded-md border border-emerald-200 bg-white px-2.5 py-1.5 text-[12px] font-medium text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-50 disabled:opacity-50 dark:border-emerald-900/50 dark:bg-zinc-900 dark:text-emerald-300 dark:hover:bg-emerald-950/30"
+          >
+            {exportingStandalone ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Package className="h-3.5 w-3.5" />
+            )}
+            <span className="hidden xl:inline">Export</span>
+          </button>
         ) : null}
 
         <button

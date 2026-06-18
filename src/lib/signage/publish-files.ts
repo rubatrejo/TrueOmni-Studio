@@ -3,6 +3,7 @@ import 'server-only';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import { listSignageDisplays, loadSignageClient, loadSignageDisplay } from './config';
 import { loadSignageI18n } from './i18n';
 import { kvSignageClient } from './kv-store';
 import {
@@ -87,6 +88,60 @@ export async function buildSignageThemePublishFiles(clientSlug: string): Promise
  * concatena un bloque `:root` con los overrides de `branding.tokens`. Si no
  * hay base ni overrides, devuelve cadena vacía (no se publica el archivo).
  */
+/**
+ * Construye el bundle COMPLETO de archivos para el **export standalone** del
+ * producto signage: a diferencia del publish PR (theme o un solo display), aquí
+ * se exporta todo el cliente para que el repo generado tenga un runtime signage
+ * autónomo:
+ *
+ *   clients-signage/<slug>/client.json + tokens.css + i18n/<locale>.json   (theme)
+ *   clients-signage/<slug>/{events,social,news}.json                       (contenido)
+ *   clients-signage/<slug>/displays/<displaySlug>/display.json             (cada display)
+ *
+ * Los assets binarios siguen como refs (relativas o Blob URLs) dentro del JSON;
+ * `scripts/export-standalone.ts` los materializa a archivos locales en la Action.
+ *
+ * Devuelve también `clientName` para el naming del repo (`TrueOmni-<Cliente>-…`).
+ */
+export async function buildSignageStandaloneManifest(
+  clientSlug: string,
+): Promise<{ files: PublishFile[]; clientName: string }> {
+  const files: PublishFile[] = [];
+
+  // 1. Theme: client.json + tokens.css + i18n (KV-first, fallback fs).
+  files.push(...(await buildSignageThemePublishFiles(clientSlug)));
+
+  // 2. Contenido compartido entre displays: events / social / news (KV→fs).
+  const resolved = await loadSignageClient(clientSlug);
+  if (!resolved) {
+    throw new Error(`[signage] cliente "${clientSlug}" no existe ni en KV ni en fs`);
+  }
+  files.push(
+    {
+      path: `clients-signage/${clientSlug}/events.json`,
+      content: `${JSON.stringify(resolved.events, null, 2)}\n`,
+    },
+    {
+      path: `clients-signage/${clientSlug}/social.json`,
+      content: `${JSON.stringify(resolved.social, null, 2)}\n`,
+    },
+    {
+      path: `clients-signage/${clientSlug}/news.json`,
+      content: `${JSON.stringify(resolved.news, null, 2)}\n`,
+    },
+  );
+
+  // 3. Cada display del cliente (KV→fs).
+  const displays = await listSignageDisplays(clientSlug);
+  for (const entry of displays) {
+    const display = await loadSignageDisplay(clientSlug, entry.slug);
+    if (!display) continue;
+    files.push(...buildSignageDisplayPublishFiles(clientSlug, entry.slug, display));
+  }
+
+  return { files, clientName: resolved.name };
+}
+
 async function buildTokensCss(clientSlug: string, clientFile: SignageClientFile): Promise<string> {
   let baseCss = '';
   const candidates = [

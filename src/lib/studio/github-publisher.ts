@@ -307,7 +307,7 @@ export function exporterRunsUrl(config: ExporterDispatchConfig): string {
  */
 export async function dispatchExporterWorkflow(
   config: ExporterDispatchConfig,
-  inputs: { slug: string; product: 'kiosk' | 'pwa'; manifestUrl: string },
+  inputs: { slug: string; product: 'kiosk' | 'pwa' | 'signage'; manifestUrl: string },
 ): Promise<void> {
   const octokit = new Octokit({ auth: config.token });
   await octokit.actions.createWorkflowDispatch({

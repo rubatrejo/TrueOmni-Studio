@@ -612,19 +612,19 @@ export async function publishToFilesystem(
 export interface StandaloneExportResult {
   dispatched: boolean;
   slug: string;
-  product: 'kiosk' | 'pwa';
+  product: 'kiosk' | 'pwa' | 'signage';
   manifestUrl: string;
   runsUrl: string;
 }
 
 /**
- * Dispara la generación de un kiosk/PWA standalone autocontenido del cliente.
- * El backend arma el manifest, lo sube a Blob y dispara la Action del builder;
- * responde 202 con el link a la run (`runsUrl`).
+ * Dispara la generación de un kiosk/PWA/signage standalone autocontenido del
+ * cliente. El backend arma el manifest, lo sube a Blob y dispara la Action del
+ * builder; responde 202 con el link a la run (`runsUrl`).
  */
 export async function publishStandalone(
   slug: string,
-  product: 'kiosk' | 'pwa',
+  product: 'kiosk' | 'pwa' | 'signage',
 ): Promise<StandaloneExportResult> {
   return http<StandaloneExportResult>(`/api/studio/publish-standalone/${slug}?product=${product}`, {
     method: 'POST',

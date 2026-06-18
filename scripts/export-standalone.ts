@@ -42,9 +42,9 @@ const dest =
     : `/tmp/${product}-${slug}`;
 const dry = process.argv.includes('--dry');
 
-if (!slug || (product !== 'kiosk' && product !== 'pwa')) {
+if (!slug || (product !== 'kiosk' && product !== 'pwa' && product !== 'signage')) {
   console.error(
-    'uso: npx tsx scripts/export-standalone.ts <slug> [destDir] --product=kiosk|pwa [--dry]',
+    'uso: npx tsx scripts/export-standalone.ts <slug> [destDir] --product=kiosk|pwa|signage [--dry]',
   );
   process.exit(1);
 }
@@ -98,6 +98,12 @@ async function countFiles(dir: string): Promise<number> {
 }
 
 async function main() {
+  // Signage tiene estructura propia (clients-signage/<slug>/) → flujo aparte.
+  if (product === 'signage') {
+    await mainSignage();
+    return;
+  }
+
   // 1. Copiar el árbol del runtime de ESTE producto (sin el otro, sin Studio/Signage/Walls).
   execFileSync(
     'node',
@@ -636,6 +642,232 @@ async function main() {
   console.log(
     `failed:      ${report.failed.length}${dry ? ' (dry: URLs externas no descargadas)' : ''}`,
   );
+}
+
+/**
+ * Flujo de export del producto SIGNAGE / Digital Displays. Estructura propia
+ * (`clients-signage/<slug>/` con client.json + events/social/news.json +
+ * displays/<d>/display.json + i18n + tokens.css + assets), distinta del kiosk.
+ *
+ * Materializa los assets referenciados en esos JSON (Blob URLs subidas por el
+ * operador + relativos del template) a archivos locales bajo `assets/...` y
+ * reescribe las refs, de modo que el repo signage sea autocontenido. Reusa
+ * `materializeAssets` + `createFsDeps` (mismos de kiosk/pwa).
+ */
+async function mainSignage() {
+  const dataDir = 'clients-signage';
+
+  // 1. Árbol del runtime signage (sin kiosk/pwa/walls/Studio).
+  execFileSync(
+    'node',
+    [join(root, 'scripts/export-runtime-tree.mjs'), dest, slug, '--product=signage'],
+    { stdio: 'inherit' },
+  );
+
+  const srcClientDir = join(root, dataDir, slug);
+
+  // 2. Cargar los JSON del cliente (apply-standalone-manifest ya volcó el KV al fs).
+  const readJson = async (rel: string, fallback: unknown) => {
+    try {
+      return JSON.parse(await readFile(join(srcClientDir, rel), 'utf8'));
+    } catch {
+      return fallback;
+    }
+  };
+  const client = await readJson('client.json', null);
+  if (!client) {
+    console.error(`[export] no se encontró ${dataDir}/${slug}/client.json`);
+    process.exit(1);
+  }
+  const events = await readJson('events.json', []);
+  const social = await readJson('social.json', { posts: [] });
+  const news = await readJson('news.json', {
+    source: { kind: 'manual', items: [] },
+    rotationIntervalSec: 8,
+  });
+
+  // Displays declarados en el client (fallback: leer la carpeta displays/).
+  const declared: string[] = Array.isArray(client.displays) ? client.displays : [];
+  const displaySlugs = declared.length
+    ? declared
+    : await readdir(join(srcClientDir, 'displays')).catch(() => [] as string[]);
+  const displays: Array<{ slug: string; data: unknown }> = [];
+  for (const ds of displaySlugs) {
+    const data = await readJson(join('displays', ds, 'display.json'), null);
+    if (data) displays.push({ slug: ds, data });
+  }
+
+  const clientName: string = client?.name || slug;
+  const clientToken = sanitizeName(clientName);
+
+  // 3. Recolectar refs de assets de todos los JSON (campos conocidos del schema).
+  const refs: CollectedImage[] = [];
+  const push = (ref: unknown, dir: string, base: string) => {
+    if (typeof ref === 'string' && ref.trim()) refs.push({ ref, target: { dir, base } });
+  };
+  const branding = (client.branding ?? {}) as {
+    logos?: { default?: string; dark?: string };
+    brandVideo?: { src?: string };
+  };
+  push(branding.logos?.default, 'assets/Branding', `${clientToken}-logo`);
+  push(branding.logos?.dark, 'assets/Branding', `${clientToken}-logo-dark`);
+  push(branding.brandVideo?.src, 'assets/Branding', `${clientToken}-brand-video`);
+  const header = client.header as { background?: { kind?: string; src?: string } } | undefined;
+  if (header?.background?.kind === 'image') {
+    push(header.background.src, 'assets/Branding', `${clientToken}-header-bg`);
+  }
+  (Array.isArray(events) ? events : []).forEach((e: unknown, i: number) => {
+    const ev = e as { image?: string; title?: string; id?: string };
+    push(ev?.image, 'assets/Events', sanitizeName(ev?.title || ev?.id || `event-${i}`));
+  });
+  const socialObj = social as {
+    posts?: unknown[];
+    featuredTweet?: { image?: string; avatar?: string };
+  };
+  (Array.isArray(socialObj.posts) ? socialObj.posts : []).forEach((p: unknown, i: number) => {
+    const post = p as { image?: string; author?: string; id?: string };
+    push(post?.image, 'assets/Social', sanitizeName(post?.author || post?.id || `post-${i}`));
+  });
+  push(socialObj.featuredTweet?.image, 'assets/Social', 'featured-tweet');
+  push(socialObj.featuredTweet?.avatar, 'assets/Social', 'featured-tweet-avatar');
+  for (const { slug: ds, data } of displays) {
+    const dir = `assets/Displays/${sanitizeName(ds)}`;
+    const d = data as {
+      playlist?: unknown[];
+      playlists?: Array<{ slides?: unknown[] }>;
+    };
+    const slides = [
+      ...(Array.isArray(d.playlist) ? d.playlist : []),
+      ...(Array.isArray(d.playlists) ? d.playlists.flatMap((pl) => pl?.slides ?? []) : []),
+    ];
+    for (const slideU of slides) {
+      const slide = slideU as {
+        id?: string;
+        slots?: Array<{ slotKey?: string; module?: { kind?: string; asset?: { url?: string } } }>;
+      };
+      for (const slot of slide.slots ?? []) {
+        const m = slot.module;
+        if (m && (m.kind === 'video-image' || m.kind === 'ads')) {
+          push(m.asset?.url, dir, sanitizeName(`${slide.id ?? 'slide'}-${slot.slotKey ?? 'slot'}`));
+        }
+      }
+    }
+  }
+
+  // 4. Materializar (descarga http/data, copia relativos del template).
+  let deps: MaterializeAssetsDeps = createFsDeps({
+    clientAssetsDir: join(root, dataDir, slug, 'assets'),
+    defaultAssetsDir: join(root, dataDir, 'default', 'assets'),
+    destClientDir: join(dest, dataDir, slug),
+  });
+  if (dry) deps = { ...deps, fetchUrl: async () => null };
+  const { map, report } = await materializeAssets(refs, deps, { concurrency: 16 });
+
+  // 5. Reescribir refs (deep) y escribir los JSON localizados al dest.
+  const rewrite = <T>(v: T): T => {
+    if (typeof v === 'string') return (map.get(v) ?? v) as T;
+    if (Array.isArray(v)) return v.map((x) => rewrite(x)) as T;
+    if (v && typeof v === 'object') {
+      const out: Record<string, unknown> = {};
+      for (const [k, val] of Object.entries(v)) out[k] = rewrite(val);
+      return out as T;
+    }
+    return v;
+  };
+  const writeJson = async (rel: string, data: unknown) => {
+    const abs = join(dest, dataDir, slug, rel);
+    await mkdir(dirname(abs), { recursive: true });
+    await writeFile(abs, JSON.stringify(rewrite(data), null, 2) + '\n', 'utf8');
+  };
+  await writeJson('client.json', client);
+  await writeJson('events.json', events);
+  await writeJson('social.json', social);
+  await writeJson('news.json', news);
+  for (const { slug: ds, data } of displays) {
+    await writeJson(join('displays', ds, 'display.json'), data);
+  }
+
+  // 6. ASSETS.md — catálogo de la carpeta de assets para el Dev.
+  const assetsRoot = join(dest, dataDir, slug, 'assets');
+  let tree = '';
+  try {
+    const top = (await readdir(assetsRoot, { withFileTypes: true }))
+      .filter((dirent) => dirent.isDirectory())
+      .map((dirent) => dirent.name)
+      .sort();
+    for (const folder of top) {
+      const count = await countFiles(join(assetsRoot, folder));
+      tree += `- \`assets/${folder}/\` — ${count} archivo(s)\n`;
+    }
+  } catch {
+    /* sin assets */
+  }
+  await writeFile(
+    join(dest, 'ASSETS.md'),
+    [
+      `# Assets — ${clientName} (signage)`,
+      '',
+      'Assets del producto Digital Displays (signage) de este cliente. Incluye branding',
+      '(logos, brand video, header background), imágenes de eventos/social y los media de',
+      'los slots `video-image`/`ads` de cada display. Las refs en los JSON ya apuntan a',
+      'estos paths locales.',
+      '',
+      '## Carpetas presentes',
+      '',
+      tree || '(sin assets)',
+    ].join('\n') + '\n',
+    'utf8',
+  );
+
+  // 7. Rename `clients-signage/` → `<ClientName>-Assets/` + reescritura de refs en src/.
+  //    El runtime referencia la carpeta como arg `path.join(..., 'clients-signage', ...)`
+  //    (SIGNAGE_ROOT) y como segmento `clients-signage/`. Se reescriben ambas.
+  const assetsFolder = clientFolderName(clientName);
+  let dataRefsRewritten = 0;
+  try {
+    await rename(join(dest, dataDir), join(dest, assetsFolder));
+    const reArg = /(['"])clients-signage\1/g;
+    const rePath = /\bclients-signage\//g;
+    const listedData = execFileSync(
+      'grep',
+      [
+        '-rlE',
+        '--include=*.ts',
+        '--include=*.tsx',
+        '([\'"]clients-signage[\'"]|\\bclients-signage/)',
+        join(dest, 'src'),
+      ],
+      { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
+    )
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    for (const file of listedData) {
+      const before = await readFile(file, 'utf8');
+      const after = before
+        .replace(reArg, `$1${assetsFolder}$1`)
+        .replace(rePath, `${assetsFolder}/`);
+      if (after !== before) {
+        await writeFile(file, after, 'utf8');
+        dataRefsRewritten++;
+      }
+    }
+  } catch (e) {
+    console.error('[export] rename clients-signage/ → <ClientName>-Assets/ falló:', e);
+  }
+
+  console.log('\n── export-standalone (signage) report ──');
+  console.log(`client:      ${clientName} (${slug})`);
+  console.log(`displays:    ${displays.length}`);
+  console.log(`dest:        ${dest}`);
+  console.log(`downloaded:  ${report.downloaded}`);
+  console.log(`copied:      ${report.copied}`);
+  console.log(`inlined:     ${report.inlined}`);
+  console.log(
+    `failed:      ${report.failed.length}${dry ? ' (dry: URLs externas no descargadas)' : ''}`,
+  );
+  if (dataRefsRewritten)
+    console.log(`data refs:   ${dataRefsRewritten} files rewritten (${assetsFolder})`);
 }
 
 main().catch((e) => {

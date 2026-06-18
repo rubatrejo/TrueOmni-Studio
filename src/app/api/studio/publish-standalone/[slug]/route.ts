@@ -5,6 +5,7 @@ import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 
 import { SUPER_ADMIN_EMAIL } from '@/auth';
+import { buildSignageStandaloneManifest } from '@/lib/signage/publish-files';
 import {
   dispatchExporterWorkflow,
   exporterRunsUrl,
@@ -50,13 +51,16 @@ type RouteParams = { params: Promise<{ slug: string }> };
 export async function POST(req: Request, { params }: RouteParams) {
   const { slug } = await params;
   const url = new URL(req.url);
-  const product = (url.searchParams.get('product') ?? 'kiosk') as 'kiosk' | 'pwa';
+  const product = (url.searchParams.get('product') ?? 'kiosk') as 'kiosk' | 'pwa' | 'signage';
 
   if (!STUDIO_SLUG_REGEX.test(slug)) {
     return NextResponse.json({ error: 'Invalid slug' }, { status: 400 });
   }
-  if (product !== 'kiosk' && product !== 'pwa') {
-    return NextResponse.json({ error: 'product must be "kiosk" or "pwa"' }, { status: 400 });
+  if (product !== 'kiosk' && product !== 'pwa' && product !== 'signage') {
+    return NextResponse.json(
+      { error: 'product must be "kiosk", "pwa" or "signage"' },
+      { status: 400 },
+    );
   }
 
   // Approval gate: idéntico al publish PR. La allowlist `STUDIO_ADMIN_EMAILS`
@@ -94,6 +98,29 @@ export async function POST(req: Request, { params }: RouteParams) {
   }
 
   try {
+    // ── Signage: schema y carpeta de datos propios (clients-signage/<slug>/)
+    //    → manifest de archivos ya construidos (no el merge kiosk). ──
+    if (product === 'signage') {
+      const { files, clientName } = await buildSignageStandaloneManifest(slug);
+      const manifest = { slug, product, generatedBy: actorEmail, files, clientName };
+      const blob = await put(
+        `standalone-manifests/${slug}-${product}.json`,
+        JSON.stringify(manifest),
+        { access: 'public', contentType: 'application/json', addRandomSuffix: true },
+      );
+      await dispatchExporterWorkflow(dispatchConfig, { slug, product, manifestUrl: blob.url });
+      return NextResponse.json(
+        {
+          dispatched: true,
+          slug,
+          product,
+          manifestUrl: blob.url,
+          runsUrl: exporterRunsUrl(dispatchConfig),
+        },
+        { status: 202 },
+      );
+    }
+
     const [bundle, studioConfig] = await Promise.all([
       loadBundleFromKv(slug),
       loadConfigFromKv(slug),

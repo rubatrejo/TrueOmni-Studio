@@ -16,6 +16,8 @@ import { useCallback, useEffect, useState } from 'react';
 
 import type { SignageClientResolved, SignageDisplayConfig } from '@/lib/signage/schema';
 
+import { useToast } from '../../_components/Toast';
+import { publishStandalone } from '../../_lib/api-client';
 import { useDisplayEditStore } from '../_lib/display-edit-store';
 import { saveDisplay, useDebouncedAutosave } from '../_lib/save-display';
 import { saveTheme } from '../_lib/save-theme';
@@ -150,8 +152,31 @@ export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps
 
   const [activeTab, setActiveTab] = useState<DisplaySectionKey>('branding');
   const [previewKey, setPreviewKey] = useState(0);
+  const [exportingStandalone, setExportingStandalone] = useState(false);
+  const toast = useToast();
 
   const bridge = useSignageBridge();
+
+  // Export standalone del producto signage COMPLETO del cliente (theme +
+  // displays + contenido + assets). Análogo al de kiosk/PWA.
+  const handleExportStandalone = useCallback(async () => {
+    if (exportingStandalone) return;
+    setExportingStandalone(true);
+    try {
+      const res = await publishStandalone(client.slug, 'signage');
+      toast.show('Signage export dispatched', {
+        variant: 'success',
+        description: `Track the build run: ${res.runsUrl}`,
+      });
+    } catch (err) {
+      toast.show('Export failed', {
+        variant: 'error',
+        description: err instanceof Error ? err.message : String(err),
+      });
+    } finally {
+      setExportingStandalone(false);
+    }
+  }, [exportingStandalone, client.slug, toast]);
 
   // Init draft display.
   useEffect(() => {
@@ -274,6 +299,8 @@ export function DisplayEditor({ client, display, tokensCss }: DisplayEditorProps
           isDirty={dirty}
           previewHref={previewHref}
           onPublish={() => setActiveTab('publish')}
+          onExportStandalone={handleExportStandalone}
+          exportingStandalone={exportingStandalone}
         />
 
         <div className="flex flex-1 overflow-hidden">

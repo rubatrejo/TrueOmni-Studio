@@ -31,16 +31,41 @@ const DEST = process.argv[2] ?? '/tmp/kiosk-standalone';
 const SLUG = process.argv[3] ?? 'default';
 const WITH_ASSETS = process.argv.includes('--with-assets');
 const PRODUCT = process.argv.find((a) => a.startsWith('--product='))?.split('=')[1] ?? 'kiosk';
-if (PRODUCT !== 'kiosk' && PRODUCT !== 'pwa') {
-  console.error(`--product debe ser 'kiosk' o 'pwa' (recibido: ${PRODUCT})`);
+if (PRODUCT !== 'kiosk' && PRODUCT !== 'pwa' && PRODUCT !== 'signage') {
+  console.error(`--product debe ser 'kiosk', 'pwa' o 'signage' (recibido: ${PRODUCT})`);
   process.exit(1);
 }
-// El OTRO producto se poda: sus rutas + sus componentes/libs exclusivos. Lo
-// compartido (config, listings, events, map, social-wall, …) viaja en ambos.
-const OTHER_PRODUCT = {
-  kiosk: ['src/app/(pwa)', 'src/components/pwa'],
-  pwa: ['src/app/(kiosk)', 'src/components/billboard'],
-}[PRODUCT];
+
+// Rutas/componentes/libs EXCLUSIVOS de cada producto. Lo compartido (config,
+// listings, events, map, social-wall, ui, weather, …) NO está aquí: viaja en
+// cualquier export. Al exportar un producto se podan los exclusivos de TODOS los
+// demás (incluido video-walls, que aún no es target de export standalone).
+const PRODUCT_EXCLUSIVE = {
+  kiosk: ['src/app/(kiosk)', 'src/components/billboard'],
+  pwa: ['src/app/(pwa)', 'src/components/pwa'],
+  signage: [
+    'src/app/(signage)',
+    'src/app/signage-assets',
+    'src/lib/signage',
+    'src/components/signage',
+  ],
+  walls: [
+    'src/app/(video-walls)',
+    'src/app/video-wall-assets',
+    'src/lib/video-walls',
+    'src/components/video-walls',
+  ],
+};
+const OTHER_PRODUCT = Object.entries(PRODUCT_EXCLUSIVE)
+  .filter(([key]) => key !== PRODUCT)
+  .flatMap(([, paths]) => paths);
+
+// Carpeta de DATOS del producto activo (la única que viaja, filtrada al slug).
+// Las de los otros productos se podan (un export no arrastra data ajena, #4).
+const DATA_DIR = { kiosk: 'clients', pwa: 'clients', signage: 'clients-signage' }[PRODUCT];
+const OTHER_DATA_DIRS = ['clients', 'clients-signage', 'clients-walls'].filter(
+  (d) => d !== DATA_DIR,
+);
 
 /** Rutas (relativas a la raíz) que NO viajan al árbol standalone. */
 const EXCLUDE = new Set(
@@ -77,25 +102,19 @@ const EXCLUDE = new Set(
     'src/app/api/oauth',
     'src/middleware.ts',
     'src/auth.ts',
-    // Signage / Video Walls: productos fuera de alcance del kiosk+PWA
-    'src/app/(signage)',
-    'src/app/(video-walls)',
-    'src/app/signage-assets',
-    'src/app/video-wall-assets',
-    'src/lib/signage',
-    'src/lib/video-walls',
+    // Ingesta de feeds: solo la usa el backend del Studio, no el runtime.
     'src/lib/ingest',
-    'src/components/signage',
-    'src/components/video-walls',
-    // Data de OTROS productos: cada Publish es independiente; un export de kiosk
-    // NO debe arrastrar el contenido de signage ni de video-walls (#4 feedback).
-    'clients-signage',
-    'clients-walls',
+    // Utilidades signage SOLO del Studio (publish PR + diagnostics): no son
+    // runtime y arrastran `github-publisher`/Octokit. Se podan del standalone
+    // (irrelevantes en kiosk/pwa, donde lib/signage entero ya se poda).
+    'src/lib/signage/diagnostics.ts',
+    'src/lib/signage/publish-files.ts',
     // el propio toolchain de export no viaja al repo del cliente
     'scripts/export-runtime-tree.mjs',
     'scripts/export-standalone.ts',
-    // el OTRO producto del runtime (kiosk⇄pwa) se poda
+    // productos exclusivos a podar (todos menos el activo) + sus carpetas de datos
     ...OTHER_PRODUCT,
+    ...OTHER_DATA_DIRS,
   ].map((p) => p.split('/').join(sep)),
 );
 
@@ -118,17 +137,17 @@ function isExcluded(absPath) {
   if (parts[0] === 'src' && parts[1] === 'lib' && parts[2] === 'studio' && parts.length >= 4) {
     if (!STUDIO_RUNTIME_KEEP.has(parts[3])) return true;
   }
-  // kiosk-only: podar las libs PWA-exclusivas (src/lib/pwa-*.ts).
+  // Solo la PWA usa las libs `src/lib/pwa-*.ts`: se podan en kiosk y signage.
   if (
-    PRODUCT === 'kiosk' &&
+    PRODUCT !== 'pwa' &&
     parts[0] === 'src' &&
     parts[1] === 'lib' &&
     parts[2]?.startsWith('pwa-')
   ) {
     return true;
   }
-  // clients/<x>: solo viaja el cliente target (+ default como fallback + _template).
-  if (parts[0] === 'clients' && parts.length >= 2) {
+  // <DATA_DIR>/<x>: solo viaja el cliente target (+ default como fallback + _template).
+  if (parts[0] === DATA_DIR && parts.length >= 2) {
     const slug = parts[1];
     if (slug !== SLUG && slug !== 'default' && slug !== '_template') return true;
     // assets pesados: por defecto NO se copian (los materializa la Fase 2 al

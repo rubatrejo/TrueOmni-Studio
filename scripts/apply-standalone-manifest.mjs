@@ -15,7 +15,7 @@
  * Uso:  MANIFEST_URL=<blob-url> node scripts/apply-standalone-manifest.mjs
  */
 import { mkdir, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 
 const manifestUrl = process.env.MANIFEST_URL;
 if (!manifestUrl) {
@@ -29,44 +29,70 @@ if (!res.ok) {
   process.exit(1);
 }
 const manifest = await res.json();
-const { slug, product, config, tokensCss, i18n, studioConfig } = manifest;
-if (!slug || !config) {
-  console.error('Manifest inválido: falta `slug` o `config`.');
+const { slug, product, config, tokensCss, i18n, studioConfig, files, clientName } = manifest;
+if (!slug) {
+  console.error('Manifest inválido: falta `slug`.');
   process.exit(1);
 }
 
-const clientDir = join(process.cwd(), 'clients', slug);
-await mkdir(join(clientDir, 'i18n'), { recursive: true });
+const tmp = process.env.RUNNER_TEMP || '/tmp';
+let summary = '';
+let repoClientName = clientName || slug;
 
-await writeFile(join(clientDir, 'config.json'), JSON.stringify(config, null, 2) + '\n', 'utf8');
+if (Array.isArray(files)) {
+  // ── Manifest de archivos (signage): se escriben tal cual sobre el checkout.
+  //    Cada `file.path` ya viene en formato `clients-signage/<slug>/...`. ──
+  if (files.length === 0) {
+    console.error('Manifest inválido: `files` está vacío.');
+    process.exit(1);
+  }
+  for (const file of files) {
+    if (!file?.path || typeof file.content !== 'string') continue;
+    const abs = join(process.cwd(), file.path);
+    await mkdir(dirname(abs), { recursive: true });
+    await writeFile(abs, file.content, 'utf8');
+  }
+  summary = `${files.length} archivos escritos`;
+} else {
+  // ── Manifest kiosk/pwa (config merged + tokens + i18n + studioConfig). ──
+  if (!config) {
+    console.error('Manifest inválido: falta `config`.');
+    process.exit(1);
+  }
+  const clientDir = join(process.cwd(), 'clients', slug);
+  await mkdir(join(clientDir, 'i18n'), { recursive: true });
 
-if (tokensCss) {
-  await writeFile(join(clientDir, 'tokens.css'), tokensCss, 'utf8');
-}
+  await writeFile(join(clientDir, 'config.json'), JSON.stringify(config, null, 2) + '\n', 'utf8');
 
-let locales = 0;
-if (i18n && typeof i18n === 'object') {
-  for (const [locale, data] of Object.entries(i18n)) {
+  if (tokensCss) {
+    await writeFile(join(clientDir, 'tokens.css'), tokensCss, 'utf8');
+  }
+
+  let locales = 0;
+  if (i18n && typeof i18n === 'object') {
+    for (const [locale, data] of Object.entries(i18n)) {
+      await writeFile(
+        join(clientDir, 'i18n', `${locale}.json`),
+        JSON.stringify(data, null, 2) + '\n',
+        'utf8',
+      );
+      locales++;
+    }
+  }
+
+  // El config crudo del editor (botón Download) se guarda en un temp; el workflow
+  // lo coloca en la RAÍZ del repo standalone como `<slug>-config.json` (#5).
+  let studioConfigSaved = false;
+  if (studioConfig) {
     await writeFile(
-      join(clientDir, 'i18n', `${locale}.json`),
-      JSON.stringify(data, null, 2) + '\n',
+      join(tmp, 'studio-config.json'),
+      JSON.stringify(studioConfig, null, 2) + '\n',
       'utf8',
     );
-    locales++;
+    studioConfigSaved = true;
   }
-}
-
-// El config crudo del editor (botón Download) se guarda en un temp; el workflow
-// lo coloca en la RAÍZ del repo standalone como `<slug>-config.json` (#5).
-const tmp = process.env.RUNNER_TEMP || '/tmp';
-let studioConfigSaved = false;
-if (studioConfig) {
-  await writeFile(
-    join(tmp, 'studio-config.json'),
-    JSON.stringify(studioConfig, null, 2) + '\n',
-    'utf8',
-  );
-  studioConfigSaved = true;
+  if (studioConfig && studioConfig.nombre) repoClientName = studioConfig.nombre;
+  summary = `clients/${slug}/ (config${tokensCss ? ' + tokens' : ''} + ${locales} locales${studioConfigSaved ? ' + studio-config' : ''})`;
 }
 
 // Naming personalizado del repo/zip/artifact (#9): TrueOmni-<Cliente>-<Producto>-MM-DD-YYYY
@@ -83,14 +109,11 @@ function titleCaseHyphen(s) {
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join('-');
 }
-const clientName = (studioConfig && studioConfig.nombre) || slug;
 const prod = product || 'kiosk';
 const now = new Date();
 const mm = String(now.getMonth() + 1).padStart(2, '0');
 const dd = String(now.getDate()).padStart(2, '0');
-const repoName = `TrueOmni-${titleCaseHyphen(clientName)}-${titleCaseHyphen(prod)}-${mm}-${dd}-${now.getFullYear()}`;
+const repoName = `TrueOmni-${titleCaseHyphen(repoClientName)}-${titleCaseHyphen(prod)}-${mm}-${dd}-${now.getFullYear()}`;
 await writeFile(join(tmp, 'repo-name.txt'), repoName, 'utf8');
 
-console.log(
-  `✓ manifest aplicado a clients/${slug}/ (config${tokensCss ? ' + tokens' : ''} + ${locales} locales${studioConfigSaved ? ' + studio-config' : ''}) → repo: ${repoName}`,
-);
+console.log(`✓ manifest aplicado a ${summary} → repo: ${repoName}`);

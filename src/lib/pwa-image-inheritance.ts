@@ -17,18 +17,24 @@
  *   - dashboard.tiles[].image (por `key`)  ← tile del kiosk con la misma key
  *   - dashboard.quickAccess[].image (por `key`) ← idem (si la key matchea)
  *   - dashboard.heroImage                   ← branding.homeHero.src (kind image)
- *   - welcome.background                    ← branding.idleBackground.src (kind image)
- *   - login.background                      ← welcome.background resuelto ↦ idleBackground
+ *   - welcome.background                    ← fondo idle del kiosk (image)
+ *   - login.background                      ← welcome.background resuelto ↦ idle
+ *
+ * IMPORTANTE — el fondo idle del kiosk es `billboard.background` (lo que el
+ * operador ve en el idle), NO el campo muerto `branding.idleBackground`
+ * (desconectado del runtime desde 2026-05-25). En runtime ese valor llega como
+ * `config.features.billboard_background` (lo persiste el publish del kiosk);
+ * en el editor del Studio se lee del `billboard.background` del KioskConfig.
  */
-import type { PwaConfig } from '@/lib/config';
+import type { KioskConfig, PwaConfig } from '@/lib/config';
 
 /** Imágenes del kiosk que la PWA puede heredar (todas opcionales). */
 export interface PwaImageSources {
   /** `branding.homeHero.src` del kiosk (solo si `kind === 'image'`). */
   homeHero?: string;
-  /** `branding.idleBackground.src` del kiosk (solo si `kind === 'image'`). */
+  /** Fondo idle del kiosk = `billboard.background.src` (solo si es imagen). */
   idleBackground?: string;
-  /** Mapa `key → image` de las tiles del kiosk (`modules.tiles`). */
+  /** Mapa `key → image` de las tiles del kiosk (home tiles). */
   tileImages?: Record<string, string>;
 }
 
@@ -83,4 +89,39 @@ export function resolvePwaImages(pwa: PwaConfig, sources: PwaImageSources): PwaC
   }
 
   return next;
+}
+
+/**
+ * Construye las `PwaImageSources` desde el **config de runtime** (el `config.json`
+ * que comparten kiosk y PWA). Es la fuente para la resolución LIVE: la PWA hereda
+ * lo que el kiosk tiene en el mismo config, sin republicar.
+ *
+ *   - homeHero        ← `branding.homeHero` (kind image)
+ *   - idleBackground  ← `features.billboard_background` (type image)
+ *   - tileImages      ← `features.home.tiles[]` (key → image)
+ */
+export function pwaImageSourcesFromConfig(config: KioskConfig): PwaImageSources {
+  const tileImages: Record<string, string> = {};
+  for (const t of config.features?.home?.tiles ?? []) {
+    if (t.image) tileImages[t.key] = t.image;
+  }
+  const homeHero = config.branding?.homeHero;
+  const idle = config.features?.billboard_background;
+  return {
+    homeHero: homeHero?.kind === 'image' && homeHero.src ? homeHero.src : undefined,
+    idleBackground: idle?.type === 'image' && idle.src ? idle.src : undefined,
+    tileImages,
+  };
+}
+
+/**
+ * Resuelve el slice `features.pwa` con las imágenes heredadas del kiosk leídas
+ * del **mismo** config de runtime. Devuelve `undefined` si no hay slice PWA.
+ * Pensado para los server components de la PWA (`/pwa`, `/pwa/login`,
+ * `/pwa/dashboard`) — herencia LIVE sin republish.
+ */
+export function resolvePwaConfigImages(config: KioskConfig): PwaConfig | undefined {
+  const pwa = config.features?.pwa;
+  if (!pwa) return undefined;
+  return resolvePwaImages(pwa, pwaImageSourcesFromConfig(config));
 }

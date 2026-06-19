@@ -1,6 +1,7 @@
 import { LoginScreenLive } from '@/components/pwa/login-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig, type PwaLoginConfig } from '@/lib/config';
+import { resolvePwaConfigImages } from '@/lib/pwa-image-inheritance';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,8 +31,12 @@ const FALLBACK_ERROR = {
 export default async function PwaLoginPage() {
   const config = await getConfig();
   const pwa = config.features?.pwa;
-  const login = pwa?.login ?? FALLBACK_LOGIN;
-  const background = login.background ?? pwa?.welcome?.background ?? 'assets/pwa/welcome-bg.jpg';
+  // Slice con imágenes heredadas LIVE del kiosk. El background del Login ya
+  // resuelve la cadena login → welcome → idle del kiosk (ver el helper).
+  const resolvedPwa = resolvePwaConfigImages(config);
+  const login = resolvedPwa?.login ?? pwa?.login ?? FALLBACK_LOGIN;
+  const background =
+    login.background ?? resolvedPwa?.welcome?.background ?? 'assets/pwa/welcome-bg.jpg';
 
   return (
     <MobileCanvas>

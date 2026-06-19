@@ -2,16 +2,19 @@ import { PwaAskAiHost } from '@/components/pwa/ask-ai/pwa-ask-ai-host';
 import { DashboardLive } from '@/components/pwa/dashboard-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
+import { resolvePwaConfigImages } from '@/lib/pwa-image-inheritance';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * Home/Dashboard de la PWA (`/pwa/dashboard`). Destino del Login/Skip.
- * El contenido (hero, quick-access, tiles) viene de `config.features.pwa.dashboard`.
+ * El contenido (hero, quick-access, tiles) viene de `config.features.pwa.dashboard`,
+ * con las imágenes VACÍAS heredadas LIVE del kiosk (hero ← branding.homeHero,
+ * tiles/quickAccess ← features.home.tiles por key). Ver `resolvePwaConfigImages`.
  */
 export default async function PwaDashboardPage() {
   const config = await getConfig();
-  const d = config.features?.pwa?.dashboard;
+  const d = resolvePwaConfigImages(config)?.dashboard;
   // Ask AI mobile (D2): reutiliza la config del kiosk (`home.askAi`); cero duplicación.
   const askAi = config.features?.home?.askAi?.enabled ? config.features.home.askAi : null;
   const t = config.textos;

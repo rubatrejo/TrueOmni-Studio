@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import type { PwaConfig } from '@/lib/config';
+import type { KioskConfig, PwaConfig } from '@/lib/config';
 
-import { resolvePwaImages, type PwaImageSources } from './pwa-image-inheritance';
+import {
+  pwaImageSourcesFromConfig,
+  resolvePwaConfigImages,
+  resolvePwaImages,
+  type PwaImageSources,
+} from './pwa-image-inheritance';
 
 /** Construye un slice PWA mínimo con dashboard/welcome/login para los tests. */
 function makePwa(overrides: Partial<PwaConfig> = {}): PwaConfig {
@@ -96,5 +101,79 @@ describe('resolvePwaImages', () => {
     expect(out.dashboard).toBeUndefined();
     expect(out.welcome).toBeUndefined();
     expect(out.login).toBeUndefined();
+  });
+});
+
+/** Config de runtime mínimo con las fuentes del kiosk para los tests. */
+function makeConfig(overrides: Partial<KioskConfig> = {}): KioskConfig {
+  return {
+    branding: {
+      logo: { default: 'assets/logo.svg', alt: 'Logo' },
+      homeHero: { kind: 'image', src: 'assets/branding/home-hero.jpg' },
+    },
+    features: {
+      billboard_background: { type: 'image', src: 'assets/billboard-0/hero.jpg' },
+      home: {
+        tiles: [
+          { key: 'restaurants', label: 'Restaurants', image: 'assets/home/tiles/restaurants.jpg' },
+          { key: 'events', label: 'Events', image: 'assets/home/tiles/events.jpg' },
+        ],
+        listings: [],
+      },
+      pwa: makePwa(),
+    },
+    ...overrides,
+  } as unknown as KioskConfig;
+}
+
+describe('pwaImageSourcesFromConfig', () => {
+  it('lee hero (branding.homeHero), idle (features.billboard_background) y tiles (features.home.tiles)', () => {
+    const sources = pwaImageSourcesFromConfig(makeConfig());
+    expect(sources.homeHero).toBe('assets/branding/home-hero.jpg');
+    expect(sources.idleBackground).toBe('assets/billboard-0/hero.jpg');
+    expect(sources.tileImages?.restaurants).toBe('assets/home/tiles/restaurants.jpg');
+  });
+
+  it('NO hereda el idle si el fondo del billboard es video', () => {
+    const config = makeConfig({
+      features: {
+        billboard_background: { type: 'video', src: 'assets/billboard-0/hero.mp4' },
+      },
+    } as unknown as Partial<KioskConfig>);
+    const sources = pwaImageSourcesFromConfig(config);
+    expect(sources.idleBackground).toBeUndefined();
+  });
+
+  it('NO hereda el hero si branding.homeHero es video', () => {
+    const config = makeConfig({
+      branding: {
+        logo: { default: 'assets/logo.svg', alt: 'Logo' },
+        homeHero: { kind: 'video', src: 'assets/branding/home-hero.mp4' },
+      },
+    } as unknown as Partial<KioskConfig>);
+    const sources = pwaImageSourcesFromConfig(config);
+    expect(sources.homeHero).toBeUndefined();
+  });
+});
+
+describe('resolvePwaConfigImages', () => {
+  it('resuelve el slice PWA con las imágenes heredadas del config de runtime (live)', () => {
+    const out = resolvePwaConfigImages(makeConfig());
+    expect(out?.dashboard?.heroImage).toBe('assets/branding/home-hero.jpg');
+    expect(out?.dashboard?.tiles[0].image).toBe('assets/home/tiles/restaurants.jpg');
+    expect(out?.welcome?.background).toBe('assets/billboard-0/hero.jpg');
+    expect(out?.login?.background).toBe('assets/billboard-0/hero.jpg');
+  });
+
+  it('respeta el override propio de la PWA (events tiene imagen propia)', () => {
+    const out = resolvePwaConfigImages(makeConfig());
+    expect(out?.dashboard?.tiles[1].image).toBe('assets/pwa/own-events.jpg');
+  });
+
+  it('devuelve undefined si no hay slice PWA', () => {
+    const config = makeConfig({
+      features: { home: { tiles: [], listings: [] } },
+    } as unknown as Partial<KioskConfig>);
+    expect(resolvePwaConfigImages(config)).toBeUndefined();
   });
 });

@@ -38,6 +38,11 @@ export const IMAGE_FIELDS: ReadonlySet<string> = new Set([
   'idleLogo',
   'footerLogo',
   'favicon',
+  // Hero del Home (branding.homeHero.{src}) y fondo idle compartido del Billboard
+  // (features.billboard_background.{src}) — el contexto de imagen baja al `src`.
+  // La PWA standalone los hereda, así que deben materializarse en el export.
+  'homeHero',
+  'billboard_background',
   'shareBackground',
   'shareCardLogo',
   'qrLogo',

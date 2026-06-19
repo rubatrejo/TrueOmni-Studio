@@ -113,6 +113,16 @@ export function buildFilesystemConfig(
         features[key] = v.background;
       }
     }
+    // Fondo idle COMPARTIDO por las 4 variants. El runtime del billboard NO
+    // depende de este campo (usa bridge/defaults), pero lo persistimos para
+    // que la PWA lo herede como fondo de Welcome/Login (ver
+    // `pwa-image-inheritance`) y para completar el round-trip que
+    // `bootstrap-from-fs` ya lee (`features.billboard_background`).
+    const sharedBg = studio.billboard.background;
+    const sharedBgSrc = skipDataUrl(sharedBg?.src);
+    if (sharedBg && sharedBgSrc !== undefined) {
+      features.billboard_background = { type: sharedBg.type, src: sharedBgSrc };
+    }
   }
 
   // ───── modules / tiles / wayfinding / systemModules ─────
@@ -294,6 +304,15 @@ function applyBranding(branding: Record<string, unknown>, studioBranding: KioskC
 
   const favicon = skipDataUrl(studioBranding.favicon);
   if (favicon !== undefined) branding.favicon = favicon;
+
+  // homeHero: hero del Home Dashboard (imagen/video). El kiosk lo aplica en el
+  // header (sobre el default); la PWA lo hereda en su Dashboard cuando no tiene
+  // uno propio. Se persiste al runtime para que ambos productos lo vean sin
+  // depender del bridge del Studio. (`skipDataUrl` ignora vacío y data: URIs.)
+  const homeHeroSrc = skipDataUrl(studioBranding.homeHero?.src);
+  if (homeHeroSrc !== undefined) {
+    branding.homeHero = { kind: studioBranding.homeHero?.kind ?? 'image', src: homeHeroSrc };
+  }
 
   // Fonts: sólo persistir nombres simples si difieren de los defaults del schema
   // (Montserrat / Open Sans). Si son los defaults, no añadir el bloque (ruido).

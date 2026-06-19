@@ -96,6 +96,7 @@ export function PwaShell({
   initialUnified,
   kioskSystemModules,
   kioskTileImages,
+  kioskIdleBackground,
   availableLocales,
   mapboxToken,
 }: {
@@ -119,6 +120,11 @@ export function PwaShell({
    * `resolvePwaImages` en `@/lib/pwa-image-inheritance`.
    */
   kioskTileImages: Record<string, string>;
+  /**
+   * Fondo idle del Kiosk = `billboard.background` del KioskConfig (read-only).
+   * Fuente de la herencia silenciosa del fondo de Welcome/Login de la PWA (solo
+   * si es imagen). NO confundir con `branding.idleBackground` (campo muerto). */
+  kioskIdleBackground?: { type: 'image' | 'video'; src: string };
   /** Idiomas que ofrece el cliente (`features.languages.available`) para el
    *  editor i18n (F-PWA-7). `null` → el editor usa su lista por defecto. */
   availableLocales: string[] | null;
@@ -193,11 +199,12 @@ export function PwaShell({
   const kioskImageSources = useMemo<PwaImageSources>(
     () => ({
       homeHero: branding.homeHero?.kind === 'image' ? branding.homeHero.src : undefined,
-      idleBackground:
-        branding.idleBackground?.kind === 'image' ? branding.idleBackground.src : undefined,
+      // Fondo idle = `billboard.background` del Kiosk (lo que el operador ve en el
+      // idle), NO `branding.idleBackground` (campo muerto desde 2026-05-25).
+      idleBackground: kioskIdleBackground?.type === 'image' ? kioskIdleBackground.src : undefined,
       tileImages: kioskTileImages,
     }),
-    [branding.homeHero, branding.idleBackground, kioskTileImages],
+    [branding.homeHero, kioskIdleBackground, kioskTileImages],
   );
 
   // Empuja el slice PWA + el systemModules del Kiosk al preview en cada cambio

@@ -5,7 +5,6 @@ import { NextResponse } from 'next/server';
 
 import { SUPER_ADMIN_EMAIL } from '@/auth';
 import type { PwaConfig } from '@/lib/config';
-import { resolvePwaImages, type PwaImageSources } from '@/lib/pwa-image-inheritance';
 import { resolvePwaVisibility } from '@/lib/pwa-module-visibility';
 import {
   getGitHubPublishConfig,
@@ -124,33 +123,19 @@ export async function POST(req: Request, { params }: RouteParams) {
       ...DEFAULT_SYSTEM_MODULES,
       ...(kioskCfg?.modules?.systemModules ?? {}),
     };
-    // Hornear también la herencia silenciosa de IMÁGENES del Kiosk (hero/idle del
-    // branding + tiles): los campos de imagen vacíos del slice PWA se rellenan
-    // con la imagen equivalente del kiosk. En producción no hay bridge, así que
-    // la resolución se congela aquí (igual que `moduleVisibility`).
-    const kioskTileImages: Record<string, string> = {};
-    for (const t of kioskCfg?.modules?.tiles ?? []) {
-      if (t.image) kioskTileImages[t.key] = t.image;
-    }
-    const kioskImageSources: PwaImageSources = {
-      homeHero:
-        kioskCfg?.branding.homeHero?.kind === 'image' ? kioskCfg.branding.homeHero.src : undefined,
-      idleBackground:
-        kioskCfg?.branding.idleBackground?.kind === 'image'
-          ? kioskCfg.branding.idleBackground.src
-          : undefined,
-      tileImages: kioskTileImages,
+    // Las IMÁGENES heredadas del Kiosk (hero ← branding.homeHero, tiles ←
+    // features.home.tiles, fondo idle ← features.billboard_background) NO se
+    // hornean aquí: el runtime de la PWA las resuelve LIVE desde el MISMO
+    // config compartido (`resolvePwaConfigImages`), así un cambio en el Kiosk
+    // se refleja sin republicar la PWA. Solo congelamos `moduleVisibility`
+    // (que sí depende del slice del Kiosk en el KV, no del config de runtime).
+    const bakedSlice: PwaConfig = {
+      ...slice,
+      moduleVisibility: resolvePwaVisibility({
+        kioskSystemModules,
+        pwaModuleVisibility: slice.moduleVisibility ?? null,
+      }),
     };
-    const bakedSlice: PwaConfig = resolvePwaImages(
-      {
-        ...slice,
-        moduleVisibility: resolvePwaVisibility({
-          kioskSystemModules,
-          pwaModuleVisibility: slice.moduleVisibility ?? null,
-        }),
-      },
-      kioskImageSources,
-    );
 
     const configPath = path.join(process.cwd(), 'clients', slug, 'config.json');
     const repoPath = path.relative(process.cwd(), configPath).replaceAll(path.sep, '/');

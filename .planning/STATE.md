@@ -4,6 +4,62 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-19 — 3 cambios del editor PWA: logo XS/sin-XL + herencia LIVE de imágenes Kiosk→PWA
+
+**Hecho (2 commits a prod):**
+
+- **Limpieza de arranque:** borrados ~13 temporales untracked del repro local
+  (`*-tmp.*`, `_dump-*.test.ts`, `_repro-pwa-dispatch.mts`, `clients/_pretest_`,
+  `clients/hello-harford`). `rm` está bloqueado en sesión → lo corrió Rubén con `!`.
+- **`6af9bfc` — Logo PWA XS + quitar XL del editor (Dashboard + Login):** el control
+  compartido `PwaLogoControls` ahora ofrece XS·S·M·L (antes S·M·L·XL). XS nuevo
+  (dashboard 100px; welcome/login escala 0.62). XL se conserva en tipos y mapas de
+  px/escala por **back-compat** (no rompe configs guardados con XL); solo se quita el
+  botón. `pwa-schema.ts` no valida `logoSize` con enum → sin riesgo de crash.
+- **`60c0572` — Herencia LIVE de imágenes Kiosk→PWA (hero/tiles/idle) + fix fuente idle:**
+  la PWA hereda resolviendo en RUNTIME desde el MISMO config compartido
+  (`resolvePwaConfigImages` + `pwaImageSourcesFromConfig` en `pwa-image-inheritance.ts`).
+  Editas el Kiosk → publicas el Kiosk → la PWA lo refleja **sin republicar la PWA**.
+  Override propio de la PWA gana (vacío hereda / lleno overridea / borrar revierte).
+  - Fondo Welcome/Login ← **`billboard.background`** (idle REAL), no el campo muerto
+    `branding.idleBackground`. Solo si es imagen (video → la PWA mantiene su default).
+  - Hero Dashboard ← `branding.homeHero`; tiles/quickAccess ← `features.home.tiles` (por key).
+  - **publish del Kiosk (`publish-merger`)** ahora persiste `features.billboard_background`
+    (completa el round-trip que `bootstrap-from-fs` ya leía) y `branding.homeHero`
+    (antes NO se persistía → de paso el hero del operador ahora SÍ aparece en el Kiosk
+    de producción — gap latente arreglado). `config.ts` formaliza ambos campos.
+  - **publish de la PWA** deja de hornear imágenes (runtime resuelve live); mantiene el
+    bake de `moduleVisibility`.
+  - editor PWA (`PwaShell`/`page.tsx`): el preview usa `billboard.background` del KioskConfig.
+  - export standalone: `IMAGE_FIELDS` += `homeHero`, `billboard_background` (materializa esos assets).
+
+**Verificado:**
+
+- `pnpm typecheck` + `pnpm lint` limpios · 63 tests verdes (helper 15 nuevos incl. video→no
+  hereda + visibilidad + schemas) · `pnpm kiosk:dev` arranca limpio y `/`, `/pwa`,
+  `/pwa/login`, `/pwa/dashboard` → 200 sin errores. Cliente `default` idéntico (campos PWA
+  no vacíos → cero regresión). Deploy del `60c0572` quedó en BUILDING al cierre — VIGILAR READY.
+
+**Pendiente / siguiente:**
+
+- **QA visual en el Studio (Rubén):** cliente con imágenes en el Kiosk + campos PWA vacíos →
+  confirmar Welcome/Login = idle del Kiosk, y tiles/hero del Dashboard PWA = los del Kiosk.
+  agent-browser no entra (auth GitHub).
+- Confirmar deploy `60c0572` READY (estaba BUILDING).
+- (Arquitectura) el runtime del Billboard del Kiosk sigue usando bridge/defaults; ahora hay
+  `features.billboard_background` persistido — futuro: que el idle del Kiosk en prod lo lea.
+
+**Decisiones:**
+
+- Herencia **live en runtime** (no bake-at-publish) porque kiosk y PWA comparten el mismo
+  `config.json`; auto-sync real sin republicar. Idle requirió persistir `billboard.background`
+  (no estaba en el config de runtime); tiles ya estaban (`features.home.tiles`).
+- XL fuera del editor pero válido en tipos/mapas (back-compat anti-crash, lección 2026-06-15).
+
+**Fase:** Milestone PWA / Studio — conexiones Kiosk↔PWA (módulos ✅, imágenes ✅ live).
+
+---
+
 ### Sesión 2026-06-18 — Export Signage + validación Export PWA + panel Modules PWA (herencia del Kiosk) + plan imágenes Kiosk→PWA
 
 **Hecho (todo en prod, deploys Vercel READY):**

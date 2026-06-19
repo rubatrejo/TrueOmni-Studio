@@ -50,14 +50,17 @@ interface LoginScreenProps {
   forgotHref?: string;
   /** Textos del modal de error (validación mock fallida). */
   errorTexts: LoginErrorTexts;
-  /** Tamaño del logo (slot idle). Default 'M' = width 251.4. */
-  logoSize?: 'S' | 'M' | 'L' | 'XL';
+  /** Tamaño del logo (slot idle). Default 'M' = width 251.4.
+   *  `XL` se mantiene por back-compat; el editor ofrece XS→L. */
+  logoSize?: 'XS' | 'S' | 'M' | 'L' | 'XL';
   /** Offset del logo en px, sumado a su posición base (62, 122). */
   logoOffset?: { x: number; y: number };
 }
 
-/** Factor de escala del logo por tamaño (ratios del kiosk: 280/360, 1, 480/360, 600/360). */
-const LOGO_SCALE: Record<'S' | 'M' | 'L' | 'XL', number> = {
+/** Factor de escala del logo por tamaño (ratios del kiosk: 280/360, 1, 480/360, 600/360).
+ *  'XS' añadido como mínimo; 'XL' se mantiene por back-compat. */
+const LOGO_SCALE: Record<'XS' | 'S' | 'M' | 'L' | 'XL', number> = {
+  XS: 0.62,
   S: 0.78,
   M: 1,
   L: 1.33,

@@ -230,10 +230,16 @@ export function PwaPlaceholderPanel({
   );
 }
 
-export type PwaLogoSize = 'S' | 'M' | 'L' | 'XL';
+// `XL` se conserva en el tipo por back-compat (configs guardados que ya lo traen
+// no deben romper ni perder su valor), pero el editor ya no lo OFRECE como botón:
+// el rango útil para el logo de la PWA mobile es XS→L. Ver `LOGO_SIZE_BUTTONS`.
+export type PwaLogoSize = 'XS' | 'S' | 'M' | 'L' | 'XL';
+
+/** Tamaños ofrecidos en el editor (XL queda fuera; XS es el nuevo mínimo). */
+const LOGO_SIZE_BUTTONS = ['XS', 'S', 'M', 'L'] as const;
 
 /**
- * Controles del logo de una pantalla de la PWA: tamaño (S/M/L/XL, mismo look que
+ * Controles del logo de una pantalla de la PWA: tamaño (XS/S/M/L, mismo look que
  * el selector del kiosk) + posición (move X/Y en px). Reutilizable en cualquier
  * editor PWA (Dashboard, Login…) para que el UI sea consistente.
  */
@@ -260,7 +266,7 @@ export function PwaLogoControls({
           aria-label="Logo size"
           className="inline-flex rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-800 dark:bg-zinc-900/40"
         >
-          {(['S', 'M', 'L', 'XL'] as const).map((s) => {
+          {LOGO_SIZE_BUTTONS.map((s) => {
             const active = (size ?? 'M') === s;
             return (
               <button

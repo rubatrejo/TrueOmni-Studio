@@ -862,8 +862,9 @@ export interface PwaLoginConfig {
   loginCta: string;
   createAccountCta: string;
   skipLogin: string;
-  /** Tamaño del logo del Login/Welcome (slot idle). Default 'M' (width 251.4). */
-  logoSize?: 'S' | 'M' | 'L' | 'XL';
+  /** Tamaño del logo del Login/Welcome (slot idle). Default 'M' (width 251.4).
+   *  `XL` se mantiene por back-compat; el editor ofrece XS→L. */
+  logoSize?: 'XS' | 'S' | 'M' | 'L' | 'XL';
   /** Offset del logo en px, sumado a su posición base. Permite moverlo. */
   logoOffset?: { x: number; y: number };
 }
@@ -915,8 +916,9 @@ export interface PwaDashboardConfig {
   /** Tiles del grid principal. */
   tiles: PwaTile[];
   /** Tamaño del logo del header del dashboard (default 'M'). Análogo al
-   *  `heroLogoSize` del kiosk. */
-  logoSize?: 'S' | 'M' | 'L' | 'XL';
+   *  `heroLogoSize` del kiosk. `XL` se mantiene por back-compat; el editor
+   *  ofrece XS→L. */
+  logoSize?: 'XS' | 'S' | 'M' | 'L' | 'XL';
   /** Desplazamiento del logo del header en px (default {x:0,y:0}). Se suma a
    *  la posición base (left:20, top:48). Permite mover el logo. */
   logoOffset?: { x: number; y: number };
@@ -1984,6 +1986,10 @@ export interface KioskConfig {
     /** Logo del footer. Default: `logo.default`. */
     footerLogo?: string;
     favicon?: string;
+    /** Hero del Home Dashboard del kiosk (imagen o video). Lo escribe el publish
+     *  desde el branding unificado; el `<HomeHeader>` lo aplica sobre el default.
+     *  La PWA hereda esta imagen en su Dashboard cuando no tiene una propia. */
+    homeHero?: { kind: 'image' | 'video'; src: string };
   };
   textos: Record<string, string>;
   navegacion?: Record<string, string>;
@@ -1997,6 +2003,11 @@ export interface KioskConfig {
     permitir_compartir_qr?: boolean;
     /** Variante del Billboard idle (0-4). Default 0 si no se declara. */
     billboard_variant?: 0 | 1 | 2 | 3 | 4;
+    /** Fondo idle compartido por las 4 variants del Billboard (lo escribe el
+     *  publish del kiosk desde `billboard.background`). El runtime del billboard
+     *  no depende de él (usa bridge/defaults), pero la PWA lo hereda como fondo
+     *  de Welcome/Login cuando no tiene uno propio. Solo se hereda si es imagen. */
+    billboard_background?: { type: 'image' | 'video'; src: string };
     /** Configuración del Main Dashboard / Home. */
     home?: {
       tiles: HomeTile[];

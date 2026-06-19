@@ -21,7 +21,7 @@ interface DashboardScreenProps {
   tiles: PwaTile[];
   notifications: PwaNotification[];
   /** Tamaño del logo del header (default 'M' = 154px de ancho). */
-  logoSize?: 'S' | 'M' | 'L' | 'XL';
+  logoSize?: 'XS' | 'S' | 'M' | 'L' | 'XL';
   /** Offset del logo en px, sumado a la posición base (left:20, top:48). */
   logoOffset?: { x: number; y: number };
   /** Opacidad (0–100 %) de la capa oscura sobre la foto de cada tile. Si
@@ -29,8 +29,11 @@ interface DashboardScreenProps {
   tileOverlayOpacity?: number;
 }
 
-/** Ancho del logo del header por tamaño (px). 'M' = 154 (verbatim del XD). */
-const LOGO_SIZE_PX: Record<'S' | 'M' | 'L' | 'XL', number> = {
+/** Ancho del logo del header por tamaño (px). 'M' = 154 (verbatim del XD).
+ *  'XS' añadido para logos que necesitan ser aún más pequeños; 'XL' se mantiene
+ *  por back-compat aunque el editor ya no lo ofrezca. */
+const LOGO_SIZE_PX: Record<'XS' | 'S' | 'M' | 'L' | 'XL', number> = {
+  XS: 100,
   S: 124,
   M: 154,
   L: 190,

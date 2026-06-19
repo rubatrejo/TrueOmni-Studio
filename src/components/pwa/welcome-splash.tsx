@@ -21,14 +21,17 @@ interface WelcomeSplashProps {
   nextHref?: string;
   /** Ancho del logo como fracción del canvas. Default 0.6704 (251.4/375 del XD). */
   logoWidthPct?: number;
-  /** Tamaño del logo (escala el ancho); compartido con el Login. Default 'M'. */
-  logoSize?: 'S' | 'M' | 'L' | 'XL';
+  /** Tamaño del logo (escala el ancho); compartido con el Login. Default 'M'.
+   *  `XL` se mantiene por back-compat; el editor ofrece XS→L. */
+  logoSize?: 'XS' | 'S' | 'M' | 'L' | 'XL';
   /** Offset del logo en px desde el centro; compartido con el Login. */
   logoOffset?: { x: number; y: number };
 }
 
-/** Factor de escala del logo por tamaño (ratios del kiosk). Igual que el Login. */
-const LOGO_SCALE: Record<'S' | 'M' | 'L' | 'XL', number> = {
+/** Factor de escala del logo por tamaño (ratios del kiosk). Igual que el Login.
+ *  'XS' añadido como mínimo; 'XL' se mantiene por back-compat. */
+const LOGO_SCALE: Record<'XS' | 'S' | 'M' | 'L' | 'XL', number> = {
+  XS: 0.62,
   S: 0.78,
   M: 1,
   L: 1.33,

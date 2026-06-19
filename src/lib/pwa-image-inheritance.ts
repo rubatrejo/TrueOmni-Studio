@@ -43,9 +43,44 @@ function isEmpty(value: string | undefined | null): boolean {
   return !value || value.trim() === '';
 }
 
-/** Devuelve `current` si tiene contenido; si no, la fuente heredada (o ''). */
+/**
+ * Placeholders del SEED de la PWA: el slice se crea con imágenes de scaffolding
+ * ya puestas (no son una elección del operador). Mientras sigan ahí, la PWA debe
+ * HEREDAR del kiosk. Un upload real del operador es siempre una URL http(s)/
+ * blob/data (ver `ImageField` → `uploadToBlob`), nunca una de estas rutas, así
+ * que distinguir por valor exacto es seguro y no pisa overrides reales.
+ * Mantener en sync con el seed PWA (welcome/login/dashboard).
+ */
+const PWA_SEED_IMAGE_PLACEHOLDERS: ReadonlySet<string> = new Set([
+  'assets/pwa/welcome-bg.jpg',
+  'assets/pwa/dashboard/hero.jpg',
+  'assets/pwa/dashboard/quick-regions.jpg',
+  'assets/pwa/dashboard/quick-trip-planner.jpg',
+  'assets/pwa/dashboard/quick-places-to-stay.jpg',
+  'assets/pwa/dashboard/quick-events.jpg',
+  'assets/pwa/dashboard/tile-scavenger-hunt.jpg',
+]);
+
+/**
+ * Un campo de imagen es HEREDABLE (debe tomar la del kiosk) si:
+ *  - está vacío, o
+ *  - sigue siendo un placeholder del seed (lista de arriba), o
+ *  - es una ruta default de tile del kiosk (`assets/home/tiles/…`) — el seed de
+ *    los tiles de la PWA apunta a esas rutas, así que se considera "sin tocar".
+ * Cualquier otra cosa (URL http/blob/data subida, u otra ruta) es una elección
+ * explícita del operador y se respeta (override gana).
+ */
+function isInheritable(value: string | undefined | null): boolean {
+  if (isEmpty(value)) return true;
+  const v = (value as string).trim().replace(/^\//, '');
+  if (PWA_SEED_IMAGE_PLACEHOLDERS.has(v)) return true;
+  if (v.startsWith('assets/home/tiles/')) return true;
+  return false;
+}
+
+/** Devuelve `current` si es una elección real; si no, la fuente heredada (o ''). */
 function inherit(current: string | undefined, source: string | undefined): string {
-  if (!isEmpty(current)) return current as string;
+  if (!isInheritable(current)) return current as string;
   return source && !isEmpty(source) ? source : (current ?? '');
 }
 

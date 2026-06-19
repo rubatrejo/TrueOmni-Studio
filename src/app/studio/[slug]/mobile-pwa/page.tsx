@@ -66,9 +66,20 @@ export default async function MobilePwaEditorPage({
   for (const t of rawKiosk?.modules?.tiles ?? []) {
     if (t.image) kioskTileImages[t.key] = t.image;
   }
-  // Fondo idle del Kiosk (`billboard.background`) → fuente de la herencia
-  // silenciosa del fondo de Welcome/Login de la PWA. NO `branding.idleBackground`.
-  const kioskIdleBackground = rawKiosk?.billboard?.background;
+  // Fondo idle del Kiosk → fuente de la herencia del fondo de Welcome/Login.
+  // Fuente principal: `billboard.background` (lo que el operador edita en el
+  // Billboard editor). Fallback: `branding.idleBackground` (Branding → Media),
+  // por si lo configuró ahí. Solo se hereda si es imagen (lo filtra el resolver).
+  const bbBg = rawKiosk?.billboard?.background;
+  const brandIdle = rawKiosk?.branding?.idleBackground;
+  const kioskIdleBackground = bbBg?.src
+    ? bbBg
+    : brandIdle?.src
+      ? {
+          type: brandIdle.kind === 'image' ? ('image' as const) : ('video' as const),
+          src: brandIdle.src,
+        }
+      : undefined;
 
   // Fallback defensivo: si el cliente aún no tiene unified branding, lo
   // materializamos con defaults para que el editor abra (edge case raro —

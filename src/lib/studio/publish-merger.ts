@@ -113,15 +113,24 @@ export function buildFilesystemConfig(
         features[key] = v.background;
       }
     }
-    // Fondo idle COMPARTIDO por las 4 variants. El runtime del billboard NO
-    // depende de este campo (usa bridge/defaults), pero lo persistimos para
-    // que la PWA lo herede como fondo de Welcome/Login (ver
-    // `pwa-image-inheritance`) y para completar el round-trip que
-    // `bootstrap-from-fs` ya lee (`features.billboard_background`).
-    const sharedBg = studio.billboard.background;
+  }
+
+  // Fondo idle COMPARTIDO (lo que el operador ve en el idle). El runtime del
+  // billboard NO depende de este campo (usa bridge/defaults), pero lo
+  // persistimos para que la PWA lo herede como fondo de Welcome/Login (ver
+  // `pwa-image-inheritance`) y para completar el round-trip que
+  // `bootstrap-from-fs` ya lee (`features.billboard_background`). Fuente
+  // principal `billboard.background`; fallback `branding.idleBackground`
+  // (Branding → Media) por si lo configuró ahí. Solo imagen.
+  {
+    const sharedBg = studio.billboard?.background;
     const sharedBgSrc = skipDataUrl(sharedBg?.src);
+    const brandIdle = studio.branding?.idleBackground;
+    const brandIdleSrc = brandIdle?.kind === 'image' ? skipDataUrl(brandIdle.src) : undefined;
     if (sharedBg && sharedBgSrc !== undefined) {
       features.billboard_background = { type: sharedBg.type, src: sharedBgSrc };
+    } else if (brandIdleSrc !== undefined) {
+      features.billboard_background = { type: 'image', src: brandIdleSrc };
     }
   }
 

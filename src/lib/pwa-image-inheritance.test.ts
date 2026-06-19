@@ -102,6 +102,34 @@ describe('resolvePwaImages', () => {
     expect(out.welcome).toBeUndefined();
     expect(out.login).toBeUndefined();
   });
+
+  it('hereda aunque el slice traiga los PLACEHOLDERS del seed (no son elección del operador)', () => {
+    const pwa = makePwa({
+      welcome: { background: 'assets/pwa/welcome-bg.jpg' },
+      dashboard: {
+        heroTitle: 'Hi',
+        heroImage: 'assets/pwa/dashboard/hero.jpg',
+        quickAccess: [
+          { key: 'regions', label: 'REGIONS', image: 'assets/pwa/dashboard/quick-regions.jpg' },
+        ],
+        tiles: [
+          { key: 'restaurants', label: 'Restaurants', image: 'assets/home/tiles/restaurants.jpg' },
+        ],
+      },
+    });
+    const out = resolvePwaImages(pwa, SOURCES);
+    expect(out.welcome?.background).toBe('assets/branding/idle-bg.jpg');
+    expect(out.login?.background).toBe('assets/branding/idle-bg.jpg');
+    expect(out.dashboard?.heroImage).toBe('assets/branding/home-hero.jpg');
+    expect(out.dashboard?.quickAccess[0].image).toBe('assets/home/tiles/regions.jpg');
+    expect(out.dashboard?.tiles[0].image).toBe('assets/home/tiles/restaurants.jpg');
+  });
+
+  it('un upload real (URL http) NUNCA es placeholder: el override gana', () => {
+    const pwa = makePwa({ welcome: { background: 'https://cdn.example.com/my-welcome.jpg' } });
+    const out = resolvePwaImages(pwa, SOURCES);
+    expect(out.welcome?.background).toBe('https://cdn.example.com/my-welcome.jpg');
+  });
 });
 
 /** Config de runtime mínimo con las fuentes del kiosk para los tests. */

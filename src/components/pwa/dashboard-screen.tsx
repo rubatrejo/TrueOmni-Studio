@@ -33,7 +33,7 @@ interface DashboardScreenProps {
  *  'XS' añadido para logos que necesitan ser aún más pequeños; 'XL' se mantiene
  *  por back-compat aunque el editor ya no lo ofrezca. */
 const LOGO_SIZE_PX: Record<'XS' | 'S' | 'M' | 'L' | 'XL', number> = {
-  XS: 70,
+  XS: 45,
   S: 124,
   M: 154,
   L: 190,

@@ -36,6 +36,14 @@ export interface PwaImageSources {
   idleBackground?: string;
   /** Mapa `key → image` de las tiles del kiosk (home tiles). */
   tileImages?: Record<string, string>;
+  /**
+   * Mapa `key → label` de las tiles del kiosk (home tiles). El nombre del módulo
+   * tiene una sola fuente de verdad: el Kiosk. Si una tile del Dashboard PWA
+   * comparte `key` con una del Kiosk, su label SIEMPRE refleja el del Kiosk
+   * (renombrar en el Kiosk se ve en la PWA, sin editar dos veces). Las tiles
+   * PWA-only (sin match) conservan su propio label.
+   */
+  tileLabels?: Record<string, string>;
 }
 
 /** Un campo de imagen está "vacío" (debe heredar) si es nullish o solo espacios. */
@@ -92,8 +100,13 @@ function inherit(current: string | undefined, source: string | undefined): strin
 export function resolvePwaImages(pwa: PwaConfig, sources: PwaImageSources): PwaConfig {
   const next: PwaConfig = { ...pwa };
   const tileImages = sources.tileImages ?? {};
+  const tileLabels = sources.tileLabels ?? {};
 
   // 1. Dashboard: hero + tiles + quickAccess (match por key con el kiosk).
+  //    - imagen: hereda si el campo PWA está "sin tocar" (vacío/placeholder).
+  //    - label: el nombre del módulo SIEMPRE viene del Kiosk si hay match por
+  //      key (fuente única; renombrar en el Kiosk se refleja en la PWA). Las
+  //      tiles PWA-only (sin match) conservan su label.
   if (pwa.dashboard) {
     next.dashboard = {
       ...pwa.dashboard,
@@ -101,10 +114,12 @@ export function resolvePwaImages(pwa: PwaConfig, sources: PwaImageSources): PwaC
       tiles: pwa.dashboard.tiles.map((t) => ({
         ...t,
         image: inherit(t.image, tileImages[t.key]),
+        label: tileLabels[t.key] ?? t.label,
       })),
       quickAccess: pwa.dashboard.quickAccess.map((q) => ({
         ...q,
         image: inherit(q.image, tileImages[q.key]),
+        label: tileLabels[q.key] ?? q.label,
       })),
     };
   }
@@ -137,8 +152,10 @@ export function resolvePwaImages(pwa: PwaConfig, sources: PwaImageSources): PwaC
  */
 export function pwaImageSourcesFromConfig(config: KioskConfig): PwaImageSources {
   const tileImages: Record<string, string> = {};
+  const tileLabels: Record<string, string> = {};
   for (const t of config.features?.home?.tiles ?? []) {
     if (t.image) tileImages[t.key] = t.image;
+    if (t.label) tileLabels[t.key] = t.label;
   }
   const homeHero = config.branding?.homeHero;
   const idle = config.features?.billboard_background;
@@ -146,6 +163,7 @@ export function pwaImageSourcesFromConfig(config: KioskConfig): PwaImageSources 
     homeHero: homeHero?.kind === 'image' && homeHero.src ? homeHero.src : undefined,
     idleBackground: idle?.type === 'image' && idle.src ? idle.src : undefined,
     tileImages,
+    tileLabels,
   };
 }
 

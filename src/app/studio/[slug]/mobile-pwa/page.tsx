@@ -63,8 +63,12 @@ export default async function MobilePwaEditorPage({
   // Mapa key → image de las tiles del Kiosk → fuente de la herencia silenciosa
   // de imágenes de los tiles del Dashboard PWA (ver resolvePwaImages).
   const kioskTileImages: Record<string, string> = {};
+  // Mapa key → label: el nombre del módulo tiene una sola fuente (el Kiosk); la
+  // tile del Dashboard PWA con la misma key refleja ese nombre (sin editar 2 veces).
+  const kioskTileLabels: Record<string, string> = {};
   for (const t of rawKiosk?.modules?.tiles ?? []) {
     if (t.image) kioskTileImages[t.key] = t.image;
+    if (t.label) kioskTileLabels[t.key] = t.label;
   }
   // Fondo idle del Kiosk → fuente de la herencia del fondo de Welcome/Login.
   // Fuente principal: `billboard.background` (lo que el operador edita en el
@@ -102,6 +106,7 @@ export default async function MobilePwaEditorPage({
       initialUnified={branding}
       kioskSystemModules={kioskSystemModules}
       kioskTileImages={kioskTileImages}
+      kioskTileLabels={kioskTileLabels}
       kioskIdleBackground={kioskIdleBackground}
       availableLocales={availableLocales}
       mapboxToken={mapboxToken}

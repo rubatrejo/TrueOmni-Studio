@@ -34,8 +34,8 @@ interface DashboardScreenProps {
  *  por back-compat aunque el editor ya no lo ofrezca. */
 const LOGO_SIZE_PX: Record<'XS' | 'S' | 'M' | 'L' | 'XL', number> = {
   XS: 45,
-  S: 124,
-  M: 154,
+  S: 99,
+  M: 123,
   L: 190,
   XL: 230,
 };

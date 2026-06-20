@@ -130,6 +130,21 @@ describe('resolvePwaImages', () => {
     const out = resolvePwaImages(pwa, SOURCES);
     expect(out.welcome?.background).toBe('https://cdn.example.com/my-welcome.jpg');
   });
+
+  it('el label de la tile SIEMPRE refleja el del Kiosk si comparten key (nombre único)', () => {
+    const pwa = makePwa();
+    pwa.dashboard!.tiles[0].label = 'Restaurantes PWA'; // label propio de la PWA
+    const out = resolvePwaImages(pwa, {
+      ...SOURCES,
+      tileLabels: { restaurants: 'Dining', regions: 'Regions' },
+    });
+    // restaurants comparte key con el kiosk → toma el nombre del kiosk.
+    expect(out.dashboard?.tiles[0].label).toBe('Dining');
+    // quickAccess regions también refleja el del kiosk.
+    expect(out.dashboard?.quickAccess[0].label).toBe('Regions');
+    // events NO está en tileLabels (PWA-only) → conserva su label.
+    expect(out.dashboard?.tiles[1].label).toBe('Events');
+  });
 });
 
 /** Config de runtime mínimo con las fuentes del kiosk para los tests. */

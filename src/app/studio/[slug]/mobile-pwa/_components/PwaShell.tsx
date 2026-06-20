@@ -47,7 +47,15 @@ function brandingToPatch(b: Branding, clientName: string): PwaBrandingPatch {
     idleLogo: b.idleLogo,
     footerLogo: b.footerLogo,
     favicon: b.favicon,
-    fonts: { display: b.fonts?.display, body: b.fonts?.body },
+    fonts: {
+      display: b.fonts?.display,
+      body: b.fonts?.body,
+      // Incluir las fuentes custom subidas para que el preview de la PWA las
+      // inyecte igual que el kiosk (antes solo iban los nombres → una Display
+      // custom del cliente no se aplicaba en la PWA).
+      displayCustom: b.fonts?.displayCustom,
+      bodyCustom: b.fonts?.bodyCustom,
+    },
     clientName,
   };
 }
@@ -96,6 +104,7 @@ export function PwaShell({
   initialUnified,
   kioskSystemModules,
   kioskTileImages,
+  kioskTileLabels,
   kioskIdleBackground,
   availableLocales,
   mapboxToken,
@@ -120,6 +129,12 @@ export function PwaShell({
    * `resolvePwaImages` en `@/lib/pwa-image-inheritance`.
    */
   kioskTileImages: Record<string, string>;
+  /**
+   * Mapa `key → label` de las tiles del Kiosk. El nombre del módulo se hereda
+   * del Kiosk (fuente única); la tile del Dashboard PWA con la misma key refleja
+   * ese nombre. Las tiles PWA-only conservan su label.
+   */
+  kioskTileLabels: Record<string, string>;
   /**
    * Fondo idle del Kiosk = `billboard.background` del KioskConfig (read-only).
    * Fuente de la herencia silenciosa del fondo de Welcome/Login de la PWA (solo
@@ -203,8 +218,9 @@ export function PwaShell({
       // idle), NO `branding.idleBackground` (campo muerto desde 2026-05-25).
       idleBackground: kioskIdleBackground?.type === 'image' ? kioskIdleBackground.src : undefined,
       tileImages: kioskTileImages,
+      tileLabels: kioskTileLabels,
     }),
-    [branding.homeHero, kioskIdleBackground, kioskTileImages],
+    [branding.homeHero, kioskIdleBackground, kioskTileImages, kioskTileLabels],
   );
 
   // Empuja el slice PWA + el systemModules del Kiosk al preview en cada cambio

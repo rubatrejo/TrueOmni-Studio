@@ -235,8 +235,8 @@ export function PwaPlaceholderPanel({
 // el rango útil para el logo de la PWA mobile es XS→L. Ver `LOGO_SIZE_BUTTONS`.
 export type PwaLogoSize = 'XS' | 'S' | 'M' | 'L' | 'XL';
 
-/** Tamaños ofrecidos en el editor (XL queda fuera; XS es el nuevo mínimo). */
-const LOGO_SIZE_BUTTONS = ['XS', 'S', 'M', 'L'] as const;
+/** Tamaños ofrecidos en el editor (XS→M; L y XL quedan fuera por petición). */
+const LOGO_SIZE_BUTTONS = ['XS', 'S', 'M'] as const;
 
 /**
  * Controles del logo de una pantalla de la PWA: tamaño (XS/S/M/L, mismo look que

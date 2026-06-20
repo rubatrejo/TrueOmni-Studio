@@ -29,7 +29,15 @@ export type PwaBrandingPatch = {
   idleLogo?: string;
   footerLogo?: string;
   favicon?: string;
-  fonts?: { display?: string; body?: string };
+  fonts?: {
+    display?: string;
+    body?: string;
+    /** Fuente custom subida (woff2/woff/ttf/otf como data URL). Si está, se
+     *  inyecta vía @font-face y gana sobre la Google Font del slot. Paridad con
+     *  el kiosk: sin esto, una Display custom del cliente no se ve en la PWA. */
+    displayCustom?: { name: string; dataUrl: string; format: 'woff2' | 'woff' | 'ttf' | 'otf' };
+    bodyCustom?: { name: string; dataUrl: string; format: 'woff2' | 'woff' | 'ttf' | 'otf' };
+  };
   clientName?: string;
 };
 

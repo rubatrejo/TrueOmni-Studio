@@ -97,7 +97,14 @@ export function DashboardScreen({
           z-10 para tapar el solape de la foto del hero. */}
       <Layer h={90} className="relative z-10 shrink-0" style={{ backgroundColor: BRAND }}>
         <div className="absolute" style={{ left: logoX, top: logoY, width: logoW }}>
-          <TrueOmniLogo className="h-auto w-full text-white" title={logoAlt} slot="default" />
+          {/* minWidthPx={0}: el ancho lo dicta `logoW` (logoSize). Sin esto, el
+              floor de 120px del override pisaría XS/S y el logo se vería enorme. */}
+          <TrueOmniLogo
+            className="h-auto w-full text-white"
+            title={logoAlt}
+            slot="default"
+            minWidthPx={0}
+          />
         </div>
         {/* before:-inset expande el área de tap a ≥40px sin mover el glifo (E3). */}
         <button

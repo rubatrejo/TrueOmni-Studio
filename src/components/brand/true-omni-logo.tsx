@@ -45,6 +45,14 @@ interface TrueOmniLogoProps {
    *    reservado.
    */
   align?: 'left' | 'center';
+  /**
+   * Ancho mínimo (px) del logo cuando es un override raster (evita que un logo
+   * cuadrado se vea diminuto en un header ancho). Default 120 (comportamiento
+   * histórico del kiosk). Pasa `0` cuando el tamaño lo controla un contenedor
+   * explícito (p. ej. el `logoSize` del header del Dashboard PWA), para que ese
+   * ancho NO quede pisado por el floor. Solo aplica al render `<img>` (override).
+   */
+  minWidthPx?: number;
 }
 
 /**
@@ -86,6 +94,7 @@ function TrueOmniLogoBase({
   title = 'TrueOmni',
   slot = 'default',
   align = 'center',
+  minWidthPx = 120,
 }: TrueOmniLogoProps) {
   const [override, setOverride] = useState<string | null>(null);
 
@@ -134,7 +143,7 @@ function TrueOmniLogoBase({
         className={`${className ?? ''} block object-contain ${
           align === 'left' ? 'object-left' : 'object-center'
         }`}
-        style={{ minWidth: '120px' }}
+        style={{ minWidth: `${minWidthPx}px` }}
       />
     );
   }

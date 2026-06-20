@@ -33,7 +33,7 @@ interface DashboardScreenProps {
  *  'XS' añadido para logos que necesitan ser aún más pequeños; 'XL' se mantiene
  *  por back-compat aunque el editor ya no lo ofrezca. */
 const LOGO_SIZE_PX: Record<'XS' | 'S' | 'M' | 'L' | 'XL', number> = {
-  XS: 100,
+  XS: 70,
   S: 124,
   M: 154,
   L: 190,
@@ -44,6 +44,8 @@ const BRAND = 'hsl(var(--brand-primary))';
 const PWA = 'hsl(var(--pwa-primary))';
 const MONTSERRAT = { fontFamily: 'var(--font-montserrat)' } as const;
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
+/** Fuente Display del cliente (titulares/categorías). Cae a Montserrat. */
+const DISPLAY = { fontFamily: 'var(--font-display)' } as const;
 
 const bg = (src: string): React.CSSProperties => ({
   backgroundImage: `url("${resolveAssetUrl(src)}")`,
@@ -250,7 +252,10 @@ export function DashboardScreen({
                   className="absolute inset-0"
                   style={{ backgroundColor: `rgba(0,0,0,${tileOverlayAlpha})` }}
                 />
-                <span className="absolute inset-0 flex items-center justify-center whitespace-pre-line px-3 text-center text-[15px] font-bold leading-tight text-white">
+                <span
+                  className="absolute inset-0 flex items-center justify-center whitespace-pre-line px-3 text-center text-[15px] font-bold leading-tight text-white"
+                  style={DISPLAY}
+                >
                   {t.label}
                 </span>
               </button>

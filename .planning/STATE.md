@@ -4,6 +4,55 @@ Este archivo es la memoria persistente entre sesiones. Cada `/terminar` añade u
 
 ---
 
+### Sesión 2026-06-19 (cont.) — Iteración editor PWA: fix herencia idle + tamaños logo + fuente Display + nombres de módulos
+
+**Hecho (todo en prod, deploys READY):**
+
+- **`f59518c` — fix herencia de imágenes (placeholders del seed):** el fondo de Welcome/Login
+  (y hero/tiles) NO heredaba del Kiosk porque el slice PWA nace con placeholders no vacíos
+  (`assets/pwa/welcome-bg.jpg`, etc.) y la herencia solo rellenaba VACÍOS. Nuevo `isInheritable()`
+  en `pwa-image-inheritance.ts`: hereda si vacío, si es placeholder del seed (lista conocida) o
+  ruta default de tile (`assets/home/tiles/…`); un upload real es URL http/blob/data → se respeta.
+  Fuente del idle ampliada: `billboard.background` y fallback `branding.idleBackground` (Branding→Media).
+- **`ef88a7f`→`b331c25`→`70f64a4` — logo XS del dashboard:** el logo se veía ENORME y no cambiaba.
+  Causa raíz (`70f64a4`): `TrueOmniLogo` (override raster) tenía `minWidth:120px` HARDCODEADO que
+  pisaba cualquier `logoSize`. Fix: prop opcional `minWidthPx` (default 120 = kiosk intacto); el
+  Dashboard PWA pasa `minWidthPx={0}` → el ancho lo dicta `logoSize`. Lección: si un tamaño no
+  responde, sospechar un `min-width`/floor antes de seguir bajando el valor.
+- **`689cde9` — 3 ajustes finales (aprobados por Rubén "ya quedó"):**
+  - Logo dashboard: `LOGO_SIZE_PX` XS=45, S=99, M=123 (S/M −20%); editor solo ofrece XS·S·M
+    (`LOGO_SIZE_BUTTONS`); L y XL fuera del editor pero vivos en mapas/tipos (back-compat).
+  - Tipografía Display custom: el bridge del editor PWA (`PwaBrandingPatch`/`brandingToPatch`)
+    ahora envía `displayCustom`/`bodyCustom` (antes solo nombres Google) → fuente subida se inyecta
+    en el preview de la PWA igual que el kiosk. Tiles del dashboard usan `var(--font-display)`.
+  - Nombres de módulos = fuente única (Kiosk): `PwaImageSources.tileLabels` + mirror en
+    `resolvePwaImages` (tile/quickAccess con la misma key SIEMPRE toman el label del Kiosk;
+    PWA-only conservan el suyo). Live en runtime + preview. Renombrar en el Kiosk se ve en la PWA.
+
+**Verificado:** typecheck + lint + 18 tests del helper + `pnpm kiosk:dev` (`/`, `/pwa`, `/pwa/login`,
+`/pwa/dashboard` → 200) en cada iteración. 6 deploys Vercel READY.
+
+**Pendiente / siguiente:**
+
+- **QA visual Rubén** confirmó logo OK. Falta confirmar visualmente #2 (fuente Display) — si la
+  fuente del cliente es **Google Font** debería aplicarse ya; si es **archivo subido**, este fix la
+  arregla. Si aún no se ve, pedir el nombre/tipo de la fuente.
+- **Posible follow-up #3:** que el TÍTULO DENTRO de la pantalla del listing (header de
+  Restaurants/Things To Do en la PWA) también herede del Kiosk (hoy solo heredan los **tiles** del
+  Dashboard). Esperando confirmación de Rubén si lo quiere.
+- Para clientes ya publicados: el **fondo idle** se refleja tras re-publicar el Kiosk una vez
+  (persiste `features.billboard_background`); nombres/tiles/hero ya son live sin republicar.
+
+**Decisiones:**
+
+- Placeholders del seed = "sin tocar" (heredables); upload real = URL http/blob/data (override gana).
+- Nombres de módulos: mirror SIEMPRE del Kiosk para keys compartidas (consistencia, no editar 2 veces).
+- `minWidthPx` configurable en `TrueOmniLogo` en vez de quitar el floor (no romper el kiosk).
+
+**Fase:** Milestone PWA / Studio — conexiones Kiosk↔PWA (módulos ✅, imágenes ✅, nombres ✅, logo ✅).
+
+---
+
 ### Sesión 2026-06-19 — 3 cambios del editor PWA: logo XS/sin-XL + herencia LIVE de imágenes Kiosk→PWA
 
 **Hecho (2 commits a prod):**

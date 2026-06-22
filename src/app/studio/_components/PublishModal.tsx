@@ -15,10 +15,11 @@ import {
   Upload,
   X,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import {
+  publishPwaSlice,
   publishStandalone,
   publishToFilesystem,
   type PublishFileChange,
@@ -37,6 +38,11 @@ interface PublishModalProps {
   currentVersion?: number;
   /** Editor que está publicando. Se persiste en el timeline local. */
   editor?: string;
+  /** Producto que se publica. `'kiosk'` (default) publica el bundle completo
+   *  vía `/publish/[slug]`; `'pwa'` publica solo el slice `features.pwa` vía
+   *  `/publish/[slug]/pwa`. El modal (diff, fs/PR, approval gate, export) es
+   *  idéntico — solo cambia el endpoint y un par de copys. */
+  product?: 'kiosk' | 'pwa';
 }
 
 type Phase = 'preview' | 'preview-loading' | 'publishing' | 'done' | 'error';
@@ -47,7 +53,16 @@ export function PublishModal({
   onClose,
   currentVersion = 0,
   editor = 'ruben@trueomni.com',
+  product = 'kiosk',
 }: PublishModalProps) {
+  // Endpoint según producto. Ambos comparten firma `(slug, {dryRun, mode})` y
+  // forma de respuesta (`files`/`mode`/`written`/`pr`), así que el resto del
+  // modal es agnóstico al producto.
+  const runPublish = useCallback(
+    (opts: { dryRun?: boolean }) =>
+      product === 'pwa' ? publishPwaSlice(slug, opts) : publishToFilesystem(slug, opts),
+    [product, slug],
+  );
   const [phase, setPhase] = useState<Phase>('preview-loading');
   const [files, setFiles] = useState<PublishFileChange[]>([]);
   const [mode, setMode] = useState<'fs' | 'pr'>('fs');
@@ -68,7 +83,7 @@ export function PublishModal({
     setError(null);
     setWritten(0);
     setPr(null);
-    publishToFilesystem(slug, { dryRun: true })
+    runPublish({ dryRun: true })
       .then((res) => {
         setFiles(res.files);
         setMode(res.mode);
@@ -83,7 +98,7 @@ export function PublishModal({
         setError(message);
         setPhase('error');
       });
-  }, [open, slug]);
+  }, [open, slug, runPublish]);
 
   // Hallazgos S-28 / S-29: Escape + focus trap unificados.
   useEscapeClose(open, onClose);
@@ -119,7 +134,7 @@ export function PublishModal({
     setPhase('publishing');
     setError(null);
     try {
-      const res = await publishToFilesystem(slug, { dryRun: false });
+      const res = await runPublish({ dryRun: false });
       setFiles(res.files);
       setWritten(res.written);
       setMode(res.mode);
@@ -186,12 +201,18 @@ export function PublishModal({
                   {mode === 'pr' ? (
                     <>
                       Opens a PR against <span className="font-mono">main</span> with the diff of{' '}
-                      <span className="font-mono">clients/{slug}/</span>. Merge the PR to redeploy.
+                      <span className="font-mono">
+                        clients/{slug}/{product === 'pwa' ? 'config.json' : ''}
+                      </span>
+                      . Merge the PR to redeploy.
                     </>
                   ) : (
                     <>
-                      Writes the bundle from KV to{' '}
-                      <span className="font-mono">clients/{slug}/</span>.
+                      Writes the {product === 'pwa' ? 'PWA section' : 'bundle'} from KV to{' '}
+                      <span className="font-mono">
+                        clients/{slug}/{product === 'pwa' ? 'config.json' : ''}
+                      </span>
+                      .
                     </>
                   )}
                 </p>
@@ -263,7 +284,9 @@ export function PublishModal({
                 </>
               )}
 
-              {phase !== 'preview-loading' ? <StandaloneExportSection slug={slug} /> : null}
+              {phase !== 'preview-loading' ? (
+                <StandaloneExportSection slug={slug} product={product} />
+              ) : null}
             </div>
 
             <div className="flex items-center justify-end gap-2 border-t border-zinc-100 px-5 py-3 dark:border-zinc-800">

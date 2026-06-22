@@ -12,6 +12,7 @@ import type { Branding, SystemModules } from '@/lib/studio/schema';
 
 import { MobileTabBar, type MobileEditorTab } from '../../../_components/MobileTabBar';
 import { PreviewPanel } from '../../../_components/PreviewPanel';
+import { PublishModal } from '../../../_components/PublishModal';
 import { SaveBar } from '../../../_components/SaveBar';
 import { SidebarTabs } from '../../../_components/SidebarTabs';
 import { useToast } from '../../../_components/Toast';
@@ -19,7 +20,6 @@ import { TopBar } from '../../../_components/TopBar';
 import {
   patchClientBranding,
   patchPwaSlice,
-  publishPwaSlice,
   publishStandalone,
   type PwaSliceMetaDto,
 } from '../../../_lib/api-client';
@@ -153,7 +153,7 @@ export function PwaShell({
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const toast = useToast();
 
-  const [publishing, setPublishing] = useState(false);
+  const [publishOpen, setPublishOpen] = useState(false);
   const [exportingStandalone, setExportingStandalone] = useState(false);
 
   // Export standalone SOLO de la PWA (cada editor exporta su producto).
@@ -297,37 +297,16 @@ export function PwaShell({
   }, [pwa, savedPwa, branding, savedBranding, slug, initialUnified, toast]);
 
   const handlePublish = useCallback(async () => {
-    if (publishing) return;
+    // Guarda primero los cambios pendientes para que el slice en KV esté al día
+    // y el diff del modal (KV → fs) refleje lo último editado; luego abre el
+    // MISMO modal del kiosk (`product="pwa"`): preview del diff, fs/PR con
+    // approval gate, PR link y export. Reemplaza el publish directo + toast.
     const dirtyNow =
       JSON.stringify(pwa) !== JSON.stringify(savedPwa) ||
       JSON.stringify(branding) !== JSON.stringify(savedBranding);
     if (dirtyNow) await handleSave();
-    setPublishing(true);
-    try {
-      const result = await publishPwaSlice(slug);
-      if (result.pr) {
-        toast.show('Published · PR opened', {
-          variant: 'success',
-          description: `${result.pr.branch} → ${result.pr.url}`,
-        });
-      } else if (result.written > 0) {
-        toast.show('Published to filesystem', {
-          variant: 'success',
-          description: `${result.written} file(s) updated.`,
-        });
-      } else {
-        toast.show('Nothing to publish', { description: 'No changes vs the published config.' });
-      }
-    } catch (err) {
-      console.error('[PWA Publish]', err);
-      toast.show('Publish failed', {
-        variant: 'error',
-        description: err instanceof Error ? err.message : 'Unknown error',
-      });
-    } finally {
-      setPublishing(false);
-    }
-  }, [publishing, pwa, savedPwa, branding, savedBranding, handleSave, slug, toast]);
+    setPublishOpen(true);
+  }, [pwa, savedPwa, branding, savedBranding, handleSave]);
 
   const handleDiscard = useCallback(() => {
     setPwa(savedPwa);
@@ -472,6 +451,14 @@ export function PwaShell({
                 ? 'You have unsaved changes'
                 : ''}
         </p>
+
+        <PublishModal
+          open={publishOpen}
+          slug={slug}
+          onClose={() => setPublishOpen(false)}
+          currentVersion={meta?.currentVersion ?? 0}
+          product="pwa"
+        />
       </div>
     </StudioSlugProvider>
   );

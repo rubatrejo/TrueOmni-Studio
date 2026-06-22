@@ -5,6 +5,7 @@ import { Eye, EyeOff, GripVertical } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import type { PwaDashboardConfig, PwaQuickAccess, PwaTile } from '@/lib/config';
+import { isInheritable, type PwaImageSources } from '@/lib/pwa-image-inheritance';
 import { resolvePwaTileRoute } from '@/lib/pwa-routes';
 
 import { ImageField } from '../../../_components/ImageField';
@@ -31,12 +32,16 @@ export function ModulesEditor({
   onChange,
   logo,
   onLogoChange,
+  kioskImageSources,
 }: {
   value: PwaDashboardConfig | undefined;
   onChange: (next: PwaDashboardConfig) => void;
   /** Logo del cliente (`branding.logo`) — editable aquí igual que en el kiosk. */
   logo?: string;
   onLogoChange?: (next: string | undefined) => void;
+  /** Imágenes del Kiosk heredables (hero ← homeHero, tiles ← tileImages[key])
+   *  para mostrarlas como "Inherited from Kiosk" en los ImageFields sin tocar. */
+  kioskImageSources?: PwaImageSources;
 }) {
   const v: PwaDashboardConfig = {
     ...EMPTY_DASHBOARD,
@@ -123,7 +128,8 @@ export function ModulesEditor({
             hint="Background photo of the dashboard hero. JPG or PNG."
             layout="cover"
             aspect="390/200"
-            value={v.heroImage}
+            value={isInheritable(v.heroImage) ? undefined : v.heroImage}
+            inheritedPreview={isInheritable(v.heroImage) ? kioskImageSources?.homeHero : undefined}
             onChange={(next) => onChange({ ...v, heroImage: next ?? '' })}
           />
         </PwaGroup>
@@ -167,6 +173,7 @@ export function ModulesEditor({
                     key={`${q.key}-${i}`}
                     item={q}
                     options={options}
+                    inheritedImage={kioskImageSources?.tileImages?.[q.key]}
                     onSwap={(tileKey) => swapQuickAccess(i, tileKey)}
                     onLabel={(label) => updateQuick(i, { label })}
                     onImage={(image) => updateQuick(i, { image: image ?? '' })}
@@ -285,6 +292,7 @@ export function ModulesEditor({
                 <PwaTileRow
                   key={t.key}
                   tile={t}
+                  inheritedImage={kioskImageSources?.tileImages?.[t.key]}
                   onToggle={() => updateTile(t.key, { enabled: !(t.enabled !== false) })}
                   onLabel={(label) => updateTile(t.key, { label })}
                   onWide={(wide) => updateTile(t.key, { wide })}
@@ -306,12 +314,15 @@ export function ModulesEditor({
 
 function PwaTileRow({
   tile,
+  inheritedImage,
   onToggle,
   onLabel,
   onWide,
   onImage,
 }: {
   tile: PwaTile;
+  /** Imagen del tile del Kiosk con la misma key (herencia silenciosa). */
+  inheritedImage?: string;
   onToggle: () => void;
   onLabel: (label: string) => void;
   onWide: (wide: boolean) => void;
@@ -429,7 +440,8 @@ function PwaTileRow({
           layout="compact"
           label="Tile image"
           hint="Background photo · JPG · PNG"
-          value={tile.image}
+          value={isInheritable(tile.image) ? undefined : tile.image}
+          inheritedPreview={isInheritable(tile.image) ? inheritedImage : undefined}
           onChange={onImage}
         />
       </div>
@@ -489,6 +501,7 @@ function ToggleSwitch({
 function PwaQuickAccessRow({
   item,
   options,
+  inheritedImage,
   onSwap,
   onLabel,
   onImage,
@@ -496,6 +509,8 @@ function PwaQuickAccessRow({
   item: PwaQuickAccess;
   /** Tiles del Dashboard elegibles para intercambiar con este slot. */
   options: PwaTile[];
+  /** Imagen del tile del Kiosk con la misma key (herencia silenciosa). */
+  inheritedImage?: string;
   /** Intercambia este acceso rápido con el tile `tileKey` (swap con Dashboard). */
   onSwap: (tileKey: string) => void;
   onLabel: (label: string) => void;
@@ -605,7 +620,8 @@ function PwaQuickAccessRow({
           layout="compact"
           label="Tile image"
           hint="Background photo · JPG · PNG"
-          value={item.image}
+          value={isInheritable(item.image) ? undefined : item.image}
+          inheritedPreview={isInheritable(item.image) ? inheritedImage : undefined}
           onChange={onImage}
         />
       </div>

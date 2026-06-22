@@ -1,6 +1,7 @@
 'use client';
 
 import type { PwaWelcomeConfig } from '@/lib/config';
+import { isInheritable } from '@/lib/pwa-image-inheritance';
 
 import { ImageField } from '../../../_components/ImageField';
 
@@ -17,11 +18,17 @@ const EMPTY: PwaWelcomeConfig = { background: '', autoAdvanceMs: 2500 };
 export function WelcomeEditor({
   value,
   onChange,
+  inheritedBackground,
 }: {
   value: PwaWelcomeConfig | undefined;
   onChange: (next: PwaWelcomeConfig) => void;
+  /** Fondo idle del Kiosk que este campo hereda cuando está sin tocar. */
+  inheritedBackground?: string;
 }) {
   const v: PwaWelcomeConfig = { ...EMPTY, ...value };
+  // Si el fondo está "sin tocar" (vacío/placeholder), el editor muestra la
+  // imagen heredada del Kiosk en vez del estado vacío (paridad con el runtime).
+  const bgInherits = isInheritable(v.background);
 
   return (
     <div className="flex h-full flex-col">
@@ -36,7 +43,8 @@ export function WelcomeEditor({
             hint="Fullscreen photo behind the logo (390×844). JPG or PNG."
             layout="cover"
             aspect="390/844"
-            value={v.background}
+            value={bgInherits ? undefined : v.background}
+            inheritedPreview={bgInherits ? inheritedBackground : undefined}
             onChange={(next) => onChange({ ...v, background: next ?? '' })}
           />
         </PwaGroup>

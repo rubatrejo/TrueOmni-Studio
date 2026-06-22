@@ -1,6 +1,7 @@
 'use client';
 
 import type { PwaLoginConfig, PwaLoginErrorConfig } from '@/lib/config';
+import { isInheritable } from '@/lib/pwa-image-inheritance';
 
 import { ImageField } from '../../../_components/ImageField';
 
@@ -33,13 +34,17 @@ export function LoginEditor({
   login,
   loginError,
   onChange,
+  inheritedBackground,
 }: {
   login: PwaLoginConfig | undefined;
   loginError: PwaLoginErrorConfig | undefined;
   onChange: (login: PwaLoginConfig, loginError: PwaLoginErrorConfig) => void;
+  /** Fondo heredado (idle del Kiosk → Welcome → Login) cuando el campo está sin tocar. */
+  inheritedBackground?: string;
 }) {
   const l: PwaLoginConfig = { ...EMPTY_LOGIN, ...login };
   const e: PwaLoginErrorConfig = { ...EMPTY_ERROR, ...loginError };
+  const bgInherits = isInheritable(l.background);
 
   const setLogin = (patch: Partial<PwaLoginConfig>) => onChange({ ...l, ...patch }, e);
   const setError = (patch: Partial<PwaLoginErrorConfig>) => onChange(l, { ...e, ...patch });
@@ -57,7 +62,8 @@ export function LoginEditor({
             hint="Fullscreen photo behind the form (390×844). Falls back to the Welcome background if empty."
             layout="cover"
             aspect="390/844"
-            value={l.background}
+            value={bgInherits ? undefined : l.background}
+            inheritedPreview={bgInherits ? inheritedBackground : undefined}
             onChange={(next) => setLogin({ background: next })}
           />
         </PwaGroup>

@@ -2,6 +2,7 @@
 
 import type { PwaConfig } from '@/lib/config';
 import { normalizePwaDashboard } from '@/lib/pwa-dashboard';
+import type { PwaImageSources } from '@/lib/pwa-image-inheritance';
 import type { Branding, SystemModules } from '@/lib/studio/schema';
 
 import { BrandingSyncBanner } from '../../../_components/BrandingSyncBanner';
@@ -54,6 +55,7 @@ export function PwaEditorPanel({
   branding,
   onBrandingChange,
   kioskSystemModules,
+  kioskImageSources,
   availableLocales,
   mapboxToken,
   currentVersion,
@@ -67,6 +69,9 @@ export function PwaEditorPanel({
   onBrandingChange: (next: Branding) => void;
   /** `systemModules` del Kiosk del cliente (read-only) para la herencia del panel Modules. */
   kioskSystemModules: SystemModules;
+  /** Imágenes del Kiosk heredables (idle/hero/tiles) para mostrarlas como
+   *  preview "Inherited from Kiosk" en los ImageFields vacíos del editor. */
+  kioskImageSources: PwaImageSources;
   /** Idiomas del cliente para el editor i18n (F-PWA-7). */
   availableLocales: string[] | null;
   /** Token Mapbox para el picker de coords del Scavenger Hunt. */
@@ -111,7 +116,11 @@ export function PwaEditorPanel({
 
   if (sectionKey === 'welcome') {
     return (
-      <WelcomeEditor value={pwa.welcome} onChange={(welcome) => onPwaChange({ ...pwa, welcome })} />
+      <WelcomeEditor
+        value={pwa.welcome}
+        onChange={(welcome) => onPwaChange({ ...pwa, welcome })}
+        inheritedBackground={kioskImageSources.idleBackground}
+      />
     );
   }
 
@@ -121,6 +130,7 @@ export function PwaEditorPanel({
         login={pwa.login}
         loginError={pwa.loginError}
         onChange={(login, loginError) => onPwaChange({ ...pwa, login, loginError })}
+        inheritedBackground={kioskImageSources.idleBackground}
       />
     );
   }
@@ -134,6 +144,7 @@ export function PwaEditorPanel({
         }
         logo={branding.logo}
         onLogoChange={(logo) => onBrandingChange({ ...branding, logo: logo ?? '' })}
+        kioskImageSources={kioskImageSources}
       />
     );
   }

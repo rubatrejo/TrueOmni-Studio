@@ -21,6 +21,14 @@ interface ImageFieldProps {
   value?: string;
   onChange: (next: string | undefined) => void;
   /**
+   * Imagen HEREDADA del Kiosk para este campo. Cuando el campo está "sin tocar"
+   * (vacío/placeholder), el editor la pasa aquí: el field la muestra atenuada con
+   * el sello "Inherited from Kiosk" en vez del estado vacío, para que el operador
+   * vea lo que realmente se renderiza. NO es el valor guardado (subir overridea;
+   * el campo sigue heredando hasta que el operador sube uno propio).
+   */
+  inheritedPreview?: string;
+  /**
    * - `compact`: layout horizontal pequeño (logos múltiples).
    * - `square`: aspect 1:1, image contained at 80% (default).
    * - `cover`: image fills 100% del card con object-cover. Aspect lo dicta
@@ -48,6 +56,7 @@ export function ImageField({
   maxBytes = 500 * 1024,
   value,
   onChange,
+  inheritedPreview,
   layout = 'square',
   aspect = '16/9',
 }: ImageFieldProps) {
@@ -58,6 +67,10 @@ export function ImageField({
   const slug = useStudioSlug();
   const blobAvailable = useBlobAvailable();
   const previewSrc = slug ? resolveStudioAsset(slug, value) : value;
+  // Preview de la imagen heredada del Kiosk (solo se usa en el estado vacío).
+  const inheritedSrc =
+    inheritedPreview && slug ? resolveStudioAsset(slug, inheritedPreview) : inheritedPreview;
+  const showInherited = !value && !!inheritedSrc;
 
   const pickFile = async (file: File) => {
     setError(null);
@@ -138,6 +151,29 @@ export function ImageField({
               Replace
             </button>
           </>
+        ) : showInherited ? (
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={busy}
+            className="group absolute inset-0 disabled:opacity-50"
+            aria-label={`Inherited from kiosk — upload to override ${label || 'image'}`}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              loading="lazy"
+              src={inheritedSrc}
+              alt={label || 'Inherited image'}
+              className="absolute inset-0 h-full w-full object-cover opacity-70 transition group-hover:opacity-90"
+            />
+            <span className="absolute left-2 top-2 rounded-full bg-zinc-900/70 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+              Inherited from Kiosk
+            </span>
+            <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 bg-gradient-to-t from-black/70 to-transparent py-3 text-[12px] font-medium text-white opacity-0 transition group-hover:opacity-100">
+              <Upload className="h-3.5 w-3.5" />
+              Upload to override
+            </span>
+          </button>
         ) : (
           <button
             type="button"
@@ -223,6 +259,14 @@ export function ImageField({
               alt={label}
               className="block h-full w-full object-contain p-1"
             />
+          ) : showInherited ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              loading="lazy"
+              src={inheritedSrc}
+              alt={`${label} (inherited)`}
+              className="block h-full w-full object-cover opacity-70"
+            />
           ) : (
             <Upload className="h-3.5 w-3.5 text-zinc-400" />
           )}
@@ -238,6 +282,8 @@ export function ImageField({
                 <Loader2 className="h-3 w-3 shrink-0 animate-spin text-sky-500" />
                 <span>Uploading…</span>
               </>
+            ) : showInherited ? (
+              <span className="text-sky-600 dark:text-sky-400">Inherited from Kiosk</span>
             ) : (
               <span>{hint}</span>
             )}

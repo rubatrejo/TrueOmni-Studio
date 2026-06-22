@@ -78,7 +78,7 @@ const PWA_SEED_IMAGE_PLACEHOLDERS: ReadonlySet<string> = new Set([
  * Cualquier otra cosa (URL http/blob/data subida, u otra ruta) es una elección
  * explícita del operador y se respeta (override gana).
  */
-function isInheritable(value: string | undefined | null): boolean {
+export function isInheritable(value: string | undefined | null): boolean {
   if (isEmpty(value)) return true;
   const v = (value as string).trim().replace(/^\//, '');
   if (PWA_SEED_IMAGE_PLACEHOLDERS.has(v)) return true;

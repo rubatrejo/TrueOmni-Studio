@@ -411,6 +411,7 @@ export function PwaShell({
                   branding={branding}
                   onBrandingChange={setBranding}
                   kioskSystemModules={kioskSystemModules}
+                  kioskImageSources={kioskImageSources}
                   availableLocales={availableLocales}
                   mapboxToken={mapboxToken}
                   currentVersion={meta?.currentVersion ?? 0}

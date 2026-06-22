@@ -19,5 +19,17 @@ export function CreateAccountPhotoScreenLive({
   config?: PwaCreateAccountConfig;
 }) {
   const cfg = usePwaSection('createAccount', config);
-  return <CreateAccountPhotoScreen {...data} texts={cfg ? cfg.photo : data.texts} />;
+  // Fondo resuelto por el bridge (login → welcome → server), igual que Login —
+  // en el preview del Studio (iframe KIOSK_CLIENT=default) el override del
+  // cliente llega por bridge; sin esto quedaba el placeholder del default.
+  const liveLogin = usePwaSection('login', undefined);
+  const liveWelcome = usePwaSection('welcome', undefined);
+  const background = liveLogin?.background ?? liveWelcome?.background ?? data.background;
+  return (
+    <CreateAccountPhotoScreen
+      {...data}
+      background={background}
+      texts={cfg ? cfg.photo : data.texts}
+    />
+  );
 }

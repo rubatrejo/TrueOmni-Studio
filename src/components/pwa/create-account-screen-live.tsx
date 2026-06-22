@@ -20,9 +20,17 @@ export function CreateAccountScreenLive({
   config?: PwaCreateAccountConfig;
 }) {
   const cfg = usePwaSection('createAccount', config);
+  // El fondo se resuelve por el bridge (login → welcome → fallback del server),
+  // igual que LoginScreenLive. En el preview del Studio el iframe corre con
+  // KIOSK_CLIENT=default, así que SIN esto el fondo se quedaba en el placeholder
+  // del default; el override del cliente (con el idle heredado) llega por bridge.
+  const liveLogin = usePwaSection('login', undefined);
+  const liveWelcome = usePwaSection('welcome', undefined);
+  const background = liveLogin?.background ?? liveWelcome?.background ?? data.background;
   return (
     <CreateAccountScreen
       {...data}
+      background={background}
       texts={
         cfg
           ? {

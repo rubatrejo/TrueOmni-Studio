@@ -50,6 +50,7 @@ export default async function MobilePwaEditorPage({
     readClientFs(slug).catch(() => ({ config: null, tokensCss: null })),
   ]);
   const availableLocales = fsClient.config?.features?.languages?.available ?? null;
+  const defaultLocale = fsClient.config?.features?.languages?.default ?? 'en';
   const mapboxToken = fsClient.config?.integraciones?.mapbox_token ?? '';
 
   // systemModules del Kiosk (KV studioConfig) → fuente de la herencia de
@@ -109,6 +110,7 @@ export default async function MobilePwaEditorPage({
       kioskTileLabels={kioskTileLabels}
       kioskIdleBackground={kioskIdleBackground}
       availableLocales={availableLocales}
+      defaultLocale={defaultLocale}
       mapboxToken={mapboxToken}
     />
   );

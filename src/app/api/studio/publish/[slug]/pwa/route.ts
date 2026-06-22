@@ -58,6 +58,18 @@ export async function POST(req: Request, { params }: RouteParams) {
   const url = new URL(req.url);
   const dryRun = url.searchParams.get('dryRun') === '1';
   const requestedMode = url.searchParams.get('mode') as PublishMode | null;
+  // Idiomas a publicar (overlay i18n de la PWA). Ausente = publicar todos. El
+  // locale base NO vive en el overlay (es el propio slice) → siempre se publica.
+  const localesParam = url.searchParams.get('locales');
+  const publishLocales =
+    localesParam !== null
+      ? new Set(
+          localesParam
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean),
+        )
+      : null;
 
   if (!STUDIO_SLUG_REGEX.test(slug)) {
     return NextResponse.json({ error: 'Invalid slug' }, { status: 400 });
@@ -136,6 +148,17 @@ export async function POST(req: Request, { params }: RouteParams) {
         pwaModuleVisibility: slice.moduleVisibility ?? null,
       }),
     };
+
+    // Selector de idiomas: si el operador eligió un subconjunto, el overlay i18n
+    // publicado se filtra a esos locales (el base ya va en el slice). Sin selección
+    // se publican todos (comportamiento histórico).
+    if (publishLocales && slice.i18n) {
+      const filtered: Record<string, Record<string, string>> = {};
+      for (const [locale, overlay] of Object.entries(slice.i18n)) {
+        if (publishLocales.has(locale)) filtered[locale] = overlay;
+      }
+      bakedSlice.i18n = filtered;
+    }
 
     const configPath = path.join(process.cwd(), 'clients', slug, 'config.json');
     const repoPath = path.relative(process.cwd(), configPath).replaceAll(path.sep, '/');

@@ -107,6 +107,7 @@ export function PwaShell({
   kioskTileLabels,
   kioskIdleBackground,
   availableLocales,
+  defaultLocale,
   mapboxToken,
 }: {
   slug: string;
@@ -143,6 +144,9 @@ export function PwaShell({
   /** Idiomas que ofrece el cliente (`features.languages.available`) para el
    *  editor i18n (F-PWA-7). `null` → el editor usa su lista por defecto. */
   availableLocales: string[] | null;
+  /** Locale base/default del cliente (`features.languages.default`) — siempre se
+   *  publica; el selector de idiomas del modal no lo deja deseleccionar. */
+  defaultLocale: string;
   /** Token Mapbox del cliente (`integraciones.mapbox_token`) para los pickers de
    *  coords de Scavenger/Wayfinding. '' si no está configurado. */
   mapboxToken: string;
@@ -459,6 +463,8 @@ export function PwaShell({
           onClose={() => setPublishOpen(false)}
           currentVersion={meta?.currentVersion ?? 0}
           product="pwa"
+          pwaLocales={availableLocales ?? undefined}
+          pwaDefaultLocale={defaultLocale}
         />
       </div>
     </StudioSlugProvider>

@@ -429,11 +429,14 @@ export interface PwaPublishResult {
 /** Publica solo `features.pwa` (fs en dev, PR en producción). */
 export async function publishPwaSlice(
   slug: string,
-  options: { dryRun?: boolean; mode?: 'fs' | 'pr' } = {},
+  options: { dryRun?: boolean; mode?: 'fs' | 'pr'; locales?: string[] } = {},
 ): Promise<PwaPublishResult> {
   const params = new URLSearchParams();
   if (options.dryRun) params.set('dryRun', '1');
   if (options.mode) params.set('mode', options.mode);
+  // Idiomas a publicar (overlay i18n de la PWA). Ausente = todos. El locale base
+  // siempre va (es el propio slice). El backend filtra `features.pwa.i18n`.
+  if (options.locales) params.set('locales', options.locales.join(','));
   const qs = params.toString() ? `?${params.toString()}` : '';
   return http<PwaPublishResult>(`/api/studio/publish/${slug}/pwa${qs}`, { method: 'POST' });
 }

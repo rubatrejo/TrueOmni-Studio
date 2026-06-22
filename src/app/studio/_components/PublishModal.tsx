@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   AlertCircle,
+  Check,
   CheckCircle2,
   ExternalLink,
   FileText,
@@ -15,8 +16,10 @@ import {
   Upload,
   X,
 } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+
+import { LOCALE_LABELS } from '@/lib/i18n';
 
 import {
   publishPwaSlice,
@@ -43,6 +46,13 @@ interface PublishModalProps {
    *  `/publish/[slug]/pwa`. El modal (diff, fs/PR, approval gate, export) es
    *  idéntico — solo cambia el endpoint y un par de copys. */
   product?: 'kiosk' | 'pwa';
+  /** Solo `product='pwa'`: idiomas del cliente (`features.languages.available`)
+   *  para el selector de idiomas a publicar. El operador elige cuáles incluir;
+   *  el backend filtra el overlay `features.pwa.i18n`. */
+  pwaLocales?: string[];
+  /** Locale base/default — siempre se publica (es el propio slice), no se puede
+   *  deseleccionar en el selector. */
+  pwaDefaultLocale?: string;
 }
 
 type Phase = 'preview' | 'preview-loading' | 'publishing' | 'done' | 'error';
@@ -54,14 +64,47 @@ export function PublishModal({
   currentVersion = 0,
   editor = 'ruben@trueomni.com',
   product = 'kiosk',
+  pwaLocales,
+  pwaDefaultLocale,
 }: PublishModalProps) {
+  // Selector de idiomas (solo PWA). El locale base/default siempre se publica
+  // (es el propio slice); el operador togglea el resto.
+  const defaultLocale = pwaDefaultLocale ?? pwaLocales?.[0] ?? 'en';
+  const allLocalesKey = (pwaLocales ?? []).join(',');
+  const toggleableLocales = useMemo(
+    () => (pwaLocales ?? []).filter((l) => l !== defaultLocale),
+    [allLocalesKey, defaultLocale], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const showLocaleSelector = product === 'pwa' && toggleableLocales.length > 0;
+  // Locales seleccionados a publicar (incluye SIEMPRE el base). Init = todos.
+  const [selectedLocales, setSelectedLocales] = useState<Set<string>>(
+    () => new Set(pwaLocales ?? []),
+  );
+  // Reset al reabrir o si cambia la lista de idiomas del cliente.
+  useEffect(() => {
+    setSelectedLocales(new Set(allLocalesKey ? allLocalesKey.split(',') : []));
+  }, [allLocalesKey, open]);
+  const toggleLocale = (loc: string) =>
+    setSelectedLocales((prev) => {
+      const next = new Set(prev);
+      if (next.has(loc)) next.delete(loc);
+      else next.add(loc);
+      return next;
+    });
+
   // Endpoint según producto. Ambos comparten firma `(slug, {dryRun, mode})` y
   // forma de respuesta (`files`/`mode`/`written`/`pr`), así que el resto del
-  // modal es agnóstico al producto.
+  // modal es agnóstico al producto. En PWA pasa los locales elegidos (filtra el
+  // overlay i18n); cambiar la selección re-corre el dry-run (diff actualizado).
   const runPublish = useCallback(
     (opts: { dryRun?: boolean }) =>
-      product === 'pwa' ? publishPwaSlice(slug, opts) : publishToFilesystem(slug, opts),
-    [product, slug],
+      product === 'pwa'
+        ? publishPwaSlice(slug, {
+            ...opts,
+            locales: showLocaleSelector ? [...selectedLocales] : undefined,
+          })
+        : publishToFilesystem(slug, opts),
+    [product, slug, showLocaleSelector, selectedLocales],
   );
   const [phase, setPhase] = useState<Phase>('preview-loading');
   const [files, setFiles] = useState<PublishFileChange[]>([]);
@@ -228,6 +271,57 @@ export function PublishModal({
             </div>
 
             <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
+              {showLocaleSelector ? (
+                <div className="rounded-md border border-zinc-200 bg-zinc-50/60 px-3 py-2.5 dark:border-zinc-800 dark:bg-zinc-900/40">
+                  <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                    Languages to publish
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {/* Base/default: siempre se publica (es el propio slice). */}
+                    <span className="inline-flex items-center gap-1 rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11.5px] font-medium text-sky-800 dark:border-sky-900/50 dark:bg-sky-950/40 dark:text-sky-200">
+                      {LOCALE_LABELS[defaultLocale] ?? defaultLocale}
+                      <span className="text-[9.5px] uppercase opacity-70">default</span>
+                    </span>
+                    {toggleableLocales.map((loc) => {
+                      const on = selectedLocales.has(loc);
+                      const locked = phase === 'publishing' || phase === 'done';
+                      return (
+                        <button
+                          key={loc}
+                          type="button"
+                          role="checkbox"
+                          aria-checked={on}
+                          disabled={locked}
+                          onClick={() => toggleLocale(loc)}
+                          className={
+                            'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11.5px] font-medium transition disabled:opacity-50 ' +
+                            (on
+                              ? 'border-sky-300 bg-sky-50 text-sky-800 dark:border-sky-900/50 dark:bg-sky-950/40 dark:text-sky-200'
+                              : 'border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-400')
+                          }
+                        >
+                          <span
+                            className={
+                              'grid h-3.5 w-3.5 place-items-center rounded-[3px] border text-white ' +
+                              (on
+                                ? 'border-sky-500 bg-sky-500'
+                                : 'border-zinc-300 dark:border-zinc-600')
+                            }
+                          >
+                            {on ? <Check className="h-2.5 w-2.5" /> : null}
+                          </span>
+                          {LOCALE_LABELS[loc] ?? loc}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="mt-1.5 text-[10.5px] text-zinc-400 dark:text-zinc-600">
+                    Unchecked languages keep their kiosk/base text in the published app (their PWA
+                    translations are left out).
+                  </p>
+                </div>
+              ) : null}
+
               {phase === 'preview-loading' ? (
                 <div className="flex items-center justify-center gap-2 py-12 text-[12px] text-zinc-500">
                   <Loader2 className="h-4 w-4 animate-spin" />

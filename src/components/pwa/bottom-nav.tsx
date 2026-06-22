@@ -90,3 +90,31 @@ export function PwaBottomNav({ active }: { active?: PwaNavKey }) {
     </Layer>
   );
 }
+
+/**
+ * Bottom nav del producto **Tablet**: mismo contenido y destinos que `PwaBottomNav`
+ * (reusa `usePwaVisibleNav` + `NAV_ARIA` + iconos) pero a todo el ancho de la
+ * tablet con celdas más altas (reflow). Alto fijo en px (no 375-space) para que
+ * llene el canvas tablet. `iconSize` escala el glifo al nuevo alto.
+ */
+export function PwaBottomNavTablet({ active }: { active?: PwaNavKey }) {
+  const router = useRouter();
+  const nav = usePwaVisibleNav();
+  return (
+    <nav className="flex h-[62px] w-full shrink-0 items-stretch" style={{ backgroundColor: BRAND }}>
+      {nav.map(({ key, Icon, href }) => (
+        <button
+          key={key}
+          type="button"
+          aria-label={NAV_ARIA[key]}
+          aria-current={key === active ? 'page' : undefined}
+          onClick={() => href && router.push(href)}
+          className="flex flex-1 items-center justify-center text-white transition"
+          style={key === active ? { backgroundColor: PWA } : undefined}
+        >
+          <Icon size={26} />
+        </button>
+      ))}
+    </nav>
+  );
+}

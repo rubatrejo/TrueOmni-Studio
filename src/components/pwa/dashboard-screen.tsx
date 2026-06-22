@@ -10,7 +10,8 @@ import { resolvePwaTileRoute } from '@/lib/pwa-routes';
 
 import { PwaBottomNav } from './bottom-nav';
 import { NotificationIcon, ProfileIcon, SearchIcon } from './dashboard-icons';
-import { Layer, S } from './mobile-layer';
+import { useDevice } from './device-context';
+import { Layer, useLayerScale } from './mobile-layer';
 import { usePwaModuleVisibility } from './pwa-bridge-context';
 
 interface DashboardScreenProps {
@@ -90,6 +91,10 @@ export function DashboardScreen({
   const tileOverlayAlpha = tileOverlayOpacity == null ? 0.4 : tileOverlayOpacity / 100;
   const tileTitlePx = TILE_TITLE_SIZE_PX[tileTitleSize ?? 'S'];
   const router = useRouter();
+  const { isTablet } = useDevice();
+  // Escala device-aware del 375-space (phone 1.04; tablet llena el ancho). Se
+  // usa donde el overlap del hero vive FUERA del `Layer` (su marginTop).
+  const layerScale = useLayerScale();
   const { unreadCount } = useNotifications(notifications);
   const logoW = LOGO_SIZE_PX[logoSize ?? 'M'];
   const logoX = 20 + (logoOffset?.x ?? 0);
@@ -169,7 +174,11 @@ export function DashboardScreen({
 
       {/* Hero fijo (tamaño original del XD). Solapa 14px bajo el header (z menor)
           para que el contenido caiga en las coords exactas del XD (foto y96, título y128). */}
-      <Layer h={276} className="shrink-0" style={{ backgroundColor: BRAND, marginTop: -14 * S }}>
+      <Layer
+        h={276}
+        className="shrink-0"
+        style={{ backgroundColor: BRAND, marginTop: -14 * layerScale }}
+      >
         {/* Foto (llena el hero; anclada arriba para que no rebase por la parte superior) */}
         <div
           className="absolute bg-cover bg-top"
@@ -248,9 +257,18 @@ export function DashboardScreen({
         })}
       </Layer>
 
-      {/* Grid de tiles (único que scrollea) */}
+      {/* Grid de tiles (único que scrollea). 2 columnas igual que el PWA; en
+          tablet los tiles son más grandes (alto/espaciado/título) — el grid
+          sigue siendo el real-px del canvas, que en tablet ya es más ancho. */}
       <div className="scrollbar-hide flex-1 overflow-y-auto bg-background">
-        <div className="grid grid-cols-2 gap-4 px-5 pb-5 pt-5">
+        <div
+          className={`grid ${
+            isTablet
+              ? 'mx-auto grid-cols-3 gap-5 px-7 pb-8 pt-6'
+              : 'grid-cols-2 gap-4 px-5 pb-5 pt-5'
+          }`}
+          style={isTablet ? { maxWidth: 375 * 1.62 } : undefined}
+        >
           {tiles
             .filter(
               (t) => t.enabled !== false && !quickAccessKeys.has(t.key) && isModuleVisible(t.key),
@@ -263,9 +281,9 @@ export function DashboardScreen({
                   const dest = resolvePwaTileRoute(t);
                   if (dest) router.push(dest);
                 }}
-                className={`relative h-[125px] overflow-hidden rounded-[6px] bg-cover bg-center ${
-                  t.wide ? 'col-span-2' : ''
-                }`}
+                className={`relative overflow-hidden bg-cover bg-center ${
+                  isTablet ? 'h-[150px] rounded-[12px]' : 'h-[125px] rounded-[6px]'
+                } ${t.wide ? 'col-span-2' : ''}`}
                 style={bg(t.image)}
               >
                 <span
@@ -274,7 +292,7 @@ export function DashboardScreen({
                 />
                 <span
                   className="absolute inset-0 flex items-center justify-center whitespace-pre-line px-3 text-center font-bold leading-tight text-white"
-                  style={{ ...DISPLAY, fontSize: tileTitlePx }}
+                  style={{ ...DISPLAY, fontSize: isTablet ? tileTitlePx * 1.25 : tileTitlePx }}
                 >
                   {t.label}
                 </span>

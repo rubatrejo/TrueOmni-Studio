@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 
 import { I18nProvider } from '@/components/i18n-provider';
 import { PwaAdsProvider } from '@/components/pwa/ads/pwa-ads-context';
+import { DeviceProvider } from '@/components/pwa/device-context';
 import { PwaBridgeProvider } from '@/components/pwa/pwa-bridge-context';
 import { PwaRouteGuard } from '@/components/pwa/pwa-route-guard';
 import { StudioBridge } from '@/components/studio-bridge';
@@ -68,9 +69,11 @@ export default async function PwaLayout({ children }: { children: ReactNode }) {
   return (
     <I18nProvider localesMap={localesMap} defaultLocale={defaultLocale} available={available}>
       <PwaBridgeProvider initial={resolvedPwa}>
-        <PwaRouteGuard />
-        <PwaAdsProvider ads={ads}>{children}</PwaAdsProvider>
-        <StudioBridge />
+        <DeviceProvider>
+          <PwaRouteGuard />
+          <PwaAdsProvider ads={ads}>{children}</PwaAdsProvider>
+          <StudioBridge />
+        </DeviceProvider>
       </PwaBridgeProvider>
     </I18nProvider>
   );

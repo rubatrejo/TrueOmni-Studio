@@ -4,11 +4,8 @@ import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
 import { PwaAdsSlot } from './ads/pwa-ads-slot';
+import { deviceDims, useDevice } from './device-context';
 import { PwaKeyboardProvider } from './pwa-keyboard-provider';
-
-/** Canvas de referencia de la PWA (mobile retrato). Adaptado de artboards XD 375×812. */
-const PWA_WIDTH_PX = 390;
-const PWA_HEIGHT_PX = 844;
 
 /** Padding alrededor del canvas en dev-view (fuera del iframe del Studio). */
 const VIEWPORT_PADDING_X_PX = 48;
@@ -50,6 +47,12 @@ const BRAND = 'hsl(var(--brand-primary))';
  * arrancamos en `embedded=false` (= SSR) y leemos el valor real tras mount.
  */
 export function MobileCanvas({ children }: { children: ReactNode }) {
+  const { device, orientation } = useDevice();
+  // Dimensiones del canvas según el form factor (phone 390×844 intacto; tablet
+  // = dims iPad por orientación). Las pantallas con layout de tablet reflowean
+  // dentro de este canvas; las que aún no, caen al layout phone.
+  const { w: canvasW, h: canvasH } = deviceDims(device, orientation);
+  const isTablet = device === 'tablet';
   const [scale, setScale] = useState(1);
   const [embedded, setEmbedded] = useState(false);
   const [standalone, setStandalone] = useState(false);
@@ -65,13 +68,13 @@ export function MobileCanvas({ children }: { children: ReactNode }) {
     const updateScale = () => {
       const availW = window.innerWidth - VIEWPORT_PADDING_X_PX * 2;
       const availH = window.innerHeight - VIEWPORT_PADDING_Y_PX * 2;
-      setScale(Math.min(availW / PWA_WIDTH_PX, availH / PWA_HEIGHT_PX, 1));
+      setScale(Math.min(availW / canvasW, availH / canvasH, 1));
     };
 
     updateScale();
     window.addEventListener('resize', updateScale);
     return () => window.removeEventListener('resize', updateScale);
-  }, [embedded, standalone]);
+  }, [embedded, standalone, canvasW, canvasH]);
 
   // Modo standalone (PWA instalada en el SO): llena el viewport real y respeta las
   // safe-areas de iOS (notch / Dynamic Island arriba, home indicator abajo). El padding
@@ -92,7 +95,7 @@ export function MobileCanvas({ children }: { children: ReactNode }) {
         <div
           data-pwa-canvas
           className="relative h-full w-full overflow-hidden bg-background text-foreground"
-          style={{ maxWidth: `${PWA_WIDTH_PX}px` }}
+          style={{ maxWidth: `${canvasW}px` }}
         >
           <PwaKeyboardProvider>{children}</PwaKeyboardProvider>
           <PwaAdsSlot />
@@ -101,13 +104,13 @@ export function MobileCanvas({ children }: { children: ReactNode }) {
     );
   }
 
-  // Modo embedded (iframe): canvas a 390×844 reales, ocupando el iframe.
+  // Modo embedded (iframe): canvas a tamaño real del device, ocupando el iframe.
   if (embedded) {
     return (
       <div
         data-pwa-canvas
         className="relative overflow-hidden bg-background text-foreground"
-        style={{ width: `${PWA_WIDTH_PX}px`, height: `${PWA_HEIGHT_PX}px` }}
+        style={{ width: `${canvasW}px`, height: `${canvasH}px` }}
       >
         <PwaKeyboardProvider>{children}</PwaKeyboardProvider>
         <PwaAdsSlot />
@@ -121,13 +124,15 @@ export function MobileCanvas({ children }: { children: ReactNode }) {
       className="fixed inset-0 flex items-center justify-center overflow-hidden bg-zinc-100 dark:bg-zinc-900"
       style={{ padding: VIEWPORT_PADDING_Y_PX }}
     >
-      <div style={{ width: PWA_WIDTH_PX * scale, height: PWA_HEIGHT_PX * scale }}>
+      <div style={{ width: canvasW * scale, height: canvasH * scale }}>
         <div
           data-pwa-canvas
-          className="relative overflow-hidden rounded-[44px] bg-background text-foreground shadow-2xl"
+          className={`relative overflow-hidden bg-background text-foreground shadow-2xl ${
+            isTablet ? 'rounded-[28px]' : 'rounded-[44px]'
+          }`}
           style={{
-            width: `${PWA_WIDTH_PX}px`,
-            height: `${PWA_HEIGHT_PX}px`,
+            width: `${canvasW}px`,
+            height: `${canvasH}px`,
             transform: `scale(${scale})`,
             transformOrigin: 'top left',
           }}

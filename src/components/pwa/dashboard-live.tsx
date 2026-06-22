@@ -3,6 +3,8 @@
 import type { PwaDashboardConfig, PwaNotification } from '@/lib/config';
 
 import { DashboardScreen } from './dashboard-screen';
+import { DashboardScreenTablet } from './dashboard-screen-tablet';
+import { useDevice } from './device-context';
 import { usePwaSection } from './pwa-bridge-context';
 
 /**
@@ -21,6 +23,25 @@ export function DashboardLive({
   notifications: PwaNotification[];
 }) {
   const d = usePwaSection('dashboard', dashboard) ?? dashboard;
+  const { isTablet } = useDevice();
+
+  // Tablet: layout a medida full-width (mismo lenguaje visual del PWA, tamaños
+  // cómodos). El phone (pixel-perfect) queda intacto.
+  if (isTablet) {
+    return (
+      <DashboardScreenTablet
+        logoAlt={logoAlt}
+        heroTitle={d.heroTitle}
+        heroImage={d.heroImage}
+        quickAccess={d.quickAccess}
+        tiles={d.tiles}
+        notifications={notifications}
+        tileOverlayOpacity={d.tileOverlayOpacity}
+        tileTitleSize={d.tileTitleSize}
+      />
+    );
+  }
+
   return (
     <DashboardScreen
       logoAlt={logoAlt}

@@ -4,6 +4,8 @@ import { prewarmAiAvatar } from '@/hooks/use-tavus-conversation';
 import { resolveAssetUrl } from '@/lib/asset-url';
 import { useAiStore } from '@/stores/ai-store';
 
+import { useDevice } from '../device-context';
+
 /** Glifo "sparkles" (fallback si el cliente no configuró avatar). */
 function SparklesIcon({ size = 26 }: { size?: number }) {
   return (
@@ -33,6 +35,7 @@ export function PwaAskAiTrigger({
   avatarSrc?: string;
 }) {
   const open = useAiStore((s) => s.open);
+  const { isTablet } = useDevice();
   // Pre-warm la conversación Tavus al tocar el FAB (antes del open) para que el
   // conversation_url esté casi listo cuando el modal monta.
   const prewarm = () => prewarmAiAvatar(clientName);
@@ -52,7 +55,8 @@ export function PwaAskAiTrigger({
         <img
           src={resolveAssetUrl(avatarSrc)}
           alt={ariaLabel}
-          className="block h-[58px] w-auto drop-shadow-lg"
+          // Tablet: +30% (58 → 75px) por petición.
+          className={`block w-auto drop-shadow-lg ${isTablet ? 'h-[75px]' : 'h-[58px]'}`}
         />
       </button>
     );
@@ -69,12 +73,12 @@ export function PwaAskAiTrigger({
       style={{
         right: 16,
         bottom: 72,
-        width: 67,
-        height: 67,
+        width: isTablet ? 87 : 67,
+        height: isTablet ? 87 : 67,
         backgroundColor: 'hsl(var(--brand-secondary))',
       }}
     >
-      <SparklesIcon size={31} />
+      <SparklesIcon size={isTablet ? 40 : 31} />
     </button>
   );
 }

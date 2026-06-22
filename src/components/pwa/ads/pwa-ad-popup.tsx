@@ -4,6 +4,8 @@ import { AdCloseButton } from '@/components/ads/ad-close-button';
 import { useImageCornerTheme } from '@/components/ads/use-image-corner-theme';
 import type { Ad } from '@/lib/config';
 
+import { useDevice } from '../device-context';
+
 /**
  * Popup ad PWA — interstitial bloqueante centrado dentro del canvas 390. Backdrop
  * `rgba(0,0,0,0.75)`, z-80 (sobre hero/bottom). Solo la X cierra (el backdrop no).
@@ -12,6 +14,7 @@ import type { Ad } from '@/lib/config';
 export function PwaAdPopup({ ad, onDismiss }: { ad: Ad; onDismiss: () => void }) {
   const detected = useImageCornerTheme(ad.image);
   const theme = ad.theme ?? detected;
+  const { isTablet } = useDevice();
   return (
     <div
       role="dialog"
@@ -22,7 +25,11 @@ export function PwaAdPopup({ ad, onDismiss }: { ad: Ad; onDismiss: () => void })
     >
       <div
         className="relative overflow-hidden rounded-[16px]"
-        style={{ maxWidth: 340, maxHeight: '86%', boxShadow: '0 16px 40px rgba(0,0,0,0.45)' }}
+        style={{
+          maxWidth: isTablet ? 560 : 340,
+          maxHeight: '86%',
+          boxShadow: '0 16px 40px rgba(0,0,0,0.45)',
+        }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -32,7 +39,12 @@ export function PwaAdPopup({ ad, onDismiss }: { ad: Ad; onDismiss: () => void })
           className="block"
           style={{ display: 'block', height: 'auto', maxWidth: '100%' }}
         />
-        <AdCloseButton theme={theme} size={38} style={{ top: 12, right: 12 }} onClick={onDismiss} />
+        <AdCloseButton
+          theme={theme}
+          size={isTablet ? 48 : 38}
+          style={{ top: 12, right: 12 }}
+          onClick={onDismiss}
+        />
       </div>
     </div>
   );

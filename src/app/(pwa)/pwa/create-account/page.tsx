@@ -1,6 +1,7 @@
 import { CreateAccountScreenLive } from '@/components/pwa/create-account-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
+import { resolvePwaConfigImages } from '@/lib/pwa-image-inheritance';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,8 +33,13 @@ export default async function PwaCreateAccountPage() {
   const pwa = config.features?.pwa;
   const ca = pwa?.createAccount;
   const texts = ca ?? FALLBACK;
+  // Mismo fondo heredado que Login/Welcome: la cadena login → welcome → idle del
+  // kiosk se resuelve LIVE (ver el helper). Sin esto el flujo caía al placeholder.
+  const resolvedPwa = resolvePwaConfigImages(config);
   const background =
-    pwa?.login?.background ?? pwa?.welcome?.background ?? 'assets/pwa/welcome-bg.jpg';
+    resolvedPwa?.login?.background ??
+    resolvedPwa?.welcome?.background ??
+    'assets/pwa/welcome-bg.jpg';
 
   return (
     <MobileCanvas>

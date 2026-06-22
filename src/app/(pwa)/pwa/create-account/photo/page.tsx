@@ -1,6 +1,7 @@
 import { CreateAccountPhotoScreenLive } from '@/components/pwa/create-account-photo-screen-live';
 import { MobileCanvas } from '@/components/pwa/mobile-canvas';
 import { getConfig } from '@/lib/config';
+import { resolvePwaConfigImages } from '@/lib/pwa-image-inheritance';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,8 +31,12 @@ export default async function PwaCreateAccountPhotoPage({
   const config = await getConfig();
   const pwa = config.features?.pwa;
   const photo = pwa?.createAccount?.photo ?? FALLBACK;
+  // Mismo fondo heredado que Login/Welcome (login → welcome → idle del kiosk).
+  const resolvedPwa = resolvePwaConfigImages(config);
   const background =
-    pwa?.login?.background ?? pwa?.welcome?.background ?? 'assets/pwa/welcome-bg.jpg';
+    resolvedPwa?.login?.background ??
+    resolvedPwa?.welcome?.background ??
+    'assets/pwa/welcome-bg.jpg';
 
   const sp = await searchParams;
   const rawName = Array.isArray(sp?.name) ? sp.name[0] : sp?.name;

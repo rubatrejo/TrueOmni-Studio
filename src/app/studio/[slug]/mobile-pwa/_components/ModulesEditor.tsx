@@ -215,6 +215,40 @@ export function ModulesEditor({
               </button>
             ) : null}
           </div>
+          {/* Tamaño de la tipografía del título de los tiles. Default 'S' = 15px
+              (verbatim del XD); M/L/XL agrandan. Mismo look que el selector de
+              tamaño del logo, para consistencia con el resto del editor PWA. */}
+          <div>
+            <span className="mb-1 block text-[12px] font-medium text-zinc-600 dark:text-zinc-400">
+              Title size
+            </span>
+            <div
+              role="radiogroup"
+              aria-label="Tile title size"
+              className="inline-flex rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-800 dark:bg-zinc-900/40"
+            >
+              {(['S', 'M', 'L', 'XL'] as const).map((s) => {
+                const active = (v.tileTitleSize ?? 'S') === s;
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    onClick={() => onChange({ ...v, tileTitleSize: s })}
+                    className={
+                      'rounded-md px-3.5 py-1 text-[11.5px] font-semibold transition ' +
+                      (active
+                        ? 'bg-sky-500 text-white shadow-sm'
+                        : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/40')
+                    }
+                  >
+                    {s}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </PwaGroup>
 
         {/* Dashboard tiles — misma UI que el editor del kiosk (drag · rename ·

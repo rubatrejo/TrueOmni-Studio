@@ -27,6 +27,8 @@ interface DashboardScreenProps {
   /** Opacidad (0–100 %) de la capa oscura sobre la foto de cada tile. Si
    *  `undefined`, default 40 % (negro) — el look verbatim del XD. */
   tileOverlayOpacity?: number;
+  /** Tamaño de la tipografía del título de los tiles (default 'S' = 15px). */
+  tileTitleSize?: 'S' | 'M' | 'L' | 'XL';
 }
 
 /** Ancho del logo del header por tamaño (px). 'M' = 154 (verbatim del XD).
@@ -38,6 +40,15 @@ const LOGO_SIZE_PX: Record<'XS' | 'S' | 'M' | 'L' | 'XL', number> = {
   M: 123,
   L: 190,
   XL: 230,
+};
+
+/** Tamaño de fuente del título de los tiles del grid (px). 'S' = 15 (verbatim
+ *  del XD); M/L/XL agrandan para clientes que lo necesiten. */
+const TILE_TITLE_SIZE_PX: Record<'S' | 'M' | 'L' | 'XL', number> = {
+  S: 15,
+  M: 18,
+  L: 22,
+  XL: 26,
 };
 
 const BRAND = 'hsl(var(--brand-primary))';
@@ -73,9 +84,11 @@ export function DashboardScreen({
   logoSize,
   logoOffset,
   tileOverlayOpacity,
+  tileTitleSize,
 }: DashboardScreenProps) {
   // Default 40 % (negro) = look verbatim del XD; con valor → value/100.
   const tileOverlayAlpha = tileOverlayOpacity == null ? 0.4 : tileOverlayOpacity / 100;
+  const tileTitlePx = TILE_TITLE_SIZE_PX[tileTitleSize ?? 'S'];
   const router = useRouter();
   const { unreadCount } = useNotifications(notifications);
   const logoW = LOGO_SIZE_PX[logoSize ?? 'M'];
@@ -260,8 +273,8 @@ export function DashboardScreen({
                   style={{ backgroundColor: `rgba(0,0,0,${tileOverlayAlpha})` }}
                 />
                 <span
-                  className="absolute inset-0 flex items-center justify-center whitespace-pre-line px-3 text-center text-[15px] font-bold leading-tight text-white"
-                  style={DISPLAY}
+                  className="absolute inset-0 flex items-center justify-center whitespace-pre-line px-3 text-center font-bold leading-tight text-white"
+                  style={{ ...DISPLAY, fontSize: tileTitlePx }}
                 >
                   {t.label}
                 </span>

@@ -927,6 +927,11 @@ export interface PwaDashboardConfig {
    *  opacidad es editable; el color (negro) no. Análogo al `tileOverlayOpacity`
    *  del Home del kiosk, pero independiente por producto. */
   tileOverlayOpacity?: number;
+  /** Tamaño de la tipografía del título de los tiles del grid. Si `undefined`,
+   *  el runtime usa el default ('S' = 15px, verbatim del XD). El editor ofrece
+   *  S/M/L/XL para agrandarla. Independiente del `tileTitleFontSize` (px) del
+   *  Home del kiosk. */
+  tileTitleSize?: 'S' | 'M' | 'L' | 'XL';
 }
 
 /** Ítem de la lista del More Menu. */

@@ -12,6 +12,7 @@ import { getClientSlug } from '@/lib/client-env';
 import { getConfig } from '@/lib/config';
 import { loadAllLocales } from '@/lib/i18n-server';
 import { resolvePwaForLocale } from '@/lib/pwa-i18n';
+import { pwaImageSourcesFromConfig, resolvePwaImages } from '@/lib/pwa-image-inheritance';
 
 /** Cookie que fija el locale del slice PWA resuelto en server (la escribe el selector). */
 const PWA_LOCALE_COOKIE = 'pwa_locale';
@@ -53,7 +54,16 @@ export default async function PwaLayout({ children }: { children: ReactNode }) {
   const cookieLocale = (await cookies()).get(PWA_LOCALE_COOKIE)?.value;
   const activeLocale =
     cookieLocale && available.includes(cookieLocale) ? cookieLocale : defaultLocale;
-  const resolvedPwa = resolvePwaForLocale(config.features?.pwa ?? null, activeLocale);
+  // El slice que alimenta el bridge debe estar resuelto en DOS ejes: locale
+  // (textos traducidos) e IMÁGENES heredadas del Kiosk. Si solo se resuelve el
+  // locale, las pantallas que derivan su imagen vía `usePwaSection` (p. ej.
+  // LoginScreenLive: `liveWelcome.background`) leen el placeholder crudo del seed
+  // y NO heredan el fondo idle del Kiosk. Aplicamos la herencia de imágenes sobre
+  // el slice ya resuelto por locale, con las fuentes del MISMO config de runtime.
+  const localeResolved = resolvePwaForLocale(config.features?.pwa ?? null, activeLocale);
+  const resolvedPwa = localeResolved
+    ? resolvePwaImages(localeResolved, pwaImageSourcesFromConfig(config))
+    : null;
 
   return (
     <I18nProvider localesMap={localesMap} defaultLocale={defaultLocale} available={available}>

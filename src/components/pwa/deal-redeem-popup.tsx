@@ -65,7 +65,7 @@ export function DealRedeemPopup({
 
       {/* Card centrado */}
       <div
-        className="pwa-sheet-up-anim relative flex max-h-[85%] w-[calc(100%-40px)] flex-col overflow-hidden rounded-[20px] shadow-2xl"
+        className="pwa-sheet-up-anim relative flex max-h-[85%] w-[calc(100%-40px)] max-w-[400px] flex-col overflow-hidden rounded-[20px] shadow-2xl"
         style={{ backgroundColor: 'hsl(var(--pwa-sheet-bg))' }}
       >
         <div className="scrollbar-hide flex-1 overflow-y-auto">

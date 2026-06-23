@@ -7,6 +7,7 @@ import type { PwaTripPlannerModuleConfig } from '@/lib/config';
 import type { UseItineraryRailResult } from '@/lib/itinerary-favorites';
 
 import { SearchIcon } from '../dashboard-icons';
+import { useDevice } from '../device-context';
 import { Layer, S } from '../mobile-layer';
 
 import { TpCategoryMenu } from './tp-category-menu';
@@ -33,6 +34,7 @@ export function TpListView({
   onOpenMyPlan: () => void;
 }) {
   const router = useRouter();
+  const { isTablet } = useDevice();
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeCat, setActiveCat] = useState('things-to-do');
   const [selectedDay, setSelectedDay] = useState(1);
@@ -42,7 +44,18 @@ export function TpListView({
   const headerTitle = isLocal ? tp.menu.localListings : (category?.label ?? tp.title);
   const distanceTemplate = textos.itinerary_distance_away ?? '{n} mi away';
 
-  const headerH = 90 * S;
+  // Header chrome a tamaño dashboard en tablet (64px), 375-space escalado en phone.
+  const headerH = isTablet ? 64 : 90 * S;
+
+  const hamburgerIcon = menuOpen ? (
+    <svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+      <path d="M5 5l14 14M19 5L5 19" stroke="white" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  ) : (
+    <svg width={26} height={22} viewBox="0 0 24 20" fill="none">
+      <path d="M2 2h20M2 10h20M2 18h20" stroke="white" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
 
   const localInPlan = (ll: TpLocalListing) =>
     ll.stops.length > 0 && ll.stops.every((s) => rail.has(s.slug, s.kind));
@@ -53,46 +66,82 @@ export function TpListView({
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-background">
-      {/* Header: hamburguesa + título + search */}
-      <Layer h={90} className="relative z-10 shrink-0" style={{ backgroundColor: BRAND }}>
-        <button
-          type="button"
-          aria-label="Menu"
-          onClick={() => setMenuOpen((o) => !o)}
-          className="absolute text-white"
-          style={{ left: 18, top: 46 }}
+      {/* Header: hamburguesa + título + search. En tablet va full-width a tamaño
+          dashboard (iconos a los bordes con gap); en phone, 375-space escalado. */}
+      {isTablet ? (
+        <header
+          className="relative z-10 flex shrink-0 items-center px-8"
+          style={{ height: 64, backgroundColor: BRAND }}
         >
-          {menuOpen ? (
-            <svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-              <path d="M5 5l14 14M19 5L5 19" stroke="white" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          ) : (
-            <svg width={24} height={20} viewBox="0 0 24 20" fill="none">
-              <path
-                d="M2 2h20M2 10h20M2 18h20"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          )}
-        </button>
-        <div
-          className="pointer-events-none absolute text-center font-bold text-white"
-          style={{ left: 60, top: 53, width: 255, fontSize: 17, ...OPEN_SANS }}
-        >
-          {headerTitle}
-        </div>
-        <button
-          type="button"
-          aria-label="Search"
-          onClick={() => router.push('/pwa/search')}
-          className="absolute text-white"
-          style={{ right: 18, top: 48 }}
-        >
-          <SearchIcon size={20} />
-        </button>
-      </Layer>
+          <button
+            type="button"
+            aria-label="Menu"
+            onClick={() => setMenuOpen((o) => !o)}
+            className="text-white"
+          >
+            {hamburgerIcon}
+          </button>
+          <div
+            className="pointer-events-none absolute left-1/2 -translate-x-1/2 text-center font-bold text-white"
+            style={{ fontSize: 22, ...OPEN_SANS }}
+          >
+            {headerTitle}
+          </div>
+          <button
+            type="button"
+            aria-label="Search"
+            onClick={() => router.push('/pwa/search')}
+            className="ml-auto text-white"
+          >
+            <SearchIcon size={24} />
+          </button>
+        </header>
+      ) : (
+        <Layer h={90} className="relative z-10 shrink-0" style={{ backgroundColor: BRAND }}>
+          <button
+            type="button"
+            aria-label="Menu"
+            onClick={() => setMenuOpen((o) => !o)}
+            className="absolute text-white"
+            style={{ left: 18, top: 46 }}
+          >
+            {menuOpen ? (
+              <svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M5 5l14 14M19 5L5 19"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+            ) : (
+              <svg width={24} height={20} viewBox="0 0 24 20" fill="none">
+                <path
+                  d="M2 2h20M2 10h20M2 18h20"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+            )}
+          </button>
+          <div
+            className="pointer-events-none absolute text-center font-bold text-white"
+            style={{ left: 60, top: 53, width: 255, fontSize: 17, ...OPEN_SANS }}
+          >
+            {headerTitle}
+          </div>
+          <button
+            type="button"
+            aria-label="Search"
+            onClick={() => router.push('/pwa/search')}
+            className="absolute text-white"
+            style={{ right: 18, top: 48 }}
+          >
+            <SearchIcon size={20} />
+          </button>
+        </Layer>
+      )}
 
       {/* Lista scrollable (bg navy → separa cards) */}
       <div className="scrollbar-hide flex min-h-0 flex-1 flex-col gap-[3px] overflow-y-auto">
@@ -166,6 +215,7 @@ export function TpListView({
               }}
               selectedDay={selectedDay}
               onSelectDay={setSelectedDay}
+              large={isTablet}
             />
           </div>
         </>

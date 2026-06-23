@@ -8,7 +8,9 @@ import type { BrochureItem, PwaDigitalBrochureModuleConfig } from '@/lib/config'
 
 import { PwaBottomNav } from './bottom-nav';
 import { SearchIcon } from './dashboard-icons';
+import { useDevice } from './device-context';
 import { S } from './mobile-layer';
+import { PwaListTabletHeader } from './pwa-list-tablet-header';
 import { PwaSubHeader } from './pwa-sub-header';
 
 const BRAND = 'hsl(var(--brand-primary))';
@@ -64,6 +66,7 @@ export function BrochuresListScreen({
   brochures: BrochureItem[];
 }) {
   const router = useRouter();
+  const { isTablet } = useDevice();
   const [category, setCategory] = useState<string>('all');
   const [query, setQuery] = useState('');
 
@@ -81,56 +84,63 @@ export function BrochuresListScreen({
 
   const tabs = ['all', ...categories];
 
+  // Search bar reutilizado en ambos layouts (phone 375-space / tablet full-width).
+  const searchBar = (
+    <div
+      className="flex items-center gap-2 rounded-full px-[14px] text-white"
+      style={{ height: isTablet ? 44 : 38, backgroundColor: 'hsl(0 0% 100% / 0.25)' }}
+    >
+      <SearchIcon size={isTablet ? 18 : 15} className="shrink-0" />
+      <input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder={texts.searchPlaceholder}
+        className="h-full flex-1 bg-transparent text-white outline-none placeholder:text-white/70"
+        style={{ fontFamily: OPEN_SANS, fontSize: isTablet ? 17 : 15 }}
+      />
+      {query.trim() ? (
+        <button
+          type="button"
+          aria-label="Clear"
+          onClick={() => setQuery('')}
+          className="text-xl leading-none text-white/70"
+        >
+          ×
+        </button>
+      ) : null}
+    </div>
+  );
+
   return (
     <div className="relative flex h-full w-full flex-col bg-background">
       {/* Header brand (mismo patrón que ListingsListScreen): back + título +
-          search bar donde va el segmented "Listings/Map". */}
-      <div
-        className="relative z-10 shrink-0"
-        style={{ height: HEADER_H * S, backgroundColor: BRAND }}
-      >
+          search bar. Tablet = full-width compartido; phone = 375-space escalado. */}
+      {isTablet ? (
+        <PwaListTabletHeader title={texts.title} onBack={() => router.push('/pwa/more')}>
+          {searchBar}
+        </PwaListTabletHeader>
+      ) : (
         <div
-          className="absolute left-0 top-0"
-          style={{
-            width: 375,
-            height: HEADER_H,
-            transform: `scale(${S})`,
-            transformOrigin: 'top left',
-          }}
+          className="relative z-10 shrink-0"
+          style={{ height: HEADER_H * S, backgroundColor: BRAND }}
         >
-          <PwaSubHeader title={texts.title} />
-          {/* Search bar (sustituye al segmented Listings/Map del listings screen) */}
           <div
-            className="absolute flex items-center gap-2 rounded-full px-[14px] text-white"
+            className="absolute left-0 top-0"
             style={{
-              left: 16,
-              top: 100,
-              width: 343,
-              height: 38,
-              backgroundColor: 'hsl(0 0% 100% / 0.25)',
+              width: 375,
+              height: HEADER_H,
+              transform: `scale(${S})`,
+              transformOrigin: 'top left',
             }}
           >
-            <SearchIcon size={15} className="shrink-0" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={texts.searchPlaceholder}
-              className="h-full flex-1 bg-transparent text-[15px] text-white outline-none placeholder:text-white/70"
-              style={{ fontFamily: OPEN_SANS }}
-            />
-            {query.trim() ? (
-              <button
-                type="button"
-                aria-label="Clear"
-                onClick={() => setQuery('')}
-                className="text-xl leading-none text-white/70"
-              >
-                ×
-              </button>
-            ) : null}
+            <PwaSubHeader title={texts.title} />
+            {/* Search bar (sustituye al segmented Listings/Map del listings screen) */}
+            <div className="absolute" style={{ left: 16, top: 100, width: 343 }}>
+              {searchBar}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Tabs de categoría */}
       <div

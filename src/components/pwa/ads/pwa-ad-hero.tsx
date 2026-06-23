@@ -7,8 +7,9 @@ import type { Ad } from '@/lib/config';
 /**
  * Hero ad PWA — banner top-fixed dentro del canvas 390. No bloquea. z-70 (sobre el
  * contenido y el header). Cubre la MISMA área que la imagen del hero del Dashboard
- * (390×255) a sangre completa, sin bordes: la imagen (ya recortada, sin margen
- * transparente) se estira al área (`object-fit: fill`). La X la pinta `AdCloseButton`.
+ * (390×255) a sangre completa, sin bordes: la imagen llena el área SIN deformarse
+ * (`object-fit: cover` — recorta el excedente en vez de estirar), tanto en phone
+ * como en tablet. La X la pinta `AdCloseButton`.
  */
 export function PwaAdHero({ ad, onDismiss }: { ad: Ad; onDismiss: () => void }) {
   const detected = useImageCornerTheme(ad.image);
@@ -31,7 +32,7 @@ export function PwaAdHero({ ad, onDismiss }: { ad: Ad; onDismiss: () => void }) 
           width: '100%',
           height: '100%',
           display: 'block',
-          objectFit: 'fill',
+          objectFit: 'cover',
         }}
       />
       <AdCloseButton theme={theme} size={34} style={{ top: 12, right: 12 }} onClick={onDismiss} />

@@ -5,12 +5,14 @@ import { useState } from 'react';
 import type { AiPreferences } from '@/lib/ai-itinerary';
 import type { AiQuestion, PwaTripPlannerModuleConfig } from '@/lib/config';
 
+import { useDevice } from '../device-context';
 import { Layer } from '../mobile-layer';
 import { PwaSubHeader } from '../pwa-sub-header';
 
 import { TpAiQuestion } from './tp-ai-question';
 
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
+const BRAND = 'hsl(var(--brand-primary))';
 
 export function TpAiWizard({
   questions,
@@ -29,6 +31,7 @@ export function TpAiWizard({
   onFinish: (answers: AiPreferences) => void;
   onBack: () => void;
 }) {
+  const { isTablet } = useDevice();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<AiPreferences>({});
 
@@ -50,10 +53,31 @@ export function TpAiWizard({
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-background">
-      {/* Header (sub-header compartido; back propio del wizard) */}
-      <Layer h={90} className="relative z-10 shrink-0">
-        <PwaSubHeader title={title} onBack={back} />
-      </Layer>
+      {/* Header (sub-header compartido; back propio del wizard). En tablet va
+          full-width a tamaño dashboard (en el flujo, no portal) para que el hero
+          de la pregunta no quede tapado/cortado por el hueco del Layer. */}
+      {isTablet ? (
+        <header
+          className="relative z-10 flex shrink-0 items-center px-8"
+          style={{ height: 64, backgroundColor: BRAND }}
+        >
+          <button type="button" aria-label="Back" onClick={back} className="text-white">
+            <svg width={14} height={24} viewBox="0 0 11.87 20.36" fill="#fff" aria-hidden>
+              <path d="M.292,10.946a.975.975,0,0,1,0-1.392L9.537.417a1.456,1.456,0,0,1,2.041,0,1.415,1.415,0,0,1,0,2.016L3.669,10.25l7.909,7.815a1.417,1.417,0,0,1,0,2.017,1.456,1.456,0,0,1-2.041,0Z" />
+            </svg>
+          </button>
+          <div
+            className="pointer-events-none absolute left-1/2 -translate-x-1/2 text-center font-bold text-white"
+            style={{ fontSize: 22, letterSpacing: '-0.024em', ...OPEN_SANS }}
+          >
+            {title}
+          </div>
+        </header>
+      ) : (
+        <Layer h={90} className="relative z-10 shrink-0">
+          <PwaSubHeader title={title} onBack={back} />
+        </Layer>
+      )}
 
       {/* Pregunta */}
       <div className="scrollbar-hide min-h-0 flex-1 overflow-y-auto">
@@ -62,6 +86,7 @@ export function TpAiWizard({
           value={value}
           onChange={(v) => setAnswers((a) => ({ ...a, [q.key]: v }))}
           clientName={clientName}
+          isTablet={isTablet}
         />
       </div>
 

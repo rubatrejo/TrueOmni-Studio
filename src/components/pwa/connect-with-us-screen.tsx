@@ -9,7 +9,9 @@ import type { PwaConnectHoursDay, PwaConnectSocial } from '@/lib/config';
 
 import { PwaBottomNav } from './bottom-nav';
 import { ConnectMap } from './connect-map';
+import { useDevice } from './device-context';
 import { S } from './mobile-layer';
+import { PwaSubHeader } from './pwa-sub-header';
 
 /* Tokens (white-label): cero hex de branding en JSX; `#fff` (3 dígitos) es blanco puro
    y no lo caza el auditor. El rojo del pin vive en `connect-map.tsx` (marcador de mapa). */
@@ -84,8 +86,6 @@ const ICON_DIRECTIONS =
 const ICON_CLOCK =
   'M9.158,18.333a9.167,9.167,0,1,1,9.176-9.167A9.172,9.172,0,0,1,9.158,18.333Zm.009-16.5A7.333,7.333,0,1,0,16.5,9.167,7.342,7.342,0,0,0,9.167,1.833Zm3.9,11.138h0L8.25,10.083v-5.5H9.625V9.4l4.125,2.448-.688,1.126Z';
 const ICON_CHEVRON_RIGHT = 'M0,1.421,1.458,0l6.25,6.088-6.25,6.088L0,10.756,4.792,6.088Z';
-const ICON_BACK =
-  'M.292,10.946a.975.975,0,0,1,0-1.392L9.537.417a1.456,1.456,0,0,1,2.041,0,1.415,1.415,0,0,1,0,2.016L3.669,10.25l7.909,7.815a1.417,1.417,0,0,1,0,2.017,1.456,1.456,0,0,1-2.041,0Z';
 
 interface ConnectWithUsScreenProps {
   title: string;
@@ -127,8 +127,16 @@ export function ConnectWithUsScreen({
   mapboxToken,
 }: ConnectWithUsScreenProps) {
   const router = useRouter();
+  const { isTablet } = useDevice();
   const [hoursOpen, setHoursOpen] = useState(false);
   useEscapeToClose(hoursOpen, () => setHoursOpen(false));
+
+  // En tablet el mapa va más alto; el bloque inferior (dirección + footer) se
+  // empuja hacia abajo por el delta vía un <g transform> (phone = pixel-perfect,
+  // delta 0). MIDDLE_H crece para reservar el alto extra del SVG.
+  const mapH = isTablet ? 360 : MAP_H;
+  const belowDelta = mapH - MAP_H;
+  const middleH = MIDDLE_H + belowDelta;
 
   const open = (url?: string) => {
     if (url) window.open(url, '_blank', 'noopener,noreferrer');
@@ -149,53 +157,31 @@ export function ConnectWithUsScreen({
 
   return (
     <div className="relative flex h-full w-full flex-col bg-background">
-      {/* Header fijo (brand). Status bar del SO no se dibuja. */}
-      <div
-        className="relative z-10 shrink-0"
-        style={{ height: HEADER_H * S, backgroundColor: BRAND }}
-      >
-        <svg
-          width="100%"
-          height={HEADER_H * S}
-          viewBox={`0 0 375 ${HEADER_H}`}
-          xmlns="http://www.w3.org/2000/svg"
+      {/* Header fijo (brand): PwaSubHeader estándar (back + título). En phone va en
+          la caja 375-space escalada; en tablet se renderiza full-width vía portal. */}
+      <div className="relative z-10 shrink-0" style={{ height: HEADER_H * S }}>
+        <div
+          className="absolute left-0 top-0"
+          style={{
+            width: 375,
+            height: HEADER_H,
+            transform: `scale(${S})`,
+            transformOrigin: 'top left',
+          }}
         >
-          <g
-            transform="translate(22.5 55.5)"
-            role="button"
-            aria-label="Back"
-            style={{ cursor: 'pointer' }}
-            onClick={() => router.push('/pwa/more')}
-          >
-            {/* hit-area transparente */}
-            <rect x="-14" y="-12" width="44" height="44" fill="transparent" />
-            <path d={ICON_BACK} fill="#fff" />
-          </g>
-          <text
-            x={187.5}
-            y={72}
-            textAnchor="middle"
-            fill="#fff"
-            style={{
-              fontFamily: OPEN_SANS,
-              fontWeight: 700,
-              fontSize: 17,
-              letterSpacing: '-0.024em',
-            }}
-          >
-            {title}
-          </text>
-        </svg>
+          <PwaSubHeader title={title} onBack={() => router.push('/pwa/more')} />
+        </div>
       </div>
 
       {/* Centro scrollable: SVG estático + overlay del mapa (fuera del scale). */}
       <div className="scrollbar-hide relative flex-1 overflow-y-auto bg-background">
-        <div className="relative" style={{ height: MIDDLE_H * S }}>
+        <div className="relative" style={{ height: middleH * S }}>
           <svg
             className="absolute left-0 top-0"
             width="100%"
-            height={MIDDLE_H * S}
-            viewBox={`0 0 375 ${MIDDLE_H}`}
+            height={middleH * S}
+            viewBox={`0 0 375 ${middleH}`}
+            preserveAspectRatio="xMidYMid meet"
             xmlns="http://www.w3.org/2000/svg"
           >
             {/* Marca omni (brand) */}
@@ -319,65 +305,77 @@ export function ConnectWithUsScreen({
             {/* Hairline bajo la fila de horario (sobre el mapa) */}
             <rect x={0} y={333.985} width={375} height={1.015} fill={HAIRLINE} />
 
-            {/* Dirección */}
-            <text
-              x={18}
-              y={543}
-              fill={FG}
-              style={{ fontFamily: OPEN_SANS, fontWeight: 400, fontSize: 12 }}
-            >
-              {address}
-            </text>
-
-            {/* Copyright (auto-wrap, centrado) */}
-            <foreignObject x={12} y={560} width={351} height={64}>
-              <div
-                style={{
-                  fontFamily: OPEN_SANS,
-                  fontSize: 12,
-                  lineHeight: '17px',
-                  textAlign: 'center',
-                  color: FG,
-                }}
+            {/* Bloque inferior (dirección + footer): se empuja hacia abajo en tablet
+                por `belowDelta` (= mapa más alto). En phone belowDelta=0 → idéntico. */}
+            <g transform={belowDelta ? `translate(0 ${belowDelta})` : undefined}>
+              {/* Dirección */}
+              <text
+                x={18}
+                y={543}
+                fill={FG}
+                style={{ fontFamily: OPEN_SANS, fontWeight: 400, fontSize: 12 }}
               >
-                {copyright}
-              </div>
-            </foreignObject>
+                {address}
+              </text>
 
-            {/* Divider del footer */}
-            <rect x={13} y={633} width={350} height={2} rx={1} fill={FOOTER_DIV} />
+              {/* Copyright (auto-wrap, centrado) */}
+              <foreignObject x={12} y={560} width={351} height={64}>
+                <div
+                  style={{
+                    fontFamily: OPEN_SANS,
+                    fontSize: 12,
+                    lineHeight: '17px',
+                    textAlign: 'center',
+                    color: FG,
+                  }}
+                >
+                  {copyright}
+                </div>
+              </foreignObject>
 
-            {/* Footer del producto (fijo, no white-label) */}
-            <text
-              x={187.5}
-              y={674}
-              textAnchor="middle"
-              fill={FG_MUTED}
-              style={{ fontFamily: OPEN_SANS, fontWeight: 400, fontSize: 10 }}
-            >
-              Designed and built by
-            </text>
-            <foreignObject x={0} y={685} width={375} height={24}>
-              <div style={{ display: 'flex', justifyContent: 'center', color: FG }}>
-                {/* slot="brand" → marca propia TrueOmni, nunca la sobrescribe el Studio */}
-                <TrueOmniLogo className="h-[18px] w-auto" slot="brand" />
-              </div>
-            </foreignObject>
-            <text
-              x={187.5}
-              y={738}
-              textAnchor="middle"
-              fill={FG}
-              style={{ fontFamily: OPEN_SANS, fontWeight: 400, fontSize: 10 }}
-            >
-              trueomni.com
-            </text>
+              {/* Divider del footer */}
+              <rect x={13} y={633} width={350} height={2} rx={1} fill={FOOTER_DIV} />
+
+              {/* Footer del producto (fijo, no white-label) */}
+              <text
+                x={187.5}
+                y={674}
+                textAnchor="middle"
+                fill={FG_MUTED}
+                style={{ fontFamily: OPEN_SANS, fontWeight: 400, fontSize: 10 }}
+              >
+                Designed and built by
+              </text>
+              <foreignObject x={0} y={685} width={375} height={24}>
+                <div style={{ display: 'flex', justifyContent: 'center', color: FG }}>
+                  {/* slot="brand" → marca propia TrueOmni, nunca la sobrescribe el Studio */}
+                  <TrueOmniLogo className="h-[18px] w-auto" slot="brand" />
+                </div>
+              </foreignObject>
+              <text
+                x={187.5}
+                y={738}
+                textAnchor="middle"
+                fill={FG}
+                style={{ fontFamily: OPEN_SANS, fontWeight: 400, fontSize: 10 }}
+              >
+                trueomni.com
+              </text>
+            </g>
           </svg>
 
-          {/* Mapa interactivo (overlay HTML, fuera del scale del SVG) */}
+          {/* Mapa interactivo (overlay HTML, fuera del scale del SVG). Más alto en
+              tablet (mapH). El SVG se centra (meet) a 390px; alineamos el mapa a ese
+              mismo ancho y centro para que no quede corrido respecto al contenido. */}
           <div
-            className="absolute left-0 overflow-hidden"
-            style={{ top: MAP_TOP * S, width: '100%', height: MAP_H * S }}
+            className="absolute overflow-hidden"
+            style={{
+              top: MAP_TOP * S,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 375 * S,
+              height: mapH * S,
+            }}
           >
             <ConnectMap token={mapboxToken} coords={coords} className="h-full w-full" />
           </div>

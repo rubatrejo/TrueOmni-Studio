@@ -75,7 +75,7 @@ export function TpWelcomePopup({
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/45 px-5">
       <div
-        className="duration-250 flex w-full flex-col items-center overflow-hidden rounded-[14px] bg-white pb-6 transition-all ease-out"
+        className="duration-250 flex w-full max-w-[400px] flex-col items-center overflow-hidden rounded-[14px] bg-white pb-6 transition-all ease-out"
         style={{
           ...OPEN_SANS,
           opacity: visible ? 1 : 0,

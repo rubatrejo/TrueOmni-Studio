@@ -5478,6 +5478,73 @@ Fase 3 ✅ (parcial: falta 3b F-PWA-5/6); pendiente Fase 4.
 
 ---
 
+### Sesión 2026-06-22 — Producto Tablet portrait: Fase 2 (resto de pantallas) + iteración de feedback
+
+> Contexto: el piloto del Dashboard Tablet portrait quedó en el commit `da0108a` (sin push,
+> Fase 1 incompleta). Esta sesión añade el RESTO de pantallas tablet + 17 issues de feedback
+> visual iterados con Rubén. El STATE venía desfasado (no recogía la fase Tablet); esta entrada
+> la documenta. **Patrón device-aware:** `useDevice()` → `isTablet`; el phone (pixel-perfect XD)
+> NO se toca, se elige variante por device. Verificación visual con `agent-browser` en
+> `/pwa/...?device=tablet&orientation=portrait`.
+
+**Hecho (todo tablet portrait, salvo nota):**
+
+- **Fase 2 — adaptación de pantallas a tablet** (venía sin commitear del corte de luz): headers
+  full-width + grids reflow en listings-grid (categorías), more, connect, passes, in-layer-nav,
+  pwa-sub-header, y trip-planner (list-view, cards, welcome popup).
+- **Profile tablet:** nuevo `profile-screen-tablet.tsx` (layout full-width: hero+avatar centrado,
+  barras de sección, cards en scroll horizontal); `profile-screen-live` elige variante por device.
+- **Header tablet compartido** `pwa-list-tablet-header.tsx` (`PwaListTabletHeader` + `PwaTabletSegmented`):
+  fuente única (back+título+filtro/sort+control), adoptado en listings-list, pwa-map, brochures-list,
+  deals. Arregla el bug del portal (filtro/tabs flotando pequeños en el centro).
+- **Events tablet:** cards en **2 columnas** agrupadas por día (en vez de timeline 1-col con rail).
+- **AI wizard (trip-planner):** header full-width tablet + hero más alto (no se cortaba).
+- **Menú categorías trip-planner:** prop `large` (ancho/texto/iconos mayores en tablet).
+- **Connect With Us:** mapa más alto (182→360) y centrado/alineado al contenido (tablet); el footer
+  del SVG se empuja con un `<g transform>` (phone pixel-perfect intacto, `belowDelta=0`).
+- **Sub-category tiles** (listings-grid): 3-col → **2-col** con cards 200px.
+- **Status bar tablet (+50→40px):** `TABLET_STATUS_INSET` en `device-context`; `MobileCanvas`
+  reserva franja navy arriba (paddingTop + franja que SOLAPA 12px el header para tapar el seam
+  blanco sub-pixel) → cubre TODAS las pantallas de una vez. Portal de `PwaSubHeader` baja al inset.
+- **Quick Access labels (dashboard tablet):** MAYÚSCULAS → sentence case (`REGIONS`→`Regions`).
+- **Popups consistentes (`max-w-[400px]`):** tp-ai-popup, deal-redeem-popup, hunt-welcome-sheet
+  (antes se estiraban a todo el ancho en tablet). El **popup ad** quedó en `width:500` fijo en
+  tablet (el `maxWidth` solo lo dejaba en tamaño nativo; `width:780` quedó enorme).
+- **Ads tablet:** popup +tamaño; hero/bottom `object-fit: cover` (llenan sin estirar). Nota: se
+  probó `contain`+letterbox (token `--pwa-ad-letterbox`, quedó definido pero sin uso) y luego
+  `fill` (estiraba) antes de cerrar en `cover`.
+
+**Verificado:**
+
+- `pnpm typecheck` exit 0 · `validate:configs` 3/3 · `lint` sin issues nuevos en los tocados.
+- Revisión visual `agent-browser` (viewport ~1000×1340) de cada pantalla tablet tras cada fix +
+  **no-regresión phone** (Connect/Events/Listings pixel-perfect intactos; popups/ads sin cambio en
+  phone porque los topes/insets son no-op a 390px).
+
+**Pendiente / siguiente (mañana, feedback de Rubén):**
+
+- Seguir iterando feedback visual de la tablet portrait.
+- **Map view tablet:** el mapa interactivo (`ListingsMap`) se renderiza angosto a la izquierda
+  (no full-width) — reportado como observación, NO arreglado aún.
+- Header de Events en tablet queda un pelín más alto que los demás (su `pt-11` se suma al inset);
+  cosmético, no ajustado.
+- **Tablet Fase 1+2 sigue SIN PUSH** (incompleta: faltan landscape + editor Studio + activación).
+  Commits son locales; no desplegar hasta cerrar la fase.
+
+**Decisiones:**
+
+- Status bar resuelto a nivel `MobileCanvas` (1 constante) en vez de tocar ~8 headers → cobertura
+  universal sin drift.
+- Popup ad: `width` FIJO determinista (no `maxWidth`, que dependía del tamaño nativo del asset).
+- Issue 3 (quick access sentence case) solo en tablet; el dashboard phone es pixel-perfect XD.
+- Commit local sin push por decisión de fase incompleta (heredada de `da0108a`).
+
+**Fase:** Producto Tablet portrait — Fase 1 (Dashboard, `da0108a`) ✅ + Fase 2 (resto de pantallas
+
+- feedback) ✅ local; pendiente landscape + editor Studio + activación. Sin push.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

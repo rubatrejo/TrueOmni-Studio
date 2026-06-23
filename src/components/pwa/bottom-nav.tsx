@@ -9,6 +9,7 @@ import {
   MapNavIcon,
   MoreNavIcon,
 } from './dashboard-icons';
+import { useDevice } from './device-context';
 import { Layer } from './mobile-layer';
 import { usePwaModuleVisibility } from './pwa-bridge-context';
 
@@ -68,8 +69,11 @@ export function usePwaVisibleNav(): typeof PWA_NAV {
  * `active` opcional: las sub-pantallas (p.ej. Connect With Us) lo omiten → sin resaltado.
  */
 export function PwaBottomNav({ active }: { active?: PwaNavKey }) {
+  const { isTablet } = useDevice();
   const router = useRouter();
   const nav = usePwaVisibleNav();
+  // En tablet usamos el nav full-width tamaño dashboard (consistencia del chrome).
+  if (isTablet) return <PwaBottomNavTablet active={active} />;
   return (
     <Layer h={56} className="shrink-0" style={{ backgroundColor: BRAND }}>
       <div className="flex h-full w-full">

@@ -21,7 +21,7 @@ export function TpAiPopup({
       className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 px-6"
       style={OPEN_SANS}
     >
-      <div className="relative w-full rounded-[14px] bg-white px-6 pb-7 pt-7 text-center">
+      <div className="relative mx-auto w-full max-w-[400px] rounded-[14px] bg-white px-6 pb-7 pt-7 text-center">
         <button
           type="button"
           aria-label="Close"

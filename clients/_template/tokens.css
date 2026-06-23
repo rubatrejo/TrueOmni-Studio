@@ -37,6 +37,7 @@
   --pwa-route-pin: 1 78% 55%; /* pin "YOU ARE HERE" de la ruta de Wayfinding */
   --pwa-floorplan-bg: 60 9% 94%; /* fondo del lienzo de floor plan (Wayfinding) */
   --pwa-success: 122 41% 45%; /* verde semántico de proximidad/éxito (check-in geofence) */
+  --pwa-ad-letterbox: 0 0% 8%; /* fondo neutro del letterbox de los ads hero/bottom (contain, no fill) — chrome, igual para todo cliente */
 
   /* ---------------------------------------------------------------------- */
   /*  TOKENS SEMÁNTICOS (consumidos por Tailwind y componentes)             */

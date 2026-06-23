@@ -9,6 +9,7 @@ import { LOCALE_LABELS } from '@/lib/i18n';
 
 import { PwaBottomNav } from './bottom-nav';
 import { NotificationIcon, SearchIcon } from './dashboard-icons';
+import { useDevice } from './device-context';
 import { Layer } from './mobile-layer';
 import { GlobeIcon, PwaLanguageSheet } from './pwa-language-sheet';
 import { PwaSurveyOverlay } from './pwa-survey-overlay';
@@ -59,6 +60,7 @@ export function MoreScreen({
   clientSlug,
 }: MoreScreenProps) {
   const router = useRouter();
+  const { isTablet } = useDevice();
   const [surveyOpen, setSurveyOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
   // Selector de idioma: solo tiene sentido con >1 idioma disponible (D1).
@@ -78,27 +80,47 @@ export function MoreScreen({
 
   return (
     <div className="flex h-full w-full flex-col bg-background">
-      {/* Header: search bar + inbox */}
-      <Layer h={90} className="relative z-10 shrink-0" style={{ backgroundColor: BRAND }}>
-        <div
-          className="absolute flex items-center gap-2 rounded-full px-[14px]"
-          style={{
-            left: 20,
-            top: 46,
-            width: 285,
-            height: 40,
-            backgroundColor: 'hsl(0 0% 100% / 0.25)',
-          }}
+      {/* Header: search bar + inbox. Tablet = full-width a tamaño dashboard. */}
+      {isTablet ? (
+        <header
+          className="relative z-10 flex shrink-0 items-center gap-4 px-8"
+          style={{ height: 64, backgroundColor: BRAND }}
         >
-          <SearchIcon size={15} className="shrink-0 text-white" />
-          <span className="truncate text-white" style={{ fontSize: 15, ...OPEN_SANS }}>
-            {searchPlaceholder}
-          </span>
-        </div>
-        <div className="absolute text-white" style={{ left: 334, top: 54 }}>
-          <NotificationIcon size={24} />
-        </div>
-      </Layer>
+          <div
+            className="flex h-10 flex-1 items-center gap-2 rounded-full px-[14px]"
+            style={{ backgroundColor: 'hsl(0 0% 100% / 0.25)' }}
+          >
+            <SearchIcon size={16} className="shrink-0 text-white" />
+            <span className="truncate text-white" style={{ fontSize: 15, ...OPEN_SANS }}>
+              {searchPlaceholder}
+            </span>
+          </div>
+          <div className="shrink-0 text-white">
+            <NotificationIcon size={24} />
+          </div>
+        </header>
+      ) : (
+        <Layer h={90} className="relative z-10 shrink-0" style={{ backgroundColor: BRAND }}>
+          <div
+            className="absolute flex items-center gap-2 rounded-full px-[14px]"
+            style={{
+              left: 20,
+              top: 46,
+              width: 285,
+              height: 40,
+              backgroundColor: 'hsl(0 0% 100% / 0.25)',
+            }}
+          >
+            <SearchIcon size={15} className="shrink-0 text-white" />
+            <span className="truncate text-white" style={{ fontSize: 15, ...OPEN_SANS }}>
+              {searchPlaceholder}
+            </span>
+          </div>
+          <div className="absolute text-white" style={{ left: 334, top: 54 }}>
+            <NotificationIcon size={24} />
+          </div>
+        </Layer>
+      )}
 
       {/* Banda olive: ubicación + clima */}
       <Layer h={43} className="shrink-0" style={{ backgroundColor: OLIVE }}>

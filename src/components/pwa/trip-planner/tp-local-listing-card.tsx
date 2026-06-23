@@ -2,6 +2,7 @@
 
 import { resolveAssetUrl } from '@/lib/asset-url';
 
+import { useDevice } from '../device-context';
 import { PwaHeart } from '../pwa-heart';
 
 import type { TpLocalListing } from './types';
@@ -24,8 +25,12 @@ export function TpLocalListingCard({
   /** Eyebrow uppercase (ej. label de Local Listings). */
   eyebrow: string;
 }) {
+  const { isTablet } = useDevice();
   return (
-    <div className="relative h-[150px] w-full shrink-0 overflow-hidden" style={OPEN_SANS}>
+    <div
+      className="relative w-full shrink-0 overflow-hidden"
+      style={{ height: isTablet ? 230 : 150, ...OPEN_SANS }}
+    >
       {/* Collage */}
       <div className="absolute inset-0 flex">
         {ll.images.map((img, i) => (

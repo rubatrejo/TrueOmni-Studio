@@ -73,29 +73,45 @@ function Row({
   catKey,
   active,
   onClick,
+  large,
 }: {
   label: string;
   catKey: string;
   active: boolean;
   onClick: () => void;
+  large?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left"
+      className={`flex w-full items-center text-left ${large ? 'gap-3.5 px-6 py-3.5' : 'gap-2.5 px-4 py-2.5'}`}
     >
       <span
-        className="flex h-[22px] w-[22px] items-center justify-center rounded-full"
-        style={{ backgroundColor: 'hsl(var(--brand-secondary))' }}
+        className="flex items-center justify-center rounded-full"
+        style={{
+          backgroundColor: 'hsl(var(--brand-secondary))',
+          width: large ? 32 : 22,
+          height: large ? 32 : 22,
+        }}
       >
-        <svg width={13} height={13} viewBox="0 0 24 24" fill="none" aria-hidden>
+        <svg
+          width={large ? 18 : 13}
+          height={large ? 18 : 13}
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden
+        >
           <CatGlyph catKey={catKey} />
         </svg>
       </span>
       <span
-        className="text-[14px] font-bold"
-        style={{ color: 'hsl(var(--brand-secondary))', opacity: active ? 1 : 0.85 }}
+        className="font-bold"
+        style={{
+          color: 'hsl(var(--brand-secondary))',
+          opacity: active ? 1 : 0.85,
+          fontSize: large ? 18 : 14,
+        }}
       >
         {label}
       </span>
@@ -110,6 +126,7 @@ export function TpCategoryMenu({
   onSelect,
   selectedDay,
   onSelectDay,
+  large,
 }: {
   categories: TpCategory[];
   localListingsLabel: string;
@@ -117,11 +134,13 @@ export function TpCategoryMenu({
   onSelect: (key: string) => void;
   selectedDay: number;
   onSelectDay: (i: number) => void;
+  /** Tablet: menú a tamaño cómodo (ancho/texto/iconos mayores). */
+  large?: boolean;
 }) {
   return (
     <div
-      className="absolute left-0 top-0 z-30 w-[210px] rounded-br-[14px] bg-white py-2 shadow-xl"
-      style={OPEN_SANS}
+      className="absolute left-0 top-0 z-30 rounded-br-[14px] bg-white py-2 shadow-xl"
+      style={{ ...OPEN_SANS, width: large ? 320 : 210 }}
     >
       {categories.map((c) => (
         <div key={c.key}>
@@ -130,6 +149,7 @@ export function TpCategoryMenu({
             catKey={c.key}
             active={active === c.key}
             onClick={() => onSelect(c.key)}
+            large={large}
           />
           {/* Week-strip cuando Events está activo */}
           {c.key === 'events' && active === 'events' && (
@@ -176,6 +196,7 @@ export function TpCategoryMenu({
         catKey="local-listings"
         active={active === 'local-listings'}
         onClick={() => onSelect('local-listings')}
+        large={large}
       />
     </div>
   );

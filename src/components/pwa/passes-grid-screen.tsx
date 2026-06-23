@@ -6,6 +6,7 @@ import { resolveAssetUrl } from '@/lib/asset-url';
 import type { PassItem } from '@/lib/config';
 
 import { PwaBottomNav } from './bottom-nav';
+import { useDevice } from './device-context';
 import { S } from './mobile-layer';
 import { PwaSubHeader } from './pwa-sub-header';
 
@@ -23,6 +24,7 @@ const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
  */
 export function PassesGridScreen({ title, passes }: { title: string; passes: PassItem[] }) {
   const router = useRouter();
+  const { isTablet } = useDevice();
 
   return (
     <div className="relative flex h-full w-full flex-col bg-background">
@@ -45,7 +47,7 @@ export function PassesGridScreen({ title, passes }: { title: string; passes: Pas
             onClick={() => router.push(`/pwa/passes/${p.slug}`)}
             className="relative block w-full overflow-hidden rounded-[8px] bg-cover bg-center text-left"
             style={{
-              height: 144,
+              height: isTablet ? 210 : 144,
               backgroundImage: `url("${resolveAssetUrl(p.cover)}")`,
               boxShadow: '0 8px 20px -10px hsl(0 0% 0% / 0.45)',
             }}

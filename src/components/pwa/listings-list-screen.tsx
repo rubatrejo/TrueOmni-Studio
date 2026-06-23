@@ -9,10 +9,12 @@ import { applyFilters, EMPTY_FILTER, isFilterEmpty, type FilterState } from '@/l
 import type { MapItem } from '@/lib/map-item';
 
 import { PwaBottomNav, type PwaNavKey } from './bottom-nav';
+import { useDevice } from './device-context';
 import { ListingRow, type ListingItem } from './listing-row';
 import { ListingsMap } from './listings-map';
 import { S } from './mobile-layer';
 import { PwaFilterOverlay, type FilterTexts } from './pwa-filter-overlay';
+import { PwaListTabletHeader, PwaTabletSegmented } from './pwa-list-tablet-header';
 import { PwaSubHeader } from './pwa-sub-header';
 
 const BRAND = 'hsl(var(--brand-primary))';
@@ -84,6 +86,7 @@ export function ListingsListScreen({
   initialSubcategory,
 }: Props) {
   const router = useRouter();
+  const { isTablet } = useDevice();
   const [tab, setTab] = useState<'listings' | 'map'>(initialTab);
   // Favoritos persistentes (sessionStorage, compartido con kiosk + Trip Planner) — C3.
   const { isFavorited, toggle: toggleFav } = useFavorites();
@@ -100,79 +103,91 @@ export function ListingsListScreen({
 
   return (
     <div className="relative flex h-full w-full flex-col bg-background">
-      {/* Header fijo (brand): back + título + filtro + tabs Listings/Map */}
-      <div
-        className="relative z-10 shrink-0"
-        style={{ height: HEADER_H * S, backgroundColor: BRAND }}
-      >
-        <div
-          className="absolute left-0 top-0"
-          style={{
-            width: 375,
-            height: HEADER_H,
-            transform: `scale(${S})`,
-            transformOrigin: 'top left',
-          }}
+      {/* Header fijo (brand): back + título + filtro + tabs Listings/Map.
+          Tablet = full-width compartido; phone = 375-space escalado (pixel-perfect). */}
+      {isTablet ? (
+        <PwaListTabletHeader
+          title={title}
+          onBack={() => router.push(basePath)}
+          onFilter={() => setFilterOpen(true)}
+          filterActive={filterActive}
         >
-          <PwaSubHeader title={title} onBack={() => router.push(basePath)} />
-          <button
-            type="button"
-            aria-label="Filter"
-            onClick={() => setFilterOpen(true)}
-            className="absolute text-white"
-            style={{ left: 333, top: 48, width: 28, height: 28 }}
-          >
-            {filterActive && (
-              <span
-                className="absolute rounded-full"
-                style={{
-                  right: -2,
-                  top: -2,
-                  width: 9,
-                  height: 9,
-                  backgroundColor: 'hsl(var(--pwa-favorite))',
-                }}
-              />
-            )}
-            <svg width={24} height={20.6} viewBox="0 0 28 24" fill="currentColor" aria-hidden>
-              <g transform="translate(-2 -4)">
-                <path d="M2,7A1,1,0,0,1,3,6H20.184a2.982,2.982,0,0,1,5.632,0H29a1,1,0,0,1,0,2H25.816a2.982,2.982,0,0,1-5.632,0H3A1,1,0,0,1,2,7Zm27,8H14.816a2.982,2.982,0,0,0-5.632,0H3a1,1,0,0,0,0,2H9.184a2.982,2.982,0,0,0,5.632,0H29a1,1,0,0,0,0-2Zm0,9H25.816a2.982,2.982,0,0,0-5.632,0H3a1,1,0,0,0,0,2H20.184a2.982,2.982,0,0,0,5.632,0H29a1,1,0,0,0,0-2Z" />
-              </g>
-            </svg>
-          </button>
-          {/* Segmented control */}
+          <PwaTabletSegmented tabs={tabs} tab={tab} onChange={setTab} />
+        </PwaListTabletHeader>
+      ) : (
+        <div
+          className="relative z-10 shrink-0"
+          style={{ height: HEADER_H * S, backgroundColor: BRAND }}
+        >
           <div
-            className="absolute flex overflow-hidden rounded-[6px]"
+            className="absolute left-0 top-0"
             style={{
-              left: 16,
-              top: 100,
-              width: 343,
-              height: 38,
-              border: '1px solid hsl(0 0% 100% / 0.5)',
+              width: 375,
+              height: HEADER_H,
+              transform: `scale(${S})`,
+              transformOrigin: 'top left',
             }}
           >
-            {(['listings', 'map'] as const).map((t) => {
-              const isActive = tab === t;
-              return (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setTab(t)}
-                  className="flex flex-1 items-center justify-center font-semibold"
+            <PwaSubHeader title={title} onBack={() => router.push(basePath)} />
+            <button
+              type="button"
+              aria-label="Filter"
+              onClick={() => setFilterOpen(true)}
+              className="absolute text-white"
+              style={{ left: 333, top: 48, width: 28, height: 28 }}
+            >
+              {filterActive && (
+                <span
+                  className="absolute rounded-full"
                   style={{
-                    fontSize: 15,
-                    fontFamily: OPEN_SANS,
-                    backgroundColor: isActive ? '#fff' : 'transparent',
-                    color: isActive ? BRAND : '#fff',
+                    right: -2,
+                    top: -2,
+                    width: 9,
+                    height: 9,
+                    backgroundColor: 'hsl(var(--pwa-favorite))',
                   }}
-                >
-                  {t === 'listings' ? tabs.listings : tabs.map}
-                </button>
-              );
-            })}
+                />
+              )}
+              <svg width={24} height={20.6} viewBox="0 0 28 24" fill="currentColor" aria-hidden>
+                <g transform="translate(-2 -4)">
+                  <path d="M2,7A1,1,0,0,1,3,6H20.184a2.982,2.982,0,0,1,5.632,0H29a1,1,0,0,1,0,2H25.816a2.982,2.982,0,0,1-5.632,0H3A1,1,0,0,1,2,7Zm27,8H14.816a2.982,2.982,0,0,0-5.632,0H3a1,1,0,0,0,0,2H9.184a2.982,2.982,0,0,0,5.632,0H29a1,1,0,0,0,0-2Zm0,9H25.816a2.982,2.982,0,0,0-5.632,0H3a1,1,0,0,0,0,2H20.184a2.982,2.982,0,0,0,5.632,0H29a1,1,0,0,0,0-2Z" />
+                </g>
+              </svg>
+            </button>
+            {/* Segmented control */}
+            <div
+              className="absolute flex overflow-hidden rounded-[6px]"
+              style={{
+                left: 16,
+                top: 100,
+                width: 343,
+                height: 38,
+                border: '1px solid hsl(0 0% 100% / 0.5)',
+              }}
+            >
+              {(['listings', 'map'] as const).map((t) => {
+                const isActive = tab === t;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setTab(t)}
+                    className="flex flex-1 items-center justify-center font-semibold"
+                    style={{
+                      fontSize: 15,
+                      fontFamily: OPEN_SANS,
+                      backgroundColor: isActive ? '#fff' : 'transparent',
+                      color: isActive ? BRAND : '#fff',
+                    }}
+                  >
+                    {t === 'listings' ? tabs.listings : tabs.map}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Cuerpo */}
       {tab === 'listings' ? (

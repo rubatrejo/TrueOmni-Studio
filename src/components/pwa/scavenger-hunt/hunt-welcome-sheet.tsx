@@ -53,7 +53,7 @@ export function HuntWelcomeSheet({ title, description, taskTypes, button }: Hunt
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 px-5">
       <div
-        className="flex w-full flex-col items-center rounded-[12px] bg-white px-6 pb-6 pt-5 transition-all duration-300 ease-out"
+        className="flex w-full max-w-[400px] flex-col items-center rounded-[12px] bg-white px-6 pb-6 pt-5 transition-all duration-300 ease-out"
         style={{
           ...OPEN_SANS,
           opacity: visible ? 1 : 0,

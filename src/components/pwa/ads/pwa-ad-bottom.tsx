@@ -7,8 +7,9 @@ import type { Ad } from '@/lib/config';
 /**
  * Bottom ad PWA — strip bottom-fixed dentro del canvas 390. No bloquea. z-70
  * (queda sobre el bottom nav mientras esté visible, como el kiosk). A sangre
- * completa sin bordes: alto 146px (= aspecto nativo del asset recortado a 390px),
- * imagen estirada (`object-fit: fill`).
+ * completa sin bordes: alto 146px, imagen que llena el área SIN deformarse
+ * (`object-fit: cover` — recorta el excedente en vez de estirar), tanto en phone
+ * como en tablet.
  */
 export function PwaAdBottom({ ad, onDismiss }: { ad: Ad; onDismiss: () => void }) {
   const detected = useImageCornerTheme(ad.image);
@@ -31,7 +32,7 @@ export function PwaAdBottom({ ad, onDismiss }: { ad: Ad; onDismiss: () => void }
           width: '100%',
           height: '100%',
           display: 'block',
-          objectFit: 'fill',
+          objectFit: 'cover',
         }}
       />
       <AdCloseButton theme={theme} size={32} style={{ top: 12, right: 12 }} onClick={onDismiss} />

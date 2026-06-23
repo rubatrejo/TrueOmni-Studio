@@ -26,6 +26,14 @@ export const DEVICE_DIMS: Record<string, { w: number; h: number }> = {
   'tablet-landscape': { w: 1194, h: 834 },
 };
 
+/**
+ * Alto reservado arriba del canvas en TABLET para la barra de estado del SO
+ * (hora + batería/wifi). El chrome (header navy) se extiende este alto extra para
+ * que el contenido del header no quede tapado por la status bar del dispositivo.
+ * Solo aplica a tablet; en phone el notch se maneja por pantalla (`pt-11`).
+ */
+export const TABLET_STATUS_INSET = 40;
+
 export function deviceDims(device: Device, orientation: Orientation): { w: number; h: number } {
   if (device === 'tablet') {
     return orientation === 'landscape'

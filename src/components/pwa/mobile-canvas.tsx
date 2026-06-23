@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
 import { PwaAdsSlot } from './ads/pwa-ads-slot';
-import { deviceDims, useDevice } from './device-context';
+import { deviceDims, TABLET_STATUS_INSET, useDevice } from './device-context';
 import { PwaKeyboardProvider } from './pwa-keyboard-provider';
 
 /** Padding alrededor del canvas en dev-view (fuera del iframe del Studio). */
@@ -76,6 +76,25 @@ export function MobileCanvas({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('resize', updateScale);
   }, [embedded, standalone, canvasW, canvasH]);
 
+  // En tablet reservamos una franja navy arriba (status bar del SO: hora + batería/
+  // wifi). El contenido de TODAS las pantallas baja por el `paddingTop` del canvas,
+  // así el header navy de cada una continúa el color de la franja. Phone = 0.
+  const tabletInset = isTablet ? TABLET_STATUS_INSET : 0;
+  const body = (
+    <>
+      {isTablet ? (
+        // La franja SOLAPA ~12px el header (navy sobre navy) para tapar el seam
+        // sub-pixel (línea blanca) entre el área de padding y el header en flujo.
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 z-40"
+          style={{ height: tabletInset + 12, backgroundColor: BRAND }}
+        />
+      ) : null}
+      <PwaKeyboardProvider>{children}</PwaKeyboardProvider>
+      <PwaAdsSlot />
+    </>
+  );
+
   // Modo standalone (PWA instalada en el SO): llena el viewport real y respeta las
   // safe-areas de iOS (notch / Dynamic Island arriba, home indicator abajo). El padding
   // navy continúa el color del header y del bottom nav. Ancho tope 390 (centrado) para
@@ -95,10 +114,9 @@ export function MobileCanvas({ children }: { children: ReactNode }) {
         <div
           data-pwa-canvas
           className="relative h-full w-full overflow-hidden bg-background text-foreground"
-          style={{ maxWidth: `${canvasW}px` }}
+          style={{ maxWidth: `${canvasW}px`, boxSizing: 'border-box', paddingTop: tabletInset }}
         >
-          <PwaKeyboardProvider>{children}</PwaKeyboardProvider>
-          <PwaAdsSlot />
+          {body}
         </div>
       </div>
     );
@@ -110,10 +128,14 @@ export function MobileCanvas({ children }: { children: ReactNode }) {
       <div
         data-pwa-canvas
         className="relative overflow-hidden bg-background text-foreground"
-        style={{ width: `${canvasW}px`, height: `${canvasH}px` }}
+        style={{
+          width: `${canvasW}px`,
+          height: `${canvasH}px`,
+          boxSizing: 'border-box',
+          paddingTop: tabletInset,
+        }}
       >
-        <PwaKeyboardProvider>{children}</PwaKeyboardProvider>
-        <PwaAdsSlot />
+        {body}
       </div>
     );
   }
@@ -135,10 +157,11 @@ export function MobileCanvas({ children }: { children: ReactNode }) {
             height: `${canvasH}px`,
             transform: `scale(${scale})`,
             transformOrigin: 'top left',
+            boxSizing: 'border-box',
+            paddingTop: tabletInset,
           }}
         >
-          <PwaKeyboardProvider>{children}</PwaKeyboardProvider>
-          <PwaAdsSlot />
+          {body}
         </div>
       </div>
     </div>

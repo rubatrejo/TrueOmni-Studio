@@ -17,6 +17,7 @@ import { pwaShare } from '@/lib/pwa-share';
 
 import { PwaBottomNav } from './bottom-nav';
 import { ProfileIcon, SearchIcon } from './dashboard-icons';
+import { useDevice } from './device-context';
 import { PwaFilterOverlay, type FilterTexts } from './pwa-filter-overlay';
 import { PwaHeart } from './pwa-heart';
 import { SavedTripButton } from './saved-trip-button';
@@ -76,6 +77,7 @@ export function EventsTimelineScreen({
   events: EventItem[];
 }) {
   const router = useRouter();
+  const { isTablet } = useDevice();
   const [query, setQuery] = useState('');
   // Favoritos de eventos persistentes (sessionStorage, compartido con el kiosk) — C3.
   const { isFavorited, toggle: toggleFav } = useEventFavorites();
@@ -109,6 +111,17 @@ export function EventsTimelineScreen({
       isFirst: i === 0,
       isLast: i === visible.length - 1,
     }));
+  }, [visible]);
+
+  // Tablet: agrupa los eventos visibles por día (encabezado de fecha + grid 2-col).
+  const dayGroups = useMemo(() => {
+    const out: { date: string; events: EventItem[] }[] = [];
+    for (const event of visible) {
+      const last = out[out.length - 1];
+      if (last && last.date === event.date) last.events.push(event);
+      else out.push({ date: event.date, events: [event] });
+    }
+    return out;
   }, [visible]);
 
   const filterTexts: FilterTexts = {
@@ -213,125 +226,215 @@ export function EventsTimelineScreen({
         </button>
       </div>
 
-      {/* Cuerpo: timeline */}
-      <div className="scrollbar-hide flex-1 overflow-y-auto bg-background">
-        {rows.length === 0 ? (
-          <p
-            className="px-6 py-16 text-center"
-            style={{ fontSize: 14, color: 'hsl(var(--foreground) / 0.6)', fontFamily: OPEN_SANS }}
-          >
-            {texts.emptyState}
-          </p>
-        ) : (
-          <ul className="pb-4">
-            {rows.map(({ event, showDate, isFirst, isLast }) => {
-              const marker = formatTimelineDate(event.date);
+      {/* Cuerpo: timeline (phone) / grid 2-col agrupado por día (tablet) */}
+      {isTablet ? (
+        <div className="scrollbar-hide flex-1 overflow-y-auto bg-background px-8 py-6">
+          {dayGroups.length === 0 ? (
+            <p
+              className="py-16 text-center"
+              style={{
+                fontSize: 15,
+                color: 'hsl(var(--foreground) / 0.6)',
+                fontFamily: OPEN_SANS,
+              }}
+            >
+              {texts.emptyState}
+            </p>
+          ) : (
+            dayGroups.map((group) => {
+              const marker = formatTimelineDate(group.date);
               return (
-                <li key={event.slug} className="flex gap-2 px-4">
-                  {/* Rail izquierdo: fecha + línea + dot */}
-                  <div className="relative w-[46px] shrink-0">
-                    {/* línea vertical (continua entre filas) */}
-                    <span
-                      className="absolute"
-                      style={{
-                        left: 42,
-                        top: isFirst ? 18 : 0,
-                        bottom: isLast ? 'auto' : 0,
-                        height: isLast ? 18 : undefined,
-                        width: 2,
-                        backgroundColor: LINE,
-                      }}
-                    />
-                    {/* dot alineado al título */}
-                    <span
-                      className="absolute rounded-full"
-                      style={{
-                        left: 37,
-                        top: 13,
-                        width: 11,
-                        height: 11,
-                        backgroundColor: BRAND,
-                        border: '2px solid hsl(var(--background))',
-                      }}
-                    />
-                    {showDate && (
-                      <div className="pt-1 text-right" style={{ paddingRight: 14 }}>
-                        <div
-                          className="font-bold leading-none"
-                          style={{ fontSize: 20, color: BRAND, fontFamily: OPEN_SANS }}
+                <section key={group.date} className="mb-8">
+                  <h2
+                    className="mb-3 flex items-baseline gap-2 font-bold"
+                    style={{ color: BRAND, fontFamily: OPEN_SANS }}
+                  >
+                    <span style={{ fontSize: 24 }}>{marker.day}</span>
+                    <span style={{ fontSize: 16 }}>{marker.monthShort}</span>
+                  </h2>
+                  <div className="grid grid-cols-2 gap-5">
+                    {group.events.map((event) => (
+                      <div key={event.slug} className="flex flex-col">
+                        <button
+                          type="button"
+                          onClick={() => router.push(`/pwa/events/${event.slug}`)}
+                          className="block w-full text-left"
                         >
-                          {marker.day}
-                        </div>
-                        <div
-                          className="font-bold leading-none"
-                          style={{ fontSize: 13, color: BRAND, fontFamily: OPEN_SANS }}
-                        >
-                          {marker.monthShort}
+                          <span
+                            className="block font-bold text-foreground"
+                            style={{ fontSize: 18, fontFamily: OPEN_SANS }}
+                          >
+                            {event.title}
+                          </span>
+                          <span
+                            className="mt-2 block w-full overflow-hidden rounded-[10px] bg-cover bg-center"
+                            style={{
+                              height: 190,
+                              backgroundImage: `url("${resolveAssetUrl(event.image)}")`,
+                            }}
+                          />
+                          <span
+                            className="mt-2 block"
+                            style={{
+                              fontSize: 13.5,
+                              color: 'hsl(var(--foreground) / 0.55)',
+                              fontFamily: OPEN_SANS,
+                            }}
+                          >
+                            {formatEventCardWhen(event.date, event.startTime)}
+                          </span>
+                        </button>
+                        <div className="mt-2.5 flex items-center gap-5" style={{ color: PWA }}>
+                          <ShareIconButton
+                            size={20}
+                            onShare={() =>
+                              pwaShare({
+                                title: event.title,
+                                text: event.title,
+                                url: event.ticketsUrl ?? event.website,
+                              })
+                            }
+                          />
+                          <button
+                            type="button"
+                            aria-label="Favorite"
+                            onClick={() => toggleFav(event.slug)}
+                          >
+                            <PwaHeart filled={isFavorited(event.slug)} size={22} />
+                          </button>
                         </div>
                       </div>
-                    )}
+                    ))}
                   </div>
+                </section>
+              );
+            })
+          )}
+        </div>
+      ) : (
+        <div className="scrollbar-hide flex-1 overflow-y-auto bg-background">
+          {rows.length === 0 ? (
+            <p
+              className="px-6 py-16 text-center"
+              style={{
+                fontSize: 14,
+                color: 'hsl(var(--foreground) / 0.6)',
+                fontFamily: OPEN_SANS,
+              }}
+            >
+              {texts.emptyState}
+            </p>
+          ) : (
+            <ul className="pb-4">
+              {rows.map(({ event, showDate, isFirst, isLast }) => {
+                const marker = formatTimelineDate(event.date);
+                return (
+                  <li key={event.slug} className="flex gap-2 px-4">
+                    {/* Rail izquierdo: fecha + línea + dot */}
+                    <div className="relative w-[46px] shrink-0">
+                      {/* línea vertical (continua entre filas) */}
+                      <span
+                        className="absolute"
+                        style={{
+                          left: 42,
+                          top: isFirst ? 18 : 0,
+                          bottom: isLast ? 'auto' : 0,
+                          height: isLast ? 18 : undefined,
+                          width: 2,
+                          backgroundColor: LINE,
+                        }}
+                      />
+                      {/* dot alineado al título */}
+                      <span
+                        className="absolute rounded-full"
+                        style={{
+                          left: 37,
+                          top: 13,
+                          width: 11,
+                          height: 11,
+                          backgroundColor: BRAND,
+                          border: '2px solid hsl(var(--background))',
+                        }}
+                      />
+                      {showDate && (
+                        <div className="pt-1 text-right" style={{ paddingRight: 14 }}>
+                          <div
+                            className="font-bold leading-none"
+                            style={{ fontSize: 20, color: BRAND, fontFamily: OPEN_SANS }}
+                          >
+                            {marker.day}
+                          </div>
+                          <div
+                            className="font-bold leading-none"
+                            style={{ fontSize: 13, color: BRAND, fontFamily: OPEN_SANS }}
+                          >
+                            {marker.monthShort}
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Card del evento */}
-                  <div
-                    className={`min-w-0 flex-1 ${isLast ? '' : 'border-b'} pb-5 pt-1`}
-                    style={isLast ? undefined : { borderColor: 'hsl(var(--foreground) / 0.1)' }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => router.push(`/pwa/events/${event.slug}`)}
-                      className="block w-full text-left"
+                    {/* Card del evento */}
+                    <div
+                      className={`min-w-0 flex-1 ${isLast ? '' : 'border-b'} pb-5 pt-1`}
+                      style={isLast ? undefined : { borderColor: 'hsl(var(--foreground) / 0.1)' }}
                     >
-                      <span
-                        className="block font-bold text-foreground"
-                        style={{ fontSize: 17, fontFamily: OPEN_SANS }}
-                      >
-                        {event.title}
-                      </span>
-                      <span
-                        className="mt-1.5 block w-full overflow-hidden rounded-[8px] bg-cover bg-center"
-                        style={{
-                          height: 130,
-                          backgroundImage: `url("${resolveAssetUrl(event.image)}")`,
-                        }}
-                      />
-                      <span
-                        className="mt-2 block"
-                        style={{
-                          fontSize: 12.5,
-                          color: 'hsl(var(--foreground) / 0.55)',
-                          fontFamily: OPEN_SANS,
-                        }}
-                      >
-                        {formatEventCardWhen(event.date, event.startTime)}
-                      </span>
-                    </button>
-                    <div className="mt-2.5 flex items-center gap-5" style={{ color: PWA }}>
-                      <ShareIconButton
-                        size={18}
-                        onShare={() =>
-                          pwaShare({
-                            title: event.title,
-                            text: event.title,
-                            url: event.ticketsUrl ?? event.website,
-                          })
-                        }
-                      />
                       <button
                         type="button"
-                        aria-label="Favorite"
-                        onClick={() => toggleFav(event.slug)}
+                        onClick={() => router.push(`/pwa/events/${event.slug}`)}
+                        className="block w-full text-left"
                       >
-                        <PwaHeart filled={isFavorited(event.slug)} size={20} />
+                        <span
+                          className="block font-bold text-foreground"
+                          style={{ fontSize: 17, fontFamily: OPEN_SANS }}
+                        >
+                          {event.title}
+                        </span>
+                        <span
+                          className="mt-1.5 block w-full overflow-hidden rounded-[8px] bg-cover bg-center"
+                          style={{
+                            height: 130,
+                            backgroundImage: `url("${resolveAssetUrl(event.image)}")`,
+                          }}
+                        />
+                        <span
+                          className="mt-2 block"
+                          style={{
+                            fontSize: 12.5,
+                            color: 'hsl(var(--foreground) / 0.55)',
+                            fontFamily: OPEN_SANS,
+                          }}
+                        >
+                          {formatEventCardWhen(event.date, event.startTime)}
+                        </span>
                       </button>
+                      <div className="mt-2.5 flex items-center gap-5" style={{ color: PWA }}>
+                        <ShareIconButton
+                          size={18}
+                          onShare={() =>
+                            pwaShare({
+                              title: event.title,
+                              text: event.title,
+                              url: event.ticketsUrl ?? event.website,
+                            })
+                          }
+                        />
+                        <button
+                          type="button"
+                          aria-label="Favorite"
+                          onClick={() => toggleFav(event.slug)}
+                        >
+                          <PwaHeart filled={isFavorited(event.slug)} size={20} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      )}
 
       <PwaBottomNav active="events" />
 

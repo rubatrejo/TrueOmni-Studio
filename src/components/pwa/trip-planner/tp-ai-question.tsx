@@ -11,11 +11,14 @@ export function TpAiQuestion({
   value,
   onChange,
   clientName,
+  isTablet,
 }: {
   question: AiQuestion;
   value: string | string[] | undefined;
   onChange: (v: string | string[]) => void;
   clientName: string;
+  /** Tablet: hero más alto para no recortar la imagen en el canvas ancho. */
+  isTablet?: boolean;
 }) {
   const fill = (s: string) => s.replaceAll('{client_name}', clientName);
   const isMulti = question.type === 'multi';
@@ -38,11 +41,14 @@ export function TpAiQuestion({
     <div className="flex flex-col" style={OPEN_SANS}>
       {/* Hero */}
       <div
-        className="h-[170px] w-full bg-cover bg-center"
-        style={{ backgroundImage: `url("${resolveAssetUrl(question.hero_image)}")` }}
+        className="w-full bg-cover bg-center"
+        style={{
+          height: isTablet ? 320 : 170,
+          backgroundImage: `url("${resolveAssetUrl(question.hero_image)}")`,
+        }}
       />
 
-      <div className="px-5 pt-5">
+      <div className={isTablet ? 'mx-auto max-w-[560px] px-5 pt-6' : 'px-5 pt-5'}>
         <h2
           className="text-center text-[22px] font-extrabold"
           style={{ color: 'hsl(var(--brand-secondary))' }}

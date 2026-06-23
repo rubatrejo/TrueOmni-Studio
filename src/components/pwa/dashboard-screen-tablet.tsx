@@ -68,8 +68,14 @@ export function DashboardScreenTablet({
   );
   // Los accesos rápidos van PRIMERO en el grid, con el mismo UI de tile que el
   // resto (rectángulo con overlay + título). Comparten la forma {key,label,
-  // image,route}; los tiles además pueden ser `wide`.
-  const gridItems: (PwaQuickAccess | PwaTile)[] = [...visibleQuickAccess, ...visibleTiles];
+  // image,route}; los tiles además pueden ser `wide`. Los labels de quick access
+  // vienen en MAYÚSCULAS del config (XD del phone); en el grid del tablet se pasan
+  // a sentence case (solo la primera letra) para igualar a los tiles normales.
+  const sentenceCase = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+  const gridItems: (PwaQuickAccess | PwaTile)[] = [
+    ...visibleQuickAccess.map((q) => ({ ...q, label: sentenceCase(q.label) })),
+    ...visibleTiles,
+  ];
 
   return (
     <div className="flex h-full w-full flex-col bg-background">

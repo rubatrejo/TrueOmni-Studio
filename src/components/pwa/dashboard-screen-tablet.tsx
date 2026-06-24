@@ -10,6 +10,7 @@ import { resolvePwaTileRoute } from '@/lib/pwa-routes';
 
 import { PwaBottomNavTablet } from './bottom-nav';
 import { NotificationIcon, ProfileIcon, SearchIcon } from './dashboard-icons';
+import { useDevice } from './device-context';
 import { usePwaModuleVisibility } from './pwa-bridge-context';
 
 /**
@@ -55,6 +56,7 @@ export function DashboardScreenTablet({
   tileTitleSize,
 }: DashboardScreenTabletProps) {
   const router = useRouter();
+  const { isLandscape } = useDevice();
   const { unreadCount } = useNotifications(notifications);
   const isModuleVisible = usePwaModuleVisibility();
 
@@ -120,7 +122,10 @@ export function DashboardScreenTablet({
 
       {/* Hero full-width: SOLO foto + título. Los accesos rápidos se movieron al
           grid de tiles (mismo UI), así que el hero cubre todo ese espacio. */}
-      <div className="relative shrink-0 overflow-hidden" style={{ height: 286 }}>
+      <div
+        className="relative shrink-0 overflow-hidden"
+        style={{ height: isLandscape ? 210 : 286 }}
+      >
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url("${resolveAssetUrl(heroImage)}")` }}
@@ -144,7 +149,8 @@ export function DashboardScreenTablet({
 
       {/* Grid de tiles a todo el ancho (3 columnas). */}
       <div className="scrollbar-hide min-h-0 flex-1 overflow-y-auto bg-background">
-        <div className="grid grid-cols-3 gap-5 px-8 pb-8 pt-6">
+        {/* Landscape: 5 columnas (1194px de ancho); portrait: 3. */}
+        <div className={`grid gap-5 px-8 pb-8 pt-6 ${isLandscape ? 'grid-cols-5' : 'grid-cols-3'}`}>
           {gridItems.map((t, i) => (
             <button
               key={`${t.key}-${i}`}

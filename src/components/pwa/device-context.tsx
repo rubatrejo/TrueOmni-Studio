@@ -48,12 +48,15 @@ type DeviceContextValue = {
   orientation: Orientation;
   /** True si el form factor es tablet (azúcar para los componentes). */
   isTablet: boolean;
+  /** True solo en tablet + landscape (azúcar: evita repetir la condición en cada pantalla). */
+  isLandscape: boolean;
 };
 
 const DeviceContext = createContext<DeviceContextValue>({
   device: 'phone',
   orientation: 'portrait',
   isTablet: false,
+  isLandscape: false,
 });
 
 export function DeviceProvider({ children }: { children: ReactNode }) {
@@ -64,6 +67,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
     device: 'phone',
     orientation: 'portrait',
     isTablet: false,
+    isLandscape: false,
   });
 
   useEffect(() => {
@@ -72,7 +76,12 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
       const device: Device = params.get('device') === 'tablet' ? 'tablet' : 'phone';
       const orientation: Orientation =
         params.get('orientation') === 'landscape' ? 'landscape' : 'portrait';
-      setValue({ device, orientation, isTablet: device === 'tablet' });
+      setValue({
+        device,
+        orientation,
+        isTablet: device === 'tablet',
+        isLandscape: device === 'tablet' && orientation === 'landscape',
+      });
     } catch {
       /* ignore — sin window/params nos quedamos en phone */
     }

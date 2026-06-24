@@ -86,7 +86,7 @@ export function ListingsListScreen({
   initialSubcategory,
 }: Props) {
   const router = useRouter();
-  const { isTablet } = useDevice();
+  const { isTablet, isLandscape } = useDevice();
   const [tab, setTab] = useState<'listings' | 'map'>(initialTab);
   // Favoritos persistentes (sessionStorage, compartido con kiosk + Trip Planner) — C3.
   const { isFavorited, toggle: toggleFav } = useFavorites();
@@ -199,7 +199,9 @@ export function ListingsListScreen({
             {resultsLabel.replace('{count}', String(vItems.length))}
           </div>
           {vItems.length > 0 ? (
-            <ul className="mt-2 pb-6">
+            // Landscape: 2 columnas de filas (aprovecha el ancho; evita la fila
+            // ancha con hueco muerto). Portrait/phone = lista 1-col (sin cambios).
+            <ul className={`mt-2 pb-6 ${isLandscape ? 'grid grid-cols-2' : ''}`}>
               {vItems.map((it) => (
                 <ListingRow
                   key={it.slug}

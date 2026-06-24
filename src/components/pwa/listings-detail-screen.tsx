@@ -160,7 +160,7 @@ export function ListingsDetailScreen({
 }) {
   // Favorito persistente (sessionStorage, compartido con kiosk + Trip Planner) — C3.
   const { isFavorited, toggle: toggleFav } = useFavorites();
-  const { isTablet } = useDevice();
+  const { isTablet, isLandscape } = useDevice();
   const fav = isFavorited(detail.slug);
   const [menuOpen, setMenuOpen] = useState(false);
   const hasHeroAction = heroPrimaryAction.kind !== 'none';
@@ -324,136 +324,145 @@ export function ListingsDetailScreen({
           ))}
         </div>
 
-        {/* Fila de fecha/hora (solo Events) */}
-        {detail.eventWhen && (
-          <div
-            className="flex items-center gap-2.5 border-b px-[18px]"
-            style={{ minHeight: 56, borderColor: 'hsl(var(--foreground) / 0.1)' }}
-          >
-            <svg width={18} height={18} viewBox="0 0 448 512" fill={PWA} aria-hidden>
-              <path d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192z" />
-            </svg>
-            <div className="py-2.5">
-              <div
-                className="font-semibold"
-                style={{ fontSize: 13.5, color: FG, fontFamily: OPEN_SANS }}
-              >
-                {detail.eventWhen.dateLabel}
-              </div>
-              <div
-                style={{
-                  fontSize: 13,
-                  color: 'hsl(var(--foreground) / 0.6)',
-                  fontFamily: OPEN_SANS,
-                }}
-              >
-                {detail.eventWhen.timeLabel}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Fila de horario (#10) */}
-        {detail.openHours && (
-          <div
-            className="flex items-center justify-between border-b px-[18px]"
-            style={{ height: 56, borderColor: 'hsl(var(--foreground) / 0.1)' }}
-          >
-            <div className="flex items-center gap-2">
-              <svg width={18} height={18} viewBox="0 0 24 24" fill="none" aria-hidden>
-                <circle cx="12" cy="12" r="9" stroke={FG} strokeWidth="1.6" />
-                <path d="M12 7v5l3 2" stroke={FG} strokeWidth="1.6" strokeLinecap="round" />
+        {/* Landscape: el contenido informativo (horario, mapa, dirección,
+            descripción) se centra en una columna max-width para que el texto no
+            se estire en 1194px. Portrait/phone = display:contents (sin efecto).
+            Hero y barra de acciones quedan full-width. */}
+        <div className={isLandscape ? 'mx-auto w-full max-w-[840px]' : 'contents'}>
+          {/* Fila de fecha/hora (solo Events) */}
+          {detail.eventWhen && (
+            <div
+              className="flex items-center gap-2.5 border-b px-[18px]"
+              style={{ minHeight: 56, borderColor: 'hsl(var(--foreground) / 0.1)' }}
+            >
+              <svg width={18} height={18} viewBox="0 0 448 512" fill={PWA} aria-hidden>
+                <path d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192z" />
               </svg>
-              <span style={{ fontSize: 13.5, color: FG, fontFamily: OPEN_SANS }}>
-                <span className="font-semibold">{texts.openNowUntil} </span>
-                {todayRange}
-              </span>
+              <div className="py-2.5">
+                <div
+                  className="font-semibold"
+                  style={{ fontSize: 13.5, color: FG, fontFamily: OPEN_SANS }}
+                >
+                  {detail.eventWhen.dateLabel}
+                </div>
+                <div
+                  style={{
+                    fontSize: 13,
+                    color: 'hsl(var(--foreground) / 0.6)',
+                    fontFamily: OPEN_SANS,
+                  }}
+                >
+                  {detail.eventWhen.timeLabel}
+                </div>
+              </div>
             </div>
+          )}
+
+          {/* Fila de horario (#10) */}
+          {detail.openHours && (
+            <div
+              className="flex items-center justify-between border-b px-[18px]"
+              style={{ height: 56, borderColor: 'hsl(var(--foreground) / 0.1)' }}
+            >
+              <div className="flex items-center gap-2">
+                <svg width={18} height={18} viewBox="0 0 24 24" fill="none" aria-hidden>
+                  <circle cx="12" cy="12" r="9" stroke={FG} strokeWidth="1.6" />
+                  <path d="M12 7v5l3 2" stroke={FG} strokeWidth="1.6" strokeLinecap="round" />
+                </svg>
+                <span style={{ fontSize: 13.5, color: FG, fontFamily: OPEN_SANS }}>
+                  <span className="font-semibold">{texts.openNowUntil} </span>
+                  {todayRange}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setHoursOpen(true)}
+                className="font-semibold"
+                style={{ fontSize: 13, color: PWA, fontFamily: OPEN_SANS }}
+              >
+                {texts.moreHours}
+              </button>
+            </div>
+          )}
+
+          {/* Open Dining Guide (#10) */}
+          {texts.openDiningGuide && detail.diningGuideUrl && (
             <button
               type="button"
-              onClick={() => setHoursOpen(true)}
-              className="font-semibold"
+              onClick={() => open(detail.diningGuideUrl)}
+              className="block w-full border-b px-[18px] py-3 text-left font-bold"
+              style={{
+                fontSize: 13,
+                color: PWA,
+                borderColor: 'hsl(var(--foreground) / 0.1)',
+                fontFamily: OPEN_SANS,
+              }}
+            >
+              {texts.openDiningGuide}
+            </button>
+          )}
+
+          {/* Mapa — Trails: 2 tabs (mapa / ruta GeoJSON); resto: pin simple */}
+          {trailMap ? (
+            <PwaTrailMap
+              data={trailMap.data}
+              token={mapboxToken}
+              defaultLabel={trailMap.defaultLabel}
+              trailLabel={trailMap.trailLabel}
+              title={detail.title}
+            />
+          ) : (
+            <MapboxMap
+              token={mapboxToken}
+              coords={detail.coords}
+              interactive
+              pinScale={0.6}
+              className="w-full"
+              style={{ height: isTablet ? 280 : 150 }}
+            />
+          )}
+
+          {/* Dirección + Directions */}
+          <div
+            className="border-b px-[18px] py-4"
+            style={{ borderColor: 'hsl(var(--foreground) / 0.1)' }}
+          >
+            <p style={{ fontSize: 14, color: FG, fontFamily: OPEN_SANS }}>{detail.address}</p>
+            <button
+              type="button"
+              onClick={() => open(directionsUrl)}
+              className="mt-1 font-bold"
               style={{ fontSize: 13, color: PWA, fontFamily: OPEN_SANS }}
             >
-              {texts.moreHours}
+              {texts.seeDirections}
             </button>
           </div>
-        )}
 
-        {/* Open Dining Guide (#10) */}
-        {texts.openDiningGuide && detail.diningGuideUrl && (
-          <button
-            type="button"
-            onClick={() => open(detail.diningGuideUrl)}
-            className="block w-full border-b px-[18px] py-3 text-left font-bold"
-            style={{
-              fontSize: 13,
-              color: PWA,
-              borderColor: 'hsl(var(--foreground) / 0.1)',
-              fontFamily: OPEN_SANS,
-            }}
-          >
-            {texts.openDiningGuide}
-          </button>
-        )}
+          {/* Considerations (solo Trails) */}
+          {considerations && (
+            <PwaConsiderations
+              considerations={considerations.data}
+              labels={considerations.labels}
+            />
+          )}
 
-        {/* Mapa — Trails: 2 tabs (mapa / ruta GeoJSON); resto: pin simple */}
-        {trailMap ? (
-          <PwaTrailMap
-            data={trailMap.data}
-            token={mapboxToken}
-            defaultLabel={trailMap.defaultLabel}
-            trailLabel={trailMap.trailLabel}
-            title={detail.title}
-          />
-        ) : (
-          <MapboxMap
-            token={mapboxToken}
-            coords={detail.coords}
-            interactive
-            pinScale={0.6}
-            className="w-full"
-            style={{ height: isTablet ? 280 : 150 }}
-          />
-        )}
-
-        {/* Dirección + Directions */}
-        <div
-          className="border-b px-[18px] py-4"
-          style={{ borderColor: 'hsl(var(--foreground) / 0.1)' }}
-        >
-          <p style={{ fontSize: 14, color: FG, fontFamily: OPEN_SANS }}>{detail.address}</p>
-          <button
-            type="button"
-            onClick={() => open(directionsUrl)}
-            className="mt-1 font-bold"
-            style={{ fontSize: 13, color: PWA, fontFamily: OPEN_SANS }}
-          >
-            {texts.seeDirections}
-          </button>
-        </div>
-
-        {/* Considerations (solo Trails) */}
-        {considerations && (
-          <PwaConsiderations considerations={considerations.data} labels={considerations.labels} />
-        )}
-
-        {/* Descripción */}
-        <div className="px-[18px] py-4">
-          <h2 className="font-bold" style={{ fontSize: 17, color: FG, fontFamily: OPEN_SANS }}>
-            {texts.description}
-          </h2>
-          <p
-            className="mt-2"
-            style={{
-              fontSize: 14,
-              lineHeight: 1.5,
-              color: 'hsl(var(--foreground) / 0.7)',
-              fontFamily: OPEN_SANS,
-            }}
-          >
-            {detail.description}
-          </p>
+          {/* Descripción */}
+          <div className="px-[18px] py-4">
+            <h2 className="font-bold" style={{ fontSize: 17, color: FG, fontFamily: OPEN_SANS }}>
+              {texts.description}
+            </h2>
+            <p
+              className="mt-2"
+              style={{
+                fontSize: 14,
+                lineHeight: 1.5,
+                color: 'hsl(var(--foreground) / 0.7)',
+                fontFamily: OPEN_SANS,
+              }}
+            >
+              {detail.description}
+            </p>
+          </div>
         </div>
       </div>
 

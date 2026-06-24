@@ -65,7 +65,7 @@ export function PwaMapScreen({
   mapboxToken,
 }: Props) {
   const router = useRouter();
-  const { isTablet } = useDevice();
+  const { isTablet, isLandscape } = useDevice();
   const [tab, setTab] = useState<'listings' | 'map'>('map');
   const [chip, setChip] = useState<string>('all');
   // Favoritos persistentes (sessionStorage, compartido con kiosk + Trip Planner) — C3.
@@ -210,7 +210,8 @@ export function PwaMapScreen({
             {resultsLabel.replace('{count}', String(vItems.length))}
           </div>
           {vItems.length > 0 ? (
-            <ul className="mt-2 pb-6">
+            // Landscape: 2 columnas de filas (igual que las listas de módulo).
+            <ul className={`mt-2 pb-6 ${isLandscape ? 'grid grid-cols-2' : ''}`}>
               {vItems.map((it) => (
                 <ListingRow
                   key={it.slug}

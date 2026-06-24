@@ -126,7 +126,14 @@ export function PreviewPanel({
   // el portrait, así que cabe holgado y un zoom mayor hace que el placeholder
   // y futuros previews mobile sean legibles sin tener que tocar el zoom.
   useEffect(() => {
-    const defaultScale = orientation === 'mobile-pwa' ? 0.8 : 0.4;
+    const defaultScale =
+      orientation === 'mobile-pwa'
+        ? 0.8
+        : orientation === 'tablet-portrait'
+          ? 0.7
+          : orientation === 'tablet-landscape'
+            ? 0.6
+            : 0.4;
     const holder = containerRef.current?.parentElement;
     if (!holder) {
       setScale(defaultScale);

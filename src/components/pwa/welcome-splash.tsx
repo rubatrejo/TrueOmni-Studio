@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { TrueOmniLogo } from '@/components/brand/true-omni-logo';
 import { resolveAssetUrl } from '@/lib/asset-url';
 
+import { useDevice } from './device-context';
+
 interface WelcomeSplashProps {
   /** Path/URL de la imagen de fondo fullscreen. */
   background: string;
@@ -62,6 +64,7 @@ export function WelcomeSplash({
   logoOffset,
 }: WelcomeSplashProps) {
   const router = useRouter();
+  const { isTablet } = useDevice();
   const [logoIn, setLogoIn] = useState(false);
   const logoW = logoWidthPct * LOGO_SCALE[logoSize ?? 'M'];
   const ox = logoOffset?.x ?? 0;
@@ -95,6 +98,9 @@ export function WelcomeSplash({
           className="transition-all duration-700 ease-out"
           style={{
             width: `${logoW * 100}%`,
+            // En tablet el 67% del canvas (834/1194px) hace el logo gigante; lo
+            // capeamos para que luzca proporcionado. Phone (390px) = sin cap.
+            maxWidth: isTablet ? 320 : undefined,
             opacity: logoIn ? 1 : 0,
             transform: `translate(${ox}px, ${oy}px) ${logoIn ? 'scale(1)' : 'scale(0.96)'}`,
           }}

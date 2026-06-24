@@ -319,12 +319,15 @@ export function StudioBridge() {
           if (typeof data.section === 'string') applyPwaActiveSection(data.section);
           break;
         case 'studio:pwa-nav':
-          // Navega el preview PWA a una ruta (`/pwa/...`) sin reload completo
-          // cuando ya estamos en el mismo origin.
+          // Navega el preview PWA a una ruta (`/pwa/...`). PRESERVA el query actual
+          // (`?device=tablet&orientation=…`): sin esto, navegar entre secciones del
+          // editor Tablet recargaba el iframe SIN el param → `device-context` caía a
+          // phone y el contenido se renderizaba a 390px con espacio en blanco.
           if (typeof data.route === 'string' && data.route.startsWith('/pwa')) {
             try {
-              if (window.location.pathname !== data.route) {
-                window.location.assign(data.route);
+              const target = data.route.split('?')[0]!;
+              if (window.location.pathname !== target) {
+                window.location.assign(target + window.location.search);
               }
             } catch {}
           }

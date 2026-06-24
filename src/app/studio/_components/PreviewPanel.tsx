@@ -3,12 +3,19 @@
 import { Maximize, Minus, Plus, RotateCcw, X } from 'lucide-react';
 import { useEffect, useRef, useState, type RefObject } from 'react';
 
-type PreviewOrientation = 'portrait' | 'landscape' | 'mobile-pwa';
+type PreviewOrientation =
+  | 'portrait'
+  | 'landscape'
+  | 'mobile-pwa'
+  | 'tablet-portrait'
+  | 'tablet-landscape';
 
 const ORIENTATION_DIMS: Record<PreviewOrientation, { w: number; h: number }> = {
   portrait: { w: 1080, h: 1920 },
   landscape: { w: 1920, h: 1080 },
   'mobile-pwa': { w: 390, h: 844 },
+  'tablet-portrait': { w: 834, h: 1194 },
+  'tablet-landscape': { w: 1194, h: 834 },
 };
 
 /**
@@ -41,6 +48,7 @@ export function PreviewPanel({
   onIframeLoad,
   onLocaleChange,
   product = 'kiosk',
+  device = 'phone',
 }: {
   slug: string;
   nombre: string;
@@ -56,11 +64,19 @@ export function PreviewPanel({
    *  y oculta los device tabs de orientación (la PWA solo tiene un viewport).
    *  Default `'kiosk'` conserva el comportamiento original. */
   product?: 'kiosk' | 'pwa';
+  /** Form-factor del preview PWA. `'tablet'` (producto Tablets) carga
+   *  `/pwa?device=tablet&orientation=…` y muestra tabs Portrait/Landscape de
+   *  tablet. Default `'phone'` = comportamiento PWA actual (un viewport 390×844). */
+  device?: 'phone' | 'tablet';
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
   const [orientation, setOrientation] = useState<PreviewOrientation>(
-    product === 'pwa' ? 'mobile-pwa' : initialOrientation,
+    product === 'pwa'
+      ? device === 'tablet'
+        ? 'tablet-portrait'
+        : 'mobile-pwa'
+      : initialOrientation,
   );
   const [fullScreen, setFullScreen] = useState(false);
   // Ruta actual del iframe del preview cuando se abre el Full Screen. El
@@ -149,7 +165,15 @@ export function PreviewPanel({
   // Pasa el viewport como query param para que el KioskCanvas client-side
   // pueda detectar mobile-pwa y renderizar a 390×844 en lugar de 1080×1920.
   const previewSrc =
-    product === 'pwa' ? '/pwa' : orientation === 'mobile-pwa' ? '/?viewport=mobile-pwa' : '/';
+    product === 'pwa'
+      ? device === 'tablet'
+        ? `/pwa?device=tablet&orientation=${
+            orientation === 'tablet-landscape' ? 'landscape' : 'portrait'
+          }`
+        : '/pwa'
+      : orientation === 'mobile-pwa'
+        ? '/?viewport=mobile-pwa'
+        : '/';
 
   // F-PWA-8: al remontar el iframe (reload / cambio de orientación / cliente)
   // volvemos a ocultarlo hasta el próximo `onLoad` + breve margen.
@@ -186,9 +210,31 @@ export function PreviewPanel({
       <div className="flex shrink-0 items-center justify-between px-6 pb-3 pt-4">
         <div className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-zinc-900 dark:bg-zinc-950">
           {product === 'pwa' ? (
-            // La PWA tiene un solo viewport (390×844). Mostramos un tab estático
-            // en vez del selector de orientación del kiosk.
-            <DeviceTab active onClick={() => {}} icon={<MobileGlyph />} label="Mobile · 390×844" />
+            device === 'tablet' ? (
+              // El producto Tablet reusa el runtime PWA con tabs de orientación.
+              <>
+                <DeviceTab
+                  active={orientation === 'tablet-portrait'}
+                  onClick={() => setOrientation('tablet-portrait')}
+                  icon={<MobileGlyph />}
+                  label="Tablet · 834×1194"
+                />
+                <DeviceTab
+                  active={orientation === 'tablet-landscape'}
+                  onClick={() => setOrientation('tablet-landscape')}
+                  icon={<LandscapeGlyph />}
+                  label="Tablet · 1194×834"
+                />
+              </>
+            ) : (
+              // La PWA tiene un solo viewport (390×844). Tab estático.
+              <DeviceTab
+                active
+                onClick={() => {}}
+                icon={<MobileGlyph />}
+                label="Mobile · 390×844"
+              />
+            )
           ) : (
             <>
               <DeviceTab
@@ -353,6 +399,7 @@ export function PreviewPanel({
           nombre={nombre}
           orientation={orientation}
           product={product}
+          device={device}
           initialSrc={fullScreenSrc}
           onClose={() => setFullScreen(false)}
         />
@@ -376,6 +423,7 @@ function FullScreenPreview({
   nombre,
   orientation,
   product = 'kiosk',
+  device = 'phone',
   initialSrc,
   onClose,
 }: {
@@ -383,6 +431,7 @@ function FullScreenPreview({
   nombre: string;
   orientation: PreviewOrientation;
   product?: 'kiosk' | 'pwa';
+  device?: 'phone' | 'tablet';
   /** Ruta de la pantalla actual del preview pequeño (same-origin). Si es
    *  `null` se usa la raíz del producto como fallback. */
   initialSrc?: string | null;
@@ -392,9 +441,13 @@ function FullScreenPreview({
   const [scale, setScale] = useState(1);
   const { w, h } = ORIENTATION_DIMS[orientation];
   // Ruta del iframe fullscreen: la pantalla actual capturada, o el fallback
-  // a la raíz del producto.
+  // a la raíz del producto (device-aware para tablet).
   const kioskSrc = initialSrc ?? '/';
-  const pwaSrc = initialSrc ?? '/pwa';
+  const pwaSrc =
+    initialSrc ??
+    (device === 'tablet'
+      ? `/pwa?device=tablet&orientation=${orientation === 'tablet-landscape' ? 'landscape' : 'portrait'}`
+      : '/pwa');
 
   useEffect(() => {
     function fit() {

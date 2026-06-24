@@ -11,8 +11,8 @@ import type { LucideIcon } from 'lucide-react';
  *   `/studio/[client]/kiosk`
  *   `/studio/[client]/digital-displays`
  *   `/studio/[client]/video-walls`
- *   `/studio/[client]/mobile-pwa`     (coming soon)
- *   `/studio/[client]/tablets`        (coming soon)
+ *   `/studio/[client]/mobile-pwa`
+ *   `/studio/[client]/tablets`        (reusa el editor PWA; preview en tablet)
  */
 
 export type ProductStatus = 'live' | 'soon';
@@ -66,9 +66,7 @@ export const STUDIO_PRODUCTS: readonly StudioProduct[] = [
     label: 'Tablets',
     segment: 'tablets',
     icon: Tablet,
-    status: 'soon',
-    comingSoonCopy:
-      'Editor de Tablets para experiencias touch heredando branding del cliente. Disponible en próximas versiones.',
+    status: 'live',
   },
 ] as const;
 

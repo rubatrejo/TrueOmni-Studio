@@ -109,6 +109,8 @@ export function PwaShell({
   availableLocales,
   defaultLocale,
   mapboxToken,
+  deviceOverride = 'phone',
+  productLabel = 'Mobile PWA',
 }: {
   slug: string;
   nombre: string;
@@ -150,6 +152,12 @@ export function PwaShell({
   /** Token Mapbox del cliente (`integraciones.mapbox_token`) para los pickers de
    *  coords de Scavenger/Wayfinding. '' si no está configurado. */
   mapboxToken: string;
+  /** Form-factor del preview. `'tablet'` = card Tablets (el editor es el MISMO
+   *  de la PWA; solo cambia el preview a dims de tablet con tabs de orientación).
+   *  Default `'phone'` = el editor PWA de siempre. */
+  deviceOverride?: 'phone' | 'tablet';
+  /** Etiqueta del producto en el TopBar/breadcrumb. Default `'Mobile PWA'`. */
+  productLabel?: string;
 }) {
   const [activeTab, setActiveTab] = useState<PwaSectionKey>('branding');
   const [mobileTab, setMobileTab] = useState<MobileEditorTab>('editor');
@@ -353,7 +361,7 @@ export function PwaShell({
           currentVersion={meta?.currentVersion ?? 0}
           saveState={effectiveSaveState}
           isDirty={isDirty}
-          productLabel="Mobile PWA"
+          productLabel={productLabel}
           previewHref="/pwa"
           showExportImport={false}
           onPublish={() => void handlePublish()}
@@ -438,6 +446,7 @@ export function PwaShell({
                 slug={slug}
                 nombre={nombre}
                 product="pwa"
+                device={deviceOverride}
                 reloadKey={previewKey}
                 iframeRef={iframeRef}
                 onIframeLoad={onIframeLoad}

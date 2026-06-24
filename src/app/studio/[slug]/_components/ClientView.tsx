@@ -281,11 +281,10 @@ export function ClientView({
               segment="tablets"
               productSegment="tablets"
               label="Tablets"
-              description="Touch-first tablet experiences for the floor. Variante portátil del kiosk para staff."
+              description="Tu app móvil en formato tablet (portrait + landscape). Mismo contenido que la PWA."
               icon={Tablet}
-              status="soon"
-              soonTimeline="Exploring · 2027"
-              active={initialManifest.products.tablets}
+              status="live"
+              active={initialManifest.products.mobilePwa}
             />
           </div>
         </section>
@@ -295,7 +294,16 @@ export function ClientView({
 }
 
 function activeCount(products: ClientManifest['products']): number {
-  return Object.values(products).filter(Boolean).length;
+  // Tablet espeja a la PWA: cuenta como activo si la PWA lo está (igual que la
+  // card, que usa `active = mobilePwa`), para que el badge no diga "4" con 5 cards.
+  const tablets = products.tablets || products.mobilePwa;
+  return [
+    products.kiosks,
+    products.digitalDisplays,
+    products.mobilePwa,
+    products.videoWalls,
+    tablets,
+  ].filter(Boolean).length;
 }
 
 function SectionHeading({ title, subtitle }: { title: string; subtitle: string }) {

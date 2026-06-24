@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { PwaAdsSlot } from './ads/pwa-ads-slot';
 import { deviceDims, TABLET_STATUS_INSET, useDevice } from './device-context';
 import { PwaKeyboardProvider } from './pwa-keyboard-provider';
+import { isStandalone } from './runtime-detect';
 
 /** Padding alrededor del canvas en dev-view (fuera del iframe del Studio). */
 const VIEWPORT_PADDING_X_PX = 48;
@@ -23,14 +24,6 @@ function detectEmbedded(): boolean {
   } catch {
     return true; // cross-origin → asumimos embedded
   }
-}
-
-/** PWA instalada (añadida a inicio): el SO la lanza full-screen sin chrome del navegador. */
-function detectStandalone(): boolean {
-  if (typeof window === 'undefined') return false;
-  // iOS Safari expone `navigator.standalone`; el resto, el media query estándar.
-  const iosStandalone = (window.navigator as { standalone?: boolean }).standalone === true;
-  return iosStandalone || window.matchMedia('(display-mode: standalone)').matches;
 }
 
 /** Color del header/bottom-nav: rellena el notch y el home-indicator de forma continua. */
@@ -70,7 +63,7 @@ export function MobileCanvas({
 
   useEffect(() => {
     setEmbedded(detectEmbedded());
-    setStandalone(detectStandalone());
+    setStandalone(isStandalone());
   }, []);
 
   useEffect(() => {

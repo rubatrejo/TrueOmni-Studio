@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
+import { isStandalone } from './runtime-detect';
+
 /**
  * Form factor del runtime de la PWA. El producto **Tablet** reutiliza TODO el
  * runtime de la PWA (mismas rutas, mismo bridge, mismos datos `features.pwa`),
@@ -71,19 +73,55 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
+    // 1) Param explícito (preview del Studio, tests, dev-view) → fijo, gana siempre.
+    let fixed: { device: Device; orientation: Orientation } | null = null;
     try {
       const params = new URLSearchParams(window.location.search);
-      const device: Device = params.get('device') === 'tablet' ? 'tablet' : 'phone';
-      const orientation: Orientation =
-        params.get('orientation') === 'landscape' ? 'landscape' : 'portrait';
+      const dParam = params.get('device');
+      const oParam = params.get('orientation');
+      if (dParam !== null || oParam !== null) {
+        const device: Device = dParam === 'tablet' ? 'tablet' : 'phone';
+        const orientation: Orientation = oParam === 'landscape' ? 'landscape' : 'portrait';
+        fixed = { device, orientation };
+      }
+    } catch {
+      /* sin window/params → cae a la resolución por defecto (phone) */
+    }
+
+    // 2) Standalone (dispositivo real desplegado) → auto-detección por viewport.
+    // 3) Si no (pestaña normal / dev-view sin param) → phone (comportamiento actual).
+    const resolve = (): { device: Device; orientation: Orientation } => {
+      if (fixed) return fixed;
+      if (isStandalone()) {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        const device: Device = Math.min(w, h) >= 600 ? 'tablet' : 'phone';
+        const orientation: Orientation = device === 'tablet' && w >= h ? 'landscape' : 'portrait';
+        return { device, orientation };
+      }
+      return { device: 'phone', orientation: 'portrait' };
+    };
+
+    const apply = () => {
+      const { device, orientation } = resolve();
       setValue({
         device,
         orientation,
         isTablet: device === 'tablet',
         isLandscape: device === 'tablet' && orientation === 'landscape',
       });
-    } catch {
-      /* ignore — sin window/params nos quedamos en phone */
+    };
+    apply();
+
+    // Rotación / resize en vivo SOLO cuando auto-detectamos (con param el valor es fijo:
+    // el preview del Studio no debe cambiar al redimensionar la ventana del editor).
+    if (!fixed) {
+      window.addEventListener('resize', apply);
+      window.addEventListener('orientationchange', apply);
+      return () => {
+        window.removeEventListener('resize', apply);
+        window.removeEventListener('orientationchange', apply);
+      };
     }
   }, []);
 

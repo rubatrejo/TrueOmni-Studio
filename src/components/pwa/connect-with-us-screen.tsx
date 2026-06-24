@@ -127,7 +127,7 @@ export function ConnectWithUsScreen({
   mapboxToken,
 }: ConnectWithUsScreenProps) {
   const router = useRouter();
-  const { isTablet } = useDevice();
+  const { isTablet, isLandscape } = useDevice();
   const [hoursOpen, setHoursOpen] = useState(false);
   useEscapeToClose(hoursOpen, () => setHoursOpen(false));
 
@@ -366,14 +366,15 @@ export function ConnectWithUsScreen({
 
           {/* Mapa interactivo (overlay HTML, fuera del scale del SVG). Más alto en
               tablet (mapH). El SVG se centra (meet) a 390px; alineamos el mapa a ese
-              mismo ancho y centro para que no quede corrido respecto al contenido. */}
+              mismo ancho y centro. En landscape el mapa va FULL-WIDTH (rompe la
+              columna centrada del contenido). */}
           <div
             className="absolute overflow-hidden"
             style={{
               top: MAP_TOP * S,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 375 * S,
+              left: isLandscape ? 0 : '50%',
+              transform: isLandscape ? 'none' : 'translateX(-50%)',
+              width: isLandscape ? '100%' : 375 * S,
               height: mapH * S,
             }}
           >

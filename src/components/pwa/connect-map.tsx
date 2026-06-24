@@ -64,7 +64,14 @@ export function ConnectMap({
       .setLngLat([coords.lng, coords.lat])
       .addTo(map);
 
+    // El canvas de Mapbox fija su tamaño en el init; si el contenedor cambia de
+    // ancho después (p. ej. el mapa de Connect pasa a full-width en landscape tras
+    // el switch de device), hay que re-encajarlo o queda angosto a la izquierda.
+    const ro = new ResizeObserver(() => map.resize());
+    ro.observe(containerRef.current);
+
     return () => {
+      ro.disconnect();
       map.remove();
       mapRef.current = null;
     };

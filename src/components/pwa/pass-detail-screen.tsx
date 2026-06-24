@@ -4,6 +4,7 @@ import { resolveAssetUrl } from '@/lib/asset-url';
 import type { PassActivity, PassItem, PwaPassesModuleConfig } from '@/lib/config';
 
 import { PwaBottomNav } from './bottom-nav';
+import { useDevice } from './device-context';
 import { S } from './mobile-layer';
 import { PwaSubHeader } from './pwa-sub-header';
 import { ShareIconButton } from './share-icon-button';
@@ -86,10 +87,12 @@ export function PassDetailScreen({
   pass: PassItem;
   texts: PwaPassesModuleConfig;
 }) {
+  const { isTablet, isLandscape } = useDevice();
   return (
     <div className="relative flex h-full w-full flex-col bg-background">
-      {/* Header brand (escalado) */}
-      <div className="relative z-10 shrink-0" style={{ height: 90 * S }}>
+      {/* Header brand. En tablet el PwaSubHeader se portalea full-width 64px → el
+          spacer iguala ese alto para PEGAR el hero (sin el gap blanco del 90·S). */}
+      <div className="relative z-10 shrink-0" style={{ height: isTablet ? 64 : 90 * S }}>
         <div
           className="absolute left-0 top-0"
           style={{ width: 375, height: 90, transform: `scale(${S})`, transformOrigin: 'top left' }}
@@ -104,10 +107,14 @@ export function PassDetailScreen({
 
       {/* Cuerpo scroll */}
       <div className="scrollbar-hide flex-1 overflow-y-auto bg-background">
-        {/* Hero */}
+        {/* Hero — en tablet más alto (220) para que la imagen luzca y quede pegada
+            al header. Phone = 160 (sin cambios). */}
         <div
           className="relative w-full bg-cover bg-center"
-          style={{ height: 160, backgroundImage: `url("${resolveAssetUrl(pass.cover)}")` }}
+          style={{
+            height: isTablet ? 220 : 160,
+            backgroundImage: `url("${resolveAssetUrl(pass.cover)}")`,
+          }}
         >
           <span
             className="absolute inset-0"
@@ -138,11 +145,13 @@ export function PassDetailScreen({
           ) : null}
         </div>
 
-        {/* Lista de actividades */}
+        {/* Lista de actividades — landscape: 2 columnas (aprovecha el ancho). */}
         {pass.activities.length > 0 ? (
-          pass.activities.map((a) => (
-            <ActivityRow key={a.slug} activity={a} viewWebsite={texts.viewWebsite} />
-          ))
+          <div className={isLandscape ? 'grid grid-cols-2' : ''}>
+            {pass.activities.map((a) => (
+              <ActivityRow key={a.slug} activity={a} viewWebsite={texts.viewWebsite} />
+            ))}
+          </div>
         ) : (
           <p
             className="px-[14px] py-8 text-center"

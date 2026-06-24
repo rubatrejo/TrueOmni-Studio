@@ -124,7 +124,7 @@ export function DashboardScreenTablet({
           grid de tiles (mismo UI), así que el hero cubre todo ese espacio. */}
       <div
         className="relative shrink-0 overflow-hidden"
-        style={{ height: isLandscape ? 210 : 286 }}
+        style={{ height: isLandscape ? 230 : 286 }}
       >
         <div
           className="absolute inset-0 bg-cover bg-center"

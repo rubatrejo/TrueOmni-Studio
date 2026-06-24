@@ -401,27 +401,31 @@ export function ListingsDetailScreen({
               {texts.openDiningGuide}
             </button>
           )}
+        </div>
 
-          {/* Mapa — Trails: 2 tabs (mapa / ruta GeoJSON); resto: pin simple */}
-          {trailMap ? (
-            <PwaTrailMap
-              data={trailMap.data}
-              token={mapboxToken}
-              defaultLabel={trailMap.defaultLabel}
-              trailLabel={trailMap.trailLabel}
-              title={detail.title}
-            />
-          ) : (
-            <MapboxMap
-              token={mapboxToken}
-              coords={detail.coords}
-              interactive
-              pinScale={0.6}
-              className="w-full"
-              style={{ height: isTablet ? 280 : 150 }}
-            />
-          )}
+        {/* Mapa — full-width en landscape (rompe la columna centrada). Trails:
+              2 tabs (mapa / ruta GeoJSON); resto: pin simple. */}
+        {trailMap ? (
+          <PwaTrailMap
+            data={trailMap.data}
+            token={mapboxToken}
+            defaultLabel={trailMap.defaultLabel}
+            trailLabel={trailMap.trailLabel}
+            title={detail.title}
+          />
+        ) : (
+          <MapboxMap
+            token={mapboxToken}
+            coords={detail.coords}
+            interactive
+            pinScale={0.6}
+            className="w-full"
+            style={{ height: isTablet ? 280 : 150 }}
+          />
+        )}
 
+        {/* Reabre la columna centrada para el resto del contenido textual. */}
+        <div className={isLandscape ? 'mx-auto w-full max-w-[840px]' : 'contents'}>
           {/* Dirección + Directions */}
           <div
             className="border-b px-[18px] py-4"

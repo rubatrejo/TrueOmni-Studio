@@ -137,9 +137,11 @@ export function EventsTimelineScreen({
 
   return (
     <div className="relative flex h-full w-full flex-col bg-background">
-      {/* Header brand: avatar + buscador + inbox */}
+      {/* Header brand: avatar + buscador + inbox. En tablet el `pt-11` (notch del
+          phone) sobra — el canvas ya reserva el status inset — y dejaba el header
+          de Events más alto que el de las listas. Se baja a pt-3 para igualarlos. */}
       <div
-        className="flex shrink-0 items-center gap-2.5 px-3 pb-2.5 pt-11"
+        className={`flex shrink-0 items-center gap-2.5 px-3 pb-2.5 ${isTablet ? 'pt-3' : 'pt-11'}`}
         style={{ backgroundColor: BRAND }}
       >
         <button

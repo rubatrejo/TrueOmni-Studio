@@ -112,7 +112,11 @@ export function ListingsListScreen({
           onFilter={() => setFilterOpen(true)}
           filterActive={filterActive}
         >
-          <PwaTabletSegmented tabs={tabs} tab={tab} onChange={setTab} />
+          {/* Landscape: el segmented no va full-width (queda enorme); se limita a
+              la mitad del ancho. Portrait = full-width (sin cambios). */}
+          <div className={isLandscape ? 'w-1/2' : ''}>
+            <PwaTabletSegmented tabs={tabs} tab={tab} onChange={setTab} />
+          </div>
         </PwaListTabletHeader>
       ) : (
         <div

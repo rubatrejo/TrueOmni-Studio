@@ -19,6 +19,7 @@ import type { TicketableEvent } from '@/lib/tickets';
 
 import { PwaBottomNav } from './bottom-nav';
 import { ProfileIcon, SearchIcon } from './dashboard-icons';
+import { useDevice } from './device-context';
 import { PwaFilterOverlay, type FilterTexts } from './pwa-filter-overlay';
 import { PwaHeart } from './pwa-heart';
 import { PwaWeekPicker } from './pwa-week-picker';
@@ -79,6 +80,7 @@ export function TicketsScreen({
   tickets: TicketableEvent[];
 }) {
   const router = useRouter();
+  const { isLandscape } = useDevice();
   const [query, setQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState(() => initialDate(tickets));
   // Favoritos de tickets persistentes (sessionStorage) — C3.
@@ -225,7 +227,8 @@ export function TicketsScreen({
             {texts.emptyState}
           </p>
         ) : (
-          <ul className="pb-4 pt-[11px]">
+          // Landscape: 2 columnas de tiles (timeline en 2 columnas).
+          <ul className={`pb-4 pt-[11px] ${isLandscape ? 'grid grid-cols-2 gap-x-4' : ''}`}>
             {visible.map((event, i) => {
               const isFirst = i === 0;
               const isLast = i === visible.length - 1;

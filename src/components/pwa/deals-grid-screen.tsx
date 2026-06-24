@@ -50,7 +50,7 @@ export function DealsGridScreen({
   featureCatalog: string[];
 }) {
   const router = useRouter();
-  const { isTablet } = useDevice();
+  const { isTablet, isLandscape } = useDevice();
   const [query, setQuery] = useState('');
   const [sortOpen, setSortOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -188,7 +188,9 @@ export function DealsGridScreen({
       {/* Grid 2-col / empty */}
       <div className="scrollbar-hide flex-1 overflow-y-auto bg-background">
         {visible.length > 0 ? (
-          <div className="grid grid-cols-2 gap-3 px-4 pb-5 pt-2">
+          <div
+            className={`grid gap-3 px-4 pb-5 pt-2 ${isLandscape ? 'grid-cols-3' : 'grid-cols-2'}`}
+          >
             {visible.map((d) => (
               <DealCardPwa
                 key={d.slug}

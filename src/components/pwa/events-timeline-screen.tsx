@@ -77,7 +77,7 @@ export function EventsTimelineScreen({
   events: EventItem[];
 }) {
   const router = useRouter();
-  const { isTablet, isLandscape } = useDevice();
+  const { isTablet } = useDevice();
   const [query, setQuery] = useState('');
   // Favoritos de eventos persistentes (sessionStorage, compartido con el kiosk) — C3.
   const { isFavorited, toggle: toggleFav } = useEventFavorites();
@@ -254,8 +254,8 @@ export function EventsTimelineScreen({
                     <span style={{ fontSize: 24 }}>{marker.day}</span>
                     <span style={{ fontSize: 16 }}>{marker.monthShort}</span>
                   </h2>
-                  {/* Landscape: 3 columnas por día (aprovecha el ancho); portrait = 2. */}
-                  <div className={`grid gap-5 ${isLandscape ? 'grid-cols-3' : 'grid-cols-2'}`}>
+                  {/* Tablet: 2 columnas por día en ambas orientaciones. */}
+                  <div className="grid grid-cols-2 gap-5">
                     {group.events.map((event) => (
                       <div key={event.slug} className="flex flex-col">
                         <button

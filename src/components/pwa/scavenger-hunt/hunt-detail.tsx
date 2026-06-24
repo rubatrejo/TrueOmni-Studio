@@ -7,6 +7,7 @@ import { resolveAssetUrl } from '@/lib/asset-url';
 import type { ScavengerHunt, PwaScavengerHuntConfig } from '@/lib/config';
 
 import { PwaBottomNav } from '../bottom-nav';
+import { useDevice } from '../device-context';
 import { S } from '../mobile-layer';
 import { PwaSubHeader } from '../pwa-sub-header';
 
@@ -39,6 +40,7 @@ export function HuntDetail({
   clientCoords,
 }: HuntDetailProps) {
   const [tab, setTab] = useState<'tasks' | 'map'>('tasks');
+  const { isTablet } = useDevice();
   const { completionPercent, completedCount, isCompleted, isTaskCompleted } = useHuntProgress(
     hunt.slug,
     hunt.tasks.length,
@@ -71,7 +73,9 @@ export function HuntDetail({
 
       {/* Hero image (fijo en ambos tabs; el contenido de abajo es lo que cambia) */}
       <div
-        className="relative mx-4 h-[130px] overflow-hidden rounded-[10px] bg-cover bg-center"
+        className={`relative mx-4 overflow-hidden rounded-[10px] bg-cover bg-center ${
+          isTablet ? 'h-[156px]' : 'h-[130px]'
+        }`}
         style={{ backgroundImage: `url(${heroSrc})` }}
       >
         <span className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

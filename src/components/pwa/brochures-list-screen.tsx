@@ -66,7 +66,7 @@ export function BrochuresListScreen({
   brochures: BrochureItem[];
 }) {
   const router = useRouter();
-  const { isTablet } = useDevice();
+  const { isTablet, isLandscape } = useDevice();
   const [category, setCategory] = useState<string>('all');
   const [query, setQuery] = useState('');
 
@@ -186,7 +186,8 @@ export function BrochuresListScreen({
             {texts.noResults.replace('{query}', query.trim())}
           </p>
         ) : (
-          <ul className="px-4 py-4">
+          // Landscape: 2 columnas de brochures.
+          <ul className={`px-4 py-4 ${isLandscape ? 'grid grid-cols-2 gap-x-3.5' : ''}`}>
             {visible.map((b) => (
               <li key={b.slug} className="mb-3.5">
                 <button

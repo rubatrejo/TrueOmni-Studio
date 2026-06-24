@@ -11,6 +11,7 @@ import { pwaShare } from '@/lib/pwa-share';
 
 import { PwaBottomNav } from './bottom-nav';
 import { BrochureGridOverlay } from './brochure-grid-overlay';
+import { useDevice } from './device-context';
 import { ShareIconButton } from './share-icon-button';
 
 const MIN_ZOOM = 0.75;
@@ -91,6 +92,7 @@ export function BrochureReaderScreen({
   texts: PwaDigitalBrochureModuleConfig;
 }) {
   const router = useRouter();
+  const { isLandscape } = useDevice();
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const [totalPages, setTotalPages] = useState<number>(brochure.pageCount);
   const [currentPage, setCurrentPage] = useState(1);
@@ -382,12 +384,42 @@ export function BrochureReaderScreen({
         ) : (
           // `margin:auto` en flex centra vertical y horizontalmente cuando la página
           // cabe; cuando hay zoom (overflow) permite hacer scroll/pan a todos los bordes.
-          <div className="p-3" style={{ width: `${zoom * 100}%`, margin: 'auto' }}>
+          // Landscape (sin zoom): se ve la PÁGINA COMPLETA (contain) — cabe a lo alto
+          // del canvas corto aunque queden espacios a los lados, en vez de llenar el
+          // ancho y desbordar verticalmente.
+          <div
+            className="p-3"
+            style={
+              isLandscape && zoom <= FIT_ZOOM
+                ? {
+                    width: '100%',
+                    height: '100%',
+                    margin: 'auto',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }
+                : { width: `${zoom * 100}%`, margin: 'auto' }
+            }
+          >
             <BrochurePdfPage
               pdf={pdf}
               pageNumber={currentPage}
               scale={RENDER_SCALE}
-              canvasStyle={{ width: '100%', maxWidth: 'none', height: 'auto', margin: '0 auto' }}
+              style={
+                isLandscape && zoom <= FIT_ZOOM ? { height: '100%', maxWidth: '100%' } : undefined
+              }
+              canvasStyle={
+                isLandscape && zoom <= FIT_ZOOM
+                  ? {
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      width: 'auto',
+                      height: 'auto',
+                      margin: '0 auto',
+                    }
+                  : { width: '100%', maxWidth: 'none', height: 'auto', margin: '0 auto' }
+              }
             />
           </div>
         )}

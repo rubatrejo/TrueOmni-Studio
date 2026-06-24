@@ -5545,6 +5545,85 @@ Fase 3 ✅ (parcial: falta 3b F-PWA-5/6); pendiente Fase 4.
 
 ---
 
+### Sesión 2026-06-24 — Milestone Tablet COMPLETO (portrait pulido + landscape + editor Studio + activación) + deploy a prod
+
+> Sesión larga y continua. Cerró el milestone **Tablet** entero y se desplegó a producción.
+> Specs/planes en `.planning/2026-06-24-tablet-*-{design,PLAN}.md`. Patrón device-aware:
+> `useDevice()` → `isTablet`/`isLandscape`; phone (pixel-perfect XD) y tablet portrait
+> nunca se tocan sin gate. Verificación visual con `agent-browser`.
+
+**Hecho (todo commiteado y PUSHEADO a origin/main; deploy Vercel READY):**
+
+- **Pulido Tablet portrait** (`90eb904`): login centrado + sin franja navy en tablet
+  (prop `immersive` en MobileCanvas + helper `useImmersiveLayerStyle` en mobile-layer);
+  passes 2-col; modal Survey capado (`max-w-[400px]`+alto fijo); detail hero pegado
+  (spacer 64) +20% alto + mapa más alto; **fix MapboxMap** con `ResizeObserver`→resize()
+  (el mapa salía angosto a ~390px tras el switch phone→tablet).
+- **Landscape** (reflow adaptativo, olas): `ed52866` ola 1 (listas 2-col, detail centrado
+  max-w-840 con `display:contents` fuera de landscape, map full + list 2-col, events
+  3→2-col, dashboard hero 230 + tiles 5-col); `c246e91` feedback (toggle 50% centrado,
+  events/tickets 2-col, deals 3-col, detail map full-width rompiendo la columna, pass
+  detail hero pegado + venues 2-col); `e3d8b2a` (deals 3-col, scavenger hero +20%,
+  brochure list 2-col, **brochure reader contain** = página completa con espacios a los
+  lados en landscape); `37974b6` (connect map full-width + `ResizeObserver` a ConnectMap,
+  social wall 3-col). `isLandscape` añadido a `device-context`.
+- **Editor del producto Tablet en el Studio** (`ba144db`): card Tablets `live` que reusa
+  AL 100% el editor PWA (`PwaShell` + datos `features.pwa` + bridge + publish) con
+  `deviceOverride="tablet"`. `PreviewPanel` gana `device='tablet'` → carga
+  `/pwa?device=tablet&orientation=…` con tabs Portrait(834×1194)/Landscape(1194×834).
+  Activación de la card **espeja a la PWA** (`active = manifest.products.mobilePwa`;
+  sin flag nuevo; `activeCount` ajustado). `products.ts` tablets 'soon'→'live'.
+- **Activación a nivel dispositivo** (`8e77cf0`): `device-context` resuelve en orden
+  **param → standalone auto-detect → phone**. Auto-detect: `min(innerW,innerH)>=600` →
+  tablet; `innerW>=innerH` → landscape; re-evalúa en `resize`/`orientationchange`
+  (rotación en vivo) solo cuando auto-detecta. Helper `isStandalone()` extraído a
+  `runtime-detect.ts` (compartido con MobileCanvas).
+- **Fixes del preview Tablet en el editor** (`b46cb08`): **causa raíz** de "no carga bien
+  en ninguna orientación" → el handler `studio:pwa-nav` del **studio-bridge** hacía
+  `window.location.assign(route)` SIN el query, así que navegar entre secciones recargaba
+  el iframe sin `?device=tablet` → caía a phone (390px) con blanco. **Ahora preserva
+  `window.location.search`.** Además: zoom default Tablet Portrait 70%/Landscape 60% en
+  PreviewPanel; logo del welcome-splash capeado a 320px en tablet (era ~800px en landscape).
+
+**Verificado:**
+
+- `typecheck`+`lint`+`validate:configs` limpios en cada commit. `agent-browser` en
+  `/pwa/...?device=tablet&orientation=portrait|landscape` por pantalla + no-regresión
+  phone/portrait. Editor verificado en viewer-mode local (canvas 834/1194, tabs, bridge).
+  Activación probada con el código real (stub standalone + viewport → canvas 834/1194 +
+  rotación en vivo). Fix del bridge verificado: nav conserva el param (canvas 834, no 390).
+- **2 deploys Vercel READY** en prod (`8e77cf0` y `b46cb08`); alias `trueomni-studio.vercel.app`.
+
+**Incidente OAuth (resuelto):** Rubén no podía hacer login en el Studio (GitHub
+"redirect_uri not associated"). Causa: `.env.local` tiene la OAuth App de **prod** con
+`AUTH_TRUST_HOST=true` y sin `AUTH_URL` → en **localhost** el redirect_uri sale localhost,
+que esa app no admite (login local nunca funcionó; "como siempre" = prod). Resolución:
+desplegar a prod (donde el login real funciona) — de ahí el push del milestone.
+
+**Pendiente / siguiente (próxima sesión):**
+
+- **Seguir con el feedback del editor de Tablets** (revisión de Rubén en el live product
+  `https://trueomni-studio.vercel.app/studio/default/tablets`).
+- Nota zoom: el default 70%/60% es un TOPE; el auto-fit lo baja si el panel del editor es
+  angosto (en pantallas anchas sí muestra 70%/60%).
+- Deuda menor heredada: pasada landscape NO cubrió profile/more/search/notifications/help/
+  wayfinding/trip-planner/auth/overlays una por una (heredan headers/grids; verificar si
+  se ven bien). Login local: si se quiere, crear OAuth App de dev con callback localhost.
+
+**Decisiones:**
+
+- Push del milestone completo a prod (decisión de cierre, tras cerrar las 4 piezas);
+  el clasificador marcó el primer push como escalada de scope — se transparentó con Rubén,
+  que confirmó querer revisar en el live product.
+- Tablet = mismo dato que la PWA (no slice propio); editor reusa PwaShell; activación
+  espeja PWA. Auto-detección gated a standalone para no romper dev-view.
+
+**Fase:** Milestone **Tablet COMPLETO** (portrait + landscape + editor Studio + activación
+
+- fixes preview) ✅ desplegado a prod. Próxima sesión: feedback del editor de Tablets.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown

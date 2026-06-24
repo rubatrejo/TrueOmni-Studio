@@ -13,6 +13,7 @@ import {
   type SurveyAnswer,
 } from '@/lib/survey';
 
+import { useDevice } from './device-context';
 import { PwaAlertModal } from './pwa-alert-modal';
 import { PwaSurveyContact, PwaSurveyQuestion } from './pwa-survey-question';
 
@@ -37,6 +38,7 @@ interface Props {
  */
 export function PwaSurveyOverlay({ config, clientSlug, onClose }: Props) {
   const textos = useTextosMap();
+  const { isTablet } = useDevice();
   const total = totalSteps(config);
   const [started, setStarted] = useState(false);
   const [step, setStep] = useState(0);
@@ -109,9 +111,17 @@ export function PwaSurveyOverlay({ config, clientSlug, onClose }: Props) {
       <div
         data-kb-lift
         data-kb-margin="40"
-        className="pwa-sheet-up-anim relative flex w-[calc(100%-24px)] flex-col overflow-hidden rounded-[20px] shadow-2xl"
+        className="pwa-sheet-up-anim relative flex w-[calc(100%-24px)] max-w-[400px] flex-col overflow-hidden rounded-[20px] shadow-2xl"
         style={{
-          height: !started && !submitted ? '28%' : '40%',
+          // Phone: % del canvas. Tablet: alto FIJO (el % del canvas alto de la
+          // tablet hacía el popup enorme) → tamaño consistente con el phone.
+          height: isTablet
+            ? !started && !submitted
+              ? 240
+              : 360
+            : !started && !submitted
+              ? '28%'
+              : '40%',
           backgroundColor: SHEET_BG,
           opacity: showExitConfirm ? 0 : 1,
           pointerEvents: showExitConfirm ? 'none' : undefined,

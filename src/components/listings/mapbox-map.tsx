@@ -63,7 +63,16 @@ export function MapboxMap({
       .setLngLat([coords.lng, coords.lat])
       .addTo(map);
 
+    // El canvas de Mapbox fija su tamaño al del contenedor en el init y NO se
+    // reajusta solo si el contenedor cambia de tamaño después. En la PWA el
+    // device pasa de phone→tablet tras el mount (hydration-safe), agrandando el
+    // contenedor: sin esto el mapa quedaba renderizado al ancho phone (~390px)
+    // angosto a la izquierda del canvas tablet. El observer lo re-encaja.
+    const ro = new ResizeObserver(() => map.resize());
+    ro.observe(containerRef.current);
+
     return () => {
+      ro.disconnect();
       map.remove();
     };
   }, [token, coords.lat, coords.lng, zoom, interactive, pinScale]);

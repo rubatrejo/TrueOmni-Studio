@@ -27,6 +27,31 @@ export function useLayerScale(): number {
 }
 
 /**
+ * Estilo del layer 375×812 de las pantallas **inmersivas** (login / create
+ * account / forgot password / check email / photo): fondo fullscreen + bloque de
+ * contenido en coords verbatim del XD.
+ *
+ * - **Phone:** `scale(S)` anclado top-left (idéntico al XD, sin cambios).
+ * - **Tablet:** el MISMO bloque escalado ×S pero **centrado** (vertical y
+ *   horizontal) en el canvas del device, en vez de pegado arriba-izquierda. Así
+ *   en la tablet la tarjeta de login queda al centro y no diminuta en la esquina.
+ *
+ * El offset se clampa a ≥0 para que en orientaciones donde el bloque casi llena
+ * el canvas no se recorte por arriba/izquierda.
+ */
+export function useImmersiveLayerStyle(): React.CSSProperties {
+  const { device, orientation } = useDevice();
+  const base = { width: 375, height: 812, transformOrigin: 'top left' } as const;
+  if (device !== 'tablet') {
+    return { ...base, transform: `scale(${S})` };
+  }
+  const { w, h } = deviceDims(device, orientation);
+  const tx = Math.max(0, (w - 375 * S) / 2);
+  const ty = Math.max(0, (h - 812 * S) / 2);
+  return { ...base, transform: `translate(${tx}px, ${ty}px) scale(${S})` };
+}
+
+/**
  * Capa con coordenadas verbatim del XD (375 de ancho) escalada al ancho del
  * canvas del device. Los hijos se posicionan en absoluto en el espacio 375; el
  * `transform: scale` crea el bloque contenedor para esos absolutos. En phone el

@@ -28,8 +28,9 @@ export function PassesGridScreen({ title, passes }: { title: string; passes: Pas
 
   return (
     <div className="relative flex h-full w-full flex-col bg-background">
-      {/* Header brand (escalado) */}
-      <div className="relative z-10 shrink-0" style={{ height: 90 * S }}>
+      {/* Header brand (escalado en phone; en tablet el PwaSubHeader se portalea
+          full-width 64px → el spacer en flujo iguala ese alto para pegar el cuerpo). */}
+      <div className="relative z-10 shrink-0" style={{ height: isTablet ? 64 : 90 * S }}>
         <div
           className="absolute left-0 top-0"
           style={{ width: 375, height: 90, transform: `scale(${S})`, transformOrigin: 'top left' }}
@@ -38,8 +39,12 @@ export function PassesGridScreen({ title, passes }: { title: string; passes: Pas
         </div>
       </div>
 
-      {/* Cuerpo scroll: cards de passes */}
-      <div className="scrollbar-hide flex-1 space-y-3 overflow-y-auto bg-background px-4 pb-5 pt-3">
+      {/* Cuerpo scroll: cards de passes. Phone = columna; tablet = grid 2-col. */}
+      <div
+        className={`scrollbar-hide flex-1 overflow-y-auto bg-background px-4 pb-5 pt-3 ${
+          isTablet ? 'grid grid-cols-2 content-start gap-3' : 'space-y-3'
+        }`}
+      >
         {passes.map((p) => (
           <button
             key={p.slug}

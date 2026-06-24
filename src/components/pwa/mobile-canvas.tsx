@@ -46,7 +46,18 @@ const BRAND = 'hsl(var(--brand-primary))';
  * Hydration safety (igual que `KioskCanvas`): SSR no conoce `window.parent`, así que
  * arrancamos en `embedded=false` (= SSR) y leemos el valor real tras mount.
  */
-export function MobileCanvas({ children }: { children: ReactNode }) {
+export function MobileCanvas({
+  children,
+  immersive = false,
+}: {
+  children: ReactNode;
+  /**
+   * Pantalla **inmersiva** (fondo fullscreen, sin header navy): login, welcome,
+   * create account, forgot password… En tablet NO reservamos la franja del status
+   * bar ni pintamos la barra navy superior, para que el fondo llegue al borde.
+   */
+  immersive?: boolean;
+}) {
   const { device, orientation } = useDevice();
   // Dimensiones del canvas según el form factor (phone 390×844 intacto; tablet
   // = dims iPad por orientación). Las pantallas con layout de tablet reflowean
@@ -79,10 +90,10 @@ export function MobileCanvas({ children }: { children: ReactNode }) {
   // En tablet reservamos una franja navy arriba (status bar del SO: hora + batería/
   // wifi). El contenido de TODAS las pantallas baja por el `paddingTop` del canvas,
   // así el header navy de cada una continúa el color de la franja. Phone = 0.
-  const tabletInset = isTablet ? TABLET_STATUS_INSET : 0;
+  const tabletInset = isTablet && !immersive ? TABLET_STATUS_INSET : 0;
   const body = (
     <>
-      {isTablet ? (
+      {isTablet && !immersive ? (
         // La franja SOLAPA ~12px el header (navy sobre navy) para tapar el seam
         // sub-pixel (línea blanca) entre el área de padding y el header en flujo.
         <div

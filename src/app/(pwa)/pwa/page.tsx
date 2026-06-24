@@ -18,7 +18,7 @@ export default async function PwaHomePage() {
   const welcome = resolvePwaConfigImages(config)?.welcome;
 
   return (
-    <MobileCanvas>
+    <MobileCanvas immersive>
       <WelcomeSplashLive welcome={welcome} logoAlt={config.branding.logo.alt} />
     </MobileCanvas>
   );

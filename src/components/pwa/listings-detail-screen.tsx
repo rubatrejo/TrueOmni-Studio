@@ -9,6 +9,7 @@ import type { DayOpen, TrailConsiderations } from '@/lib/config';
 import { useFavorites } from '@/lib/favorites';
 
 import { PwaBottomNav, type PwaNavKey } from './bottom-nav';
+import { useDevice } from './device-context';
 import { S } from './mobile-layer';
 import { PwaConsiderations, type ConsiderationsLabels } from './pwa-considerations';
 import { PwaHeart } from './pwa-heart';
@@ -159,6 +160,7 @@ export function ListingsDetailScreen({
 }) {
   // Favorito persistente (sessionStorage, compartido con kiosk + Trip Planner) — C3.
   const { isFavorited, toggle: toggleFav } = useFavorites();
+  const { isTablet } = useDevice();
   const fav = isFavorited(detail.slug);
   const [menuOpen, setMenuOpen] = useState(false);
   const hasHeroAction = heroPrimaryAction.kind !== 'none';
@@ -196,8 +198,10 @@ export function ListingsDetailScreen({
 
   return (
     <div className="relative flex h-full w-full flex-col bg-background">
-      {/* Header fijo (sub-header compartido) */}
-      <div className="relative z-10 shrink-0" style={{ height: 90 * S }}>
+      {/* Header fijo (sub-header compartido). En tablet el PwaSubHeader se portalea
+          full-width 64px → el spacer en flujo iguala ese alto para PEGAR el hero
+          al header (sin el gap blanco que dejaba el spacer de 90·S). */}
+      <div className="relative z-10 shrink-0" style={{ height: isTablet ? 64 : 90 * S }}>
         <div
           className="absolute left-0 top-0"
           style={{ width: 375, height: 90, transform: `scale(${S})`, transformOrigin: 'top left' }}
@@ -212,10 +216,14 @@ export function ListingsDetailScreen({
 
       {/* Cuerpo scrolleable */}
       <div className="scrollbar-hide flex-1 overflow-y-auto">
-        {/* Hero */}
+        {/* Hero — en tablet +20% de alto para que la imagen luzca más. Phone
+            queda en 200 (pixel-perfect del XD). */}
         <div
           className="relative w-full bg-cover bg-center"
-          style={{ height: 200, backgroundImage: `url("${resolveAssetUrl(detail.image)}")` }}
+          style={{
+            height: isTablet ? 240 : 200,
+            backgroundImage: `url("${resolveAssetUrl(detail.image)}")`,
+          }}
         >
           <span
             className="absolute inset-0"
@@ -405,7 +413,7 @@ export function ListingsDetailScreen({
             interactive
             pinScale={0.6}
             className="w-full"
-            style={{ height: 150 }}
+            style={{ height: isTablet ? 280 : 150 }}
           />
         )}
 

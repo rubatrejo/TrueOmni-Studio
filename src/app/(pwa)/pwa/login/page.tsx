@@ -39,7 +39,7 @@ export default async function PwaLoginPage() {
     login.background ?? resolvedPwa?.welcome?.background ?? 'assets/pwa/welcome-bg.jpg';
 
   return (
-    <MobileCanvas>
+    <MobileCanvas immersive>
       <LoginScreenLive
         login={login}
         loginError={pwa?.loginError ?? FALLBACK_ERROR}

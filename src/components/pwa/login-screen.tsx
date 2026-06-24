@@ -8,6 +8,7 @@ import { useCurrentLocale } from '@/components/i18n-provider';
 import { resolveAssetUrl } from '@/lib/asset-url';
 
 import { LoginErrorModal } from './login-error-modal';
+import { useImmersiveLayerStyle } from './mobile-layer';
 import { PwaPrimaryButton } from './pwa-button';
 import { GlobeIcon, PwaLanguageSheet } from './pwa-language-sheet';
 import { AppleSocialIcon, FacebookSocialIcon, GoogleSocialIcon } from './social-icons';
@@ -15,8 +16,6 @@ import { AppleSocialIcon, FacebookSocialIcon, GoogleSocialIcon } from './social-
 /** Validación mock de email (sin backend): formato básico. */
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** El XD está a 375×812; el canvas es 390×844 → se escala el layer ×1.04. */
-const SCALE = 390 / 375;
 /** Fuente Open Sans (la usa el XD en labels y placeholders). */
 const OPEN_SANS = { fontFamily: 'var(--font-open-sans)' } as const;
 
@@ -127,6 +126,8 @@ export function LoginScreen({
 }: LoginScreenProps) {
   const router = useRouter();
   const locale = useCurrentLocale();
+  // Layer 375×812: top-left en phone (verbatim XD), centrado en tablet.
+  const layerStyle = useImmersiveLayerStyle();
   // Logo: tamaño (escala width/height base 251.4×46.2) + posición (offset px).
   const logoScale = LOGO_SCALE[logoSize ?? 'M'];
   const logoW = 251.4 * logoScale;
@@ -160,16 +161,9 @@ export function LoginScreen({
       />
       <div className="absolute inset-0 bg-black/80" />
 
-      {/* Layer 375×812 con coords verbatim del XD, escalado al canvas 390×844. */}
-      <div
-        className="absolute left-0 top-0"
-        style={{
-          width: 375,
-          height: 812,
-          transform: `scale(${SCALE})`,
-          transformOrigin: 'top left',
-        }}
-      >
+      {/* Layer 375×812 con coords verbatim del XD. Phone: escalado top-left.
+          Tablet: el mismo bloque centrado en el canvas (login al centro). */}
+      <div className="absolute left-0 top-0" style={layerStyle}>
         {/* Logo */}
         <div
           className="absolute"

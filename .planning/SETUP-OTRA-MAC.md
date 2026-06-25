@@ -170,57 +170,26 @@ La memoria operativa entre sesiones ya viaja por git dentro de `.planning/STATE.
 La memoria propia de Claude (`~/.claude/.../memory/`, preferencias y feedback) **no**
 va al repo del proyecto; se sincroniza con un **repo privado de dotfiles**.
 
-### 7a. Una vez, en ESTA Mac (crear el repo)
+### 7a. Ya creado — repo `rubatrejo/claude-config` (privado)
 
-```bash
-cd ~/.claude
-git init -q claude-config 2>/dev/null || true
-#   Estructura: solo lo portable y NO sensible
-#   (memoria del proyecto + comandos/agentes/hooks globales + CLAUDE.md).
-#   Se EXCLUYE: caches, sessions, history, downloads, plugins y settings*.json
-#   (estos últimos pueden contener tokens — no subir sin revisar).
-```
-
-Contenido recomendado a versionar:
+Este repo **ya existe** (privado). Contiene solo lo portable y NO sensible, con la
+estructura de rutas relativa a `~/.claude` en la raíz:
 
 ```
 projects/-Users-rubenramirez-Documents-Claude-Code-Kiosk-Portrait-Old/memory/
-commands/
-agents/
-hooks/
-CLAUDE.md
+commands/   agents/   hooks/   CLAUDE.md
 ```
 
-`.gitignore` del repo de dotfiles (excluye lo pesado/efímero/sensible):
-
-```gitignore
-*
-!projects/
-!projects/**/memory/
-!projects/**/memory/**
-!commands/      !commands/**
-!agents/        !agents/**
-!hooks/         !hooks/**
-!CLAUDE.md
-# nunca:
-settings*.json
-**/cache/**
-sessions/  history.jsonl  downloads/  plugins/  shell-snapshots/
-```
-
-```bash
-gh repo create claude-config --private --source=. --remote=origin
-git add -A && git commit -q -m "chore: dotfiles de Claude (memoria + comandos)"
-git push -u origin main
-```
+**Excluye a propósito** `settings*.json`, caches, sessions, history, downloads y
+plugins (tokens / peso). El propio repo trae un `README.md` con estos mismos pasos.
 
 ### 7b. En la Mac nueva (traer la memoria)
 
 ```bash
 cd ~/.claude
-git clone https://github.com/rubatrejo/claude-config.git _claude-config
-#   copia/symlinkea el contenido dentro de ~/.claude conservando rutas:
-rsync -a _claude-config/ ~/.claude/    # respeta projects/, commands/, agents/, hooks/, CLAUDE.md
+git clone https://github.com/rubatrejo/claude-config.git claude-config
+rsync -a --exclude='.git' --exclude='README.md' --exclude='.gitignore' \
+  claude-config/ ~/.claude/    # restaura projects/, commands/, agents/, hooks/, CLAUDE.md
 ```
 
 > **Nota del hash:** si el usuario de macOS difiere, la carpeta
@@ -228,11 +197,19 @@ rsync -a _claude-config/ ~/.claude/    # respeta projects/, commands/, agents/, 
 > Arranca `claude` una vez (crea la carpeta con el hash correcto), cierra, y mueve
 > el contenido de `memory/` del hash viejo al nuevo.
 
-### 7c. Alternativa cómoda (opcional)
+### 7c. Mantener la memoria en sync (al cerrar sesión)
+
+```bash
+HASH="projects/-Users-rubenramirez-Documents-Claude-Code-Kiosk-Portrait-Old/memory"
+rsync -a "$HOME/.claude/$HASH/" ~/.claude/claude-config/$HASH/
+cd ~/.claude/claude-config && git add -A && git commit -m "memoria: $(date +%F)" && git push
+```
+
+### 7d. Alternativa cómoda (opcional)
 
 Symlink de la carpeta `memory/` a **iCloud Drive** para sync automático sin
 comandos. Más cómodo, pero con riesgo de conflictos si editas en dos Macs casi a la
-vez. El repo git (7a/7b) es la opción robusta y recomendada.
+vez. El repo git (7a/7b/7c) es la opción robusta y recomendada.
 
 ---
 

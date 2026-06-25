@@ -34,6 +34,19 @@ const TILE_TITLE_SIZE_PX: Record<'S' | 'M' | 'L' | 'XL', number> = {
   XL: 30,
 };
 
+/** ALTURA del logo del header tablet por tamaño (px). Se controla por altura
+ *  (no por ancho fijo) para que SIEMPRE quepa en el header de 64px y nunca se
+ *  recorte por arriba, y para que el setting `logoSize` (XS→XL) sí se respete
+ *  en el producto Tablet. 'M' ≈ 34px reproduce el tamaño previo (~ancho 160).
+ *  El logo del SVG/override mantiene su aspecto con `w-auto`. */
+const LOGO_HEIGHT_PX: Record<'XS' | 'S' | 'M' | 'L' | 'XL', number> = {
+  XS: 22,
+  S: 28,
+  M: 34,
+  L: 42,
+  XL: 48,
+};
+
 interface DashboardScreenTabletProps {
   logoAlt: string;
   heroTitle: string;
@@ -41,6 +54,8 @@ interface DashboardScreenTabletProps {
   quickAccess: PwaQuickAccess[];
   tiles: PwaTile[];
   notifications: PwaNotification[];
+  logoSize?: 'XS' | 'S' | 'M' | 'L' | 'XL';
+  logoOffset?: { x: number; y: number };
   tileOverlayOpacity?: number;
   tileTitleSize?: 'S' | 'M' | 'L' | 'XL';
 }
@@ -52,6 +67,8 @@ export function DashboardScreenTablet({
   quickAccess,
   tiles,
   notifications,
+  logoSize,
+  logoOffset,
   tileOverlayOpacity,
   tileTitleSize,
 }: DashboardScreenTabletProps) {
@@ -62,6 +79,9 @@ export function DashboardScreenTablet({
 
   const tileOverlayAlpha = tileOverlayOpacity == null ? 0.4 : tileOverlayOpacity / 100;
   const tileTitlePx = TILE_TITLE_SIZE_PX[tileTitleSize ?? 'S'];
+  const logoH = LOGO_HEIGHT_PX[logoSize ?? 'M'];
+  const logoOx = logoOffset?.x ?? 0;
+  const logoOy = logoOffset?.y ?? 0;
 
   const visibleQuickAccess = quickAccess.filter((q) => isModuleVisible(q.key)).slice(0, 4);
   const quickAccessKeys = new Set(visibleQuickAccess.map((q) => q.key));
@@ -86,9 +106,12 @@ export function DashboardScreenTablet({
         className="relative z-10 flex shrink-0 items-center justify-between px-8"
         style={{ height: 64, backgroundColor: BRAND }}
       >
-        <div className="flex items-center" style={{ width: 160 }}>
+        <div
+          className="flex items-center"
+          style={{ height: logoH, transform: `translate(${logoOx}px, ${logoOy}px)` }}
+        >
           <TrueOmniLogo
-            className="h-auto w-full text-white"
+            className="h-full w-auto text-white"
             title={logoAlt}
             slot="default"
             minWidthPx={0}
@@ -149,8 +172,14 @@ export function DashboardScreenTablet({
 
       {/* Grid de tiles a todo el ancho (3 columnas). */}
       <div className="scrollbar-hide min-h-0 flex-1 overflow-y-auto bg-background">
-        {/* Landscape: 5 columnas (1194px de ancho); portrait: 3. */}
-        <div className={`grid gap-5 px-8 pb-8 pt-6 ${isLandscape ? 'grid-cols-5' : 'grid-cols-3'}`}>
+        {/* Landscape: 5 columnas (1194px de ancho); portrait: 3.
+            `min-h-full` + `auto-rows-[minmax(150px,1fr)]`: cuando hay POCOS
+            módulos las filas crecen para repartir todo el alto disponible (sin
+            aire muerto entre los tiles y el bottom-nav); cuando hay muchos
+            mantienen 150px mínimo y el contenedor scrollea. */}
+        <div
+          className={`grid min-h-full auto-rows-[minmax(150px,1fr)] gap-5 px-8 pb-8 pt-6 ${isLandscape ? 'grid-cols-5' : 'grid-cols-3'}`}
+        >
           {gridItems.map((t, i) => (
             <button
               key={`${t.key}-${i}`}
@@ -161,7 +190,9 @@ export function DashboardScreenTablet({
               }}
               // En tablet todos los tiles van a tamaño normal (1 columna); se
               // ignora el flag `wide` del PWA para que el grid 3-col quede parejo.
-              className="relative h-[150px] overflow-hidden rounded-[12px] bg-cover bg-center"
+              // `h-full`: el tile llena su celda (las filas se estiran para
+              // ocupar el alto disponible cuando hay pocos módulos).
+              className="relative h-full overflow-hidden rounded-[12px] bg-cover bg-center"
               style={{ backgroundImage: `url("${resolveAssetUrl(t.image)}")` }}
             >
               <span

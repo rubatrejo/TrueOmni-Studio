@@ -26,13 +26,13 @@ export function PwaAdPopup({ ad, onDismiss }: { ad: Ad; onDismiss: () => void })
       <div
         className="relative overflow-hidden rounded-[16px]"
         style={{
-          // La card se ajusta al tamaño NATIVO de la imagen (ancho/alto auto),
-          // acotada por `maxWidth`/`maxHeight`. En tablet el tope es mayor (560px)
-          // para que el ad luzca prominente, pero NUNCA se fuerza el ancho: así
-          // la imagen conserva su proporción y no se estira/upscalea. Phone: tope
-          // original (340px).
-          maxWidth: isTablet ? 560 : 340,
-          maxHeight: isTablet ? '82%' : '86%',
+          // Tablet: ancho FIJO (no solo `maxWidth`, que dejaría el popup en el
+          // tamaño nativo de la imagen — chico). 500px = modal centrado con
+          // márgenes claros, en la misma familia que los demás popups (~400px)
+          // pero un poco más prominente por ser un ad visual. Phone: tope original.
+          width: isTablet ? 500 : undefined,
+          maxWidth: isTablet ? '88%' : 340,
+          maxHeight: isTablet ? '88%' : '86%',
           boxShadow: '0 16px 40px rgba(0,0,0,0.45)',
         }}
       >
@@ -45,9 +45,8 @@ export function PwaAdPopup({ ad, onDismiss }: { ad: Ad; onDismiss: () => void })
           style={{
             display: 'block',
             height: 'auto',
-            width: 'auto',
+            width: isTablet ? '100%' : 'auto',
             maxWidth: '100%',
-            maxHeight: '100%',
           }}
         />
         <AdCloseButton

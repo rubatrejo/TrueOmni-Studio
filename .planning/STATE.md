@@ -5624,6 +5624,59 @@ desplegar a prod (donde el login real funciona) — de ahí el push del mileston
 
 ---
 
+### Sesión 2026-06-26 — Feedback editor Tablets (logo + tiles) + portabilidad a otra Mac (guía/PDF/script/repo de memoria)
+
+> Editor de Tablets **aprobado y cerrado** por Rubén. Luego pivote a preparar la
+> continuación del proyecto en una segunda Mac vía GitHub (Rubén sale de viaje).
+
+**Hecho (todo en prod, deploys READY):**
+
+- **`3df8bb7` — 3 fixes del producto Tablet** (verificados con agent-browser en
+  `/pwa?device=tablet` portrait+landscape):
+  - **Logo header dashboard:** ignoraba `logoSize` (ancho fijo 160px) y un logo alto
+    se recortaba por arriba. Ahora por **altura acotada al header** (`LOGO_HEIGHT_PX`
+    XS→XL, `w-auto`); `dashboard-live` le pasa `logoSize`/`logoOffset` como al phone.
+  - **Tiles con hueco:** grid `min-h-full` + `auto-rows-[minmax(150px,1fr)]` + tile
+    `h-full` → las filas se **estiran para llenar** el alto (opción elegida por Rubén).
+  - **Ads** (luego revertido, ver abajo): se acotaron y centraron.
+- **`250e2d9` — revert de ads:** Rubén pidió dejar los ads PWA **como estaban** (a
+  sangre completa). Solo se revirtió la parte de ads; logo y tiles se mantienen.
+  → **Editor de Tablets APROBADO y cerrado.**
+- **Portabilidad a otra Mac** (Rubén: "solo un GitHub y ya, todo lo demás ya lo tengo"):
+  - `05329e1`/`c5fa94e` — guía `.planning/SETUP-OTRA-MAC.md` + **PDF** (6 págs, raíz).
+  - `b7c8535` — **`setup.sh`**: un comando tras clonar hace `vercel env pull` +
+    `pnpm install` + trae la memoria de Claude (clona/pull `claude-config` + rsync de
+    `projects/` solamente, sin tocar la config global de la otra máquina).
+  - **Repo privado `rubatrejo/claude-config`** creado (commit `ccb88d0`): memoria del
+    proyecto (28) + commands/agents/hooks GSD + CLAUDE.md. Escaneado por secretos antes
+    de subir (limpio); excluye settings/caches/sessions/history/plugins.
+
+**Verificado:** typecheck + lint limpios en cada commit; agent-browser (tablet
+portrait/landscape + no-regresión phone); `bash -n setup.sh` OK; `git ls-files` del repo
+de memoria sin nada sensible; repo confirmado PRIVATE. Todos los deploys Vercel READY.
+
+**Pendiente / siguiente:**
+
+- **Probar `setup.sh` end-to-end en la Mac nueva** (one-liner: clonar TrueOmni-Studio en
+  `~/Documents/Claude Code/Kiosk Portrait Old` + `bash setup.sh`).
+- Deuda menor heredada: verificar **landscape** una por una en profile/more/search/
+  notifications/help/wayfinding/trip-planner/auth/overlays.
+- Rumbos abiertos del roadmap: Fase 4 (primer cliente real) · Fase 5 (automatización) ·
+  milestone **backend real** PWA/Tablet (login/sync/push/wallet/offline).
+
+**Decisiones:**
+
+- Ads del Tablet se quedan a sangre completa (revert por decisión de Rubén).
+- Memoria de Claude se sincroniza vía **repo git privado** (no iCloud); `setup.sh` solo
+  restaura `projects/` para no pisar la config global de la otra Mac.
+- Clonar SIEMPRE en la ruta idéntica (`~/Documents/Claude Code/Kiosk Portrait Old`): la
+  memoria de Claude se indexa por la ruta absoluta del proyecto.
+
+**Fase:** Milestone Tablet **cerrado/aprobado**. Infra de portabilidad a 2ª Mac lista.
+Próxima sesión: probar `setup.sh` en destino o arrancar Fase 4 / backend real.
+
+---
+
 ## Plantilla de entrada (copiar al cerrar sesión)
 
 ```markdown
